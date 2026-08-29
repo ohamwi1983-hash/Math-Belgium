@@ -62,8 +62,11 @@ ces deux conventions.
   `Block.kind` pour rendre chaque bloc de contenu.
 - `Rappel`, `Methode`, `Attention`, `Astuce`, `PiegeClassique` (`components/chapter/Callouts.tsx`)
   — callouts stylés distinctement (couleur + icône propres à chacun, cohérentes sur tout le site).
-- `ExempleResolu`, `WrongRight`, `CarteEntrainement`, `RecapFinal` (dossier
-  `components/chapter/`).
+- `ExempleResolu`, `WrongRight`, `CarteEntrainement`, `RecapFinal`, `ChecklistRelecture` (dossier
+  `components/chapter/`) — `ChecklistRelecture` est un composant à part entière (fichier propre),
+  distinct de `RecapFinal` : l'un résume la théorie ("Ce qu'il faut retenir"), l'autre est la
+  liste de vérifications de méthode à se poser avant de rendre sa copie. `RecapFinal` l'utilise en
+  composition quand `recap.checklist` est fourni.
 - `MathInline`, `RichText`, `RichParagraph` (`components/Math.tsx`) — rendu KaTeX + mini-syntaxe.
 - `Illustration` (`components/illustrations/Illustration.tsx`) — enveloppe commune
   figure/diagram-frame/figcaption pour toute illustration ; bascule sur `IllustrationSpec.kind` :
