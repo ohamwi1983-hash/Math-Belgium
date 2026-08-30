@@ -2,10 +2,12 @@ import type { IllustrationSpec } from '../../content/types'
 
 type Props = Omit<Extract<IllustrationSpec, { kind: 'curvePlot' }>, 'caption'>
 
-const X_LEFT = 70
-const X_RIGHT = 610
-const Y_TOP = 20
-const Y_BOTTOM = 250
+// Deux formats : "wide" (existant, pour les graphes pleine largeur — paraboles, arctan sur un
+// large domaine) et "compact" (≈1,2:1, proche des proportions réelles de la source pour un
+// graphe individuel — ex. arcsin/arccos seuls). Le format wide, étiré à 2,2:1, rend ces
+// graphes-là disproportionnellement bas une fois contraints à une largeur d'écran mobile.
+const WIDE = { viewBox: '0 0 640 290', xLeft: 70, xRight: 610, yTop: 20, yBottom: 250 }
+const COMPACT = { viewBox: '0 0 320 260', xLeft: 45, xRight: 300, yTop: 20, yBottom: 220 }
 const SAMPLES = 100
 
 const TONE_CLASS: Record<'accent' | 'faint' | 'good' | 'bad', string> = {
@@ -44,7 +46,10 @@ export function CurvePlot({
   yAxisLabel,
   showYAxis = true,
   fixedYRange,
+  compact = false,
 }: Props) {
+  const { viewBox, xLeft: X_LEFT, xRight: X_RIGHT, yTop: Y_TOP, yBottom: Y_BOTTOM } = compact ? COMPACT : WIDE
+
   let yTop: number, yBottom: number
   if (fixedYRange) {
     yTop = fixedYRange.max
@@ -85,7 +90,7 @@ export function CurvePlot({
   }
 
   return (
-    <svg viewBox="0 0 640 290" role="img" aria-label="Graphe de fonction(s)">
+    <svg viewBox={viewBox} role="img" aria-label="Graphe de fonction(s)">
       {imageBand &&
         (() => {
           const topValue = imageBand.direction === 'up' ? yTop : imageBand.from

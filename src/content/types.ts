@@ -92,6 +92,10 @@ export type IllustrationSpec =
       /** Masque l'axe vertical — pour les mini-diagrammes compacts, où l'original ne trace qu'une
        * ligne horizontale (ex. les diagrammes "0/1/2 racines", trop petits pour un axe complet). */
       showYAxis?: boolean
+      /** Cadre plus carré (≈1,2:1 au lieu de 2,2:1) pour les graphes individuels compacts (ex.
+       * arcsin/arccos seuls) — le cadre large par défaut, étiré, les rend disproportionnellement
+       * bas/tassés une fois contraints à une largeur d'écran mobile. */
+      compact?: boolean
       caption: string
     }
   | {
