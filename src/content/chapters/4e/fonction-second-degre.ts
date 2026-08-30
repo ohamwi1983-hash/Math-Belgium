@@ -85,9 +85,9 @@ export const fonctionSecondDegre: ChapterContent = {
           illustration: {
             kind: 'curvePlot',
             curves: [
-              { fn: (x) => 2 * x * x, tone: 'accent' },
-              { fn: (x) => 0.4 * x * x, tone: 'faint' },
-              { fn: (x) => -1 * x * x, tone: 'bad' },
+              { fn: (x) => 2 * x * x, tone: 'accent', xMin: -1.9, xMax: 1.9 },
+              { fn: (x) => 0.4 * x * x, tone: 'faint', xMin: -3, xMax: 3 },
+              { fn: (x) => -1 * x * x + 6, tone: 'bad', xMin: -2.7, xMax: 2.7 },
             ],
             xMin: -3,
             xMax: 3,
@@ -118,9 +118,9 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            curves: [{ fn: (x) => (x - 2) * (x - 2) - 1, tone: 'accent' }],
-            xMin: -1,
-            xMax: 5,
+            curves: [{ fn: (x) => 0.5 * (x - 2) * (x - 2) - 1, tone: 'accent', xMin: -1.8, xMax: 5.8 }],
+            xMin: -2,
+            xMax: 6,
             xTicks: [-1, 1, 3, 4, 5],
             axisOfSymmetry: { x: 2, label: 'x = 2' },
             points: [{ x: 2, y: -1, label: 'S(2 ; −1)', tone: 'accent' }],
@@ -159,7 +159,7 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            curves: [{ fn: (x) => -1 * (x + 1) * (x + 1) + 4, tone: 'accent' }],
+            curves: [{ fn: (x) => -0.6 * (x + 1) * (x + 1) + 4, tone: 'accent', xMin: -4.4, xMax: 2.4 }],
             xMin: -5,
             xMax: 3,
             xTicks: [-4, -3, -2, 2],
@@ -199,8 +199,8 @@ export const fonctionSecondDegre: ChapterContent = {
           items: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: (x) => (x - 1) * (x - 4), tone: 'accent' }],
-              xMin: 0,
+              curves: [{ fn: (x) => 0.5 * (x - 2.5) * (x - 2.5) - 1.125, tone: 'accent' }],
+              xMin: -1,
               xMax: 5,
               xTicks: [],
               showYAxis: false,
@@ -211,9 +211,9 @@ export const fonctionSecondDegre: ChapterContent = {
             },
             {
               kind: 'curvePlot',
-              curves: [{ fn: (x) => (x - 2) * (x - 2), tone: 'accent' }],
-              xMin: 0,
-              xMax: 4,
+              curves: [{ fn: (x) => 0.5 * (x - 2) * (x - 2), tone: 'accent' }],
+              xMin: -1,
+              xMax: 5,
               xTicks: [],
               showYAxis: false,
               roots: [{ x: 2 }],
@@ -223,9 +223,9 @@ export const fonctionSecondDegre: ChapterContent = {
             },
             {
               kind: 'curvePlot',
-              curves: [{ fn: (x) => (x - 2) * (x - 2) + 1, tone: 'bad' }],
-              xMin: 0,
-              xMax: 4,
+              curves: [{ fn: (x) => 0.5 * (x - 2) * (x - 2) + 1.5, tone: 'bad' }],
+              xMin: -1,
+              xMax: 5,
               xTicks: [],
               showYAxis: false,
               xAxisLabel: '',
@@ -374,8 +374,8 @@ export const fonctionSecondDegre: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [
-                { fn: (x) => x * x, tone: 'faint' },
-                { fn: (x) => (x - 3) * (x - 3), tone: 'accent' },
+                { fn: (x) => x * x, tone: 'faint', xMin: -2, xMax: 2.5 },
+                { fn: (x) => (x - 3) * (x - 3), tone: 'accent', xMin: 0.5, xMax: 5 },
               ],
               xMin: -2,
               xMax: 5,
@@ -389,8 +389,8 @@ export const fonctionSecondDegre: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [
-                { fn: (x) => x * x, tone: 'faint' },
-                { fn: (x) => x * x + 2, tone: 'accent' },
+                { fn: (x) => x * x, tone: 'faint', xMin: -2.6, xMax: 2.6 },
+                { fn: (x) => x * x + 2, tone: 'accent', xMin: -2.2, xMax: 2.2 },
               ],
               xMin: -3,
               xMax: 3,
@@ -426,8 +426,8 @@ export const fonctionSecondDegre: ChapterContent = {
           illustration: {
             kind: 'curvePlot',
             curves: [
-              { fn: (x) => x * x, tone: 'faint' },
-              { fn: (x) => (x - 3) * (x - 3) + 2, tone: 'accent' },
+              { fn: (x) => x * x, tone: 'faint', xMin: -2.6, xMax: 2.6 },
+              { fn: (x) => (x - 3) * (x - 3) + 2, tone: 'accent', xMin: 0.8, xMax: 5.2 },
             ],
             xMin: -3,
             xMax: 7,
