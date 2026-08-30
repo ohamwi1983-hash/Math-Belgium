@@ -46,11 +46,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               setALabel: 'A',
               setBLabel: 'B',
               pointsA: [0, 0.5, 1],
-              pointsB: [0, 0.32, 0.64, 1],
+              pointsB: [0, 1 / 3, 2 / 3, 1],
               arrows: [
                 { from: 0, to: 0 },
                 { from: 1, to: 1 },
-                { from: 2, to: 2 },
+                { from: 2, to: 3 },
               ],
               caption:
                 'Injective (deux flèches distinctes → deux images distinctes) mais non ' +
@@ -60,7 +60,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'setMapping',
               setALabel: 'A',
               setBLabel: 'B',
-              pointsA: [0, 0.32, 0.64, 1],
+              pointsA: [0, 1 / 3, 2 / 3, 1],
               pointsB: [0, 0.5, 1],
               arrows: [
                 { from: 0, to: 0 },
@@ -99,11 +99,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           items: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: (x) => -x + 3, tone: 'accent' }],
-              xMin: 0,
-              xMax: 4,
+              curves: [{ fn: (x) => (x * x * x) / 4, tone: 'accent' }],
+              xMin: -2,
+              xMax: 2,
               xTicks: [],
-              testLine: { y: 1, points: [{ x: 2 }] },
+              testLine: { y: 0.5, points: [{ x: Math.cbrt(2) }] },
               xAxisLabel: '',
               yAxisLabel: '',
               showYAxis: false,
@@ -111,11 +111,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             },
             {
               kind: 'curvePlot',
-              curves: [{ fn: (x) => (x - 2) * (x - 2), tone: 'accent' }],
-              xMin: 0,
-              xMax: 4,
+              curves: [{ fn: (x) => x * x - 1, tone: 'accent' }],
+              xMin: -2,
+              xMax: 2,
               xTicks: [],
-              testLine: { y: 1, points: [{ x: 1 }, { x: 3 }] },
+              testLine: { y: 0.5, points: [{ x: -Math.sqrt(1.5) }, { x: Math.sqrt(1.5) }] },
               xAxisLabel: '',
               yAxisLabel: '',
               showYAxis: false,
@@ -136,6 +136,64 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'Autrement dit, dès que $f$ est **injective**, sa réciproque existe déjà comme ' +
             "fonction — il suffit de restreindre l'ensemble d'arrivée à Image($f$) pour obtenir " +
             'la bijectivité automatiquement.',
+        },
+        {
+          kind: 'para',
+          text:
+            "À l'inverse, si $f$ n'est pas injective, sa relation réciproque n'est pas une " +
+            'fonction — un même $x$ y aurait plusieurs images :',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x * x, tone: 'accent', xMin: -Math.sqrt(2), xMax: Math.sqrt(2) },
+              { fn: (x) => Math.sqrt(Math.max(0, x)), tone: 'good', xMin: 0, xMax: 2 },
+              { fn: (x) => -Math.sqrt(Math.max(0, x)), tone: 'good', xMin: 0, xMax: 2 },
+              { fn: (x) => x, tone: 'faint' },
+            ],
+            xMin: -2,
+            xMax: 2,
+            xTicks: [],
+            points: [
+              { x: 1, y: 1, label: '', tone: 'bad' },
+              { x: 1, y: -1, label: '', tone: 'bad' },
+            ],
+            xAxisLabel: '',
+            yAxisLabel: '',
+            showYAxis: false,
+            caption:
+              'En orange : $y = x^2$ (domaine ℝ, non injective). En vert : sa relation ' +
+              'réciproque $y = \\pm\\sqrt{x}$ — $x = 1$ a deux images (points marqués) : ce ' +
+              "n'est pas une fonction.",
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Le domaine de $f^{-1}$ est l\'image de $f$, et l\'image de $f^{-1}$ est le domaine ' +
+            'de $f$ : les deux graphes sont **symétriques** par rapport à la droite $y = x$.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => 2 * x + 1, tone: 'accent', xMin: -2.5, xMax: 1.5 },
+              { fn: (x) => (x - 1) / 2, tone: 'good' },
+              { fn: (x) => x, tone: 'faint' },
+            ],
+            xMin: -4,
+            xMax: 4,
+            xTicks: [],
+            xAxisLabel: '',
+            yAxisLabel: '',
+            showYAxis: false,
+            caption:
+              'En orange : $f(x) = 2x+1$. En vert : sa réciproque $f^{-1}(x) = \\dfrac{x-1}{2}$. ' +
+              'Les deux graphes sont symétriques par rapport à la droite $y = x$ (pointillés).',
+          },
         },
         {
           kind: 'definition',
@@ -329,13 +387,14 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [
-                { fn: Math.sin, tone: 'faint', xMin: -PI * 1.05, xMax: PI * 1.05 },
+                { fn: Math.sin, tone: 'faint', xMin: -2 * PI, xMax: 2 * PI },
                 { fn: Math.sin, tone: 'accent', xMin: -PI / 2, xMax: PI / 2 },
               ],
-              xMin: -PI * 1.05,
-              xMax: PI * 1.05,
+              xMin: -2 * PI,
+              xMax: 2 * PI,
               xTicks: [-PI / 2, PI / 2],
               xTickLabels: { [-PI / 2]: '-π/2', [PI / 2]: 'π/2' },
+              fixedYRange: { min: -1.3, max: 1.3 },
               xAxisLabel: '',
               yAxisLabel: '',
               showYAxis: false,
@@ -344,13 +403,14 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [
-                { fn: Math.cos, tone: 'faint', xMin: -0.1, xMax: PI * 1.1 },
+                { fn: Math.cos, tone: 'faint', xMin: -2 * PI, xMax: 2 * PI },
                 { fn: Math.cos, tone: 'accent', xMin: 0, xMax: PI },
               ],
-              xMin: -0.1,
-              xMax: PI * 1.1,
+              xMin: -2 * PI,
+              xMax: 2 * PI,
               xTicks: [0, PI],
               xTickLabels: { 0: '0', [PI]: 'π' },
+              fixedYRange: { min: -1.3, max: 1.3 },
               xAxisLabel: '',
               yAxisLabel: '',
               showYAxis: false,
@@ -359,13 +419,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [
-                { fn: Math.tan, tone: 'faint', xMin: -PI / 2 + 0.08, xMax: PI / 2 - 0.08 },
-                { fn: Math.tan, tone: 'accent', xMin: -PI / 2 + 0.08, xMax: PI / 2 - 0.08 },
+                { fn: Math.tan, tone: 'faint', xMin: -PI + 0.18, xMax: -PI / 2 - 0.06 },
+                { fn: Math.tan, tone: 'accent', xMin: -PI / 2 + 0.06, xMax: PI / 2 - 0.06 },
+                { fn: Math.tan, tone: 'faint', xMin: PI / 2 + 0.06, xMax: PI - 0.18 },
               ],
-              xMin: -PI / 2 + 0.02,
-              xMax: PI / 2 - 0.02,
+              xMin: -3 * PI,
+              xMax: 3 * PI,
               xTicks: [-PI / 2, PI / 2],
               xTickLabels: { [-PI / 2]: '-π/2', [PI / 2]: 'π/2' },
+              verticalAsymptotes: [{ x: -PI / 2 }, { x: PI / 2 }],
+              fixedYRange: { min: -4, max: 4 },
               xAxisLabel: '',
               yAxisLabel: '',
               showYAxis: false,
@@ -415,7 +478,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'unitCircleArc',
               mode: 'tan',
-              angle: 0.6,
+              angle: Math.atan(0.9),
               caption: "y = arctan(x) : l'arc dont la tangente géométrique (droite verticale) vaut x.",
             },
           ],
@@ -444,20 +507,22 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           items: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: Math.asin, tone: 'accent' }],
-              xMin: -1,
-              xMax: 1,
+              curves: [{ fn: Math.asin, tone: 'accent', xMin: -1, xMax: 1 }],
+              xMin: -1.3,
+              xMax: 1.3,
               xTicks: [-1, 1],
+              fixedYRange: { min: -1.9, max: 1.9 },
               xAxisLabel: 'x',
               yAxisLabel: 'y',
               caption: 'y = arcsin(x) — domaine [−1 ; 1], image [−π/2 ; π/2].',
             },
             {
               kind: 'curvePlot',
-              curves: [{ fn: Math.acos, tone: 'accent' }],
-              xMin: -1,
-              xMax: 1,
+              curves: [{ fn: Math.acos, tone: 'accent', xMin: -1, xMax: 1 }],
+              xMin: -1.3,
+              xMax: 1.3,
               xTicks: [-1, 1],
+              fixedYRange: { min: -0.3, max: 3.5 },
               xAxisLabel: 'x',
               yAxisLabel: 'y',
               caption: 'y = arccos(x) — domaine [−1 ; 1], image [0 ; π].',
@@ -465,10 +530,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [{ fn: Math.atan, tone: 'accent' }],
-              xMin: -6,
-              xMax: 6,
-              xTicks: [-4, -2, 2, 4],
+              xMin: -10,
+              xMax: 10,
+              xTicks: [-8, -4, 4, 8],
               horizontalAsymptotes: [{ y: PI / 2 }, { y: -PI / 2 }],
+              fixedYRange: { min: -2.1, max: 2.1 },
               xAxisLabel: 'x',
               yAxisLabel: 'y',
               caption: 'y = arctan(x) — domaine ℝ, image ]−π/2 ; π/2[ (asymptotes en pointillés).',
@@ -681,20 +747,22 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           items: [
             {
               kind: 'curvePlot',
-              curves: [{ fn: Math.asin, tone: 'accent' }],
-              xMin: -1,
-              xMax: 1,
+              curves: [{ fn: Math.asin, tone: 'accent', xMin: -1, xMax: 1 }],
+              xMin: -1.3,
+              xMax: 1.3,
               xTicks: [-1, 1],
+              fixedYRange: { min: -1.9, max: 1.9 },
               xAxisLabel: 'x',
               yAxisLabel: 'y',
               caption: 'y = arcsin(x)',
             },
             {
               kind: 'curvePlot',
-              curves: [{ fn: Math.acos, tone: 'accent' }],
-              xMin: -1,
-              xMax: 1,
+              curves: [{ fn: Math.acos, tone: 'accent', xMin: -1, xMax: 1 }],
+              xMin: -1.3,
+              xMax: 1.3,
               xTicks: [-1, 1],
+              fixedYRange: { min: -0.3, max: 3.5 },
               xAxisLabel: 'x',
               yAxisLabel: 'y',
               caption: 'y = arccos(x)',
@@ -702,10 +770,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'curvePlot',
               curves: [{ fn: Math.atan, tone: 'accent' }],
-              xMin: -6,
-              xMax: 6,
-              xTicks: [-4, -2, 2, 4],
+              xMin: -10,
+              xMax: 10,
+              xTicks: [-8, -4, 4, 8],
               horizontalAsymptotes: [{ y: PI / 2 }, { y: -PI / 2 }],
+              fixedYRange: { min: -2.1, max: 2.1 },
               xAxisLabel: 'x',
               yAxisLabel: 'y',
               caption: 'y = arctan(x)',

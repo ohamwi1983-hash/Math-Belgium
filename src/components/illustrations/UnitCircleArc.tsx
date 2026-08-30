@@ -2,19 +2,28 @@ import type { IllustrationSpec } from '../../content/types'
 
 type Props = Omit<Extract<IllustrationSpec, { kind: 'unitCircleArc' }>, 'caption'>
 
-const CX = 95
-const CY = 95
-const R = 72
-const ARC_R = R * 0.55
 const SIZE = 190
+
+// Source : sin/cos partagent centre/rayon ; tan a son propre centre/rayon (cercle plus petit,
+// décalé à gauche pour laisser la place à la tangente qui dépasse à droite).
+const GEOM = {
+  sin: { cx: 95, cy: 95, r: 72 },
+  cos: { cx: 95, cy: 95, r: 72 },
+  tan: { cx: 75, cy: 95, r: 62 },
+}
 
 /**
  * Cercle trigonométrique + rayon + arc + projection, pour illustrer arcsin/arccos/arctan. La
  * projection est géométriquement différente selon `mode` (pas juste une couleur) : horizontale
  * sur l'axe des y pour sin, verticale sur l'axe des x pour cos, sur la tangente géométrique
- * verticale (x = cx+R) pour tan — voir la note dans types.ts.
+ * verticale (x = cx+R) pour tan — voir la note dans types.ts. L'arc décoratif se trace au rayon
+ * plein du cercle pour sin/cos (c'est littéralement l'arc du cercle unité), mais à 0,62×rayon
+ * pour tan (sinon il faudrait le tracer sur la tangente elle-même, hors du cercle).
  */
 export function UnitCircleArc({ mode, angle }: Props) {
+  const { cx: CX, cy: CY, r: R } = GEOM[mode]
+  const ARC_R = mode === 'tan' ? R * 0.62 : R
+
   const pointX = CX + R * Math.cos(angle)
   const pointY = CY - R * Math.sin(angle)
 
@@ -30,14 +39,17 @@ export function UnitCircleArc({ mode, angle }: Props) {
   const radiusEndX = mode === 'tan' ? tanPointX : pointX
   const radiusEndY = mode === 'tan' ? tanPointY : pointY
 
+  const hMargin = mode === 'tan' ? R + 40 : R + 12
+  const vMargin = mode === 'tan' ? R + 20 : R + 12
+
   return (
     <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={`Cercle trigonométrique illustrant arc${mode}`}>
-      <line x1={CX - R - 8} y1={CY} x2={CX + R + 8} y2={CY} className="svg-line" strokeWidth="1.2" />
-      <line x1={CX} y1={CY - R - 8} x2={CX} y2={CY + R + 8} className="svg-line" strokeWidth="1.2" />
+      <line x1={CX - R - (mode === 'tan' ? 10 : 12)} y1={CY} x2={CX + hMargin} y2={CY} className="svg-line" strokeWidth="1.2" />
+      <line x1={CX} y1={CY - vMargin} x2={CX} y2={CY + vMargin} className="svg-line" strokeWidth="1.2" />
       <circle cx={CX} cy={CY} r={R} fill="none" className="svg-line" strokeWidth="1.2" />
 
       {mode === 'tan' && (
-        <line x1={tanPointX} y1={CY - R - 8} x2={tanPointX} y2={CY + R + 8} className="svg-faint" strokeWidth="1.5" />
+        <line x1={CX + R} y1={CY - vMargin} x2={CX + R} y2={CY + vMargin} className="svg-faint" strokeWidth="1.5" />
       )}
 
       {mode === 'sin' && (

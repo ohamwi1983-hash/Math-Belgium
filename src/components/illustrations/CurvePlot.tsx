@@ -35,6 +35,7 @@ export function CurvePlot({
   xTickLabels,
   axisOfSymmetry,
   horizontalAsymptotes,
+  verticalAsymptotes,
   points,
   roots,
   imageBand,
@@ -42,21 +43,28 @@ export function CurvePlot({
   xAxisLabel,
   yAxisLabel,
   showYAxis = true,
+  fixedYRange,
 }: Props) {
-  const allYs = curves
-    .flatMap((c) => {
-      const cMin = c.xMin ?? xMin
-      const cMax = c.xMax ?? xMax
-      return Array.from({ length: SAMPLES + 1 }, (_, i) => c.fn(cMin + ((cMax - cMin) * i) / SAMPLES))
-    })
-    .filter(Number.isFinite)
-    .concat((points ?? []).map((p) => p.y))
-  const yMax = Math.max(...allYs, 0)
-  const yMin = Math.min(...allYs, 0)
-  // Marge pour ne pas coller les extrema au bord du cadre.
-  const span = yMax - yMin || 1
-  const yTop = yMax + span * 0.12
-  const yBottom = yMin - span * 0.12
+  let yTop: number, yBottom: number
+  if (fixedYRange) {
+    yTop = fixedYRange.max
+    yBottom = fixedYRange.min
+  } else {
+    const allYs = curves
+      .flatMap((c) => {
+        const cMin = c.xMin ?? xMin
+        const cMax = c.xMax ?? xMax
+        return Array.from({ length: SAMPLES + 1 }, (_, i) => c.fn(cMin + ((cMax - cMin) * i) / SAMPLES))
+      })
+      .filter(Number.isFinite)
+      .concat((points ?? []).map((p) => p.y))
+    const yMax = Math.max(...allYs, 0)
+    const yMin = Math.min(...allYs, 0)
+    // Marge pour ne pas coller les extrema au bord du cadre.
+    const span = yMax - yMin || 1
+    yTop = yMax + span * 0.12
+    yBottom = yMin - span * 0.12
+  }
 
   const xScale = (v: number) => X_LEFT + ((v - xMin) / (xMax - xMin)) * (X_RIGHT - X_LEFT)
   const yScale = (v: number) => Y_BOTTOM - ((v - yBottom) / (yTop - yBottom)) * (Y_BOTTOM - Y_TOP)
@@ -139,6 +147,9 @@ export function CurvePlot({
 
       {horizontalAsymptotes?.map((a, i) => (
         <line key={i} x1={X_LEFT} y1={yScale(a.y)} x2={X_RIGHT} y2={yScale(a.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+      ))}
+      {verticalAsymptotes?.map((a, i) => (
+        <line key={i} x1={xScale(a.x)} y1={Y_BOTTOM} x2={xScale(a.x)} y2={Y_TOP} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
       ))}
 
       {testLine && (

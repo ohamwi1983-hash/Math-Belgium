@@ -72,6 +72,12 @@ export type IllustrationSpec =
       axisOfSymmetry?: { x: number; label: string }
       /** Asymptotes horizontales (ex. y = ±π/2 pour arctan). */
       horizontalAsymptotes?: { y: number }[]
+      /** Asymptotes verticales (ex. x = ±π/2 pour tan avant restriction). */
+      verticalAsymptotes?: { x: number }[]
+      /** Fenêtre y fixe : désactive l'échelle automatique (nécessaire près d'une asymptote, où
+       * les valeurs échantillonnées explosent et casseraient l'échelle auto). Le SVG racine
+       * découpe nativement tout ce qui dépasse — pas de clip-path à ajouter. */
+      fixedYRange?: { min: number; max: number }
       /** Points marqués (ex. sommet). */
       points?: { x: number; y: number; label: string; tone: 'accent' | 'good' | 'bad' }[]
       /** Racines marquées sur l'axe des x (0, 1 ou 2 éléments). */

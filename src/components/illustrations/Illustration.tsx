@@ -1,4 +1,5 @@
 import type { IllustrationSpec } from '../../content/types'
+import { RichText } from '../Math'
 import { MachineDiagram } from './MachineDiagram'
 import { DomainNumberLine } from './DomainNumberLine'
 import { CompositionIntroDiagram } from './CompositionIntroDiagram'
@@ -50,7 +51,11 @@ export function Illustration({ spec }: { spec: IllustrationSpec }) {
   return (
     <figure>
       <div className="diagram-frame">{renderSvg(spec)}</div>
-      {caption && <figcaption>{caption}</figcaption>}
+      {caption && (
+        <figcaption>
+          <RichText text={caption} />
+        </figcaption>
+      )}
     </figure>
   )
 }
