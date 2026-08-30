@@ -385,6 +385,7 @@ table.tableau td.axe-x { text-align: left; color: var(--ink-soft); font-family: 
 table.tableau td.signe-pos { color: var(--good); font-weight: 600; }
 table.tableau td.signe-neg { color: var(--bad); font-weight: 600; }
 table.tableau td.zero-cell { color: var(--ink-faint); }
+table.tableau td.indef-cell { color: var(--bad); font-weight: 700; }
 table.tableau tr:last-child td { border-bottom: none; }
 
 /* ---------- groupe d'illustrations compactes côte à côte ---------- */

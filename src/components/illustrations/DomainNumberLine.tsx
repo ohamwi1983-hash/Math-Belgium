@@ -8,7 +8,7 @@ const PLOT_LEFT = 70
 const PLOT_RIGHT = 600
 
 /** Droite graduée : trait plein = valeurs acceptées, rond vide = point exclu. */
-export function DomainNumberLine({ min, max, segments, points, extraTicks, axisLabel }: Omit<Props, 'caption'>) {
+export function DomainNumberLine({ min, max, segments, points, extraTicks, signLabels, axisLabel }: Omit<Props, 'caption'>) {
   const toX = (value: number) => PLOT_LEFT + ((value - min) / (max - min)) * (PLOT_RIGHT - PLOT_LEFT)
   const resolve = (endpoint: number | 'min' | 'max') =>
     endpoint === 'min' ? PLOT_LEFT : endpoint === 'max' ? PLOT_RIGHT : toX(endpoint)
@@ -60,9 +60,29 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, axisL
               <text x={x} y={AXIS_Y + 25} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="14" fontWeight="600">
                 {pt.label}
               </text>
+              {pt.sublabel && (
+                <text x={x} y={AXIS_Y + 45} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="11">
+                  {pt.sublabel}
+                </text>
+              )}
             </g>
           )
         })}
+
+        {signLabels?.map((s, i) => (
+          <text
+            key={i}
+            x={toX(s.value)}
+            y={AXIS_Y - 30}
+            textAnchor="middle"
+            className={s.sign === '+' ? 'svg-good' : 'svg-bad'}
+            fontFamily="Fraunces, serif"
+            fontStyle="italic"
+            fontSize="14"
+          >
+            {s.sign}
+          </text>
+        ))}
 
         <text x={(PLOT_LEFT + PLOT_RIGHT) / 2} y={AXIS_Y - 30} textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15">
           {axisLabel}

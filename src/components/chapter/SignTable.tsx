@@ -1,10 +1,11 @@
 import type { Block } from '../../content/types'
 
-const TONE_CLASS: Record<'zero' | 'pos' | 'neg' | 'plain', string | undefined> = {
+const TONE_CLASS: Record<'zero' | 'pos' | 'neg' | 'plain' | 'indef', string | undefined> = {
   zero: 'zero-cell',
   pos: 'signe-pos',
   neg: 'signe-neg',
   plain: undefined,
+  indef: 'indef-cell',
 }
 
 /** Tableau de signes / de variation — lignes alignées colonne par colonne. */

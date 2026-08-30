@@ -10,9 +10,19 @@ export type IllustrationSpec =
       max: number
       /** Accepted ("good") segments, using `min`/`max` as open-ended sentinels. */
       segments: { from: number | 'min'; to: number | 'max' }[]
-      points: { value: number; closed: boolean; label: string; tone: 'good' | 'bad' }[]
+      points: {
+        value: number
+        closed: boolean
+        label: string
+        tone: 'good' | 'bad'
+        /** Annotation secondaire sous le libellé principal (ex. "CE : toujours exclu"). */
+        sublabel?: string
+      }[]
       /** Small unlabeled/faint reference ticks, e.g. the origin. */
       extraTicks?: { value: number; label: string }[]
+      /** Signe affiché au-dessus d'une zone (ex. le signe d'un trinôme sur toute la droite, pas
+       * seulement la solution surlignée) — position au point donné, pas déduite des segments. */
+      signLabels?: { value: number; sign: '+' | '−' }[]
       axisLabel: string
       caption: string
     }
@@ -199,7 +209,7 @@ export type Block =
        */
       kind: 'signTable'
       caption: string
-      rows: { label: string; cells: { text: string; tone: 'zero' | 'pos' | 'neg' | 'plain' }[] }[]
+      rows: { label: string; cells: { text: string; tone: 'zero' | 'pos' | 'neg' | 'plain' | 'indef' }[] }[]
     }
   | ({
       /** Tableau à en-tête (colonnes fixes, lignes de données) — forme différente de `signTable`
