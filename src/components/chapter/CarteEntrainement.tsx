@@ -5,7 +5,7 @@ import { generatorLink } from '../../lib/generatorLink'
 export function CarteEntrainement({ block }: { block: Extract<Block, { kind: 'entrainement' }> }) {
   const href = generatorLink(block.chantier, block.generatorId)
   return (
-    <div className="generator-card">
+    <div className="generator-card no-export">
       <div className="generator-head">
         <div>
           <p className="eyebrow2">S'entraîner</p>
