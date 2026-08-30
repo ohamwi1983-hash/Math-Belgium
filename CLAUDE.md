@@ -39,6 +39,7 @@ de `Block` — le même bloc peut apparaître dans n'importe quel ordre selon le
 | ---------------- | ---------------------------------------------------------------------- |
 | `para`           | Paragraphe de prose (texte riche, voir ci-dessous)                     |
 | `subheading`     | Sous-titre de sous-section (`h3`)                                      |
+| `list`           | Liste à puces simple, hors callout (`ul.plain`)                       |
 | `rappel`         | Callout neutre "Rappel"                                                |
 | `methode`        | Callout "Méthode", liste d'étapes numérotées                          |
 | `attention`      | Callout "⚠ Attention"                                                  |
@@ -47,6 +48,9 @@ de `Block` — le même bloc peut apparaître dans n'importe quel ordre selon le
 | `exemple`        | "Exemple résolu" : badge, formule, étapes tagguées, résultat encadré  |
 | `wrongRight`     | Comparaison côte-à-côte ✗ incorrect / ✓ correct                       |
 | `illustration`   | Figure SVG autonome (voir plus bas)                                    |
+| `illustrationGroup` | Plusieurs illustrations compactes côte à côte (grille `diag-multi`) |
+| `signTable`      | Tableau de signes / de variation (lignes alignées colonne par colonne) |
+| `video`          | Placeholder "vidéo à venir" (exclu de l'export)                        |
 | `entrainement`   | Carte "S'entraîner" en fin de section, avec lien vers le générateur   |
 
 Le texte de tous les champs `text`/`items`/`formula` supporte une mini-syntaxe : `$latex$` pour
@@ -68,6 +72,12 @@ ces deux conventions.
   liste de vérifications de méthode à se poser avant de rendre sa copie. `RecapFinal` l'utilise en
   composition quand `recap.checklist` est fourni.
 - `MathInline`, `RichText`, `RichParagraph` (`components/Math.tsx`) — rendu KaTeX + mini-syntaxe.
+  **Piège vérifié en pratique** : `$latex$` imbriqué à l'intérieur de `**gras**` (ex.
+  `'**$a > 0$**'`) n'est PAS reparsé — le tokenizer capture tout le texte entre `**...**` comme
+  gras littéral, dollars compris, et KaTeX ne s'exécute jamais dessus. Toujours écrire le gras et
+  le math comme deux segments adjacents, jamais l'un dans l'autre.
+- `SignTable` (`components/chapter/SignTable.tsx`) — tableau de signes/variation, lignes alignées
+  colonne par colonne (`tone: 'zero' | 'pos' | 'neg' | 'plain'` par cellule).
 - `Illustration` (`components/illustrations/Illustration.tsx`) — enveloppe commune
   figure/diagram-frame/figcaption pour toute illustration ; bascule sur `IllustrationSpec.kind` :
   - `machine` — schéma "x entre, f(x) sort".
@@ -81,6 +91,15 @@ ces deux conventions.
   - `functionGraph` — trace la courbe réelle d'une fonction JS fournie (échantillonnage, pas une
     courbe approximative dessinée à la main) ; réutilisable pour de futurs chapitres (limites,
     asymptotes, dérivées) qui auront aussi besoin de tracer une fonction sur un intervalle.
+  - `curvePlot` — généralise `functionGraph` : plusieurs courbes superposées (tons `accent` /
+    `faint` / `good` / `bad`), axe de symétrie, points marqués, racines sur l'axe des x, bande
+    d'image ombrée. Couvre la quasi-totalité des besoins graphiques d'un chapitre sur les
+    paraboles (allures, sommet, image, racines, translations) sans dupliquer le moteur de tracé
+    par cas d'usage. L'axe vertical se plante à x=0 réel (pas au bord gauche du cadre) : attention
+    si on le retouche, l'échelle est calée sur `xMin`, pas sur un `xAxisMin` séparé comme dans
+    `functionGraph`.
+  - `fencedEnclosure` — schéma géométrique (mur + enclos rectangulaire + clôture), pas une courbe ;
+    reste un kind séparé plutôt que d'être forcé dans `curvePlot`, qui ne modélise que des fonctions.
 
 Toutes les illustrations utilisent les classes CSS `svg-ink` / `svg-line` / `svg-accent` /
 `svg-good` / `svg-bad` / `svg-faint` définies dans `src/index.css`, qui pointent vers les variables
@@ -88,10 +107,14 @@ de thème — elles s'adaptent donc automatiquement au thème sombre.
 
 ## Convention de lien vers un générateur
 
-`https://plateforme-maths.vercel.app/{chantier}/{idGenerateur}` — voir
-`src/lib/generatorLink.ts`. `chantier` ∈ {`4e`, `5e-4h`, `6e-6h`} (le slug exact du chantier 4e
-sur `plateforme-maths` reste à vérifier avant de publier le premier chapitre de 4e — non confirmé
-à ce stade).
+Le routing n'est **pas uniforme entre chantiers** — vérifié sur le déploiement réel, pas supposé :
+
+- `4e` : générateurs à la racine → `https://plateforme-maths.vercel.app/{idGenerateur}`
+- `5e-4h`, `6e-6h` : générateurs dans un dossier → `https://plateforme-maths.vercel.app/{chantier}/{idGenerateur}`
+
+Voir `src/lib/generatorLink.ts`, qui encapsule ce cas spécial : l'authoring d'un chapitre pose
+toujours `chantier` = `levelSlug` (ex. `'4e'`, `'5e-4h'`), la fonction se charge de générer la
+bonne forme d'URL selon le chantier.
 
 ## Structure de navigation
 
@@ -124,6 +147,15 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   intégralité, texte et illustrations. Les illustrations graphiques (droites graduées du domaine,
   diagrammes $C_f$/$C_g$, graphe de $h(r)$) ont été reconstituées à partir de l'artifact original
   (et non redessinées à l'aveugle depuis une extraction de texte).
+- **4e, Chapitre 1 — La fonction du second degré** (`fonction-second-degre`) : migré en intégralité
+  depuis l'artifact d'origine. A nécessité, découverts en cours de migration (absents du schéma
+  initial) : les kinds `list`, `signTable`, `illustrationGroup`, `video`, et les deux kinds
+  d'illustration `curvePlot`/`fencedEnclosure`. Une simplification assumée : le tableau "Image
+  selon le signe de a" (3 colonnes, 2 lignes) a été converti en liste à puces plutôt que de créer
+  un troisième type de tableau pour ce seul cas. Vérifié par rendu SSR réel (pas seulement `tsc`) :
+  aucun `$...$` non résolu, aucun lien générateur cassé, les deux callouts "piège classique" sur le
+  bon composant malgré une classe CSS source ambiguë (`callout-attention` réutilisée pour les deux
+  labels dans l'artifact).
 
 ## Vérification avant de pousser
 

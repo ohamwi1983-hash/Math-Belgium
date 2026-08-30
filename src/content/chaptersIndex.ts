@@ -1,5 +1,6 @@
 import type { ChapterContent } from './types'
 import { fonctionsComposees } from './chapters/5e-4h/fonctions-composees'
+import { fonctionSecondDegre } from './chapters/4e/fonction-second-degre'
 
 export interface LevelEntry {
   slug: string
@@ -12,7 +13,7 @@ export interface LevelEntry {
  * Ajouter un chapitre = ajouter son fichier de données ici, jamais une nouvelle route codée à la main.
  */
 export const LEVELS: LevelEntry[] = [
-  { slug: '4e', label: '4e', chapters: [] },
+  { slug: '4e', label: '4e', chapters: [fonctionSecondDegre] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees] },
   { slug: '6e-6h', label: '6e (6h)', chapters: [] },
 ]

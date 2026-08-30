@@ -1,4 +1,5 @@
 import type { ChapterContent } from '../../content/types'
+import { RichText } from '../Math'
 import { BlockList } from './BlockRenderer'
 import { RecapFinal } from './RecapFinal'
 import { ExportSection } from './ExportSection'
@@ -15,7 +16,9 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
           {chapter.level} — Chapitre {chapter.chapterNumber}
         </p>
         <h1 className="chapter-title">{chapter.title}</h1>
-        <p className="chapter-lede">{chapter.lede}</p>
+        <p className="chapter-lede">
+          <RichText text={chapter.lede} />
+        </p>
         <nav className="toc no-export">
           <p className="toc-label">Dans ce chapitre</p>
           <ol>

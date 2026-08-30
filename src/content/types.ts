@@ -52,6 +52,39 @@ export type IllustrationSpec =
       yAxisLabel: string
       caption: string
     }
+  | {
+      kind: 'curvePlot'
+      /**
+       * Une ou plusieurs courbes tracées sur les mêmes axes (ex. comparer plusieurs valeurs de a,
+       * ou une courbe "avant" fanée + une courbe "après" en accent lors d'une translation).
+       */
+      curves: { fn: (x: number) => number; tone: 'accent' | 'faint' | 'good' | 'bad' }[]
+      xMin: number
+      xMax: number
+      xTicks: number[]
+      /** Ligne verticale pointillée (ex. axe de symétrie). */
+      axisOfSymmetry?: { x: number; label: string }
+      /** Points marqués (ex. sommet). */
+      points?: { x: number; y: number; label: string; tone: 'accent' | 'good' | 'bad' }[]
+      /** Racines marquées sur l'axe des x (0, 1 ou 2 éléments). */
+      roots?: { x: number; label?: string }[]
+      /** Bande horizontale ombrée représentant l'image (l'ensemble des y atteints). */
+      imageBand?: { from: number; direction: 'up' | 'down'; tone: 'good' | 'bad' }
+      xAxisLabel: string
+      yAxisLabel: string
+      /** Masque l'axe vertical — pour les mini-diagrammes compacts, où l'original ne trace qu'une
+       * ligne horizontale (ex. les diagrammes "0/1/2 racines", trop petits pour un axe complet). */
+      showYAxis?: boolean
+      caption: string
+    }
+  | {
+      kind: 'fencedEnclosure'
+      /** Enclos rectangulaire adossé à un mur : deux côtés égaux (x), un côté opposé (label libre). */
+      wallLabel: string
+      sideLabel: string
+      baseLabel: string
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string
@@ -61,6 +94,7 @@ export interface ExempleStep {
 export type Block =
   | { kind: 'para'; text: string }
   | { kind: 'subheading'; text: string }
+  | { kind: 'list'; items: string[] }
   | { kind: 'rappel'; label?: string; items: string[] }
   | { kind: 'methode'; label?: string; items: string[] }
   | { kind: 'attention'; label?: string; text: string }
@@ -77,12 +111,29 @@ export type Block =
   | { kind: 'wrongRight'; wrongTag: string; wrong: string; rightTag: string; right: string }
   | { kind: 'illustration'; illustration: IllustrationSpec }
   | {
+      /** Plusieurs illustrations compactes côte à côte (ex. comparer 0/1/2 racines). */
+      kind: 'illustrationGroup'
+      items: IllustrationSpec[]
+    }
+  | {
       kind: 'entrainement'
       title: string
       generatorId: string
       description: string[]
       chantier: string
       whereLabel: string
+    }
+  | { kind: 'video'; title: string }
+  | {
+      /**
+       * Tableau de signes / de variation. Chaque ligne a le même nombre de cellules, alignées
+       * colonne par colonne (bornes/zéros en `tone: 'zero'`, contenu d'intervalle en 'pos'/'neg'
+       * ou texte libre en 'plain'). Découvert nécessaire en migrant ce chapitre — absent du
+       * schéma initial, qui n'avait pas encore rencontré de tableau de signes.
+       */
+      kind: 'signTable'
+      caption: string
+      rows: { label: string; cells: { text: string; tone: 'zero' | 'pos' | 'neg' | 'plain' }[] }[]
     }
 
 export interface ChapterSection {
