@@ -140,6 +140,60 @@ export const fonctionSecondDegre: ChapterContent = {
             '$\\dfrac{x_1+x_2}{2}$. Par exemple, si $f(0) = 5$ et $f(6) = 5$, l’axe est $x = ' +
             '\\dfrac{0+6}{2} = 3$ — sans avoir besoin de connaître $a$, $b$ ni $c$.',
         },
+        { kind: 'subheading', text: 'D’où vient la formule $x_S = -b/(2a)$ ?' },
+        {
+          kind: 'para',
+          text:
+            'Cette même astuce du milieu permet de retrouver l’abscisse du sommet $x_S$ ' +
+            '**directement** à partir de $a$, $b$ et $c$, sans passer par la forme canonique. ' +
+            'Partons d’une parabole générale $f(x) = ax^2+bx+c$, et comparons-la à ' +
+            '$g(x) = ax^2+bx$ — la même parabole, mais avec $c$ remplacé par $0$. Pour tout $x$, ' +
+            '$f(x) = g(x) + c$ : les deux courbes ont exactement la même forme, seulement ' +
+            'décalées verticalement de $c$.',
+        },
+        {
+          kind: 'para',
+          text:
+            'Un décalage vertical ne change jamais l’abscisse du sommet — seule son ordonnée ' +
+            'bouge. Donc $x_S(f) = x_S(g)$ : trouver $x_S$ de **n’importe quelle** parabole ' +
+            'revient à trouver $x_S$ de $g(x)=ax^2+bx$, où $c=0$.',
+        },
+        {
+          kind: 'para',
+          text:
+            'Or $g(x)=ax^2+bx=0$ se résout par mise en évidence de $x$ (section précédente) : ' +
+            '$x(ax+b)=0 \\iff x_1 = 0$ ou $x_2 = -\\dfrac{b}{a}$ — deux racines, donc deux points ' +
+            'de même hauteur (0), exactement la situation de l’astuce ci-dessus. Leur milieu ' +
+            'donne $x_S$ :',
+        },
+        { kind: 'para', text: '$x_S = \\dfrac{0 + (-b/a)}{2} = -\\dfrac{b}{2a}$' },
+        {
+          kind: 'para',
+          text:
+            'Cette valeur de $x_S$ vaut pour $f$ tout autant que pour $g$ (le décalage vertical ' +
+            'ne l’affecte pas) — mais $y_S$, lui, dépend bien de $c$ : il se calcule en ' +
+            'substituant $x_S$ dans le $f$ **original**.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Formules du sommet',
+          items: [
+            '$x_S = -\\dfrac{b}{2a}$',
+            '$AS \\equiv x = x_S$ (axe de symétrie)',
+            '$S(x_S\\,;\\,y_S)$, avec $y_S = f(x_S)$',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'application directe',
+          formula: '$f(x) = 2x^2-8x+3$',
+          steps: [{ tag: 'abscisse du sommet', text: '$x_S = -\\dfrac{-8}{2 \\cdot 2} = 2$' }],
+          result: {
+            tag: 'ordonnée et sommet',
+            text: '$y_S = f(2) = 8-16+3 = -5 \\to S(2\\,;\\,-5)$ — le même résultat que par la ' +
+              'forme canonique, plus loin dans ce chapitre.',
+          },
+        },
         { kind: 'subheading', text: 'Domaine et image' },
         {
           kind: 'para',

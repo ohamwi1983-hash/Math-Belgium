@@ -19,7 +19,11 @@ export function BlockRenderer({ block }: { block: Block }) {
         </p>
       )
     case 'subheading':
-      return <h3 className="sub-title">{block.text}</h3>
+      return (
+        <h3 className="sub-title">
+          <RichText text={block.text} />
+        </h3>
+      )
     case 'list':
       return (
         <ul className="plain">
