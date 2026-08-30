@@ -41,6 +41,7 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, axisL
         {points.map((pt, i) => {
           const x = toX(pt.value)
           const toneClass = pt.tone === 'good' ? 'svg-good' : 'svg-bad'
+          const toneVar = pt.tone === 'good' ? 'var(--good)' : 'var(--bad)'
           return (
             <g key={i}>
               {!pt.closed && (
@@ -50,9 +51,11 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, axisL
                 cx={x}
                 cy={SEGMENT_Y}
                 r="5"
-                className={toneClass}
-                fill={pt.closed ? undefined : 'var(--surface)'}
-                strokeWidth={pt.closed ? undefined : 2.5}
+                // Inline `style` (not the `fill`/`stroke` attributes) so the "open circle" fill
+                // actually wins over the .svg-good/.svg-bad class rules: a CSS class always beats
+                // a plain SVG presentation attribute, which would otherwise render every point filled.
+                style={{ fill: pt.closed ? toneVar : 'var(--surface)', stroke: toneVar }}
+                strokeWidth={pt.closed ? 1.5 : 2.5}
               />
               <text x={x} y={AXIS_Y + 25} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="14" fontWeight="600">
                 {pt.label}

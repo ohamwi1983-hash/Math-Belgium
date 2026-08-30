@@ -8,13 +8,17 @@ const Y_BOTTOM = 250
 const Y_TOP = 20
 const SAMPLES = 80
 
-/** Trace la courbe réelle de `fn` sur [xMin, xMax], avec un point marqué. */
-export function FunctionGraph({ fn, xMin, xMax, xTicks, markX, markLabel, xAxisLabel, yAxisLabel }: Props) {
+/**
+ * Trace la courbe réelle de `fn` sur [xMin, xMax], avec un point marqué. L'axe vertical est
+ * planté à `xAxisMin` (0 par défaut) — qui peut être antérieur à `xMin` quand la courbe elle-même
+ * ne démarre son tracé que plus loin, pour ne pas s'approcher d'une asymptote près de l'axe.
+ */
+export function FunctionGraph({ fn, xMin, xMax, xAxisMin = 0, xTicks, markX, markLabel, xAxisLabel, yAxisLabel }: Props) {
   const xs = Array.from({ length: SAMPLES + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / SAMPLES)
   const ys = xs.map(fn)
   const yMax = Math.max(...ys, fn(markX))
 
-  const xScale = (v: number) => X_LEFT + ((v - xMin) / (xMax - xMin)) * (X_RIGHT - X_LEFT)
+  const xScale = (v: number) => X_LEFT + ((v - xAxisMin) / (xMax - xAxisMin)) * (X_RIGHT - X_LEFT)
   const yScale = (v: number) => Y_BOTTOM - (v / yMax) * (Y_BOTTOM - Y_TOP)
 
   const pathD = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xScale(x).toFixed(2)},${yScale(ys[i]).toFixed(2)}`).join(' ')

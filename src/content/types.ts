@@ -40,8 +40,11 @@ export type IllustrationSpec =
   | {
       kind: 'functionGraph'
       fn: (x: number) => number
+      /** Où commence le tracé de la courbe (peut être > xAxisMin pour éviter une asymptote proche de l'axe). */
       xMin: number
       xMax: number
+      /** Où l'axe vertical est planté ; par défaut 0 (l'origine réelle), même si la courbe démarre plus loin. */
+      xAxisMin?: number
       xTicks: number[]
       markX: number
       markLabel: string
