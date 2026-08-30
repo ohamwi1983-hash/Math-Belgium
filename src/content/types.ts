@@ -240,5 +240,8 @@ export interface ChapterContent {
     table?: FeatureTableData
     checklist?: { label?: string; items: string[] }
     forward?: string
+    /** Carte "S'entraîner"/"Se tester" en toute fin de synthèse (ex. quiz vrai/faux transversal
+     * à tout le chapitre) — distincte des cartes de fin de section, positionnée après `forward`. */
+    entrainement?: Extract<Block, { kind: 'entrainement' }>
   }
 }

@@ -604,5 +604,17 @@ export const fonctionsComposees: ChapterContent = {
     forward:
       'Le domaine de définition revient au premier plan dans le chapitre sur les limites et les ' +
       'asymptotes : c’est lui qui indique, dès le départ, où chercher les comportements à étudier.',
+    entrainement: {
+      kind: 'entrainement',
+      title: 'Quiz vrai ou faux — tout le chapitre',
+      generatorId: '5gen39',
+      description: [
+        '7 thèmes de 20 affirmations chacun (vocabulaire, domaine rationnel, domaine avec ' +
+          'racines, décomposition, composition, lecture graphique, problèmes-contexte) — choisis ' +
+          'un thème, réponds vrai ou faux, la justification est toujours révélée.',
+      ],
+      chantier: '5e-4h',
+      whereLabel: '5e (4h) → « 39. Fonctions : rappels et compléments — quiz vrai/faux »',
+    },
   },
 }
