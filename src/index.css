@@ -351,6 +351,30 @@ figcaption {
   margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); font-size: 0.95rem; color: var(--ink-faint);
 }
 
+/* ---------- export (Word / PDF / PowerPoint) ---------- */
+.export-section {
+  margin-top: 40px; padding: 26px 28px; background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.export-section h2 { font-size: 1.2rem; margin-bottom: 8px; }
+.export-section > p { color: var(--ink-soft); font-size: 0.95rem; margin-bottom: 18px; }
+.export-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+.export-btn {
+  flex: 1 1 180px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 14px; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--radius); font-family: var(--sans); cursor: pointer; text-align: center;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.export-btn .export-icon { font-size: 1.5rem; line-height: 1; }
+.export-btn .export-label { font-weight: 700; font-size: 0.95rem; }
+.export-btn .export-sub { font-size: 0.78rem; color: var(--ink-faint); }
+.export-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+.export-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.export-status {
+  margin-top: 16px; margin-bottom: 0; font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); min-height: 1.4em;
+}
+.export-status.is-error { color: var(--bad); }
+
 /* ---------- KaTeX sizing tweak ---------- */
 .katex { font-size: 1.02em; }
 

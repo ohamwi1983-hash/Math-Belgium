@@ -1,6 +1,7 @@
 import type { ChapterContent } from '../../content/types'
 import { BlockList } from './BlockRenderer'
 import { RecapFinal } from './RecapFinal'
+import { ExportSection } from './ExportSection'
 
 /**
  * Gabarit unique partagé par tous les chapitres. Un chapitre est entièrement défini par ses
@@ -15,7 +16,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
         </p>
         <h1 className="chapter-title">{chapter.title}</h1>
         <p className="chapter-lede">{chapter.lede}</p>
-        <nav className="toc">
+        <nav className="toc no-export">
           <p className="toc-label">Dans ce chapitre</p>
           <ol>
             {chapter.sections.map((section) => (
@@ -48,6 +49,8 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
       ))}
 
       <RecapFinal recap={chapter.recap} />
+
+      <ExportSection chapter={chapter} />
     </div>
   )
 }
