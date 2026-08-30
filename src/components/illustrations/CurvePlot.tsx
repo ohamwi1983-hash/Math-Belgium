@@ -32,16 +32,25 @@ export function CurvePlot({
   xMin,
   xMax,
   xTicks,
+  xTickLabels,
   axisOfSymmetry,
+  horizontalAsymptotes,
   points,
   roots,
   imageBand,
+  testLine,
   xAxisLabel,
   yAxisLabel,
   showYAxis = true,
 }: Props) {
-  const xs = Array.from({ length: SAMPLES + 1 }, (_, i) => xMin + ((xMax - xMin) * i) / SAMPLES)
-  const allYs = curves.flatMap((c) => xs.map(c.fn)).concat((points ?? []).map((p) => p.y))
+  const allYs = curves
+    .flatMap((c) => {
+      const cMin = c.xMin ?? xMin
+      const cMax = c.xMax ?? xMax
+      return Array.from({ length: SAMPLES + 1 }, (_, i) => c.fn(cMin + ((cMax - cMin) * i) / SAMPLES))
+    })
+    .filter(Number.isFinite)
+    .concat((points ?? []).map((p) => p.y))
   const yMax = Math.max(...allYs, 0)
   const yMin = Math.min(...allYs, 0)
   // Marge pour ne pas coller les extrema au bord du cadre.
@@ -58,8 +67,14 @@ export function CurvePlot({
   // construction, ce qui n'est plus vrai ici puisque l'échelle est calée sur xMin).
   const zeroX = xScale(0)
 
-  const pathFor = (fn: (x: number) => number) =>
-    xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xScale(x).toFixed(2)},${yScale(fn(x)).toFixed(2)}`).join(' ')
+  // Chaque courbe peut avoir son propre sous-intervalle d'échantillonnage (ex. portion restreinte
+  // en accent sur fond de courbe complète en fané) — par défaut, l'intervalle du graphe entier.
+  const pathFor = (c: { fn: (x: number) => number; xMin?: number; xMax?: number }) => {
+    const cMin = c.xMin ?? xMin
+    const cMax = c.xMax ?? xMax
+    const cxs = Array.from({ length: SAMPLES + 1 }, (_, i) => cMin + ((cMax - cMin) * i) / SAMPLES)
+    return cxs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xScale(x).toFixed(2)},${yScale(c.fn(x)).toFixed(2)}`).join(' ')
+  }
 
   return (
     <svg viewBox="0 0 640 290" role="img" aria-label="Graphe de fonction(s)">
@@ -85,7 +100,7 @@ export function CurvePlot({
       <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
         {xTicks.map((t) => (
           <text key={t} x={xScale(t)} y={zeroY + 16} textAnchor="middle">
-            {t}
+            {xTickLabels?.[t] ?? t}
           </text>
         ))}
       </g>
@@ -122,10 +137,23 @@ export function CurvePlot({
         </>
       )}
 
+      {horizontalAsymptotes?.map((a, i) => (
+        <line key={i} x1={X_LEFT} y1={yScale(a.y)} x2={X_RIGHT} y2={yScale(a.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+      ))}
+
+      {testLine && (
+        <>
+          <line x1={X_LEFT} y1={yScale(testLine.y)} x2={X_RIGHT} y2={yScale(testLine.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="3 3" />
+          {testLine.points.map((p, i) => (
+            <circle key={i} cx={xScale(p.x)} cy={yScale(testLine.y)} r="4" className="svg-bad" />
+          ))}
+        </>
+      )}
+
       {curves.map((c, i) => (
         <path
           key={i}
-          d={pathFor(c.fn)}
+          d={pathFor(c)}
           // `style` (not the `fill` attribute) so this actually wins over .svg-bad/.svg-good,
           // which set fill for their solid-marker use elsewhere — same trap documented in
           // DomainNumberLine. A curve is never filled regardless of tone.

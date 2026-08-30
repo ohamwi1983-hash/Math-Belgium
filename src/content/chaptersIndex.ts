@@ -1,6 +1,7 @@
 import type { ChapterContent } from './types'
 import { fonctionsComposees } from './chapters/5e-4h/fonctions-composees'
 import { fonctionSecondDegre } from './chapters/4e/fonction-second-degre'
+import { fonctionsReciproquesCyclometriques } from './chapters/6e-6h/fonctions-reciproques-cyclometriques'
 
 export interface LevelEntry {
   slug: string
@@ -15,7 +16,7 @@ export interface LevelEntry {
 export const LEVELS: LevelEntry[] = [
   { slug: '4e', label: '4e', chapters: [fonctionSecondDegre] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees] },
-  { slug: '6e-6h', label: '6e (6h)', chapters: [] },
+  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques] },
 ]
 
 export function findChapter(levelSlug: string, chapterSlug: string): ChapterContent | undefined {

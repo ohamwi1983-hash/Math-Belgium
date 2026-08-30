@@ -81,3 +81,18 @@ export function PiegeClassique({ block }: { block: Extract<Block, { kind: 'piege
     </div>
   )
 }
+
+/** Callout "Définitions" — paragraphes de définition formelle (pas une liste à puces, contrairement
+ * à `Rappel`). */
+export function Definition({ block }: { block: Extract<Block, { kind: 'definition' }> }) {
+  return (
+    <div className="callout callout-definition">
+      <p className="callout-label">{block.label ?? 'Définitions'}</p>
+      {block.items.map((item, i) => (
+        <p key={i}>
+          <RichText text={item} />
+        </p>
+      ))}
+    </div>
+  )
+}

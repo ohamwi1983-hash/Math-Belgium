@@ -45,11 +45,15 @@ de `Block` — le même bloc peut apparaître dans n'importe quel ordre selon le
 | `attention`      | Callout "⚠ Attention"                                                  |
 | `astuce`         | Callout "💡 Astuce" (+ liste optionnelle)                              |
 | `piege`          | Callout "Piège classique"                                              |
+| `definition`     | Callout "Définitions" — paragraphes de définition formelle, pas une liste à puces |
 | `exemple`        | "Exemple résolu" : badge, formule, étapes tagguées, résultat encadré  |
+| `exempleLibre`   | "Exemple résolu" en forme libre : blocs imbriqués quelconques (prose, chaîne...), quand le raisonnement ne se découpe pas en étapes/résultat rigides |
 | `wrongRight`     | Comparaison côte-à-côte ✗ incorrect / ✓ correct                       |
 | `illustration`   | Figure SVG autonome (voir plus bas)                                    |
 | `illustrationGroup` | Plusieurs illustrations compactes côte à côte (grille `diag-multi`) |
 | `signTable`      | Tableau de signes / de variation (lignes alignées colonne par colonne) |
+| `featureTable`   | Tableau à en-tête fixe (colonnes nommées, lignes de données) — forme différente de `signTable` |
+| `operationChain` | Chaîne de valeurs reliées par des opérations nommées sur les flèches (HTML/flexbox, pas SVG — les nœuds contiennent du texte riche/KaTeX) |
 | `video`          | Placeholder "vidéo à venir" (exclu de l'export)                        |
 | `entrainement`   | Carte "S'entraîner" en fin de section, avec lien vers le générateur   |
 
@@ -57,6 +61,10 @@ Le texte de tous les champs `text`/`items`/`formula` supporte une mini-syntaxe :
 une formule KaTeX inline, `**gras**` pour l'emphase — voir `RichText` dans
 `src/components/Math.tsx`. Ne jamais écrire de JSX dans les fichiers de contenu : tout passe par
 ces deux conventions.
+
+`ChapterContent.recap.items` est optionnel : une synthèse peut être purement tabulaire
+(`recap.table`, même forme que `featureTable`) sans liste à puces — cas rencontré dès qu'un
+chapitre récapitule plusieurs fonctions/objets comparables plutôt qu'une liste de principes.
 
 ## Composants réutilisables
 
@@ -78,6 +86,11 @@ ces deux conventions.
   le math comme deux segments adjacents, jamais l'un dans l'autre.
 - `SignTable` (`components/chapter/SignTable.tsx`) — tableau de signes/variation, lignes alignées
   colonne par colonne (`tone: 'zero' | 'pos' | 'neg' | 'plain'` par cellule).
+- `FeatureTable` (`components/chapter/FeatureTable.tsx`) — tableau à en-tête fixe (colonnes
+  nommées, ex. "Fonction | Domaine | Image"), réutilisé tel quel pour `recap.table`.
+- `OperationChain` (`components/chapter/OperationChain.tsx`) — chaîne HTML/flexbox (pas SVG) de
+  valeurs KaTeX reliées par des opérations nommées sur les flèches, `direction: 'forward' |
+  'backward'` pour une chaîne qui se lit à l'envers (ex. "défaire" une composition).
 - `Illustration` (`components/illustrations/Illustration.tsx`) — enveloppe commune
   figure/diagram-frame/figcaption pour toute illustration ; bascule sur `IllustrationSpec.kind` :
   - `machine` — schéma "x entre, f(x) sort".
@@ -93,13 +106,29 @@ ces deux conventions.
     asymptotes, dérivées) qui auront aussi besoin de tracer une fonction sur un intervalle.
   - `curvePlot` — généralise `functionGraph` : plusieurs courbes superposées (tons `accent` /
     `faint` / `good` / `bad`), axe de symétrie, points marqués, racines sur l'axe des x, bande
-    d'image ombrée. Couvre la quasi-totalité des besoins graphiques d'un chapitre sur les
-    paraboles (allures, sommet, image, racines, translations) sans dupliquer le moteur de tracé
-    par cas d'usage. L'axe vertical se plante à x=0 réel (pas au bord gauche du cadre) : attention
-    si on le retouche, l'échelle est calée sur `xMin`, pas sur un `xAxisMin` séparé comme dans
-    `functionGraph`.
+    d'image ombrée, asymptotes horizontales, ligne de test horizontale (avec points
+    d'intersection). Chaque courbe peut avoir son propre sous-intervalle d'échantillonnage
+    (`xMin`/`xMax` par courbe) — utile pour une portion restreinte en accent sur fond de courbe
+    complète en fané (ex. sin restreint à [−π/2 ; π/2] sur fond de sinusoïde complète). `xTickLabels`
+    permet des étiquettes symboliques (ex. "π/2") plutôt que la valeur décimale brute. Couvre la
+    quasi-totalité des besoins graphiques d'un chapitre sur les paraboles ou les fonctions
+    trigonométriques sans dupliquer le moteur de tracé par cas d'usage. L'axe vertical se plante à
+    x=0 réel (pas au bord gauche du cadre) : attention si on le retouche, l'échelle est calée sur
+    `xMin`, pas sur un `xAxisMin` séparé comme dans `functionGraph`.
   - `fencedEnclosure` — schéma géométrique (mur + enclos rectangulaire + clôture), pas une courbe ;
     reste un kind séparé plutôt que d'être forcé dans `curvePlot`, qui ne modélise que des fonctions.
+  - `setMapping` — diagramme d'application entre deux ensembles A et B (points + flèches), pour
+    injectivité/surjectivité/bijectivité. Positions verticales en fraction relative (0–1) par
+    point, flèches par indices. **Utilise `useId()` pour l'id du marqueur de flèche** (pas un id
+    fixe) car ce kind apparaît typiquement plusieurs fois sur une même page (3 diagrammes
+    comparés) — un id fixe collisionnerait. Les autres composants à flèche du dossier (`cp-arrow`,
+    `chain-arrow`, `fg-arrow`, `domain-arrow`) utilisent encore un id fixe ; ça reste sans
+    symptôme visible tant que tous les marqueurs partageant l'id ont un rendu identique, mais
+    `useId()` est la bonne pratique à suivre pour tout nouveau composant à marqueur.
+  - `unitCircleArc` — cercle trigonométrique + rayon + arc + projection, pour arcsin/arccos/arctan.
+    `mode` distingue une géométrie de projection réellement différente (horizontale sur l'axe y
+    pour sin, verticale sur l'axe x pour cos, sur la tangente géométrique verticale pour tan) —
+    pas juste une couleur qui change.
 
 Toutes les illustrations utilisent les classes CSS `svg-ink` / `svg-line` / `svg-accent` /
 `svg-good` / `svg-bad` / `svg-faint` définies dans `src/index.css`, qui pointent vers les variables
@@ -156,6 +185,18 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   aucun `$...$` non résolu, aucun lien générateur cassé, les deux callouts "piège classique" sur le
   bon composant malgré une classe CSS source ambiguë (`callout-attention` réutilisée pour les deux
   labels dans l'artifact).
+- **6e (6h), Chapitre 1 — Fonctions réciproques & cyclométriques** (`fonctions-reciproques-cyclometriques`) :
+  migré en intégralité. A nécessité plusieurs kinds/extensions supplémentaires par rapport au
+  schéma d'alors : callout `definition`, `exempleLibre` (exemple en forme libre, blocs imbriqués),
+  `featureTable` (tableau à en-tête, y compris pour `recap.table` — la synthèse de ce chapitre est
+  purement tabulaire, sans liste à puces), `operationChain` (chaîne HTML de valeurs/opérations
+  nommées), et sur `curvePlot` : échantillonnage par courbe, asymptotes horizontales, ligne de
+  test horizontale, `xTickLabels` symboliques. Deux nouveaux kinds d'illustration : `setMapping`
+  (diagrammes ensemblistes injectif/surjectif/bijectif) et `unitCircleArc` (cercle trigonométrique
+  pour arcsin/arccos/arctan). Cartes génératrices enrichies (titre/description rédigés) bien que
+  la source n'ait que des liens minimalistes, et la petite illustration décorative d'en-tête de
+  l'artifact a été omise — deux décisions éditoriales confirmées avant rédaction, pas des
+  raccourcis pris silencieusement.
 
 ## Vérification avant de pousser
 

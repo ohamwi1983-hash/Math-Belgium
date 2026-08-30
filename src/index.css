@@ -249,6 +249,10 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .callout-astuce .callout-label { color: var(--tip); }
 .callout-astuce ul, .callout-astuce ol { padding-left: 1.3em; margin: 8px 0 0; }
 .callout-astuce li { margin: 4px 0; }
+.callout-definition { border-left-color: var(--good); background: var(--good-soft); }
+.callout-definition .callout-label { color: var(--good); }
+.callout-exemple { border-left-color: var(--accent); background: var(--surface-2); }
+.callout-exemple .callout-label { color: var(--accent-ink); }
 
 /* ---------- exemple résolu ---------- */
 .exemple {
@@ -350,6 +354,24 @@ figcaption {
 .synthese .forward {
   margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); font-size: 0.95rem; color: var(--ink-faint);
 }
+
+/* ---------- chaîne d'opérations (operationChain) ---------- */
+.chain-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 2px; margin: 20px 0;
+  padding: 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.chain-row-item { display: flex; align-items: center; gap: 2px; }
+.chain-node {
+  font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--ink);
+  padding: 4px 8px; white-space: nowrap;
+}
+.chain-op {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; margin: 0 4px; min-width: 64px;
+}
+.chain-op-label {
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); white-space: nowrap; text-align: center;
+}
+.chain-arrow { font-size: 1.1rem; color: var(--accent); line-height: 1; }
 
 /* ---------- tableau de signes / de variation ---------- */
 .table-scroll { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); border-radius: var(--radius); }

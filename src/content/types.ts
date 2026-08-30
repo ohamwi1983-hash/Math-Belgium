@@ -57,19 +57,30 @@ export type IllustrationSpec =
       /**
        * Une ou plusieurs courbes tracées sur les mêmes axes (ex. comparer plusieurs valeurs de a,
        * ou une courbe "avant" fanée + une courbe "après" en accent lors d'une translation).
+       * `xMin`/`xMax` par courbe : sous-intervalle d'échantillonnage propre à cette courbe (ex.
+       * portion restreinte en accent sur fond de courbe complète en fané) ; par défaut, l'intervalle
+       * du graphe entier.
        */
-      curves: { fn: (x: number) => number; tone: 'accent' | 'faint' | 'good' | 'bad' }[]
+      curves: { fn: (x: number) => number; tone: 'accent' | 'faint' | 'good' | 'bad'; xMin?: number; xMax?: number }[]
       xMin: number
       xMax: number
       xTicks: number[]
+      /** Étiquette personnalisée pour une valeur de xTicks (ex. "π/2" plutôt que "1.5707...").
+       * Sans entrée pour une valeur donnée, le nombre brut est affiché. */
+      xTickLabels?: Record<number, string>
       /** Ligne verticale pointillée (ex. axe de symétrie). */
       axisOfSymmetry?: { x: number; label: string }
+      /** Asymptotes horizontales (ex. y = ±π/2 pour arctan). */
+      horizontalAsymptotes?: { y: number }[]
       /** Points marqués (ex. sommet). */
       points?: { x: number; y: number; label: string; tone: 'accent' | 'good' | 'bad' }[]
       /** Racines marquées sur l'axe des x (0, 1 ou 2 éléments). */
       roots?: { x: number; label?: string }[]
       /** Bande horizontale ombrée représentant l'image (l'ensemble des y atteints). */
       imageBand?: { from: number; direction: 'up' | 'down'; tone: 'good' | 'bad' }
+      /** Ligne horizontale de test (ex. test de la droite horizontale pour l'injectivité), avec
+       * les points d'intersection marqués. */
+      testLine?: { y: number; points: { x: number }[] }
       xAxisLabel: string
       yAxisLabel: string
       /** Masque l'axe vertical — pour les mini-diagrammes compacts, où l'original ne trace qu'une
@@ -85,10 +96,38 @@ export type IllustrationSpec =
       baseLabel: string
       caption: string
     }
+  | {
+      /** Diagramme d'application entre deux ensembles A et B (points + flèches), pour illustrer
+       * injectivité/surjectivité/bijectivité. Positions verticales en fraction relative (0–1) de
+       * la hauteur du diagramme, pour reproduire fidèlement un espacement irrégulier si besoin. */
+      kind: 'setMapping'
+      setALabel: string
+      setBLabel: string
+      pointsA: number[]
+      pointsB: number[]
+      arrows: { from: number; to: number }[]
+      caption: string
+    }
+  | {
+      /** Cercle trigonométrique avec rayon, arc et projection, pour illustrer arcsin/arccos/arctan.
+       * `mode` distingue la projection (horizontale sur l'axe y pour sin, verticale sur l'axe x
+       * pour cos, sur la tangente géométrique verticale pour tan) — géométrie réellement
+       * différente selon le cas, pas juste une couleur qui change. */
+      kind: 'unitCircleArc'
+      mode: 'sin' | 'cos' | 'tan'
+      /** Angle représenté, en radians. */
+      angle: number
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string
   text: string
+}
+
+export interface FeatureTableData {
+  headers: string[]
+  rows: string[][]
 }
 
 export type Block =
@@ -101,12 +140,29 @@ export type Block =
   | { kind: 'astuce'; label?: string; text: string; items?: string[] }
   | { kind: 'piege'; label?: string; text: string }
   | {
+      /** Callout "Définitions" — plusieurs paragraphes de définition formelle, pas une liste à
+       * puces (contrairement à `rappel`). Découvert nécessaire pour du contenu de 6e riche en
+       * définitions formelles (injectif/surjectif/bijectif) — absent des chapitres 4e/5e. */
+      kind: 'definition'
+      label?: string
+      items: string[]
+    }
+  | {
       kind: 'exemple'
       badge?: string
       formula?: string
       steps: ExempleStep[]
       result: { tag: string; text: string; isEmpty?: boolean }
       illustration?: IllustrationSpec
+    }
+  | {
+      /** "Exemple résolu" en forme libre : paragraphes de prose enchaînés (peut inclure une
+       * chaîne d'opérations, une illustration...), pas la structure rigide badge/étapes/résultat
+       * de `exemple`. Utiliser quand le raisonnement ne se découpe pas proprement en étapes
+       * taguées + un résultat final unique. */
+      kind: 'exempleLibre'
+      label?: string
+      blocks: Block[]
     }
   | { kind: 'wrongRight'; wrongTag: string; wrong: string; rightTag: string; right: string }
   | { kind: 'illustration'; illustration: IllustrationSpec }
@@ -135,6 +191,22 @@ export type Block =
       caption: string
       rows: { label: string; cells: { text: string; tone: 'zero' | 'pos' | 'neg' | 'plain' }[] }[]
     }
+  | ({
+      /** Tableau à en-tête (colonnes fixes, lignes de données) — forme différente de `signTable`
+       * (qui aligne des bornes/intervalles). Ex. "Fonction | Domaine | Image | Dérivée". */
+      kind: 'featureTable'
+      caption?: string
+    } & FeatureTableData)
+  | {
+      /** Chaîne de valeurs reliées par des opérations nommées sur les flèches (ex. décomposer
+       * puis "défaire" une fonction opération par opération). HTML/flexbox, pas SVG : les nœuds
+       * contiennent du texte riche (KaTeX), pas seulement des formes géométriques. */
+      kind: 'operationChain'
+      nodes: string[]
+      /** Longueur = nodes.length − 1. */
+      operations: string[]
+      direction?: 'forward' | 'backward'
+    }
 
 export interface ChapterSection {
   id: string
@@ -161,7 +233,11 @@ export interface ChapterContent {
   }
   sections: ChapterSection[]
   recap: {
-    items: string[]
+    /** Optionnel : certaines synthèses sont purement tabulaires (voir `table`), sans liste à puces. */
+    items?: string[]
+    /** Tableau de synthèse, quand le format tabulaire est plus clair qu'une liste (ex. un
+     * récapitulatif domaine/image/dérivée par fonction). */
+    table?: FeatureTableData
     checklist?: { label?: string; items: string[] }
     forward?: string
   }

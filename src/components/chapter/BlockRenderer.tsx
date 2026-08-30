@@ -1,11 +1,13 @@
 import type { Block } from '../../content/types'
 import { RichText } from '../Math'
 import { Illustration } from '../illustrations/Illustration'
-import { Rappel, Methode, Attention, Astuce, PiegeClassique } from './Callouts'
+import { Rappel, Methode, Attention, Astuce, PiegeClassique, Definition } from './Callouts'
 import { ExempleResolu } from './ExempleResolu'
 import { WrongRight } from './WrongRight'
 import { CarteEntrainement } from './CarteEntrainement'
 import { SignTable } from './SignTable'
+import { FeatureTable } from './FeatureTable'
+import { OperationChain } from './OperationChain'
 
 /** Renders one content block. Sections/intros are just ordered arrays of these. */
 export function BlockRenderer({ block }: { block: Block }) {
@@ -38,8 +40,17 @@ export function BlockRenderer({ block }: { block: Block }) {
       return <Astuce block={block} />
     case 'piege':
       return <PiegeClassique block={block} />
+    case 'definition':
+      return <Definition block={block} />
     case 'exemple':
       return <ExempleResolu block={block} />
+    case 'exempleLibre':
+      return (
+        <div className="callout callout-exemple">
+          <p className="callout-label">{block.label ?? 'Exemple résolu'}</p>
+          <BlockList blocks={block.blocks} />
+        </div>
+      )
     case 'wrongRight':
       return <WrongRight block={block} />
     case 'illustration':
@@ -56,6 +67,10 @@ export function BlockRenderer({ block }: { block: Block }) {
       return <CarteEntrainement block={block} />
     case 'signTable':
       return <SignTable block={block} />
+    case 'featureTable':
+      return <FeatureTable block={block} />
+    case 'operationChain':
+      return <OperationChain block={block} />
     case 'video':
       return (
         <div className="video-frame-wrap no-export">

@@ -8,6 +8,8 @@ import { CompositionNumericDiagram } from './CompositionNumericDiagram'
 import { FunctionGraph } from './FunctionGraph'
 import { CurvePlot } from './CurvePlot'
 import { FencedEnclosure } from './FencedEnclosure'
+import { SetMapping } from './SetMapping'
+import { UnitCircleArc } from './UnitCircleArc'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -35,6 +37,10 @@ function renderSvg(spec: IllustrationSpec) {
       return <CurvePlot {...spec} />
     case 'fencedEnclosure':
       return <FencedEnclosure {...spec} />
+    case 'setMapping':
+      return <SetMapping {...spec} />
+    case 'unitCircleArc':
+      return <UnitCircleArc {...spec} />
   }
 }
 
