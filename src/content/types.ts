@@ -139,6 +139,68 @@ export type IllustrationSpec =
       angle: number
       caption: string
     }
+  | {
+      /**
+       * Cercle + secteur/segment/corde/polygone(s) inscrit ou circonscrit — schéma géométrique
+       * générique, pas une courbe. Couvre plusieurs besoins (secteur simple, segment circulaire,
+       * polygone régulier inscrit, encadrement d'Archimède avec inscrit+circonscrit, cercle nu
+       * avec un point marqué et une ligne de sol) avec un seul kind configurable plutôt qu'un par
+       * variante — dans le même esprit que la généralisation de `curvePlot`.
+       */
+      kind: 'circleDiagram'
+      /** Angle de départ du secteur mis en évidence (rad, sens trigonométrique). Absent si aucun secteur. */
+      startAngle?: number
+      /** Angle du secteur (θ, rad). */
+      sectorAngle?: number
+      /** Ce qui est mis en évidence : l'arc seul, le segment (corde+arc), ou le secteur plein. */
+      highlight?: 'arc' | 'segment' | 'sector'
+      /** Dessine la corde reliant les deux extrémités du secteur. */
+      showChord?: boolean
+      /** Polygone régulier inscrit (sommets sur le cercle), trait fin. */
+      inscribedPolygon?: number
+      /** Polygone régulier circonscrit (côtés tangents au cercle), trait fin — encadrement d'Archimède. */
+      circumscribedPolygon?: number
+      /** Ligne de sol tangente en bas du cercle (ex. grande roue). */
+      groundLine?: boolean
+      /** Point marqué sur le cercle à un angle donné, hors de tout secteur (ex. la nacelle). */
+      markedPoint?: { angle: number; label?: string }
+      centerLabel?: string
+      radiusLabel?: string
+      pointALabel?: string
+      pointBLabel?: string
+      angleLabel?: string
+      caption: string
+    }
+  | {
+      /** Cercle gradué avec plusieurs rayons tracés à des angles remarquables, chacun étiqueté —
+       * diagramme de référence (ex. les 16 angles remarquables), pas une construction pas à pas. */
+      kind: 'trigCircleReference'
+      angles: { value: number; label: string }[]
+      caption: string
+    }
+  | {
+      /**
+       * Place 1 ou 2 points sur le cercle trigonométrique par leur angle, avec accessoires
+       * optionnels — pour les diagrammes de symétrie (α et π−α pour sin, α et −α pour cos, α et
+       * π+α pour tan) et pour des exemples ponctuels (ex. cos(u)=1/2). Généralise mieux que
+       * d'étendre `unitCircleArc`, qui est spécifiquement bâti autour d'une seule projection
+       * sin/cos/tan, pas de deux points arbitraires reliés.
+       */
+      kind: 'circleAngles'
+      points: { angle: number; label: string; tone: 'accent' | 'good' | 'bad' }[]
+      /** Trace la droite passant par les points (étendue aux bords du cadre, pas juste le segment
+       * entre eux) — sert de corde pour sin/cos, et de sécante prolongée jusqu'à la tangente pour tan. */
+      connectPoints?: boolean
+      /** Projections en pointillés de chaque point vers l'axe horizontal. */
+      projectToXAxis?: boolean
+      /** Projections en pointillés de chaque point vers l'axe vertical. */
+      projectToYAxis?: boolean
+      /** Ligne horizontale de référence à hauteur t (ex. y=t pour cos x=t), étiquetée. */
+      horizontalLine?: { y: number; label: string }
+      /** Ligne verticale de référence à x=t (ex. pour cos x=t, symétrie par rapport à l'axe horizontal). */
+      verticalLine?: { x: number; label: string }
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string

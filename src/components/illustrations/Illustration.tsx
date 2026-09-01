@@ -11,6 +11,9 @@ import { CurvePlot } from './CurvePlot'
 import { FencedEnclosure } from './FencedEnclosure'
 import { SetMapping } from './SetMapping'
 import { UnitCircleArc } from './UnitCircleArc'
+import { CircleDiagram } from './CircleDiagram'
+import { TrigCircleReference } from './TrigCircleReference'
+import { CircleAngles } from './CircleAngles'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -42,6 +45,12 @@ function renderSvg(spec: IllustrationSpec) {
       return <SetMapping {...spec} />
     case 'unitCircleArc':
       return <UnitCircleArc {...spec} />
+    case 'circleDiagram':
+      return <CircleDiagram {...spec} />
+    case 'trigCircleReference':
+      return <TrigCircleReference {...spec} />
+    case 'circleAngles':
+      return <CircleAngles {...spec} />
   }
 }
 
