@@ -515,6 +515,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -1.3,
             xMax: 1.3,
             xTicks: [-1, 1],
+            points: [
+              { x: -1, y: -PI / 2, label: '', tone: 'accent' },
+              { x: 1, y: PI / 2, label: '', tone: 'accent' },
+            ],
             fixedYRange: { min: -1.9, max: 1.9 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -530,6 +534,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -1.3,
             xMax: 1.3,
             xTicks: [-1, 1],
+            points: [
+              { x: -1, y: PI, label: '', tone: 'accent' },
+              { x: 1, y: 0, label: '', tone: 'accent' },
+            ],
             fixedYRange: { min: -0.3, max: 3.5 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -545,7 +553,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -10,
             xMax: 10,
             xTicks: [-8, -4, 4, 8],
-            horizontalAsymptotes: [{ y: PI / 2 }, { y: -PI / 2 }],
+            horizontalAsymptotes: [
+              { y: PI / 2, label: 'AH ≡ y = π/2' },
+              { y: -PI / 2, label: 'AH ≡ y = −π/2' },
+            ],
             fixedYRange: { min: -2.1, max: 2.1 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -560,13 +571,91 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             "dont le sinus vaut $x$. Même logique pour arccos et arctan, chacune avec sa propre image.",
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — arcsin est impaire',
+          blocks: [
+            { kind: 'para', text: 'Soit $f(x) = \\arcsin(x)$. Montrons que $f(-x) = -f(x)$.' },
+            {
+              kind: 'para',
+              text:
+                '$f(-x) = \\arcsin(-x) \\underset{\\text{déf}}{\\iff} \\sin(f(-x)) = ' +
+                '\\sin(\\arcsin(-x)) \\underset{\\text{calc}}{\\iff} \\sin(f(-x)) = -x$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{calc}}{\\iff} -\\sin(f(-x)) = x \\underset{\\text{sin impaire}}' +
+                '{\\iff} \\sin(-f(-x)) = x$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{déf}}{\\iff} \\arcsin(\\sin(-f(-x))) = \\arcsin(x) ' +
+                '\\underset{\\text{calc}}{\\iff} -f(-x) = \\arcsin(x) = f(x)$',
+            },
+            { kind: 'para', text: 'D\'où $f(-x) = -f(x)$ : arcsin est bien impaire.' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — arccos(x) + arccos(−x) = π',
+          blocks: [
+            { kind: 'para', text: 'Soit $y = \\arccos(-x)$.' },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{déf}}{\\iff} \\cos(y) = \\cos(\\arccos(-x)) ' +
+                '\\underset{\\text{calc}}{\\iff} \\cos(y) = -x \\underset{\\text{calc}}{\\iff} -\\cos(y) = x$',
+            },
+            { kind: 'para', text: '$\\iff \\cos(\\pi - y) = x$' },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{calc}}{\\iff} \\arccos(\\cos(\\pi-y)) = \\arccos(x) ' +
+                '\\underset{\\text{déf}}{\\iff} \\pi - y = \\arccos(x)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{calc}}{\\iff} y = \\pi - \\arccos(x) \\iff \\arccos(-x) = \\pi - \\arccos(x)$',
+            },
+            { kind: 'para', text: 'D\'où $\\arccos(x) + \\arccos(-x) = \\pi$.' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — arctan est impaire',
+          blocks: [
+            { kind: 'para', text: 'Soit $f(x) = \\arctan(x)$. Même structure que pour arcsin :' },
+            {
+              kind: 'para',
+              text:
+                '$f(-x) = \\arctan(-x) \\underset{\\text{déf}}{\\iff} \\tan(f(-x)) = ' +
+                '\\tan(\\arctan(-x)) \\underset{\\text{calc}}{\\iff} \\tan(f(-x)) = -x$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{calc}}{\\iff} -\\tan(f(-x)) = x \\underset{\\text{tan impaire}}' +
+                '{\\iff} \\tan(-f(-x)) = x$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{déf}}{\\iff} \\arctan(\\tan(-f(-x))) = \\arctan(x) ' +
+                '\\underset{\\text{calc}}{\\iff} -f(-x) = \\arctan(x) = f(x)$',
+            },
+            { kind: 'para', text: 'D\'où $f(-x) = -f(x)$ : arctan est bien impaire.' },
+          ],
+        },
+        {
           kind: 'methode',
           label: 'À retenir',
           items: [
             'arcsin et arctan sont strictement croissantes ; arccos est strictement décroissante.',
             'arcsin et arctan sont **impaires** : $\\arcsin(-x) = -\\arcsin(x)$ et $\\arctan(-x) = -\\arctan(x)$.',
             'arccos n\'est **pas** impaire, mais vérifie $\\arccos(-x) = \\pi - \\arccos(x)$ — ' +
-              'conséquence de l\'identité vue en section 3.',
+              'démontré ci-dessus.',
           ],
         },
         {
@@ -616,6 +705,32 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           text: 'Identité utile, qui relie les deux fonctions (angles complémentaires d\'un triangle rectangle) :',
         },
         { kind: 'para', text: '$\\arcsin(u) + \\arccos(u) = \\pi/2 \\quad \\forall u \\in [-1;1]$' },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration',
+          blocks: [
+            { kind: 'para', text: 'Soit $y = \\arccos(x)$.' },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{déf}}{\\iff} \\cos(y) = \\cos(\\arccos(x)) ' +
+                '\\underset{\\text{calc}}{\\iff} \\cos(y) = x$',
+            },
+            { kind: 'para', text: '$\\underset{\\text{calc}}{\\iff} \\sin(\\pi/2 - y) = x$' },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{calc}}{\\iff} \\arcsin(\\sin(\\pi/2-y)) = \\arcsin(x) ' +
+                '\\underset{\\text{calc}}{\\iff} \\pi/2 - y = \\arcsin(x)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\underset{\\text{calc}}{\\iff} y = \\pi/2 - \\arcsin(x) \\iff \\arccos(x) = \\pi/2 - \\arcsin(x)$',
+            },
+            { kind: 'para', text: 'D\'où $\\arccos(x) + \\arcsin(x) = \\pi/2$.' },
+          ],
+        },
         {
           kind: 'methode',
           label: 'Méthode en 3 temps',
@@ -697,6 +812,23 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'exempleLibre',
+          label: 'Démonstration — dérivée de arccos',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Grâce à l\'identité $\\arccos(x) = \\pi/2 - \\arcsin(x)$ (section précédente), la ' +
+                'dérivée de arcsin suffit :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$(\\arccos(x))\' = (\\pi/2 - \\arcsin(x))\' = -(\\arcsin(x))\' = -\\dfrac{1}{\\sqrt{1-x^2}}$',
+            },
+          ],
+        },
+        {
           kind: 'attention',
           label: 'Pour aller plus loin — arcsin n\'est pas dérivable en ±1',
           text:
@@ -716,6 +848,23 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'para',
               text:
                 '$(\\arcsin(2x-1))\' = \\dfrac{2}{\\sqrt{1-(2x-1)^2}} = \\dfrac{2}{\\sqrt{-4x^2+4x}} = \\dfrac{1}{\\sqrt{-x^2+x}}$',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — dérivée de arctan',
+          blocks: [
+            {
+              kind: 'para',
+              text: 'Soit $f(x) = \\arctan(x)$, donc $x = \\tan(f(x))$. Dérivons les deux membres :',
+            },
+            { kind: 'para', text: '$x\' = (\\tan(f(x)))\' \\iff 1 = (1+\\tan^2(f(x))) \\cdot f\'(x)$' },
+            {
+              kind: 'para',
+              text:
+                '$\\iff f\'(x) = \\dfrac{1}{1+\\tan^2(f(x))} = \\dfrac{1}{1+x^2}$ (car ' +
+                '$\\tan(f(x)) = x$ par définition de $f$)',
             },
           ],
         },
@@ -762,6 +911,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -1.3,
             xMax: 1.3,
             xTicks: [-1, 1],
+            points: [
+              { x: -1, y: -PI / 2, label: '', tone: 'accent' },
+              { x: 1, y: PI / 2, label: '', tone: 'accent' },
+            ],
             fixedYRange: { min: -1.9, max: 1.9 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -777,6 +930,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -1.3,
             xMax: 1.3,
             xTicks: [-1, 1],
+            points: [
+              { x: -1, y: PI, label: '', tone: 'accent' },
+              { x: 1, y: 0, label: '', tone: 'accent' },
+            ],
             fixedYRange: { min: -0.3, max: 3.5 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -792,7 +949,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             xMin: -10,
             xMax: 10,
             xTicks: [-8, -4, 4, 8],
-            horizontalAsymptotes: [{ y: PI / 2 }, { y: -PI / 2 }],
+            horizontalAsymptotes: [
+              { y: PI / 2, label: 'AH ≡ y = π/2' },
+              { y: -PI / 2, label: 'AH ≡ y = −π/2' },
+            ],
             fixedYRange: { min: -2.1, max: 2.1 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',

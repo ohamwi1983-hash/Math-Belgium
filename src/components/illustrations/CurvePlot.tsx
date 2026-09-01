@@ -151,7 +151,20 @@ export function CurvePlot({
       )}
 
       {horizontalAsymptotes?.map((a, i) => (
-        <line key={i} x1={X_LEFT} y1={yScale(a.y)} x2={X_RIGHT} y2={yScale(a.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+        <g key={i}>
+          <line x1={X_LEFT} y1={yScale(a.y)} x2={X_RIGHT} y2={yScale(a.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+          {a.label && (
+            <text
+              x={X_LEFT + 6}
+              y={yScale(a.y) + (a.y >= 0 ? -6 : 16)}
+              className="svg-ink"
+              fontFamily="IBM Plex Mono, monospace"
+              fontSize="12"
+            >
+              {a.label}
+            </text>
+          )}
+        </g>
       ))}
       {verticalAsymptotes?.map((a, i) => (
         <line key={i} x1={xScale(a.x)} y1={Y_BOTTOM} x2={xScale(a.x)} y2={Y_TOP} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />

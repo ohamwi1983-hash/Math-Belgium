@@ -81,7 +81,7 @@ export type IllustrationSpec =
       /** Ligne verticale pointillée (ex. axe de symétrie). */
       axisOfSymmetry?: { x: number; label: string }
       /** Asymptotes horizontales (ex. y = ±π/2 pour arctan). */
-      horizontalAsymptotes?: { y: number }[]
+      horizontalAsymptotes?: { y: number; label?: string }[]
       /** Asymptotes verticales (ex. x = ±π/2 pour tan avant restriction). */
       verticalAsymptotes?: { x: number }[]
       /** Fenêtre y fixe : désactive l'échelle automatique (nécessaire près d'une asymptote, où
