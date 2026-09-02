@@ -377,6 +377,10 @@ export const limitesAsymptotes: ChapterContent = {
             fixedYRange: { min: -4, max: 6 },
             verticalAsymptotes: [{ x: 2, label: 'x=2' }],
             horizontalAsymptotes: [{ y: 1, label: 'y=1' }],
+            textLabels: [
+              { x: 1.7, y: -3.6, text: '−∞', tone: 'faint', anchor: 'middle' },
+              { x: 3.2, y: 5.6, text: '+∞', tone: 'faint', anchor: 'middle' },
+            ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption: 'asymptote verticale x=2 (signes opposés de chaque côté) et asymptote horizontale y=1 (aux deux extrémités)',
@@ -548,6 +552,10 @@ export const limitesAsymptotes: ChapterContent = {
             fixedYRange: { min: -8, max: 10 },
             verticalAsymptotes: [{ x: 1, label: 'x=1' }],
             obliqueAsymptotes: [{ a: 1, b: -1, label: 'y=x−1' }],
+            textLabels: [
+              { x: -2, y: 9, text: '+∞', tone: 'faint', anchor: 'middle' },
+              { x: 1.5, y: -7, text: '−∞', tone: 'faint', anchor: 'middle' },
+            ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
             caption: 'f(x)=(x²−2x−3)/(x−1) — asymptote verticale x=1 (+∞ à gauche, −∞ à droite) et asymptote oblique y=x−1',

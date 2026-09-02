@@ -251,6 +251,9 @@ export type IllustrationSpec =
       /** Met en évidence un point par des projections en pointillés vers les deux axes, avec les
        * valeurs lues affichées à leur pied (ex. lire un seuil sur une courbe cumulative). */
       highlightPoint?: { index: number; xLabel?: string; yLabel?: string }
+      /** Graduations affichées sur l'axe y (ex. les paliers 5/10/15/20 d'un effectif cumulé) —
+       * absent par défaut, contrairement à l'axe des n qui affiche toujours ses valeurs. */
+      yTicks?: number[]
       xAxisLabel: string
       yAxisLabel: string
       caption: string

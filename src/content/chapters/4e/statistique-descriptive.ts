@@ -645,6 +645,7 @@ export const statistiqueDescriptive: ChapterContent = {
             ],
             connector: 'straight',
             highlightPoint: { index: 3, xLabel: '7', yLabel: '17' },
+            yTicks: [5, 10, 15, 20],
             xAxisLabel: 'valeur',
             yAxisLabel: 'effectif cumulé',
             caption: 'lecture d\'un seuil : à x=7, l\'effectif cumulé lu sur la courbe vaut 17 — même principe pour superposer deux courbes et comparer deux séries',

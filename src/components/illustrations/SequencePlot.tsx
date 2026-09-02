@@ -11,7 +11,7 @@ const Y_BOTTOM = 200
 /** Points discrets d'une suite (n, valeur) — chaque terme est un point isolé, pas une courbe
  * continue échantillonnée. Le connecteur (lissé ou droit) est purement visuel, jamais une vraie
  * fonction interpolée. */
-export function SequencePlot({ points, connector = 'straight', stepIndicator, referenceLine, trendLabel, highlightPoint, xAxisLabel, yAxisLabel }: Props) {
+export function SequencePlot({ points, connector = 'straight', stepIndicator, referenceLine, trendLabel, highlightPoint, yTicks, xAxisLabel, yAxisLabel }: Props) {
   const markerId = `sp-arrow-${useId()}`
   const ns = points.map((p) => p.n)
   const values = points.map((p) => p.value)
@@ -99,6 +99,18 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
           </text>
         ))}
       </g>
+      {yTicks && (
+        <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="end">
+          {yTicks.map((t) => (
+            <g key={t}>
+              <line x1={X_LEFT - 4} y1={yScale(t)} x2={X_RIGHT} y2={yScale(t)} className="svg-faint" strokeWidth="1" strokeDasharray="3 3" />
+              <text x={X_LEFT - 8} y={yScale(t) + 4}>
+                {t}
+              </text>
+            </g>
+          ))}
+        </g>
+      )}
       <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="middle">
         {coords.map((c, i) => (
           <text key={i} x={c.x} y={c.y - 10}>
