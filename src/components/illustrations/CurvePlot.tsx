@@ -179,32 +179,53 @@ export function CurvePlot({
         </>
       )}
 
-      {horizontalAsymptotes?.map((a, i) => (
-        <g key={i}>
-          <line x1={X_LEFT} y1={yScale(a.y)} x2={X_RIGHT} y2={yScale(a.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
-          {a.label && (
-            <text
-              x={X_LEFT + 6}
-              y={yScale(a.y) + (a.y >= 0 ? -6 : 16)}
-              className="svg-ink"
-              fontFamily="IBM Plex Mono, monospace"
-              fontSize="12"
-            >
-              {a.label}
-            </text>
-          )}
-        </g>
-      ))}
-      {verticalAsymptotes?.map((a, i) => (
-        <g key={i}>
-          <line x1={xScale(a.x)} y1={Y_BOTTOM} x2={xScale(a.x)} y2={Y_TOP} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
-          {a.label && (
-            <text x={xScale(a.x) + 6} y={Y_TOP + 12} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
-              {a.label}
-            </text>
-          )}
-        </g>
-      ))}
+      {horizontalAsymptotes?.map((a, i) => {
+        const labelY = yScale(a.y) + (a.y >= 0 ? -6 : 16)
+        // Une asymptote horizontale proche du haut du cadre (yTop) place son label tout près de
+        // yAxisLabel, positionné lui aussi juste sous Y_TOP — collision fréquente dès que la
+        // borne haute de la fenêtre y est proche de la valeur de l'asymptote. On décale alors le
+        // label horizontalement, au-delà de yAxisLabel, plutôt que de rivaliser pour la même
+        // bande verticale.
+        const nearYAxisLabel = showYAxis && Math.abs(labelY - (Y_TOP + 10)) < 20
+        return (
+          <g key={i}>
+            <line x1={X_LEFT} y1={yScale(a.y)} x2={X_RIGHT} y2={yScale(a.y)} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+            {a.label && (
+              <text
+                x={nearYAxisLabel ? zeroX + 28 : X_LEFT + 6}
+                y={labelY}
+                className="svg-ink"
+                fontFamily="IBM Plex Mono, monospace"
+                fontSize="12"
+              >
+                {a.label}
+              </text>
+            )}
+          </g>
+        )
+      })}
+      {verticalAsymptotes?.map((a, i) => {
+        // Une asymptote verticale en x=0 coïncide avec l'axe y lui-même : son label, positionné
+        // par défaut juste sous Y_TOP comme yAxisLabel, s'y superposerait directement (cas
+        // fréquent pour un logarithme). On le décale alors plus bas pour dégager yAxisLabel.
+        const nearYAxis = showYAxis && Math.abs(xScale(a.x) - zeroX) < 20
+        return (
+          <g key={i}>
+            <line x1={xScale(a.x)} y1={Y_BOTTOM} x2={xScale(a.x)} y2={Y_TOP} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+            {a.label && (
+              <text
+                x={xScale(a.x) + 6}
+                y={nearYAxis ? Y_TOP + 26 : Y_TOP + 12}
+                className="svg-ink"
+                fontFamily="IBM Plex Mono, monospace"
+                fontSize="12"
+              >
+                {a.label}
+              </text>
+            )}
+          </g>
+        )
+      })}
 
       {testLine && (
         <>

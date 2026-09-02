@@ -7,6 +7,7 @@ import { equationsInequationsSecondDegre } from './chapters/4e/equations-inequat
 import { caracteristiquesFonctionsReference } from './chapters/4e/caracteristiques-fonctions-reference'
 import { fonctionsReciproquesCyclometriques } from './chapters/6e-6h/fonctions-reciproques-cyclometriques'
 import { fonctionsExponentielles } from './chapters/6e-6h/fonctions-exponentielles'
+import { fonctionsLogarithmes } from './chapters/6e-6h/fonctions-logarithmes'
 
 export interface LevelEntry {
   slug: string
@@ -21,7 +22,7 @@ export interface LevelEntry {
 export const LEVELS: LevelEntry[] = [
   { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites] },
-  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles] },
+  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes] },
 ]
 
 export function findChapter(levelSlug: string, chapterSlug: string): ChapterContent | undefined {
