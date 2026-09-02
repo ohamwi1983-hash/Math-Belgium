@@ -35,6 +35,8 @@ export function CurvePlot({
   xMax,
   xTicks,
   xTickLabels,
+  yTicks,
+  yTickLabels,
   axisOfSymmetry,
   horizontalAsymptotes,
   verticalAsymptotes,
@@ -117,6 +119,15 @@ export function CurvePlot({
           </text>
         ))}
       </g>
+      {showYAxis && yTicks && (
+        <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+          {yTicks.map((t) => (
+            <text key={t} x={zeroX - 8} y={yScale(t) + 4} textAnchor="end">
+              {yTickLabels?.[t] ?? t}
+            </text>
+          ))}
+        </g>
+      )}
       <text x={X_RIGHT} y={zeroY - 8} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
         {xAxisLabel}
       </text>
@@ -167,7 +178,14 @@ export function CurvePlot({
         </g>
       ))}
       {verticalAsymptotes?.map((a, i) => (
-        <line key={i} x1={xScale(a.x)} y1={Y_BOTTOM} x2={xScale(a.x)} y2={Y_TOP} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+        <g key={i}>
+          <line x1={xScale(a.x)} y1={Y_BOTTOM} x2={xScale(a.x)} y2={Y_TOP} className="svg-faint" strokeWidth="1.5" strokeDasharray="4 4" />
+          {a.label && (
+            <text x={xScale(a.x) + 6} y={Y_TOP + 12} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+              {a.label}
+            </text>
+          )}
+        </g>
       ))}
 
       {testLine && (
@@ -218,7 +236,14 @@ export function CurvePlot({
                 : { x: px + 10, y: py + 20, textAnchor: 'start' as const }
         return (
           <g key={i}>
-            <circle cx={px} cy={py} r="5" className={POINT_TONE_CLASS[p.tone]} />
+            <circle
+              cx={px}
+              cy={py}
+              r="5"
+              className={POINT_TONE_CLASS[p.tone]}
+              style={p.style === 'open' ? { fill: 'var(--surface)' } : undefined}
+              strokeWidth={p.style === 'open' ? '2.5' : undefined}
+            />
             <text {...textProps} className={POINT_TONE_CLASS[p.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">
               {p.label}
             </text>

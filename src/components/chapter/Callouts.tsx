@@ -43,6 +43,15 @@ export function Attention({ block }: { block: Extract<Block, { kind: 'attention'
       <p>
         <RichText text={block.text} />
       </p>
+      {block.items && (
+        <ul>
+          {block.items.map((item, i) => (
+            <li key={i}>
+              <RichText text={item} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

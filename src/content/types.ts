@@ -78,12 +78,17 @@ export type IllustrationSpec =
       /** Étiquette personnalisée pour une valeur de xTicks (ex. "π/2" plutôt que "1.5707...").
        * Sans entrée pour une valeur donnée, le nombre brut est affiché. */
       xTickLabels?: Record<number, string>
+      /** Graduations affichées sur l'axe y, symétrique de xTicks — pour faire apparaître
+       * explicitement l'ordonnée d'un point remarquable, pas seulement son abscisse. */
+      yTicks?: number[]
+      /** Étiquette personnalisée pour une valeur de yTicks, même principe que xTickLabels. */
+      yTickLabels?: Record<number, string>
       /** Ligne verticale pointillée (ex. axe de symétrie). */
       axisOfSymmetry?: { x: number; label: string }
       /** Asymptotes horizontales (ex. y = ±π/2 pour arctan). */
       horizontalAsymptotes?: { y: number; label?: string }[]
       /** Asymptotes verticales (ex. x = ±π/2 pour tan avant restriction). */
-      verticalAsymptotes?: { x: number }[]
+      verticalAsymptotes?: { x: number; label?: string }[]
       /** Fenêtre y fixe : désactive l'échelle automatique (nécessaire près d'une asymptote, où
        * les valeurs échantillonnées explosent et casseraient l'échelle auto). Le SVG racine
        * découpe nativement tout ce qui dépasse — pas de clip-path à ajouter. */
@@ -98,6 +103,9 @@ export type IllustrationSpec =
          * préciser manuellement dès que deux points sont assez proches pour que leurs étiquettes
          * se chevauchent (ex. un minimum et un point d'inflexion voisins). */
         labelPos?: 'above' | 'below' | 'left' | 'right'
+        /** 'open' = rond creux (contour coloré, intérieur couleur du fond) — pour un point exclu
+         * du domaine (trou). Par défaut 'filled'. */
+        style?: 'filled' | 'open'
       }[]
       /** Racines marquées sur l'axe des x (0, 1 ou 2 éléments). */
       roots?: { x: number; label?: string }[]
@@ -244,7 +252,7 @@ export type Block =
   | { kind: 'list'; items: string[] }
   | { kind: 'rappel'; label?: string; items: string[] }
   | { kind: 'methode'; label?: string; items: string[] }
-  | { kind: 'attention'; label?: string; text: string }
+  | { kind: 'attention'; label?: string; text: string; items?: string[] }
   | { kind: 'astuce'; label?: string; text: string; items?: string[] }
   | { kind: 'piege'; label?: string; text: string }
   | {
