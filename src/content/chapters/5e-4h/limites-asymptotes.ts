@@ -26,7 +26,7 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — définition intuitive d\'une limite',
           items: [
-            '$\\lim_{x \\to a} f(x) = L$ signifie que $f(x)$ se rapproche d\'autant plus près de ' +
+            '$\\displaystyle\\lim_{x \\to a} f(x) = L$ signifie que $f(x)$ se rapproche d\'autant plus près de ' +
               'L que x se rapproche d\'autant plus près de a (sans nécessairement l\'atteindre). ' +
               'La cible a peut être un nombre réel ou $\\pm\\infty$ ; la limite L peut elle-même ' +
               'être un nombre réel ou $\\pm\\infty$ — les 4 combinaisons existent (limite finie ' +
@@ -38,9 +38,9 @@ export const limitesAsymptotes: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — limites de référence à connaître',
           items: [
-            '$\\lim_{x \\to +\\infty} x^n = +\\infty$ (n≥1) ; en −∞, +∞ si n est pair, −∞ si n est impair.',
-            '$\\lim_{x \\to \\pm\\infty} 1/x = 0$ ; $\\lim_{x \\to 0^+} 1/x = +\\infty$ ; $\\lim_{x \\to 0^-} 1/x = -\\infty$.',
-            '$\\lim_{x \\to +\\infty} \\sqrt{x} = +\\infty$.',
+            '$\\displaystyle\\lim_{x \\to +\\infty} x^n = +\\infty$ (n≥1) ; en −∞, +∞ si n est pair, −∞ si n est impair.',
+            '$\\displaystyle\\lim_{x \\to \\pm\\infty} 1/x = 0$ ; $\\displaystyle\\lim_{x \\to 0^+} 1/x = +\\infty$ ; $\\displaystyle\\lim_{x \\to 0^-} 1/x = -\\infty$.',
+            '$\\displaystyle\\lim_{x \\to +\\infty} \\sqrt{x} = +\\infty$.',
             'La limite d\'un **polynôme** en ±∞ est celle de son seul terme de plus haut degré ' +
               '— tous les autres deviennent négligeables devant lui.',
             'La limite d\'une **fonction rationnelle** N(x)/D(x) en ±∞ se lit en comparant les ' +
@@ -102,18 +102,18 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'forme 0/0 — factorisation',
-          formula: '$\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$',
+          formula: '$\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2}$',
           steps: [
             { tag: 'vérifier la forme', text: 'numérateur(2)=4−10+6=0, dénominateur(2)=2−2=0 → forme 0/0, il faut factoriser' },
             { tag: 'factoriser le numérateur — recherche d\'une racine commune avec le dénominateur', text: '$x^2-5x+6 = (x-2)(x-3)$' },
             { tag: 'simplifier, valable pour x≠2', text: '$\\dfrac{(x-2)(x-3)}{x-2} = x-3$' },
           ],
-          result: { tag: 'conclusion — limite', text: '$\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2} = 2-3 = -1$' },
+          result: { tag: 'conclusion — limite', text: '$\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2} = 2-3 = -1$' },
         },
         {
           kind: 'exemple',
           badge: 'forme ∞/∞ — mise en évidence du terme dominant',
-          formula: '$\\lim_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$',
+          formula: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{3x^2-5x+1}{x^2+2}$',
           steps: [
             { tag: 'vérifier la forme', text: 'numérateur→+∞ et dénominateur→+∞ (les deux tendent vers l\'infini) → forme ∞/∞' },
             {
@@ -121,7 +121,7 @@ export const limitesAsymptotes: ChapterContent = {
               text: '$\\dfrac{3x^2-5x+1}{x^2+2} = \\dfrac{x^2(3-5/x+1/x^2)}{x^2(1+2/x^2)} = \\dfrac{3-5/x+1/x^2}{1+2/x^2}$',
             },
           ],
-          result: { tag: 'passer à la limite — chaque terme en 1/x, 1/x² tend vers 0', text: '$\\lim_{x \\to +\\infty} = \\dfrac{3}{1} = 3$' },
+          result: { tag: 'passer à la limite — chaque terme en 1/x, 1/x² tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} = \\dfrac{3}{1} = 3$' },
           illustration: {
             kind: 'curvePlot',
             curves: [{ fn: (x) => (3 * x * x - 5 * x + 1) / (x * x + 2), tone: 'accent' }],
@@ -142,7 +142,7 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'forme ∞−∞ — expression conjuguée',
-          formula: '$\\lim_{x \\to +\\infty} [\\sqrt{x^2+1} - x]$',
+          formula: '$\\displaystyle\\lim_{x \\to +\\infty} [\\sqrt{x^2+1} - x]$',
           steps: [
             { tag: 'vérifier la forme', text: 'les deux termes $\\sqrt{x^2+1}$ et x tendent vers +∞ → forme ∞−∞, impossible de conclure directement' },
             {
@@ -150,26 +150,26 @@ export const limitesAsymptotes: ChapterContent = {
               text: '$\\sqrt{x^2+1} - x = \\dfrac{(\\sqrt{x^2+1}-x)(\\sqrt{x^2+1}+x)}{\\sqrt{x^2+1}+x} = \\dfrac{x^2+1-x^2}{\\sqrt{x^2+1}+x} = \\dfrac{1}{\\sqrt{x^2+1}+x}$',
             },
           ],
-          result: { tag: 'passer à la limite — le dénominateur tend vers +∞', text: '$\\lim_{x \\to +\\infty} = 0$' },
+          result: { tag: 'passer à la limite — le dénominateur tend vers +∞', text: '$\\displaystyle\\lim_{x \\to +\\infty} = 0$' },
         },
         {
           kind: 'exemple',
           badge: 'quand la limite n\'existe pas — limites différentes à gauche et à droite',
-          formula: 'Soit $f(x) = x+3$ si $x \\le 2$, et $f(x) = x-3$ si $x>2$. La limite $\\lim_{x \\to 2} f(x)$ existe-t-elle ?',
+          formula: 'Soit $f(x) = x+3$ si $x \\le 2$, et $f(x) = x-3$ si $x>2$. La limite $\\displaystyle\\lim_{x \\to 2} f(x)$ existe-t-elle ?',
           steps: [
             { tag: 'valeur en x=2 — donnée par la première branche (x≤2)', text: '$f(2) = 2+3 = 5$' },
-            { tag: 'limite à droite — deuxième branche (x>2), quand x→2⁺', text: '$\\lim_{x \\to 2^+} f(x) = 2-3 = -1$' },
+            { tag: 'limite à droite — deuxième branche (x>2), quand x→2⁺', text: '$\\displaystyle\\lim_{x \\to 2^+} f(x) = 2-3 = -1$' },
           ],
           result: {
             tag: 'conclusion',
-            text: '$f(2)=5$ mais $\\lim_{x \\to 2^+} f(x)=-1$ : les deux valeurs ne coïncident pas, donc $\\lim_{x \\to 2} f(x)$ n\'existe pas (la courbe fait un saut en x=2).',
+            text: '$f(2)=5$ mais $\\displaystyle\\lim_{x \\to 2^+} f(x)=-1$ : les deux valeurs ne coïncident pas, donc $\\displaystyle\\lim_{x \\to 2} f(x)$ n\'existe pas (la courbe fait un saut en x=2).',
           },
         },
         {
           kind: 'attention',
           label: 'Une fonction définie EN a n\'a pas forcément une limite EN a',
           text:
-            'Que f(a) existe ne garantit rien sur $\\lim_{x \\to a} f(x)$ : ce sont deux ' +
+            'Que f(a) existe ne garantit rien sur $\\displaystyle\\lim_{x \\to a} f(x)$ : ce sont deux ' +
             'questions différentes. Une fonction peut très bien être définie partout (aucun ' +
             '« trou » dans son domaine) et pourtant ne pas avoir de limite en un point précis, ' +
             'dès que les limites à gauche et à droite de ce point diffèrent — c\'est le cas ' +
@@ -178,13 +178,13 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'point vide — un trou invisible sur le graphique',
-          formula: '$\\lim_{x \\to -3} \\dfrac{x^2-9}{x+3}$, puis décris le graphique de cette fonction.',
+          formula: '$\\displaystyle\\lim_{x \\to -3} \\dfrac{x^2-9}{x+3}$, puis décris le graphique de cette fonction.',
           steps: [
             { tag: 'vérifier la forme', text: 'numérateur(−3)=9−9=0, dénominateur(−3)=−3+3=0 → forme 0/0' },
             { tag: 'factoriser le numérateur — différence de carrés', text: '$x^2-9 = (x-3)(x+3)$' },
             { tag: 'simplifier, valable pour x≠−3', text: '$\\dfrac{(x-3)(x+3)}{x+3} = x-3$' },
           ],
-          result: { tag: 'conclusion — limite', text: '$\\lim_{x \\to -3} \\dfrac{x^2-9}{x+3} = -3-3 = -6$' },
+          result: { tag: 'conclusion — limite', text: '$\\displaystyle\\lim_{x \\to -3} \\dfrac{x^2-9}{x+3} = -3-3 = -6$' },
           illustration: {
             kind: 'curvePlot',
             curves: [{ fn: (x) => x - 3, tone: 'accent' }],
@@ -240,9 +240,9 @@ export const limitesAsymptotes: ChapterContent = {
           label: 'Rappel — condition d\'existence d\'une asymptote oblique',
           items: [
             'La droite d\'équation y=ax+b (a≠0) est asymptote oblique à la courbe de f en +∞ ' +
-              '(ou en −∞) si $\\lim_{x \\to +\\infty} [f(x)-(ax+b)] = 0$ (ou en −∞). En pratique, ' +
-              'a et b se retrouvent par deux limites successives : $a = \\lim_{x \\to \\pm\\infty} ' +
-              '\\dfrac{f(x)}{x}$ puis $b = \\lim_{x \\to \\pm\\infty} [f(x) - ax]$.',
+              '(ou en −∞) si $\\displaystyle\\lim_{x \\to +\\infty} [f(x)-(ax+b)] = 0$ (ou en −∞). En pratique, ' +
+              'a et b se retrouvent par deux limites successives : $a = \\displaystyle\\lim_{x \\to \\pm\\infty} ' +
+              '\\dfrac{f(x)}{x}$ puis $b = \\displaystyle\\lim_{x \\to \\pm\\infty} [f(x) - ax]$.',
           ],
         },
         {
@@ -268,8 +268,8 @@ export const limitesAsymptotes: ChapterContent = {
             { tag: 'vérifier la condition de degré', text: 'deg(numérateur)=2, deg(dénominateur)=1, soit exactement 1 de plus → asymptote oblique garantie' },
             { tag: 'méthode 1 — division euclidienne de x²−3x+5 par x−1', text: '$x^2-3x+5 = (x-1)(x-2) + 3$' },
             { tag: 'réécrire f(x)', text: '$f(x) = x-2 + \\dfrac{3}{x-1}$' },
-            { tag: 'méthode 2 — vérification par les limites : a = lim f(x)/x', text: '$a = \\lim_{x \\to +\\infty} \\dfrac{x^2-3x+5}{x^2-x} = 1$ (rapport des coefficients dominants x²/x²)' },
-            { tag: 'b = lim[f(x) − x]', text: '$b = \\lim_{x \\to +\\infty} \\dfrac{-2x+5}{x-1} = -2$ (rapport des coefficients dominants −2x/x)' },
+            { tag: 'méthode 2 — vérification par les limites : a = lim f(x)/x', text: '$a = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^2-3x+5}{x^2-x} = 1$ (rapport des coefficients dominants x²/x²)' },
+            { tag: 'b = lim[f(x) − x]', text: '$b = \\displaystyle\\lim_{x \\to +\\infty} \\dfrac{-2x+5}{x-1} = -2$ (rapport des coefficients dominants −2x/x)' },
           ],
           result: { tag: 'asymptote oblique — le quotient SEUL, jamais le reste', text: '$y = x-2$' },
           illustration: {
@@ -352,11 +352,11 @@ export const limitesAsymptotes: ChapterContent = {
           steps: [
             {
               tag: 'asymptote verticale — x=2, un signe différent de chaque côté',
-              text: '$\\lim_{x \\to 2^-} f(x) = -\\infty$ (la courbe plonge vers le bas juste à gauche de x=2) ; $\\lim_{x \\to 2^+} f(x) = +\\infty$ (la courbe s\'envole vers le haut juste à droite de x=2)',
+              text: '$\\displaystyle\\lim_{x \\to 2^-} f(x) = -\\infty$ (la courbe plonge vers le bas juste à gauche de x=2) ; $\\displaystyle\\lim_{x \\to 2^+} f(x) = +\\infty$ (la courbe s\'envole vers le haut juste à droite de x=2)',
             },
             {
               tag: 'asymptote horizontale — y=1, aux deux extrémités',
-              text: '$\\lim_{x \\to -\\infty} f(x) = 1$ et $\\lim_{x \\to +\\infty} f(x) = 1$',
+              text: '$\\displaystyle\\lim_{x \\to -\\infty} f(x) = 1$ et $\\displaystyle\\lim_{x \\to +\\infty} f(x) = 1$',
             },
           ],
           result: {
@@ -439,7 +439,7 @@ export const limitesAsymptotes: ChapterContent = {
               tag: 'quelques valeurs, pour observer la tendance',
               text: '$C_u(100) = 8+2{,}4 = 10{,}4$ € ; $C_u(1000) = 8+0{,}24 = 8{,}24$ € ; $C_u(10\\,000) = 8+0{,}024 = 8{,}024$ €',
             },
-            { tag: 'limite en +∞ — le terme 240/x tend vers 0', text: '$\\lim_{x \\to +\\infty} C_u(x) = 8 + 0 = 8$' },
+            { tag: 'limite en +∞ — le terme 240/x tend vers 0', text: '$\\displaystyle\\lim_{x \\to +\\infty} C_u(x) = 8 + 0 = 8$' },
           ],
           result: {
             tag: 'interprétation',
@@ -523,11 +523,11 @@ export const limitesAsymptotes: ChapterContent = {
             { tag: 'asymptote oblique', text: '$y = x-1$' },
             {
               tag: 'limites en x=1 — signe de chaque côté (x=0,9 puis x=1,1 comme sondes)',
-              text: 'à x=0,9 : numérateur=−3,99, dénominateur=−0,1, f≈39,9 (grand positif) ⟹ $\\lim_{x \\to 1^-} f(x) = +\\infty$ ; à x=1,1 : numérateur=−3,99, dénominateur=0,1, f≈−39,9 (grand négatif) ⟹ $\\lim_{x \\to 1^+} f(x) = -\\infty$',
+              text: 'à x=0,9 : numérateur=−3,99, dénominateur=−0,1, f≈39,9 (grand positif) ⟹ $\\displaystyle\\lim_{x \\to 1^-} f(x) = +\\infty$ ; à x=1,1 : numérateur=−3,99, dénominateur=0,1, f≈−39,9 (grand négatif) ⟹ $\\displaystyle\\lim_{x \\to 1^+} f(x) = -\\infty$',
             },
             {
               tag: 'limites aux bornes infinies — la courbe suit l\'asymptote',
-              text: '$\\lim_{x \\to -\\infty} f(x) = -\\infty$ et $\\lim_{x \\to +\\infty} f(x) = +\\infty$ (le terme x−1 domine)',
+              text: '$\\displaystyle\\lim_{x \\to -\\infty} f(x) = -\\infty$ et $\\displaystyle\\lim_{x \\to +\\infty} f(x) = +\\infty$ (le terme x−1 domine)',
             },
           ],
           result: {
@@ -593,7 +593,7 @@ export const limitesAsymptotes: ChapterContent = {
         'mise en évidence du terme de plus haut degré ; ∞−∞ avec des racines par l\'expression ' +
         'conjuguée. Toujours diagnostiquer la forme AVANT de choisir la technique ; le tableau ' +
         'des opérations (somme/produit/quotient) donne le résultat direct dans les cas ' +
-        'déterminés. f(a) définie ne garantit pas que $\\lim_{x \\to a} f(x)$ existe (cas d\'un saut).',
+        'déterminés. f(a) définie ne garantit pas que $\\displaystyle\\lim_{x \\to a} f(x)$ existe (cas d\'un saut).',
       '**Asymptote oblique** — y=ax+b avec a=lim f(x)/x puis b=lim[f(x)−ax] ; équivalent à la ' +
         'division euclidienne N=D×(ax+b)+reste, le reste ne fait JAMAIS partie de l\'équation ' +
         'de l\'asymptote ; horizontale dès que deg(N)≤deg(D) (y=0 si strictement inférieur), ' +
