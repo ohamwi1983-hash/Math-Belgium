@@ -152,6 +152,23 @@ export const fonctionsLogarithmes: ChapterContent = {
                 '$a^p \\cdot a^q = a^{p+q}$ (chapitre 2)',
             },
             { kind: 'para', text: '$= \\log_a(x) + \\log_a(y)$ — car $\\log_a(a^t)=t$' },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — logarithme d\'une puissance',
+          blocks: [
+            {
+              kind: 'para',
+              text: '$\\log_a(x^r) = \\log_a((a^{\\log_a(x)})^r)$ — car $a^{\\log_a(x)}=x$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= \\log_a(a^{r \\cdot \\log_a(x)})$ — propriété des puissances, ' +
+                '$(a^p)^r=a^{rp}$ (chapitre 2)',
+            },
+            { kind: 'para', text: '$= r \\cdot \\log_a(x)$ — car $\\log_a(a^t)=t$' },
             {
               kind: 'para',
               text:
