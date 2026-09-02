@@ -89,7 +89,16 @@ export type IllustrationSpec =
        * découpe nativement tout ce qui dépasse — pas de clip-path à ajouter. */
       fixedYRange?: { min: number; max: number }
       /** Points marqués (ex. sommet). */
-      points?: { x: number; y: number; label: string; tone: 'accent' | 'good' | 'bad' }[]
+      points?: {
+        x: number
+        y: number
+        label: string
+        tone: 'accent' | 'good' | 'bad'
+        /** Direction de l'étiquette par rapport au point — par défaut déduite du signe de y. À
+         * préciser manuellement dès que deux points sont assez proches pour que leurs étiquettes
+         * se chevauchent (ex. un minimum et un point d'inflexion voisins). */
+        labelPos?: 'above' | 'below' | 'left' | 'right'
+      }[]
       /** Racines marquées sur l'axe des x (0, 1 ou 2 éléments). */
       roots?: { x: number; label?: string }[]
       /** Bande horizontale ombrée représentant l'image (l'ensemble des y atteints). */

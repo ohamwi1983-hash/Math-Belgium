@@ -204,22 +204,27 @@ export function CurvePlot({
         </g>
       ))}
 
-      {points?.map((p, i) => (
-        <g key={i}>
-          <circle cx={xScale(p.x)} cy={yScale(p.y)} r="5" className={POINT_TONE_CLASS[p.tone]} />
-          <text
-            x={xScale(p.x)}
-            y={yScale(p.y) + (p.y >= 0 ? -10 : 20)}
-            textAnchor="middle"
-            className={POINT_TONE_CLASS[p.tone]}
-            fontFamily="IBM Plex Mono, monospace"
-            fontSize="13"
-            fontWeight="600"
-          >
-            {p.label}
-          </text>
-        </g>
-      ))}
+      {points?.map((p, i) => {
+        const pos = p.labelPos ?? (p.y >= 0 ? 'above' : 'below')
+        const px = xScale(p.x)
+        const py = yScale(p.y)
+        const textProps =
+          pos === 'above'
+            ? { x: px, y: py - 10, textAnchor: 'middle' as const }
+            : pos === 'below'
+              ? { x: px, y: py + 20, textAnchor: 'middle' as const }
+              : pos === 'left'
+                ? { x: px - 10, y: py + 20, textAnchor: 'end' as const }
+                : { x: px + 10, y: py + 20, textAnchor: 'start' as const }
+        return (
+          <g key={i}>
+            <circle cx={px} cy={py} r="5" className={POINT_TONE_CLASS[p.tone]} />
+            <text {...textProps} className={POINT_TONE_CLASS[p.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">
+              {p.label}
+            </text>
+          </g>
+        )
+      })}
 
       <defs>
         <marker id="cp-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
