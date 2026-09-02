@@ -400,6 +400,16 @@ table.tableau tr:last-child td { border-bottom: none; }
 }
 .video-frame-wrap .video-icon { display: block; font-size: 1.4rem; margin-bottom: 8px; }
 
+/* ---------- vidéo embarquée (YouTube) ---------- */
+.video-embed {
+  position: relative; width: 100%; padding-top: 56.25%; /* ratio 16:9 */
+  margin: 26px 0; border-radius: var(--radius); overflow: hidden; background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.video-embed iframe {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
+}
+
 /* ---------- export (Word / PDF / PowerPoint) ---------- */
 .export-section {
   margin-top: 40px; padding: 26px 28px; background: var(--surface-2); border: 1px solid var(--line);

@@ -379,7 +379,7 @@ export const fonctionSecondDegre: ChapterContent = {
             },
           ],
         },
-        { kind: 'video', title: "Analyse d'une fonction du second degré" },
+        { kind: 'video', title: "Analyse d'une fonction du second degré", youtubeId: '2qRqyuZh4FE' },
         {
           kind: 'entrainement',
           title: "Analyse d'une fonction du second degré",
@@ -497,7 +497,7 @@ export const fonctionSecondDegre: ChapterContent = {
               'forme (a reste égal à 1 ici)',
           },
         },
-        { kind: 'video', title: 'Transformations graphiques d’une parabole' },
+        { kind: 'video', title: 'Transformations graphiques d’une parabole', youtubeId: 'TviyRYRHono' },
         {
           kind: 'entrainement',
           title: 'Transformations graphiques',
@@ -556,6 +556,7 @@ export const fonctionSecondDegre: ChapterContent = {
             'ajouté au $c$ d’origine — l’erreur la plus fréquente est de le ressortir tel quel, en ' +
             'oubliant ce facteur.',
         },
+        { kind: 'video', title: 'Forme canonique et transformations', youtubeId: 'BOhdODKAigg' },
         {
           kind: 'entrainement',
           title: 'Forme canonique et transformations',

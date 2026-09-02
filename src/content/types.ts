@@ -287,7 +287,14 @@ export type Block =
       chantier: string
       whereLabel: string
     }
-  | { kind: 'video'; title: string }
+  | {
+      kind: 'video'
+      title: string
+      /** Identifiant YouTube (ex. "2qRqyuZh4FE", tiré de youtube.com/watch?v=...) — si absent,
+       * affiche le placeholder "vidéo à venir". Une fois fourni, remplace le placeholder par un
+       * lecteur embarqué responsive, exclu de l'export (un iframe ne peut pas être capturé). */
+      youtubeId?: string
+    }
   | {
       /**
        * Tableau de signes / de variation. Chaque ligne a le même nombre de cellules, alignées

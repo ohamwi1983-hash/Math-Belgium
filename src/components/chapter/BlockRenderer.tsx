@@ -76,7 +76,17 @@ export function BlockRenderer({ block }: { block: Block }) {
     case 'operationChain':
       return <OperationChain block={block} />
     case 'video':
-      return (
+      return block.youtubeId ? (
+        <div className="video-embed no-export">
+          <iframe
+            src={`https://www.youtube.com/embed/${block.youtubeId}`}
+            title={block.title}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : (
         <div className="video-frame-wrap no-export">
           <span className="video-icon" aria-hidden="true">
             🎬
