@@ -3,6 +3,7 @@ import { fonctionsComposees } from './chapters/5e-4h/fonctions-composees'
 import { trigonometrie } from './chapters/5e-4h/trigonometrie'
 import { suites } from './chapters/5e-4h/suites'
 import { limitesAsymptotes } from './chapters/5e-4h/limites-asymptotes'
+import { deriveesApplications } from './chapters/5e-4h/derivees-applications'
 import { fonctionSecondDegre } from './chapters/4e/fonction-second-degre'
 import { equationsInequationsSecondDegre } from './chapters/4e/equations-inequations-second-degre'
 import { caracteristiquesFonctionsReference } from './chapters/4e/caracteristiques-fonctions-reference'
@@ -23,7 +24,7 @@ export interface LevelEntry {
  */
 export const LEVELS: LevelEntry[] = [
   { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference, statistiqueDescriptive] },
-  { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites, limitesAsymptotes] },
+  { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites, limitesAsymptotes, deriveesApplications] },
   { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes] },
 ]
 
