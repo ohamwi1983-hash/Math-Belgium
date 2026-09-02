@@ -76,6 +76,15 @@ export type IllustrationSpec =
        * du graphe entier.
        */
       curves: { fn: (x: number) => number; tone: 'accent' | 'faint' | 'good' | 'bad'; xMin?: number; xMax?: number }[]
+      /** Zone remplie entre deux fonctions (ou entre une fonction et l'axe y=0 par défaut), sur un
+       * sous-intervalle [from;to] — pour une aire sous courbe, une aire entre deux courbes, ou un
+       * rectangle de Riemann. Distinct de `curves` : ceci dessine un polygone REMPLI, jamais un
+       * simple trait. */
+      shadedRegions?: { from: number; to: number; upper: (x: number) => number; lower?: (x: number) => number; tone?: 'accent' | 'good' | 'bad' }[]
+      /** Étiquette de texte libre à des coordonnées données, sans le cercle qui accompagne toujours
+       * un `points` — pour nommer une courbe ("y=x²"), annoter une aire ("aire=2"), ou toute
+       * légende qui ne pointe pas un endroit précis et unique du graphe. */
+      textLabels?: { x: number; y: number; text: string; tone?: 'accent' | 'good' | 'bad' | 'faint' | 'ink'; anchor?: 'start' | 'middle' | 'end' }[]
       xMin: number
       xMax: number
       xTicks: number[]

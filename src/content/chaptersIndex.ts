@@ -11,6 +11,7 @@ import { statistiqueDescriptive } from './chapters/4e/statistique-descriptive'
 import { fonctionsReciproquesCyclometriques } from './chapters/6e-6h/fonctions-reciproques-cyclometriques'
 import { fonctionsExponentielles } from './chapters/6e-6h/fonctions-exponentielles'
 import { fonctionsLogarithmes } from './chapters/6e-6h/fonctions-logarithmes'
+import { primitivesIntegrales } from './chapters/6e-6h/primitives-integrales'
 
 export interface LevelEntry {
   slug: string
@@ -25,7 +26,7 @@ export interface LevelEntry {
 export const LEVELS: LevelEntry[] = [
   { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference, statistiqueDescriptive] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites, limitesAsymptotes, deriveesApplications] },
-  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes] },
+  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes, primitivesIntegrales] },
 ]
 
 export function findChapter(levelSlug: string, chapterSlug: string): ChapterContent | undefined {

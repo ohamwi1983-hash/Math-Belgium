@@ -23,6 +23,14 @@ const POINT_TONE_CLASS: Record<'accent' | 'good' | 'bad', string> = {
   bad: 'svg-bad',
 }
 
+const LABEL_TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'faint' | 'ink', string> = {
+  accent: 'svg-accent',
+  good: 'svg-good',
+  bad: 'svg-bad',
+  faint: 'svg-ink-faint',
+  ink: 'svg-ink',
+}
+
 /**
  * Trace une ou plusieurs courbes sur les mêmes axes, avec accessoires optionnels : axe de
  * symétrie, points marqués (ex. sommet), racines sur l'axe des x, bande d'image ombrée.
@@ -40,6 +48,8 @@ export function CurvePlot({
   axisOfSymmetry,
   horizontalAsymptotes,
   obliqueAsymptotes,
+  shadedRegions,
+  textLabels,
   verticalAsymptotes,
   points,
   roots,
@@ -112,6 +122,20 @@ export function CurvePlot({
 
   return (
     <svg viewBox={viewBox} role="img" aria-label="Graphe de fonction(s)">
+      {shadedRegions?.map((r, i) => {
+        const lower = r.lower ?? (() => 0)
+        const steps = 40
+        const upperPts = Array.from({ length: steps + 1 }, (_, k) => {
+          const x = r.from + ((r.to - r.from) * k) / steps
+          return `${xScale(x).toFixed(1)},${yScale(r.upper(x)).toFixed(1)}`
+        })
+        const lowerPts = Array.from({ length: steps + 1 }, (_, k) => {
+          const x = r.to - ((r.to - r.from) * k) / steps
+          return `${xScale(x).toFixed(1)},${yScale(lower(x)).toFixed(1)}`
+        })
+        const toneClass = r.tone === 'good' ? 'svg-band-good' : r.tone === 'bad' ? 'svg-band-bad' : 'svg-band'
+        return <polygon key={i} points={[...upperPts, ...lowerPts].join(' ')} className={toneClass} />
+      })}
       {imageBand &&
         (() => {
           const topValue = imageBand.direction === 'up' ? yTop : imageBand.from
@@ -308,6 +332,20 @@ export function CurvePlot({
           </g>
         )
       })}
+
+      {textLabels?.map((t, i) => (
+        <text
+          key={i}
+          x={xScale(t.x)}
+          y={yScale(t.y)}
+          textAnchor={t.anchor ?? 'start'}
+          className={LABEL_TONE_CLASS[t.tone ?? 'ink']}
+          fontFamily="IBM Plex Mono, monospace"
+          fontSize="12"
+        >
+          {t.text}
+        </text>
+      ))}
 
       <defs>
         <marker id="cp-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">

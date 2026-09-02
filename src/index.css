@@ -303,6 +303,7 @@ figcaption {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
 }
 .svg-ink { fill: var(--ink); }
+.svg-ink-faint { fill: var(--ink-faint); }
 .svg-line { stroke: var(--ink-soft); }
 .svg-faint { stroke: var(--line); }
 .svg-accent { stroke: var(--accent); fill: var(--accent); }
@@ -310,6 +311,8 @@ figcaption {
 .svg-good-outline { stroke: var(--good); fill: none; }
 .svg-bar { fill: var(--accent); opacity: 0.75; stroke: var(--accent); stroke-width: 1; }
 .svg-band { fill: var(--accent); opacity: 0.15; }
+.svg-band-good { fill: var(--good); opacity: 0.18; }
+.svg-band-bad { fill: var(--bad); opacity: 0.18; }
 .svg-good { stroke: var(--good); fill: var(--good); }
 .svg-bad { stroke: var(--bad); fill: var(--bad); }
 .svg-attn { stroke: var(--attn); fill: var(--attn); }
