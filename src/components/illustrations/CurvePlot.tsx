@@ -39,6 +39,7 @@ export function CurvePlot({
   yTickLabels,
   axisOfSymmetry,
   horizontalAsymptotes,
+  obliqueAsymptotes,
   verticalAsymptotes,
   points,
   roots,
@@ -221,6 +222,24 @@ export function CurvePlot({
                 fontSize="12"
               >
                 {a.label}
+              </text>
+            )}
+          </g>
+        )
+      })}
+
+      {obliqueAsymptotes?.map((asym, i) => {
+        const y1 = asym.a * xMin + asym.b
+        const y2 = asym.a * xMax + asym.b
+        // Étiquette près de l'extrémité droite de la droite, légèrement au-dessus si la pente
+        // est positive (pour ne pas chevaucher le trait), en-dessous sinon.
+        const labelY = yScale(y2) + (asym.a >= 0 ? -8 : 16)
+        return (
+          <g key={i}>
+            <line x1={xScale(xMin)} y1={yScale(y1)} x2={xScale(xMax)} y2={yScale(y2)} className="svg-good-outline" strokeWidth="1.6" strokeDasharray="5 4" />
+            {asym.label && (
+              <text x={X_RIGHT - 4} y={labelY} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+                {asym.label}
               </text>
             )}
           </g>

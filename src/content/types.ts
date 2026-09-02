@@ -87,6 +87,10 @@ export type IllustrationSpec =
       axisOfSymmetry?: { x: number; label: string }
       /** Asymptotes horizontales (ex. y = ±π/2 pour arctan). */
       horizontalAsymptotes?: { y: number; label?: string }[]
+      /** Asymptote oblique (y=ax+b, a≠0) — droite penchée en pointillés, distincte d'une
+       * horizontale (a=0) : jamais interchangeables, une horizontale mal utilisée pour une
+       * pente non nulle dessinerait une ligne plate au mauvais endroit. */
+      obliqueAsymptotes?: { a: number; b: number; label?: string }[]
       /** Asymptotes verticales (ex. x = ±π/2 pour tan avant restriction). */
       verticalAsymptotes?: { x: number; label?: string }[]
       /** Fenêtre y fixe : désactive l'échelle automatique (nécessaire près d'une asymptote, où
@@ -243,7 +247,10 @@ export interface ExempleStep {
 
 export interface FeatureTableData {
   headers: string[]
-  rows: string[][]
+  /** Chaque cellule est soit du texte simple, soit un objet avec une teinte optionnelle (ex.
+   * marquer une forme indéterminée en rouge, déterminée en vert) — pour les tableaux où certaines
+   * cases doivent visuellement ressortir des autres, comme le tableau des opérations sur les limites. */
+  rows: (string | { text: string; tone: 'good' | 'bad' })[][]
 }
 
 export type Block =

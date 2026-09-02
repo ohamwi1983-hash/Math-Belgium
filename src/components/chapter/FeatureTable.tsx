@@ -18,11 +18,16 @@ export function FeatureTable({ block }: { block: Extract<Block, { kind: 'feature
         <tbody>
           {block.rows.map((row, i) => (
             <tr key={i}>
-              {row.map((cell, j) => (
-                <td key={j}>
-                  <RichText text={cell} />
-                </td>
-              ))}
+              {row.map((cell, j) => {
+                const isToned = typeof cell === 'object'
+                const text = isToned ? cell.text : cell
+                const className = isToned ? (cell.tone === 'good' ? 'signe-pos' : 'signe-neg') : undefined
+                return (
+                  <td key={j} className={className}>
+                    <RichText text={text} />
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>
