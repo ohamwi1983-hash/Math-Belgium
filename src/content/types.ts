@@ -210,6 +210,23 @@ export type IllustrationSpec =
       verticalLine?: { x: number; label: string }
       caption: string
     }
+  | {
+      /** Points discrets d'une suite (n, valeur) — pas une fonction continue, donc distinct de
+       * `curvePlot` : chaque terme est un point isolé, avec sa propre étiquette de valeur. */
+      kind: 'sequencePlot'
+      points: { n: number; value: number; label: string }[]
+      /** Connecteur visuel entre points consécutifs — aucun, segments droits, ou courbe lissée. */
+      connector?: 'none' | 'straight' | 'smooth'
+      /** Repère d'un pas entre deux points consécutifs (indices dans `points`), ex. "+r". */
+      stepIndicator?: { fromIndex: number; toIndex: number; label: string }
+      /** Ligne horizontale de référence, étiquetée (ex. la limite L d'une suite récurrente affine). */
+      referenceLine?: { value: number; label: string }
+      /** Étiquette flottante près d'un point donné (ex. "u_n → 0"). */
+      trendLabel?: { afterIndex: number; text: string }
+      xAxisLabel: string
+      yAxisLabel: string
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string
