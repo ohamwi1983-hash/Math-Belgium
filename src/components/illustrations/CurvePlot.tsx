@@ -84,11 +84,29 @@ export function CurvePlot({
 
   // Chaque courbe peut avoir son propre sous-intervalle d'échantillonnage (ex. portion restreinte
   // en accent sur fond de courbe complète en fané) — par défaut, l'intervalle du graphe entier.
+  // Une marge de tolérance (30% de la hauteur visible) laisse la courbe "sortir" un peu du cadre
+  // de façon naturelle (ex. une exponentielle qui grimpe fort en bord de fenêtre) sans jamais la
+  // laisser filer arbitrairement loin au-dessus/en-dessous — sinon le trait traverse tout le cadre
+  // visuellement, bien au-delà de la fenêtre mathématique demandée.
+  const margin = (yTop - yBottom) * 0.3
   const pathFor = (c: { fn: (x: number) => number; xMin?: number; xMax?: number }) => {
     const cMin = c.xMin ?? xMin
     const cMax = c.xMax ?? xMax
     const cxs = Array.from({ length: SAMPLES + 1 }, (_, i) => cMin + ((cMax - cMin) * i) / SAMPLES)
-    return cxs.map((x, i) => `${i === 0 ? 'M' : 'L'}${xScale(x).toFixed(2)},${yScale(c.fn(x)).toFixed(2)}`).join(' ')
+    const segments: string[][] = []
+    let current: string[] = []
+    for (const x of cxs) {
+      const y = c.fn(x)
+      const inRange = Number.isFinite(y) && y <= yTop + margin && y >= yBottom - margin
+      if (!inRange) {
+        if (current.length > 1) segments.push(current)
+        current = []
+        continue
+      }
+      current.push(`${xScale(x).toFixed(2)},${yScale(y).toFixed(2)}`)
+    }
+    if (current.length > 1) segments.push(current)
+    return segments.map((seg) => `M${seg.join(' L')}`).join(' ')
   }
 
   return (
