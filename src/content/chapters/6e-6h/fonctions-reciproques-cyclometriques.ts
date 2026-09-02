@@ -504,7 +504,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         },
         {
           kind: 'para',
-          text: '$\\displaystyle\\lim_{x \\to -\\infty} \\arctan(x) = -\\pi/2 \\qquad \\lim_{x \\to +\\infty} \\arctan(x) = \\pi/2$',
+          text: '$\\displaystyle\\lim_{x \\to -\\infty} \\arctan(x) = -\\pi/2 \\qquad \\displaystyle\\lim_{x \\to +\\infty} \\arctan(x) = \\pi/2$',
         },
         {
           kind: 'illustration',

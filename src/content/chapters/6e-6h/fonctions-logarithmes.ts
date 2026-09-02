@@ -755,14 +755,14 @@ export const fonctionsLogarithmes: ChapterContent = {
           items: [
             'Pour toute base a>0, a≠1, le sens des limites dépend de a — exactement comme le ' +
               'sens de monotonie établi à la section 1 :',
-            'Si $a>1$ : $\\lim_{x \\to 0^+} \\log_a(x) = -\\infty$, ' +
-              '$\\lim_{x \\to +\\infty} \\log_a(x) = +\\infty$.',
-            'Si $0<a<1$ : $\\lim_{x \\to 0^+} \\log_a(x) = +\\infty$, ' +
-              '$\\lim_{x \\to +\\infty} \\log_a(x) = -\\infty$.',
+            'Si $a>1$ : $\\displaystyle\\lim_{x \\to 0^+} \\log_a(x) = -\\infty$, ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} \\log_a(x) = +\\infty$.',
+            'Si $0<a<1$ : $\\displaystyle\\lim_{x \\to 0^+} \\log_a(x) = +\\infty$, ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} \\log_a(x) = -\\infty$.',
             'Dans les deux cas, la limite en $0^+$ donne au graphique son asymptote verticale ' +
               'en x=0 ; celle en +∞ diverge, mais **extrêmement lentement** si a>1. Cas ' +
-              'particulier a=e (>1, donc premier cas) : $\\lim_{x \\to 0^+} \\ln(x) = -\\infty$, ' +
-              '$\\lim_{x \\to +\\infty} \\ln(x) = +\\infty$.',
+              'particulier a=e (>1, donc premier cas) : $\\displaystyle\\lim_{x \\to 0^+} \\ln(x) = -\\infty$, ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} \\ln(x) = +\\infty$.',
           ],
         },
         {
@@ -771,7 +771,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           items: [
             'Pour toute base a>1, $\\log_a(x)$ est dominé par **n\'importe quelle** puissance ' +
               'strictement positive de x, aussi petite soit-elle :',
-            '$\\lim_{x \\to +\\infty} \\dfrac{\\log_a(x)}{x^k} = 0$ pour tout réel k>0, pour ' +
+            '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{\\log_a(x)}{x^k} = 0$ pour tout réel k>0, pour ' +
               'toute base a>1 (dont a=e).',
           ],
         },
@@ -815,7 +815,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — forme indéterminée 0 × (−∞)',
           blocks: [
-            { kind: 'para', text: '$\\lim_{x \\to 0^+} x \\cdot \\ln(x) = 0$' },
+            { kind: 'para', text: '$\\displaystyle\\lim_{x \\to 0^+} x \\cdot \\ln(x) = 0$' },
             {
               kind: 'para',
               text:
@@ -828,7 +828,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$\\lim_{x \\to +\\infty} x \\cdot \\ln(x)$ **n\'est pas** une forme indéterminée : ' +
+            '$\\displaystyle\\lim_{x \\to +\\infty} x \\cdot \\ln(x)$ **n\'est pas** une forme indéterminée : ' +
             'les deux facteurs tendent vers +∞, leur produit diverge donc directement vers +∞ ' +
             '— inutile (et faux) d\'invoquer la croissance comparée ici.',
         },
@@ -837,25 +837,25 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'definition',
           label: 'À retenir — spécifique à la base e',
           items: [
-            'Pour une base a>0, a≠1 quelconque, $\\lim_{u \\to 0} \\log_a(1+u)/u$ vaut ' +
+            'Pour une base a>0, a≠1 quelconque, $\\displaystyle\\lim_{u \\to 0} \\log_a(1+u)/u$ vaut ' +
               '$\\log_a\'(1) = 1/\\ln(a)$ (section 4) — une valeur qui ne vaut exactement 1 que ' +
               'lorsque $\\ln(a)=1$, c\'est-à-dire pour a=e. C\'est précisément ce qui rend la ' +
               'base e si commode :',
-            '$\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$',
+            '$\\displaystyle\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$',
             'C\'est le nombre dérivé de $\\ln$ en 1 — analogue exact de la limite fondamentale ' +
               '$(e^x-1)/x \\to 1$ du chapitre 2 (elle aussi spécifique à la base e).',
           ],
         },
         {
           kind: 'exempleLibre',
-          blocks: [{ kind: 'para', text: '$\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1} = 1$ (poser $u = x-1 \\to 0$)' }],
+          blocks: [{ kind: 'para', text: '$\\displaystyle\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1} = 1$ (poser $u = x-1 \\to 0$)' }],
         },
         {
           kind: 'astuce',
           label: 'Un domaine, pas une frontière',
           text:
             '$\\ln$ n\'étant tout simplement pas définie sur les réels négatifs, une ' +
-            'expression comme $\\lim_{x \\to -\\infty} \\ln(x)$ n\'a **aucun sens** — ni +∞, ' +
+            'expression comme $\\displaystyle\\lim_{x \\to -\\infty} \\ln(x)$ n\'a **aucun sens** — ni +∞, ' +
             'ni −∞, ni 0 : la question elle-même est mal posée.',
         },
         {
