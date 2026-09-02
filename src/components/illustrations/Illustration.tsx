@@ -15,6 +15,8 @@ import { CircleDiagram } from './CircleDiagram'
 import { TrigCircleReference } from './TrigCircleReference'
 import { CircleAngles } from './CircleAngles'
 import { SequencePlot } from './SequencePlot'
+import { Histogram } from './Histogram'
+import { BoxPlot } from './BoxPlot'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -54,6 +56,10 @@ function renderSvg(spec: IllustrationSpec) {
       return <CircleAngles {...spec} />
     case 'sequencePlot':
       return <SequencePlot {...spec} />
+    case 'histogram':
+      return <Histogram {...spec} />
+    case 'boxPlot':
+      return <BoxPlot {...spec} />
   }
 }
 

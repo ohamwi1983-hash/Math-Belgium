@@ -8,7 +8,7 @@ const PLOT_LEFT = 70
 const PLOT_RIGHT = 600
 
 /** Droite graduée : trait plein = valeurs acceptées, rond vide = point exclu. */
-export function DomainNumberLine({ min, max, segments, points, extraTicks, signLabels, axisLabel }: Omit<Props, 'caption'>) {
+export function DomainNumberLine({ min, max, segments, points, extraTicks, signLabels, rangeAnnotations, axisLabel }: Omit<Props, 'caption'>) {
   const toX = (value: number) => PLOT_LEFT + ((value - min) / (max - min)) * (PLOT_RIGHT - PLOT_LEFT)
   const resolve = (endpoint: number | 'min' | 'max') =>
     endpoint === 'min' ? PLOT_LEFT : endpoint === 'max' ? PLOT_RIGHT : toX(endpoint)
@@ -65,6 +65,21 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, signL
                   {pt.sublabel}
                 </text>
               )}
+            </g>
+          )
+        })}
+
+        {rangeAnnotations?.map((r, i) => {
+          const x1 = toX(r.from)
+          const x2 = toX(r.to)
+          return (
+            <g key={i}>
+              <line x1={x1} y1="18" x2={x2} y2="18" className="svg-line" strokeWidth="1.2" />
+              <line x1={x1} y1="12" x2={x1} y2="24" className="svg-line" strokeWidth="1.2" />
+              <line x1={x2} y1="12" x2={x2} y2="24" className="svg-line" strokeWidth="1.2" />
+              <text x={(x1 + x2) / 2} y="10" textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+                {r.label}
+              </text>
             </g>
           )
         })}

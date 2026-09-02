@@ -23,6 +23,10 @@ export type IllustrationSpec =
       /** Signe affiché au-dessus d'une zone (ex. le signe d'un trinôme sur toute la droite, pas
        * seulement la solution surlignée) — position au point donné, pas déduite des segments. */
       signLabels?: { value: number; sign: '+' | '−' }[]
+      /** Crochet horizontal fin au-dessus de l'axe, entre deux valeurs, avec une étiquette
+       * centrée (ex. "au moins 75% des valeurs") — distinct des segments/points, qui portent le
+       * sens accepté/exclu, pas une simple portée annotée. */
+      rangeAnnotations?: { from: number; to: number; label: string }[]
       axisLabel: string
       caption: string
     }
@@ -235,8 +239,31 @@ export type IllustrationSpec =
       referenceLine?: { value: number; label: string }
       /** Étiquette flottante près d'un point donné (ex. "u_n → 0"). */
       trendLabel?: { afterIndex: number; text: string }
+      /** Met en évidence un point par des projections en pointillés vers les deux axes, avec les
+       * valeurs lues affichées à leur pied (ex. lire un seuil sur une courbe cumulative). */
+      highlightPoint?: { index: number; xLabel?: string; yLabel?: string }
       xAxisLabel: string
       yAxisLabel: string
+      caption: string
+    }
+  | {
+      /** Histogramme — barres accolées pour des classes consécutives, hauteur = effectif (ou
+       * fréquence). Distinct de `sequencePlot`/`curvePlot` : pas de points isolés ni de courbe,
+       * des rectangles pleins dont la largeur porte l'amplitude de la classe. */
+      kind: 'histogram'
+      bars: { from: number; width: number; height: number }[]
+      xAxisLabel: string
+      yAxisLabel: string
+      caption: string
+    }
+  | {
+      /** Boîte à moustaches — une ou plusieurs séries empilées verticalement, chacune résumée en
+       * 5 nombres (min, Q1, médiane, Q3, max). Une seule série affiche les 5 valeurs sous l'axe ;
+       * plusieurs séries affichent une étiquette courte par ligne (ex. "A", "B") et un IQR
+       * optionnel au-dessus de chaque boîte, pour la comparaison. */
+      kind: 'boxPlot'
+      series: { label?: string; min: number; q1: number; median: number; q3: number; max: number; tone?: 'accent' | 'good'; iqrLabel?: string }[]
+      xAxisLabel: string
       caption: string
     }
 

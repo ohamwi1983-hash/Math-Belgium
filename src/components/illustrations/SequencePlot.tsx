@@ -11,7 +11,7 @@ const Y_BOTTOM = 200
 /** Points discrets d'une suite (n, valeur) — chaque terme est un point isolé, pas une courbe
  * continue échantillonnée. Le connecteur (lissé ou droit) est purement visuel, jamais une vraie
  * fonction interpolée. */
-export function SequencePlot({ points, connector = 'straight', stepIndicator, referenceLine, trendLabel, xAxisLabel, yAxisLabel }: Props) {
+export function SequencePlot({ points, connector = 'straight', stepIndicator, referenceLine, trendLabel, highlightPoint, xAxisLabel, yAxisLabel }: Props) {
   const markerId = `sp-arrow-${useId()}`
   const ns = points.map((p) => p.n)
   const values = points.map((p) => p.value)
@@ -106,6 +106,29 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
           </text>
         ))}
       </g>
+
+      {highlightPoint &&
+        coords[highlightPoint.index] &&
+        (() => {
+          const c = coords[highlightPoint.index]
+          return (
+            <g>
+              <line x1={c.x} y1={c.y} x2={c.x} y2={Y_BOTTOM} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
+              <line x1={X_LEFT} y1={c.y} x2={c.x} y2={c.y} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
+              <circle cx={c.x} cy={c.y} r="5" className="svg-bad" />
+              {highlightPoint.xLabel && (
+                <text x={c.x} y={Y_BOTTOM + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" fontWeight="700">
+                  {highlightPoint.xLabel}
+                </text>
+              )}
+              {highlightPoint.yLabel && (
+                <text x={X_LEFT - 8} y={c.y + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" fontWeight="700">
+                  {highlightPoint.yLabel}
+                </text>
+              )}
+            </g>
+          )
+        })()}
 
       {trendLabel &&
         coords[trendLabel.afterIndex] && (
