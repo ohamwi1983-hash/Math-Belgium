@@ -22,6 +22,7 @@ import { Histogram } from './Histogram'
 import { BoxPlot } from './BoxPlot'
 import { ComplexPlane } from './ComplexPlane'
 import { NumberSetsNesting } from './NumberSetsNesting'
+import { VectorPlane } from './VectorPlane'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -75,6 +76,8 @@ function renderSvg(spec: IllustrationSpec) {
       return <ComplexPlane {...spec} />
     case 'numberSetsNesting':
       return <NumberSetsNesting {...spec} />
+    case 'vectorPlane':
+      return <VectorPlane {...spec} />
   }
 }
 

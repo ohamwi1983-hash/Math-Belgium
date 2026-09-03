@@ -315,6 +315,38 @@ export type IllustrationSpec =
       caption: string
     }
   | {
+      /** Plan cartésien x/y — points, vecteurs (pleins ou pointillés, avec éventuelle marque de
+       * longueur égale), arcs d'angle et petits marqueurs d'angle droit à orientation libre.
+       * Composant généraliste pour le chapitre sur le calcul vectoriel, dans le même esprit que
+       * `complexPlane` (axes x/y plutôt que Re/Im ; pas de cercle ni de polygone, non nécessaires
+       * ici). */
+      kind: 'vectorPlane'
+      xMin: number
+      xMax: number
+      yMin: number
+      yMax: number
+      vectors?: { from: { x: number; y: number }; to: { x: number; y: number }; tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'; dashed?: boolean; tick?: boolean }[]
+      points?: {
+        x: number
+        y: number
+        label?: string
+        /** Étiquette d'un NOM DE VECTEUR (u, AB, u+v, 2·AB…) — chaque run avec `vector: true`
+         * reçoit la notation flèche (surlignage + petite tête ▸), comme `.vecnot` en prose mais
+         * en SVG ; les runs sans `vector` (opérateurs, scalaires, indices) restent en texte
+         * normal. Remplace `label` quand présent. */
+        vectorLabel?: { text: string; vector?: boolean }[]
+        tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink'
+        labelPos?: 'above' | 'below' | 'left' | 'right'
+        node?: boolean
+      }[]
+      angleArcs?: { cx: number; cy: number; fromDeg: number; toDeg: number; radiusPx: number; label?: string; tone?: 'accent' | 'good' | 'bad' }[]
+      /** Petit repère d'angle droit à un sommet, orienté librement selon les deux côtés qui le
+       * forment (contrairement au marqueur axé-axes de `circleAngles`) — `arm1`/`arm2` sont deux
+       * points quelconques (pas nécessairement unitaires) situés sur chacun des deux côtés. */
+      rightAngleMarkers?: { vertex: { x: number; y: number }; arm1: { x: number; y: number }; arm2: { x: number; y: number }; size?: number }[]
+      caption: string
+    }
+  | {
       /** Points discrets d'une suite (n, valeur) — pas une fonction continue, donc distinct de
        * `curvePlot` : chaque terme est un point isolé, avec sa propre étiquette de valeur. */
       kind: 'sequencePlot'
