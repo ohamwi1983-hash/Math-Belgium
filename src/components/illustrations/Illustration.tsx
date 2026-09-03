@@ -23,6 +23,9 @@ import { BoxPlot } from './BoxPlot'
 import { ComplexPlane } from './ComplexPlane'
 import { NumberSetsNesting } from './NumberSetsNesting'
 import { VectorPlane } from './VectorPlane'
+import { VennDiagram } from './VennDiagram'
+import { WeightedTree } from './WeightedTree'
+import { OutcomeGrid } from './OutcomeGrid'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -78,6 +81,12 @@ function renderSvg(spec: IllustrationSpec) {
       return <NumberSetsNesting {...spec} />
     case 'vectorPlane':
       return <VectorPlane {...spec} />
+    case 'vennDiagram':
+      return <VennDiagram {...spec} />
+    case 'weightedTree':
+      return <WeightedTree {...spec} />
+    case 'outcomeGrid':
+      return <OutcomeGrid {...spec} />
   }
 }
 

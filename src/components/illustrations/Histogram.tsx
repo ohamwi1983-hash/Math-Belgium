@@ -17,7 +17,16 @@ export function Histogram({ bars, xAxisLabel, yAxisLabel }: Props) {
   const yScale = (y: number) => Y_BOTTOM - (y / (yMax * 1.15)) * (Y_BOTTOM - Y_TOP)
 
   const xTicks = [...new Set(bars.flatMap((b) => [b.from, b.from + b.width]))].sort((a, b) => a - b)
-  const yTicks = [...new Set(bars.map((b) => b.height))].sort((a, b) => a - b)
+  const yTicksRaw = [...new Set(bars.map((b) => b.height))].sort((a, b) => a - b)
+  const yTicks: number[] = []
+  let lastTickPx = Infinity
+  for (const t of yTicksRaw) {
+    const px = yScale(t)
+    if (lastTickPx - px >= 14) {
+      yTicks.push(t)
+      lastTickPx = px
+    }
+  }
 
   return (
     <svg viewBox="0 0 460 260" role="img" aria-label="Histogramme">

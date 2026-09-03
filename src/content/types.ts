@@ -389,6 +389,39 @@ export type IllustrationSpec =
       xAxisLabel: string
       caption: string
     }
+  | {
+      /** Diagramme de Venn à 2 ensembles (toujours la même disposition géométrique : deux
+       * cercles superposés). `mode` choisit ce qui est mis en évidence ; `counts` — uniquement en
+       * mode 'counts' — affiche un effectif dans chacune des 4 régions plutôt que rien. */
+      kind: 'vennDiagram'
+      labelA: string
+      labelB: string
+      mode: 'plain' | 'highlightUnion' | 'highlightIntersection' | 'counts'
+      counts?: { aOnly: string; bOnly: string; both: string; neither: string }
+      caption: string
+    }
+  | {
+      /** Arbre pondéré à 2 niveaux (toujours 2 niveaux : ce chapitre n'en a jamais besoin de
+       * plus). `secondLevel` référence son parent par l'index dans `firstLevel` ; `pathProb`,
+       * quand fourni, affiche la probabilité du chemin complet au bout de la branche — jamais
+       * calculée automatiquement, toujours fournie explicitement pour rester fidèle à l'énoncé. */
+      kind: 'weightedTree'
+      firstLevel: { label: string; prob: string }[]
+      secondLevel: { fromFirst: number; label: string; prob: string; pathProb?: string; highlight?: boolean }[]
+      caption: string
+    }
+  | {
+      /** Grille des issues d'une expérience à 2 tirages numériques indépendants (ex. 2 dés) — un
+       * point par issue, certains mis en évidence. Distinct de `vectorPlane` : toujours un
+       * quadrillage entier 1..n, jamais d'axes négatifs ni de vecteurs. */
+      kind: 'outcomeGrid'
+      xMax: number
+      yMax: number
+      xAxisLabel: string
+      yAxisLabel: string
+      highlighted: { x: number; y: number }[]
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string

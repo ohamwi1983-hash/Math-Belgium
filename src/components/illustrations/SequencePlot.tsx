@@ -55,21 +55,30 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
     <svg viewBox="0 0 540 240" role="img" aria-label="Points d'une suite">
       <line x1={X_LEFT} y1={zeroY} x2={X_RIGHT + 8} y2={zeroY} className="svg-line" strokeWidth="1.5" markerEnd={`url(#${markerId})`} />
       <line x1={X_LEFT} y1={Y_BOTTOM} x2={X_LEFT} y2={Y_TOP - 8} className="svg-line" strokeWidth="1.5" markerEnd={`url(#${markerId})`} />
-      <text x={X_RIGHT + 4} y={zeroY + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={X_RIGHT} y={Y_BOTTOM + 32} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
         {xAxisLabel}
       </text>
       <text x={X_LEFT - 8} y={Y_TOP - 4} textAnchor="start" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
         {yAxisLabel}
       </text>
 
-      {referenceLine && (
-        <>
-          <line x1={X_LEFT} y1={yScale(referenceLine.value)} x2={X_RIGHT} y2={yScale(referenceLine.value)} className="svg-good" strokeWidth="1.5" strokeDasharray="4 3" />
-          <text x={X_RIGHT + 6} y={yScale(referenceLine.value) + 4} className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12">
-            {referenceLine.label}
-          </text>
-        </>
-      )}
+      {referenceLine &&
+        (() => {
+          const refY = yScale(referenceLine.value)
+          const lastY = coords[coords.length - 1]?.y
+          // Le label du dernier point (au-dessus de son point, x proche de X_RIGHT) et celui de la
+          // ligne de référence (juste à droite, x=X_RIGHT+6) ne se croisent que si leurs valeurs
+          // sont proches — dans ce cas seulement, on écarte le label de la référence vers le bas.
+          const labelOffset = lastY !== undefined && Math.abs(refY - lastY) < 16 ? 20 : 4
+          return (
+            <>
+              <line x1={X_LEFT} y1={refY} x2={X_RIGHT} y2={refY} className="svg-good" strokeWidth="1.5" strokeDasharray="4 3" />
+              <text x={X_RIGHT + 6} y={refY + labelOffset} className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+                {referenceLine.label}
+              </text>
+            </>
+          )
+        })()}
 
       {connectorPath && <path d={connectorPath} fill="none" style={{ fill: 'none' }} className="svg-accent-outline" strokeWidth="1.6" strokeDasharray="3 3" />}
 
