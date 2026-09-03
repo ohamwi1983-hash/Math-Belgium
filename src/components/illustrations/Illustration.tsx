@@ -20,6 +20,8 @@ import { Triangulation } from './Triangulation'
 import { SequencePlot } from './SequencePlot'
 import { Histogram } from './Histogram'
 import { BoxPlot } from './BoxPlot'
+import { ComplexPlane } from './ComplexPlane'
+import { NumberSetsNesting } from './NumberSetsNesting'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -69,6 +71,10 @@ function renderSvg(spec: IllustrationSpec) {
       return <Histogram {...spec} />
     case 'boxPlot':
       return <BoxPlot {...spec} />
+    case 'complexPlane':
+      return <ComplexPlane {...spec} />
+    case 'numberSetsNesting':
+      return <NumberSetsNesting {...spec} />
   }
 }
 

@@ -288,6 +288,33 @@ export type IllustrationSpec =
       caption: string
     }
   | {
+      /** Plan d'Argand — axes Re/Im, points d'affixe (x;y), vecteurs (segments, pleins ou
+       * pointillés, depuis l'origine ou entre deux points quelconques), arcs d'angle à centre
+       * libre, marques de longueur égale, cercle et polygone optionnels. Composant généraliste
+       * couvrant la quasi-totalité des diagrammes du chapitre sur les nombres complexes. */
+      kind: 'complexPlane'
+      xMin: number
+      xMax: number
+      yMin: number
+      yMax: number
+      circle?: { cx: number; cy: number; r: number; tone?: 'faint' | 'accent' }
+      polygon?: { points: { x: number; y: number }[]; tone?: 'accent' | 'faint' }
+      vectors?: { from: { x: number; y: number }; to: { x: number; y: number }; tone: 'accent' | 'good' | 'bad' | 'faint'; dashed?: boolean; tick?: boolean }[]
+      points?: { x: number; y: number; label?: string; tone: 'accent' | 'good' | 'bad' | 'ink'; labelPos?: 'above' | 'below' | 'left' | 'right'; node?: boolean }[]
+      /** Arc d'angle en degrés (convention standard, sens direct), à un centre libre — pas
+       * nécessairement l'origine, contrairement à `circleAngles`. */
+      angleArcs?: { cx: number; cy: number; fromDeg: number; toDeg: number; radiusPx: number; label?: string; tone?: 'accent' | 'good' | 'bad' }[]
+      caption: string
+    }
+  | {
+      /** Emboîtement ℕ⊂ℤ⊂ℚ⊂ℝ⊂ℂ — ellipses concentriques étiquetées, avec des points-exemples
+       * libres à l'intérieur. Forme trop spécifique pour un usage au-delà de cette seule figure. */
+      kind: 'numberSetsNesting'
+      rings: { rx: number; ry: number; label: string }[]
+      examplePoints: { dx: number; dy: number; label: string; anchor?: 'start' | 'end' }[]
+      caption: string
+    }
+  | {
       /** Points discrets d'une suite (n, valeur) — pas une fonction continue, donc distinct de
        * `curvePlot` : chaque terme est un point isolé, avec sa propre étiquette de valeur. */
       kind: 'sequencePlot'
