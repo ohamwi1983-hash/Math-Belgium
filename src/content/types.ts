@@ -221,7 +221,7 @@ export type IllustrationSpec =
        * sin/cos/tan, pas de deux points arbitraires reliés.
        */
       kind: 'circleAngles'
-      points: { angle: number; label: string; tone: 'accent' | 'good' | 'bad' }[]
+      points: { angle: number; label: string; tone: 'accent' | 'good' | 'bad'; dashed?: boolean }[]
       /** Trace la droite passant par les points (étendue aux bords du cadre, pas juste le segment
        * entre eux) — sert de corde pour sin/cos, et de sécante prolongée jusqu'à la tangente pour tan. */
       connectPoints?: boolean
@@ -233,6 +233,58 @@ export type IllustrationSpec =
       horizontalLine?: { y: number; label: string }
       /** Ligne verticale de référence à x=t (ex. pour cos x=t, symétrie par rapport à l'axe horizontal). */
       verticalLine?: { x: number; label: string }
+      /** Étiquettes I/II/III/IV dans chacun des 4 quadrants. */
+      showQuadrants?: boolean
+      /** Arc d'angle entre deux directions (en radians, 0=axe x positif, sens direct=trigonométrique),
+       * de rayon libre en pixels — pour le grand balayage d'un angle θ (avec flèche de sens) ou un
+       * petit arc d'angle de référence, dans une teinte distincte. */
+      angleArcs?: { from: number; to: number; tone: 'accent' | 'good' | 'bad'; radiusPx: number; label?: string; arrow?: boolean }[]
+      /** Étiquette de texte libre en coordonnées normalisées du cercle (−1 à 1, échelle cos/sin) —
+       * pour nommer O, un pied de projection P, ou tout point qui n'est pas un `points` du cercle. */
+      freeLabels?: { x: number; y: number; text: string; tone?: 'accent' | 'good' | 'bad' | 'ink' }[]
+      /** Petit carré d'angle droit, coordonnées normalisées du cercle, aux côtés alignés sur les axes
+       * (ex. au pied d'une projection, pour l'identité cos²+sin²=1). */
+      rightAngleMarkers?: { x: number; y: number }[]
+      /** Construction de tan θ comme longueur : droite verticale tangente au cercle en (1;0), le
+       * rayon OM prolongé la coupe en P(1;tan θ) — variante géométrique distincte des projections
+       * cos/sin habituelles, qui sont de simples coordonnées. */
+      tangentConstruction?: { angle: number; label?: string }
+      caption: string
+    }
+  | {
+      /** Triangle rectangle isolé, angles et côtés étiquetés — pour les constructions à angles
+       * remarquables (45-45-90, 30-60-90). Sommet de l'angle droit toujours en bas à droite. */
+      kind: 'rightTriangle'
+      /** Longueurs des 2 côtés de l'angle droit (horizontal, vertical) — l'hypoténuse s'en déduit. */
+      legs: { horizontal: number; vertical: number }
+      sideLabels: { horizontal: string; vertical: string; hypotenuse: string }
+      angleLabels: { atLeft: string; atRight: string }
+      caption: string
+    }
+  | {
+      /** Triangle ABC quelconque — sommets/côtés/angles étiquetés selon la convention constante
+       * (côté minuscule opposé au sommet majuscule de même lettre). Base [AB] toujours horizontale. */
+      kind: 'triangleGeneric'
+      /** Sommets en coordonnées libres (pixels SVG) — A et B sur la base, C au sommet. */
+      A: { x: number; y: number }
+      B: { x: number; y: number }
+      C: { x: number; y: number }
+      /** Angle(s) à marquer par un arc, aux sommets voulus. */
+      angleArcsAt?: ('A' | 'B' | 'C')[]
+      /** Hauteur issue de C, abaissée sur [AB] au point H — avec son marqueur d'angle droit. */
+      heightFromC?: { hLabel?: string; footLabel?: string }
+      /** Construction en repère : A à l'origine, B sur l'axe horizontal, projections de C avec
+       * leurs longueurs étiquetées (ex. "b cos A", "b sin A") — pour la démonstration d'Al-Kashi. */
+      coordinateConstruction?: { horizontalLabel: string; verticalLabel: string }
+      sideLabels?: { a?: string; b?: string; c?: string }
+      caption: string
+    }
+  | {
+      /** Triangulation — deux points au sol A et B alignés avec le pied F d'une tour verticale de
+       * sommet S, deux visées d'élévation depuis A et B. Forme géométrique distincte d'un triangle
+       * fermé à 3 sommets, jamais réutilisable via `triangleGeneric`. */
+      kind: 'triangulation'
+      labels: { A: string; B: string; F: string; S: string; distanceLabel: string; heightLabel: string; angleAtA: string; angleAtB: string }
       caption: string
     }
   | {

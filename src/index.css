@@ -309,6 +309,8 @@ figcaption {
 .svg-accent { stroke: var(--accent); fill: var(--accent); }
 .svg-accent-outline { stroke: var(--accent); fill: none; }
 .svg-good-outline { stroke: var(--good); fill: none; }
+.svg-bad-outline { stroke: var(--bad); fill: none; }
+.svg-quadrant { fill: var(--ink-faint); }
 .svg-bar { fill: var(--accent); opacity: 0.75; stroke: var(--accent); stroke-width: 1; }
 .svg-band { fill: var(--accent); opacity: 0.15; }
 .svg-band-good { fill: var(--good); opacity: 0.18; }

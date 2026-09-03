@@ -14,6 +14,9 @@ import { UnitCircleArc } from './UnitCircleArc'
 import { CircleDiagram } from './CircleDiagram'
 import { TrigCircleReference } from './TrigCircleReference'
 import { CircleAngles } from './CircleAngles'
+import { RightTriangle } from './RightTriangle'
+import { TriangleGeneric } from './TriangleGeneric'
+import { Triangulation } from './Triangulation'
 import { SequencePlot } from './SequencePlot'
 import { Histogram } from './Histogram'
 import { BoxPlot } from './BoxPlot'
@@ -54,6 +57,12 @@ function renderSvg(spec: IllustrationSpec) {
       return <TrigCircleReference {...spec} />
     case 'circleAngles':
       return <CircleAngles {...spec} />
+    case 'rightTriangle':
+      return <RightTriangle {...spec} />
+    case 'triangleGeneric':
+      return <TriangleGeneric {...spec} />
+    case 'triangulation':
+      return <Triangulation {...spec} />
     case 'sequencePlot':
       return <SequencePlot {...spec} />
     case 'histogram':
