@@ -441,6 +441,28 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => x * x, tone: 'accent', xMin: 0, xMax: 4.3 }],
+            xMin: -0.4,
+            xMax: 4.6,
+            xTicks: [0, 1, 2, 3, 4],
+            fixedYRange: { min: -1.6, max: 18 },
+            shadedRegions: [
+              { from: 0, to: 1, upper: (x) => 0 + (1 - 0) * (x - 0), tone: 'accent' },
+              { from: 1, to: 2, upper: (x) => 1 + (4 - 1) * (x - 1), tone: 'accent' },
+              { from: 2, to: 3, upper: (x) => 4 + (9 - 4) * (x - 2), tone: 'accent' },
+              { from: 3, to: 4, upper: (x) => 9 + (16 - 9) * (x - 3), tone: 'accent' },
+            ],
+            textLabels: [{ x: 4.4, y: 17.5, text: 'y=x²', tone: 'accent', anchor: 'end' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Quatre trapèzes approchant l\'aire sous y=x² sur [0;4] : chaque corde passe au-dessus de la courbe convexe, donc l\'approximation surestime',
+          },
+        },
+        {
           kind: 'exempleLibre',
           blocks: [
             {
@@ -662,6 +684,72 @@ export const primitivesIntegrales: ChapterContent = {
             'Esquisser rapidement le signe de f (ou de f−g) sur chaque sous-intervalle ' +
             '**avant** de poser l\'intégrale — décider où placer les valeurs absolues avant de calculer, jamais après coup.',
         },
+        { kind: 'subheading', text: 'Aire délimitée par plus de deux courbes' },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Une région peut être bordée par **plus de deux** courbes — ou, ce qui revient au ' +
+              'même, la courbe qui joue le rôle de « majorant » peut **changer** au milieu de ' +
+              'l\'intervalle. On repère alors les **points de bascule** (où deux des courbes ' +
+              'bordantes se croisent), on découpe l\'intervalle à cet endroit, et on choisit sur ' +
+              'chaque morceau la bonne paire majorant/minorant — exactement comme on découpait ' +
+              'aux racines pour une aire signée.',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x, tone: 'accent', xMin: 0, xMax: 3 },
+              { fn: (x) => 6 - x, tone: 'good', xMin: 3, xMax: 6 },
+            ],
+            xMin: -0.6,
+            xMax: 6.6,
+            xTicks: [],
+            fixedYRange: { min: -0.7, max: 4.2 },
+            shadedRegions: [{ from: 0, to: 6, upper: (x) => (x <= 3 ? x : 6 - x), tone: 'accent' }],
+            axisOfSymmetry: { x: 3, label: 'bascule en x=3' },
+            points: [
+              { x: 3, y: 3, label: '(3;3)', tone: 'bad' },
+              { x: 6, y: 0, label: '(6;0)', tone: 'accent' },
+            ],
+            textLabels: [
+              { x: 1.2, y: 1.9, text: 'y=x', tone: 'accent', anchor: 'middle' },
+              { x: 4.8, y: 1.9, text: 'y=6−x', tone: 'good', anchor: 'middle' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption: 'Région bornée par y=x, y=6−x et y=0 : la fonction majorante bascule en x=3, il faut deux intégrales',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Région bordée par y=x, y=6−x et y=0 (l\'axe des abscisses). Les deux droites se ' +
+                'croisent en (3;3) : c\'est le point de bascule. Sur [0;3], le majorant est y=x ; ' +
+                'sur [3;6], c\'est y=6−x ; le minorant est y=0 sur tout l\'intervalle.',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\text{aire} = \\int_0^3 x \\, dx + \\int_3^6 (6-x)dx = [\\dfrac{x^2}{2}]_0^3 + ' +
+                '[6x-\\dfrac{x^2}{2}]_3^6 = 4{,}5 + 4{,}5 = 9$',
+            },
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Piège spécifique à ce cas',
+          text:
+            'Ne découper qu\'aux zéros de f (comme pour une aire signée) ne suffit pas ici : il ' +
+            'faut **aussi** découper là où la courbe majorante change, même si aucune des deux ' +
+            'courbes ne s\'annule à cet endroit.',
+        },
         { kind: 'subheading', text: 'Pour aller plus loin — retrouver l\'aire d\'un disque' },
         {
           kind: 'exempleLibre',
@@ -818,6 +906,32 @@ export const primitivesIntegrales: ChapterContent = {
           blocks: [
             { kind: 'para', text: 'f(x) = 3, g(x) = x sur [0;3] :' },
             { kind: 'para', text: '$V = \\pi \\int_0^3 (9-x^2)dx = \\pi [9x-\\dfrac{x^3}{3}]_0^3 = \\pi(27-9) = 18\\pi$' },
+          ],
+        },
+        { kind: 'subheading', text: 'À quoi ressemble vraiment le solide ?' },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'solidRevolution',
+              variant: 'cone',
+              outerRadius: 3,
+              startLabel: 'x=0',
+              endLabel: 'x=3',
+              midLabel: 'disque, rayon f(x)',
+              caption:
+                'Le solide engendré par la rotation de y=x sur [0;3] (méthode des disques, ci-dessus) : un cône. Chaque tranche verticale devient un disque de rayon f(x).',
+            },
+            {
+              kind: 'solidRevolution',
+              variant: 'washer',
+              outerRadius: 3,
+              startLabel: 'x=0',
+              endLabel: 'x=3',
+              midLabel: 'rondelle',
+              caption:
+                'Le solide engendré par la région entre y=3 et y=x sur [0;3] (méthode des rondelles) : plein en x=0, paroi qui s\'amincit jusqu\'à une épaisseur nulle en x=3.',
+            },
           ],
         },
         {

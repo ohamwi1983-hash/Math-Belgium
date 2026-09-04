@@ -37,6 +37,7 @@ import { FrequencyStabilization } from './FrequencyStabilization'
 import { UniversePartition } from './UniversePartition'
 import { NaturalFrequencies } from './NaturalFrequencies'
 import { ComplementBar } from './ComplementBar'
+import { SolidRevolution } from './SolidRevolution'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -120,6 +121,8 @@ function renderSvg(spec: IllustrationSpec) {
       return <NaturalFrequencies {...spec} />
     case 'complementBar':
       return <ComplementBar {...spec} />
+    case 'solidRevolution':
+      return <SolidRevolution {...spec} />
   }
 }
 

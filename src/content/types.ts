@@ -664,6 +664,22 @@ export type IllustrationSpec =
       warning?: string
       caption: string
     }
+  | {
+      /**
+       * Solide de révolution vu « en coupe 3D » — complète le diagramme 2D de la région tournée
+       * (`curvePlot`), qui ne montre jamais le solide réellement engendré par la rotation. 'cone'
+       * dessine un solide plein (méthode des disques, rayon nul à x=a) ; 'washer' dessine une paroi
+       * creuse dont l'épaisseur s'amincit jusqu'à devenir nulle au bord large (méthode des
+       * rondelles). `outerRadius` = rayon au bord large, toujours atteint en x=b dans ce chapitre.
+       */
+      kind: 'solidRevolution'
+      variant: 'cone' | 'washer'
+      outerRadius: number
+      startLabel: string
+      endLabel: string
+      midLabel: string
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string
