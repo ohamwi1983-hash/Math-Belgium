@@ -33,6 +33,10 @@ import { LetterTiles } from './LetterTiles'
 import { PascalTriangle } from './PascalTriangle'
 import { CategoricalBarChart } from './CategoricalBarChart'
 import { SequenceOutcomes } from './SequenceOutcomes'
+import { FrequencyStabilization } from './FrequencyStabilization'
+import { UniversePartition } from './UniversePartition'
+import { NaturalFrequencies } from './NaturalFrequencies'
+import { ComplementBar } from './ComplementBar'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -108,15 +112,24 @@ function renderSvg(spec: IllustrationSpec) {
       return <CategoricalBarChart {...spec} />
     case 'sequenceOutcomes':
       return <SequenceOutcomes {...spec} />
+    case 'frequencyStabilization':
+      return <FrequencyStabilization {...spec} />
+    case 'universePartition':
+      return <UniversePartition {...spec} />
+    case 'naturalFrequencies':
+      return <NaturalFrequencies {...spec} />
+    case 'complementBar':
+      return <ComplementBar {...spec} />
   }
 }
 
 /** Wraps any illustration spec in the shared figure/diagram-frame/figcaption chrome. */
 export function Illustration({ spec }: { spec: IllustrationSpec }) {
   const caption = 'caption' in spec ? spec.caption : DEFAULT_CAPTIONS[spec.kind]
+  const compact = 'compact' in spec && spec.compact === true
   return (
     <figure>
-      <div className="diagram-frame">{renderSvg(spec)}</div>
+      <div className={compact ? 'diagram-frame diagram-frame--compact' : 'diagram-frame'}>{renderSvg(spec)}</div>
       {caption && (
         <figcaption>
           <RichText text={caption} />

@@ -306,6 +306,7 @@ figcaption {
 .diagram-frame {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
 }
+.diagram-frame--compact { max-width: 50%; margin: 0 auto; }
 .svg-ink { fill: var(--ink); }
 .svg-ink-faint { fill: var(--ink-faint); }
 .svg-line { stroke: var(--ink-soft); }

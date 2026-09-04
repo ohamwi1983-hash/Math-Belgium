@@ -151,6 +151,21 @@ chapitre récapitule plusieurs fonctions/objets comparables plutôt qu'une liste
   - `sequenceOutcomes` — plusieurs séquences d'issues DÉPLIÉES (une ligne = un chemin complet, avec
     la probabilité de chaque tirage et celle du chemin), plus l'accolade regroupant les lignes
     équiprobables. Ce qu'un `weightedTree` (2 niveaux) ne peut pas représenter pour 3 tirages.
+  - `frequencyStabilization` — ligne brisée des fréquences relevées au fil des répétitions, avec la
+    valeur limite en pointillés (probabilité expérimentale). Distinct de `sequencePlot`, qui
+    étiquette CHAQUE point et affiche son rang sous l'axe — illisible pour plusieurs dizaines de
+    relevés, alors que le grand nombre de répétitions EST le sujet ici.
+  - `universePartition` — rectangle Ω découpé en bandes verticales (la partition) traversé par un
+    événement dessiné en ellipse ombrée : la figure de la loi des probabilités totales. Distinct de
+    `vennDiagram` (2 cercles, univers non découpé) et de `groupPartition` (jetons en boîtes, sans
+    événement transversal).
+  - `naturalFrequencies` — colonnes de MÊME hauteur, chacune redécoupée à sa propre échelle (chaque
+    colonne est son propre 100 %), effectifs en regard : oppose visuellement deux conditionnements
+    inverses (P(T⁺|malade) contre P(malade|T⁺)). Distinct de `categoricalBarChart`, dont chaque
+    barre porte UNE valeur sur une échelle commune.
+  - `complementBar` — une seule barre de longueur 1 partagée en deux parts complémentaires, avec un
+    contre-exemple barré optionnel. Distinct de `categoricalBarChart`, qui dessinerait deux barres
+    séparées : ici c'est le partage d'UNE MÊME barre qui porte le sens.
 
 Toutes les illustrations utilisent les classes CSS `svg-ink` / `svg-line` / `svg-accent` /
 `svg-good` / `svg-bad` / `svg-faint` définies dans `src/index.css`, qui pointent vers les variables
@@ -277,6 +292,71 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   `featureTable` sont rendus en texte BRUT — y écrire `$...$` affiche les dollars littéralement (66
   occurrences dans le premier jet de ce chapitre, détectées seulement au rendu navigateur, pas par
   `tsc`). Y mettre des caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
+
+- **6e (6h), Chapitre 6 — Les probabilités** (`probabilites`) : migré une première fois, puis
+  **complété/enrichi à son tour** quand l'artifact source a grandi (nouvelles sections, nouveaux
+  exemples résolus, et des diagrammes de plus, portant l'artifact à 11 diagrammes). La mise à jour a
+  demandé **4 nouveaux kinds d'illustration** — `frequencyStabilization`, `universePartition`,
+  `naturalFrequencies`, `complementBar` : aucun kind existant ne convenait, et
+  `sequencePlot`/`categoricalBarChart`/`groupPartition`/`weightedTree` ont chacun été écartés pour
+  une raison structurelle documentée dans `types.ts` (étiquette par point, valeur unique par barre,
+  absence d'événement transversal, branches pondérées sans objet). Le diagramme de la loi binomiale
+  est passé de `histogram` à `categoricalBarChart` : `histogram` positionne ses barres sur un axe
+  numérique et n'affiche ni la valeur au bout de chaque barre ni l'étiquette de k, deux éléments
+  bien présents dans la source — même arbitrage que pour le chapitre 7. Le diagramme de
+  stabilisation des fréquences, jusque-là un `sequencePlot` à 8 points inventés, a été refait sur
+  les 26 relevés réels de la source. Ajouts de contenu par rapport à la version migrée : le placeholder `video` en tête de
+  section 1 (convention du site, absent), la mise en évidence des 5 cases DÉDUITES dans les deux
+  tableaux à double entrée, le libellé de l'astuce « Les deux méthodes doivent converger », la
+  mention « (plusieurs chemins) » réintroduite dans la ligne « Arbre pondéré » de la synthèse, et le
+  tableau de synthèse entier passé en KaTeX. Écarts assumés : palette du site (accent orange / good
+  vert) au lieu du bleu+orange de l'artifact ; la ligne de contre-exemple de `complementBar` est en
+  teinte `bad` (rouge) plutôt qu'orange, la sémantique « impossible » l'emportant ; les probabilités
+  de chemin de l'arbre de l'urne restent en 20/56 et 6/56 (formes non réduites, cohérentes avec
+  l'astuce « la somme des chemins vaut 1 » juste en dessous) là où la source affiche 5/14 et 3/28 —
+  la source est elle-même incohérente sur ce point ; graduations ajoutées sous l'axe du diagramme de
+  fréquences (la source n'en a aucune) ; la figure décorative d'en-tête de l'artifact est omise,
+  comme pour tous les chapitres précédents. Vérifié par rendu navigateur réel sur le build de
+  production : les figures capturées une à une et comparées à la figure correspondante de
+  l'artifact, les 18 autres chapitres re-rendus sans régression (aucun `$...$` non résolu, aucun
+  `NaN`/`undefined`, aucune erreur KaTeX ni JS).
+  **Correction de référence en avant (section 4)** : la section 4 « Probabilités : problèmes »
+  enseignait les épreuves répétées avec `C(n,k)`/`A(n,k)`, notation qui n'est formellement
+  introduite QUE dans le chapitre suivant (« Analyse combinatoire ») — un élève lisant les
+  chapitres dans l'ordre ne l'a pas encore vue. La source a été réécrite, et la migration suit :
+  tout est désormais justifié par le COMPTAGE DES CHEMINS de l'arbre (la technique déjà employée
+  en section 2), jamais par un coefficient binomial. Concrètement : un exemple résolu entièrement
+  nouveau (arbre complet à 3 tirs, $p$=0,3) où les 8 chemins sont listés et regroupés par nombre
+  de succès dans un `featureTable` à 5 colonnes (nombre de succès / chemins / nombre de chemins /
+  probabilité de CHAQUE chemin / P(X=k) — 0,027 + 0,189 + 0,441 + 0,343 = 1) porté par un
+  `exempleLibre` (`para` + `featureTable` + `para`, pour que le tableau reste DANS le cadre de
+  l'exemple comme dans la source) ; l'exemple du tireur ($n$=5) qui ÉNUMÈRE les 10 positions
+  possibles des 2 succès au lieu d'invoquer $C_5^2$ ; l'exemple de l'action boursière ($n$=3,
+  $p$=0,6) où les `3 \times` viennent du nombre de chemins, plus $C_3^k$. La sous-section
+  « Dénombrement ordonné vs non ordonné » (exemple des 5 livres, $C_5^3$/$A_5^3$) a été SUPPRIMÉE
+  — elle n'a pas sa place ici, ce contenu appartient au chapitre « Analyse combinatoire », qui le
+  traite déjà. Conséquences en cascade, toutes voulues : le diagramme `orderedExpansion` disparaît
+  avec elle (le chapitre passe de 12 à **11 diagrammes** — ce n'est PAS un bug), et le kind
+  `orderedExpansion` lui-même, devenu orphelin (vérifié par grep : plus aucune référence dans le
+  dépôt), est retiré proprement de `types.ts`, de `Illustration.tsx` et de son fichier de
+  composant ; la ligne « Dénombrement » du tableau de synthèse est retirée, la ligne « Épreuves
+  répétées » devient « compter les chemins à $k$ succès dans l'arbre, $\times p^k(1-p)^{n-k}$ », et
+  le kicker de section suit. Même correction, plus petite, en section 2 : dans l'exemple
+  « 4 lettres, 4 enveloppes », le `$C_4^2$=6 façons` est remplacé par l'énumération explicite des
+  6 paires ({1;2}, {1;3}, {1;4}, {2;3}, {2;4}, {3;4}).
+  **Bug corrigé dans le composant PARTAGÉ `ExempleResolu`** (signalé par l'utilisateur sur ce
+  chapitre, mais site-wide) : un bloc `exemple` sans résultat final à encadrer dessinait quand
+  même le cadre, produisant un rectangle VIDE à bordure rouge en bas de l'exemple. Le cadre n'est
+  désormais rendu que s'il a réellement du contenu (`result.tag` ou `result.text` non vide).
+  **Attention à ne pas confondre** : `result.isEmpty` ne veut PAS dire « pas de résultat » — c'est
+  la teinte d'alerte d'un résultat qui vaut l'ENSEMBLE VIDE (`dom(f∘g) = ∅`, chapitre 5e
+  « Fonctions composées »), qui a bien un contenu et doit continuer à s'afficher. Supprimer le
+  cadre sur ce drapeau aurait donc effacé un vrai résultat ; c'est l'ABSENCE DE CONTENU, et non le
+  drapeau, qui supprime le cadre. Les 3 blocs de ce chapitre qui détournaient `isEmpty: true` avec
+  `tag`/`text` vides ont été remis à `{ tag: '', text: '' }`. Contrôle sur les 19 chapitres :
+  156 blocs `exemple`, 153 cadres rendus, **0 cadre vide**, les 3 seuls exemples désormais sans
+  cadre étant exactement les 3 blocs concernés de ce chapitre — et le cadre `is-empty` de
+  « Fonctions composées » toujours rendu avec son contenu.
 
 ## Vérification avant de pousser
 

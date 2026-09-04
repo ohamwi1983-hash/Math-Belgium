@@ -19,6 +19,7 @@ export const probabilites: ChapterContent = {
       title: 'Probabilités et ensembles',
       kicker: '0 ≤ P(A) ≤ 1 — équiprobabilité : favorables / possibles',
       blocks: [
+        { kind: 'video', title: 'Les probabilités' },
         {
           kind: 'definition',
           label: 'Définition — expérience aléatoire',
@@ -81,27 +82,26 @@ export const probabilites: ChapterContent = {
         {
           kind: 'illustration',
           illustration: {
-            kind: 'sequencePlot',
-            points: [
-              { n: 1, value: 1, label: '1' },
-              { n: 3, value: 0.33, label: '0,33' },
-              { n: 5, value: 0.6, label: '0,6' },
-              { n: 10, value: 0.5, label: '0,5' },
-              { n: 20, value: 0.45, label: '0,45' },
-              { n: 30, value: 0.53, label: '0,53' },
-              { n: 40, value: 0.48, label: '0,48' },
-              { n: 50, value: 0.5, label: '0,5' },
+            kind: 'frequencyStabilization',
+            frequencies: [
+              0.7, 0.55, 0.5, 0.575, 0.56, 0.567, 0.557, 0.55, 0.522, 0.49, 0.5, 0.508, 0.508,
+              0.493, 0.487, 0.469, 0.476, 0.472, 0.474, 0.485, 0.5, 0.5, 0.487, 0.496, 0.5, 0.504,
             ],
-            connector: 'straight',
-            referenceLine: { value: 0.5, label: '0,5' },
-            xAxisLabel: 'nombre de lancers',
-            yAxisLabel: 'fréquence cumulée de « pile »',
+            step: 10,
+            target: { value: 0.5, label: '0,5' },
+            yMin: 0.3,
+            yMax: 0.75,
+            xTicks: [50, 100, 150, 200, 250],
+            xAxisLabel: 'nombre de répétitions',
+            yAxisLabel: 'fréquence',
             caption:
-              'La fréquence cumulée de « pile » oscille de moins en moins et se stabilise près de 0,5.',
+              '26 élèves répètent chacun 10 fois « lancer une pièce » : la fréquence cumulée de ' +
+              '« pile » oscille de moins en moins et se stabilise près de 0,5.',
           },
         },
         {
           kind: 'astuce',
+          label: 'Les deux méthodes doivent converger',
           text:
             'Pour une pièce ou un dé bien équilibrés, la probabilité a priori (1/2, 1/6, …) et ' +
             'la probabilité expérimentale (mesurée en répétant l\'expérience) convergent vers ' +
@@ -110,12 +110,11 @@ export const probabilites: ChapterContent = {
         },
         { kind: 'subheading', text: 'Représenter A∪B et A∩B' },
         {
-          kind: 'illustration',
-          illustration: { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightUnion', caption: '« A ou B » = $A \\cup B$ : réalisé dès que l\'UN AU MOINS des deux se réalise.' },
-        },
-        {
-          kind: 'illustration',
-          illustration: { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightIntersection', caption: '« A et B » = $A \\cap B$ : réalisé seulement si les DEUX se réalisent en même temps.' },
+          kind: 'illustrationGroup',
+          items: [
+            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightUnion', compact: true, caption: '« A ou B » = $A \\cup B$ : réalisé dès que l\'UN AU MOINS des deux se réalise.' },
+            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightIntersection', compact: true, caption: '« A et B » = $A \\cap B$ : réalisé seulement si les DEUX se réalisent en même temps.' },
+          ],
         },
         {
           kind: 'illustration',
@@ -125,6 +124,7 @@ export const probabilites: ChapterContent = {
             labelB: 'B',
             mode: 'counts',
             counts: { aOnly: '12', both: '6', bOnly: '9', neither: '13' },
+            compact: true,
             caption: 'Groupe de 40 personnes, $n(A)$=18, $n(B)$=15, $n(A \\cap B)$=6 : les 4 régions se partagent les 40 personnes sans chevauchement.',
           },
         },
@@ -194,16 +194,17 @@ export const probabilites: ChapterContent = {
               '$n(A \\cap B)$=6, $n(\\bar{A} \\cap \\bar{B})$=40−27=13 — la somme des 4 cases, ' +
               '12+9+6+13=40, retombe bien sur le total. Le tableau à double entrée range ces 9 ' +
               'valeurs d\'un coup : 4 d\'entre elles viennent directement de l\'énoncé (6, 15, ' +
-              '18, 40), les 5 autres se déduisent par soustraction.',
+              '18, 40) et restent en noir, les 5 autres se déduisent par soustraction et sont ' +
+              'mises en évidence.',
           ],
         },
         {
           kind: 'featureTable',
           headers: ['', 'B', 'B̄', 'Total'],
           rows: [
-            ['A', '6', '12', '18'],
-            ['Ā', '9', '13', '22'],
-            ['Total', '15', '25', '40'],
+            ['A', '6', { text: '12', tone: 'good' }, '18'],
+            ['Ā', { text: '9', tone: 'good' }, { text: '13', tone: 'good' }, { text: '22', tone: 'good' }],
+            ['Total', '15', { text: '25', tone: 'good' }, '40'],
           ],
         },
         {
@@ -338,7 +339,7 @@ export const probabilites: ChapterContent = {
             { tag: 'avec remise', text: '$P(RR) = (5/8)^2 = 25/64$ (indépendance)' },
             { tag: 'sans remise', text: '$P(RR) = (5/8) \\times (4/7) = 5/14$ — au 2e tirage il ne reste que 7 boules, dont 4 rouges' },
           ],
-          result: { tag: '', text: '', isEmpty: true },
+          result: { tag: '', text: '' },
         },
         {
           kind: 'piege',
@@ -359,6 +360,7 @@ export const probabilites: ChapterContent = {
         },
         {
           kind: 'astuce',
+          label: 'Vérifier que les chemins couvrent tout',
           text:
             'La somme des probabilités de TOUS les chemins d\'un arbre vaut toujours 1 (sans ' +
             'remise : 20/56+15/56+15/56+6/56=1) — un excellent moyen de repérer une erreur de ' +
@@ -424,9 +426,16 @@ export const probabilites: ChapterContent = {
             { tag: 'total', text: '4!=24 répartitions possibles au total' },
             { tag: 'tout correct', text: 'une seule est ENTIÈREMENT correcte, donc $P$(tout correct)=1/24' },
             { tag: 'aucune correcte', text: '$P = D(4)/4! = 9/24 = 3/8$' },
-            { tag: 'exactement 2 correctes', text: 'on choisit lesquelles ($C(4,2)$=6 façons), puis les 2 restantes forment un dérangement complet ($D(2)$=1 façon) : $P=(6 \\times 1)/24=1/4$' },
+            {
+              tag: 'exactement 2 correctes',
+              text:
+                'on énumère les paires de lettres correctement placées — {1;2}, {1;3}, {1;4}, ' +
+                '{2;3}, {2;4}, {3;4}, soit 6 paires — puis les 2 lettres restantes doivent ' +
+                'former un dérangement complet entre elles ($D(2)$=1 façon) : ' +
+                '$P=(6 \\times 1)/24=1/4$',
+            },
           ],
-          result: { tag: '', text: '', isEmpty: true },
+          result: { tag: '', text: '' },
         },
         {
           kind: 'piege',
@@ -462,6 +471,19 @@ export const probabilites: ChapterContent = {
               'probabilités totales donne, pour tout événement $A$ : ' +
               '$P(A) = \\displaystyle\\sum_{i=1}^{n} P(A|B_i) \\times P(B_i)$.',
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'universePartition',
+            parts: ['B₁', 'B₂', 'B₃', 'B₄'],
+            universeLabel: 'Ω',
+            eventLabel: 'A',
+            formulaLabel: 'P(A) = P(A∩B₁) + P(A∩B₂) + P(A∩B₃) + P(A∩B₄)',
+            caption:
+              'Une partition $B_1,\\ldots,B_4$ de $\\Omega$ : l\'événement $A$ (ombré) traverse ' +
+              'les 4 morceaux sans les déborder — sa probabilité totale est la somme de ses 4 tranches.',
+          },
         },
         {
           kind: 'illustration',
@@ -536,6 +558,49 @@ export const probabilites: ChapterContent = {
             'rareté de la maladie ($P(malade)$=0,1, ici assez rare) et du taux de faux positifs.',
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'naturalFrequencies',
+            headline: 'P(malade|T⁺) = 90/270 = 1/3',
+            columns: [
+              {
+                title: 'malades',
+                titleTone: 'accent',
+                labelSide: 'right',
+                segments: [
+                  { label: 'T⁻ : 10', count: 10, tone: 'accentFaint' },
+                  { label: 'T⁺ : 90', count: 90, tone: 'accent' },
+                ],
+                footLabel: '100 malades',
+              },
+              {
+                title: 'non malades',
+                titleTone: 'good',
+                labelSide: 'right',
+                segments: [
+                  { label: 'T⁻ : 720', count: 720, tone: 'goodFaint' },
+                  { label: 'T⁺ : 180', count: 180, tone: 'good' },
+                ],
+                footLabel: '900 non malades',
+              },
+              {
+                title: '',
+                titleTone: 'accent',
+                labelSide: 'left',
+                segments: [
+                  { label: '180', count: 180, tone: 'good' },
+                  { label: '90', count: 90, tone: 'accent' },
+                ],
+                footLabel: '270 positifs',
+              },
+            ],
+            caption:
+              'Sur 1000 personnes : 100 malades dont 90 $T^+$, et 900 non malades dont 180 $T^+$ ' +
+              '— au total 270 $T^+$, dont seulement 90 sont réellement malades : 90/270=1/3, à ne ' +
+              'pas confondre avec 90/100=0,9.',
+          },
+        },
+        {
           kind: 'piege',
           text:
             'Une partition exige que les événements recouvrent TOUT l\'univers, pas seulement ' +
@@ -561,17 +626,18 @@ export const probabilites: ChapterContent = {
             'Une école propose piano et guitare ; elle compte 60 inscrits dont 38 filles, et ' +
             'chaque élève ne suit qu\'un seul instrument. Le professeur de guitare a 28 élèves, ' +
             'dont 15 garçons — le tableau à double entrée se remplit avec ces 4 valeurs ' +
-            'd\'énoncé (60, 38, 28, 15), les 5 autres cases se déduisant par soustraction.',
+            'd\'énoncé (60, 38, 28, 15), laissées en noir ; les 5 autres cases, mises en ' +
+            'évidence, se déduisent par soustraction.',
           steps: [],
-          result: { tag: '', text: '', isEmpty: true },
+          result: { tag: '', text: '' },
         },
         {
           kind: 'featureTable',
           headers: ['', 'Piano', 'Guitare', 'Total'],
           rows: [
-            ['Garçons', '7', '15', '22'],
-            ['Filles', '25', '13', '38'],
-            ['Total', '32', '28', '60'],
+            ['Garçons', { text: '7', tone: 'good' }, '15', { text: '22', tone: 'good' }],
+            ['Filles', { text: '25', tone: 'good' }, { text: '13', tone: 'good' }, '38'],
+            ['Total', { text: '32', tone: 'good' }, '28', '60'],
           ],
         },
         {
@@ -639,48 +705,108 @@ export const probabilites: ChapterContent = {
       id: 'probabilitesproblemes',
       number: 4,
       title: 'Probabilités : problèmes',
-      kicker: 'P(X=k) = C(n,k)×pᵏ×(1−p)ⁿ⁻ᵏ',
+      kicker: 'compter les chemins à k succès dans l’arbre, × pᵏ(1−p)ⁿ⁻ᵏ',
       blocks: [
         {
           kind: 'definition',
-          label: 'Épreuves répétées et indépendantes',
+          label: 'Épreuves répétées et indépendantes : toujours un arbre',
           items: [
-            'Pour $n$ répétitions INDÉPENDANTES d\'une même épreuve à deux issues (succès de ' +
-              'probabilité $p$, échec $1-p$), la probabilité d\'obtenir EXACTEMENT $k$ succès ' +
-              'est $P(X=k) = C(n,k) \\times p^k \\times (1-p)^{n-k}$. Le coefficient $C(n,k)$ ' +
-              'compte le nombre de façons de choisir QUELS $k$ essais réussissent parmi les $n$ ' +
-              '— sans lui, on ne compte qu\'un seul agencement particulier au lieu de tous.',
+            'Répéter $n$ fois la MÊME épreuve à deux issues (succès de probabilité $p$, échec ' +
+              '$1-p$), en remettant à chaque fois les conditions à l\'identique, c\'est ' +
+              'exactement l\'arbre de la section 2 — mais où les DEUX probabilités $p$ et $1-p$ ' +
+              'sont les MÊMES à chaque étage (indépendance : le résultat d\'un tir n\'affecte ' +
+              'jamais le suivant).',
+            'Sur un chemin donné, on multiplie les probabilités étage par étage comme toujours. ' +
+              'Mais puisque $p$ et $1-p$ sont identiques à chaque étage, DEUX chemins comptant ' +
+              'le MÊME NOMBRE de succès — peu importe à quels étages ils se produisent — ont ' +
+              'exactement la même probabilité. Pour trouver $P$(exactement $k$ succès), il ' +
+              'suffit donc de COMPTER combien de chemins de l\'arbre contiennent $k$ succès, ' +
+              'puis de multiplier ce nombre par la probabilité commune à chacun de ces chemins.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — arbre complet à 3 tirs, p=0,3',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Avec seulement 3 tirs, l\'arbre complet tient sur 8 chemins — on peut tous les ' +
+                'lister et les regrouper par nombre de succès (S) :',
+            },
+            {
+              kind: 'featureTable',
+              headers: [
+                'Nombre de succès',
+                'Chemins',
+                'Nombre de chemins',
+                'Probabilité de CHAQUE chemin',
+                'P(X=k)',
+              ],
+              rows: [
+                ['3', 'SSS', '1', '$0,3^3=0,027$', '$0,027$'],
+                ['2', 'SSÉ, SÉS, ÉSS', '3', '$0,3^2 \\times 0,7=0,063$', '$3 \\times 0,063=0,189$'],
+                ['1', 'SÉÉ, ÉSÉ, ÉÉS', '3', '$0,3 \\times 0,7^2=0,147$', '$3 \\times 0,147=0,441$'],
+                ['0', 'ÉÉÉ', '1', '$0,7^3=0,343$', '$0,343$'],
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                'Vérification : 0,027+0,189+0,441+0,343 = 1 EXACTEMENT — les 8 chemins couvrent ' +
+                'tous les cas possibles, disjoints deux à deux.',
+            },
           ],
         },
         {
           kind: 'illustration',
           illustration: {
-            kind: 'histogram',
+            kind: 'categoricalBarChart',
             bars: [
-              { from: 0, width: 1, height: 0.16807 },
-              { from: 1, width: 1, height: 0.36015 },
-              { from: 2, width: 1, height: 0.3087 },
-              { from: 3, width: 1, height: 0.1323 },
-              { from: 4, width: 1, height: 0.02835 },
-              { from: 5, width: 1, height: 0.00243 },
+              { label: '0', value: 0.16807, valueLabel: '0,168' },
+              { label: '1', value: 0.36015, valueLabel: '0,360' },
+              { label: '2', value: 0.3087, valueLabel: '0,309' },
+              { label: '3', value: 0.1323, valueLabel: '0,132' },
+              { label: '4', value: 0.02835, valueLabel: '0,028' },
+              { label: '5', value: 0.00243, valueLabel: '0,002' },
             ],
-            xAxisLabel: 'k',
+            maxValue: 0.4,
+            xAxisLabel: 'k (nombre de succès)',
             yAxisLabel: 'P(X=k)',
-            caption: 'Distribution de P(X=k) pour n=5 tirs, p=0,3 : les 6 barres (k=0 à 5) totalisent une probabilité de 1.',
+            caption:
+              'Distribution de $P(X=k)$ pour $n$=5 tirs, $p$=0,3 : les 6 barres (k=0 à 5) ' +
+              'totalisent une probabilité de 1.',
           },
         },
         {
           kind: 'exemple',
           badge: 'exemple résolu — tireur, n=5, p=0,3',
           formula: '',
-          steps: [],
-          result: { tag: 'résultat', text: '$P(X=2) = C(5,2) \\times 0,3^2 \\times 0,7^3 = 10 \\times 0,09 \\times 0,343 = 0,3087$' },
+          steps: [
+            {
+              tag: 'seule la POSITION des 2 succès compte',
+              text:
+                'Avec 5 tirs, lister les 32 chemins complets serait trop lourd — mais pour ' +
+                '$P(X=2)$, seule la POSITION des 2 succès parmi les 5 tirs compte (chaque ' +
+                'position donne un chemin de probabilité $0,3^2 \\times 0,7^3$, quelle que soit ' +
+                'la position exacte). On énumère ces positions :',
+            },
+            {
+              tag: 'énumération des positions',
+              text: '{1;2}, {1;3}, {1;4}, {1;5}, {2;3}, {2;4}, {2;5}, {3;4}, {3;5}, {4;5} — soit 10 positions distinctes.',
+            },
+          ],
+          result: {
+            tag: 'résultat',
+            text: '$P(X=2) = 10 \\times 0,3^2 \\times 0,7^3 = 10 \\times 0,09 \\times 0,343 = 0,3087$',
+          },
         },
         {
           kind: 'piege',
           text:
-            'Oublier $C(5,2)$=10 donne $0,3^2 \\times 0,7^3=0,03087$ — un résultat 10 fois trop ' +
-            'petit. Le coefficient binomial n\'est JAMAIS optionnel dès que $0<k<n$.',
+            'Oublier de COMPTER le nombre de positions (ici 10) et ne garder qu\'UNE seule ' +
+            'd\'entre elles donne $0,3^2 \\times 0,7^3=0,03087$ — un résultat 10 fois trop ' +
+            'petit. Le nombre de chemins n\'est JAMAIS optionnel dès que $0<k<n$.',
         },
         {
           kind: 'methode',
@@ -701,46 +827,49 @@ export const probabilites: ChapterContent = {
             'complément fonctionne pour tout $p$ entre 0 et 1, pas seulement $p$=0,5).',
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'complementBar',
+            headline: 'n=5, p=0,3 : P(au moins 1 succès) = 1 − P(X=0)',
+            parts: [
+              { fraction: 0.16807, label: 'P(X=0)=0,168', tone: 'faint' },
+              { fraction: 0.83193, label: 'P(au moins 1)=0,832', tone: 'accent' },
+            ],
+            footer: '0,168 + 0,832 = 1',
+            warning: '✗ 5×0,3 = 1,5 (impossible, >1)',
+            caption:
+              '0,168+0,832=1 EXACTEMENT : $P(X=0)$ et $P$(au moins 1) se partagent toute la ' +
+              'barre — additionner 5×0,3=1,5 dépasserait la barre elle-même.',
+          },
+        },
+        {
           kind: 'exemple',
           badge: 'exemple résolu — action boursière, n=3, p=0,6',
-          formula: '',
+          formula:
+            'Même principe que l\'arbre à 3 tirs ci-dessus, avec $p=0,6$ (H « hausse ») : ' +
+            '1 chemin HHH, 3 chemins à 2 hausses (HHB, HBH, BHH), 3 chemins à 1 hausse ' +
+            '(HBB, BHB, BBH), 1 chemin BBB.',
           steps: [
             { tag: 'P(X=0)', text: '$0,4^3=0,064$' },
-            { tag: 'P(X=1)', text: '$C(3,1) \\times 0,6 \\times 0,4^2=0,288$' },
-            { tag: 'P(X=2)', text: '$C(3,2) \\times 0,6^2 \\times 0,4=0,432$' },
+            { tag: 'P(X=1)', text: '$3 \\times 0,6 \\times 0,4^2=0,288$' },
+            { tag: 'P(X=2)', text: '$3 \\times 0,6^2 \\times 0,4=0,432$' },
             { tag: 'P(X=3)', text: '$0,6^3=0,216$' },
           ],
-          result: { tag: 'résultat', text: 'Somme : 0,064+0,288+0,432+0,216 = 1 (ces 4 valeurs couvrent tous les cas possibles, disjoints deux à deux).' },
-        },
-        { kind: 'subheading', text: 'Dénombrement ordonné vs non ordonné' },
-        {
-          kind: 'methode',
-          label: 'Méthode',
-          items: [
-            'Choisir $k$ éléments parmi $n$ SANS tenir compte de l\'ordre : $C(n,k)$ façons. EN ' +
-              'tenant compte de l\'ordre (1er choisi, 2e, …) : $A(n,k) = C(n,k) \\times k!$ ' +
-              'façons — chaque groupe non ordonné se décline en $k!$ ordres possibles.',
-          ],
-        },
-        {
-          kind: 'exemple',
-          badge: 'exemple résolu — choisir 3 livres parmi 5',
-          formula: '',
-          steps: [{ tag: 'non ordonné', text: '$C(5,3) = 5!/(3! \\times 2!) = 10$' }],
-          result: { tag: 'ordonné', text: '$A(5,3) = 5 \\times 4 \\times 3 = 60 = C(5,3) \\times 3! = 10 \\times 6$' },
-        },
-        {
-          kind: 'piege',
-          text:
-            'Multiplier $C(n,k)$ par $k$ (et non par $k!$) pour passer au dénombrement ordonné ' +
-            'est une erreur fréquente : ici 10×3=30, très loin des 60 façons réellement ' +
-            'ordonnées — c\'est bien $k!$=3!=6 qu\'il faut utiliser, pas $k$=3.',
+          result: {
+            tag: 'somme',
+            text:
+              'Leur somme, 0,064+0,288+0,432+0,216, vaut exactement 1 (ces 4 valeurs couvrent ' +
+              'tous les cas possibles, disjoints deux à deux).',
+          },
         },
         {
           kind: 'entrainement',
           title: 'Probabilités — problèmes',
           generatorId: '6gen33',
-          description: ['Épreuves répétées (loi binomiale), « au moins un », dénombrement ordonné et non ordonné.'],
+          description: [
+            'Épreuves répétées et indépendantes, comptage des chemins à k succès dans ' +
+              'l\'arbre, « au moins un » par le complément.',
+          ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 33. Probabilités — problèmes »',
         },
@@ -752,19 +881,21 @@ export const probabilites: ChapterContent = {
     table: {
       headers: ['Notion', 'Point clé'],
       rows: [
-        ['Probabilité', '0≤P(A)≤1 ; équiprobabilité : favorables/possibles'],
-        ['Union', 'P(A∪B)=P(A)+P(B)−P(A∩B)'],
-        ['Complémentaire', 'P(Ā∩B̄)=1−P(A∪B), jamais 1−P(A)−P(B)'],
-        ['Conditionnement', 'P(A|B)=P(A∩B)/P(B) ≠ P(B|A)'],
-        ['Indépendance', 'P(A∩B)=P(A)×P(B) — toujours vérifiée, jamais devinée'],
-        ['Incompatibilité', 'P(A∩B)=0 ⟹ jamais indépendant'],
-        ['Arbre pondéré', 'chemin → produit ; événement → somme'],
+        ['Probabilité', '$0 \\leq P(A) \\leq 1$ ; équiprobabilité : favorables/possibles'],
+        ['Union', '$P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$'],
+        ['Complémentaire', '$P(\\bar{A} \\cap \\bar{B})=1-P(A \\cup B)$, jamais $1-P(A)-P(B)$'],
+        ['Conditionnement', '$P(A|B)=P(A \\cap B)/P(B) \\neq P(B|A)$'],
+        ['Indépendance', '$P(A \\cap B)=P(A) \\times P(B)$ — toujours vérifiée, jamais devinée'],
+        ['Incompatibilité', '$P(A \\cap B)=0 \\Rightarrow$ jamais indépendant'],
+        ['Arbre pondéré', 'chemin → produit ; événement (plusieurs chemins) → somme'],
         ['Avec/sans remise', 'avec remise → indépendant ; sans remise → jamais'],
-        ['Dérangement', 'D(n) ≠ n! ; D(4)=9'],
-        ['Probabilités totales', 'P(A)=∑P(A|Bᵢ)×P(Bᵢ) sur une partition'],
-        ['Théorème de Bayes', 'P(A|B)=P(B|A)×P(A)/P(B)'],
-        ['Épreuves répétées', 'P(X=k)=C(n,k)pᵏ(1−p)ⁿ⁻ᵏ'],
-        ['Dénombrement', 'non ordonné C(n,k) ; ordonné A(n,k)=C(n,k)×k!'],
+        ['Dérangement', '$D(n) \\neq n!$ ; $D(4)$=9'],
+        ['Probabilités totales', '$P(A)=\\sum P(A|B_i) \\times P(B_i)$ sur une partition'],
+        ['Théorème de Bayes', '$P(A|B)=P(B|A) \\times P(A)/P(B)$'],
+        [
+          'Épreuves répétées',
+          'compter les chemins à $k$ succès dans l’arbre, $\\times p^k(1-p)^{n-k}$',
+        ],
       ],
     },
     entrainement: {

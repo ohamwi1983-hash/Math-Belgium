@@ -428,6 +428,10 @@ export type IllustrationSpec =
       labelB: string
       mode: 'plain' | 'highlightUnion' | 'highlightIntersection' | 'counts'
       counts?: { aOnly: string; bOnly: string; both: string; neither: string }
+      /** Cadre à moitié moins large que la largeur de colonne par défaut — pour un diagramme
+       * volontairement schématique (ex. "A∪B"/"A∩B" juste après leur définition), où la disposition
+       * fixe à 2 cercles n'a besoin d'aucun détail supplémentaire à grande taille. */
+      compact?: boolean
       caption: string
     }
   | {
@@ -572,6 +576,94 @@ export type IllustrationSpec =
       footer: string
       caption: string
     }
+  | {
+      /**
+       * Stabilisation d'une fréquence relative quand on répète l'expérience : une ligne brisée de
+       * relevés successifs qui oscille de moins en moins autour d'une valeur limite (tracée en
+       * pointillés). Distinct de `sequencePlot`, qui étiquette CHAQUE point et affiche son rang
+       * sous l'axe — illisible dès qu'il y a plusieurs dizaines de relevés, alors que c'est
+       * justement le grand nombre de répétitions qui EST le sujet ici. Distinct aussi de
+       * `curvePlot`, qui échantillonne une fonction : ces valeurs sont des relevés expérimentaux,
+       * pas les images d'une formule.
+       */
+      kind: 'frequencyStabilization'
+      /** Fréquences relevées, dans l'ordre ; le relevé d'indice i correspond à (i+1)×`step` répétitions. */
+      frequencies: number[]
+      /** Nombre de répétitions séparant deux relevés consécutifs. */
+      step: number
+      /** Valeur limite attendue (la probabilité a priori), en pointillés + étiquetée à droite. */
+      target: { value: number; label: string }
+      /** Fenêtre verticale fixe — les fréquences d'un petit échantillon sortiraient sinon du cadre
+       * utile et écraseraient la zone de stabilisation. */
+      yMin: number
+      yMax: number
+      /** Graduations affichées sous l'axe horizontal (nombres de répétitions). */
+      xTicks?: number[]
+      xAxisLabel: string
+      yAxisLabel: string
+      caption: string
+    }
+  | {
+      /**
+       * Partition de l'univers en n morceaux (bandes verticales d'un rectangle Ω) TRAVERSÉE par un
+       * événement transversal (ellipse ombrée) — la figure de la loi des probabilités totales.
+       * Distinct de `vennDiagram` (géométrie figée à 2 cercles qui se chevauchent, sans univers
+       * découpé) et de `groupPartition` (jetons répartis dans des boîtes, sans événement
+       * transversal).
+       */
+      kind: 'universePartition'
+      /** Étiquettes des morceaux, de gauche à droite (largeurs égales). */
+      parts: string[]
+      universeLabel: string
+      /** Nom de l'événement transversal, écrit au-dessus de l'ellipse. */
+      eventLabel: string
+      /** Légende centrée sous le cadre (ex. la décomposition de P(A) en somme de ses tranches). */
+      formulaLabel: string
+      caption: string
+    }
+  | {
+      /**
+       * Diagramme en fréquences naturelles : plusieurs colonnes de MÊME hauteur, chacune découpée
+       * de haut en bas en segments proportionnels À L'INTÉRIEUR de la colonne (chaque colonne est
+       * donc son propre 100 %), avec l'effectif de chaque segment en regard. Sert à opposer
+       * visuellement deux conditionnements inverses (P(B|A) contre P(A|B)). Distinct de
+       * `categoricalBarChart`, dont chaque barre porte UNE valeur sur une échelle commune, jamais
+       * un empilement de sous-effectifs.
+       */
+      kind: 'naturalFrequencies'
+      /** Titre centré au-dessus du diagramme (ex. le rapport que la figure fait voir). */
+      headline: string
+      columns: {
+        /** Titre au-dessus de la colonne — chaîne vide pour une colonne de recombinaison. */
+        title: string
+        titleTone: 'accent' | 'good'
+        /** Segments de haut en bas ; leurs hauteurs sont proportionnelles à `count` dans la colonne. */
+        segments: { label: string; count: number; tone: 'accent' | 'accentFaint' | 'good' | 'goodFaint' }[]
+        /** Côté où sont écrites les étiquettes des segments. */
+        labelSide: 'left' | 'right'
+        /** Légende sous la colonne (ex. "100 malades"). */
+        footLabel: string
+      }[]
+      caption: string
+    }
+  | {
+      /**
+       * Une barre unique de longueur 1 partagée en deux parts complémentaires (ex. P(X=0) et
+       * P(au moins 1)) — la figure du raisonnement par complément. Distinct de
+       * `categoricalBarChart`, qui dessinerait DEUX barres séparées comparées à une échelle : ici
+       * c'est le partage d'une seule et même barre qui porte le sens (leur somme vaut 1).
+       */
+      kind: 'complementBar'
+      /** Titre centré au-dessus de la barre. */
+      headline: string
+      /** Exactement deux parts ; `fraction` est la part de la barre totale (leur somme vaut 1). */
+      parts: { fraction: number; label: string; tone: 'accent' | 'faint' }[]
+      /** Ligne de synthèse sous la barre (ex. "0,168 + 0,832 = 1"). */
+      footer: string
+      /** Contre-exemple barré, en teinte d'alerte (ex. "✗ 5×0,3 = 1,5 (impossible, >1)"). */
+      warning?: string
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string
@@ -608,6 +700,16 @@ export type Block =
       badge?: string
       formula?: string
       steps: ExempleStep[]
+      /**
+       * Cadre de résultat final. Laisser `tag` ET `text` vides (`{ tag: '', text: '' }`) quand
+       * l'exemple n'a pas de résultat unique à encadrer (raisonnement qui se suffit de ses
+       * étapes, ou dont la conclusion est un tableau/diagramme placé juste après) : le cadre
+       * n'est alors pas rendu du tout.
+       *
+       * `isEmpty` NE veut PAS dire « pas de résultat » : c'est la teinte d'alerte d'un résultat
+       * qui vaut l'ENSEMBLE VIDE (ex. `dom(f∘g) = ∅`) — un résultat bien réel, qui doit
+       * s'afficher.
+       */
       result: { tag: string; text: string; isEmpty?: boolean }
       illustration?: IllustrationSpec
     }
