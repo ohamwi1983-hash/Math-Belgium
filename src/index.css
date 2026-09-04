@@ -28,7 +28,11 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* :not([data-theme="light"]) — sans cette garde, cette règle s'applique quel que soit
+     data-theme, ce qui rend `withLightTheme()` (captureBlocks.ts, utilisé pour forcer un export
+     PDF/Word/PPTX toujours en clair) totalement sans effet pour un visiteur dont l'OS est en mode
+     sombre : ses exports capturaient les fonds --surface sombres posés sur une page PDF blanche. */
+  :root:not([data-theme="light"]) {
     --paper: #10161d;
     --surface: #161f27;
     --surface-2: #1b252e;
