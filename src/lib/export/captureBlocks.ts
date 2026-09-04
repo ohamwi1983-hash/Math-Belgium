@@ -20,6 +20,29 @@ async function withLightTheme<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * html2canvas ne résout pas de façon fiable une largeur CSS en pourcentage sur un `<svg>` (confirmé
+ * sur `.chapter-geometrie-analytique-plane .diagram-frame svg { width: 60% }` : capturé à sa taille
+ * quasi complète, pas 60%). Fige la taille RENDUE (déjà correcte, lue sur la page en direct) en
+ * pixels explicites juste avant la capture, pour ne plus dépendre de la résolution CSS par
+ * html2canvas — restaure l'état d'origine juste après, quoi qu'il arrive.
+ */
+function pinSvgSizes(block: HTMLElement): () => void {
+  const svgs = Array.from(block.querySelectorAll('svg'))
+  const restores = svgs.map((svg) => {
+    const prevWidth = svg.style.width
+    const prevHeight = svg.style.height
+    const rect = svg.getBoundingClientRect()
+    svg.style.width = `${rect.width}px`
+    svg.style.height = `${rect.height}px`
+    return () => {
+      svg.style.width = prevWidth
+      svg.style.height = prevHeight
+    }
+  })
+  return () => restores.forEach((restore) => restore())
+}
+
 /** Capture chaque bloc DOM en une image JPEG, à sa taille naturelle (CSS px). */
 export async function captureBlocks(
   blocks: HTMLElement[],
@@ -31,13 +54,19 @@ export async function captureBlocks(
     const images: CapturedBlock[] = []
     for (let i = 0; i < blocks.length; i++) {
       onProgress({ done: i, total: blocks.length })
-      const canvas = await html2canvas(blocks[i], {
-        scale: RENDER_SCALE,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        windowWidth: CAPTURE_WINDOW_WIDTH,
-      })
+      const unpin = pinSvgSizes(blocks[i])
+      let canvas
+      try {
+        canvas = await html2canvas(blocks[i], {
+          scale: RENDER_SCALE,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          windowWidth: CAPTURE_WINDOW_WIDTH,
+        })
+      } finally {
+        unpin()
+      }
       images.push({
         dataUrl: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
         widthPx: canvas.width / RENDER_SCALE,
