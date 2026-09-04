@@ -6,7 +6,7 @@ export interface CapturedBlock {
   heightPx: number
 }
 
-export type ExportFormat = 'docx' | 'pdf' | 'pptx'
+export type ExportFormat = 'docx' | 'pdf' | 'pptx' | 'html'
 
 export interface ExportProgress {
   done: number

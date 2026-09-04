@@ -4,7 +4,7 @@ import { collectBlocks } from './collectBlocks'
 import { captureBlocks } from './captureBlocks'
 import { downloadBlob } from './downloadBlob'
 
-const EXTENSIONS: Record<ExportFormat, string> = { docx: 'docx', pdf: 'pdf', pptx: 'pptx' }
+const EXTENSIONS: Record<ExportFormat, string> = { docx: 'docx', pdf: 'pdf', pptx: 'pptx', html: 'html' }
 
 function filenameFor(chapter: ChapterContent, format: ExportFormat): string {
   return `chapitre-${chapter.chapterNumber}-${chapter.slug}.${EXTENSIONS[format]}`
@@ -16,6 +16,17 @@ export async function runExport(
   chapter: ChapterContent,
   onProgress: (progress: ExportProgress) => void,
 ): Promise<void> {
+  // HTML (A4) reste du vrai DOM (formules KaTeX sélectionnables, mise en page CSS normale) —
+  // jamais rasterisé via html2canvas, contrairement aux 3 autres formats : voir l'en-tête de
+  // `buildHtml.ts`. Ne passe donc jamais par `collectBlocks`/`captureBlocks`.
+  if (format === 'html') {
+    onProgress({ done: 0, total: 0 })
+    const { buildHtmlBlob } = await import('./buildHtml')
+    const blob = await buildHtmlBlob(chapter)
+    downloadBlob(blob, filenameFor(chapter, format))
+    return
+  }
+
   const blocks = collectBlocks()
   const images = await captureBlocks(blocks, onProgress)
 

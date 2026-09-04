@@ -7,9 +7,10 @@ const FORMATS: { format: ExportFormat; icon: string; label: string; sub: string 
   { format: 'docx', icon: '📄', label: 'Word', sub: '.docx — A4' },
   { format: 'pdf', icon: '🖨️', label: 'PDF', sub: '.pdf — A4' },
   { format: 'pptx', icon: '🖥️', label: 'PowerPoint', sub: '.pptx — diapositives' },
+  { format: 'html', icon: '🌐', label: 'HTML (A4)', sub: '.html — imprimable, hors ligne' },
 ]
 
-const FORMAT_LABEL: Record<ExportFormat, string> = { docx: 'Word', pdf: 'PDF', pptx: 'PowerPoint' }
+const FORMAT_LABEL: Record<ExportFormat, string> = { docx: 'Word', pdf: 'PDF', pptx: 'PowerPoint', html: 'HTML (A4)' }
 
 /** Section "Télécharger ce chapitre" — export Word/PDF/PowerPoint, en bas de chaque page de chapitre. */
 export function ExportSection({ chapter }: { chapter: ChapterContent }) {
