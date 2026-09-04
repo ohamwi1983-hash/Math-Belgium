@@ -325,7 +325,37 @@ export type IllustrationSpec =
       xMax: number
       yMin: number
       yMax: number
-      vectors?: { from: { x: number; y: number }; to: { x: number; y: number }; tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'; dashed?: boolean; tick?: boolean }[]
+      /** Masque les axes x/y — pour un schéma abstrait sans repère (ex. droite + vecteur
+       * directeur sans coordonnées données). Par défaut true — comportement historique du
+       * chapitre calcul vectoriel, où le plan a toujours des axes. */
+      showAxes?: boolean
+      /** Quadrillage entier (traits fins) sur tout le cadre [xMin,xMax]×[yMin,yMax] — pour un
+       * graphe où l'élève doit pouvoir lire des coordonnées entières directement sur les cases,
+       * plutôt que sur les seuls axes. Par défaut false (comportement historique). */
+      grid?: boolean
+      /** Cercle simple (pas de secteur ni d'angle marqué — voir `circleDiagram` pour ça), pour
+       * les diagrammes mêlant droites et cercles (intersection droite/cercle, équation d'un
+       * cercle depuis un graphe). Un seul cercle : les diagrammes de ce chapitre n'en ont jamais
+       * besoin de deux à la fois. */
+      circle?: { cx: number; cy: number; r: number; tone?: 'accent' | 'faint' }
+      /** Courbe(s) réelles tracées par échantillonnage, y = fn(x) — même mécanique que
+       * `curvePlot.curves`, pour une parabole d'axe vertical sur ce plan. */
+      curves?: { fn: (x: number) => number; tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'; xMin?: number; xMax?: number }[]
+      /** Symétrique de `curves` pour une courbe qui n'est pas le graphe d'une fonction de x — ex.
+       * une parabole d'axe HORIZONTAL, x = fn(y). Jamais les deux en même temps sur une courbe
+       * donnée : orientation réellement différente, pas juste un axe qui change de nom. */
+      curvesOfY?: { fn: (y: number) => number; tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'; yMin?: number; yMax?: number }[]
+      vectors?: {
+        from: { x: number; y: number }
+        to: { x: number; y: number }
+        tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'
+        dashed?: boolean
+        tick?: boolean
+        /** Segment plein SANS pointe de flèche — pour une droite entière tracée jusqu'aux bords
+         * du cadre (ce n'est plus "un vecteur" au sens géométrique, juste un trait). Par défaut
+         * true (comportement historique : tout vecteur non pointillé porte une flèche). */
+        arrow?: boolean
+      }[]
       points?: {
         x: number
         y: number
@@ -339,7 +369,7 @@ export type IllustrationSpec =
         labelPos?: 'above' | 'below' | 'left' | 'right'
         node?: boolean
       }[]
-      angleArcs?: { cx: number; cy: number; fromDeg: number; toDeg: number; radiusPx: number; label?: string; tone?: 'accent' | 'good' | 'bad' }[]
+      angleArcs?: { cx: number; cy: number; fromDeg: number; toDeg: number; radiusPx: number; label?: string; tone?: 'accent' | 'good' | 'bad' | 'attn' | 'tip' }[]
       /** Petit repère d'angle droit à un sommet, orienté librement selon les deux côtés qui le
        * forment (contrairement au marqueur axé-axes de `circleAngles`) — `arm1`/`arm2` sont deux
        * points quelconques (pas nécessairement unitaires) situés sur chacun des deux côtés. */

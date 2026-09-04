@@ -10,6 +10,7 @@ import { caracteristiquesFonctionsReference } from './chapters/4e/caracteristiqu
 import { statistiqueDescriptive } from './chapters/4e/statistique-descriptive'
 import { cercleTrigonometriqueTriangles } from './chapters/4e/cercle-trigonometrique-triangles'
 import { calculVectoriel } from './chapters/4e/calcul-vectoriel'
+import { geometrieAnalytiquePlane } from './chapters/4e/geometrie-analytique-plane'
 import { fonctionsReciproquesCyclometriques } from './chapters/6e-6h/fonctions-reciproques-cyclometriques'
 import { fonctionsExponentielles } from './chapters/6e-6h/fonctions-exponentielles'
 import { fonctionsLogarithmes } from './chapters/6e-6h/fonctions-logarithmes'
@@ -29,7 +30,7 @@ export interface LevelEntry {
  * Ajouter un chapitre = ajouter son fichier de données ici, jamais une nouvelle route codée à la main.
  */
 export const LEVELS: LevelEntry[] = [
-  { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference, statistiqueDescriptive, cercleTrigonometriqueTriangles, calculVectoriel] },
+  { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference, statistiqueDescriptive, cercleTrigonometriqueTriangles, calculVectoriel, geometrieAnalytiquePlane] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites, limitesAsymptotes, deriveesApplications] },
   { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes, primitivesIntegrales, nombresComplexes, probabilites, analyseCombinatoire] },
 ]

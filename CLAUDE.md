@@ -219,6 +219,38 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   la source n'ait que des liens minimalistes, et la petite illustration décorative d'en-tête de
   l'artifact a été omise — deux décisions éditoriales confirmées avant rédaction, pas des
   raccourcis pris silencieusement.
+- **4e, Chapitre 7 — Géométrie analytique plane** (`geometrie-analytique-plane`) : migré en
+  intégralité (10 sections, ~19 illustrations) depuis l'artifact d'origine, suite directe du
+  chapitre 6 (Calcul vectoriel) — le vecteur directeur d'une droite y revient au centre. Aucun
+  nouveau kind d'illustration : `vectorPlane` (déjà bâti pour le calcul vectoriel) a été étendu
+  plutôt que dupliqué, dans le même esprit que la généralisation de `curvePlot`/`circleDiagram` —
+  tous les nouveaux champs sont optionnels avec un comportement par défaut identique à l'existant
+  (vérifié par rendu SSR des 18 chapitres du dépôt, y compris tous les usages `vectorPlane` du
+  chapitre calcul vectoriel, aucune régression) :
+  - `showAxes?` (def. `true`) — masque les axes pour un schéma abstrait (droite + vecteur
+    directeur sans repère, mini-diagrammes "cas" côte à côte).
+  - `grid?` (def. `false`) — quadrillage entier, pour les diagrammes où l'élève doit lire des
+    coordonnées entières directement sur les cases (équivalent du `svg-grid` de l'artifact).
+  - `circle?` — cercle simple (centre/rayon/teinte), même conception que `complexPlane.circle`.
+  - `curves?`/`curvesOfY?` — courbe échantillonnée $y=fn(x)$ ou $x=fn(y)$ (même mécanique que
+    `curvePlot.curves`) ; `curvesOfY` est nécessaire pour la parabole d'axe horizontal, qui n'est
+    pas le graphe d'une fonction de x.
+  - vecteur `arrow?` (def. `true`) — segment plein sans pointe de flèche, pour une droite entière
+    tracée jusqu'aux bords du cadre (plus un vecteur borné).
+  - `angleArcs.tone` élargi à `'attn' | 'tip'` (déjà supportés par le rendu, seul le type les
+    excluait) — nécessaire pour l'arc orange de l'angle avec Ox (section pente/angle).
+
+  Deux corrections trouvées en inspectant les captures Playwright (pas visibles en relisant le
+  code seul) : dans la figure de construction de la parabole au compas, les labels verbeux "point
+  de la parabole"/"idem" débordaient du cadre 320×300 — raccourcis en `P₁`/`P₂`, la légende sous la
+  figure porte la description complète ; le label "directrice d" chevauchait la ligne pointillée de
+  la directrice dans la figure de définition — repositionné (`labelPos: 'below'`, cadre élargi).
+  Notation vectorielle traduite en KaTeX natif (`\vec{u}`, `\begin{pmatrix}…\end{pmatrix}`,
+  `\begin{cases}…\end{cases}` pour le système paramétrique) plutôt que les classes CSS maison de
+  l'artifact (`.vecnot`/`.vecmat`/`.eqsys`) — Math-Belgium n'a pas de notation maison, tout passe
+  par KaTeX. Une figure (distance point-droite, section 6) a été rendue à l'échelle réelle avec les
+  coordonnées exactes de l'exemple qui la suit (C(−7;7), H(1;1)) plutôt que des coordonnées
+  schématiques comme dans l'artifact — la figure est directement vérifiable, pas une approximation.
 
 - **6e (6h), Chapitre 7 — Analyse combinatoire** (`analyse-combinatoire`) : migré en intégralité
   depuis l'artifact d'origine (6 sections, 12 diagrammes, toutes les démonstrations, tous les

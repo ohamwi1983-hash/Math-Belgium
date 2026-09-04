@@ -32,19 +32,44 @@ const LABEL_OFFSET: Record<'above' | 'below' | 'left' | 'right', { dx: number; d
   right: { dx: 8, dy: 4, anchor: 'start' },
 }
 
+const SAMPLES = 60
+
 /**
  * Plan cartésien x/y — points, vecteurs (pleins ou pointillés, avec éventuelle marque de longueur
  * égale), arcs d'angle et marqueurs d'angle droit à orientation libre. Composant généraliste
  * réutilisé pour la quasi-totalité des diagrammes du chapitre sur le calcul vectoriel — même
- * conception que `complexPlane`, avec des axes x/y plutôt que Re/Im.
+ * conception que `complexPlane`, avec des axes x/y plutôt que Re/Im. Étendu pour le chapitre sur
+ * la géométrie analytique (droites, cercles, paraboles) : axes/quadrillage optionnels, cercle,
+ * courbes échantillonnées (`curves`/`curvesOfY`) et vecteurs sans pointe de flèche
+ * (`arrow: false`, pour une droite entière plutôt qu'un vecteur borné) — tous les nouveaux champs
+ * sont optionnels et n'affectent aucun rendu existant du chapitre calcul vectoriel.
  */
-export function VectorPlane({ xMin, xMax, yMin, yMax, vectors, points, angleArcs, rightAngleMarkers }: Props) {
+export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = false, circle, curves, curvesOfY, vectors, points, angleArcs, rightAngleMarkers }: Props) {
   const markerId = `vplane-${useId()}`
   const xScale = (x: number) => ((x - xMin) / (xMax - xMin)) * L
   const yScale = (y: number) => H - ((y - yMin) / (yMax - yMin)) * H
 
   const axisX0 = xScale(0)
   const axisY0 = yScale(0)
+
+  const pathForCurve = (c: { fn: (x: number) => number; xMin?: number; xMax?: number }) => {
+    const cMin = c.xMin ?? xMin
+    const cMax = c.xMax ?? xMax
+    const pts = Array.from({ length: SAMPLES + 1 }, (_, i) => {
+      const x = cMin + ((cMax - cMin) * i) / SAMPLES
+      return `${xScale(x).toFixed(2)},${yScale(c.fn(x)).toFixed(2)}`
+    })
+    return `M${pts.join(' L')}`
+  }
+  const pathForCurveOfY = (c: { fn: (y: number) => number; yMin?: number; yMax?: number }) => {
+    const cMin = c.yMin ?? yMin
+    const cMax = c.yMax ?? yMax
+    const pts = Array.from({ length: SAMPLES + 1 }, (_, i) => {
+      const y = cMin + ((cMax - cMin) * i) / SAMPLES
+      return `${xScale(c.fn(y)).toFixed(2)},${yScale(y).toFixed(2)}`
+    })
+    return `M${pts.join(' L')}`
+  }
 
   // Arc SVG entre deux angles en degrés (convention standard, sens direct = trigonométrique),
   // centré sur un point (cx,cy) donné en coordonnées données, avec un rayon fixe en pixels.
@@ -71,15 +96,44 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, vectors, points, angleArcs
         ))}
       </defs>
 
+      {grid && (
+        <g className="svg-grid" strokeWidth="1">
+          {Array.from({ length: Math.floor(xMax) - Math.ceil(xMin) + 1 }, (_, i) => Math.ceil(xMin) + i).map((gx) => (
+            <line key={`gx-${gx}`} x1={xScale(gx)} y1={0} x2={xScale(gx)} y2={H} />
+          ))}
+          {Array.from({ length: Math.floor(yMax) - Math.ceil(yMin) + 1 }, (_, i) => Math.ceil(yMin) + i).map((gy) => (
+            <line key={`gy-${gy}`} x1={0} y1={yScale(gy)} x2={L} y2={yScale(gy)} />
+          ))}
+        </g>
+      )}
+
+      {circle && (
+        <circle
+          cx={xScale(circle.cx)}
+          cy={yScale(circle.cy)}
+          r={((circle.r / (xMax - xMin)) * L + (circle.r / (yMax - yMin)) * H) / 2}
+          fill="none"
+          className={circle.tone === 'faint' ? 'svg-line' : 'svg-accent-outline'}
+          strokeWidth={circle.tone === 'faint' ? '1' : '1.8'}
+        />
+      )}
+
+      {curves?.map((c, i) => <path key={`curve-${i}`} d={pathForCurve(c)} style={{ fill: 'none' }} className={LINE_TONE_CLASS[c.tone]} strokeWidth="2.2" strokeLinejoin="round" />)}
+      {curvesOfY?.map((c, i) => <path key={`curveY-${i}`} d={pathForCurveOfY(c)} style={{ fill: 'none' }} className={LINE_TONE_CLASS[c.tone]} strokeWidth="2.2" strokeLinejoin="round" />)}
+
       {/* axes x / y, à travers l'origine si elle est dans le cadre */}
-      <line x1={0} y1={axisY0} x2={L} y2={axisY0} className="svg-line" strokeWidth="1.2" />
-      <line x1={axisX0} y1={H} x2={axisX0} y2={0} className="svg-line" strokeWidth="1.2" />
-      <text x={L - 6} y={axisY0 - 8} textAnchor="end" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
-        x
-      </text>
-      <text x={axisX0 + 8} y={12} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
-        y
-      </text>
+      {showAxes && (
+        <>
+          <line x1={0} y1={axisY0} x2={L} y2={axisY0} className="svg-line" strokeWidth="1.2" />
+          <line x1={axisX0} y1={H} x2={axisX0} y2={0} className="svg-line" strokeWidth="1.2" />
+          <text x={L - 6} y={axisY0 - 8} textAnchor="end" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+            x
+          </text>
+          <text x={axisX0 + 8} y={12} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+            y
+          </text>
+        </>
+      )}
 
       {vectors?.map((v, i) => {
         const x1 = xScale(v.from.x)
@@ -103,7 +157,7 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, vectors, points, angleArcs
               className={LINE_TONE_CLASS[v.tone]}
               strokeWidth="1.8"
               strokeDasharray={v.dashed ? '4 3' : undefined}
-              markerEnd={v.dashed ? undefined : `url(#${markerId}-${v.tone})`}
+              markerEnd={v.dashed || v.arrow === false ? undefined : `url(#${markerId}-${v.tone})`}
             />
             {v.tick && (
               <line x1={midX - perpX} y1={midY - perpY} x2={midX + perpX} y2={midY + perpY} className={LINE_TONE_CLASS[v.tone]} strokeWidth="1.8" />

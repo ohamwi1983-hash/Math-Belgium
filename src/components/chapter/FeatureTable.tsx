@@ -6,7 +6,7 @@ import { RichText } from '../Math'
 export function FeatureTable({ block }: { block: Extract<Block, { kind: 'featureTable' }> }) {
   return (
     <div className="table-scroll">
-      <table className="tableau">
+      <table className="tableau feature-table">
         {block.caption && <caption>{block.caption}</caption>}
         <thead>
           <tr>

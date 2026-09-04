@@ -310,6 +310,7 @@ figcaption {
 .svg-ink-faint { fill: var(--ink-faint); }
 .svg-line { stroke: var(--ink-soft); }
 .svg-faint { stroke: var(--line); }
+.svg-grid { stroke: var(--line-soft); }
 .svg-accent { stroke: var(--accent); fill: var(--accent); }
 .svg-accent-outline { stroke: var(--accent); fill: none; }
 .svg-good-outline { stroke: var(--good); fill: none; }
@@ -402,11 +403,12 @@ table.tableau td.signe-neg { color: var(--bad); font-weight: 600; }
 table.tableau td.zero-cell { color: var(--ink-faint); }
 table.tableau td.indef-cell { color: var(--bad); font-weight: 700; }
 table.tableau tr:last-child td { border-bottom: none; }
-/* Le récapitulatif final réutilise `.tableau` pour une table "Notion / Point clé" en prose (pas
-   des symboles alignés comme un tableau de signes) : le nowrap hérité forcerait un défilement
-   horizontal dès qu'une ligne mêle formule et texte un peu long — seule cette instance doit
-   pouvoir passer à la ligne. */
-.synthese table.tableau td { white-space: normal; }
+/* `FeatureTable` (colonnes nommées, souvent de la prose ou une description verbale — contrairement
+   à `SignTable`, qui aligne des symboles courts colonne par colonne et a besoin du nowrap hérité
+   ci-dessus) repasse en retour à la ligne normal : constaté à répétition (récapitulatifs finaux
+   ET tableaux de corps de section, dans plusieurs chapitres) que le nowrap force un défilement
+   horizontal dès qu'une cellule mêle formule et texte un peu long. */
+table.feature-table td { white-space: normal; }
 
 /* ---------- groupe d'illustrations compactes côte à côte ---------- */
 .diag-multi { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; margin: 26px 0; }
