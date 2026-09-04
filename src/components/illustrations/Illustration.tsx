@@ -26,6 +26,13 @@ import { VectorPlane } from './VectorPlane'
 import { VennDiagram } from './VennDiagram'
 import { WeightedTree } from './WeightedTree'
 import { OutcomeGrid } from './OutcomeGrid'
+import { PolygonDiagonals } from './PolygonDiagonals'
+import { CircularPermutation } from './CircularPermutation'
+import { GroupPartition } from './GroupPartition'
+import { LetterTiles } from './LetterTiles'
+import { PascalTriangle } from './PascalTriangle'
+import { CategoricalBarChart } from './CategoricalBarChart'
+import { SequenceOutcomes } from './SequenceOutcomes'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -87,6 +94,20 @@ function renderSvg(spec: IllustrationSpec) {
       return <WeightedTree {...spec} />
     case 'outcomeGrid':
       return <OutcomeGrid {...spec} />
+    case 'polygonDiagonals':
+      return <PolygonDiagonals {...spec} />
+    case 'circularPermutation':
+      return <CircularPermutation {...spec} />
+    case 'groupPartition':
+      return <GroupPartition {...spec} />
+    case 'letterTiles':
+      return <LetterTiles {...spec} />
+    case 'pascalTriangle':
+      return <PascalTriangle {...spec} />
+    case 'categoricalBarChart':
+      return <CategoricalBarChart {...spec} />
+    case 'sequenceOutcomes':
+      return <SequenceOutcomes {...spec} />
   }
 }
 

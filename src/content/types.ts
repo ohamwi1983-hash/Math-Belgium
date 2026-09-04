@@ -422,6 +422,126 @@ export type IllustrationSpec =
       highlighted: { x: number; y: number }[]
       caption: string
     }
+  | {
+      /**
+       * Polygone convexe régulier à `sides` sommets, avec TOUTES ses diagonales tracées (trait
+       * fin) en plus de ses côtés (trait plein). Distinct de `circleDiagram.inscribedPolygon`,
+       * qui ne dessine que les côtés du polygone inscrit : ici les diagonales SONT le sujet du
+       * diagramme (formule D(n)=n(n−3)/2), jamais un simple décor.
+       */
+      kind: 'polygonDiagonals'
+      sides: number
+      /** Étiquettes des sommets, dans le sens de parcours à partir du sommet du haut. Par défaut
+       * 1, 2, …, n. */
+      vertexLabels?: string[]
+      /** Légende centrée sous la figure (ex. "D(9) = 27 diagonales"). */
+      summaryLabel?: string
+      caption: string
+    }
+  | {
+      /**
+       * Permutation circulaire de `n` objets distincts disposés en cercle. `mode` distingue deux
+       * géométries réellement différentes, pas une simple couleur : 'rotation' dessine l'arc de
+       * rotation (cas de la table, où seules les rotations sont équivalentes) ; 'reflection'
+       * dessine l'axe de symétrie (cas du collier, où les réflexions le sont aussi).
+       */
+      kind: 'circularPermutation'
+      n: number
+      mode: 'rotation' | 'reflection'
+      /** Étiquette de la symétrie représentée ; par défaut "rotation ≡" / "réflexion". */
+      symmetryLabel?: string
+      caption: string
+    }
+  | {
+      /**
+       * Répartition multinomiale : un pool de jetons en haut, réparti dans des boîtes NOMMÉES de
+       * tailles fixées (largeur de boîte proportionnelle à sa taille). Sert aussi bien aux
+       * "personnes en groupes" qu'aux "objets en boîtes numérotées" — la même formule
+       * n!/(n₁!…n_k!) dans les deux lectures.
+       */
+      kind: 'groupPartition'
+      /** Légende du pool, au-dessus de la rangée de jetons (ex. "10 personnes"). */
+      poolLabel: string
+      groups: { size: number; tone: 'accent' | 'good' | 'faint' }[]
+      /** Légende centrée sous les boîtes (ex. "10!/(5!×3!×2!) = 2520 répartitions"). */
+      formulaLabel: string
+      caption: string
+    }
+  | {
+      /**
+       * Rangée de tuiles-lettres colorées par identité de lettre, avec sa légende des effectifs —
+       * pour une permutation avec répétitions (anagrammes). Les lettres identiques partagent
+       * exactement la même tuile, ce qui rend visible la division par les factorielles des
+       * effectifs répétés.
+       */
+      kind: 'letterTiles'
+      letters: string[]
+      /** Une entrée par lettre DISTINCTE : son effectif et sa teinte de tuile. 'outline' = tuile
+       * évidée (contour seul), pour distinguer une 4e lettre sans introduire de couleur de plus. */
+      legend: { letter: string; count: number; tone: 'accent' | 'good' | 'ink' | 'outline' }[]
+      caption: string
+    }
+  | {
+      /**
+       * Triangle de Pascal, lignes n=0 à n=rowCount−1 — les coefficients sont CALCULÉS par le
+       * composant, jamais saisis à la main (aucun risque de faute de frappe dans le triangle).
+       * `pascalRelation` met en évidence un coefficient et ses deux parents, reliés par les deux
+       * traits de la relation C(n,k)=C(n−1,k−1)+C(n−1,k).
+       */
+      kind: 'pascalTriangle'
+      rowCount: number
+      pascalRelation?: { row: number; index: number }
+      caption: string
+    }
+  | {
+      /**
+       * Diagramme en barres à catégories NOMMÉES (étiquettes textuelles, pas des classes
+       * numériques) — distinct de `histogram`, dont les barres sont positionnées par `from`/
+       * `width` sur un axe numérique et qui ne sait ni mettre une barre en évidence, ni afficher
+       * la valeur au bout de chaque barre. Couvre en un seul kind les comparaisons à 2 catégories,
+       * les distributions discrètes indexées par k, et les comparaisons à échelle logarithmique
+       * (`scale: 'log'`, où les valeurs s'étalent sur plusieurs ordres de grandeur).
+       */
+      kind: 'categoricalBarChart'
+      orientation?: 'vertical' | 'horizontal'
+      scale?: 'linear' | 'log'
+      bars: { label: string; value: number; valueLabel?: string; tone?: 'accent' | 'good' | 'faint' }[]
+      /** Plafond d'échelle explicite — sinon la plus grande valeur. Permet de garder une marge
+       * au-dessus de la plus haute barre (et de comparer deux graphes à la même échelle). */
+      maxValue?: number
+      /** Échelle log seulement : exposant de la borne basse (une barre de valeur 10^logMin a une
+       * longueur nulle). Par défaut 2. */
+      logMin?: number
+      xAxisLabel?: string
+      yAxisLabel?: string
+      /** Mention centrée sous le graphe (ex. "échelle logarithmique"). */
+      footnote?: string
+      /** Colore la valeur affichée au bout de chaque barre dans la teinte de la barre, au lieu du
+       * gris neutre par défaut — réservé aux graphes où la comparaison des 2 valeurs EST le
+       * sujet (ex. Chevalier de Méré), pas aux distributions où la couleur marque déjà une région. */
+      colorValueLabels?: boolean
+      caption: string
+    }
+  | {
+      /**
+       * Plusieurs séquences d'issues tracées côte à côte, une par ligne, chacune avec la
+       * probabilité de chaque étape et la probabilité du chemin complet — plus une accolade
+       * regroupant les lignes équiprobables. Distinct de `weightedTree` : les séquences sont
+       * déjà DÉPLIÉES (une ligne = un chemin complet), ce qu'un arbre à 2 niveaux ne peut pas
+       * représenter pour 3 tirages.
+       */
+      kind: 'sequenceOutcomes'
+      rows: {
+        label: string
+        steps: { label: string; prob: string; tone: 'accent' | 'good' }[]
+        resultLabel: string
+      }[]
+      /** Texte de l'accolade regroupant les lignes, une entrée par ligne de texte. */
+      bracketLabel: string[]
+      /** Conclusion centrée sous le diagramme. */
+      footer: string
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string

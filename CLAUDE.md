@@ -129,6 +129,28 @@ chapitre récapitule plusieurs fonctions/objets comparables plutôt qu'une liste
     `mode` distingue une géométrie de projection réellement différente (horizontale sur l'axe y
     pour sin, verticale sur l'axe x pour cos, sur la tangente géométrique verticale pour tan) —
     pas juste une couleur qui change.
+  - `polygonDiagonals` — polygone régulier avec TOUTES ses diagonales tracées (les diagonales sont
+    énumérées par le composant, jamais saisies). Distinct de `circleDiagram.inscribedPolygon`, qui
+    ne dessine que les côtés.
+  - `circularPermutation` — `n` objets en cercle + la symétrie qui les identifie : `mode:
+    'rotation'` (arc, cas de la table) ou `'reflection'` (axe, cas du collier) — deux géométries
+    réellement différentes, pas une couleur qui change.
+  - `groupPartition` — pool de jetons réparti dans des boîtes nommées de tailles fixées (largeur de
+    boîte proportionnelle à la taille) : répartition multinomiale, personnes en groupes ou objets
+    en boîtes numérotées.
+  - `letterTiles` — rangée de tuiles-lettres colorées par identité + légende des effectifs
+    (permutation avec répétitions / anagrammes).
+  - `pascalTriangle` — triangle de Pascal, coefficients CALCULÉS par le composant ; `pascalRelation`
+    met en évidence un coefficient et ses deux parents, reliés par les traits de la relation.
+  - `categoricalBarChart` — barres à catégories NOMMÉES (étiquettes textuelles), verticales ou
+    horizontales, échelle linéaire ou logarithmique, une teinte par barre et la valeur affichée au
+    bout. Distinct de `histogram`, dont les barres sont positionnées par `from`/`width` sur un axe
+    numérique et qui ne sait ni mettre une barre en évidence ni étiqueter les valeurs — un seul kind
+    couvre ainsi la comparaison à 2 catégories, les distributions indexées par k, et la comparaison
+    log sur 3 ordres de grandeur.
+  - `sequenceOutcomes` — plusieurs séquences d'issues DÉPLIÉES (une ligne = un chemin complet, avec
+    la probabilité de chaque tirage et celle du chemin), plus l'accolade regroupant les lignes
+    équiprobables. Ce qu'un `weightedTree` (2 niveaux) ne peut pas représenter pour 3 tirages.
 
 Toutes les illustrations utilisent les classes CSS `svg-ink` / `svg-line` / `svg-accent` /
 `svg-good` / `svg-bad` / `svg-faint` définies dans `src/index.css`, qui pointent vers les variables
@@ -197,6 +219,32 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   la source n'ait que des liens minimalistes, et la petite illustration décorative d'en-tête de
   l'artifact a été omise — deux décisions éditoriales confirmées avant rédaction, pas des
   raccourcis pris silencieusement.
+
+- **6e (6h), Chapitre 7 — Analyse combinatoire** (`analyse-combinatoire`) : migré en intégralité
+  depuis l'artifact d'origine (6 sections, 12 diagrammes, toutes les démonstrations, tous les
+  tableaux). A nécessité **7 nouveaux kinds d'illustration** (aucun kind existant ne convenait) :
+  `polygonDiagonals`, `circularPermutation`, `groupPartition`, `letterTiles`, `pascalTriangle`,
+  `categoricalBarChart` (un seul kind pour 5 des 12 diagrammes : Chevalier de Méré, somme des
+  lignes de Pascal, mains de poker en échelle log, distributions hypergéométrique et binomiale) et
+  `sequenceOutcomes`. `histogram` a été écarté pour les deux distributions : ses barres sont
+  positionnées sur un axe numérique et il ne sait ni mettre une barre en évidence ni afficher la
+  valeur au bout — or la mise en évidence porte ici du sens (« la région au moins 4 »), elle n'est
+  pas décorative. Extension additive de `categoricalBarChart` : `colorValueLabels`, pour ne colorer
+  la valeur que là où la source le fait. Écarts assumés : la palette suit les jetons de thème du
+  site (accent orange / good vert) au lieu du bleu+orange de l'artifact ; les justifications des
+  démonstrations, colonne monospace alignée à droite dans la source, deviennent une clause en gras
+  en fin de phrase (`exempleLibre` + `para`) ; les kickers de section et la petite figure
+  décorative d'en-tête sont, comme pour les chapitres précédents, respectivement ajoutés et omis ;
+  le chapitre est numéroté 7 (rang réel dans `chaptersIndex`) alors que l'artifact s'annonce
+  « Chapitre 9 ». Vérifié par rendu navigateur réel (Playwright sur le build de production) :
+  chaque diagramme capturé et comparé un à un à la figure correspondante de l'artifact, les 17
+  autres chapitres re-rendus sans régression (aucun `$...$` non résolu, aucun `NaN`/`undefined`,
+  aucune erreur KaTeX ni JS).
+  **Piège confirmé en pratique** : seuls `text`/`items`/`formula`/`caption` passent par `RichText`.
+  Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section et en-têtes de
+  `featureTable` sont rendus en texte BRUT — y écrire `$...$` affiche les dollars littéralement (66
+  occurrences dans le premier jet de ce chapitre, détectées seulement au rendu navigateur, pas par
+  `tsc`). Y mettre des caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
 
 ## Vérification avant de pousser
 

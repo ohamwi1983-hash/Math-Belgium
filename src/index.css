@@ -402,6 +402,11 @@ table.tableau td.signe-neg { color: var(--bad); font-weight: 600; }
 table.tableau td.zero-cell { color: var(--ink-faint); }
 table.tableau td.indef-cell { color: var(--bad); font-weight: 700; }
 table.tableau tr:last-child td { border-bottom: none; }
+/* Le récapitulatif final réutilise `.tableau` pour une table "Notion / Point clé" en prose (pas
+   des symboles alignés comme un tableau de signes) : le nowrap hérité forcerait un défilement
+   horizontal dès qu'une ligne mêle formule et texte un peu long — seule cette instance doit
+   pouvoir passer à la ligne. */
+.synthese table.tableau td { white-space: normal; }
 
 /* ---------- groupe d'illustrations compactes côte à côte ---------- */
 .diag-multi { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; margin: 26px 0; }
