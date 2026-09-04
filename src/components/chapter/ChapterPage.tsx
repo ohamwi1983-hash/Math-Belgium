@@ -10,7 +10,7 @@ import { ExportSection } from './ExportSection'
  */
 export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
   return (
-    <div className="page">
+    <div className={`page chapter-${chapter.slug}`}>
       <header className="chapter-head">
         <p className="eyebrow">
           {chapter.level} — Chapitre {chapter.chapterNumber}
