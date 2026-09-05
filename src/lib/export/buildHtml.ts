@@ -93,10 +93,10 @@ async function inlinerPolices(css: string): Promise<string> {
  * `counter(pages)`, CSS Paged Media) — confirmé empiriquement fonctionner sous Chromium (testé via
  * Playwright, `page.pdf()`, texte extrait page par page). Support inégal hors Chromium/Edge (ex.
  * Firefox l'ignore silencieusement à ce jour) : dégradation gracieuse, la page s'imprime
- * normalement, seule la numérotation manque — jamais bloquant. `var(--mono)`/`var(--ink-faint)` ne
- * sont pas garantis résolus dans une boîte de marge `@page` par tous les moteurs, donc valeurs en
- * dur ici plutôt que les tokens du reste du fichier (mêmes valeurs que `--mono`/`--ink-faint`
- * définis plus haut dans le CSS copié). */
+ * normalement, seule la numérotation manque — jamais bloquant. `var(--mono)`/`var(--ink)` ne sont
+ * pas garantis résolus dans une boîte de marge `@page` par tous les moteurs, donc valeurs en dur
+ * ici plutôt que les tokens du reste du fichier (même noir que `--ink`, défini plus haut dans le
+ * CSS copié — pas de gris `--ink-faint`, demande explicite). */
 const STYLE_IMPRESSION = `
 @page {
   size: A4;
@@ -105,7 +105,7 @@ const STYLE_IMPRESSION = `
     content: counter(page) " / " counter(pages);
     font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
     font-size: 9.5pt;
-    color: #8a97a1;
+    color: #182430;
   }
 }
 @media print {
