@@ -25,7 +25,13 @@ const ECHELLE_DIAGRAMMES_EXPORT = 60
 async function withDiagrammesReduitsAExport<T>(chapter: ChapterContent, fn: () => Promise<T>): Promise<T> {
   if (chapter.slug !== CHAPITRE_DIAGRAMMES_REDUITS_A_EXPORT) return fn()
   const style = document.createElement('style')
-  style.textContent = `.diagram-frame svg { width: ${ECHELLE_DIAGRAMMES_EXPORT}% !important; margin: 0 auto !important; }`
+  // Exclut les mini-diagrammes d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur
+  // propre colonne de grille, un second rétrécissement à 60% de cette largeur les rend illisibles
+  // (labels A/B/θ/m) — même exclusion que l'ancienne règle CSS permanente que ce mécanisme remplace.
+  style.textContent = `
+    .diagram-frame svg { width: ${ECHELLE_DIAGRAMMES_EXPORT}% !important; margin: 0 auto !important; }
+    .diag-multi .diagram-frame svg { width: 100% !important; margin: 0 !important; }
+  `
   document.head.appendChild(style)
   try {
     return await fn()
