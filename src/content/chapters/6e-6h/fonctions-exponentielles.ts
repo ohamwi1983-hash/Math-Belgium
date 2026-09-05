@@ -44,7 +44,68 @@ export const fonctionsExponentielles: ChapterContent = {
                 "semaine, ce n'est pas une quantité fixe qui s'ajoute, mais un **facteur** " +
                 "constant (ici ×2) qui s'applique. C'est une croissance **exponentielle**.",
             },
+            {
+              kind: 'para',
+              text:
+                "Rien n'oblige à s'arrêter aux semaines entières. Le facteur multiplicatif " +
+                "quotidien $k$ doit lui aussi être constant, et sept jours doivent redonner le " +
+                "facteur hebdomadaire : $k^7 = 2$, donc $k = \\sqrt[7]{2} = 2^{1/7}$. Après " +
+                "3 jours, la surface est donc multipliée par $\\left(2^{1/7}\\right)^3 = 2^{3/7}$, " +
+                "et après 7 jours par $\\left(2^{1/7}\\right)^7 = 2$ — bien le facteur d'une " +
+                "semaine, comme il se doit.",
+            },
+            {
+              kind: 'para',
+              text:
+                "En généralisant, pour une durée de $\\dfrac{n}{p}$ semaines la surface est " +
+                "multipliée par $2^{n/p}$, et pour une durée de $\\dfrac{n}{p}$ semaines " +
+                "**avant** l'instant initial il faut au contraire **diviser** par $2^{n/p}$, " +
+                "c'est-à-dire multiplier par $2^{-n/p}$. Pour tout $t$ **rationnel**, positif ou " +
+                "négatif, on obtient donc la même écriture : $f(t) = S_0 \\cdot 2^t$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "Toutes les définitions de puissance vues les années précédentes (exposant " +
+                "entier, fractionnaire, positif, négatif), si disparates qu'elles paraissent, " +
+                "expriment ici une seule et même réalité. Reste à franchir un dernier pas : " +
+                "donner un sens à $2^t$ pour $t$ **irrationnel** — c'est exactement l'objet de " +
+                "la définition qui suit.",
+            },
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (t) => 1.2 * t + 3, tone: 'faint' },
+              { fn: (t) => Math.pow(2, t), tone: 'accent' },
+            ],
+            xMin: -0.6,
+            xMax: 3.5,
+            xTicks: [1, 2, 3],
+            fixedYRange: { min: -1, max: 10 },
+            textLabels: [
+              { x: 3.45, y: 2.4, text: 'S₀·2^t : ×2 par semaine', tone: 'accent', anchor: 'end' },
+              { x: 0.2, y: 6.1, text: '1,2t+3 : +1,2 par semaine', tone: 'faint', anchor: 'start' },
+            ],
+            points: [
+              { x: 0, y: 1, label: 'S₀', tone: 'accent' },
+              { x: 1, y: 2, label: '2S₀', tone: 'accent' },
+              { x: 2, y: 4, label: '4S₀', tone: 'accent' },
+              { x: 3, y: 8, label: '8S₀', tone: 'accent' },
+            ],
+            xAxisLabel: 't',
+            yAxisLabel: 'S',
+            caption:
+              'Les deux modèles sur les mêmes axes. En fané, le modèle linéaire : à chaque pas ' +
+              'de temps on AJOUTE toujours la même quantité (+1,2), et le graphique est une ' +
+              'droite. En accent, le modèle exponentiel : à chaque pas on MULTIPLIE par le même ' +
+              'facteur (×2), et les valeurs S₀, 2S₀, 4S₀, 8S₀ se succèdent. Le modèle linéaire ' +
+              "part pourtant plus haut — l'exponentiel ne le rattrape que vers t ≈ 2,6, puis ne " +
+              'se laisse plus jamais rejoindre.',
+          },
         },
         {
           kind: 'definition',
@@ -65,7 +126,16 @@ export const fonctionsExponentielles: ChapterContent = {
           items: [
             "Pour $a, b \\in \\mathbb{R}_0^+$ et $r, s \\in \\mathbb{R}$, exactement les mêmes " +
               'règles qu\'avec des exposants entiers ou rationnels restent valables :',
-            "$a^r \\cdot a^s = a^{r+s} \\qquad \\dfrac{a^r}{a^s} = a^{r-s} \\qquad (ab)^r = a^r b^r \\qquad (a^r)^s = a^{rs}$",
+            "**(1)** $a^r \\cdot a^s = a^{r+s} \\qquad$ **(2)** $\\dfrac{a^r}{a^s} = a^{r-s}$",
+            "**(3)** $(a \\cdot b)^r = a^r \\cdot b^r \\qquad$ **(4)** $(a^r)^s = a^{r \\cdot s}$",
+            "Ces quatre règles sont l'**extension** aux exposants réels de règles déjà connues " +
+              "pour les exposants rationnels ; elles sont admises sans démonstration à ce stade " +
+              "(une preuve complète relève de l'analyse réelle). Elles seront citées par leur " +
+              'numéro, (1) à (4), dans toutes les démonstrations du chapitre.',
+            "Attention à la condition sur les bases : si $a$ ou $b$ n'est pas strictement " +
+              "positif, ces égalités peuvent encore être vraies pour certaines valeurs de $r$ " +
+              "et $s$, mais plus pour toutes — et la règle (2) n'est **jamais** valable si " +
+              '$a = 0$, faute de pouvoir diviser par $0^s = 0$.',
           ],
         },
         {
@@ -226,6 +296,8 @@ export const fonctionsExponentielles: ChapterContent = {
             "$(a^x)' = \\ln(a) \\cdot a^x$",
             "Cas particulier essentiel : $\\ln(e) = 1$, donc $(e^x)' = e^x$ — $e^x$ est sa " +
               'propre dérivée.',
+            "Ces deux formules ne sont pas à admettre : elles sont **démontrées** en fin de " +
+              "section, à partir de la seule définition du nombre dérivé.",
           ],
         },
         {
@@ -245,6 +317,36 @@ export const fonctionsExponentielles: ChapterContent = {
                 "$g(x) = e^{3x-1} \\implies$ règle de la chaîne, $u=3x-1$, $u'=3$ : " +
                 "$g'(x) = 3e^{3x-1}$.",
             },
+            {
+              kind: 'para',
+              text:
+                "$k(x) = 3^{x^4-x}$ : base $\\ne e$ **et** exposant composé, les deux facteurs " +
+                'apparaissent donc. Avec $u(x) = x^4-x$ :',
+            },
+            {
+              kind: 'para',
+              text:
+                "$k'(x) = u'(x) \\cdot 3^{u(x)} \\cdot \\ln(3) = \\left(4x^3-1\\right) \\cdot " +
+                '3^{x^4-x} \\cdot \\ln(3)$',
+            },
+            {
+              kind: 'para',
+              text:
+                "$m(x) = e^{\\sin(x)}$ : base $e$, donc pas de facteur $\\ln$, mais la chaîne " +
+                "reste : $m'(x) = \\left(\\sin x\\right)' \\cdot e^{\\sin x} = \\cos(x) \\cdot " +
+                'e^{\\sin x}$.',
+            },
+          ],
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Les quatre formules de dérivation, en notations fonctionnelles et en pratique',
+          headers: ['Notation fonctionnelle', 'En pratique', 'Exemple'],
+          rows: [
+            ["expₐ′ = ln(a)·expₐ", "(aˣ)′ = aˣ·ln(a)", "(3ˣ)′ = 3ˣ·ln(3)"],
+            ["(expₐ ∘ f)′ = ln(a)·f′·(expₐ ∘ f)", "(a^f(x))′ = f′(x)·a^f(x)·ln(a)", "(3^(x⁴−x))′ = (4x³−1)·3^(x⁴−x)·ln(3)"],
+            ["exp′ = exp", "(eˣ)′ = eˣ", "(eˣ)′ = eˣ"],
+            ["(exp ∘ f)′ = f′·(exp ∘ f)", "(e^f(x))′ = f′(x)·e^f(x)", "(e^sin x)′ = cos(x)·e^sin x"],
           ],
         },
         { kind: 'subheading', text: "Composer une exponentielle peut restreindre le domaine" },
@@ -271,30 +373,88 @@ export const fonctionsExponentielles: ChapterContent = {
         { kind: 'subheading', text: "Pour aller plus loin — d'où vient le facteur ln(a) ?" },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration',
+          label: "Démonstration — la dérivée de aˣ est un multiple de aˣ",
           blocks: [
-            { kind: 'para', text: "Pour $f(x) = a^x$, le taux d'accroissement se factorise :" },
             {
               kind: 'para',
               text:
-                "$\\dfrac{f(x+h) - f(x)}{h} = \\dfrac{a^{x+h} - a^x}{h} = a^x \\cdot \\dfrac{a^h - a^0}{h}$",
+                "Soit $a \\in \\mathbb{R}_0^+$ et soit $f : \\mathbb{R} \\to \\mathbb{R} : " +
+                "x \\mapsto a^x$. Rien n'est supposé connu sur la dérivée de $f$ : on repart de " +
+                "la **définition** du nombre dérivé, comme limite du taux d'accroissement.",
             },
             {
               kind: 'para',
               text:
-                "$a^x$ ne dépend pas de $h$ : il sort de la limite quand $h \\to 0$ :",
+                "**Étape 1.** On écrit le taux d'accroissement de $f$ entre $x$ et $x+h$, " +
+                'directement à partir de la définition :',
+            },
+            {
+              kind: 'para',
+              text: "$\\dfrac{f(x+h) - f(x)}{h} = \\dfrac{a^{x+h} - a^x}{h}$",
             },
             {
               kind: 'para',
               text:
-                "$\\displaystyle\\lim_{h \\to 0} \\dfrac{f(x+h)-f(x)}{h} = a^x \\cdot \\displaystyle\\lim_{h \\to 0} \\dfrac{a^h - a^0}{h} = a^x \\cdot f'(0)$",
+                "**Étape 2.** Le numérateur se factorise. Par la règle **(1)**, " +
+                "$a^{x+h} = a^x \\cdot a^h$ : les deux termes du numérateur ont donc $a^x$ en " +
+                'facteur commun.',
             },
             {
               kind: 'para',
               text:
-                "Donc $f'(x) = f'(0) \\cdot a^x$ — **la dérivée est un multiple de la fonction " +
-                "elle-même**, à condition qu'elle soit dérivable en 0 (théorème admis).",
+                "$= \\dfrac{a^x \\cdot a^h - a^x}{h} = \\dfrac{a^x \\left(a^h - 1\\right)}{h}$",
             },
+            {
+              kind: 'para',
+              text:
+                "**Étape 3.** On réécrit le $1$ sous la forme $a^0$ — c'est la même valeur, mais " +
+                "cette écriture fait apparaître un taux d'accroissement de $f$ **entre 0 et** " +
+                '$0+h$ :',
+            },
+            {
+              kind: 'para',
+              text:
+                "$= a^x \\cdot \\dfrac{a^h - a^0}{h} = a^x \\cdot \\dfrac{f(0+h) - f(0)}{h}$",
+            },
+            {
+              kind: 'para',
+              text:
+                "**Étape 4.** On passe à la limite quand $h \\to 0$. Le facteur $a^x$ ne dépend " +
+                "**pas** de $h$ : c'est une constante vis-à-vis de cette limite, elle sort donc " +
+                'devant.',
+            },
+            {
+              kind: 'para',
+              text:
+                "$f'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(x+h)-f(x)}{h} = a^x \\cdot " +
+                "\\displaystyle\\lim_{h \\to 0} \\dfrac{f(0+h) - f(0)}{h}$",
+            },
+            {
+              kind: 'para',
+              text:
+                "**Étape 5.** La limite qui reste est, mot pour mot, la définition du nombre " +
+                "dérivé de $f$ **en 0**. Elle vaut donc $f'(0)$ — à condition qu'elle existe, " +
+                "c'est-à-dire que $f$ soit dérivable en 0. C'est précisément ce qu'affirme le " +
+                'théorème admis ci-dessous.',
+            },
+            { kind: 'para', text: "$f'(x) = f'(0) \\cdot a^x \\qquad \\blacksquare$" },
+            {
+              kind: 'para',
+              text:
+                "Conclusion remarquable : **la dérivée d'une exponentielle est un multiple " +
+                "d'elle-même**, et le coefficient de proportionnalité — le même pour tout $x$ — " +
+                "est simplement la pente de la courbe au point $(0\\,;1)$. Il ne dépend que de " +
+                'la base $a$. Reste à lui donner un nom : ce sera $\\ln(a)$.',
+            },
+          ],
+        },
+        {
+          kind: 'definition',
+          label: 'Théorème admis — dérivabilité en 0',
+          items: [
+            "Pour tout $a \\in \\mathbb{R}_0^+$, la fonction $f : \\mathbb{R} \\to \\mathbb{R} : " +
+              "x \\mapsto a^x$ est dérivable en 0. Ce théorème est admis sans démonstration ; " +
+              "c'est lui qui rend légitime l'étape 5 ci-dessus.",
           ],
         },
         {
@@ -302,19 +462,151 @@ export const fonctionsExponentielles: ChapterContent = {
           label: 'Définition — logarithme népérien',
           items: [
             "On appelle **logarithme népérien** de $a$, noté $\\ln(a)$, le nombre dérivé en 0 " +
-              "de $a^x$ — exactement le facteur qui apparaît ci-dessus. Ainsi $(a^x)' = \\ln(a) " +
-              "\\cdot a^x$ n'est pas une coïncidence : c'est la **définition même** de ln.",
+              "de la fonction $x \\mapsto a^x$. Autrement dit, $\\ln(a)$ n'est **rien d'autre " +
+              "qu'un nom donné au nombre** $f'(0)$ apparu ci-dessus.",
+            "En reportant cette définition dans le résultat de la démonstration, " +
+              "$f'(x) = f'(0) \\cdot a^x$, on obtient immédiatement la formule annoncée en tête " +
+              'de section :',
+            "$\\forall x \\in \\mathbb{R} : (a^x)' = \\ln(a) \\cdot a^x$",
+            "Le facteur $\\ln(a)$ n'est donc pas une coïncidence ni une constante tombée du " +
+              'ciel : il **est** la pente de la courbe en $(0\\,;1)$, par définition même.',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => Math.pow(2, x), tone: 'good' },
+              { fn: Math.exp, tone: 'accent', xMax: 1.42 },
+              { fn: (x) => 1 + Math.LN2 * x, tone: 'faint' },
+              { fn: (x) => 1 + x, tone: 'faint' },
+            ],
+            xMin: -1.5,
+            xMax: 1.6,
+            xTicks: [-1, 1],
+            fixedYRange: { min: -0.6, max: 4.2 },
+            textLabels: [
+              { x: -1.45, y: 4.0, text: 'y=e^x', tone: 'accent', anchor: 'start' },
+              { x: -1.45, y: 3.45, text: 'y=2^x', tone: 'good', anchor: 'start' },
+              { x: -1.45, y: 2.9, text: 'tangente à e^x : pente 1', tone: 'faint', anchor: 'start' },
+              { x: -1.45, y: 2.35, text: 'tangente à 2^x : pente ln(2)≈0,69', tone: 'faint', anchor: 'start' },
+            ],
+            points: [{ x: 0, y: 1, label: '(0;1)', tone: 'accent', labelPos: 'right' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              "Toutes les exponentielles passent par (0;1), mais elles n'y arrivent pas avec la " +
+              'même pente. Les deux droites grises sont les tangentes en ce point : la plus ' +
+              "pentue est celle de e^x, de pente exactement 1 ; l'autre est celle de 2^x, de " +
+              "pente ln(2) ≈ 0,69. C'est cette pente — et rien d'autre — que l'on appelle " +
+              'ln(a) ; la base e est celle, et la seule, pour laquelle elle vaut 1.',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Démonstration — pourquoi exp est sa propre dérivée",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "Le **nombre d'Euler** $e$ est défini par $e = \\displaystyle\\lim_{x \\to " +
+                "+\\infty} \\left(1+\\dfrac{1}{x}\\right)^x \\approx 2{,}71828\\ldots$ " +
+                "(l'existence de cette limite est admise). La fonction exponentielle de base " +
+                "$e$ est appelée **fonction exponentielle népérienne** et se note $\\exp$ " +
+                'plutôt que $\\exp_e$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "On admet également le résultat $\\ln(e) = 1$ : par construction, $e$ est " +
+                "exactement la base dont la courbe a une pente de 1 en $(0\\,;1)$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "Il n'y a alors plus rien à démontrer, seulement une substitution à faire. La " +
+                "formule $(a^x)' = \\ln(a) \\cdot a^x$, appliquée au cas particulier $a = e$, " +
+                'donne pour tout $x$ réel :',
+            },
+            {
+              kind: 'para',
+              text: "$\\exp'(x) = \\ln(e) \\cdot \\exp(x) = 1 \\cdot \\exp(x) = \\exp(x)$",
+            },
+            {
+              kind: 'para',
+              text:
+                "Soit, en notation usuelle, $(e^x)' = e^x$. $\\qquad \\blacksquare$ La seule " +
+                "chose qui rend $e$ spéciale est donc que **son** facteur $\\ln$ vaut 1 : toutes " +
+                "les autres bases traînent un facteur multiplicatif à chaque dérivation.",
+            },
           ],
         },
         {
           kind: 'astuce',
-          label: "💡 Le nombre d'Euler",
+          label: "💡 Retenir les décimales de e",
           text:
-            "Le nombre $e$ se définit par $e = \\displaystyle\\lim_{x \\to +\\infty} (1+1/x)^x \\approx " +
-            "2{,}71828\\ldots$ — et c'est justement l'unique base pour laquelle $\\ln(e)=1$, ce " +
-            "qui explique pourquoi $(e^x)' = e^x$ sans aucun facteur. Moyen mnémotechnique pour " +
-            'les décimales : « Je renonce à calculer la suivante » — le nombre de lettres de ' +
-            'chaque mot donne 2, 7, 1, 8, 2, 8.',
+            "Moyen mnémotechnique : « Je renonce à calculer la suivante » — le nombre de " +
+            'lettres de chaque mot donne 2, 7, 1, 8, 2, 8. La phrase rappelle au passage que ' +
+            "2,71828 n'est qu'une valeur approchée par défaut de $e$ (à moins de " +
+            '$2 \\cdot 10^{-6}$ près).',
+        },
+        {
+          kind: 'para',
+          text:
+            "Une conséquence directe de la formule : puisque $a^x > 0$ pour tout $x$, le signe " +
+            "de $(a^x)' = \\ln(a) \\cdot a^x$ est exactement celui de $\\ln(a)$. Or " +
+            "$\\ln(a) < 0$ si $0 < a < 1$, $\\ln(1) = 0$, et $\\ln(a) > 0$ si $a > 1$. Le calcul " +
+            'de dérivée **redémontre** donc, sans aucun graphique, la monotonie observée à la ' +
+            'section 1 : décroissante en dessous de 1, croissante au-dessus.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            compact: true,
+            curves: [
+              { fn: (x) => Math.pow(2, x), tone: 'accent' },
+              { fn: (x) => Math.LN2 * Math.pow(2, x), tone: 'good' },
+            ],
+            xMin: -2.2,
+            xMax: 2.2,
+            xTicks: [-2, -1, 1, 2],
+            fixedYRange: { min: -0.6, max: 5 },
+            textLabels: [
+              { x: -2.15, y: 4.6, text: 'y=2^x', tone: 'accent', anchor: 'start' },
+              { x: -2.15, y: 3.95, text: 'y=ln(2)·2^x', tone: 'good', anchor: 'start' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Base a=2 > 1 : ln(2) ≈ 0,69 est positif mais inférieur à 1, donc la dérivée ' +
+              '(en vert) reste positive — la fonction croît — tout en passant sous la courbe.',
+          },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            compact: true,
+            curves: [
+              { fn: (x) => Math.pow(0.5, x), tone: 'accent' },
+              { fn: (x) => Math.log(0.5) * Math.pow(0.5, x), tone: 'good' },
+            ],
+            xMin: -2.2,
+            xMax: 2.2,
+            xTicks: [-2, -1, 1, 2],
+            fixedYRange: { min: -3.5, max: 5 },
+            textLabels: [
+              { x: 2.15, y: 4.6, text: 'y=0,5^x', tone: 'accent', anchor: 'end' },
+              { x: 2.15, y: 3.9, text: 'y=ln(0,5)·0,5^x', tone: 'good', anchor: 'end' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Base a=0,5 < 1 : ln(0,5) ≈ −0,69 est négatif, donc la dérivée (en vert) est ' +
+              "entièrement sous l'axe — la fonction décroît partout.",
+          },
         },
         {
           kind: 'entrainement',
@@ -413,14 +705,105 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         {
           kind: 'definition',
-          label: "Principe d'équivalence",
+          label: "Principe d'équivalence — égalité de deux images par une exponentielle",
           items: [
             "$\\forall a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}, \\forall x,y \\in \\mathbb{R} : " +
               '\\quad a^x = a^y \\iff x = y$',
-            "Ce principe découle de la stricte monotonie de $\\exp_a$ (croissante ou " +
-              "décroissante, jamais horizontale) : une fonction strictement monotone ne prend " +
-              'jamais deux fois la même valeur.',
           ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Démonstration — principe d'équivalence",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "Soient $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $x,y \\in \\mathbb{R}$. " +
+                "Il s'agit d'une **équivalence** : les deux implications se démontrent " +
+                'séparément.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**1) Sens** $\\implies$ — de $a^x = a^y$ vers $x = y$. C'est le sens utile en " +
+                'pratique, celui qui autorise à « supprimer les deux bases » dans une équation.',
+            },
+            {
+              kind: 'para',
+              text:
+                "La section 1 a établi que $\\exp_a$ est **strictement monotone** : strictement " +
+                "croissante si $a > 1$, strictement décroissante si $0 < a < 1$ — et l'exclusion " +
+                'de $a = 1$ garantit que ce sont bien les deux seuls cas possibles.',
+            },
+            {
+              kind: 'para',
+              text:
+                "Or une fonction strictement monotone ne prend **jamais deux fois la même " +
+                "valeur**. En effet, prenons deux réels **distincts** $x$ et $y$ ; quitte à " +
+                'échanger leurs noms, on peut supposer $x < y$. Alors :',
+            },
+            {
+              kind: 'list',
+              items: [
+                "si $a > 1$, la stricte croissance donne $a^x < a^y$ ;",
+                'si $0 < a < 1$, la stricte décroissance donne $a^x > a^y$.',
+              ],
+            },
+            {
+              kind: 'para',
+              text:
+                "Dans les deux cas $a^x \\neq a^y$. Deux réels distincts ne peuvent donc pas " +
+                "avoir la même image par $\\exp_a$ : c'est exactement dire que $\\exp_a$ est " +
+                '**injective**.',
+            },
+            {
+              kind: 'para',
+              text:
+                "On vient de démontrer la **contraposée** de ce qui est demandé : " +
+                "$x \\neq y \\implies a^x \\neq a^y$. Une implication et sa contraposée étant " +
+                'équivalentes, on a bien $a^x = a^y \\implies x = y$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**2) Sens** $\\impliedby$ — de $x = y$ vers $a^x = a^y$. Évident : $\\exp_a$ " +
+                "est une **fonction**, elle associe une seule image à chaque antécédent ; deux " +
+                'écritures du même nombre ont donc la même image. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                "La condition $a \\neq 1$ est **indispensable**, et uniquement pour le sens " +
+                "$\\implies$. Avec $a = 1$ en effet, $1^x = 1^y = 1$ pour tous $x$ et $y$ : " +
+                "l'égalité des images est toujours vraie et n'apprend absolument rien sur les " +
+                'exposants.',
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => Math.pow(2, x), tone: 'accent' }],
+            xMin: -1,
+            xMax: 4.2,
+            xTicks: [1, 2, 3, 4],
+            fixedYRange: { min: -1, max: 11 },
+            axisOfSymmetry: { x: 3, label: 'x=3' },
+            testLine: { y: 8, points: [{ x: 3 }] },
+            textLabels: [
+              { x: -0.9, y: 8.5, text: 'y=8', tone: 'faint', anchor: 'start' },
+              { x: 2.3, y: 9.6, text: 'y=2^x', tone: 'accent', anchor: 'end' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              "Lecture graphique de l'injectivité. Résoudre 2^x = 8, c'est chercher les " +
+              'abscisses où la courbe rencontre la droite horizontale y = 8. Comme 2^x est ' +
+              "strictement croissante, elle ne peut couper cette droite qu'une seule fois : il " +
+              "y a donc au plus une solution — et comme 8 = 2³, c'est x = 3. Toute horizontale " +
+              'y = k avec k > 0 donnerait de même exactement un point.',
+          },
         },
         {
           kind: 'exemple',
@@ -516,28 +899,225 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         {
           kind: 'definition',
-          label: 'Table complète des 4 comparateurs',
-          items: ["Les quatre cas possibles, base supérieure ou inférieure à 1 :"],
+          label: "Principes d'équivalence — inégalité de deux images par une exponentielle",
+          items: [
+            "Les huit cas se rangent en deux colonnes selon la position de $a$ par rapport à 1. " +
+              'Pour tous $x, y \\in \\mathbb{R}$ :',
+            "**Si** $0 < a < 1$ **(le sens s'inverse) :** **(a)** $a^x < a^y \\iff x > y$ ; " +
+              '**(b)** $a^x \\le a^y \\iff x \\ge y$ ; **(c)** $a^x > a^y \\iff x < y$ ; ' +
+              '**(d)** $a^x \\ge a^y \\iff x \\le y$.',
+            "**Si** $a > 1$ **(le sens est conservé) :** **(e)** $a^x < a^y \\iff x < y$ ; " +
+              '**(f)** $a^x \\le a^y \\iff x \\le y$ ; **(g)** $a^x > a^y \\iff x > y$ ; ' +
+              '**(h)** $a^x \\ge a^y \\iff x \\ge y$.',
+          ],
         },
         {
           kind: 'featureTable',
           headers: ['', '0 < a < 1', 'a > 1'],
           rows: [
-            ['aˣ < aʸ', 'x > y', 'x < y'],
-            ['aˣ ≤ aʸ', 'x ≥ y', 'x ≤ y'],
-            ['aˣ > aʸ', 'x < y', 'x > y'],
-            ['aˣ ≥ aʸ', 'x ≤ y', 'x ≥ y'],
+            ['aˣ < aʸ', 'x > y  (a)', 'x < y  (e)'],
+            ['aˣ ≤ aʸ', 'x ≥ y  (b)', 'x ≤ y  (f)'],
+            ['aˣ > aʸ', 'x < y  (c)', 'x > y  (g)'],
+            ['aˣ ≥ aʸ', 'x ≤ y  (d)', 'x ≥ y  (h)'],
           ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Démonstration — cas 0 < a < 1 (le sens s'inverse)",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "Soient $0 < a < 1$ et $x, y \\in \\mathbb{R}$. Il suffit de démontrer " +
+                "**entièrement** le cas **(a)**, $a^x < a^y \\iff x > y$ : les trois autres " +
+                "s'en déduisent ensuite sans nouveau raisonnement. Les deux sens de " +
+                "l'équivalence se traitent séparément, et par des méthodes différentes.",
+            },
+            {
+              kind: 'para',
+              text:
+                "**(a), sens** $\\impliedby$ — de $x > y$ vers $a^x < a^y$. Immédiat : puisque " +
+                "$0 < a < 1$, la fonction $\\exp_a$ est strictement **décroissante** " +
+                '(section 1). Appliquée aux deux membres de $x > y$, elle en **inverse** le ' +
+                "sens, ce qui donne directement $a^x < a^y$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "**(a), sens** $\\implies$ — de $a^x < a^y$ vers $x > y$. Ce sens-ci ne se " +
+                "traite pas en appliquant une fonction aux deux membres : on raisonne **par " +
+                "l'absurde**.",
+            },
+            {
+              kind: 'para',
+              text:
+                "Supposons donc $a^x < a^y$ (hypothèse), et supposons **en outre**, en vue " +
+                "d'une contradiction, que $x \\le y$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "Puisque $0 < a < 1$, la fonction $\\exp_a$ est strictement décroissante. " +
+                "Appliquée à $x \\le y$, elle inverse le sens de cette inégalité large et " +
+                'donnerait :',
+            },
+            { kind: 'para', text: '$a^x \\ge a^y$' },
+            {
+              kind: 'para',
+              text:
+                "Ce qui **contredit** l'hypothèse $a^x < a^y$ : un même nombre ne peut pas être " +
+                "à la fois strictement inférieur et supérieur ou égal à un autre. L'hypothèse " +
+                "supplémentaire $x \\le y$ est donc impossible. Comme $x$ et $y$ sont deux " +
+                'réels, la seule possibilité restante est $x > y$. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                "**(b) découle de (a) et du principe d'équivalence de la section 4.** " +
+                "L'inégalité large $a^x \\le a^y$ signifie « $a^x < a^y$ **ou** " +
+                "$a^x = a^y$ ». Le premier cas équivaut à $x > y$ par (a) ; le second équivaut " +
+                "à $x = y$ par le principe d'équivalence de la section 4. La réunion des deux " +
+                'conclusions est exactement « $x > y$ ou $x = y$ », soit $x \\ge y$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**(c) est équivalent à (a)**, lu en échangeant les noms des deux variables. " +
+                "Écrire $a^x > a^y$, c'est écrire $a^y < a^x$ : (a) appliqué au couple " +
+                '$(y\\,;x)$ donne $y > x$, c\'est-à-dire $x < y$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**(d) est équivalent à (b)**, par le même échange de $x$ et $y$ : " +
+                "$a^x \\ge a^y$ s'écrit $a^y \\le a^x$, et (b) appliqué au couple $(y\\,;x)$ " +
+                'donne $y \\ge x$, soit $x \\le y$.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — cas a > 1 (le sens est conservé)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "Soient $a > 1$ et $x, y \\in \\mathbb{R}$. La structure est **rigoureusement " +
+                "la même** que dans la colonne précédente : seul le sens de variation de " +
+                "$\\exp_a$ change, et avec lui le sens de toutes les inégalités obtenues. On " +
+                'démontre le cas **(e)**, $a^x < a^y \\iff x < y$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**(e), sens** $\\impliedby$ — de $x < y$ vers $a^x < a^y$. Immédiat : puisque " +
+                "$a > 1$, la fonction $\\exp_a$ est strictement **croissante** (section 1). " +
+                'Appliquée aux deux membres de $x < y$, elle en **conserve** le sens.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**(e), sens** $\\implies$ — de $a^x < a^y$ vers $x < y$, de nouveau **par " +
+                "l'absurde**. Supposons $a^x < a^y$ (hypothèse), et supposons en outre " +
+                '$x \\ge y$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "Puisque $a > 1$, la fonction $\\exp_a$ est strictement croissante : appliquée " +
+                'à $x \\ge y$, elle conserve le sens et donnerait :',
+            },
+            { kind: 'para', text: '$a^x \\ge a^y$' },
+            {
+              kind: 'para',
+              text:
+                "Ce qui contredit l'hypothèse $a^x < a^y$. L'hypothèse supplémentaire " +
+                '$x \\ge y$ est donc impossible, et il reste $x < y$. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                "**(f) découle de (e) et du principe d'équivalence de la section 4** — " +
+                "$a^x \\le a^y$ se décompose en « $<$ ou $=$ », traités respectivement par (e) " +
+                "et par la section 4, ce qui donne « $x < y$ ou $x = y$ », soit $x \\le y$. " +
+                "**(g) est équivalent à (e)** et **(h) est équivalent à (f)**, par le même " +
+                'échange des rôles de $x$ et $y$ que dans la colonne de gauche.',
+            },
+            {
+              kind: 'para',
+              text:
+                "Le cas $a = e$ relève toujours de cette colonne, puisque " +
+                "$e \\approx 2{,}718 > 1$ : une inéquation en $e^{\\ldots}$ conserve donc " +
+                'toujours son comparateur.',
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => Math.pow(2, x), tone: 'accent' },
+              { fn: (x) => Math.pow(0.5, x), tone: 'bad' },
+            ],
+            xMin: -3.4,
+            xMax: 3.4,
+            xTicks: [-2, 2],
+            fixedYRange: { min: -1, max: 9 },
+            testLine: { y: 4, points: [{ x: 2 }, { x: -2 }] },
+            textLabels: [
+              { x: -3.3, y: 5.4, text: '0,5^x', tone: 'bad', anchor: 'start' },
+              { x: -3.3, y: 4.4, text: 'y=4', tone: 'faint', anchor: 'start' },
+              { x: 3.3, y: 5.4, text: '2^x', tone: 'accent', anchor: 'end' },
+              { x: 2.05, y: 3.3, text: 'x=2', tone: 'accent', anchor: 'start' },
+              { x: -2.05, y: 3.3, text: 'x=−2', tone: 'bad', anchor: 'end' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Une même comparaison à la constante 4, dans deux bases. 2^x (base 2 > 1) est ' +
+              'croissante : elle dépasse 4 à DROITE de son point de rencontre, donc ' +
+              '2^x ≥ 4 ⟺ x ≥ 2. 0,5^x (base 0,5 < 1) est décroissante : elle dépasse 4 à ' +
+              'GAUCHE du sien, donc 0,5^x ≥ 4 ⟺ x ≤ −2. Le comparateur écrit est le même — ' +
+              "l'ensemble-solution part du côté opposé.",
+          },
         },
         {
           kind: 'exemple',
           badge: 'base entre 0 et 1, exposant du second degré',
           formula: '$0{,}315^{x^2} < 0{,}315^{2x+3}$',
           steps: [
-            { tag: 'base < 1 : on inverse', text: '$x^2 > 2x+3 \\implies x^2-2x-3>0$' },
-            { tag: 'racines', text: '$3$ et $-1$' },
+            {
+              tag: 'identifier la base',
+              text: '$a = 0{,}315$, donc $0 < a < 1$ : on est dans le cas (a) du principe ci-dessus',
+            },
+            { tag: 'appliquer (a) : le sens s\'inverse', text: '$x^2 > 2x+3$' },
+            { tag: 'tout ramener dans un membre', text: '$x^2-2x-3 > 0$' },
+            {
+              tag: 'résoudre le second degré',
+              text: '$\\Delta = 4+12 = 16$, donc $x = \\dfrac{2 \\pm 4}{2}$ : racines $3$ et $-1$',
+            },
+            {
+              tag: 'signe du trinôme',
+              text:
+                'coefficient de $x^2$ positif : le trinôme est $> 0$ à **l\'extérieur** des racines',
+            },
           ],
           result: { tag: 'résultat', text: '$S = ]-\\infty\\,;\\,-1[ \\cup ]3\\,;\\,+\\infty[$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'base e > 1 : le sens est conservé',
+          formula: '$e^{4t-2} < e^{6t-5}$',
+          steps: [
+            {
+              tag: 'identifier la base',
+              text: '$a = e \\approx 2{,}718 > 1$ : cas (e) du principe, le comparateur est conservé',
+            },
+            { tag: 'appliquer (e)', text: '$4t-2 < 6t-5$' },
+            { tag: 'regrouper', text: '$-2+5 < 6t-4t \\implies 3 < 2t$' },
+          ],
+          result: { tag: 'résultat', text: '$t > \\dfrac{3}{2}$, soit $S = \\left]\\dfrac{3}{2}\\,;\\,+\\infty\\right[$' },
         },
         {
           kind: 'methode',
@@ -644,23 +1224,134 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "**Domaine :** ℝ. **Signe :** toujours strictement positive. **Dérivée :** " +
-                "$f'(x) = -2x \\cdot e^{-x^2}$ — signe opposé à celui de $x$ : **maximum** en " +
-                "$x=0$ ($f(0)=1$).",
+                "**1) Domaine.** $-x^2$ est défini pour tout réel, et $\\exp$ aussi : " +
+                "$\\text{dom } f = \\mathbb{R}$.",
             },
             {
               kind: 'para',
               text:
-                "**Dérivée seconde :** $f''(x) = (4x^2-2) \\cdot e^{-x^2}$ — s'annule en " +
-                "$x = \\pm\\sqrt{2}/2$ : **deux points d'inflexion**, symétriques par rapport à " +
-                "l'axe $y$ (la fonction est paire).",
+                "**2) Signe.** Une exponentielle ne s'annule jamais et reste strictement " +
+                "positive (section 1) : $f$ est strictement positive sur $\\mathbb{R}$. La " +
+                "courbe est donc entièrement au-dessus de l'axe des abscisses.",
             },
             {
               kind: 'para',
               text:
-                "**Limites :** $\\pm\\infty$ des deux côtés donnent $f(x) \\to 0$ (forme " +
-                "$\\infty \\cdot 0$, l'exponentielle l'emporte) : asymptote horizontale $y=0$ " +
-                'des deux côtés.',
+                "**3) Dérivée première.** $f$ est de la forme $e^{u}$ avec $u(x) = -x^2$, donc " +
+                "$u'(x) = -2x$. La règle de la chaîne $(e^{u})' = u' \\cdot e^{u}$ donne :",
+            },
+            { kind: 'para', text: "$f'(x) = -2x \\cdot e^{-x^2}$" },
+            {
+              kind: 'para',
+              text:
+                "Comme $e^{-x^2} > 0$, le signe de $f'$ est celui de $-2x$, donc **opposé** à " +
+                "celui de $x$ : $f' > 0$ avant 0, $f' < 0$ après. $f$ admet donc un **maximum** " +
+                'en $x = 0$, de valeur $f(0) = e^{0} = 1$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**4) Dérivée seconde.** Cette fois $f'$ est un **produit** de deux fonctions : " +
+                "$f' = p \\cdot q$ avec $p(x) = -2x$ et $q(x) = e^{-x^2}$. On applique la règle " +
+                "du produit $(pq)' = p'q + pq'$, en réutilisant pour $q'$ le calcul de " +
+                "l'étape 3 : $p'(x) = -2$ et $q'(x) = -2x \\cdot e^{-x^2}$.",
+            },
+            {
+              kind: 'para',
+              text:
+                "$f''(x) = \\underbrace{(-2)}_{p'} \\cdot \\underbrace{e^{-x^2}}_{q} + " +
+                "\\underbrace{(-2x)}_{p} \\cdot \\underbrace{\\left(-2x\\,e^{-x^2}\\right)}_{q'}$",
+            },
+            {
+              kind: 'para',
+              text:
+                "$= -2e^{-x^2} + 4x^2 e^{-x^2}$ — on développe le second produit : " +
+                "$(-2x) \\cdot (-2x) = 4x^2$",
+            },
+            {
+              kind: 'para',
+              text:
+                "$= \\left(4x^2-2\\right) e^{-x^2}$ — mise en évidence du facteur commun " +
+                '$e^{-x^2}$',
+            },
+            {
+              kind: 'para',
+              text:
+                "Comme $e^{-x^2} > 0$, le signe de $f''$ est celui de $4x^2-2$, qui s'annule " +
+                "pour $4x^2 = 2$, soit $x^2 = \\dfrac{1}{2}$, soit $x = \\pm\\dfrac{\\sqrt{2}}{2} " +
+                "\\approx \\pm 0{,}71$. Le trinôme $4x^2-2$ change bien de signe en ces deux " +
+                "valeurs : ce sont donc **deux points d'inflexion**, symétriques par rapport à " +
+                "l'axe $y$ (comme il se doit, $f$ étant paire).",
+            },
+            {
+              kind: 'para',
+              text:
+                "**5) Limites.** En $\\pm\\infty$, $-x^2 \\to -\\infty$, donc " +
+                "$e^{-x^2} \\to 0$ : la droite $y = 0$ est asymptote horizontale **des deux " +
+                'côtés**. La courbe ne coupe jamais cette asymptote, puisque $f$ ne ' +
+                "s'annule jamais.",
+            },
+          ],
+        },
+        {
+          kind: 'signTable',
+          caption: "Tableau de variations de f(x)=e^(−x²) — variation et concavité réunies",
+          rows: [
+            {
+              label: 'x',
+              cells: [
+                { text: '−∞', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '−√2/2', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '0', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '√2/2', tone: 'zero' },
+                { text: '', tone: 'plain' },
+                { text: '+∞', tone: 'zero' },
+              ],
+            },
+            {
+              label: "signe de f′(x)",
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '+', tone: 'pos' },
+                { text: '+', tone: 'pos' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+            {
+              label: "signe de f″(x)",
+              cells: [
+                { text: '', tone: 'plain' },
+                { text: '+', tone: 'pos' },
+                { text: '0', tone: 'zero' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '−', tone: 'neg' },
+                { text: '0', tone: 'zero' },
+                { text: '+', tone: 'pos' },
+                { text: '', tone: 'plain' },
+              ],
+            },
+            {
+              label: 'variations de f',
+              cells: [
+                { text: 'AH y=0', tone: 'plain' },
+                { text: '↗ convexe', tone: 'plain' },
+                { text: 'PI', tone: 'zero' },
+                { text: '↗ concave', tone: 'plain' },
+                { text: 'M (0;1)', tone: 'zero' },
+                { text: '↘ concave', tone: 'plain' },
+                { text: 'PI', tone: 'zero' },
+                { text: '↘ convexe', tone: 'plain' },
+                { text: 'AH y=0', tone: 'plain' },
+              ],
             },
           ],
         },
@@ -721,16 +1412,112 @@ export const fonctionsExponentielles: ChapterContent = {
               'une décroissance.',
           ],
         },
+        { kind: 'subheading', text: 'Reconnaître un accroissement de type exponentiel' },
+        {
+          kind: 'exempleLibre',
+          label: "Démonstration — le rapport ne dépend que de l'écart",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "Soient $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $r, s \\in \\mathbb{R}$ " +
+                "deux instants. On calcule le rapport des images de $r$ et $s$ par $\\exp_a$, " +
+                'en une seule ligne :',
+            },
+            {
+              kind: 'para',
+              text:
+                "$\\dfrac{\\exp_a(s)}{\\exp_a(r)} = \\dfrac{a^{s}}{a^{r}} = a^{s-r}$",
+            },
+            {
+              kind: 'para',
+              text:
+                "La première égalité n'est que la définition de $\\exp_a$ ; la seconde est la " +
+                "règle des puissances **(2)**, $\\dfrac{a^{r}}{a^{s}} = a^{r-s}$, de la " +
+                "section 1. Le résultat ne fait plus intervenir $r$ et $s$ que par leur " +
+                "**différence** $s-r$ : le rapport est donc constant dès que l'écart entre les " +
+                'deux instants est constant.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Le résultat survit à un facteur constant.** Soit maintenant " +
+                "$f : \\mathbb{R} \\to \\mathbb{R} : x \\mapsto k \\cdot a^{x}$, avec $k \\ne 0$ " +
+                "réel. Le même calcul donne, pour tous $r, s$ :",
+            },
+            {
+              kind: 'para',
+              text:
+                "$\\dfrac{f(s)}{f(r)} = \\dfrac{k \\cdot a^{s}}{k \\cdot a^{r}} = " +
+                "\\dfrac{a^{s}}{a^{r}} = a^{s-r}$",
+            },
+            {
+              kind: 'para',
+              text:
+                "Le facteur $k$ apparaît au numérateur **et** au dénominateur : il se " +
+                "**simplifie**, et le rapport obtenu est exactement le même que pour " +
+                "$\\exp_a$ toute seule. Autrement dit, la valeur initiale d'une grandeur ne " +
+                "change rien à son taux de croissance — deux populations de tailles très " +
+                'différentes peuvent croître au même rythme. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                "**La réciproque est vraie**, et elle est admise ici : une fonction définie sur " +
+                "$\\mathbb{R}$ dont le rapport $f(s)/f(r)$ ne dépend que de la différence " +
+                "$s-r$ est nécessairement une fonction exponentielle, ou un multiple de " +
+                "fonction exponentielle (ou une fonction constante, si ce rapport vaut " +
+                "toujours 1). C'est elle qui autorise, dans les problèmes, à **conclure** à un " +
+                "modèle exponentiel à partir d'un simple tableau de mesures.",
+            },
+          ],
+        },
         {
           kind: 'astuce',
-          label: '💡 Reconnaître un modèle exponentiel dans un tableau de données',
+          label: '💡 En pratique, dans un tableau de données',
           text:
-            "Le rapport entre deux valeurs d'une fonction exponentielle ne dépend que de " +
-            "l'écart entre les instants, jamais des instants eux-mêmes : $Q(s)/Q(r) = " +
-            "a^{s-r}$. En pratique, si le rapport entre deux mesures consécutives (prises à " +
-            "intervalles de temps égaux) reste à peu près constant, la situation peut être " +
-            "modélisée par une exponentielle — ce rapport constant est alors une valeur " +
-            'approchée du taux $a$.',
+            "Face à un tableau de valeurs expérimentales, on choisit des observations faites à " +
+            "**intervalles de temps égaux** (la variable augmente à pas constant), puis on " +
+            "calcule le rapport de deux valeurs **consécutives**. Si ce rapport est à peu près " +
+            "constant, la situation se modélise par $f(t) = b \\cdot a^{t}$, où $a$ est une " +
+            "valeur approchée de ce rapport et $b$ la valeur initiale (celle lue en $t=0$). " +
+            "Attention : c'est bien le **rapport** qu'il faut calculer, jamais la différence — " +
+            'une différence constante signalerait au contraire un modèle linéaire.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (t) => 100 * Math.pow(1.5, t), tone: 'accent', xMin: 0, xMax: 3.5 }],
+            xMin: -0.4,
+            xMax: 3.6,
+            xTicks: [1, 2, 3],
+            fixedYRange: { min: -40, max: 420 },
+            textLabels: [
+              { x: 0.15, y: 330, text: 'Q(t)=100·1,5^t', tone: 'accent', anchor: 'start' },
+              { x: 0.5, y: 190, text: '×1,5', tone: 'good', anchor: 'middle' },
+              { x: 1.5, y: 260, text: '×1,5', tone: 'good', anchor: 'middle' },
+              { x: 2.5, y: 370, text: '×1,5', tone: 'good', anchor: 'middle' },
+              { x: 0.05, y: 55, text: '100', tone: 'accent', anchor: 'start' },
+              { x: 1.05, y: 105, text: '150', tone: 'accent', anchor: 'start' },
+              { x: 2.05, y: 168, text: '225', tone: 'accent', anchor: 'start' },
+              { x: 3.05, y: 258, text: '337,5', tone: 'accent', anchor: 'start' },
+            ],
+            points: [
+              { x: 0, y: 100, label: '', tone: 'accent' },
+              { x: 1, y: 150, label: '', tone: 'accent' },
+              { x: 2, y: 225, label: '', tone: 'accent' },
+              { x: 3, y: 337.5, label: '', tone: 'accent' },
+            ],
+            xAxisLabel: 't',
+            yAxisLabel: 'Q',
+            caption:
+              'Quatre mesures prises à intervalles de temps égaux : 100, 150, 225 et 337,5. ' +
+              'Les DIFFÉRENCES (+50, +75, +112,5) ne sont pas constantes, mais les RAPPORTS le ' +
+              'sont : 150/100 = 225/150 = 337,5/225 = 1,5. Le modèle est donc exponentiel, de ' +
+              "taux a = 1,5 et de valeur initiale b = 100 — d'où Q(t) = 100·1,5^t, la courbe " +
+              'qui passe exactement par les quatre points.',
+          },
         },
         {
           kind: 'exempleLibre',
