@@ -10,25 +10,442 @@ export const deriveesApplications: ChapterContent = {
     "La dérivée d'une fonction en un point mesure sa pente instantanée — la vitesse exacte à " +
     "laquelle elle varie à cet endroit précis, prolongement direct des limites du chapitre " +
     "précédent (la dérivée EST une limite). Ce chapitre construit cette notion depuis sa " +
-    "définition (taux d'accroissement dont on prend la limite), établit les règles de calcul " +
-    "d'une fonction dérivée, l'utilise pour tracer une tangente, étudier localement les " +
-    "variations et les extremums d'une fonction, mener une étude complète (domaine, dérivée, " +
-    "limites, asymptotes), lire directement un graphique sans calcul, puis l'applique à " +
-    "l'optimisation géométrique, à l'économie et à la cinématique.",
+    "définition (taux d'accroissement dont on prend la limite), l'utilise pour tracer une " +
+    "tangente, établit ensuite les règles de calcul d'une fonction dérivée, puis étudie " +
+    "localement les variations et les extremums d'une fonction, mène une étude complète " +
+    "(domaine, dérivée, limites, asymptotes), lit directement un graphique sans calcul, avant " +
+    "de l'appliquer à l'optimisation géométrique, à l'économie et à la cinématique.",
 
   sections: [
     {
-      id: 'signe-derivees',
+      id: 'definition-derivee',
       number: 1,
+      title: "Calculer f'(a) par la définition",
+      kicker: "taux d'accroissement, limite quand h→0, interprétation géométrique (pente de la tangente)",
+      blocks: [
+        {
+          kind: 'rappel',
+          label: 'Rappel — définition du nombre dérivé',
+          items: [
+            'Le **taux d\'accroissement** de f entre a et a+h est $\\dfrac{f(a+h)-f(a)}{h}$ — ' +
+              'la pente de la **sécante** qui relie les points (a;f(a)) et (a+h;f(a+h)). Le ' +
+              '**nombre dérivé** f\'(a) est la **limite** de ce taux quand h se rapproche de 0 ' +
+              '(chapitre précédent) : $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Géométriquement, quand h se rapproche de 0, le point (a+h;f(a+h)) glisse le long de ' +
+            'la courbe vers (a;f(a)) : la **sécante** pivote progressivement jusqu\'à devenir la ' +
+            '**tangente** en a — sa pente limite est exactement f\'(a).',
+        },
+        {
+          kind: 'exemple',
+          badge: 'f\'(a) par la définition, sur une fonction quadratique',
+          formula: '$f(x) = x^2-3$, a = 2. Calcule f\'(2) par la définition.',
+          steps: [
+            { tag: 'f(2)', text: '$f(2) = 4-3 = 1$' },
+            { tag: 'développer f(2+h)', text: '$f(2+h) = (2+h)^2-3 = 4+4h+h^2-3 = 1+4h+h^2$' },
+            {
+              tag: 'taux d\'accroissement, simplifié au maximum',
+              text: '$\\dfrac{f(2+h)-f(2)}{h} = \\dfrac{(1+4h+h^2)-1}{h} = \\dfrac{4h+h^2}{h} = 4+h$ (valable pour h≠0)',
+            },
+          ],
+          result: { tag: 'passer à la limite', text: '$f\'(2) = \\displaystyle\\lim_{h \\to 0} (4+h) = 4$' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x * x, tone: 'accent' },
+              { fn: (x) => 1 + 4 * (x - 1), tone: 'faint', xMin: 1, xMax: 3.3 },
+              { fn: (x) => 1 + 2.5 * (x - 1), tone: 'faint', xMin: 1, xMax: 1.9 },
+              { fn: (x) => 1 + 2 * (x - 1), tone: 'good', xMin: 0.3, xMax: 3.4 },
+            ],
+            xMin: -0.3,
+            xMax: 3.4,
+            xTicks: [1],
+            fixedYRange: { min: -0.5, max: 10 },
+            points: [{ x: 1, y: 1, label: 'A(1;1)', tone: 'accent', labelPos: 'below' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption: 'f(x)=x² — les sécantes en h=2 puis h=0,5 ont pour pente 4 puis 2,5 : elles se rapprochent de la tangente en A, de pente f\'(1)=2',
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Le squelette, valable pour toute fonction',
+          items: [
+            'Calculer f(a) et développer f(a+h) (en fonction de h).',
+            'Former le taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$ et le simplifier au ' +
+              'maximum — le facteur h du dénominateur doit toujours pouvoir se simplifier ' +
+              '(sinon la limite n\'est pas directement calculable).',
+            'Passer à la limite quand h→0 sur l\'expression SIMPLIFIÉE : f\'(a).',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Ne jamais remplacer h par 0 AVANT d\'avoir simplifié',
+          text:
+            'Le taux d\'accroissement brut $\\dfrac{f(a+h)-f(a)}{h}$ vaut toujours 0/0 en h=0 ' +
+            '(forme indéterminée, comme au chapitre précédent) — c\'est exactement pourquoi il ' +
+            'faut d\'abord SIMPLIFIER par h (factorisation, ou technique du conjugué pour une ' +
+            'racine) avant de faire tendre h vers 0, jamais l\'inverse.',
+        },
+        {
+          kind: 'astuce',
+          label: 'La définition marche pour toute fonction, même sans racine',
+          text:
+            'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement se simplifie par l\'expression ' +
+            'conjuguée (comme au chapitre précédent, forme ∞−∞ ou 0/0 selon l\'écriture) — la ' +
+            'méthode générale ne change jamais, seule la technique de simplification s\'adapte ' +
+            'à la forme de f.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Calculer f\'(a) par la définition',
+          generatorId: '5gen26',
+          description: [
+            'Développe f(a+h), simplifie le taux d\'accroissement, puis calcule f\'(a) en ' +
+              'passant à la limite — sur des fonctions affines, quadratiques et rationnelles.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 26. Calculer f\'(a) par la définition »',
+        },
+      ],
+    },
+    {
+      id: 'tangentes',
+      number: 2,
+      title: 'Tangentes',
+      kicker: 'y=f(a)+f\'(a)(x−a) ; tangente horizontale ⟺ f\'(a)=0 ; tangente vs sécante',
+      blocks: [
+        {
+          kind: 'rappel',
+          label: 'Rappel — équation de la tangente en un point',
+          items: [
+            'La tangente à la courbe de f au point d\'abscisse a est la droite qui passe par ' +
+              '(a;f(a)) avec pour pente f\'(a) — sa pente EST le nombre dérivé, par définition ' +
+              'même de f\'(a) (section 1) : $y = f(a) + f\'(a)(x-a)$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'équation de la tangente en un point donné',
+          formula: '$f(x) = x^2-2x+1$, a=3. Détermine l\'équation de la tangente en x=3.',
+          steps: [
+            { tag: 'f(3)', text: 'f(3) = 9−6+1 = 4' },
+            { tag: 'f\'(x) puis f\'(3)', text: 'f\'(x) = 2x−2 ⟹ f\'(3) = 6−2 = 4' },
+            { tag: 'substituer dans y=f(a)+f\'(a)(x−a)', text: 'y = 4 + 4(x−3) = 4 + 4x − 12' },
+          ],
+          result: { tag: 'équation simplifiée', text: 'y = 4x − 8' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => (x - 1) * (x - 1), tone: 'accent' },
+              { fn: (x) => 4 + 4 * (x - 3), tone: 'good', xMin: 1.6, xMax: 4.5 },
+              { fn: () => 0, tone: 'good', xMin: 0.5, xMax: 1.5 },
+            ],
+            xMin: -0.5,
+            xMax: 4.5,
+            xTicks: [3],
+            fixedYRange: { min: -1, max: 11 },
+            points: [
+              { x: 3, y: 4, label: 'a=3 : (3;4)', tone: 'accent', labelPos: 'above' },
+              { x: 1, y: 0, label: 'a=1 : tangente horizontale', tone: 'good', labelPos: 'above' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption: 'f(x)=(x−1)² — tangente oblique au point (3;4) de pente f\'(3)=4, et tangente horizontale au point (1;0) de pente f\'(1)=0',
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Tangente horizontale',
+          items: [
+            'Une tangente est **horizontale** exactement quand sa pente est nulle, c\'est-à-dire ' +
+              'f\'(a) = 0. Avec le même f(x)=x²−2x+1 : f\'(x)=2x−2=0 ⟺ x=1, et f(1)=1−2+1=0 — la ' +
+              'tangente en x=1 est donc la droite y=0 (l\'axe des abscisses lui-même).',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Tangente ≠ sécante',
+          text:
+            'Une **sécante** relie DEUX points distincts de la courbe (a;f(a)) et (b;f(b)), de ' +
+            'pente $\\dfrac{f(b)-f(a)}{b-a}$ — c\'est le taux d\'accroissement de la section 1. ' +
+            'Une **tangente** ne touche la courbe qu\'EN UN SEUL point (localement), de pente ' +
+            'f\'(a) — c\'est la LIMITE de la sécante quand b se rapproche de a, jamais une ' +
+            'sécante elle-même.',
+        },
+        {
+          kind: 'astuce',
+          label: 'Deux points de contrôle avant de conclure',
+          text:
+            'Une équation de tangente correcte doit toujours vérifier DEUX choses : passer par ' +
+            'le point (a;f(a)) (teste x=a dans ton équation, tu dois retrouver f(a)) et avoir ' +
+            'la bonne pente (le coefficient de x doit être exactement f\'(a)) — une erreur sur ' +
+            'l\'un des deux se détecte immédiatement par cette double vérification.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Tangentes',
+          generatorId: '5gen28',
+          description: [
+            'Détermine l\'équation de la tangente en un point donné, résous une tangente ' +
+              'horizontale, ou confirme qu\'une droite est deux fois tangente à une même courbe.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 28. Tangentes »',
+        },
+      ],
+    },
+    {
+      id: 'fonction-derivee',
+      number: 3,
+      title: 'Fonction dérivée',
+      kicker:
+        'fonction dérivée, domaine de dérivabilité, interprétation du nombre dérivé, dérivées de référence, règles de la somme/produit/quotient/chaîne',
+      blocks: [
+        {
+          kind: 'rappel',
+          label: 'Rappel — domaine de dérivabilité et fonction dérivée',
+          items: [
+            'f est **dérivable en a** si f\'(a) existe (la limite du taux d\'accroissement en a ' +
+              'est un nombre réel — pas ±∞, pas indéfinie). L\'ensemble des réels où f est ' +
+              'dérivable s\'appelle le **domaine de dérivabilité** de f, noté $\\text{dom}_d f$ — ' +
+              'il peut être plus petit que dom f (ex. √x est définie en 0 mais pas dérivable en 0).',
+            'Calculer f\'(a) par la définition (section 1) pour un a QUELCONQUE de ' +
+              '$\\text{dom}_d f$, plutôt que pour une seule valeur fixée, donne une nouvelle ' +
+              'fonction : la **fonction dérivée** f\', qui associe à chaque x son nombre dérivé f\'(x).',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'fonction dérivée obtenue directement par la définition',
+          formula: '$f(x) = 2x^2-3x$, dom f = ℝ. Détermine f\'(x) par la définition.',
+          steps: [
+            {
+              tag: 'développer f(x+h) − f(x)',
+              text: 'f(x+h) − f(x) = [2(x+h)²−3(x+h)] − [2x²−3x] = (2x²+4xh+2h²−3x−3h) − 2x² + 3x = 4xh+2h²−3h',
+            },
+            {
+              tag: 'taux d\'accroissement, simplifié par h',
+              text: '$\\dfrac{f(x+h)-f(x)}{h} = \\dfrac{4xh+2h^2-3h}{h} = 4x+2h-3$',
+            },
+          ],
+          result: {
+            tag: 'passer à la limite',
+            text: '$f\'(x) = \\displaystyle\\lim_{h \\to 0} (4x+2h-3) = 4x-3$, $\\text{dom}_d f = \\mathbb{R}$',
+          },
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — interpréter le nombre dérivé (et le comparer au taux de variation)',
+          items: [
+            'Le taux de variation (moyen, entre deux points) et le nombre dérivé (instantané, ' +
+              'en un seul point) se lisent chacun de deux façons — graphique et physique — ' +
+              'pour un même type de calcul :',
+          ],
+        },
+        {
+          kind: 'featureTable',
+          headers: ['', 'Définition', 'Interprétation graphique', 'Interprétation physique'],
+          rows: [
+            [
+              'Taux de variation entre a et a+h',
+              '$\\dfrac{f(a+h)-f(a)}{h}$',
+              'pente de la sécante (AB), A(a;f(a)) et B(a+h;f(a+h))',
+              'vitesse MOYENNE de variation entre les instants a et a+h',
+            ],
+            [
+              'Nombre dérivé f\'(a)',
+              '$f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$',
+              'pente de la tangente en A(a;f(a)) — limite de la sécante (AB) quand B glisse vers A',
+              'vitesse INSTANTANÉE de variation à l\'instant a (voir section 11)',
+            ],
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — dérivées de référence',
+          items: [],
+        },
+        {
+          kind: 'featureTable',
+          headers: ['f(x)', 'xⁿ', '√x', '1/x', 'sin x', 'cos x', 'tan x', 'constante k'],
+          rows: [['f\'(x)', 'n·xⁿ⁻¹', '1/(2√x)', '−1/x²', 'cos x', '−sin x', '1/cos²x', '0']],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — 1/x et √x, retrouvées à partir de la définition (section 1)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Les deux entrées les moins évidentes du tableau ci-dessus ne s\'apprennent pas ' +
+                'par cœur sans savoir d\'où elles viennent — elles se retrouvent directement ' +
+                'avec la méthode de la section 1.',
+            },
+            { kind: 'para', text: '**a.** $f(x) = 1/x$ ($x \\in \\mathbb{R}_0$)' },
+            {
+              kind: 'para',
+              text:
+                'Taux d\'accroissement — même dénominateur, puis simplifié par h : ' +
+                '$\\dfrac{1/(x+h) - 1/x}{h} = \\dfrac{x-(x+h)}{h \\cdot x(x+h)} = \\dfrac{-h}{h \\cdot x(x+h)} = \\dfrac{-1}{x(x+h)}$',
+            },
+            { kind: 'para', text: 'Passer à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{-1}{x(x+h)} = -\\dfrac{1}{x^2}$' },
+            { kind: 'para', text: '**b.** $f(x) = \\sqrt{x}$ ($x \\in \\mathbb{R}^+$)' },
+            {
+              kind: 'para',
+              text:
+                'Forme indéterminée « 0/0 » — on multiplie par l\'expression conjuguée : ' +
+                '$\\dfrac{\\sqrt{x+h}-\\sqrt{x}}{h} = \\dfrac{(x+h)-x}{h(\\sqrt{x+h}+\\sqrt{x})} = \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}}$',
+            },
+            { kind: 'para', text: 'Passer à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}} = \\dfrac{1}{2\\sqrt{x}}$' },
+            {
+              kind: 'para',
+              text:
+                'Les dérivées de sin x et cos x se démontrent aussi par la définition, mais avec ' +
+                'des limites trigonométriques admises à ce niveau — le résultat reste dans le ' +
+                'tableau de référence.',
+            },
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Les 4 règles de calcul',
+          items: [
+            '**Somme** — (u+v)\' = u\'+v\' (chaque terme se dérive indépendamment).',
+            '**Produit** — (u·v)\' = u\'v + uv\'.',
+            '**Quotient** — $(u/v)\' = \\dfrac{u\'v - uv\'}{v^2}$ (ordre du numérateur significatif : u\' EN PREMIER).',
+            '**Composée (chaîne)** — si f(x)=g(u(x)), alors f\'(x) = u\'(x)·g\'(u(x)) : on dérive ' +
+              '« de l\'extérieur vers l\'intérieur », puis on multiplie par la dérivée de l\'intérieur.',
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'La règle de la chaîne, cas particuliers courants (u = fonction dérivable de x)',
+          items: [],
+        },
+        {
+          kind: 'featureTable',
+          headers: ['f(x)', 'uⁿ', '1/u', '√u', 'sin u', 'cos u', 'tan u'],
+          rows: [['f\'(x)', 'n·uⁿ⁻¹·u\'', '−u\'/u²', 'u\'/(2√u)', 'u\'·cos u', '−u\'·sin u', 'u\'/cos²u']],
+        },
+        {
+          kind: 'para',
+          text:
+            'Retrouvé à partir de la formule générale : par exemple pour f(x)=uⁿ, on a ' +
+            'g(u)=uⁿ donc g\'(u)=n·uⁿ⁻¹, et f\'(x)=u\'(x)·g\'(u(x))=n·uⁿ⁻¹·u\' — chaque colonne ' +
+            'du tableau n\'est qu\'une application de cette même règle à une « extérieure » g différente.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'règle du produit',
+          formula: '$f(x) = (2x+1)(x^2-3)$. Calcule f\'(x).',
+          steps: [
+            { tag: 'identifier u et v', text: 'u(x)=2x+1, u\'(x)=2 | v(x)=x²−3, v\'(x)=2x' },
+            { tag: 'appliquer (uv)\'=u\'v+uv\'', text: 'f\'(x) = 2(x²−3) + (2x+1)(2x) = 2x²−6 + 4x²+2x' },
+          ],
+          result: { tag: 'résultat, réduit', text: 'f\'(x) = 6x² + 2x − 6' },
+        },
+        {
+          kind: 'para',
+          text:
+            'Vérification par développement direct : f(x)=(2x+1)(x²−3)=2x³+x²−6x−3, dont la ' +
+            'dérivée terme à terme redonne bien 6x²+2x−6.',
+        },
+        {
+          kind: 'wrongRight',
+          wrongTag: 'piège — produit des dérivées',
+          wrong: 'u\'(x)·v\'(x) = 2·2x = 4x ≠ f\'(x)',
+          rightTag: 'correct — règle du produit',
+          right: 'u\'v+uv\' = 6x²+2x−6 = f\'(x)',
+        },
+        {
+          kind: 'attention',
+          label: '(uv)\' ≠ u\'·v\', et (u/v)\' ≠ u\'/v\'',
+          text:
+            'L\'erreur la plus fréquente de ce chapitre : dériver un produit ou un quotient en ' +
+            'dérivant chaque facteur SÉPARÉMENT puis en les recombinant naïvement. Seules la ' +
+            'somme et la composition ont une règle « simple » — le produit et le quotient ' +
+            'exigent TOUJOURS la formule complète (u\'v+uv\' ou (u\'v−uv\')/v²), jamais un raccourci.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'règle du quotient',
+          formula: '$f(x) = \\dfrac{x^2+1}{x-2}$. Calcule f\'(x).',
+          steps: [
+            { tag: 'identifier u et v', text: 'u(x)=x²+1, u\'(x)=2x | v(x)=x−2, v\'(x)=1' },
+            {
+              tag: 'appliquer (u/v)\'=(u\'v−uv\')/v², ordre du numérateur respecté',
+              text: '$f\'(x) = \\dfrac{2x(x-2) - (x^2+1)(1)}{(x-2)^2} = \\dfrac{2x^2-4x-x^2-1}{(x-2)^2}$',
+            },
+          ],
+          result: { tag: 'résultat, réduit', text: '$f\'(x) = \\dfrac{x^2-4x-1}{(x-2)^2}$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'règle de la chaîne (composée)',
+          formula: '$f(x) = (2x-1)^3$. Calcule f\'(x).',
+          steps: [
+            { tag: 'décomposer — intérieure u(x)=2x−1, extérieure g(u)=u³', text: 'u\'(x)=2 | g\'(u)=3u²' },
+            { tag: 'appliquer f\'(x)=u\'(x)·g\'(u(x))', text: 'f\'(x) = 2 · 3(2x−1)² = 6(2x−1)²' },
+          ],
+          result: { tag: 'résultat', text: 'f\'(x) = 6(2x−1)²' },
+          illustration: {
+            kind: 'chain',
+            stages: ['u=2x−1'],
+            highlightIndex: 0,
+            outputLabel: '(2x−1)³',
+            caption:
+              'décomposition de f(x)=(2x−1)³ — intérieure u(x)=2x−1 (encadré), sortie g(u)=u³ ; ' +
+              'on dérive l\'extérieure g d\'abord (3u²), puis on multiplie par u\'(x)=2, dans ' +
+              'l\'ordre inverse de la construction',
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Vérification par développement direct : (2x−1)³=8x³−12x²+6x−1, dérivée = ' +
+            '24x²−24x+6 ; 6(2x−1)²=6(4x²−4x+1)=24x²−24x+6 — les deux méthodes coïncident exactement.',
+        },
+        {
+          kind: 'astuce',
+          label: 'Repérer d\'abord la STRUCTURE, avant de dériver',
+          text:
+            'Avant tout calcul, demande-toi : est-ce une SOMME de termes indépendants (règle de ' +
+            'base), un PRODUIT de deux facteurs, un QUOTIENT, ou une fonction « dans » une ' +
+            'autre (composée) ? Cette reconnaissance préalable évite d\'appliquer la mauvaise ' +
+            'règle — un piège fréquent est de traiter une composée (ex. sin(2x)) comme si ' +
+            'l\'intérieure était triviale, en oubliant le facteur de la chaîne.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Fonction dérivée',
+          generatorId: '5gen27',
+          description: [
+            'Reconnais la structure de f(x) (règle de base, produit, quotient, composée), ' +
+              'décompose-la si besoin, puis calcule f\'(x) — avec ou sans habillage trigonométrique.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 27. Fonction dérivée »',
+        },
+      ],
+    },
+    {
+      id: 'signe-derivees',
+      number: 4,
       title: 'Association graphique/mots ↔ signe de f\'/f\'\'',
       kicker: 'signe de f\' ⟺ sens de variation ; signe de f\'\' ⟺ concavité ; point d\'inflexion',
       blocks: [
         {
           kind: 'para',
           text:
-            'Avant même de savoir calculer une dérivée, on peut LIRE son signe sur un graphique ' +
-            '— et en tirer directement le sens de variation de f, sa concavité, et la position ' +
-            'de ses extremums.',
+            'Tu sais maintenant définir f\'(a) (section 1), l\'interpréter comme pente d\'une ' +
+            'tangente (section 2), et calculer f\'(x) avec les règles de calcul (section 3) — ' +
+            'reste à savoir ce que le SIGNE de f\' (et de f\'\') révèle sur f : son sens de ' +
+            'variation, sa concavité, et la position de ses extremums.',
         },
         {
           kind: 'rappel',
@@ -122,336 +539,6 @@ export const deriveesApplications: ChapterContent = {
       ],
     },
     {
-      id: 'definition-derivee',
-      number: 2,
-      title: 'Calculer f\'(a) par la définition',
-      kicker: 'taux d\'accroissement, limite quand h→0, interprétation géométrique (pente de la tangente)',
-      blocks: [
-        {
-          kind: 'rappel',
-          label: 'Rappel — définition du nombre dérivé',
-          items: [
-            'Le **taux d\'accroissement** de f entre a et a+h est $\\dfrac{f(a+h)-f(a)}{h}$ — ' +
-              'la pente de la **sécante** qui relie les points (a;f(a)) et (a+h;f(a+h)). Le ' +
-              '**nombre dérivé** f\'(a) est la **limite** de ce taux quand h se rapproche de 0 ' +
-              '(chapitre précédent) : $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
-          ],
-        },
-        {
-          kind: 'para',
-          text:
-            'Géométriquement, quand h se rapproche de 0, le point (a+h;f(a+h)) glisse le long de ' +
-            'la courbe vers (a;f(a)) : la **sécante** pivote progressivement jusqu\'à devenir la ' +
-            '**tangente** en a — sa pente limite est exactement f\'(a).',
-        },
-        {
-          kind: 'exemple',
-          badge: 'f\'(a) par la définition, sur une fonction quadratique',
-          formula: '$f(x) = x^2-3$, a = 2. Calcule f\'(2) par la définition.',
-          steps: [
-            { tag: 'f(2)', text: '$f(2) = 4-3 = 1$' },
-            { tag: 'développer f(2+h)', text: '$f(2+h) = (2+h)^2-3 = 4+4h+h^2-3 = 1+4h+h^2$' },
-            {
-              tag: 'taux d\'accroissement, simplifié au maximum',
-              text: '$\\dfrac{f(2+h)-f(2)}{h} = \\dfrac{(1+4h+h^2)-1}{h} = \\dfrac{4h+h^2}{h} = 4+h$ (valable pour h≠0)',
-            },
-          ],
-          result: { tag: 'passer à la limite', text: '$f\'(2) = \\displaystyle\\lim_{h \\to 0} (4+h) = 4$' },
-          illustration: {
-            kind: 'curvePlot',
-            curves: [
-              { fn: (x) => x * x, tone: 'accent' },
-              { fn: (x) => 1 + 4 * (x - 1), tone: 'faint', xMin: 1, xMax: 3.3 },
-              { fn: (x) => 1 + 2.5 * (x - 1), tone: 'faint', xMin: 1, xMax: 1.9 },
-              { fn: (x) => 1 + 2 * (x - 1), tone: 'good', xMin: 0.3, xMax: 3.4 },
-            ],
-            xMin: -0.3,
-            xMax: 3.4,
-            xTicks: [1],
-            fixedYRange: { min: -0.5, max: 10 },
-            points: [{ x: 1, y: 1, label: 'A(1;1)', tone: 'accent', labelPos: 'below' }],
-            xAxisLabel: 'x',
-            yAxisLabel: 'f(x)',
-            caption: 'f(x)=x² — les sécantes en h=2 puis h=0,5 ont pour pente 4 puis 2,5 : elles se rapprochent de la tangente en A, de pente f\'(1)=2',
-          },
-        },
-        {
-          kind: 'methode',
-          label: 'Le squelette, valable pour toute fonction',
-          items: [
-            'Calculer f(a) et développer f(a+h) (en fonction de h).',
-            'Former le taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$ et le simplifier au ' +
-              'maximum — le facteur h du dénominateur doit toujours pouvoir se simplifier ' +
-              '(sinon la limite n\'est pas directement calculable).',
-            'Passer à la limite quand h→0 sur l\'expression SIMPLIFIÉE : f\'(a).',
-          ],
-        },
-        {
-          kind: 'attention',
-          label: 'Ne jamais remplacer h par 0 AVANT d\'avoir simplifié',
-          text:
-            'Le taux d\'accroissement brut $\\dfrac{f(a+h)-f(a)}{h}$ vaut toujours 0/0 en h=0 ' +
-            '(forme indéterminée, comme au chapitre précédent) — c\'est exactement pourquoi il ' +
-            'faut d\'abord SIMPLIFIER par h (factorisation, ou technique du conjugué pour une ' +
-            'racine) avant de faire tendre h vers 0, jamais l\'inverse.',
-        },
-        {
-          kind: 'astuce',
-          label: 'La définition marche pour toute fonction, même sans racine',
-          text:
-            'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement se simplifie par l\'expression ' +
-            'conjuguée (comme au chapitre précédent, forme ∞−∞ ou 0/0 selon l\'écriture) — la ' +
-            'méthode générale ne change jamais, seule la technique de simplification s\'adapte ' +
-            'à la forme de f.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Calculer f\'(a) par la définition',
-          generatorId: '5gen26',
-          description: [
-            'Développe f(a+h), simplifie le taux d\'accroissement, puis calcule f\'(a) en ' +
-              'passant à la limite — sur des fonctions affines, quadratiques et rationnelles.',
-          ],
-          chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 26. Calculer f\'(a) par la définition »',
-        },
-      ],
-    },
-    {
-      id: 'fonction-derivee',
-      number: 3,
-      title: 'Fonction dérivée',
-      kicker: 'dérivées de référence, règles de la somme/produit/quotient/chaîne',
-      blocks: [
-        {
-          kind: 'rappel',
-          label: 'Rappel — dérivées de référence',
-          items: [],
-        },
-        {
-          kind: 'featureTable',
-          headers: ['f(x)', 'xⁿ', '√x', '1/x', 'sin x', 'cos x', 'tan x', 'constante k'],
-          rows: [['f\'(x)', 'n·xⁿ⁻¹', '1/(2√x)', '−1/x²', 'cos x', '−sin x', '1/cos²x', '0']],
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Démonstration — 1/x et √x, retrouvées à partir de la définition (section 2)',
-          blocks: [
-            {
-              kind: 'para',
-              text:
-                'Les deux entrées les moins évidentes du tableau ci-dessus ne s\'apprennent pas ' +
-                'par cœur sans savoir d\'où elles viennent — elles se retrouvent directement ' +
-                'avec la méthode de la section 2.',
-            },
-            { kind: 'para', text: '**a.** $f(x) = 1/x$ ($x \\in \\mathbb{R}_0$)' },
-            {
-              kind: 'para',
-              text:
-                'Taux d\'accroissement — même dénominateur, puis simplifié par h : ' +
-                '$\\dfrac{1/(x+h) - 1/x}{h} = \\dfrac{x-(x+h)}{h \\cdot x(x+h)} = \\dfrac{-h}{h \\cdot x(x+h)} = \\dfrac{-1}{x(x+h)}$',
-            },
-            { kind: 'para', text: 'Passer à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{-1}{x(x+h)} = -\\dfrac{1}{x^2}$' },
-            { kind: 'para', text: '**b.** $f(x) = \\sqrt{x}$ ($x \\in \\mathbb{R}^+$)' },
-            {
-              kind: 'para',
-              text:
-                'Forme indéterminée « 0/0 » — on multiplie par l\'expression conjuguée : ' +
-                '$\\dfrac{\\sqrt{x+h}-\\sqrt{x}}{h} = \\dfrac{(x+h)-x}{h(\\sqrt{x+h}+\\sqrt{x})} = \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}}$',
-            },
-            { kind: 'para', text: 'Passer à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}} = \\dfrac{1}{2\\sqrt{x}}$' },
-            {
-              kind: 'para',
-              text:
-                'Les dérivées de sin x et cos x se démontrent aussi par la définition, mais avec ' +
-                'des limites trigonométriques admises à ce niveau — le résultat reste dans le ' +
-                'tableau de référence.',
-            },
-          ],
-        },
-        {
-          kind: 'methode',
-          label: 'Les 4 règles de calcul',
-          items: [
-            '**Somme** — (u+v)\' = u\'+v\' (chaque terme se dérive indépendamment).',
-            '**Produit** — (u·v)\' = u\'v + uv\'.',
-            '**Quotient** — $(u/v)\' = \\dfrac{u\'v - uv\'}{v^2}$ (ordre du numérateur significatif : u\' EN PREMIER).',
-            '**Composée (chaîne)** — si f(x)=g(u(x)), alors f\'(x) = u\'(x)·g\'(u(x)) : on dérive ' +
-              '« de l\'extérieur vers l\'intérieur », puis on multiplie par la dérivée de l\'intérieur.',
-          ],
-        },
-        {
-          kind: 'rappel',
-          label: 'La règle de la chaîne, cas particuliers courants (u = fonction dérivable de x)',
-          items: [],
-        },
-        {
-          kind: 'featureTable',
-          headers: ['f(x)', 'uⁿ', '1/u', '√u', 'sin u', 'cos u', 'tan u'],
-          rows: [['f\'(x)', 'n·uⁿ⁻¹·u\'', '−u\'/u²', 'u\'/(2√u)', 'u\'·cos u', '−u\'·sin u', 'u\'/cos²u']],
-        },
-        {
-          kind: 'para',
-          text:
-            'Retrouvé à partir de la formule générale : par exemple pour f(x)=uⁿ, on a ' +
-            'g(u)=uⁿ donc g\'(u)=n·uⁿ⁻¹, et f\'(x)=u\'(x)·g\'(u(x))=n·uⁿ⁻¹·u\' — chaque colonne ' +
-            'du tableau n\'est qu\'une application de cette même règle à une « extérieure » g différente.',
-        },
-        {
-          kind: 'exemple',
-          badge: 'règle du produit',
-          formula: '$f(x) = (2x+1)(x^2-3)$. Calcule f\'(x).',
-          steps: [
-            { tag: 'identifier u et v', text: 'u(x)=2x+1, u\'(x)=2 | v(x)=x²−3, v\'(x)=2x' },
-            { tag: 'appliquer (uv)\'=u\'v+uv\'', text: 'f\'(x) = 2(x²−3) + (2x+1)(2x) = 2x²−6 + 4x²+2x' },
-          ],
-          result: { tag: 'résultat, réduit', text: 'f\'(x) = 6x² + 2x − 6' },
-        },
-        {
-          kind: 'wrongRight',
-          wrongTag: 'piège — produit des dérivées',
-          wrong: 'u\'(x)·v\'(x) = 2·2x = 4x ≠ f\'(x)',
-          rightTag: 'correct — règle du produit',
-          right: 'u\'v+uv\' = 6x²+2x−6 = f\'(x)',
-        },
-        {
-          kind: 'attention',
-          label: '(uv)\' ≠ u\'·v\', et (u/v)\' ≠ u\'/v\'',
-          text:
-            'L\'erreur la plus fréquente de ce chapitre : dériver un produit ou un quotient en ' +
-            'dérivant chaque facteur SÉPARÉMENT puis en les recombinant naïvement. Seules la ' +
-            'somme et la composition ont une règle « simple » — le produit et le quotient ' +
-            'exigent TOUJOURS la formule complète (u\'v+uv\' ou (u\'v−uv\')/v²), jamais un raccourci.',
-        },
-        {
-          kind: 'exemple',
-          badge: 'règle du quotient',
-          formula: '$f(x) = \\dfrac{x^2+1}{x-2}$. Calcule f\'(x).',
-          steps: [
-            { tag: 'identifier u et v', text: 'u(x)=x²+1, u\'(x)=2x | v(x)=x−2, v\'(x)=1' },
-            {
-              tag: 'appliquer (u/v)\'=(u\'v−uv\')/v², ordre du numérateur respecté',
-              text: '$f\'(x) = \\dfrac{2x(x-2) - (x^2+1)(1)}{(x-2)^2} = \\dfrac{2x^2-4x-x^2-1}{(x-2)^2}$',
-            },
-          ],
-          result: { tag: 'résultat, réduit', text: '$f\'(x) = \\dfrac{x^2-4x-1}{(x-2)^2}$' },
-        },
-        {
-          kind: 'exemple',
-          badge: 'règle de la chaîne (composée)',
-          formula: '$f(x) = (2x-1)^3$. Calcule f\'(x).',
-          steps: [
-            { tag: 'décomposer — intérieure u(x)=2x−1, extérieure g(u)=u³', text: 'u\'(x)=2 | g\'(u)=3u²' },
-            { tag: 'appliquer f\'(x)=u\'(x)·g\'(u(x))', text: 'f\'(x) = 2 · 3(2x−1)² = 6(2x−1)²' },
-          ],
-          result: { tag: 'résultat', text: 'f\'(x) = 6(2x−1)²' },
-        },
-        {
-          kind: 'astuce',
-          label: 'Repérer d\'abord la STRUCTURE, avant de dériver',
-          text:
-            'Avant tout calcul, demande-toi : est-ce une SOMME de termes indépendants (règle de ' +
-            'base), un PRODUIT de deux facteurs, un QUOTIENT, ou une fonction « dans » une ' +
-            'autre (composée) ? Cette reconnaissance préalable évite d\'appliquer la mauvaise ' +
-            'règle — un piège fréquent est de traiter une composée (ex. sin(2x)) comme si ' +
-            'l\'intérieure était triviale, en oubliant le facteur de la chaîne.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Fonction dérivée',
-          generatorId: '5gen27',
-          description: [
-            'Reconnais la structure de f(x) (règle de base, produit, quotient, composée), ' +
-              'décompose-la si besoin, puis calcule f\'(x) — avec ou sans habillage trigonométrique.',
-          ],
-          chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 27. Fonction dérivée »',
-        },
-      ],
-    },
-    {
-      id: 'tangentes',
-      number: 4,
-      title: 'Tangentes',
-      kicker: 'y=f(a)+f\'(a)(x−a) ; tangente horizontale ⟺ f\'(a)=0 ; tangente vs sécante',
-      blocks: [
-        {
-          kind: 'rappel',
-          label: 'Rappel — équation de la tangente en un point',
-          items: [
-            'La tangente à la courbe de f au point d\'abscisse a est la droite qui passe par ' +
-              '(a;f(a)) avec pour pente f\'(a) — sa pente EST le nombre dérivé, par définition ' +
-              'même de f\'(a) (section 2) : $y = f(a) + f\'(a)(x-a)$.',
-          ],
-        },
-        {
-          kind: 'exemple',
-          badge: 'équation de la tangente en un point donné',
-          formula: '$f(x) = x^2-2x+1$, a=3. Détermine l\'équation de la tangente en x=3.',
-          steps: [
-            { tag: 'f(3)', text: 'f(3) = 9−6+1 = 4' },
-            { tag: 'f\'(x) puis f\'(3)', text: 'f\'(x) = 2x−2 ⟹ f\'(3) = 6−2 = 4' },
-            { tag: 'substituer dans y=f(a)+f\'(a)(x−a)', text: 'y = 4 + 4(x−3) = 4 + 4x − 12' },
-          ],
-          result: { tag: 'équation simplifiée', text: 'y = 4x − 8' },
-          illustration: {
-            kind: 'curvePlot',
-            curves: [
-              { fn: (x) => (x - 1) * (x - 1), tone: 'accent' },
-              { fn: (x) => 4 + 4 * (x - 3), tone: 'good', xMin: 1.6, xMax: 4.5 },
-            ],
-            xMin: -0.5,
-            xMax: 4.5,
-            xTicks: [3],
-            fixedYRange: { min: -1, max: 11 },
-            points: [{ x: 3, y: 4, label: 'a=3 : (3;4)', tone: 'accent', labelPos: 'above' }],
-            xAxisLabel: 'x',
-            yAxisLabel: 'f(x)',
-            caption: 'f(x)=(x−1)² — tangente au point (3;4), de pente f\'(3)=4',
-          },
-        },
-        {
-          kind: 'methode',
-          label: 'Tangente horizontale',
-          items: [
-            'Une tangente est **horizontale** exactement quand sa pente est nulle, c\'est-à-dire ' +
-              'f\'(a) = 0. Avec le même f(x)=x²−2x+1 : f\'(x)=2x−2=0 ⟺ x=1, et f(1)=1−2+1=0 — la ' +
-              'tangente en x=1 est donc la droite y=0 (l\'axe des abscisses lui-même).',
-          ],
-        },
-        {
-          kind: 'attention',
-          label: 'Tangente ≠ sécante',
-          text:
-            'Une **sécante** relie DEUX points distincts de la courbe (a;f(a)) et (b;f(b)), de ' +
-            'pente $\\dfrac{f(b)-f(a)}{b-a}$ — c\'est le taux d\'accroissement de la section 2. ' +
-            'Une **tangente** ne touche la courbe qu\'EN UN SEUL point (localement), de pente ' +
-            'f\'(a) — c\'est la LIMITE de la sécante quand b se rapproche de a, jamais une ' +
-            'sécante elle-même.',
-        },
-        {
-          kind: 'astuce',
-          label: 'Deux points de contrôle avant de conclure',
-          text:
-            'Une équation de tangente correcte doit toujours vérifier DEUX choses : passer par ' +
-            'le point (a;f(a)) (teste x=a dans ton équation, tu dois retrouver f(a)) et avoir ' +
-            'la bonne pente (le coefficient de x doit être exactement f\'(a)) — une erreur sur ' +
-            'l\'un des deux se détecte immédiatement par cette double vérification.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Tangentes',
-          generatorId: '5gen28',
-          description: [
-            'Détermine l\'équation de la tangente en un point donné, résous une tangente ' +
-              'horizontale, ou confirme qu\'une droite est deux fois tangente à une même courbe.',
-          ],
-          chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 28. Tangentes »',
-        },
-      ],
-    },
-    {
       id: 'etude-locale',
       number: 5,
       title: 'Étude locale (extremums et points critiques)',
@@ -471,7 +558,7 @@ export const deriveesApplications: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Exemple résolu — tableau de signes complet, 2 extremums réels',
           blocks: [
-            { kind: 'para', text: 'Reprends $f(x) = x^3-3x$ (section 1) et dresse le tableau de signes complet de f\'.' },
+            { kind: 'para', text: 'Reprends $f(x) = x^3-3x$ (section 4) et dresse le tableau de signes complet de f\'.' },
             {
               kind: 'signTable',
               caption: 'Signe de f\'(x) = 3(x−1)(x+1) et variations de f(x)=x³−3x',
@@ -593,7 +680,7 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Toutes les notions des sections 1 et 5 se lisent directement sur un graphique de ' +
+            'Toutes les notions des sections 4 et 5 se lisent directement sur un graphique de ' +
             'f, SANS calculer la moindre dérivée : il suffit de savoir reconnaître les formes.',
         },
         {
@@ -650,6 +737,42 @@ export const deriveesApplications: ChapterContent = {
             'jamais s\'arrêter ni redescendre — ce n\'est PAS un extremum, juste une variation ' +
             'de concavité. Un extremum exige un véritable changement de DIRECTION (la courbe ' +
             'monte puis redescend, ou l\'inverse), jamais seulement un changement de vitesse.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'un point critique qui n\'est PAS un extremum, à la lecture seule',
+          formula: 'Second graphique de f (formule toujours non donnée). Au point C, la tangente est horizontale — est-ce pour autant un extremum ?',
+          steps: [
+            {
+              tag: 'variations — lues directement',
+              text: 'f croît AVANT C, et croît ENCORE après C — aucun changement de direction nulle part',
+            },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              'la tangente en C est bien horizontale (f\'(C)=0), mais ce n\'est PAS un extremum : ' +
+              'la courbe ralentit un instant puis continue exactement dans le même sens — ' +
+              'exactement le piège décrit dans l\'encadré ci-dessus, ici identifié par simple ' +
+              'lecture, sans aucun calcul.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x * x * x, tone: 'accent', xMin: -1.6, xMax: 1.6 },
+              { fn: () => 0, tone: 'good', xMin: -0.5, xMax: 0.5 },
+            ],
+            xMin: -1.8,
+            xMax: 1.8,
+            xTicks: [],
+            fixedYRange: { min: -4.5, max: 4.5 },
+            points: [{ x: 0, y: 0, label: 'C : tangente horizontale', tone: 'accent', labelPos: 'above' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              'graphique de f — la courbe est TOUJOURS croissante, y compris de part et ' +
+              'd\'autre du point C où la tangente est momentanément horizontale',
+          },
         },
         {
           kind: 'astuce',
@@ -896,6 +1019,26 @@ export const deriveesApplications: ChapterContent = {
             tag: 'vérification par égalité des marginales',
             text: 'R\'(x)=50−2x ⟹ R\'(10)=30 | C\'(x)=2x+10 ⟹ C\'(10)=30 ⟹ Rm=Cm=30 € ✓ | B(10) = −200+400−20 = 180 €',
           },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => 50 * x - x * x, tone: 'good', xMin: 0, xMax: 20 },
+              { fn: (x) => x * x + 10 * x + 20, tone: 'bad', xMin: 0, xMax: 20 },
+            ],
+            xMin: -1,
+            xMax: 21,
+            xTicks: [10],
+            fixedYRange: { min: -10, max: 650 },
+            points: [
+              { x: 10, y: 400, label: 'R(10)=400 €', tone: 'good', labelPos: 'above' },
+              { x: 10, y: 220, label: 'C(10)=220 € — B(10)=180 € (max)', tone: 'bad', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x (quantité)',
+            yAxisLabel: '€',
+            caption:
+              'R(x)=50x−x² (recette, vert) et C(x)=x²+10x+20 (coût, rouge) — l\'écart vertical ' +
+              'entre les deux est le bénéfice B(x), maximal en x=10 (B=180 €)',
+          },
         },
         {
           kind: 'piege',
@@ -969,6 +1112,29 @@ export const deriveesApplications: ChapterContent = {
             tag: 'comparaison de TOUTES les valeurs : 2, 6, 2, 22',
             text: 'Maximum ABSOLU = 22, atteint en t=5 (à la borne !), bien plus grand que le maximum local (6). Minimum ABSOLU = 2, atteint à la fois en t=0 ET en t=3 (égalité entre une borne et un extremum local).',
           },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (t) => t * t * t - 6 * t * t + 9 * t + 2, tone: 'accent', xMin: 0, xMax: 5 },
+              { fn: () => 2, tone: 'faint', xMin: 0, xMax: 3 },
+            ],
+            xMin: -0.4,
+            xMax: 5.4,
+            xTicks: [],
+            fixedYRange: { min: -1, max: 24 },
+            points: [
+              { x: 1, y: 6, label: 'max local (1;6)', tone: 'good', labelPos: 'above' },
+              { x: 3, y: 2, label: 'min local (3;2)', tone: 'bad', labelPos: 'below' },
+              { x: 0, y: 2, label: 'f(0)=2', tone: 'bad', labelPos: 'left' },
+              { x: 5, y: 22, label: 'f(5)=22 (MAXIMUM ABSOLU)', tone: 'accent', labelPos: 'left' },
+            ],
+            xAxisLabel: 't',
+            yAxisLabel: 'f(t)',
+            caption:
+              'f(t)=t³−6t²+9t+2 sur [0;5] — le maximum local (t=1, f=6) n\'est PAS le maximum ' +
+              'absolu : celui-ci se trouve à la borne t=5 (f=22) ; le minimum absolu est ' +
+              'atteint à la fois en t=0 et t=3 (valeur commune 2)',
+          },
         },
         {
           kind: 'featureTable',
@@ -1023,7 +1189,7 @@ export const deriveesApplications: ChapterContent = {
             'Pour un mouvement en ligne droite décrit par une position s(t) (en mètres, t en ' +
               'secondes) : la **vitesse** est v(t) = s\'(t), et l\'**accélération** est a(t) = ' +
               'v\'(t) = s\'\'(t) — exactement la même logique que le sens de variation (section ' +
-              '1), appliquée à la physique : v est la dérivée de la POSITION, a est la dérivée ' +
+              '4), appliquée à la physique : v est la dérivée de la POSITION, a est la dérivée ' +
               'de la VITESSE.',
           ],
         },
@@ -1117,7 +1283,7 @@ export const deriveesApplications: ChapterContent = {
           kind: 'astuce',
           label: 'La position est extrémale exactement quand v=0',
           text:
-            'Comme pour tout extremum (section 1) : la position s(t) est maximale ou minimale ' +
+            'Comme pour tout extremum (section 4) : la position s(t) est maximale ou minimale ' +
             'au moment précis où sa dérivée v(t) s\'annule ET change de signe — repère toujours ' +
             'ce moment en premier, il structure toute l\'interprétation du mouvement.',
         },
@@ -1138,14 +1304,14 @@ export const deriveesApplications: ChapterContent = {
 
   recap: {
     items: [
-      '**Signe de f\'/f\'\'** — f\'>0 ⟹ croissante, f\'<0 ⟹ décroissante, f\'=0 ET change de ' +
-        'signe ⟹ extremum local ; f\'\'>0 ⟹ convexe, f\'\'<0 ⟹ concave, f\'\' change de signe ⟹ point d\'inflexion.',
       '**Définition de f\'(a)** — limite du taux d\'accroissement [f(a+h)−f(a)]/h quand h→0 ' +
         '(chapitre précédent), interprétée comme la pente de la tangente en a.',
-      '**Fonction dérivée** — règles de la somme, du produit (u\'v+uv\'), du quotient ' +
-        '((u\'v−uv\')/v²) et de la chaîne (u\'(x)·g\'(u(x))) ; jamais (uv)\'=u\'v\' ni (u/v)\'=u\'/v\'.',
       '**Tangente** — y=f(a)+f\'(a)(x−a) ; horizontale ⟺ f\'(a)=0 ; distincte d\'une sécante ' +
         '(qui relie deux points réels, pas un seul).',
+      '**Fonction dérivée** — règles de la somme, du produit (u\'v+uv\'), du quotient ' +
+        '((u\'v−uv\')/v²) et de la chaîne (u\'(x)·g\'(u(x))) ; jamais (uv)\'=u\'v\' ni (u/v)\'=u\'/v\'.',
+      '**Signe de f\'/f\'\'** — f\'>0 ⟹ croissante, f\'<0 ⟹ décroissante, f\'=0 ET change de ' +
+        'signe ⟹ extremum local ; f\'\'>0 ⟹ convexe, f\'\'<0 ⟹ concave, f\'\' change de signe ⟹ point d\'inflexion.',
       '**Étude locale** — tableau de signes de f\' ⟹ variations et extremums ; un point ' +
         'critique (f\'(a)=0) n\'est un extremum QUE si f\' change réellement de signe.',
       '**Étude complète** — domaine → f\' → signe → variations/extremums → limites et ' +
@@ -1164,7 +1330,7 @@ export const deriveesApplications: ChapterContent = {
       ],
     },
     forward:
-      'La dérivée seconde et l\'étude de concavité posées ici (section 1) annoncent une ' +
+      'La dérivée seconde et l\'étude de concavité posées ici (section 4) annoncent une ' +
       'lecture plus fine des courbes ; les techniques de limites et d\'asymptotes du chapitre ' +
       'précédent restent, elles, mobilisées à chaque étude complète — les deux chapitres se répondent directement.',
     entrainement: {
