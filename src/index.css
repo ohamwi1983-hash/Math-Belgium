@@ -304,13 +304,6 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 /* ---------- figures / SVG illustrations ---------- */
 figure { margin: 26px 0; }
 .diagram-frame svg { width: 100%; height: auto; display: block; overflow: visible; }
-/* Géométrie analytique plane : figures autonomes volontairement plus petites (60%, centrées) — la
-   source de ce chapitre les affiche ainsi ; scopé à ce seul chapitre via la classe `chapter-{slug}`
-   posée sur `.page` par ChapterPage, pas une règle globale sur `.diagram-frame`. Exclut les
-   mini-diagrammes d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur propre colonne de
-   grille, un second rétrécissement à 60% de cette largeur les rend illisibles (labels A/B/θ/m). */
-.chapter-geometrie-analytique-plane .diagram-frame svg { width: 60%; margin: 0 auto; }
-.chapter-geometrie-analytique-plane .diag-multi .diagram-frame svg { width: 100%; margin: 0; }
 figcaption {
   margin-top: 10px; font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); text-align: center;
 }
