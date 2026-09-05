@@ -65,6 +65,17 @@ export const primitivesIntegrales: ChapterContent = {
           },
         },
         {
+          kind: 'definition',
+          label: 'Notation — intégrale indéfinie',
+          items: [
+            'L\'ensemble de TOUTES les primitives de f sur I s\'appelle l\'**intégrale ' +
+              'indéfinie** de f sur I et se note $\\int f(x)dx$ : on écrit $\\int f(x)dx = ' +
+              'F(x)+C$ (C ∈ ℝ), où F est une primitive quelconque de f.',
+            'Ce symbole, écrit **sans bornes**, désigne donc une **famille de fonctions** — à ne ' +
+              'pas confondre avec $\\int_a^b f(x)dx$, qui désigne un **nombre** et sera défini à la section 3.',
+          ],
+        },
+        {
           kind: 'featureTable',
           caption: 'Primitives usuelles',
           headers: ['f(x)', 'Primitive F(x)', 'Condition'],
@@ -93,7 +104,8 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Si l\'intégrande se présente comme u\'(x)·f(u(x)) — la dérivée d\'une expression ' +
+            'Si l\'**intégrande** (la fonction écrite sous le signe ∫) se présente comme ' +
+              'u\'(x)·f(u(x)) — la dérivée d\'une expression ' +
               'composée apparaît EXACTEMENT comme facteur —, alors une primitive est F(u(x)) + ' +
               'C, où F est une primitive de f. Cas particuliers très utiles :',
             '$\\dfrac{u\'}{u} \\to \\ln|u| + C \\qquad u\'e^u \\to e^u + C \\qquad u\'u^n \\to \\dfrac{u^{n+1}}{n+1} + C$',
