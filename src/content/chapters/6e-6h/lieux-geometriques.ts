@@ -364,80 +364,6 @@ export const lieuxGeometriques: ChapterContent = {
             "Ne jamais s'étonner d'un résultat fractionnaire ici, et ne jamais arrondir avant la " +
             'fin du calcul.',
         },
-        { kind: 'subheading', text: 'Démontrer une propriété par la géométrie analytique — méthode générale' },
-        {
-          kind: 'methode',
-          label: 'Méthode en 4 étapes',
-          items: [
-            "Choisir un repère **adapté** à la figure — souvent un sommet à l'origine et un côté " +
-              'sur un axe, pour simplifier les calculs sans perdre en généralité.',
-            'Traduire les données en coordonnées avec des **paramètres génériques** (des lettres, ' +
-              "jamais des nombres fixés) — une propriété prouvée pour des lettres vaut pour tous " +
-              "les cas particuliers, alors qu'un exemple numérique n'en prouve qu'un seul.",
-            'Traduire la propriété à démontrer en une égalité entre expressions calculées à ' +
-              'partir de ces paramètres.',
-            'Développer les deux membres et constater qu\'ils coïncident, quels que soient les ' +
-              'paramètres.',
-          ],
-        },
-        {
-          kind: 'exempleLibre',
-          label: "Exemple résolu — les diagonales d'un parallélogramme se coupent en leur milieu",
-          blocks: [
-            {
-              kind: 'para',
-              text:
-                'Repère choisi : $A(0;0)$, $B(2a;0)$, $D(2b;2c)$ avec a, b, c **quelconques** (le ' +
-                'facteur 2 évite toute fraction dans les milieux). Comme ABCD est un ' +
-                'parallélogramme, $C=B+D-A=(2a+2b;2c)$.',
-            },
-            {
-              kind: 'para',
-              text: 'milieu$[AC] = (a+b;c)$ et milieu$[BD] = (a+b;c)$',
-            },
-            {
-              kind: 'para',
-              text:
-                'Les deux milieux sont **identiques** pour tout a, b, c — les diagonales $[AC]$ et ' +
-                '$[BD]$ se coupent bien toujours en leur milieu commun, quel que soit le ' +
-                'parallélogramme choisi.',
-            },
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -1,
-            xMax: 7,
-            yMin: -1,
-            yMax: 4,
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 4, y: 0 }, tone: 'ink', arrow: false },
-              { from: { x: 4, y: 0 }, to: { x: 6, y: 3 }, tone: 'ink', arrow: false },
-              { from: { x: 6, y: 3 }, to: { x: 2, y: 3 }, tone: 'ink', arrow: false },
-              { from: { x: 2, y: 3 }, to: { x: 0, y: 0 }, tone: 'ink', arrow: false },
-              { from: { x: 0, y: 0 }, to: { x: 6, y: 3 }, tone: 'faint', dashed: true, arrow: false },
-              { from: { x: 4, y: 0 }, to: { x: 2, y: 3 }, tone: 'faint', dashed: true, arrow: false },
-            ],
-            points: [
-              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
-              { x: 4, y: 0, label: 'B', tone: 'ink', labelPos: 'right' },
-              { x: 6, y: 3, label: 'C', tone: 'ink', labelPos: 'right' },
-              { x: 2, y: 3, label: 'D', tone: 'ink', labelPos: 'left' },
-              { x: 3, y: 1.5, label: 'milieu commun', tone: 'accent', labelPos: 'above' },
-            ],
-            caption:
-              'parallélogramme ABCD (a=2, b=1, c=1,5 pour l\'illustration) : les diagonales [AC] et [BD] se coupent en leur milieu commun (3;1,5)',
-          },
-        },
-        {
-          kind: 'astuce',
-          text:
-            'Traiter cet exemple avec des coordonnées numériques fixées (ex. B(4;0), D(2;3)) ne ' +
-            'prouverait la propriété que pour ce parallélogramme précis. Garder a, b, c génériques ' +
-            'est ce qui transforme un exemple en démonstration.',
-        },
         {
           kind: 'entrainement',
           title: 'Points et droites remarquables du triangle',
@@ -689,8 +615,90 @@ export const lieuxGeometriques: ChapterContent = {
     },
 
     {
-      id: 'lieux-elimination',
+      id: 'methode-generale-demonstration',
       number: 3,
+      title: 'Démontrer une propriété par la géométrie analytique',
+      kicker: 'méthode générale en 4 étapes — repère adapté, paramètres génériques, traduire, développer',
+      blocks: [
+        {
+          kind: 'methode',
+          label: 'Méthode en 4 étapes',
+          items: [
+            "Choisir un repère **adapté** à la figure — souvent un sommet à l'origine et un côté " +
+              'sur un axe, pour simplifier les calculs sans perdre en généralité.',
+            'Traduire les données en coordonnées avec des **paramètres génériques** (des lettres, ' +
+              "jamais des nombres fixés) — une propriété prouvée pour des lettres vaut pour tous " +
+              "les cas particuliers, alors qu'un exemple numérique n'en prouve qu'un seul.",
+            'Traduire la propriété à démontrer en une égalité entre expressions calculées à ' +
+              'partir de ces paramètres.',
+            'Développer les deux membres et constater qu\'ils coïncident, quels que soient les ' +
+              'paramètres.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: "Exemple résolu — les diagonales d'un parallélogramme se coupent en leur milieu",
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Repère choisi : $A(0;0)$, $B(2a;0)$, $D(2b;2c)$ avec a, b, c **quelconques** (le ' +
+                'facteur 2 évite toute fraction dans les milieux). Comme ABCD est un ' +
+                'parallélogramme, $C=B+D-A=(2a+2b;2c)$.',
+            },
+            {
+              kind: 'para',
+              text: 'milieu$[AC] = (a+b;c)$ et milieu$[BD] = (a+b;c)$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les deux milieux sont **identiques** pour tout a, b, c — les diagonales $[AC]$ et ' +
+                '$[BD]$ se coupent bien toujours en leur milieu commun, quel que soit le ' +
+                'parallélogramme choisi.',
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1,
+            xMax: 7,
+            yMin: -1,
+            yMax: 4,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 4, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: 4, y: 0 }, to: { x: 6, y: 3 }, tone: 'ink', arrow: false },
+              { from: { x: 6, y: 3 }, to: { x: 2, y: 3 }, tone: 'ink', arrow: false },
+              { from: { x: 2, y: 3 }, to: { x: 0, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 3 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 4, y: 0 }, to: { x: 2, y: 3 }, tone: 'faint', dashed: true, arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 4, y: 0, label: 'B', tone: 'ink', labelPos: 'right' },
+              { x: 6, y: 3, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: 2, y: 3, label: 'D', tone: 'ink', labelPos: 'left' },
+              { x: 3, y: 1.5, label: 'milieu commun', tone: 'accent', labelPos: 'above' },
+            ],
+            caption:
+              'parallélogramme ABCD (a=2, b=1, c=1,5 pour l\'illustration) : les diagonales [AC] et [BD] se coupent en leur milieu commun (3;1,5)',
+          },
+        },
+        {
+          kind: 'astuce',
+          text:
+            'Traiter cet exemple avec des coordonnées numériques fixées (ex. B(4;0), D(2;3)) ne ' +
+            'prouverait la propriété que pour ce parallélogramme précis. Garder a, b, c génériques ' +
+            'est ce qui transforme un exemple en démonstration.',
+        },
+      ],
+    },
+
+    {
+      id: 'lieux-elimination',
+      number: 4,
       title: 'Lieux géométriques et élimination de paramètre',
       kicker: 'traduire une condition en (x;y), sans paramètre à éliminer — 7 natures possibles',
       blocks: [
@@ -922,61 +930,6 @@ export const lieuxGeometriques: ChapterContent = {
             },
           ],
         },
-        { kind: 'subheading', text: 'Lieu défini par une représentation paramétrique' },
-        {
-          kind: 'definition',
-          items: [
-            'Un lieu peut être donné directement par deux équations $x=f(t)$, $y=g(t)$ (une ' +
-              '**représentation paramétrique**), plutôt que par une seule condition géométrique. ' +
-              'Pour retrouver l\'équation cartésienne du lieu, on élimine t entre les deux ' +
-              'équations — le plus souvent via une **identité** qui relie f et g (par exemple ' +
-              '$\\cos^2 t+\\sin^2 t=1$).',
-          ],
-        },
-        {
-          kind: 'exemple',
-          badge: "l'astroïde",
-          formula: '$x=\\cos^3\\lambda$, $y=\\sin^3\\lambda$',
-          steps: [
-            { tag: 'isoler', text: 'on prend la racine cubique de chaque équation pour isoler $\\cos\\lambda$ et $\\sin\\lambda$' },
-            { tag: 'identité', text: '$x^{2/3}+y^{2/3} = \\cos^2\\lambda+\\sin^2\\lambda = 1$' },
-          ],
-          result: {
-            tag: 'astroïde',
-            text:
-              'courbe fermée, à 4 « pointes » sur les axes en $(\\pm1;0)$ et $(0;\\pm1)$ ; la ' +
-              'restriction $\\lambda \\in [0;2\\pi[$ balaie la courbe entière une seule fois',
-          },
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -1.5,
-            xMax: 1.5,
-            yMin: -1.4,
-            yMax: 1.4,
-            curves: [
-              { fn: (x) => Math.pow(1 - Math.pow(Math.abs(x), 2 / 3), 1.5), tone: 'ink', xMin: -1, xMax: 1 },
-              { fn: (x) => -Math.pow(1 - Math.pow(Math.abs(x), 2 / 3), 1.5), tone: 'ink', xMin: -1, xMax: 1 },
-            ],
-            points: [
-              { x: 1, y: 0, label: '(1;0)', tone: 'ink', labelPos: 'right' },
-              { x: -1, y: 0, label: '(−1;0)', tone: 'ink', labelPos: 'left' },
-              { x: 0, y: 1, label: '(0;1)', tone: 'ink', labelPos: 'above' },
-              { x: 0, y: -1, label: '(0;−1)', tone: 'ink', labelPos: 'below' },
-            ],
-            caption: "astroïde $x=\\cos^3\\lambda$, $y=\\sin^3\\lambda$, d'équation cartésienne $x^{2/3}+y^{2/3}=1$",
-          },
-        },
-        {
-          kind: 'astuce',
-          text:
-            'Pour contrôler un résultat, choisir une valeur simple de λ (ex. $\\lambda=\\pi/2$ ' +
-            'donne $\\cos\\lambda=0$, $\\sin\\lambda=1$, donc le point (0;1)) et vérifier qu\'il ' +
-            "satisfait bien l'équation cartésienne obtenue — un contrôle rapide qui ne demande " +
-            'aucun nouveau calcul.',
-        },
         {
           kind: 'entrainement',
           title: 'Lieux géométriques et élimination de paramètre',
@@ -994,7 +947,7 @@ export const lieuxGeometriques: ChapterContent = {
 
     {
       id: 'methode-generatrices',
-      number: 4,
+      number: 5,
       title: 'Problèmes de lieux : méthode des génératrices',
       kicker: 'deux droites mobiles, un paramètre commun α — éliminer, factoriser, trier singulier/parasite/propre',
       blocks: [
@@ -1223,6 +1176,69 @@ export const lieuxGeometriques: ChapterContent = {
         },
       ],
     },
+
+    {
+      id: 'lieu-parametrique',
+      number: 6,
+      title: 'Lieux définis par une représentation paramétrique',
+      kicker: "x=f(t), y=g(t) — éliminer t via une identité, ex. l'astroïde",
+      blocks: [
+        {
+          kind: 'definition',
+          items: [
+            'Un lieu peut être donné directement par deux équations $x=f(t)$, $y=g(t)$ (une ' +
+              '**représentation paramétrique**), plutôt que par une seule condition géométrique. ' +
+              'Pour retrouver l\'équation cartésienne du lieu, on élimine t entre les deux ' +
+              'équations — le plus souvent via une **identité** qui relie f et g (par exemple ' +
+              '$\\cos^2 t+\\sin^2 t=1$).',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: "l'astroïde",
+          formula: '$x=\\cos^3\\lambda$, $y=\\sin^3\\lambda$',
+          steps: [
+            { tag: 'isoler', text: 'on prend la racine cubique de chaque équation pour isoler $\\cos\\lambda$ et $\\sin\\lambda$' },
+            { tag: 'identité', text: '$x^{2/3}+y^{2/3} = \\cos^2\\lambda+\\sin^2\\lambda = 1$' },
+          ],
+          result: {
+            tag: 'astroïde',
+            text:
+              'courbe fermée, à 4 « pointes » sur les axes en $(\\pm1;0)$ et $(0;\\pm1)$ ; la ' +
+              'restriction $\\lambda \\in [0;2\\pi[$ balaie la courbe entière une seule fois',
+          },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1.5,
+            xMax: 1.5,
+            yMin: -1.4,
+            yMax: 1.4,
+            curves: [
+              { fn: (x) => Math.pow(1 - Math.pow(Math.abs(x), 2 / 3), 1.5), tone: 'ink', xMin: -1, xMax: 1 },
+              { fn: (x) => -Math.pow(1 - Math.pow(Math.abs(x), 2 / 3), 1.5), tone: 'ink', xMin: -1, xMax: 1 },
+            ],
+            points: [
+              { x: 1, y: 0, label: '(1;0)', tone: 'ink', labelPos: 'right' },
+              { x: -1, y: 0, label: '(−1;0)', tone: 'ink', labelPos: 'left' },
+              { x: 0, y: 1, label: '(0;1)', tone: 'ink', labelPos: 'above' },
+              { x: 0, y: -1, label: '(0;−1)', tone: 'ink', labelPos: 'below' },
+            ],
+            caption: "astroïde $x=\\cos^3\\lambda$, $y=\\sin^3\\lambda$, d'équation cartésienne $x^{2/3}+y^{2/3}=1$",
+          },
+        },
+        {
+          kind: 'astuce',
+          text:
+            'Pour contrôler un résultat, choisir une valeur simple de λ (ex. $\\lambda=\\pi/2$ ' +
+            'donne $\\cos\\lambda=0$, $\\sin\\lambda=1$, donc le point (0;1)) et vérifier qu\'il ' +
+            "satisfait bien l'équation cartésienne obtenue — un contrôle rapide qui ne demande " +
+            'aucun nouveau calcul.',
+        },
+      ],
+    },
   ],
 
   recap: {
@@ -1239,17 +1255,17 @@ export const lieuxGeometriques: ChapterContent = {
         ['Milieux → sommets', "$A=B'+C'-A'$ (et permutations)"],
         ['Bissectrice', '$AI/IC=AB/BC$ — jamais le milieu, sauf triangle isocèle en B'],
         ['Symétrique par rapport à une droite', '$Q=2H-P$, H pied de la perpendiculaire'],
-        ['Démontrer une propriété analytiquement', '4 étapes : repère adapté, paramètres génériques, traduire, développer les deux membres'],
         ['Cercle (forme générale)', '$x^2+y^2+Dx+Ey+F=0$ — centre $(-D/2;-E/2)$, rayon $\\sqrt{D^2/4+E^2/4-F}$'],
         ['Cercle par 2 points, rayon donné', 'toujours 2 centres possibles, symétriques par rapport à la droite'],
         ['Cercle inscrit', 'incentre $=(aA+bB+cC)/(a+b+c)$ — jamais le centre de gravité'],
         ['Tangentes depuis un point extérieur', 'toujours 2, via $dist(O;d)=r$ ; longueur $=\\sqrt{OP^2-r^2}$'],
+        ['Démontrer une propriété analytiquement', '4 étapes : repère adapté, paramètres génériques, traduire, développer les deux membres'],
         ["7 natures d'un lieu", 'vide, point, droite, paire de droites, cercle, bande pleine, forme étendue'],
         ['$|x-p|+|y-q|=k$ vs $|x-p|-|y-q|=k$', 'losange borné vs lieu non borné (4 demi-droites)'],
         ['Théorème de la médiane', '$PA^2+PB^2=k$ : seuil $AB^2/2$, 3 régimes cercle/point/vide'],
         ["Cercle d'Apollonius", '$PA^2=k\\cdot PB^2$ : k=1 → médiatrice ; k≠1 → cercle'],
-        ['Lieu paramétrique', 'éliminer t via une identité (ex. astroïde : $x^{2/3}+y^{2/3}=1$)'],
         ['Méthode des génératrices', 'éliminer α, factoriser, trier singulier/parasite/propre, préciser la restriction'],
+        ['Lieu paramétrique', 'éliminer t via une identité (ex. astroïde : $x^{2/3}+y^{2/3}=1$)'],
       ],
     },
     forward:
