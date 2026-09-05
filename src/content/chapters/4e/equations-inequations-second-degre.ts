@@ -165,6 +165,66 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'expression commune en évidence, exactement comme $x$ dans le tout premier exemple ' +
             'de cette section.',
         },
+        { kind: 'subheading', text: 'Somme et produit des racines (relations de Viète)' },
+        {
+          kind: 'para',
+          text:
+            'Connaître la somme et le produit des racines, sans les avoir calculées, permet de ' +
+            'vérifier des solutions déjà trouvées ou de retrouver l\'une d\'elles quand on connaît l\'autre.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Relations de Viète',
+          items: [
+            'Pour une équation $ax^2+bx+c=0$ ($\\Delta > 0$), la somme des racines vaut ' +
+              '$x_1+x_2 = -\\dfrac{b}{a}$.',
+            'Le produit des racines vaut $x_1 \\cdot x_2 = \\dfrac{c}{a}$.',
+          ],
+        },
+        {
+          kind: 'methode',
+          label: 'Démonstration',
+          items: [
+            'Partir des deux racines données par la formule du discriminant : ' +
+              '$x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$, $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$.',
+            'Additionner : les termes en $\\sqrt{\\Delta}$ s\'annulent, ' +
+              '$x_1+x_2 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}+\\dfrac{-b-\\sqrt{\\Delta}}{2a} = -\\dfrac{b}{a}$.',
+            'Multiplier : $x_1 \\cdot x_2 = \\dfrac{(-b+\\sqrt{\\Delta})(-b-\\sqrt{\\Delta})}{4a^2} = ' +
+              '\\dfrac{b^2-(b^2-4ac)}{4a^2} = \\dfrac{c}{a}$.',
+          ],
+        },
+        { kind: 'subheading', text: 'Écrire une équation à partir de ses solutions' },
+        {
+          kind: 'rappel',
+          label: 'Forme factorisée',
+          items: [
+            'Si $x_1$ et $x_2$ sont solutions d\'une équation du second degré, cette équation ' +
+              'est de la forme $a(x-x_1)(x-x_2)=0$ avec $a \\neq 0$.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Par exemple, si $3$ et $-7$ sont solutions d\'une équation du second degré, alors ' +
+            'cette équation est de la forme $a(x-3)(x+7)=0$ avec $a \\neq 0$.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Forme x² − Sx + P = 0',
+          items: [
+            'Si $S$ est la somme des racines et $P$ leur produit, l\'équation $ax^2+bx+c=0$ ' +
+              'peut s\'écrire, à un facteur $a$ près, $x^2 - Sx + P = 0$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'application directe',
+          steps: [
+            { tag: 'racines données', text: '$x_1=2$ et $x_2=5$' },
+            { tag: 'somme et produit', text: '$S = x_1+x_2 = 7$, $P = x_1 \\cdot x_2 = 10$' },
+          ],
+          result: { tag: 'équation', text: '$x^2 - 7x + 10 = 0$' },
+        },
         { kind: 'video', title: 'Résoudre une équation du second degré, méthode par méthode' },
         {
           kind: 'entrainement',
@@ -717,6 +777,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         'avant développement) ; le discriminant sert au cas général, jamais par défaut.',
       '**Discriminant** — $\\Delta = b^2-4ac$, $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ ; ' +
         'Viète : $S = x_1+x_2 = -b/a$, $P = x_1 \\cdot x_2 = c/a$.',
+      '**Écrire une équation à partir de ses racines** — $a(x-x_1)(x-x_2)=0$ ($a \\neq 0$), ou, ' +
+        'à un facteur $a$ près, $x^2 - Sx + P = 0$.',
       '**Signe d\'un trinôme** — racines → signe de a → intervalle, avec la notation à ' +
         'crochets inversés (jamais des parenthèses).',
       '**Produit de facteurs** — une ligne par facteur, produit négatif si un nombre impair de ' +

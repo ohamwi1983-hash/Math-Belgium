@@ -238,6 +238,19 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   jamais interchangé). Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les deux
   nouvelles sous-sections et les 4 occurrences corrigées capturées à l'écran, aucun `$...$` non
   résolu, `npm run build` et `npm run lint` propres.
+- **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
+  chapitre déjà en place (5 techniques de résolution, tableau de signes, signe d'un produit,
+  fractions rationnelles, inconnue au dénominateur, inéquations rationnelles — souvent plus complet
+  que la source d'un manuel de référence sur ces points). Comparé point par point à la page
+  « Synthèse » d'un manuel (10 points), deux manques réels identifiés et comblés (choix validé
+  explicitement : les deux manques seulement, pas un alignement forcé sur les 8 autres points déjà
+  couverts, parfois différemment) : les relations de Viète ($x_1+x_2=-b/a$, $x_1 \cdot x_2=c/a$)
+  avec leur démonstration à partir de la formule du discriminant, et l'écriture d'une équation à
+  partir de ses solutions ($a(x-x_1)(x-x_2)=0$, puis $x^2-Sx+P=0$) — insérées en fin de la section
+  « Résoudre une équation du second degré », après le cas de mise en évidence généralisée. La puce
+  `recap` correspondante a été étendue en conséquence. Vérifié par rendu navigateur réel (`vite
+  preview`, Playwright) : les deux nouvelles sous-sections capturées à l'écran, aucun `$...$` non
+  résolu, `npm run build` et `npm run lint` propres.
 - **6e (6h), Chapitre 1 — Fonctions réciproques & cyclométriques** (`fonctions-reciproques-cyclometriques`) :
   migré en intégralité. A nécessité plusieurs kinds/extensions supplémentaires par rapport au
   schéma d'alors : callout `definition`, `exempleLibre` (exemple en forme libre, blocs imbriqués),
