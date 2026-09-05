@@ -35,9 +35,26 @@ export const fonctionsLogarithmes: ChapterContent = {
           items: [
             'Pour $a>0$, $a \\neq 1$, $\\log_a$ est l\'unique fonction définie sur ' +
               '$\\mathbb{R}_0^+ = ]0;+\\infty[$ telle que, pour tout $x>0$ et tout $y \\in ' +
-              '\\mathbb{R}$ : $\\log_a(x) = y \\iff a^y = x$.',
-            'Conséquence directe : $\\log_a(a^x) = x$ pour tout $x$ réel, et ' +
-              '$a^{\\log_a(x)} = x$ pour tout $x>0$ — $\\log_a$ et $\\exp_a$ s\'annulent mutuellement.',
+              '\\mathbb{R}$ : $\\log_a(x) = y \\iff a^y = x$. Cette équivalence est le ' +
+              '**principe d\'équivalence fondamental** : le logarithme de base $a$ d\'un réel ' +
+              'strictement positif est l\'exposant de la puissance de $a$ égale à ce réel.',
+          ],
+        },
+        {
+          kind: 'definition',
+          label: 'Propriétés immédiates',
+          items: [
+            'Quatre égalités se lisent directement sur le principe d\'équivalence ' +
+              'ci-dessus. Pour toute base $a>0$, $a \\neq 1$, tout $x>0$ et tout ' +
+              '$r \\in \\mathbb{R}$ :',
+            '**(P1)** $\\log_a(1) = 0$ — car $a^0 = 1$.',
+            '**(P2)** $\\log_a(a) = 1$ — car $a^1 = a$.',
+            '**(P3)** $\\log_a(a^r) = r$ — l\'exposant à donner à $a$ pour obtenir $a^r$ est ' +
+              'évidemment $r$ : $\\log_a$ **défait** $\\exp_a$.',
+            '**(P4)** $a^{\\log_a(x)} = x$ — en posant $y = \\log_a(x)$, le principe ' +
+              'd\'équivalence donne exactement $a^y = x$ : $\\exp_a$ **défait** $\\log_a$.',
+            'Ces quatre propriétés sont l\'outil de base de **toutes** les démonstrations de ce ' +
+              'chapitre : elles y seront citées par leur numéro, (P1) à (P4).',
           ],
         },
         {
@@ -113,6 +130,11 @@ export const fonctionsLogarithmes: ChapterContent = {
             xMax: 3.2,
             xTicks: [],
             fixedYRange: { min: -2.5, max: 3.2 },
+            textLabels: [
+              { x: 0.55, y: 2.95, text: 'y=2^x', tone: 'good', anchor: 'start' },
+              { x: 2.55, y: 2.15, text: 'y=x', tone: 'faint', anchor: 'start' },
+              { x: 2.35, y: 0.3, text: 'y=log₂x', tone: 'accent', anchor: 'start' },
+            ],
             points: [
               { x: 0.8, y: Math.pow(2, 0.8), label: '(r;s)', tone: 'bad' },
               { x: Math.pow(2, 0.8), y: 0.8, label: '(s;r)', tone: 'accent', labelPos: 'below' },
@@ -120,9 +142,39 @@ export const fonctionsLogarithmes: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'exp₂ et log₂ symétriques par rapport à la droite y=x (ici a=2) : si (r;s) ' +
-              'appartient au graphique de exp₂, alors (s;r) appartient à celui de log₂ — vrai ' +
-              'pour toute base a>0, a≠1',
+              'Cas a > 1 (ici a=2) : exp₂ et log₂ sont symétriques par rapport à la droite y=x. ' +
+              'Si (r;s) appartient au graphique de exp₂, alors (s;r) appartient à celui de log₂ ' +
+              '— c\'est la traduction graphique de « fonctions réciproques ».',
+          },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x, tone: 'faint' },
+              { fn: (x) => Math.pow(0.5, x), tone: 'good', xMin: -1.7 },
+              { fn: (x) => Math.log(x) / Math.log(0.5), tone: 'accent', xMin: 0.04 },
+            ],
+            xMin: -2.5,
+            xMax: 3.2,
+            xTicks: [],
+            fixedYRange: { min: -2.5, max: 3.2 },
+            textLabels: [
+              { x: -2.4, y: 2.55, text: 'y=0,5^x', tone: 'good', anchor: 'start' },
+              { x: 2.55, y: 2.15, text: 'y=x', tone: 'faint', anchor: 'start' },
+              { x: 0.7, y: -1.95, text: 'y=log₀,₅x', tone: 'accent', anchor: 'start' },
+            ],
+            points: [
+              { x: -1.2, y: Math.pow(0.5, -1.2), label: '(r;s)', tone: 'bad' },
+              { x: Math.pow(0.5, -1.2), y: -1.2, label: '(s;r)', tone: 'accent', labelPos: 'right' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Cas 0 < a < 1 (ici a=0,5) : même symétrie par rapport à y=x, mais les deux ' +
+              'courbes sont maintenant décroissantes. La réciprocité ne dépend pas de la base — ' +
+              'seul le sens de variation change.',
           },
         },
         {
@@ -143,15 +195,46 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$\\log_a(xy) = \\log_a(a^{\\log_a(x)} \\cdot a^{\\log_a(y)})$ — car $a^{\\log_a(t)}=t$',
+                'Soient $a>0$, $a \\neq 1$, et $x,y>0$. Toute la démonstration tient en une ' +
+                'idée : réécrire $x$ et $y$ comme des **puissances de la base** $a$, pour ' +
+                'utiliser les règles de calcul sur les exposants du chapitre 2.',
             },
             {
               kind: 'para',
               text:
-                '$= \\log_a(a^{\\log_a(x) + \\log_a(y)})$ — propriété des puissances, ' +
-                '$a^p \\cdot a^q = a^{p+q}$ (chapitre 2)',
+                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$ et $y = a^{\\log_a(y)}$. En ' +
+                'remplaçant $x$ et $y$ par ces écritures dans $\\log_a(xy)$ :',
             },
-            { kind: 'para', text: '$= \\log_a(x) + \\log_a(y)$ — car $\\log_a(a^t)=t$' },
+            {
+              kind: 'para',
+              text: '$\\log_a(xy) = \\log_a\\!\\left(a^{\\log_a(x)} \\cdot a^{\\log_a(y)}\\right)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** L\'argument est maintenant un produit de deux puissances de même ' +
+                'base $a$ : la propriété des puissances $a^p \\cdot a^q = a^{p+q}$ (chapitre 2) ' +
+                'permet de n\'en faire qu\'une seule, en **additionnant** les exposants :',
+            },
+            {
+              kind: 'para',
+              text: '$= \\log_a\\!\\left(a^{\\log_a(x) + \\log_a(y)}\\right)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** L\'argument est désormais de la forme $a^r$, avec ' +
+                '$r = \\log_a(x) + \\log_a(y)$. Par **(P3)**, $\\log_a(a^r) = r$ :',
+            },
+            { kind: 'para', text: '$= \\log_a(x) + \\log_a(y) \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'C\'est bien la propriété annoncée : le logarithme **transforme un produit en ' +
+                'somme**. Toute la démonstration s\'est jouée sur le passage de $\\cdot$ à $+$ à ' +
+                'l\'étape 2 — les étapes 1 et 3 ne font qu\'entrer puis sortir de l\'écriture ' +
+                '« puissance de $a$ ».',
+            },
           ],
         },
         {
@@ -160,20 +243,92 @@ export const fonctionsLogarithmes: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: '$\\log_a(x^r) = \\log_a((a^{\\log_a(x)})^r)$ — car $a^{\\log_a(x)}=x$',
+              text:
+                'Soient $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$. Même schéma en trois ' +
+                'étapes que pour le produit, avec cette fois la propriété des puissances ' +
+                'relative à une puissance de puissance.',
             },
             {
               kind: 'para',
               text:
-                '$= \\log_a(a^{r \\cdot \\log_a(x)})$ — propriété des puissances, ' +
-                '$(a^p)^r=a^{rp}$ (chapitre 2)',
+                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$. On remplace $x$ par cette ' +
+                'écriture dans $\\log_a(x^r)$ :',
             },
-            { kind: 'para', text: '$= r \\cdot \\log_a(x)$ — car $\\log_a(a^t)=t$' },
+            {
+              kind: 'para',
+              text: '$\\log_a(x^r) = \\log_a\\!\\left(\\left(a^{\\log_a(x)}\\right)^r\\right)$',
+            },
             {
               kind: 'para',
               text:
-                'Le logarithme d\'un quotient $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$ se ' +
-                'démontre exactement de la même façon, en utilisant $a^p/a^q = a^{p-q}$.',
+                '**Étape 2.** L\'argument est une puissance de puissance : par ' +
+                '$(a^p)^r = a^{p \\cdot r}$ (chapitre 2), les deux exposants se **multiplient** :',
+            },
+            {
+              kind: 'para',
+              text: '$= \\log_a\\!\\left(a^{r \\cdot \\log_a(x)}\\right)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** L\'argument est de la forme $a^t$ avec $t = r \\cdot \\log_a(x)$. ' +
+                'Par **(P3)**, $\\log_a(a^t) = t$ :',
+            },
+            { kind: 'para', text: '$= r \\cdot \\log_a(x) \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'Le logarithme **transforme une puissance en produit** : l\'exposant $r$ « ' +
+                'descend » devant le logarithme. C\'est cette propriété qui permettra, en ' +
+                'section 2, de faire sortir l\'inconnue d\'un exposant.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — logarithme d\'un quotient',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soient $a>0$, $a \\neq 1$, et $x,y>0$. Le schéma est rigoureusement le même que ' +
+                'pour le produit ; seule change la propriété des puissances utilisée à ' +
+                'l\'étape 2.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$ et $y = a^{\\log_a(y)}$, d\'où :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\log_a\\!\\left(\\dfrac{x}{y}\\right) = ' +
+                '\\log_a\\!\\left(\\dfrac{a^{\\log_a(x)}}{a^{\\log_a(y)}}\\right)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** L\'argument est un quotient de deux puissances de même base $a$ : ' +
+                'par $a^p / a^q = a^{p-q}$ (chapitre 2), les exposants se **soustraient** :',
+            },
+            {
+              kind: 'para',
+              text: '$= \\log_a\\!\\left(a^{\\log_a(x) - \\log_a(y)}\\right)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** Par **(P3)** appliquée à $t = \\log_a(x) - \\log_a(y)$ :',
+            },
+            { kind: 'para', text: '$= \\log_a(x) - \\log_a(y) \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'On aurait aussi pu déduire ce résultat des deux précédents, sans repartir de ' +
+                '**(P4)** : $\\log_a(x/y) = \\log_a(x \\cdot y^{-1}) = \\log_a(x) + ' +
+                '\\log_a(y^{-1})$ (logarithme d\'un produit) $= \\log_a(x) + (-1) \\cdot ' +
+                '\\log_a(y)$ (logarithme d\'une puissance, avec $r=-1$) $= \\log_a(x) - \\log_a(y)$.',
             },
           ],
         },
@@ -196,7 +351,82 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'definition',
-          label: 'Changement de base',
+          label: 'Changement de base — pour les exponentielles',
+          items: [
+            'Pour deux bases $a,b>0$, $a \\neq 1$, $b \\neq 1$, et tout $x$ réel : ' +
+              '$a^x = b^{\\,x \\cdot \\log_b(a)}$.',
+            'Autrement dit : **toute** exponentielle peut se réécrire dans **n\'importe quelle** ' +
+              'autre base, au prix d\'un facteur constant $\\log_b(a)$ dans l\'exposant.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — changement de base pour les exponentielles',
+          blocks: [
+            {
+              kind: 'para',
+              text: 'Soient $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et soit $x$ un réel.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** On réécrit d\'abord la **base** $a$ comme une puissance de $b$. ' +
+                'Comme $a>0$, la propriété **(P4)** appliquée en base $b$ donne ' +
+                '$a = b^{\\log_b(a)}$. On élève les deux membres à la puissance $x$ :',
+            },
+            {
+              kind: 'para',
+              text: '$a^x = \\left(b^{\\log_b(a)}\\right)^{x}$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** Le membre de droite est une puissance de puissance : par ' +
+                '$(b^p)^x = b^{p \\cdot x}$ (chapitre 2), les exposants se multiplient :',
+            },
+            { kind: 'para', text: '$= b^{\\,x \\cdot \\log_b(a)} \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'Lecture graphique : passer de $\\exp_b$ à $\\exp_a$ revient à **diviser toutes ' +
+                'les abscisses par** $\\log_b(a)$. En effet $a^x = b^{x \\cdot \\log_b(a)}$ : la ' +
+                'valeur que $\\exp_a$ atteint en $x$, $\\exp_b$ ne l\'atteint qu\'en ' +
+                '$x \\cdot \\log_b(a)$.',
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => Math.pow(2, x), tone: 'accent', xMax: 1.85 },
+              { fn: (x) => Math.pow(3, x), tone: 'good', xMax: 1.18 },
+            ],
+            xMin: -2,
+            xMax: 2.4,
+            xTicks: [],
+            fixedYRange: { min: -0.5, max: 3.6 },
+            textLabels: [
+              { x: -1.95, y: 3.2, text: 'g(x)=3^x', tone: 'good', anchor: 'start' },
+              { x: -1.95, y: 2.5, text: 'f(x)=2^x', tone: 'accent', anchor: 'start' },
+            ],
+            points: [
+              { x: 1, y: 3, label: '(1;3)', tone: 'good', labelPos: 'left' },
+              { x: Math.log(3) / Math.log(2), y: 3, label: '(log₂3;3)', tone: 'accent', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Changement de base en action : 3^x = 2^(x·log₂3). La hauteur 3, atteinte par 3^x ' +
+              'dès x=1, n\'est atteinte par 2^x qu\'en x=log₂3 ≈ 1,58 — le graphique de 3^x ' +
+              's\'obtient donc à partir de celui de 2^x en divisant toutes les abscisses par ' +
+              'log₂3 (soit ≈ ×0,63).',
+          },
+        },
+        {
+          kind: 'definition',
+          label: 'Changement de base — pour les logarithmes',
           items: [
             'Pour deux bases $a,b>0$, $a \\neq 1$, $b \\neq 1$, tout logarithme de base $a$ se ' +
               'ramène toujours à n\'importe quelle autre base $b$ : $\\log_a(x) = ' +
@@ -205,36 +435,217 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration — changement de base',
+          label: 'Démonstration — changement de base pour les logarithmes',
           blocks: [
-            { kind: 'para', text: 'Soit $y = \\log_a(x)$. On écrit successivement les égalités équivalentes :' },
-            { kind: 'para', text: '$a^y = x$ — définition de $\\log_a$, réciproque de $\\exp_a$' },
-            {
-              kind: 'para',
-              text: '$\\log_b(a^y) = \\log_b(x)$ — en appliquant $\\log_b$ aux deux membres (fonction bien définie)',
-            },
-            { kind: 'para', text: '$y \\cdot \\log_b(a) = \\log_b(x)$ — car $\\log_b(a^y)=y \\cdot \\log_b(a)$' },
-            { kind: 'para', text: '$y = \\dfrac{\\log_b(x)}{\\log_b(a)}$ — division par $\\log_b(a) \\neq 0$ (car $a \\neq 1$)' },
             {
               kind: 'para',
               text:
-                'Conséquence : toutes les fonctions logarithmes, quelle que soit leur base, ' +
-                'sont des **multiples** les unes des autres.',
+                'Soient $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et soit $x>0$. On **pose** ' +
+                '$y = \\log_a(x)$ : démontrer la formule revient alors à calculer $y$ en ' +
+                'fonction de logarithmes de base $b$ uniquement. On écrit successivement les ' +
+                'égalités équivalentes suivantes.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** $y = \\log_a(x)$ signifie exactement, par le principe ' +
+                'd\'équivalence fondamental :',
+            },
+            { kind: 'para', text: '$a^{y} = x$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** On applique au membre de gauche le changement de base pour les ' +
+                'exponentielles démontré ci-dessus, $a^{y} = b^{\\,y \\cdot \\log_b(a)}$ :',
+            },
+            { kind: 'para', text: '$b^{\\,y \\cdot \\log_b(a)} = x$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** Cette dernière égalité est de la forme $b^{\\,\\square} = x$. Par ' +
+                'le principe d\'équivalence fondamental **appliqué cette fois en base** $b$, ' +
+                'l\'exposant $\\square$ est exactement $\\log_b(x)$ :',
+            },
+            { kind: 'para', text: '$y \\cdot \\log_b(a) = \\log_b(x)$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 4.** Enfin, $\\log_b(a) \\neq 0$ : par **(P1)**, $\\log_b$ ne s\'annule ' +
+                'qu\'en 1, et $a \\neq 1$ par hypothèse. On peut donc diviser les deux membres ' +
+                'par $\\log_b(a)$ :',
+            },
+            { kind: 'para', text: '$y = \\dfrac{\\log_b(x)}{\\log_b(a)}$' },
+            {
+              kind: 'para',
+              text:
+                'Comme $y = \\log_a(x)$ par construction, on conclut $\\log_a(x) = ' +
+                '\\dfrac{\\log_b(x)}{\\log_b(a)}$. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Conséquence importante : $\\log_b(a)$ étant une **constante** (elle ne dépend ' +
+                'pas de $x$), l\'égalité se lit $\\log_a = \\dfrac{1}{\\log_b(a)} \\cdot ' +
+                '\\log_b$ — toutes les fonctions logarithmes, quelle que soit leur base, sont ' +
+                'des **multiples** les unes des autres.',
+            },
+            {
+              kind: 'para',
+              text:
+                'La réciproque est vraie elle aussi : tout multiple non nul $k \\cdot \\log_b$ ' +
+                'est encore une fonction logarithme. Il suffit de choisir la base $a$ telle que ' +
+                '$k = \\dfrac{1}{\\log_b(a)}$, c\'est-à-dire $\\log_b(a) = \\dfrac{1}{k}$, ' +
+                'c\'est-à-dire $a = b^{1/k}$ — un réel bien strictement positif et différent ' +
+                'de 1 dès que $k \\neq 0$.',
             },
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => Math.log(x) / Math.log(2), tone: 'good', xMin: 0.15 },
+              { fn: (x) => Math.log(x), tone: 'accent', xMin: 0.09 },
+              { fn: (x) => Math.log10(x), tone: 'bad', xMin: 0.004 },
+              { fn: (x) => Math.log(x) / Math.log(0.5), tone: 'faint', xMin: 0.15 },
+            ],
+            xMin: -0.5,
+            xMax: 4,
+            xTicks: [2, 3],
+            fixedYRange: { min: -2.4, max: 2.4 },
+            textLabels: [
+              { x: 3.2, y: 1.95, text: 'log₂', tone: 'good', anchor: 'start' },
+              { x: 3.2, y: 1.3, text: 'ln', tone: 'accent', anchor: 'start' },
+              { x: 3.2, y: 0.18, text: 'log₁₀', tone: 'bad', anchor: 'start' },
+              { x: 2.35, y: -2.1, text: 'log₀,₅', tone: 'faint', anchor: 'start' },
+            ],
+            points: [{ x: 1, y: 0, label: '(1;0)', tone: 'accent', labelPos: 'below' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Quatre fonctions logarithmes (bases 2, e, 10 et 0,5) sur les mêmes axes. Elles ' +
+              'passent toutes par (1;0) et sont toutes multiples les unes des autres : leurs ' +
+              'ordonnées sont, en chaque x, proportionnelles entre elles. Un coefficient négatif ' +
+              '(cas de log₀,₅, dont le coefficient vaut 1/ln(0,5) < 0) retourne simplement la ' +
+              'courbe autour de l\'axe des abscisses.',
+          },
         },
         {
           kind: 'astuce',
           label: 'Le logarithme népérien : le cas particulier a = e',
           text:
             'Le nombre $e$ (introduit au chapitre 2 comme l\'unique base pour laquelle ' +
-            '$\\exp_a\' = \\exp_a$) donne un logarithme particulièrement important, le ' +
-            '**logarithme népérien** $\\log_e$, presque toujours noté $\\ln$ plutôt que ' +
-            '$\\log_e$. Le changement de base ci-dessus, avec $b=e$, donne alors une écriture ' +
-            'de **tout** logarithme uniquement à l\'aide de $\\ln$ : $\\log_a(x) = ' +
-            '\\dfrac{\\ln(x)}{\\ln(a)}$. C\'est cette écriture qui rend $\\ln$ si pratique en ' +
-            'pratique : une calculatrice n\'a souvent qu\'une touche $\\ln$. Pour obtenir ' +
-            '$\\log_2(10)$ par exemple, on calcule $\\ln(10)/\\ln(2) \\approx 3{,}32$.',
+            '$\\exp_a\' = \\exp_a$) donne un logarithme particulièrement important : $\\log_e$, ' +
+            'la fonction réciproque de $\\exp$. Le **logarithme népérien** $\\ln$, lui, a été ' +
+            'introduit au chapitre 2 par une tout autre voie — comme le coefficient qui apparaît ' +
+            'dans la dérivée $(a^x)\' = a^x \\cdot \\ln(a)$. Ces deux fonctions, définies ' +
+            'indépendamment l\'une de l\'autre, sont en fait **la même** : c\'est l\'objet du ' +
+            'théorème démontré juste après. On note donc $\\ln$ plutôt que $\\log_e$. Le ' +
+            'changement de base ci-dessus, avec $b=e$, donne alors une écriture de **tout** ' +
+            'logarithme uniquement à l\'aide de $\\ln$ : $\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$. ' +
+            'C\'est cette écriture qui rend $\\ln$ si pratique en pratique : une calculatrice ' +
+            'n\'a souvent qu\'une touche $\\ln$. Pour obtenir $\\log_2(10)$ par exemple, on ' +
+            'calcule $\\ln(10)/\\ln(2) \\approx 3{,}32$.',
+        },
+        {
+          kind: 'definition',
+          label: 'Identification du logarithme népérien avec le logarithme de base e',
+          items: ['Pour tout $a>0$ : $\\ln(a) = \\log_e(a)$.'],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — pourquoi ln est exactement log_e',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soit $a>0$, $a \\neq 1$. L\'idée est de **calculer la dérivée de** $\\exp_a$ ' +
+                '**de deux façons différentes**, puis d\'identifier les deux résultats.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Premier calcul** — via le changement de base. Le théorème démontré plus haut, ' +
+                'appliqué avec $b=e$, donne $a^x = e^{\\,x \\cdot \\log_e(a)}$. On dérive cette ' +
+                'écriture :',
+            },
+            {
+              kind: 'para',
+              text: '$(a^x)\' = \\left(e^{\\,x \\cdot \\log_e(a)}\\right)\'$ — changement de base',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= e^{\\,x \\cdot \\log_e(a)} \\cdot \\left(x \\cdot \\log_e(a)\\right)\'$ — ' +
+                'règle de la chaîne, et $\\exp\' = \\exp$ (chapitre 2)',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= e^{\\,x \\cdot \\log_e(a)} \\cdot \\log_e(a)$ — dérivée d\'une fonction du ' +
+                'premier degré : $\\log_e(a)$ est une **constante**, donc ' +
+                '$(x \\cdot \\log_e(a))\' = \\log_e(a)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= a^x \\cdot \\log_e(a)$ — on repasse à la base $a$ par le même changement de ' +
+                'base, en sens inverse',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Deuxième calcul** — la formule déjà connue. Le chapitre 2 avait établi ' +
+                'directement, pour toute base $a>0$ : $(a^x)\' = a^x \\cdot \\ln(a)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Identification.** Les deux calculs portent sur la même fonction dérivée, donc ' +
+                'pour tout $x$ réel : $a^x \\cdot \\log_e(a) = a^x \\cdot \\ln(a)$. Comme ' +
+                '$a^x > 0$ (jamais nul), on peut diviser les deux membres par $a^x$ :',
+            },
+            { kind: 'para', text: '$\\log_e(a) = \\ln(a) \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'Le cas $a=1$ se vérifie à part et sans calcul : $\\ln(1)=0$ et $\\log_e(1)=0$ ' +
+                'par **(P1)**. L\'égalité vaut donc bien pour tout $a>0$.',
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x, tone: 'faint' },
+              { fn: Math.exp, tone: 'good', xMax: 1.5 },
+              { fn: Math.log, tone: 'accent', xMin: 0.09 },
+            ],
+            xMin: -1.6,
+            xMax: 4,
+            xTicks: [],
+            fixedYRange: { min: -2.5, max: 4 },
+            textLabels: [
+              { x: 1.35, y: 3.55, text: 'exp', tone: 'good', anchor: 'start' },
+              { x: 2.75, y: 3.35, text: 'y=x', tone: 'faint', anchor: 'start' },
+              { x: 3.45, y: 0.72, text: 'ln', tone: 'accent', anchor: 'start' },
+            ],
+            points: [
+              { x: 0, y: 1, label: '(0;1)', tone: 'good', labelPos: 'left' },
+              { x: 1, y: E, label: '(1;e)', tone: 'good', labelPos: 'above' },
+              { x: 1, y: 0, label: '(1;0)', tone: 'accent', labelPos: 'below' },
+              { x: E, y: 1, label: '(e;1)', tone: 'accent', labelPos: 'right' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Le cas particulier a=e : exp et ln, symétriques par rapport à y=x. Les points ' +
+              'remarquables se répondent deux à deux — (0;1) et (1;e) sur exp deviennent (1;0) ' +
+              'et (e;1) sur ln, coordonnées échangées.',
+          },
         },
         {
           kind: 'exempleLibre',
@@ -243,15 +654,58 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$) peut s\'écrire ' +
-                '$f(x) = C \\cdot b^{kx}$ dans n\'importe quelle autre base $b>0$, $b \\neq 1$, ' +
-                'avec $C=r \\cdot a^t$ et $k=s \\cdot \\log_b(a)$.',
+                'Toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, et $r,s,t$ ' +
+                'réels) peut s\'écrire $f(x) = C \\cdot b^{kx}$ dans n\'importe quelle autre ' +
+                'base $b>0$, $b \\neq 1$. Voici la justification, ligne par ligne :',
+            },
+            { kind: 'para', text: '$f(x) = r \\cdot a^{sx+t}$' },
+            {
+              kind: 'para',
+              text:
+                '$= \\left(r \\cdot a^{t}\\right) \\cdot a^{sx}$ — on **sépare l\'exposant** : ' +
+                'par $a^{p+q} = a^p \\cdot a^q$ (chapitre 2), $a^{sx+t} = a^{sx} \\cdot a^{t}$, ' +
+                'et $a^{t}$ est une constante que l\'on regroupe avec $r$',
             },
             {
               kind: 'para',
               text:
-                'En base $e$ : $f(x) = 4 \\cdot 3^{5x+2} = (4 \\cdot 3^2) \\cdot 3^{5x} = ' +
-                '36 \\cdot e^{(5\\ln(3))x} \\approx 36 \\cdot e^{5{,}493x}$.',
+                '$= \\left(r \\cdot a^{t}\\right) \\cdot b^{\\,(s \\cdot \\log_b(a))\\,x}$ — ' +
+                'changement de base pour les exponentielles appliqué à $a^{sx} = ' +
+                '\\left(a^{s}\\right)^{x}$, ou directement $a^{u} = b^{\\,u \\cdot \\log_b(a)}$ ' +
+                'avec $u = sx$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= C \\cdot b^{kx}$ — en **posant** $C = r \\cdot a^{t}$ et ' +
+                '$k = s \\cdot \\log_b(a)$, deux constantes qui ne dépendent pas de $x$. ' +
+                '$\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Application numérique en base $e$, avec $f(x) = 4 \\cdot 3^{5x+2}$ (donc $r=4$, ' +
+                '$a=3$, $s=5$, $t=2$) :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$f(x) = 4 \\cdot 3^{5x+2} = \\left(4 \\cdot 3^{2}\\right) \\cdot 3^{5x} = ' +
+                '36 \\cdot 3^{5x}$ — séparation de l\'exposant, avec $4 \\cdot 3^2 = 36$',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= 36 \\cdot e^{\\,(5\\ln(3))\\,x} \\approx 36 \\cdot e^{5{,}493\\,x}$ — ' +
+                'changement de base vers $e$, avec $k = 5\\ln(3) \\approx 5{,}493$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Le coefficient obtenu est ici un logarithme, ensuite arrondi. En pratique, ' +
+                'quand on ajuste un modèle sur des données réelles, rien ne dit que les ' +
+                'constantes de $r \\cdot a^{sx+t}$ soient plus « simples » que celles de ' +
+                '$C \\cdot e^{kx}$ : les deux modèles sont strictement équivalents.',
             },
           ],
         },
@@ -261,9 +715,10 @@ export const fonctionsLogarithmes: ChapterContent = {
           text:
             'Un repère **semi-logarithmique** gradue un axe (souvent $Oy$) selon une **échelle ' +
             'logarithmique** : une même distance sépare toujours deux graduations de même ' +
-            '*rapport* (entre 1 et 10, autant qu\'entre 10 et 100, ou 100 et 1 000), et non de ' +
-            'même différence. La distance entre l\'origine et une valeur $N$ vaut $\\log(N)$ — ' +
-            'l\'origine se situe donc en 1, car $\\log(1)=0$. Ce type de repère représente un ' +
+            '**rapport** (entre 1 et 10, autant qu\'entre 10 et 100, ou 100 et 1 000), et non de ' +
+            'même différence. Une telle échelle se construit avec le logarithme de base 10 : la ' +
+            'distance entre l\'origine et une valeur $N$ vaut $\\log_{10}(N)$ — l\'origine se ' +
+            'situe donc en 1, car $\\log_{10}(1)=0$. Ce type de repère représente un ' +
             'phénomène exponentiel par une droite, et permet de comparer des taux de croissance ' +
             'très différents sur un même graphique.',
         },
@@ -337,7 +792,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           text:
             'Après avoir résolu par $\\log_a$ ou $\\exp_a$ (quelle que soit la base $a$), il ' +
             'faut **toujours** vérifier que la solution garde chaque argument de logarithme de ' +
-            'l\'équation *initiale* strictement positif — une solution trouvée algébriquement ' +
+            'l\'équation **initiale** strictement positif — une solution trouvée algébriquement ' +
             'peut violer cette condition et doit alors être rejetée.',
         },
         {
@@ -368,21 +823,67 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration',
+          label: 'Démonstration — égalité de deux logarithmes',
           blocks: [
             {
               kind: 'para',
               text:
-                '$\\log_a(x) = \\log_a(y) \\implies a^{\\log_a(x)} = a^{\\log_a(y)}$ — $\\exp_a$ ' +
-                'est une fonction : deux entrées égales ⟹ mêmes sorties',
+                'Soient $a>0$, $a \\neq 1$, et $x,y>0$. Il s\'agit d\'une **équivalence** : il ' +
+                'faut donc démontrer les deux implications séparément.',
             },
-            { kind: 'para', text: '$\\implies x = y$ — car $a^{\\log_a(x)}=x$' },
             {
               kind: 'para',
               text:
-                'Réciproquement, $x=y \\implies \\log_a(x)=\\log_a(y)$ est immédiat (une ' +
-                'fonction associe une seule image à chaque antécédent). Cas particulier $a=e$ : ' +
-                '$\\ln(x)=\\ln(y) \\iff x=y$.',
+                '**1) Sens** $\\implies$ — de $\\log_a(x) = \\log_a(y)$ vers $x = y$. C\'est le ' +
+                'sens utile en pratique, celui qui autorise à « supprimer les deux logarithmes ».',
+            },
+            {
+              kind: 'para',
+              text:
+                'On part de l\'hypothèse et on applique $\\exp_a$ aux deux membres. C\'est ' +
+                'légitime parce que $\\exp_a$ est une **fonction** : deux nombres égaux ont ' +
+                'nécessairement la même image.',
+            },
+            {
+              kind: 'para',
+              text: '$\\log_a(x) = \\log_a(y) \\implies a^{\\log_a(x)} = a^{\\log_a(y)}$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Or **(P4)** donne $a^{\\log_a(x)} = x$ pour le membre de gauche et ' +
+                '$a^{\\log_a(y)} = y$ pour celui de droite. En remplaçant :',
+            },
+            { kind: 'para', text: '$\\implies x = y$' },
+            {
+              kind: 'para',
+              text:
+                'Autre façon de dire exactement la même chose : $\\log_a$ est strictement ' +
+                'monotone (croissante si $a>1$, décroissante si $0<a<1$), donc **injective** — ' +
+                'deux nombres **distincts** ne peuvent pas avoir le même logarithme. Si leurs ' +
+                'logarithmes sont égaux, c\'est donc que les nombres l\'étaient déjà.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2) Sens** $\\impliedby$ — de $x = y$ vers $\\log_a(x) = \\log_a(y)$. ' +
+                'Immédiat : $\\log_a$ est une fonction, elle associe une seule image à chaque ' +
+                'antécédent ; deux écritures du même nombre ont donc le même logarithme. ' +
+                '$\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Cas particulier $a=e$ : pour tous $x,y>0$, $\\ln(x)=\\ln(y) \\iff x=y$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Attention à la portée de l\'énoncé : l\'équivalence suppose **dès le départ** ' +
+                '$x>0$ et $y>0$. Appliquée à une équation où $x$ et $y$ sont des expressions en ' +
+                'l\'inconnue, elle n\'est donc valable que **sur le domaine** où ces deux ' +
+                'expressions sont strictement positives — d\'où l\'obligation de poser les ' +
+                'conditions d\'existence avant de « supprimer les logarithmes ».',
             },
           ],
         },
@@ -482,26 +983,97 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
-          label: 'Démonstration (cas 0 < a < 1)',
+          label: 'Démonstration — cas 0 < a < 1 (le sens s\'inverse)',
           blocks: [
             {
               kind: 'para',
               text:
-                'Si $0<a<1$, la fonction exponentielle de base a est strictement ' +
-                '**décroissante** (chapitre 2). On a alors :',
+                'Soient $0<a<1$ et $u,v>0$. On démontre l\'équivalence ' +
+                '$\\log_a(u) < \\log_a(v) \\iff u > v$ ; les trois autres comparateurs s\'en ' +
+                'déduisent ensuite. Les deux sens se démontrent séparément, et **chacun ' +
+                's\'appuie sur une fonction différente** — c\'est le point délicat.',
             },
             {
               kind: 'para',
               text:
-                '$\\log_a(u) \\le \\log_a(v) \\implies a^{\\log_a(u)} \\ge a^{\\log_a(v)}$ — ' +
-                '$\\exp_a$ décroissante inverse le sens',
+                '**1) Sens** $\\implies$, en s\'appuyant sur $\\exp_a$. Puisque $0<a<1$, la ' +
+                'fonction $\\exp_a$ est strictement **décroissante** (chapitre 2) : appliquée ' +
+                'aux deux membres d\'une inégalité stricte, elle en **inverse** le sens.',
             },
-            { kind: 'para', text: '$\\implies u \\ge v$ — car $a^{\\log_a(x)}=x$' },
+            {
+              kind: 'para',
+              text: '$\\log_a(u) < \\log_a(v) \\implies a^{\\log_a(u)} > a^{\\log_a(v)}$',
+            },
             {
               kind: 'para',
               text:
-                'Pour $a>1$ (dont le cas particulier $a=e$), $\\exp_a$ est croissante, et la ' +
-                'même démonstration conserve le sens de l\'inégalité au lieu de l\'inverser.',
+                'Par **(P4)**, $a^{\\log_a(u)} = u$ et $a^{\\log_a(v)} = v$. En remplaçant les ' +
+                'deux membres :',
+            },
+            { kind: 'para', text: '$\\implies u > v$' },
+            {
+              kind: 'para',
+              text:
+                '**2) Sens** $\\impliedby$, en s\'appuyant cette fois sur $\\log_a$ elle-même. ' +
+                'Puisque $0<a<1$, la fonction $\\log_a$ est strictement **décroissante** sur ' +
+                '$\\mathbb{R}_0^+$ (section 1) : de $u > v$ (avec $u,v>0$) on tire directement ' +
+                '$\\log_a(u) < \\log_a(v)$. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Les trois autres comparateurs.** $\\log_a(u) \\le \\log_a(v) \\iff u \\ge v$ ' +
+                's\'obtient en combinant ce qui précède avec l\'égalité de deux logarithmes ' +
+                '($\\log_a(u) = \\log_a(v) \\iff u = v$, section 2) : « $\\le$ » n\'est que ' +
+                '« $<$ ou $=$ », et chacun des deux cas a déjà été traité. Les comparateurs ' +
+                '$>$ et $\\ge$ ne sont, eux, que les mêmes énoncés lus en échangeant les rôles ' +
+                'de $u$ et $v$.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — cas a > 1 (le sens est conservé)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soient $a>1$ et $u,v>0$. On démontre cette fois ' +
+                '$\\log_a(u) < \\log_a(v) \\iff u < v$. La structure est **identique** à celle ' +
+                'du cas précédent : seul le sens de variation de $\\exp_a$ et de $\\log_a$ ' +
+                'change, et avec lui le sens de l\'inégalité obtenue.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**1) Sens** $\\implies$. Puisque $a>1$, la fonction $\\exp_a$ est strictement ' +
+                '**croissante** (chapitre 2) : appliquée aux deux membres, elle **conserve** le ' +
+                'sens de l\'inégalité.',
+            },
+            {
+              kind: 'para',
+              text: '$\\log_a(u) < \\log_a(v) \\implies a^{\\log_a(u)} < a^{\\log_a(v)}$',
+            },
+            {
+              kind: 'para',
+              text: 'Par **(P4)**, $a^{\\log_a(u)} = u$ et $a^{\\log_a(v)} = v$, d\'où :',
+            },
+            { kind: 'para', text: '$\\implies u < v$' },
+            {
+              kind: 'para',
+              text:
+                '**2) Sens** $\\impliedby$. Puisque $a>1$, la fonction $\\log_a$ est strictement ' +
+                '**croissante** sur $\\mathbb{R}_0^+$ (section 1) : de $u < v$ (avec $u,v>0$) on ' +
+                'tire directement $\\log_a(u) < \\log_a(v)$. $\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Les comparateurs $\\le$, $>$ et $\\ge$ se déduisent de la même façon qu\'au cas ' +
+                '$0<a<1$ : par l\'égalité de deux logarithmes pour passer du strict au large, et ' +
+                'par échange de $u$ et $v$ pour retourner le comparateur. Le cas $a=e$ n\'est ' +
+                'qu\'un cas particulier de celui-ci, puisque $e \\approx 2{,}718 > 1$ : pour ' +
+                'tous $u,v>0$, $\\ln(u) < \\ln(v) \\iff u < v$.',
             },
           ],
         },
@@ -514,6 +1086,76 @@ export const fonctionsLogarithmes: ChapterContent = {
             ['logₐ(u) > logₐ(v)', 'u < v', 'u > v'],
             ['logₐ(u) ≥ logₐ(v)', 'u ≤ v', 'u ≥ v'],
           ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — comparaison avec une constante',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'La troisième ligne de la méthode ci-dessus — $\\log_a(u) < y \\iff u > a^y$ si ' +
+                '$0<a<1$ — n\'est pas un résultat nouveau : elle se **déduit** de ce qui ' +
+                'précède, sans nouvelle démonstration à partir de zéro. Soient $0<a<1$, $u>0$ et ' +
+                '$y$ un réel quelconque.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** Le membre de droite $y$ n\'est pas encore un logarithme : on le ' +
+                'réécrit comme tel. Par **(P3)**, $\\log_a(a^{y}) = y$. On peut donc remplacer ' +
+                '$y$ par $\\log_a(a^{y})$ :',
+            },
+            { kind: 'para', text: '$\\log_a(u) < y \\iff \\log_a(u) < \\log_a(a^{y})$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** Les deux membres sont maintenant des logarithmes de même base : ' +
+                'c\'est exactement la situation traitée par la démonstration précédente, avec ' +
+                '$v = a^{y}$ (bien strictement positif, puisqu\'une puissance de $a>0$ l\'est ' +
+                'toujours). Le cas $0<a<1$ inverse le sens :',
+            },
+            { kind: 'para', text: '$\\iff u > a^{y} \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'Le même raisonnement en deux étapes, mené avec $a>1$, donne ' +
+                '$\\log_a(u) < y \\iff u < a^{y}$ ; et les comparateurs $\\le$, $>$, $\\ge$ ' +
+                's\'obtiennent de façon analogue. Cas particulier $a=e$ : pour tout $u>0$ et ' +
+                'tout $y$ réel, $\\ln(u) < y \\iff u < e^{y}$.',
+            },
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: Math.log, tone: 'accent', xMin: 0.075 },
+              { fn: (x) => Math.log(x) / Math.log(0.5), tone: 'bad', xMin: 0.075, xMax: 6.1 },
+            ],
+            xMin: -0.8,
+            xMax: 9,
+            xTicks: [1, Math.exp(2)],
+            xTickLabels: { [Math.exp(2)]: 'e²' },
+            fixedYRange: { min: -2.6, max: 3.2 },
+            testLine: { y: 2, points: [{ x: 0.25 }, { x: Math.exp(2) }] },
+            textLabels: [
+              { x: -0.72, y: 2.28, text: 'y=2', tone: 'faint', anchor: 'start' },
+              { x: 0.45, y: 2.55, text: 'x=0,25', tone: 'bad', anchor: 'start' },
+              { x: 8.75, y: 2.55, text: 'x=e²≈7,39', tone: 'accent', anchor: 'end' },
+              { x: 8.1, y: 1.35, text: 'ln', tone: 'accent', anchor: 'start' },
+              { x: 3.35, y: -2.15, text: 'log₀,₅', tone: 'bad', anchor: 'start' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Une même comparaison à la constante 2, dans deux bases. ln (base e > 1) est ' +
+              'croissante : ln(x) ≤ 2 est vrai à gauche du point de rencontre, soit S = ]0;e²]. ' +
+              'log₀,₅ (base < 1) est décroissante : log₀,₅(x) ≤ 2 est vrai à droite du sien, ' +
+              'soit S = [0,25;+∞[. Le comparateur écrit est le même — l\'ensemble-solution part ' +
+              'du côté opposé.',
+          },
         },
         {
           kind: 'exempleLibre',
@@ -628,13 +1270,79 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$\\ln$ et exp étant réciproques, la dérivée d\'une fonction réciproque ' +
-                '$f^{-1}$ vérifie $(f^{-1})\'(x) = 1/f\'(f^{-1}(x))$. Appliqué à $f = \\exp$ :',
+                'Soit $x>0$. La démonstration n\'utilise **aucun calcul de limite** : elle ' +
+                'combine trois résultats déjà acquis, un par ligne.',
             },
-            { kind: 'para', text: '$\\ln\'(x) = \\dfrac{1}{\\exp\'(\\ln(x))}$ — dérivée d\'une fonction réciproque' },
-            { kind: 'para', text: '$= \\dfrac{1}{\\exp(\\ln(x))}$ — car $\\exp\'=\\exp$ (chapitre 2)' },
-            { kind: 'para', text: '$= \\dfrac{1}{x}$ — car $\\exp(\\ln(x))=x$' },
+            {
+              kind: 'para',
+              text:
+                '**Le point de départ** est le théorème de dérivation d\'une fonction ' +
+                'réciproque : si $f$ est dérivable et bijective, sa réciproque $f^{-1}$ vérifie ' +
+                '$(f^{-1})\'(x) = \\dfrac{1}{f\'\\!\\left(f^{-1}(x)\\right)}$ — la dérivée de la ' +
+                'réciproque est l\'**inverse** de la dérivée de $f$, évaluée non pas en $x$ mais ' +
+                'en $f^{-1}(x)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** On applique ce théorème à $f = \\exp$, dont la réciproque est ' +
+                '$f^{-1} = \\ln$ (section 1). En remplaçant $f$ par $\\exp$ et $f^{-1}$ par ' +
+                '$\\ln$ :',
+            },
+            { kind: 'para', text: '$\\ln\'(x) = \\dfrac{1}{\\exp\'(\\ln(x))}$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** Le chapitre 2 a établi que $\\exp$ est **sa propre dérivée** : ' +
+                '$\\exp\' = \\exp$. On peut donc remplacer $\\exp\'$ par $\\exp$ au ' +
+                'dénominateur, sans rien changer d\'autre :',
+            },
+            { kind: 'para', text: '$= \\dfrac{1}{\\exp(\\ln(x))}$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** Le dénominateur est maintenant $\\exp(\\ln(x))$, c\'est-à-dire ' +
+                '$e^{\\ln(x)}$ : c\'est exactement **(P4)** écrite en base $e$, qui vaut $x$ ' +
+                '(c\'est le fait que $\\exp$ et $\\ln$ soient réciproques, une seconde fois) :',
+            },
+            { kind: 'para', text: '$= \\dfrac{1}{x} \\qquad \\blacksquare$' },
+            {
+              kind: 'para',
+              text:
+                'Remarquer que la formule n\'a de sens que pour $x>0$ — ce qui est bien le ' +
+                'domaine de $\\ln$ — et que $1/x > 0$ y est **toujours strictement positif** : ' +
+                'c\'est la preuve formelle que $\\ln$ est strictement croissante, propriété ' +
+                'jusqu\'ici seulement lue sur le graphique.',
+            },
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: Math.log, tone: 'accent', xMin: 0.06 },
+              { fn: (x) => 1 / x, tone: 'good', xMin: 0.26 },
+            ],
+            xMin: -0.7,
+            xMax: 7,
+            xTicks: [1],
+            fixedYRange: { min: -2.8, max: 3.6 },
+            textLabels: [
+              { x: 5.9, y: 2.35, text: 'ln x', tone: 'accent', anchor: 'start' },
+              { x: 5.9, y: 0.55, text: "ln'x=1/x", tone: 'good', anchor: 'start' },
+              { x: 1.6, y: 2.9, text: "ln'(x) > 0 partout", tone: 'good', anchor: 'start' },
+            ],
+            points: [{ x: 1, y: 1, label: '', tone: 'good' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'ln et sa dérivée 1/x. La dérivée reste strictement positive sur tout ]0;+∞[ : ln ' +
+              'est donc strictement croissante partout, y compris là où elle est négative. Et ' +
+              'cette dérivée est elle-même décroissante (elle tend vers 0) : la croissance de ln ' +
+              'ralentit sans jamais s\'arrêter — c\'est ce que signifie « concavité tournée vers ' +
+              'le bas ».',
+          },
         },
         {
           kind: 'methode',
@@ -703,6 +1411,91 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'exempleLibre',
+          label: 'Démonstration — dérivée d\'une puissance à exposant variable',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Soient $g$ une fonction dérivable et **strictement positive**, et $h$ une ' +
+                'fonction dérivable. La stricte positivité de $g$ est indispensable : c\'est ce ' +
+                'qui autorise à écrire $\\ln(g(x))$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** On réécrit la puissance en base $e$. Par **(P4)** en base $e$, ' +
+                '$g(x) = e^{\\ln(g(x))}$ ; en élevant à la puissance $h(x)$ et en multipliant ' +
+                'les exposants :',
+            },
+            {
+              kind: 'para',
+              text: '$\\left((g(x))^{h(x)}\\right)\' = \\left(e^{\\,h(x) \\cdot \\ln(g(x))}\\right)\'$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** C\'est maintenant une composée $e^{u(x)}$, avec ' +
+                '$u(x) = h(x) \\cdot \\ln(g(x))$. La règle de la chaîne, avec $\\exp\'=\\exp$, ' +
+                'donne $(e^{u})\' = u\' \\cdot e^{u}$ :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= \\left(h(x) \\cdot \\ln(g(x))\\right)\' \\cdot e^{\\,h(x) \\cdot \\ln(g(x))}$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** L\'exposant $u$ est un **produit** de deux fonctions : on le ' +
+                'dérive par la règle du produit $(pq)\' = p\'q + pq\'$, avec $p = h$ et ' +
+                '$q = \\ln \\circ\\, g$ :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\left(h(x) \\cdot \\ln(g(x))\\right)\' = h\'(x) \\cdot \\ln(g(x)) + h(x) ' +
+                '\\cdot \\left(\\ln(g(x))\\right)\'$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 4.** Le facteur restant se dérive par la règle de la chaîne établie ' +
+                'plus haut : $\\left(\\ln(g(x))\\right)\' = \\dfrac{g\'(x)}{g(x)}$. En ' +
+                'reportant :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= h\'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g\'(x)}{g(x)}$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 5.** Il reste à revenir de $e^{\\,h(x) \\cdot \\ln(g(x))}$ à ' +
+                '$(g(x))^{h(x)}$ — c\'est l\'étape 1 relue en sens inverse. En regroupant :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$\\left((g(x))^{h(x)}\\right)\' = \\left(h\'(x) \\cdot \\ln(g(x)) + ' +
+                '\\dfrac{h(x) \\cdot g\'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)} ' +
+                '\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Contrôle de cohérence sur deux cas connus. Si $h$ est **constante** égale à ' +
+                '$n$, alors $h\'=0$ et il reste $\\dfrac{n \\cdot g\'}{g} \\cdot g^{n} = n \\cdot ' +
+                'g^{n-1} \\cdot g\'$ : la dérivée d\'une puissance usuelle. Si $g$ est ' +
+                '**constante** égale à $a>0$, alors $g\'=0$ et il reste ' +
+                '$h\' \\cdot \\ln(a) \\cdot a^{h}$ : la dérivée d\'une exponentielle composée du ' +
+                'chapitre 2. La formule générale contient bien les deux règles connues comme ' +
+                'cas particuliers.',
+            },
+          ],
+        },
+        {
+          kind: 'exempleLibre',
           label: 'Exemple résolu — exposant variable, dérivée logarithmique complète',
           blocks: [
             {
@@ -738,12 +1531,59 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Démonstration de logₐ\'(x) = 1/(x·ln(a))',
           blocks: [
-            { kind: 'para', text: '$\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$ — changement de base' },
             {
               kind: 'para',
               text:
-                '$\\log_a\'(x) = \\dfrac{\\ln\'(x)}{\\ln(a)} = \\dfrac{1}{x \\cdot \\ln(a)}$ — ' +
-                '$\\ln(a)$ est une constante ⟹ dérivée d\'un multiple de ln',
+                'Soient $a>0$, $a \\neq 1$, et $x>0$. Aucun calcul nouveau n\'est nécessaire : ' +
+                'il suffit de ramener $\\log_a$ à $\\ln$, dont la dérivée vient d\'être établie.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1.** Le changement de base, appliqué avec $b=e$, exprime $\\log_a$ à ' +
+                'partir de $\\ln$ seul :',
+            },
+            { kind: 'para', text: '$\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2.** Le point clé : $\\ln(a)$ est une **constante** — elle ne dépend ' +
+                'pas de $x$. L\'écriture ci-dessus est donc simplement ' +
+                '$\\dfrac{1}{\\ln(a)} \\cdot \\ln(x)$, un multiple de $\\ln$ par un nombre fixe. ' +
+                'Or $(k \\cdot f)\' = k \\cdot f\'$ pour toute constante $k$ : la constante sort ' +
+                'de la dérivation, et il ne reste qu\'à dériver $\\ln$.',
+            },
+            { kind: 'para', text: '$\\log_a\'(x) = \\dfrac{1}{\\ln(a)} \\cdot \\ln\'(x) = \\dfrac{\\ln\'(x)}{\\ln(a)}$' },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3.** On remplace $\\ln\'(x)$ par sa valeur $\\dfrac{1}{x}$, démontrée ' +
+                'plus haut :',
+            },
+            {
+              kind: 'para',
+              text:
+                '$= \\dfrac{1}{\\ln(a)} \\cdot \\dfrac{1}{x} = \\dfrac{1}{x \\cdot \\ln(a)} ' +
+                '\\qquad \\blacksquare$',
+            },
+            {
+              kind: 'para',
+              text:
+                'Cette formule redonne, sans aucun graphique, tous les résultats de monotonie et ' +
+                'de concavité de la section 1. Comme $x>0$, le signe de $\\log_a\'(x)$ est ' +
+                'exactement celui de $\\ln(a)$ : **positif** si $a>1$ (donc $\\log_a$ ' +
+                'croissante), **négatif** si $0<a<1$ (donc décroissante). En dérivant une ' +
+                'seconde fois, $\\log_a\'\'(x) = \\dfrac{-1}{x^2 \\cdot \\ln(a)}$, de signe ' +
+                '**opposé** : la concavité est tournée vers le bas si $a>1$, vers le haut si ' +
+                '$0<a<1$. On retrouve ligne pour ligne le tableau de la section 1.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Vérification sur le cas $a=e$ : $\\ln(e)=1$ par **(P2)**, donc ' +
+                '$\\log_e\'(x) = \\dfrac{1}{x \\cdot 1} = \\dfrac{1}{x}$ — bien la dérivée de ' +
+                '$\\ln$. C\'est exactement ce qui rend la base $e$ commode : elle est **la ' +
+                'seule** pour laquelle le facteur $1/\\ln(a)$ disparaît.',
             },
           ],
         },
@@ -796,22 +1636,30 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: Math.sqrt, tone: 'good', xMin: 0 },
-              { fn: Math.log, tone: 'accent', xMin: 0.03 },
+              { fn: Math.cbrt, tone: 'bad', xMin: 0 },
+              { fn: Math.log, tone: 'accent', xMin: 0.05 },
             ],
-            xMin: -0.6,
-            xMax: 20,
-            xTicks: [4],
-            fixedYRange: { min: -3, max: 5 },
-            points: [
-              { x: 4, y: Math.log(4), label: 'écart minimal (x=4)', tone: 'accent', labelPos: 'right' },
-              { x: 4, y: 2, label: '', tone: 'bad' },
+            xMin: -10,
+            xMax: 220,
+            xTicks: [100, 200],
+            fixedYRange: { min: -3.5, max: 16 },
+            textLabels: [
+              { x: 8, y: 14.6, text: 'y=√x', tone: 'good', anchor: 'start' },
+              { x: 8, y: 12.6, text: 'y=∛x', tone: 'bad', anchor: 'start' },
+              { x: 8, y: 10.6, text: 'y=ln x', tone: 'accent', anchor: 'start' },
+              { x: 55, y: 2, text: 'ln repasse sous ∛x (x≈93)', tone: 'accent', anchor: 'start' },
             ],
+            points: [{ x: 93.3, y: Math.log(93.3), label: '', tone: 'accent' }],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'En orange : ln(x). En vert : √x. Même la racine carrée, qui croît elle-même très lentement, reste toujours au-dessus de ln.',
+            caption:
+              'ln comparée à deux fonctions « racines », elles-mêmes déjà très lentes. La racine ' +
+              'carrée reste au-dessus de ln pour tout x>0. La racine cubique, elle, se laisse ' +
+              'brièvement dépasser (entre x≈6 et x≈93) — mais finit par repasser devant et ne ' +
+              'redescend plus jamais : ln croît plus lentement que √x, que ∛x, et plus ' +
+              'généralement que toute puissance x^k avec k>0, aussi petit soit k.',
           },
         },
         {
@@ -826,7 +1674,73 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Les exponentielles (base > 1) dominent toujours les puissances (degré > 0), qui ' +
               'dominent toujours les logarithmes (base > 1) — dans cet ordre, quel que soit à ' +
               'quel point la base ou le degré favorisent, a priori, l\'un des deux camps.',
+            'Le mot important est **« finit par »** : sur un intervalle borné, l\'ordre observé ' +
+              'peut être tout autre. Les deux graphiques ci-dessous montrent exactement ce ' +
+              'décalage entre ce qu\'on voit près de l\'origine et ce qui se passe réellement ' +
+              'en $+\\infty$.',
           ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x, tone: 'faint' },
+              { fn: (x) => x * x, tone: 'good', xMax: 3.28 },
+              { fn: (x) => x * x * x, tone: 'bad', xMin: -1.27, xMax: 2.2 },
+              { fn: Math.exp, tone: 'accent', xMax: 2.36 },
+            ],
+            xMin: -1.6,
+            xMax: 3.6,
+            xTicks: [1, 2, 3],
+            fixedYRange: { min: -2, max: 10.5 },
+            textLabels: [
+              { x: -1.55, y: 9.6, text: 'y=eˣ', tone: 'accent', anchor: 'start' },
+              { x: -1.55, y: 8.4, text: 'y=x³', tone: 'bad', anchor: 'start' },
+              { x: -1.55, y: 7.2, text: 'y=x²', tone: 'good', anchor: 'start' },
+              { x: -1.55, y: 6, text: 'y=x', tone: 'faint', anchor: 'start' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Vue rapprochée. Sur cette fenêtre, eˣ ne domine pas du tout : x³ la rattrape en ' +
+              'x≈1,86 et passe devant, pour ne repasser derrière que bien plus loin. Conclure ' +
+              'ici « eˣ croît moins vite que x³ » serait une erreur de lecture — il faut ' +
+              'regarder plus loin, ce que fait le graphique suivant.',
+          },
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x, tone: 'faint' },
+              { fn: (x) => x * x, tone: 'good' },
+              { fn: (x) => x * x * x, tone: 'bad', xMin: -1.2 },
+              { fn: Math.exp, tone: 'accent', xMax: 6.15 },
+            ],
+            xMin: -1.8,
+            xMax: 6.2,
+            xTicks: [2, 4, 6],
+            fixedYRange: { min: -45, max: 440 },
+            textLabels: [
+              { x: -1.75, y: 415, text: 'y=eˣ', tone: 'accent', anchor: 'start' },
+              { x: -1.75, y: 355, text: 'y=x³', tone: 'bad', anchor: 'start' },
+              { x: -1.75, y: 295, text: 'y=x²', tone: 'good', anchor: 'start' },
+              { x: -1.75, y: 235, text: 'y=x', tone: 'faint', anchor: 'start' },
+            ],
+            points: [
+              { x: 4.5364, y: Math.exp(4.5364), label: 'eˣ dépasse x³', tone: 'accent', labelPos: 'right' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'Même famille de courbes, fenêtre élargie (attention : l\'échelle verticale va ' +
+              'maintenant jusqu\'à 440). eˣ rattrape puis dépasse définitivement x³ en x≈4,54, ' +
+              'et s\'en écarte ensuite de plus en plus vite. Pendant ce temps y=x et y=x², ' +
+              'écrasées par le changement d\'échelle, semblent confondues avec l\'axe — c\'est ' +
+              'précisément ce que veut dire « dominées ».',
+          },
         },
         {
           kind: 'exempleLibre',
