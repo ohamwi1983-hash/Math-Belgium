@@ -13,7 +13,7 @@ function filenameFor(chapter: ChapterContent, format: ExportFormat): string {
 /** Diagrammes jugés trop grands une fois exportés (Word/PDF/PowerPoint/HTML A4) — règle GÉNÉRALE,
  * tout chapitre confondu, portant UNIQUEMENT sur l'export, jamais sur le site en ligne (où les
  * diagrammes gardent leur taille normale, `width: 100%` dans `src/index.css`). */
-const ECHELLE_DIAGRAMMES_EXPORT = 60
+const ECHELLE_DIAGRAMMES_EXPORT = 40
 
 /** Réduit temporairement tous les diagrammes autonomes avant `fn`, puis restaure l'état d'origine —
  * même mécanisme que `withLightTheme()` (`captureBlocks.ts`) : un `<style>` injecté dans `<head>`
