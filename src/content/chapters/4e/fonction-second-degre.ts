@@ -280,6 +280,31 @@ export const fonctionSecondDegre: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x * x - 4 * x, tone: 'faint', xMin: -0.6, xMax: 4.6 },
+              { fn: (x) => x * x - 4 * x + 6, tone: 'accent', xMin: -0.6, xMax: 4.6 },
+            ],
+            xMin: -1,
+            xMax: 5,
+            xTicks: [-1, 1, 3, 4, 5],
+            axisOfSymmetry: { x: 2, label: 'x = 2' },
+            roots: [{ x: 0 }, { x: 4 }],
+            points: [{ x: 2, y: 2, label: 'S(2 ; 2)', tone: 'accent' }],
+            textLabels: [
+              { x: 3.2, y: -3, text: 'g(x) = x² − 4x', tone: 'ink' },
+              { x: 2.3, y: 7.2, text: 'f(x) = x² − 4x + 6', tone: 'accent' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'g(x) = x² − 4x (racines 0 et 4) et f(x) = x² − 4x + 6 (aucune racine réelle) : ' +
+              'ajouter c translate la courbe verticalement, sans jamais déplacer $x_S = 2$',
+          },
+        },
+        {
           kind: 'exemple',
           badge: 'application directe',
           formula: '$f(x) = 2x^2-8x+3$',
