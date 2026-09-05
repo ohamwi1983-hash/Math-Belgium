@@ -1,6 +1,12 @@
 // Data schema for the shared `ChapterPage` template. A chapter is authored as data
 // (this schema), never as one-off JSX — see CLAUDE.md.
 
+/** Nom de balise d'un Web Component interactif porté depuis un artifact d'origine (registre
+ * complet dans `src/interactive/`, monté via `InteractiveWidget`, voir `components/chapter/
+ * InteractiveWidget.tsx`). Liste fermée — un nouveau widget porté ajoute son propre module
+ * `register-*.js` et sa propre entrée ici, jamais une chaîne libre. */
+export type InteractiveWidgetTag = 'gen7-widget' | 'gen8-widget' | 'parabole-widget' | 'transformations-widget'
+
 export type IllustrationSpec =
   | { kind: 'machine' }
   | {
@@ -878,6 +884,28 @@ export type Block =
       description: string[]
       chantier: string
       whereLabel: string
+      /**
+       * Widget interactif gradé, porté (Web Component autonome, Shadow DOM) depuis l'artifact
+       * d'origine et monté directement dans la carte, au-dessus de la description — seuls gen7 et
+       * gen8 (4e, chapitre "La fonction du second degré") en ont un port aujourd'hui. Le lien vers
+       * la version hébergée sur plateforme-maths (`whereLabel`) reste toujours affiché en dessous :
+       * c'est la version de référence maintenue, le widget embarqué est une commodité, pas un
+       * remplacement.
+       */
+      widgetTag?: InteractiveWidgetTag
+    }
+  | {
+      /**
+       * Atelier interactif libre ("Manipule toi-même") — Web Component autonome (Shadow DOM) porté
+       * depuis l'artifact d'origine, sans notion de correction ni de score, contrairement à
+       * `entrainement` qui pointe toujours vers un générateur gradé hébergé sur plateforme-maths.
+       * Ces ateliers n'existent nulle part ailleurs (pas de générateur `genN` équivalent) : rien à
+       * lier en plus du widget lui-même.
+       */
+      kind: 'atelier'
+      tag: InteractiveWidgetTag
+      label: string
+      caption?: string
     }
   | {
       kind: 'video'

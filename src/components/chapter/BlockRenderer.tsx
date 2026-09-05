@@ -8,6 +8,7 @@ import { CarteEntrainement } from './CarteEntrainement'
 import { SignTable } from './SignTable'
 import { FeatureTable } from './FeatureTable'
 import { OperationChain } from './OperationChain'
+import { InteractiveWidget } from './InteractiveWidget'
 
 /** Renders one content block. Sections/intros are just ordered arrays of these. */
 export function BlockRenderer({ block }: { block: Block }) {
@@ -69,6 +70,16 @@ export function BlockRenderer({ block }: { block: Block }) {
       )
     case 'entrainement':
       return <CarteEntrainement block={block} />
+    case 'atelier':
+      return (
+        <div className="atelier-frame-wrap no-export">
+          <p className="atelier-label">
+            <span aria-hidden="true">🛠️</span> {block.label}
+          </p>
+          <InteractiveWidget tag={block.tag} />
+          {block.caption && <p className="atelier-caption">{block.caption}</p>}
+        </div>
+      )
     case 'signTable':
       return <SignTable block={block} />
     case 'featureTable':

@@ -290,6 +290,14 @@ export const fonctionSecondDegre: ChapterContent = {
               'forme canonique, plus loin dans ce chapitre.',
           },
         },
+        {
+          kind: 'atelier',
+          tag: 'parabole-widget',
+          label: 'Manipule toi-même — fais varier a, b et c',
+          caption:
+            'Coche AS, S ou OAO pour faire apparaître l’axe de symétrie, le sommet et l’ordonnée ' +
+            'à l’origine directement sur le graphe, en direct.',
+        },
         { kind: 'subheading', text: 'Domaine et image' },
         {
           kind: 'para',
@@ -480,6 +488,7 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'entrainement',
           title: "Analyse d'une fonction du second degré",
           generatorId: 'gen7',
+          widgetTag: 'gen7-widget',
           description: [
             'Coefficients, allure, axe et sommet, domaine/image, racines, tableau de signes et de ' +
               'variation — les six notions de cette partie, réunies en un seul exercice, ' +
@@ -593,11 +602,20 @@ export const fonctionSecondDegre: ChapterContent = {
               'forme (a reste égal à 1 ici)',
           },
         },
+        {
+          kind: 'atelier',
+          tag: 'transformations-widget',
+          label: 'Manipule toi-même — fais varier TH, EV/CV et TV',
+          caption:
+            'Coche AS, S ou OAO pour faire apparaître l’axe de symétrie, le sommet et l’ordonnée ' +
+            'à l’origine directement sur le graphe, en direct.',
+        },
         { kind: 'video', title: 'Transformations graphiques d’une parabole', youtubeId: 'TviyRYRHono' },
         {
           kind: 'entrainement',
           title: 'Transformations graphiques',
           generatorId: 'gen8',
+          widgetTag: 'gen8-widget',
           description: [
             'Lis p, q, l’étirement/la compression (EV/CV) et la symétrie (SOX) directement sur un ' +
               'graphe Mafs interactif.',
