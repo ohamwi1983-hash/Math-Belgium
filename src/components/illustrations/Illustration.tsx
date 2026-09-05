@@ -38,6 +38,8 @@ import { UniversePartition } from './UniversePartition'
 import { NaturalFrequencies } from './NaturalFrequencies'
 import { ComplementBar } from './ComplementBar'
 import { SolidRevolution } from './SolidRevolution'
+import { SolidCavaliere } from './SolidCavaliere'
+import { PlaneSketch } from './PlaneSketch'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -123,6 +125,10 @@ function renderSvg(spec: IllustrationSpec) {
       return <ComplementBar {...spec} />
     case 'solidRevolution':
       return <SolidRevolution {...spec} />
+    case 'solidCavaliere':
+      return <SolidCavaliere {...spec} />
+    case 'planeSketch':
+      return <PlaneSketch {...spec} />
   }
 }
 

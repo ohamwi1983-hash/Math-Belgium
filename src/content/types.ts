@@ -680,6 +680,78 @@ export type IllustrationSpec =
       midLabel: string
       caption: string
     }
+  | {
+      /**
+       * Solide en perspective cavalière (cube/parallélépipède), sommets nommés A..H selon la
+       * convention constante du chapitre géométrie dans l'espace (ABCD = base, EFGH = face du
+       * dessus, E au-dessus de A, F au-dessus de B, etc.). Le sommet arrière-bas-gauche (D) est
+       * TOUJOURS celui dont les 3 arêtes (D-A, D-C, D-H) se tracent en pointillé — convention de
+       * perspective cavalière vérifiée empiriquement, fixée une fois pour toutes par ce composant,
+       * jamais recalculée ni configurable. Couvre le cube nu (mini-comparaisons côte à côte), le
+       * cube annoté des 3 axes (introduction à la perspective cavalière), un plan mis en évidence
+       * sur une face, une ou deux arêtes/diagonales mises en évidence, et un polygone de section
+       * libre par-dessus les faces.
+       */
+      kind: 'solidCavaliere'
+      /** 'large' = cube principal (figure pleine largeur) ; 'small' = mini-cube (grille de cas
+       * comparés côte à côte) — même topologie, coordonnées propres à chaque échelle. */
+      size: 'large' | 'small'
+      /** Cube annoté des 3 axes x (horizontal), z (vertical), y (diagonal à 45°, pointillé,
+       * réduit de moitié) — uniquement significatif en size 'large', seule figure du chapitre qui
+       * en a besoin. */
+      showAxes?: boolean
+      /** Sommets à étiqueter (A..H) ; un sommet absent de la liste reste sans étiquette (cas des
+       * mini-cubes de comparaison, jamais nommés dans la source). `tone` colore le TEXTE de
+       * l'étiquette (`plan` = violet, pour un sommet de la face mise en évidence) ; `dotTone`
+       * colore le POINT lui-même (`accent`, pour un sommet qui est aussi un point remarquable —
+       * ex. un point de percée tombant exactement sur un sommet déjà nommé). Les deux sont
+       * indépendants : un sommet du plan violet garde un point ink normal sauf mention contraire. */
+      vertexLabels?: { vertex: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'; tone?: 'ink' | 'plan'; dotTone?: 'ink' | 'accent' }[]
+      /** Face du solide mise en évidence (violet), désignée par 4 de ses sommets dans l'ordre du
+       * contour — dessinée par-dessus l'arête nue correspondante. */
+      highlightedPlane?: { vertices: ('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H')[] }
+      /** Arête(s)/diagonale(s) mises en évidence, désignées par leurs 2 sommets — pas
+       * nécessairement une arête réelle du solide (ex. la grande diagonale A-G). */
+      highlightedLines?: { from: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'; to: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H'; tone: 'accent' | 'good' }[]
+      /** Points libres, à des coordonnées propres au repère SVG du solide choisi (pas
+       * nécessairement un sommet nommé) — ex. un point de section au milieu d'une arête verticale. */
+      freePoints?: { x: number; y: number; label?: string; tone?: 'accent' | 'ink' }[]
+      /** Polygone fermé et rempli (accent, semi-transparent) tracé par-dessus les faces du solide
+       * — le polygone de section. */
+      sectionPolygon?: { points: { x: number; y: number }[] }
+      caption: string
+    }
+  | {
+      /**
+       * Schéma géométrique abstrait dans l'espace, PAS bâti sur un solide nommé (voir
+       * `solidCavaliere` pour ça) : un ou deux plans esquissés (remplissage violet plein, ou
+       * simple contour pointillé pour un plan auxiliaire, ou teinte neutre de sol), des
+       * lignes/contours et des points libres tracés dessus, avec leurs étiquettes. Composant
+       * générique qui couvre à la fois les figures « déterminer un plan », « deux/trois plans »,
+       * « point de percée », les mini-diagrammes de direction de l'ombre au soleil et sa scène
+       * principale, et la perspective centrale (rails + point de fuite).
+       */
+      kind: 'planeSketch'
+      width: number
+      height: number
+      /** 'plan' = remplissage violet plein (le plan principal, cible) ; 'planDashed' = contour
+       * seul, pointillé (un plan auxiliaire ou un second plan de comparaison) ; 'ground' = teinte
+       * neutre de sol (surface2), pour la scène de l'ombre au soleil. */
+      planes?: { points: { x: number; y: number }[]; style: 'plan' | 'planDashed' | 'ground' }[]
+      /** Lignes, segments, flèches ou contours de polygone tracés par-dessus les plans. */
+      lines?: {
+        points: { x: number; y: number }[]
+        tone: 'ink' | 'faint' | 'accent' | 'good' | 'bad' | 'attn'
+        closed?: boolean
+        dashed?: boolean
+        arrow?: boolean
+      }[]
+      points?: { x: number; y: number; label?: string; tone?: 'ink' | 'accent' | 'good'; labelDx?: number; labelDy?: number }[]
+      /** Étiquettes de texte libres, sans point associé (ex. π, α, d, b, "point de percée", "45°",
+       * ou un ✓/✗ de validation à côté d'une flèche de direction). */
+      freeLabels?: { x: number; y: number; text: string; tone?: 'ink' | 'accent' | 'good' | 'bad' | 'plan' }[]
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string

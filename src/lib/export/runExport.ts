@@ -22,12 +22,21 @@ const ECHELLE_DIAGRAMMES_EXPORT = 60
  * de cette largeur les rend illisibles (labels A/B/θ/m). Couvre les 4 formats d'un seul point :
  * `captureBlocks`/html2canvas (docx/pdf/pptx) lit les styles calculés au moment de la capture, et
  * `buildHtml.ts` copie `document.styleSheets` au moment de l'export — cette règle temporaire est
- * donc visible des deux pipelines sans dupliquer la logique. */
+ * donc visible des deux pipelines sans dupliquer la logique.
+ *
+ * Exclut aussi `.svg-cavaliere-axes` (le cube annoté des 3 axes, chapitre « Géométrie dans
+ * l'espace ») — bug confirmé de html2canvas, PAS de ce site : dès que ce SVG précis passe par un
+ * `width` en `%`, html2canvas perd la ligne ET l'étiquette de l'axe x (horizontal, avec marker de
+ * flèche), quelle que soit la position exacte de cette ligne dans le viewBox — reproduit isolément
+ * hors de l'app (repro minimal avec le même html2canvas.js, sans le reste du site), et confirmé
+ * absent à 100% (`width` fixe, jamais en `%`). Restreint à ce seul diagramme plutôt qu'un
+ * contournement plus large, tant qu'aucun autre diagramme du site n'est touché. */
 async function withDiagrammesReduitsAExport<T>(fn: () => Promise<T>): Promise<T> {
   const style = document.createElement('style')
   style.textContent = `
     .diagram-frame svg { width: ${ECHELLE_DIAGRAMMES_EXPORT}% !important; margin: 0 auto !important; }
     .diag-multi .diagram-frame svg { width: 100% !important; margin: 0 !important; }
+    .diagram-frame svg.svg-cavaliere-axes { width: 100% !important; margin: 0 !important; }
   `
   document.head.appendChild(style)
   try {

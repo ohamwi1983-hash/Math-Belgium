@@ -19,6 +19,11 @@
   --attn-soft: #f7ecd6;
   --tip: #8a7200;
   --tip-soft: #faf3d5;
+  /* Violet dédié à la géométrie dans l'espace : mettre en évidence un PLAN (surface) sans jamais
+     se confondre avec --accent (déjà pris par les droites/points mis en évidence sur ce même
+     chapitre — un plan ET une droite sécante apparaissent souvent sur la même figure). */
+  --plan: #5b4ea3;
+  --plan-ink: #443a80;
   --on-accent: #fff8f0;
   --radius: 3px;
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
@@ -53,6 +58,8 @@
     --attn-soft: #332510;
     --tip: #d6bb4a;
     --tip-soft: #302c10;
+    --plan: #a494e8;
+    --plan-ink: #c3b8f2;
     --on-accent: #201404;
     color-scheme: dark;
   }
@@ -332,6 +339,9 @@ figcaption {
 .svg-vecname { text-decoration: overline; text-decoration-color: currentColor; text-decoration-thickness: 1.3px; text-decoration-skip-ink: none; }
 .svg-vechead { font-size: 0.55em; }
 .svg-surface2 { fill: var(--surface-2); }
+.svg-plan-fill { fill: var(--plan); fill-opacity: 0.22; stroke: var(--plan); stroke-width: 1.3; stroke-linejoin: round; }
+.svg-plan-outline { fill: none; stroke: var(--plan); }
+.svg-plan-ink { fill: var(--plan-ink); }
 
 /* ---------- carte générateur ---------- */
 .generator-card {
