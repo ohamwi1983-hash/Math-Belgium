@@ -10,24 +10,21 @@ function filenameFor(chapter: ChapterContent, format: ExportFormat): string {
   return `chapitre-${chapter.chapterNumber}-${chapter.slug}.${EXTENSIONS[format]}`
 }
 
-/** Chapitre dont les diagrammes sont jugés trop grands une fois exportés (Word/PDF/PowerPoint/HTML
- * A4) — demande explicite portant UNIQUEMENT sur l'export, jamais sur le site en ligne (où les
+/** Diagrammes jugés trop grands une fois exportés (Word/PDF/PowerPoint/HTML A4) — règle GÉNÉRALE,
+ * tout chapitre confondu, portant UNIQUEMENT sur l'export, jamais sur le site en ligne (où les
  * diagrammes gardent leur taille normale, `width: 100%` dans `src/index.css`). */
-const CHAPITRE_DIAGRAMMES_REDUITS_A_EXPORT = 'geometrie-analytique-plane'
 const ECHELLE_DIAGRAMMES_EXPORT = 60
 
-/** Réduit temporairement les diagrammes de `chapter` (si concerné) avant `fn`, puis restaure l'état
- * d'origine — même mécanisme que `withLightTheme()` (`captureBlocks.ts`) : un `<style>` injecté
- * dans `<head>` pendant l'export, retiré aussitôt après. Couvre les 4 formats d'un seul point :
+/** Réduit temporairement tous les diagrammes autonomes avant `fn`, puis restaure l'état d'origine —
+ * même mécanisme que `withLightTheme()` (`captureBlocks.ts`) : un `<style>` injecté dans `<head>`
+ * pendant l'export, retiré aussitôt après. Exclut les mini-diagrammes d'un `illustrationGroup`
+ * (`.diag-multi`) : déjà réduits par leur propre colonne de grille, un second rétrécissement à 60%
+ * de cette largeur les rend illisibles (labels A/B/θ/m). Couvre les 4 formats d'un seul point :
  * `captureBlocks`/html2canvas (docx/pdf/pptx) lit les styles calculés au moment de la capture, et
  * `buildHtml.ts` copie `document.styleSheets` au moment de l'export — cette règle temporaire est
  * donc visible des deux pipelines sans dupliquer la logique. */
-async function withDiagrammesReduitsAExport<T>(chapter: ChapterContent, fn: () => Promise<T>): Promise<T> {
-  if (chapter.slug !== CHAPITRE_DIAGRAMMES_REDUITS_A_EXPORT) return fn()
+async function withDiagrammesReduitsAExport<T>(fn: () => Promise<T>): Promise<T> {
   const style = document.createElement('style')
-  // Exclut les mini-diagrammes d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur
-  // propre colonne de grille, un second rétrécissement à 60% de cette largeur les rend illisibles
-  // (labels A/B/θ/m) — même exclusion que l'ancienne règle CSS permanente que ce mécanisme remplace.
   style.textContent = `
     .diagram-frame svg { width: ${ECHELLE_DIAGRAMMES_EXPORT}% !important; margin: 0 auto !important; }
     .diag-multi .diagram-frame svg { width: 100% !important; margin: 0 !important; }
@@ -46,7 +43,7 @@ export async function runExport(
   chapter: ChapterContent,
   onProgress: (progress: ExportProgress) => void,
 ): Promise<void> {
-  return withDiagrammesReduitsAExport(chapter, async () => {
+  return withDiagrammesReduitsAExport(async () => {
     // HTML (A4) reste du vrai DOM (formules KaTeX sélectionnables, mise en page CSS normale) —
     // jamais rasterisé via html2canvas, contrairement aux 3 autres formats : voir l'en-tête de
     // `buildHtml.ts`. Ne passe donc jamais par `collectBlocks`/`captureBlocks`.
