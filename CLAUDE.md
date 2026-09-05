@@ -222,6 +222,22 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   aucun `$...$` non résolu, aucun lien générateur cassé, les deux callouts "piège classique" sur le
   bon composant malgré une classe CSS source ambiguë (`callout-attention` réutilisée pour les deux
   labels dans l'artifact).
+  **Complété à son tour** quand l'artifact source a grandi (même schéma que pour le chapitre
+  « Probabilités » ci-dessous) : deux nouvelles sous-sections en tête d'`intro` — un rappel de la
+  fonction du premier degré ($m$/$p$, zéro, exemple résolu) et la fonction de référence $f(x)=x^2$
+  (courbe + `featureTable` de ses caractéristiques) — puis une nouvelle sous-section "Reconnaître
+  une fonction à partir d'un tableau de valeurs" dans la section "Étudier une parabole", entre le
+  rôle du coefficient a et le sommet (`exempleLibre` portant un `featureTable` x/f(x) + le
+  raisonnement par accroissements successifs). Correctif de cohérence de notation, demandé
+  explicitement : la source utilisait $p$/$q$ pour les coordonnées du sommet dans deux endroits
+  (l'intro de la sous-section "Sommet et axe de symétrie" et le rappel "Forme canonique") alors que
+  la dérivation complète juste en dessous ("D'où vient la formule $x_S=-b/(2a)$ ?") utilise déjà
+  $x_S$/$y_S$ — uniformisé sur $x_S$/$y_S$ partout où il s'agit du sommet (sommet, domaine/image,
+  forme canonique, et les 3 puces `recap` correspondantes), en laissant `Les translations` inchangée
+  ($p$/$q$ y désignent des amplitudes de décalage, pas les coordonnées du sommet — sens différent,
+  jamais interchangé). Vérifié par rendu navigateur réel (`vite preview`, Playwright) : les deux
+  nouvelles sous-sections et les 4 occurrences corrigées capturées à l'écran, aucun `$...$` non
+  résolu, `npm run build` et `npm run lint` propres.
 - **6e (6h), Chapitre 1 — Fonctions réciproques & cyclométriques** (`fonctions-reciproques-cyclometriques`) :
   migré en intégralité. A nécessité plusieurs kinds/extensions supplémentaires par rapport au
   schéma d'alors : callout `definition`, `exempleLibre` (exemple en forme libre, blocs imbriqués),

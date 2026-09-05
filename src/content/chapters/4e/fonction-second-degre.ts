@@ -18,6 +18,69 @@ export const fonctionSecondDegre: ChapterContent = {
       {
         kind: 'para',
         text:
+          "Avant d'attaquer le second degré, un rappel s'impose : la fonction définie par " +
+          '$f(x) = mx + p$ est une fonction du **premier degré**, et son graphique est toujours ' +
+          'une **droite**.',
+      },
+      {
+        kind: 'rappel',
+        label: 'Paramètres m et p',
+        items: [
+          "$m$ est le **taux d'accroissement** de f, la **pente** de la droite : " +
+            '$m = \\dfrac{f(x_2) - f(x_1)}{x_2 - x_1}$.',
+          "$p$ est l'**ordonnée à l'origine** : la valeur de f quand $x = 0$, donc $f(0) = p$.",
+        ],
+      },
+      {
+        kind: 'para',
+        text:
+          "Le **zéro** de f — là où la droite coupe l'axe des x — se retrouve en résolvant " +
+          '$mx + p = 0$, soit $x = -p/m$.',
+      },
+      {
+        kind: 'exemple',
+        badge: 'f(x) = 2x − 3',
+        steps: [
+          { tag: "m — taux d'accroissement", text: '$m = 2$' },
+          { tag: "p — ordonnée à l'origine", text: '$p = -3$, donc $f(0) = -3$' },
+        ],
+        result: { tag: 'zéro de f', text: '$x = -(-3)/2 = 1{,}5$' },
+      },
+      {
+        kind: 'para',
+        text:
+          'Le graphique de la fonction de référence $f(x) = x^2$ est une **parabole P** ' +
+          'tournée vers le haut, dont le sommet est l’origine du repère.',
+      },
+      {
+        kind: 'illustration',
+        illustration: {
+          kind: 'curvePlot',
+          curves: [{ fn: (x) => x * x, tone: 'accent', xMin: -2.9, xMax: 2.9 }],
+          xMin: -3,
+          xMax: 3,
+          xTicks: [-2, -1, 1, 2],
+          points: [{ x: 0, y: 0, label: '(0 ; 0)', tone: 'good' }],
+          xAxisLabel: 'x',
+          yAxisLabel: 'y',
+          caption: 'f(x) = x² : sommet (0 ; 0), concavité tournée vers le haut',
+        },
+      },
+      {
+        kind: 'featureTable',
+        caption: 'Caractéristiques de f(x) = x²',
+        headers: ['Caractéristique', 'Valeur'],
+        rows: [
+          ['Domaine de f', 'ℝ'],
+          ['Sommet de P', '(0 ; 0)'],
+          ['Concavité de P', 'vers le haut'],
+          ['Racine de f', 'x = 0'],
+          ['Axe de symétrie de P', 'x = 0'],
+        ],
+      },
+      {
+        kind: 'para',
+        text:
           'Une fonction du second degré (ou fonction quadratique) est une fonction qui peut ' +
           "s'écrire sous la **forme développée** :",
       },
@@ -106,13 +169,46 @@ export const fonctionSecondDegre: ChapterContent = {
             'le haut ou vers le bas : seul le signe de $a$ compte. Un grand $c$ ne fait que ' +
             'décaler la courbe, jamais la retourner.',
         },
+        { kind: 'subheading', text: 'Reconnaître une fonction à partir d’un tableau de valeurs' },
+        {
+          kind: 'para',
+          text:
+            'Lorsqu’on ne connaît une grandeur que par un tableau de valeurs (accroissements de x ' +
+            'toujours identiques), on peut reconnaître le type de fonction sans en connaître ' +
+            'l’équation, en observant les **accroissements** successifs de f(x) :',
+        },
+        {
+          kind: 'list',
+          items: [
+            'si les **accroissements** de f(x) sont constants → f est du **premier degré** ;',
+            'si les **accroissements des accroissements** de f(x) sont constants → f est du ' +
+              '**second degré**.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'reconnaître via un tableau',
+          blocks: [
+            {
+              kind: 'featureTable',
+              headers: ['x', '0', '1', '2', '3', '4'],
+              rows: [['f(x)', '1', '2', '5', '10', '17']],
+            },
+            { kind: 'para', text: 'Accroissements de f(x) : 1, 3, 5, 7 — pas constants.' },
+            {
+              kind: 'rappel',
+              label: 'Accroissements des accroissements',
+              items: ['2, 2, 2 — constants → f est du second degré.'],
+            },
+          ],
+        },
         { kind: 'subheading', text: 'Sommet et axe de symétrie' },
         {
           kind: 'para',
           text:
             'Toute parabole est **symétrique** par rapport à une droite verticale qui passe par ' +
             'son point le plus bas (si $a > 0$) ou le plus haut (si $a < 0$) : le **sommet** ' +
-            '$S(p\\,;\\,q)$. Cette droite est l’**axe de symétrie**, d’équation $x = p$.',
+            '$S(x_S\\,;\\,y_S)$. Cette droite est l’**axe de symétrie**, d’équation $x = x_S$.',
         },
         {
           kind: 'illustration',
@@ -200,13 +296,13 @@ export const fonctionSecondDegre: ChapterContent = {
           text:
             'Le **domaine** est toujours $\\mathbb{R}$ — l’un des rares faits de ce chapitre qui ' +
             'ne dépend d’aucun coefficient. L’**image**, elle, dépend directement du sommet ' +
-            '$S(p\\,;\\,q)$ et du signe de $a$ :',
+            '$S(x_S\\,;\\,y_S)$ et du signe de $a$ :',
         },
         {
           kind: 'list',
           items: [
-            'Si $a > 0$ — le sommet est un minimum ; $\\operatorname{im} f = [q\\,;\\,{+\\infty}[$.',
-            'Si $a < 0$ — le sommet est un maximum ; $\\operatorname{im} f = ]{-\\infty}\\,;\\,q]$.',
+            'Si $a > 0$ — le sommet est un minimum ; $\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$.',
+            'Si $a < 0$ — le sommet est un maximum ; $\\operatorname{im} f = ]{-\\infty}\\,;\\,y_S]$.',
           ],
         },
         {
@@ -520,7 +616,7 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'rappel',
           label: 'Forme canonique',
-          items: ['$f(x) = a(x-p)^2+q$, de sommet $S(p\\,;\\,q)$.'],
+          items: ['$f(x) = a(x-x_S)^2+y_S$, de sommet $S(x_S\\,;\\,y_S)$.'],
         },
         { kind: 'para', text: 'Pour passer de la forme développée à la forme canonique, on **complète le carré** :' },
         {
@@ -774,13 +870,14 @@ export const fonctionSecondDegre: ChapterContent = {
     items: [
       '**Coefficient a** — son signe donne le sens d’ouverture (minimum ou maximum), sa valeur ' +
         'absolue donne l’allure (resserrée ou aplatie) ; b et c n’y changent rien.',
-      '**Sommet et axe** — $S(p\\,;\\,q)$ est le point extrémal, $x=p$ son axe de symétrie ; deux ' +
-        'points de même hauteur suffisent à le retrouver par leur milieu.',
+      '**Sommet et axe** — $S(x_S\\,;\\,y_S)$ est le point extrémal, $x=x_S$ son axe de symétrie ; ' +
+        '$x_S = -b/(2a)$, $y_S = f(x_S)$ ; deux points de même hauteur suffisent aussi à le ' +
+        'retrouver par leur milieu.',
       '**Domaine et image** — $\\operatorname{dom} f = \\mathbb{R}$ toujours ; $\\operatorname{im} ' +
-        'f = [q\\,;\\,{+\\infty}[$ si $a>0$, $]{-\\infty}\\,;\\,q]$ si $a<0$.',
+        'f = [y_S\\,;\\,{+\\infty}[$ si $a>0$, $]{-\\infty}\\,;\\,y_S]$ si $a<0$.',
       '**Zéros et signe** — 0, 1 ou 2 racines réelles ; entre les racines, signe opposé à a ; à ' +
         'l’extérieur, signe de a.',
-      '**Forme canonique** — $f(x)=a(x-p)^2+q$ s’obtient en complétant le carré ; a se met en ' +
+      '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$ s’obtient en complétant le carré ; a se met en ' +
         'évidence avant de compléter si $a \\neq 1$.',
       '**En contexte** — modéliser (variable → grandeur → domaine de validité), puis vérifier si ' +
         'le sommet théorique tombe dans ce domaine avant de conclure à un optimum réel.',
