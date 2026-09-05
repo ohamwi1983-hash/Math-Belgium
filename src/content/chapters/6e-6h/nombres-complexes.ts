@@ -66,7 +66,7 @@ export const nombresComplexes: ChapterContent = {
             'Deux complexes sont égaux si et seulement s\'ils ont mêmes parties réelle ET ' +
               'imaginaire — jamais une égalité « globale » approchée : c\'est ce qui permet ' +
               'd\'identifier séparément les deux parties dans toute équation entre complexes ' +
-              '(déjà utilisé pour la racine carrée, section 2).',
+              '(on s\'en servira plus loin pour la racine carrée, section 2).',
           ],
         },
         {
@@ -108,8 +108,8 @@ export const nombresComplexes: ChapterContent = {
             'Il n\'existe PAS de relation d\'ordre dans ℂ compatible avec les opérations ' +
             '(contrairement à ℝ) : des écritures comme $z_1 < z_2$ ou $z > 0$ n\'ont AUCUN sens ' +
             'pour des complexes non réels. Seuls des nombres RÉELS (parties réelles, ' +
-            'modules, …) peuvent être comparés avec <, ≤, >, ≥ — jamais deux complexes ' +
-            'quelconques entre eux.',
+            'parties imaginaires, longueurs, …) peuvent être comparés avec <, ≤, >, ≥ — ' +
+            'jamais deux complexes quelconques entre eux.',
         },
         {
           kind: 'definition',
@@ -245,7 +245,12 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'methode',
           label: 'Milieu et distance',
-          items: ['$z_M = \\dfrac{z_A+z_B}{2} \\qquad AB = |z_B - z_A|$'],
+          items: [
+            '$z_M = \\dfrac{z_A+z_B}{2} \\qquad AB = |z_B - z_A|$',
+            'La notation $|a+bi| = \\sqrt{a^2+b^2}$ désigne la LONGUEUR du vecteur d\'affixe ' +
+              '$a+bi$ — c\'est le théorème de Pythagore appliqué dans le plan d\'Argand. Cette ' +
+              'longueur sera étudiée pour elle-même à la section 4.',
+          ],
         },
         {
           kind: 'exemple',
@@ -266,8 +271,9 @@ export const nombresComplexes: ChapterContent = {
           label: 'Méthode',
           items: [
             'Pour trouver $x+iy$ tel que $(x+iy)^2 = a+bi$ : on développe $(x^2-y^2) + 2xyi = ' +
-              'a+bi$, puis on identifie parties réelle/imaginaire. On ajoute une 3e équation ' +
-              'en prenant le module des deux membres :',
+              'a+bi$, puis on identifie parties réelle/imaginaire. On obtient une 3e équation ' +
+              'en ÉLEVANT AU CARRÉ ces deux équations puis en les ADDITIONNANT membre à membre ' +
+              '(démonstration ci-dessous) :',
             '$x^2-y^2 = a \\qquad 2xy = b \\qquad x^2+y^2 = \\sqrt{a^2+b^2}$',
           ],
         },
@@ -299,14 +305,15 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'La 3e équation est $x^2+y^2 = \\sqrt{a^2+b^2}$ (le MODULE de $a+bi$), pas $a^2+b^2$ ' +
-            '(le module AU CARRÉ) — confusion classique entre les deux.',
+            'La 3e équation est $x^2+y^2 = \\sqrt{a^2+b^2}$, avec la RACINE CARRÉE : c\'est ' +
+            '$(x^2+y^2)^2$ qui vaut $a^2+b^2$, pas $x^2+y^2$ lui-même. Oublier cette racine ' +
+            'est la confusion classique.',
         },
         {
           kind: 'exemple',
           badge: 'Exemple résolu — 3+4i',
           steps: [
-            { tag: 'module et système', text: 'Module de $3+4i$ : $\\sqrt{3^2+4^2}=5$, d\'où $x^2-y^2=3,\\ 2xy=4,\\ x^2+y^2=5$' },
+            { tag: 'carrés additionnés → 3e équation', text: '$\\sqrt{3^2+4^2}=5$, d\'où le système $x^2-y^2=3,\\ 2xy=4,\\ x^2+y^2=5$' },
             { tag: 'somme / différence', text: 'En additionnant/soustrayant : $x^2=4,\\ y^2=1$, donc $x=\\pm2,\\ y=\\pm1$' },
             { tag: 'signe relatif via 2xy=4>0', text: '$x$ et $y$ ont le MÊME signe' },
           ],
@@ -318,8 +325,8 @@ export const nombresComplexes: ChapterContent = {
           blocks: [
             { kind: 'para', text: 'Poser $z=x+iy$ dans $z^2=5-12i$ : $x^2-y^2+2xyi = 5-12i$' },
             { kind: 'para', text: 'Égaler parties réelle et imaginaire : $x^2-y^2=5$ (1) $\\quad 2xy=-12$ (2)' },
-            { kind: 'para', text: 'Module des deux membres : $|5-12i| = \\sqrt{5^2+12^2} = \\sqrt{169} = 13$' },
-            { kind: 'para', text: '3e équation : $x^2+y^2=13$ (3)' },
+            { kind: 'para', text: 'Élever (1) et (2) au carré, puis additionner membre à membre : $(x^2+y^2)^2 = 5^2+12^2 = 169$' },
+            { kind: 'para', text: '3e équation : $x^2+y^2 = \\sqrt{169} = 13$ (3)' },
             { kind: 'para', text: '(1)+(3), divisé par 2 : $x^2 = (5+13)/2 = 9$ — (3)−(1), divisé par 2 : $y^2 = (13-5)/2 = 4$' },
             { kind: 'para', text: 'D\'où $x=\\pm3,\\ y=\\pm2$. Signe relatif via (2) : $2xy=-12<0 \\implies x$ et $y$ de signes OPPOSÉS' },
             { kind: 'para', text: 'Conclusion : racines carrées de $5-12i$ : $z_1=3-2i$ et $z_2=-3+2i$' },
@@ -338,7 +345,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Affixes et racines carrées',
           generatorId: '6gen35',
-          description: ['Calcule un milieu, une distance, ou les deux racines carrées d\'un nombre complexe par le système x²−y², 2xy, module.'],
+          description: ['Calcule un milieu, une distance, ou les deux racines carrées d\'un nombre complexe par le système x²−y², 2xy, somme des carrés.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 35. Affixes et racines carrées »',
         },
@@ -492,8 +499,10 @@ export const nombresComplexes: ChapterContent = {
           label: 'Module et argument',
           items: [
             'Le **module** de $z=a+bi$ est sa distance à l\'origine : $|z| = \\sqrt{a^2+b^2}$, ' +
-              'toujours positif ou nul. L\'**argument** $arg(z)$ est l\'angle (à $2\\pi$ près) ' +
-              'entre l\'axe des réels positifs et le vecteur $\\vec{OM}$.',
+              'toujours positif ou nul — c\'est la longueur déjà utilisée à la section 2 pour ' +
+              'la distance $AB=|z_B-z_A|$, qui reçoit ici son nom. L\'**argument** $arg(z)$ ' +
+              'est l\'angle (à $2\\pi$ près) entre l\'axe des réels positifs et le vecteur ' +
+              '$\\vec{OM}$.',
           ],
         },
         {
@@ -573,9 +582,12 @@ export const nombresComplexes: ChapterContent = {
               kind: 'para',
               text:
                 'Pour le quotient, on multiplie numérateur et dénominateur par le conjugué de ' +
-                '$z_2$ : $z_1/z_2 = z_1\\bar{z}_2/(z_2\\bar{z}_2) = z_1\\bar{z}_2/r_2^2$. Comme ' +
-                '$\\bar{z}_2$ a pour module $r_2$ et pour argument $-\\theta_2$ (rappel ' +
-                'section 4), le produit $z_1\\bar{z}_2$ a pour module $r_1r_2$ et pour ' +
+                '$z_2$ : $z_1/z_2 = z_1\\bar{z}_2/(z_2\\bar{z}_2) = z_1\\bar{z}_2/r_2^2$. Or ' +
+                '$\\bar{z}_2 = r_2(\\cos\\theta_2-i\\sin\\theta_2) = ' +
+                'r_2(\\cos(-\\theta_2)+i\\sin(-\\theta_2))$, puisque $\\cos(-\\theta)=' +
+                '\\cos\\theta$ et $\\sin(-\\theta)=-\\sin\\theta$ : le conjugué a donc le MÊME ' +
+                'module $r_2$ et l\'argument OPPOSÉ $-\\theta_2$. Le produit $z_1\\bar{z}_2$ ' +
+                'a alors pour module $r_1r_2$ et pour ' +
                 'argument $\\theta_1-\\theta_2$ (démonstration ci-dessus) ; diviser par le ' +
                 'réel positif $r_2^2$ divise le module par $r_2^2$ sans toucher l\'argument, ' +
                 'd\'où le module final $r_1r_2/r_2^2 = r_1/r_2$.',
