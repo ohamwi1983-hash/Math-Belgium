@@ -87,9 +87,27 @@ async function inlinerPolices(css: string): Promise<string> {
  * quadrillé décoratif du `<body>` (`repeating-linear-gradient`, copié depuis `src/index.css`) doit
  * être neutralisé explicitement : sans ce `background: #fff`, ce motif traverse visuellement les
  * boîtes opaques (`.diagram-frame` etc.) à l'impression — confirmé empiriquement (rendu PDF
- * inspecté page par page), pas juste théorique. */
+ * inspecté page par page), pas juste théorique.
+ *
+ * Numérotation "n / total" en bas de chaque page (`@bottom-center` + `counter(page)`/
+ * `counter(pages)`, CSS Paged Media) — confirmé empiriquement fonctionner sous Chromium (testé via
+ * Playwright, `page.pdf()`, texte extrait page par page). Support inégal hors Chromium/Edge (ex.
+ * Firefox l'ignore silencieusement à ce jour) : dégradation gracieuse, la page s'imprime
+ * normalement, seule la numérotation manque — jamais bloquant. `var(--mono)`/`var(--ink-faint)` ne
+ * sont pas garantis résolus dans une boîte de marge `@page` par tous les moteurs, donc valeurs en
+ * dur ici plutôt que les tokens du reste du fichier (mêmes valeurs que `--mono`/`--ink-faint`
+ * définis plus haut dans le CSS copié). */
 const STYLE_IMPRESSION = `
-@page { size: A4; margin: 15mm; }
+@page {
+  size: A4;
+  margin: 18mm 15mm 20mm 15mm;
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+    font-size: 9.5pt;
+    color: #8a97a1;
+  }
+}
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #ffffff !important; }
