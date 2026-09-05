@@ -358,6 +358,63 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   cadre étant exactement les 3 blocs concernés de ce chapitre — et le cadre `is-empty` de
   « Fonctions composées » toujours rendu avec son contenu.
 
+- **6e (6h), Chapitre 9 — Lieux géométriques** (`lieux-geometriques`) : migré en intégralité depuis
+  un artifact `plateforme-maths` (6e/6h, chapitre 9 dans ce dépôt-là — conservé tel quel ici,
+  contrairement au chapitre « Analyse combinatoire » qui avait suivi son rang réel dans
+  `chaptersIndex.ts`, sur demande explicite pour ce chapitre-ci), 4 sections (droites/points
+  remarquables du triangle, cercles, lieux sans paramètre, méthode des génératrices) + synthèse
+  tabulaire (18 lignes) + quiz vrai/faux (`6gen72`), 20 diagrammes, tous en `vectorPlane` (aucun
+  autre kind nécessaire — ce chapitre est presque un prolongement direct de « Géométrie analytique
+  plane »). Deux extensions additives de `vectorPlane`, dans le même esprit que celles déjà faites
+  pour ce chapitre 4e (optionnelles, sans effet sur le rendu existant) :
+  - `circles?: {cx,cy,r,tone}[]` — plusieurs cercles simultanés sur un même plan (le singulier
+    `circle?` existant est inchangé, toujours utilisé partout ailleurs) ; nécessaire pour le
+    diagramme « cercle passant par 2 points, rayon donné », qui affiche réellement 2 cercles
+    solutions à la fois, pas un cercle répété. Rendu par un simple `.map` juste après `circle`,
+    même formule de rayon moyenné que l'existant.
+  - Aucun nouveau kind pour la « bande pleine » (2 droites parallèles + région pleine entre elles) :
+    `vectorPlane` n'a pas de primitive de remplissage, alors composée avec seulement les 2 droites
+    frontières (`vectors`, `arrow:false`) + une étiquette texte (`points`, `node:false`) — la
+    légende de la figure explicite que la bande entière, bords compris, vérifie l'équation.
+    Simplification assumée, disclosée ici plutôt que masquée.
+  - L'astroïde ($x=\cos^3\lambda$, $y=\sin^3\lambda$) est une courbe fermée, pas le graphe d'une
+    fonction : rendue par 2 entrées `curves` sur le même `vectorPlane` (moitié haute
+    `(1-|x|^{2/3})^{1.5}`, moitié basse son opposée), toutes deux `xMin:-1, xMax:1` — les 4 pointes
+    (dérivée verticale) restent nettes avec l'échantillonnage existant (60 points), aucune
+    dégradation constatée au rendu.
+
+  **Bug sitewide découvert et corrigé en cours de route** (pas seulement dans ce chapitre) :
+  `VectorPlane`'s `LINE_TONE_CLASS` faisait pointer la teinte `'ink'` vers la classe CSS
+  `.svg-ink`, qui ne définit QUE `fill` (jamais `stroke`) — réservée à l'origine aux `<text>` et aux
+  points pleins. Un `vector`/`curve` en teinte `'ink'` (ligne/courbe = un trait, jamais un
+  remplissage) se retrouvait donc sans AUCUN trait, silencieusement invisible : confirmé, en
+  reproduisant le bug d'abord sur ce nouveau chapitre (triangle entier, losange, astroïde
+  entièrement absents à l'écran malgré un DOM correct), puis retrouvé déjà latent dans 2 chapitres
+  DÉJÀ EN PRODUCTION — `calcul-vectoriel.ts` (le vecteur $\vec{AB}$ de la figure « k·AB », teinte
+  `'ink'`, sans `arrow:false`) et `geometrie-analytique-plane.ts` (les 2 droites parallèles a/b de
+  la figure d'introduction aux lieux géométriques, teinte `'ink'`, `arrow:false`) — jamais
+  remarqué faute de contrôle visuel systématique sur ces figures précises. Correction ciblée et non
+  régressive : nouvelle classe `.svg-ink-stroke { stroke: var(--ink); fill: var(--ink); }` dans
+  `index.css` (jamais réutilisée ailleurs, donc aucun risque pour les ~100 usages de `.svg-ink` sur
+  du texte) et `LINE_TONE_CLASS.ink` de `VectorPlane.tsx` repointé dessus. Vérifié par capture
+  Playwright avant/après sur les 3 figures concernées (ce chapitre + les 2 déjà en production) :
+  triangle/losange/astroïde/parallèles désormais bien visibles, aucune autre figure du site (tons
+  `accent`/`good`/`bad`/`attn`/`tip`/`faint`, déjà correctement stroke+fill ou stroke seul) non
+  affectée par ce changement puisque `.svg-ink` lui-même reste strictement inchangé.
+
+  Vérifié par `tsc -b` + `npm run build` propres, `npm run lint` sans nouvel avertissement, et rendu
+  Playwright réel sur le build de production : aucun `$...$` non résolu (piège rencontré : `kicker`
+  de section et `description` de bloc `entrainement` ne passent PAS par `RichText`, contrairement à
+  `caption`/`items`/`text` — corrigé en écrivant ces deux champs en Unicode simple, jamais en
+  LaTeX ; piège rencontré une seconde fois : un `$...$` imbriqué À L'INTÉRIEUR d'un `**gras**` dans
+  un item de `methode` n'est jamais reparsé — séparé en segments gras/math adjacents), les 20
+  diagrammes du chapitre capturés un à un (astroïde à 4 pointes nettes, 2 cercles solutions bien
+  distincts, tous les triangles/losanges/parallélogrammes correctement tracés), les 5 liens
+  générateur (`6gen54`, `6gen55`, `6gen56`, `6gen57`, `6gen72`) pointant vers
+  `https://plateforme-maths.vercel.app/6e-6h/6genNN`, et re-rendu sans régression de
+  `geometrie-analytique-plane` et `calcul-vectoriel` (seul changement observé : les 3 figures
+  ci-dessus, auparavant silencieusement cassées, s'affichent enfin correctement).
+
 ## Vérification avant de pousser
 
 - `npm run build` (= `tsc -b && vite build`) doit passer sans erreur.

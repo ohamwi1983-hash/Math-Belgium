@@ -320,6 +320,14 @@ figcaption {
 .diagram-frame--compact { max-width: 50%; margin: 0 auto; }
 .svg-ink { fill: var(--ink); }
 .svg-ink-faint { fill: var(--ink-faint); }
+/* Stroke+fill counterpart of .svg-ink, for lines/curves/arrow-marker triangles — matches the
+   fill+stroke shape of .svg-accent/.svg-good/.svg-bad/.svg-attn/.svg-tip below. .svg-ink itself
+   MUST stay fill-only (never gains a stroke): ~100 <text> elements across the illustration
+   components rely on it never drawing an outline. Discovered while migrating "Lieux géométriques":
+   VectorPlane's LINE_TONE_CLASS mapped tone 'ink' straight to .svg-ink, so any vector/curve given
+   tone 'ink' rendered with no stroke at all (silently invisible) — confirmed already latent in the
+   shipped calcul-vectoriel chapter (the k·AB illustration's first, "ink"-toned vector). */
+.svg-ink-stroke { stroke: var(--ink); fill: var(--ink); }
 .svg-line { stroke: var(--ink-soft); }
 .svg-faint { stroke: var(--line); }
 .svg-grid { stroke: var(--line-soft); }

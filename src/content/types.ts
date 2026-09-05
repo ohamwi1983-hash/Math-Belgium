@@ -338,6 +338,11 @@ export type IllustrationSpec =
        * cercle depuis un graphe). Un seul cercle : les diagrammes de ce chapitre n'en ont jamais
        * besoin de deux à la fois. */
       circle?: { cx: number; cy: number; r: number; tone?: 'accent' | 'faint' }
+      /** Plusieurs cercles simultanés — ex. les 2 cercles solutions d'un problème "cercle passant
+       * par 2 points, rayon donné". Distinct de `circle` (gardé pour compatibilité, un seul
+       * cercle) : certains diagrammes ont réellement besoin de 2 cercles affichés à la fois, pas
+       * d'un cercle unique répété. */
+      circles?: { cx: number; cy: number; r: number; tone?: 'accent' | 'faint' | 'good' }[]
       /** Courbe(s) réelles tracées par échantillonnage, y = fn(x) — même mécanique que
        * `curvePlot.curves`, pour une parabole d'axe vertical sur ce plan. */
       curves?: { fn: (x: number) => number; tone: 'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint'; xMin?: number; xMax?: number }[]

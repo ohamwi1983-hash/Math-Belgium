@@ -6,13 +6,16 @@ type Props = Omit<Extract<IllustrationSpec, { kind: 'vectorPlane' }>, 'caption'>
 const L = 320
 const H = 300
 
+// 'ink' uses the stroke-only .svg-ink-stroke, never the fill-only .svg-ink (reserved for text and
+// point fills, relied on by ~100 <text> usages elsewhere to never draw an outline) — a vector or
+// curve is a stroke, not a fill, and .svg-ink has no `stroke` property at all.
 const LINE_TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'attn' | 'tip' | 'ink' | 'faint', string> = {
   accent: 'svg-accent',
   good: 'svg-good',
   bad: 'svg-bad',
   attn: 'svg-attn',
   tip: 'svg-tip',
-  ink: 'svg-ink',
+  ink: 'svg-ink-stroke',
   faint: 'svg-line',
 }
 
@@ -44,7 +47,7 @@ const SAMPLES = 60
  * (`arrow: false`, pour une droite entière plutôt qu'un vecteur borné) — tous les nouveaux champs
  * sont optionnels et n'affectent aucun rendu existant du chapitre calcul vectoriel.
  */
-export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = false, circle, curves, curvesOfY, vectors, points, angleArcs, rightAngleMarkers }: Props) {
+export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = false, circle, circles, curves, curvesOfY, vectors, points, angleArcs, rightAngleMarkers }: Props) {
   const markerId = `vplane-${useId()}`
   const xScale = (x: number) => ((x - xMin) / (xMax - xMin)) * L
   const yScale = (y: number) => H - ((y - yMin) / (yMax - yMin)) * H
@@ -117,6 +120,18 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
           strokeWidth={circle.tone === 'faint' ? '1' : '1.8'}
         />
       )}
+
+      {circles?.map((c, i) => (
+        <circle
+          key={`circle-${i}`}
+          cx={xScale(c.cx)}
+          cy={yScale(c.cy)}
+          r={((c.r / (xMax - xMin)) * L + (c.r / (yMax - yMin)) * H) / 2}
+          fill="none"
+          className={c.tone === 'faint' ? 'svg-line' : c.tone === 'good' ? 'svg-good-outline' : 'svg-accent-outline'}
+          strokeWidth={c.tone === 'faint' ? '1' : '1.8'}
+        />
+      ))}
 
       {curves?.map((c, i) => <path key={`curve-${i}`} d={pathForCurve(c)} style={{ fill: 'none' }} className={LINE_TONE_CLASS[c.tone]} strokeWidth="2.2" strokeLinejoin="round" />)}
       {curvesOfY?.map((c, i) => <path key={`curveY-${i}`} d={pathForCurveOfY(c)} style={{ fill: 'none' }} className={LINE_TONE_CLASS[c.tone]} strokeWidth="2.2" strokeLinejoin="round" />)}
