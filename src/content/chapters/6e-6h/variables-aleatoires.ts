@@ -13,7 +13,7 @@ export const variablesAleatoires: ChapterContent = {
   title: 'Variables aléatoires et lois de probabilités',
   slug: 'variables-aleatoires',
   lede:
-    "Combien un jeu rapporte-t-il en moyenne ? À partir de combien d'épreuves un événement rare devient-il presque certain ? Quelle proportion d'une population se situe dans un intervalle donné ? Ce chapitre construit les outils pour répondre : variable aléatoire discrète et espérance, loi binomiale, loi normale — première loi continue de la plateforme, lue via une table de la fonction de répartition Φ — un générateur de clôture qui combine binomiale, normale et théorème de Bayes, puis la loi de Poisson pour les événements rares.",
+    "Combien un jeu rapporte-t-il en moyenne ? À partir de combien d'épreuves un événement rare devient-il presque certain ? Quelle proportion d'une population se situe dans un intervalle donné ? Ce chapitre construit les outils pour répondre : variable aléatoire discrète et espérance, loi binomiale, passage au continu par la densité de probabilité, loi uniforme continue, loi normale — lue via une table de la fonction de répartition Φ — un générateur de clôture qui combine binomiale, normale et théorème de Bayes, puis la loi de Poisson pour les événements rares.",
   sections: [
     {
       id: 'variablesdiscretes',
@@ -26,6 +26,42 @@ export const variablesAleatoires: ChapterContent = {
           items: [
             "Une **variable aléatoire discrète** $X$ associe à chaque issue d'une expérience une valeur numérique parmi un ensemble fini $\\{x_1,\\ldots,x_n\\}$. Sa **loi de probabilité** donne $P(X=x_i)$ pour chaque valeur, avec la contrainte $\\sum P(X=x_i) = 1$ — jamais plus, jamais moins.",
           ],
+        },
+        { kind: 'subheading', text: 'Fonction de répartition F(x)=P(X≤x)' },
+        {
+          kind: 'definition',
+          label: 'Fonction de répartition',
+          items: [
+            "La **fonction de répartition** $F$ d'une variable aléatoire discrète associe à tout réel $x$ la probabilité cumulée $F(x)=P(X\\leq x)$ — la somme des probabilités de toutes les valeurs inférieures ou égales à $x$. Son graphique est toujours un graphique en escaliers, jamais une courbe continue.",
+          ],
+        },
+        {
+          kind: 'featureTable',
+          headers: ['x', '2', '3', '4', '5', '6'],
+          rows: [
+            ['P(X=x)', '0,15', '0,25', '0,30', '0,20', '0,10'],
+            ['F(x)=P(X≤x)', '0,15', '0,40', '0,70', '0,90', '**1,00**'],
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'stepFunction',
+            jumps: [2, 3, 4, 5, 6],
+            levels: [0, 0.15, 0.4, 0.7, 0.9, 1.0],
+            levelLabels: ['0,15', '0,40', '0,70', '0,90', '1,00'],
+            xMin: 1.3,
+            xMax: 6.7,
+            xAxisLabel: 'x',
+            yAxisLabel: 'F(x)',
+            caption:
+              "Graphique en escaliers de F : chaque palier est constant entre deux valeurs de X, et F ne saute qu'aux valeurs prises par X, jamais entre.",
+          },
+        },
+        {
+          kind: 'astuce',
+          label: 'Chaque marche mesure exactement P(X=x)',
+          text: 'La hauteur du saut de $F$ en $x=x_i$ est toujours $P(X=x_i)$ — par exemple le saut en $x=4$ vaut $0,70-0,40=0,30$, exactement $P(X=4)$. Lire un graphique en escaliers revient donc à lire directement toute la loi de probabilité.',
         },
         {
           kind: 'definition',
@@ -143,42 +179,6 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: 'Une somme à 1 ne suffit jamais à elle seule',
           text: "Deux événements contraires vérifient toujours $P(A)+P(B)=1$, mais la réciproque est fausse : il faut en plus l'absence de chevauchement. Repérer le mot-frontière commun (« au moins $k$ » et « au plus $k$ » partagent toujours $X=k$) est le réflexe le plus rapide — le vrai couple de contraires de « au moins $k$ » est « au plus $k-1$ », jamais « au plus $k$ ».",
-        },
-        { kind: 'subheading', text: 'Fonction de répartition F(x)=P(X≤x)' },
-        {
-          kind: 'definition',
-          label: 'Fonction de répartition',
-          items: [
-            "La **fonction de répartition** $F$ d'une variable aléatoire discrète associe à tout réel $x$ la probabilité cumulée $F(x)=P(X\\leq x)$ — la somme des probabilités de toutes les valeurs inférieures ou égales à $x$. Son graphique est toujours un graphique en escaliers, jamais une courbe continue.",
-          ],
-        },
-        {
-          kind: 'featureTable',
-          headers: ['x', '2', '3', '4', '5', '6'],
-          rows: [
-            ['P(X=x)', '0,15', '0,25', '0,30', '0,20', '0,10'],
-            ['F(x)=P(X≤x)', '0,15', '0,40', '0,70', '0,90', '**1,00**'],
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'stepFunction',
-            jumps: [2, 3, 4, 5, 6],
-            levels: [0, 0.15, 0.4, 0.7, 0.9, 1.0],
-            levelLabels: ['0,15', '0,40', '0,70', '0,90', '1,00'],
-            xMin: 1.3,
-            xMax: 6.7,
-            xAxisLabel: 'x',
-            yAxisLabel: 'F(x)',
-            caption:
-              "Graphique en escaliers de F : chaque palier est constant entre deux valeurs de X, et F ne saute qu'aux valeurs prises par X, jamais entre.",
-          },
-        },
-        {
-          kind: 'astuce',
-          label: 'Chaque marche mesure exactement P(X=x)',
-          text: 'La hauteur du saut de $F$ en $x=x_i$ est toujours $P(X=x_i)$ — par exemple le saut en $x=4$ vaut $0,70-0,40=0,30$, exactement $P(X=4)$. Lire un graphique en escaliers revient donc à lire directement toute la loi de probabilité.',
         },
         { kind: 'subheading', text: 'Jeux et gains — jeu favorable, défavorable ou équitable' },
         {
@@ -412,16 +412,242 @@ export const variablesAleatoires: ChapterContent = {
       ],
     },
     {
-      id: 'loinormale',
+      id: 'variablecontinue',
       number: 3,
+      title: 'Variable aléatoire continue et densité de probabilité',
+      blocks: [
+        {
+          kind: 'para',
+          text: "Les variables aléatoires rencontrées jusqu'ici ne prenaient qu'un nombre fini de valeurs. Quand la valeur observée peut être **n'importe quel réel d'un intervalle** — la graduation exacte où s'arrête une aiguille, la masse exacte d'un sachet de sucre — la probabilité qu'elle prenne une valeur bien précise est nulle : si ce n'était pas le cas, la somme des probabilités serait infinie et non égale à 1. On ne peut donc plus définir une loi de probabilité valeur par valeur comme pour une variable discrète ; on n'attribue une probabilité qu'aux événements définis par un intervalle.",
+        },
+        {
+          kind: 'definition',
+          label: 'Variable aléatoire continue',
+          items: [
+            "Une **variable aléatoire continue** est une variable aléatoire qui peut prendre toutes les valeurs réelles d'un intervalle $I$, ou d'une union d'intervalles.",
+          ],
+        },
+        {
+          kind: 'definition',
+          label: 'Densité de probabilité',
+          items: [
+            "On appelle **densité de probabilité** d'une variable aléatoire $X$, dont l'ensemble des valeurs possibles est un intervalle $[u;v]$ de $\\mathbb{R}$, une fonction $f$ définie, continue et positive sur $[u;v]$ telle que :",
+            "$\\displaystyle\\int_u^v f(t)\\,dt = 1$ ;",
+            "quel que soit l'intervalle $[a;b]$ contenu dans $[u;v]$ (c'est-à-dire $[a;b]\\subset[u;v]$), on a $\\displaystyle P(a\\leq X\\leq b) = \\int_a^b f(t)\\,dt$.",
+          ],
+        },
+        {
+          kind: 'para',
+          text: "La probabilité que la valeur de la variable aléatoire appartienne à un intervalle $[a;b]$ est donc l'**aire de la surface sous la courbe** de $f$, entre les droites $x=a$ et $x=b$ — jamais la valeur $f(t)$ lue en un point.",
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (t: number) => Math.pow(t - 3, 2) / 36 + 1 / 12, tone: 'accent', xMin: 0, xMax: 6 }],
+            shadedRegions: [{ from: 2, to: 4, upper: (t: number) => Math.pow(t - 3, 2) / 36 + 1 / 12, tone: 'accent' }],
+            textLabels: [
+              { x: 1.1, y: 0.31, text: 'y=f(t)', tone: 'ink', anchor: 'middle' },
+              { x: 3, y: 0.04, text: 'P(a≤X≤b)', tone: 'accent', anchor: 'middle' },
+            ],
+            xMin: 0,
+            xMax: 6,
+            xTicks: [0, 2, 4, 6],
+            xTickLabels: { 0: 'u', 2: 'a', 4: 'b', 6: 'v' },
+            fixedYRange: { min: 0, max: 0.4 },
+            xAxisLabel: 't',
+            yAxisLabel: 'f(t)',
+            caption:
+              "Densité de probabilité f sur [u;v] : l'aire totale sous la courbe vaut toujours 1, et l'aire de la zone teintée, entre a et b, vaut exactement P(a≤X≤b).",
+          },
+        },
+        {
+          kind: 'definition',
+          label: "Fonction de répartition d'une variable aléatoire continue",
+          items: [
+            "La **fonction de répartition** d'une variable aléatoire continue $X$ est la fonction $F$ définie sur $\\mathbb{R}$ par $F(x)=P(X\\leq x)$ — exactement la même définition que dans le cas discret, mais son graphique est cette fois une courbe continue et croissante, jamais un graphique en escaliers.",
+          ],
+        },
+        { kind: 'subheading', text: 'Propriétés de la fonction de répartition et de la densité' },
+        {
+          kind: 'list',
+          items: [
+            "La fonction de répartition est dérivable sur $I$ et sa dérivée y est la densité de probabilité : $F'=f$.",
+            'La fonction de répartition est croissante sur $I$.',
+            'Quels que soient les réels $a$ et $b$ de $I$ (avec $a<b$) : $P(X=a)=0$ ;',
+            '$P(X<a)=P(X\\leq a)=F(a)$ ;',
+            '$P(X>a)=P(X\\geq a)=1-F(a)$ ;',
+            '$P(a<X<b)=P(a\\leq X<b)=P(a<X\\leq b)=P(a\\leq X\\leq b)=F(b)-F(a)$.',
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Strict ou large : aucune différence en continu',
+          text: "Puisque $P(X=a)=0$ pour toute valeur isolée, ajouter ou retirer une borne ne change jamais la probabilité d'un intervalle : $P(a<X<b)$ et $P(a\\leq X\\leq b)$ valent toujours la même chose, $F(b)-F(a)$. C'est exactement l'inverse du cas discret, où la valeur frontière $X=k$ pèse un vrai $P(X=k)$ et fait se recouvrir « au moins $k$ » et « au plus $k$ » (section 1).",
+        },
+        {
+          kind: 'definition',
+          label: "Espérance, variance et écart-type d'une variable aléatoire continue",
+          items: [
+            "L'**espérance mathématique** d'une variable aléatoire $X$ dont l'ensemble des valeurs possibles est un intervalle $[u;v]$ de $\\mathbb{R}$ est définie par :",
+            '$\\displaystyle E(X) = \\int_u^v t\\cdot f(t)\\,dt$',
+            "Sa **variance** est définie par $\\displaystyle V(X) = \\int_u^v [t-E(X)]^2\\cdot f(t)\\,dt$, et son **écart-type** est la racine carrée de sa variance : $\\sigma(X)=\\sqrt{V(X)}$.",
+          ],
+        },
+      ],
+    },
+    {
+      id: 'discreteoucontinue',
+      number: 4,
+      title: 'Variable aléatoire discrète ? Variable aléatoire continue ?',
+      blocks: [
+        {
+          kind: 'para',
+          text: 'Les deux familles partagent exactement les mêmes notions — loi, fonction de répartition, espérance, variance, écart-type — mais chacune les porte avec un outil différent : une somme pondérée dans le cas discret, une intégrale dans le cas continu.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['', 'Variable aléatoire discrète', 'Variable aléatoire continue'],
+          rows: [
+            ['Nombre de valeurs', 'Fini ou dénombrable', 'Infini'],
+            [
+              'Probabilité',
+              'La **loi de probabilité** donne la probabilité pour chaque valeur de $X$.',
+              "La **fonction de densité** permet de calculer la probabilité qu'une valeur appartienne à un intervalle.",
+            ],
+            ['Fonction de répartition', 'Somme de probabilités', 'Intégrale de la fonction densité'],
+            ['Espérance mathématique', '$\\displaystyle E(X)=\\sum_{i=1}^{n} p_i\\,x_i$', '$\\displaystyle E(X)=\\int_u^v t\\,f(t)\\,dt$'],
+            [
+              'Variance',
+              '$\\displaystyle V(X)=\\sum_{i=1}^{n} p_i\\,x_i^2-[E(X)]^2$',
+              '$\\displaystyle V(X)=\\int_u^v t^2 f(t)\\,dt-[E(X)]^2$',
+            ],
+            ['Écart-type', '$\\sigma(X)=\\sqrt{V(X)}$', '$\\sigma(X)=\\sqrt{V(X)}$'],
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: "Passer d'une colonne à l'autre : deux substitutions",
+          text: "Chaque formule continue se lit comme sa jumelle discrète en remplaçant $\\sum$ par $\\int$ et la probabilité ponctuelle $p_i=P(X=x_i)$ par $f(t)\\,dt$ — l'espérance reste toujours une moyenne des valeurs pondérée par leur poids de probabilité, jamais une moyenne simple des valeurs possibles. Seul l'écart-type s'écrit à l'identique dans les 2 colonnes : $\\sigma(X)=\\sqrt{V(X)}$, quelle que soit la nature de la variable aléatoire.",
+        },
+      ],
+    },
+    {
+      id: 'loiuniformecontinue',
+      number: 5,
+      title: 'Loi uniforme continue',
+      blocks: [
+        {
+          kind: 'definition',
+          label: 'Définition',
+          items: [
+            "Pour $X$ uniformément réparti sur $[a;b]$, la densité est constante, égale à $1/(b-a)$ — et la probabilité d'un intervalle ne dépend que de sa longueur, jamais de sa position :",
+            '$P(c\\leq X\\leq d) = \\dfrac{d-c}{b-a}$',
+            '$E(X) = \\dfrac{a+b}{2} \\qquad V(X) = \\dfrac{(b-a)^2}{12}$',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: () => 1 / 60, tone: 'accent', xMin: 0, xMax: 60 }],
+            shadedRegions: [
+              { from: 10, to: 25, upper: () => 1 / 60, tone: 'accent' },
+              { from: 35, to: 50, upper: () => 1 / 60, tone: 'good' },
+            ],
+            xMin: 0,
+            xMax: 60,
+            xTicks: [0, 10, 25, 35, 50, 60],
+            fixedYRange: { min: 0, max: 0.02 },
+            xAxisLabel: 'x',
+            yAxisLabel: 'densité',
+            caption:
+              'X uniforme sur [0;60] : les 2 zones teintées ([10;25] et [35;50]) ont la même longueur (15) et donc la même probabilité (0,25), bien qu\'elles occupent des positions différentes.',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — E(X), V(X) et σ(X) pour X uniforme sur [0;60]',
+          blocks: [
+            { kind: 'para', text: '$E(X) = (0+60)/2 = 30 \\qquad V(X) = 60^2/12 = 300 \\qquad \\sigma(X) = \\sqrt{300} \\approx 17,32$' },
+            {
+              kind: 'para',
+              text: '$E(X)=30$ tombe exactement au milieu de $[0;60]$ — normal pour une loi uniforme, toujours symétrique autour du centre de l\'intervalle.',
+            },
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Seule la longueur compte, jamais la position',
+          text: '$P(10\\leq X\\leq25)=15/60=0,25$ et $P(35\\leq X\\leq50)=15/60=0,25$ sont identiques — 2 intervalles de même longueur ont toujours la même probabilité, quelle que soit leur position dans $[a;b]$.',
+        },
+      ],
+    },
+    {
+      id: 'loinormale',
+      number: 6,
       title: 'Loi normale',
       blocks: [
         {
           kind: 'definition',
-          label: 'Première loi continue du chapitre',
+          label: 'Une loi continue, lue via la fonction de répartition Φ',
           items: [
-            "Contrairement aux lois discrètes vues jusqu'ici, une variable $X$ suivant une **loi normale** $N(\\mu,\\sigma)$ peut prendre n'importe quelle valeur réelle — $P(X=x)$ vaut toujours 0 pour un réel $x$ précis ; seule une probabilité sur un intervalle a un sens, lue via la **fonction de répartition** $\\Phi$ de la loi normale centrée réduite $N(0,1)$ : $\\Phi(z)=P(Z\\leq z)$.",
+            "Une variable $X$ suivant une **loi normale** $N(\\mu,\\sigma)$ est une variable aléatoire continue, dont la densité est la courbe « en cloche » de Gauss : $P(X=x)$ vaut donc toujours 0 pour un réel $x$ précis, et seule une probabilité sur un intervalle a un sens — lue ici via la **fonction de répartition** $\\Phi$ de la loi normale centrée réduite $N(0,1)$ : $\\Phi(z)=P(Z\\leq z)$.",
           ],
+        },
+        { kind: 'subheading', text: 'La règle empirique 68-95-99,7' },
+        {
+          kind: 'featureTable',
+          headers: ['k', 'Intervalle', "% dans l'intervalle", '% hors (2 côtés)', '% hors (1 côté)'],
+          rows: [
+            ['1', '[μ−σ;μ+σ]', '68,3%', '31,7%', '15,85%'],
+            ['2', '[μ−2σ;μ+2σ]', '95,4%', '4,6%', '2,3%'],
+            ['3', '[μ−3σ;μ+3σ]', '99,7%', '0,3%', '0,15%'],
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              {
+                fn: (x: number) => Math.exp(-Math.pow((x - 50) / 10, 2) / 2) / (10 * Math.sqrt(2 * Math.PI)),
+                tone: 'accent',
+              },
+            ],
+            shadedRegions: [
+              {
+                from: 30,
+                to: 70,
+                upper: (x: number) => Math.exp(-Math.pow((x - 50) / 10, 2) / 2) / (10 * Math.sqrt(2 * Math.PI)),
+                tone: 'good',
+              },
+            ],
+            xMin: 15,
+            xMax: 85,
+            xTicks: [30, 50, 70],
+            xTickLabels: { 30: 'μ−2σ=30', 50: 'μ=50', 70: 'μ+2σ=70' },
+            textLabels: [{ x: 50, y: 0.038, text: '95,4%', tone: 'good' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'densité',
+            caption:
+              'N(50,10) : environ 95,4% des valeurs se situent dans [μ−2σ;μ+2σ]=[30;70] (zone teintée) — le reste, 4,6%, se répartit à égalité entre les 2 queues.',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Exemple résolu — X~N(50,10), hors de [30;70]',
+          blocks: [
+            {
+              kind: 'para',
+              text: '$50-2\\times10=30$ et $50+2\\times10=70$ : environ $95,4\\%$ des valeurs tombent dans $[30;70]$, donc $1-0,954=0,046$ (4,6%) tombent en dehors, tous côtés confondus.',
+            },
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Diviser par 2 pour un seul côté',
+          text: "La probabilité d'être seulement au-dessus de 70 (un seul côté) n'est jamais le complément total ($4,6\\%$) — la loi normale étant symétrique, ce complément se partage également entre les deux queues : $0,046/2=0,023$ (2,3%) pour un seul côté. Oublier cette division par 2 est l'erreur la plus fréquente de cette règle.",
         },
         {
           kind: 'definition',
@@ -478,60 +704,6 @@ export const variablesAleatoires: ChapterContent = {
           text: "Pour un intervalle de la loi centrée réduite, on soustrait toujours deux valeurs de $\\Phi$ — jamais on ne les additionne (ce qui pourrait même dépasser 1, signal d'alerte immédiat) :",
         },
         { kind: 'para', text: '$P(1\\leq Z\\leq2) = \\Phi(2)-\\Phi(1) \\approx 0,9772-0,8413 = 0,1359$' },
-        { kind: 'subheading', text: 'La règle empirique 68-95-99,7' },
-        {
-          kind: 'featureTable',
-          headers: ['k', 'Intervalle', "% dans l'intervalle", '% hors (2 côtés)', '% hors (1 côté)'],
-          rows: [
-            ['1', '[μ−σ;μ+σ]', '68,3%', '31,7%', '15,85%'],
-            ['2', '[μ−2σ;μ+2σ]', '95,4%', '4,6%', '2,3%'],
-            ['3', '[μ−3σ;μ+3σ]', '99,7%', '0,3%', '0,15%'],
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'curvePlot',
-            curves: [
-              {
-                fn: (x: number) => Math.exp(-Math.pow((x - 50) / 10, 2) / 2) / (10 * Math.sqrt(2 * Math.PI)),
-                tone: 'accent',
-              },
-            ],
-            shadedRegions: [
-              {
-                from: 30,
-                to: 70,
-                upper: (x: number) => Math.exp(-Math.pow((x - 50) / 10, 2) / 2) / (10 * Math.sqrt(2 * Math.PI)),
-                tone: 'good',
-              },
-            ],
-            xMin: 15,
-            xMax: 85,
-            xTicks: [30, 50, 70],
-            xTickLabels: { 30: 'μ−2σ=30', 50: 'μ=50', 70: 'μ+2σ=70' },
-            textLabels: [{ x: 50, y: 0.038, text: '95,4%', tone: 'good' }],
-            xAxisLabel: 'x',
-            yAxisLabel: 'densité',
-            caption:
-              'N(50,10) : environ 95,4% des valeurs se situent dans [μ−2σ;μ+2σ]=[30;70] (zone teintée) — le reste, 4,6%, se répartit à égalité entre les 2 queues.',
-          },
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Exemple résolu — X~N(50,10), hors de [30;70]',
-          blocks: [
-            {
-              kind: 'para',
-              text: '$50-2\\times10=30$ et $50+2\\times10=70$ : environ $95,4\\%$ des valeurs tombent dans $[30;70]$, donc $1-0,954=0,046$ (4,6%) tombent en dehors, tous côtés confondus.',
-            },
-          ],
-        },
-        {
-          kind: 'attention',
-          label: 'Diviser par 2 pour un seul côté',
-          text: "La probabilité d'être seulement au-dessus de 70 (un seul côté) n'est jamais le complément total ($4,6\\%$) — la loi normale étant symétrique, ce complément se partage également entre les deux queues : $0,046/2=0,023$ (2,3%) pour un seul côté. Oublier cette division par 2 est l'erreur la plus fréquente de cette règle.",
-        },
         { kind: 'subheading', text: 'Sens inverse — retrouver z (ou x) depuis une probabilité' },
         {
           kind: 'methode',
@@ -551,6 +723,20 @@ export const variablesAleatoires: ChapterContent = {
             },
           ],
         },
+        { kind: 'subheading', text: "S'assurer qu'une distribution statistique suit une loi normale" },
+        {
+          kind: 'methode',
+          label: 'Les 2 vérifications à mener sur la série statistique',
+          items: [
+            'La moyenne, le mode et la médiane de la série statistique ont des valeurs approximativement égales.',
+            'Les données se répartissent selon la règle empirique : environ $68,3\\%$ dans $[\\mu-\\sigma;\\mu+\\sigma]$, environ $95,4\\%$ dans $[\\mu-2\\sigma;\\mu+2\\sigma]$, environ $99,7\\%$ dans $[\\mu-3\\sigma;\\mu+3\\sigma]$.',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Un critère pratique, jamais une démonstration',
+          text: "Ces vérifications suffisent, en pratique, pour conclure que la loi est normale — mais elles ne constituent pas, théoriquement, une condition suffisante : les satisfaire ne démontre jamais que la distribution est exactement normale.",
+        },
         {
           kind: 'entrainement',
           title: 'Loi normale',
@@ -563,7 +749,7 @@ export const variablesAleatoires: ChapterContent = {
     },
     {
       id: 'extensionsbayes',
-      number: 4,
+      number: 7,
       title: 'Extensions : binomiale, normale et Bayes',
       blocks: [
         {
@@ -686,51 +872,6 @@ export const variablesAleatoires: ChapterContent = {
           label: 'Confondre les 2 approximations de la binomiale',
           text: "L'approximation par une loi de Poisson (vue plus loin, $n\\geq30$, $p\\leq0,1$) et l'approximation par une loi normale ($n>30$, $0,3<p<0,7$) ont des domaines de validité qui ne se chevauchent jamais : la première sert pour un $p$ proche de 0 (événement rare), la seconde pour un $p$ proche de 0,5. Un $p$ intermédiaire (par exemple $p=0,2$) ne remplit aucune des deux — la binomiale exacte reste alors la seule option correcte.",
         },
-        { kind: 'subheading', text: 'Loi uniforme continue' },
-        {
-          kind: 'definition',
-          label: 'Définition',
-          items: [
-            "Pour $X$ uniformément réparti sur $[a;b]$, la densité est constante, égale à $1/(b-a)$ — et la probabilité d'un intervalle ne dépend que de sa longueur, jamais de sa position :",
-            '$P(c\\leq X\\leq d) = \\dfrac{d-c}{b-a}$',
-            '$E(X) = \\dfrac{a+b}{2} \\qquad V(X) = \\dfrac{(b-a)^2}{12}$',
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'curvePlot',
-            curves: [{ fn: () => 1 / 60, tone: 'accent', xMin: 0, xMax: 60 }],
-            shadedRegions: [
-              { from: 10, to: 25, upper: () => 1 / 60, tone: 'accent' },
-              { from: 35, to: 50, upper: () => 1 / 60, tone: 'good' },
-            ],
-            xMin: 0,
-            xMax: 60,
-            xTicks: [0, 10, 25, 35, 50, 60],
-            fixedYRange: { min: 0, max: 0.02 },
-            xAxisLabel: 'x',
-            yAxisLabel: 'densité',
-            caption:
-              'X uniforme sur [0;60] : les 2 zones teintées ([10;25] et [35;50]) ont la même longueur (15) et donc la même probabilité (0,25), bien qu\'elles occupent des positions différentes.',
-          },
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Exemple résolu — E(X), V(X) et σ(X) pour X uniforme sur [0;60]',
-          blocks: [
-            { kind: 'para', text: '$E(X) = (0+60)/2 = 30 \\qquad V(X) = 60^2/12 = 300 \\qquad \\sigma(X) = \\sqrt{300} \\approx 17,32$' },
-            {
-              kind: 'para',
-              text: '$E(X)=30$ tombe exactement au milieu de $[0;60]$ — normal pour une loi uniforme, toujours symétrique autour du centre de l\'intervalle.',
-            },
-          ],
-        },
-        {
-          kind: 'astuce',
-          label: 'Seule la longueur compte, jamais la position',
-          text: '$P(10\\leq X\\leq25)=15/60=0,25$ et $P(35\\leq X\\leq50)=15/60=0,25$ sont identiques — 2 intervalles de même longueur ont toujours la même probabilité, quelle que soit leur position dans $[a;b]$.',
-        },
         { kind: 'subheading', text: "Reconstruire une loi et appliquer l'espérance à une population" },
         {
           kind: 'exempleLibre',
@@ -791,7 +932,7 @@ export const variablesAleatoires: ChapterContent = {
     },
     {
       id: 'loipoisson',
-      number: 5,
+      number: 8,
       title: 'Loi de Poisson',
       blocks: [
         {
@@ -930,19 +1071,23 @@ export const variablesAleatoires: ChapterContent = {
     table: {
       headers: ['Notion', 'Point clé'],
       rows: [
+        ['Fonction de répartition', '$F(x)=P(X\\leq x)$ — graphique en escaliers'],
         ['Espérance discrète', '$E(X)=\\sum x_iP(X=x_i)$ — moyenne pondérée, jamais une moyenne simple'],
         ['Variance et écart-type', '$V(X)=E(X^2)-[E(X)]^2$ ; $\\sigma(X)=\\sqrt{V(X)}$'],
-        ['Fonction de répartition', '$F(x)=P(X\\leq x)$ — graphique en escaliers'],
         ['Événements contraires', 'intersection vide et union complète — jamais juste « somme=1 »'],
-        ['Loi uniforme discrète', '$E(X)=(n+1)/2$, $V(X)=(n^2-1)/12$ — cas particulier'],
         ["Loi hypergéométrique", "$E(X)=nK/N$ — cas particulier d'une loi discrète"],
+        ['Loi uniforme discrète', '$E(X)=(n+1)/2$, $V(X)=(n^2-1)/12$ — cas particulier'],
         ['Loi binomiale', '$P(X=k)=C(n,k)p^k(1-p)^{n-k}$ ; $E(X)=np$, $V(X)=np(1-p)$'],
         ['Trouver n (binomiale)', '$n>\\ln(1-\\text{seuil})/\\ln(1-p)$ — inversion du sens car $\\ln(1-p)<0$'],
-        ['Loi normale', 'seule loi continue ; $Z=(X-\\mu)/\\sigma$ ; $\\Phi(z)=P(Z\\leq z)$'],
-        ['Règle empirique', '68,3% / 95,4% / 99,7% pour k=1, 2, 3 écarts-types'],
-        ['Approximation binomiale→normale', '$n>30$, $0,3<p<0,7 \\implies \\mu=np$, $\\sigma=\\sqrt{np(1-p)}$'],
-        ['Bayes à 3 catégories', '$P(\\text{cat.}j\\mid\\text{critère})=q_jr_j/P_{totale}$'],
+        ['Densité de probabilité', "$\\int_u^v f(t)\\,dt=1$ et $P(a\\leq X\\leq b)=\\int_a^b f(t)\\,dt$ — une aire sous la courbe, jamais une valeur $f(t)$"],
+        ['Variable aléatoire continue', '$P(X=a)=0$ ; $P(a<X<b)=P(a\\leq X\\leq b)=F(b)-F(a)$ — strict ou large, même probabilité'],
+        ['Discrète ou continue', '$\\sum p_ix_i$ devient $\\int t\\,f(t)\\,dt$ — mêmes notions, deux outils ; $\\sigma(X)=\\sqrt{V(X)}$ dans les 2 cas'],
         ['Loi uniforme continue', '$P(c\\leq X\\leq d)=(d-c)/(b-a)$ ; $E(X)=(a+b)/2$, $V(X)=(b-a)^2/12$'],
+        ['Loi normale', 'loi continue ; $Z=(X-\\mu)/\\sigma$ ; $\\Phi(z)=P(Z\\leq z)$'],
+        ['Règle empirique', '68,3% / 95,4% / 99,7% pour k=1, 2, 3 écarts-types'],
+        ['Vérifier la normalité', 'moyenne ≈ mode ≈ médiane, et répartition 68,3 / 95,4 / 99,7% — critère pratique, jamais une preuve'],
+        ['Bayes à 3 catégories', '$P(\\text{cat.}j\\mid\\text{critère})=q_jr_j/P_{totale}$'],
+        ['Approximation binomiale→normale', '$n>30$, $0,3<p<0,7 \\implies \\mu=np$, $\\sigma=\\sqrt{np(1-p)}$'],
         ['Loi de Poisson', '$P(X=k)=e^{-\\lambda}\\lambda^k/k!$ ; $E(X)=V(X)=\\lambda$'],
         ['Approximation binomiale→Poisson', '$n\\geq30$, $p\\leq0,1$, $np\\leq15 \\implies \\lambda=np$'],
       ],

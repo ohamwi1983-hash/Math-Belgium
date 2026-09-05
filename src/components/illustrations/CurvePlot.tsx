@@ -153,7 +153,15 @@ export function CurvePlot({
         })()}
 
       {showYAxis && <line x1={zeroX} y1={Y_BOTTOM} x2={zeroX} y2={Y_TOP} className="svg-line" strokeWidth="1.5" markerEnd="url(#cp-arrow)" />}
-      <line x1={X_LEFT} y1={zeroY} x2={X_RIGHT} y2={zeroY} className="svg-line" strokeWidth="1.5" markerEnd="url(#cp-arrow)" />
+      {/* Bug corrigé (chapitre "Variables aléatoires") : tracée sans condition, cette ligne se
+          plaçait à yScale(0) même quand 0 est hors de [yBottom;yTop] (cas d'un fixedYRange qui
+          n'inclut pas 0) — avec overflow:visible sur le <svg>, elle atterrissait alors des
+          centaines de pixels plus bas, par-dessus le contenu suivant de la page. Même logique que
+          l'axe des x conditionnel du chantier plateforme-maths (axesLeger) : ne tracer que si 0
+          est réellement dans la plage visible. */}
+      {yBottom <= 0 && yTop >= 0 && (
+        <line x1={X_LEFT} y1={zeroY} x2={X_RIGHT} y2={zeroY} className="svg-line" strokeWidth="1.5" markerEnd="url(#cp-arrow)" />
+      )}
 
       <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
         {xTicks.map((t) => (
