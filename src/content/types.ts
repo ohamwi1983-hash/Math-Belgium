@@ -752,6 +752,55 @@ export type IllustrationSpec =
       freeLabels?: { x: number; y: number; text: string; tone?: 'ink' | 'accent' | 'good' | 'bad' | 'plan' }[]
       caption: string
     }
+  | {
+      /**
+       * Fonction de répartition d'une variable discrète — graphique en escaliers, jamais une
+       * courbe continue. `levels` a toujours un élément de plus que `jumps` (le palier avant le
+       * 1er saut, puis un palier après chaque saut) ; `levelLabels` étiquette chaque palier SAUF
+       * le tout premier (toujours 0, jamais utile à annoter).
+       */
+      kind: 'stepFunction'
+      jumps: number[]
+      levels: number[]
+      levelLabels?: string[]
+      xMin: number
+      xMax: number
+      yMax?: number
+      xAxisLabel: string
+      yAxisLabel: string
+      caption: string
+    }
+  | {
+      /**
+       * Modèle d'aire dans un carré d'aire 1 — un rectangle teinté de largeur `p1` et de hauteur
+       * `p2` représente le produit `p1×p2` (2 épreuves indépendantes), jamais leur somme.
+       */
+      kind: 'productAreaSquare'
+      p1: number
+      p1Label: string
+      p2: number
+      p2Label: string
+      productLabel: string
+      axisLabel1: string
+      axisLabel2: string
+      caption: string
+    }
+  | {
+      /**
+       * Compare 2 (ou plus) lignes graduées identiques, chacune portant 2 intervalles teintés
+       * différemment — pour montrer visuellement si 2 événements se chevauchent ou non. `overlapAt`
+       * marque d'un repère la valeur frontière partagée quand les intervalles se recouvrent.
+       */
+      kind: 'intervalComparison'
+      min: number
+      max: number
+      ticks: number[]
+      rows: {
+        ranges: { from: number | 'min'; to: number | 'max'; tone: 'accent' | 'good'; label: string }[]
+        overlapAt?: number
+      }[]
+      caption: string
+    }
 
 export interface ExempleStep {
   tag: string

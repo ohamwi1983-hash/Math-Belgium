@@ -19,6 +19,7 @@ import { primitivesIntegrales } from './chapters/6e-6h/primitives-integrales'
 import { nombresComplexes } from './chapters/6e-6h/nombres-complexes'
 import { probabilites } from './chapters/6e-6h/probabilites'
 import { analyseCombinatoire } from './chapters/6e-6h/analyse-combinatoire'
+import { variablesAleatoires } from './chapters/6e-6h/variables-aleatoires'
 
 export interface LevelEntry {
   slug: string
@@ -33,7 +34,7 @@ export interface LevelEntry {
 export const LEVELS: LevelEntry[] = [
   { slug: '4e', label: '4e', chapters: [fonctionSecondDegre, equationsInequationsSecondDegre, caracteristiquesFonctionsReference, statistiqueDescriptive, cercleTrigonometriqueTriangles, calculVectoriel, geometrieAnalytiquePlane, geometrieDansEspace] },
   { slug: '5e-4h', label: '5e (4h)', chapters: [fonctionsComposees, trigonometrie, suites, limitesAsymptotes, deriveesApplications] },
-  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes, primitivesIntegrales, nombresComplexes, probabilites, analyseCombinatoire] },
+  { slug: '6e-6h', label: '6e (6h)', chapters: [fonctionsReciproquesCyclometriques, fonctionsExponentielles, fonctionsLogarithmes, primitivesIntegrales, nombresComplexes, probabilites, analyseCombinatoire, variablesAleatoires] },
 ]
 
 export function findChapter(levelSlug: string, chapterSlug: string): ChapterContent | undefined {

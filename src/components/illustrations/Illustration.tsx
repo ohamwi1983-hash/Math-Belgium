@@ -40,6 +40,9 @@ import { ComplementBar } from './ComplementBar'
 import { SolidRevolution } from './SolidRevolution'
 import { SolidCavaliere } from './SolidCavaliere'
 import { PlaneSketch } from './PlaneSketch'
+import { StepFunction } from './StepFunction'
+import { ProductAreaSquare } from './ProductAreaSquare'
+import { IntervalComparison } from './IntervalComparison'
 
 const DEFAULT_CAPTIONS: Partial<Record<IllustrationSpec['kind'], string>> = {
   machine: 'x entre dans la machine f, il en ressort f(x)',
@@ -129,6 +132,12 @@ function renderSvg(spec: IllustrationSpec) {
       return <SolidCavaliere {...spec} />
     case 'planeSketch':
       return <PlaneSketch {...spec} />
+    case 'stepFunction':
+      return <StepFunction {...spec} />
+    case 'productAreaSquare':
+      return <ProductAreaSquare {...spec} />
+    case 'intervalComparison':
+      return <IntervalComparison {...spec} />
   }
 }
 
