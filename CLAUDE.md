@@ -431,6 +431,40 @@ chapitre, télécharge le chapitre en `.docx`, `.pdf` et `.pptx` via `src/lib/ex
   `geometrie-analytique-plane` et `calcul-vectoriel` (seul changement observé : les 3 figures
   ci-dessus, auparavant silencieusement cassées, s'affichent enfin correctement).
 
+- **5e (4h), Chapitre 5 — Dérivées et applications** (`derivees-applications`) : réenrichi et
+  réordonné depuis une version plus ancienne du même artifact `plateforme-maths` (5e/4h). L'ordre
+  des sections a changé pour suivre le manuel FWB source : « Calculer f'(a) par la définition »
+  passe en section 1, « Tangentes » en section 2, « Fonction dérivée » en section 3, « Association
+  graphique/mots ↔ signe de f'/f'' » en section 4 (contre section 1 dans la version précédente) —
+  toutes les références internes « section N » (11 au total) et les kickers ont été réécrits pour
+  suivre. Contenu ajouté dans « Fonction dérivée » : un rappel domaine de dérivabilité + définition
+  formelle de la fonction dérivée avec un exemple résolu ($f(x)=2x^2-3x \Rightarrow f'(x)=4x-3$ par
+  la définition), et un `featureTable` comparant taux de variation (moyen) et nombre dérivé
+  (instantané) sur trois colonnes (Définition/Interprétation graphique/Interprétation physique) —
+  suit le même motif « `rappel` à un seul item + `featureTable` immédiatement après » déjà utilisé
+  pour le tableau des dérivées de référence de cette section. Un nouveau diagramme `chain` (déjà
+  existant, réutilisé tel quel) illustre la décomposition $f(x)=(2x-1)^3$ dans l'exemple de la règle
+  de la chaîne. Trois nouvelles illustrations `curvePlot` : la tangente horizontale en x=1 est
+  désormais dessinée sur le même graphe que la tangente oblique en x=3 (section « Tangentes »,
+  au lieu d'une seule tangente comme avant) ; un second exemple résolu en « Lecture graphique » (un
+  point à tangente horizontale qui n'est PAS un extremum, $f(x)=x^3$, lu uniquement sur le
+  graphique) ; les courbes recette/coût R(x)=50x−x² et C(x)=x²+10x+20 en « Contexte économique »
+  (l'écart vertical au point x=10 visualise le bénéfice maximal) ; et le graphe de
+  $f(t)=t^3-6t^2+9t+2$ sur [0;5] en « Extrema en contexte borné » (les 4 valeurs comparées —
+  bornes et extremums locaux — marquées sur la courbe). Deux nouvelles illustrations de la source
+  ont été délibérément omises, disclosed ici plutôt que silencieuses : une ligne de signes dessinée
+  en SVG dans « Étude locale » (strictement redondante avec le `signTable` juste au-dessus, même
+  contenu) et un schéma de rectangle annoté dans « Optimisation géométrique » (redondant avec
+  l'énoncé de la contrainte, qui donne déjà x/y/périmètre en toutes lettres). **Piège rencontré en
+  vérifiant au rendu** : une étiquette de point (`f(5)=22 (MAXIMUM ABSOLU)`) positionnée `labelPos:
+  'above'` au point le plus à droite d'un `curvePlot` débordait du cadre SVG (le texte est centré
+  sur le point en mode `above`) — corrigé en `labelPos: 'left'` (texte ancré à droite du point,
+  grandit vers l'intérieur du cadre) ; à surveiller pour tout futur point proche du bord droit d'un
+  graphe. Vérifié par `npm run build` propre, `npm run lint` sans nouvel avertissement, et rendu
+  Playwright réel sur le build de production : les 11 sections dans le nouvel ordre, le récapitulatif
+  final réordonné à l'identique, aucun `$...$` non résolu, chaque nouvelle illustration capturée et
+  relue individuellement (dont la correction du débordement ci-dessus).
+
 ## Vérification avant de pousser
 
 - `npm run build` (= `tsc -b && vite build`) doit passer sans erreur.
