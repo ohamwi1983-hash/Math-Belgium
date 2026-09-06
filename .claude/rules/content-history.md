@@ -642,3 +642,45 @@ paths:
   Vérifié par rendu navigateur réel (clair et sombre) des 6 illustrations et des 4 tableaux ; sitewide
   `regress_all.mjs` : `0` erreur, `0` `NaN`, `0` signe `$` isolé, sur les 23 chapitres. `npm run
   build`/`npm run lint` propres.
+
+- **6e (6h), Chapitre 9 — Lieux géométriques** (`lieux-geometriques`) : à la différence des
+  chapitres 2/3 de 5e ci-dessus (réécritures complètes), le contenu existant (prose, exemples,
+  valeurs numériques) collait déjà presque mot pour mot au nouvel artifact — le remplacement s'est
+  donc fait en **patch additif ciblé** plutôt qu'en réécriture : une seule correction de formulation
+  dans le chapeau (« à partir des milieux de ses côtés » → « à partir de ses milieux », pour coller
+  exactement à l'artifact) et **9 nouvelles illustrations** insérées aux emplacements correspondants,
+  structure des 6 sections numérotées et `recap.table` (18 lignes) inchangées.
+  L'artifact source présente 2 sujets sous forme d'« interludes » hors sommaire (non numérotés) ;
+  `ChapterSection` n'a aucune notion de section non numérotée (`id, number, title, kicker, blocks`
+  tous obligatoires, section toujours dans la TOC auto-générée) — décision : conserver la structure à
+  6 sections numérotées déjà en place (déjà une adaptation fidèle réalisée lors d'une session
+  antérieure) plutôt que de forcer une restructuration artificielle pour imiter un choix de mise en
+  forme propre à un fichier source particulier.
+  **9 nouveaux diagrammes `vectorPlane`** (tous en extension additive du kind générique existant,
+  aucun nouveau kind créé) : repère orthonormé vs affine (`illustrationGroup` 2 panneaux), forme
+  implicite (deux équations proportionnelles d'une même droite), vecteur directeur + vecteur normal
+  (avec `rightAngleMarkers`), droites parallèles/perpendiculaires (`illustrationGroup` 2 panneaux),
+  pente/angle entre deux sécantes (`angleArcs` + étiquettes $m_1$/$m_2$), droite verticale $x=k$,
+  incentre $I$ vs centre de gravité $G$ d'un même triangle (les deux clairement distincts), les 3
+  régimes d'un lieu paramétré par seuil (`illustrationGroup` 3 panneaux : cercle si $k>$ seuil, point
+  unique si $k=$ seuil, lieu vide si $k<$ seuil), et les 4 distances perpendiculaires d'un point aux
+  côtés d'un carré. Trois diagrammes purement taxonomiques de l'artifact (repère orthonormé sous
+  forme de rappel isolé, les 4 étapes de la méthode analytique en organigramme, les 7 natures de
+  lieux en grille d'icônes) ont été délibérément **omis** : ce sont des reformulations visuelles du
+  texte sans configuration géométrique propre à représenter, contrairement aux 9 retenus.
+  **Limitation de `VectorPlane` découverte et documentée** : le champ `circle` ne peut jamais rendre
+  une ellipse — `VectorPlane.tsx` calcule `r` en **moyennant** le rayon mis à l'échelle en x et celui
+  mis à l'échelle en y (`r = ((circle.r/(xMax-xMin))*L + (circle.r/(yMax-yMin))*H) / 2`) et dessine
+  toujours un `<circle>` SVG vrai, quel que soit le rapport d'aspect du domaine — vérifié par capture
+  d'écran (un cercle donné sur un domaine anisotrope reste parfaitement rond). Le panneau « repère
+  affine » (qui doit montrer qu'un cercle y paraît écrasé) a donc été refait sans le champ `circle` :
+  domaine anisotrope (`xMin:-3,xMax:3,yMin:-1,yMax:1`) avec seulement `grid: true`, les lignes de
+  grille étant mises à l'échelle x/y indépendamment et rendant fidèlement des cellules rectangulaires
+  — légende ajustée pour parler du quadrillage non carré plutôt que d'un cercle écrasé.
+  **Piège de positionnement d'étiquette retrouvé une fois de plus** (diagramme pente/angle) :
+  l'étiquette « $m_1$ » posée sur le point terminal de la sécante avec `labelPos:'right'` était
+  coupée au bord du domaine (`xMax` trop proche) — corrigé en déplaçant le point d'ancrage à
+  l'intérieur du domaine sur la même droite, avec `labelPos:'above'`.
+  Vérifié par rendu navigateur réel (clair et sombre) des 9 nouvelles illustrations (33 figures au
+  total sur la page) ; sitewide `regress_all.mjs` : `0` erreur, `0` `NaN`, `0` signe `$` isolé, sur
+  les 23 chapitres. `npm run build`/`npm run lint` propres.

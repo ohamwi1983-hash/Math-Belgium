@@ -7,7 +7,7 @@ export const lieuxGeometriques: ChapterContent = {
   title: 'Lieux géométriques',
   slug: 'lieux-geometriques',
   lede:
-    "Retrouver un triangle à partir des milieux de ses côtés, construire le cercle qui passe par " +
+    "Retrouver un triangle à partir de ses milieux, construire le cercle qui passe par " +
     "trois points, décrire par une équation l'ensemble des points vérifiant une condition donnée, " +
     "ou suivre la trajectoire du point d'intersection de deux droites mobiles : ce chapitre relie " +
     "l'algèbre des droites (forme implicite $ax+by+c=0$) et des cercles à la question centrale de " +
@@ -42,6 +42,25 @@ export const lieuxGeometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'vectorPlane',
+              xMin: -3, xMax: 3, yMin: -2.8125, yMax: 2.8125,
+              grid: true,
+              circle: { cx: 0, cy: 0, r: 2, tone: 'accent' },
+              caption: 'repère ORTHONORMÉ : un cercle y reste rond, distances et angles se calculent avec les formules usuelles',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -3, xMax: 3, yMin: -1, yMax: 1,
+              grid: true,
+              caption:
+                "repère seulement AFFINE (ici, unités différentes sur les deux axes) : le carreau du quadrillage n'est plus carré — distance, angle, cercle perdent leur sens usuel",
+            },
+          ],
+        },
+        {
           kind: 'astuce',
           text:
             "Avant d'écrire $dist(P;d)=\\ldots$ ou une équation de cercle " +
@@ -62,6 +81,16 @@ export const lieuxGeometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3, xMax: 5, yMin: -2, yMax: 4,
+            vectors: [{ from: { x: -2, y: 3 }, to: { x: 4, y: -1 }, tone: 'accent', arrow: false }],
+            points: [{ x: 1.4, y: 0.7, label: '2x+3y−5=0 ≡ 4x+6y−10=0', tone: 'accent', node: false, labelPos: 'above' }],
+            caption: '2x+3y−5=0 et 4x+6y−10=0 : deux équations proportionnelles d\'une seule et même droite, jamais deux droites différentes',
+          },
+        },
+        {
           kind: 'methode',
           label: 'Vecteur directeur, vecteur normal, rotation de 90°',
           items: [
@@ -72,12 +101,53 @@ export const lieuxGeometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -2, xMax: 3, yMin: -1, yMax: 3.6875,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 2, y: 1 }, tone: 'ink' },
+              { from: { x: 0, y: 0 }, to: { x: -1, y: 2 }, tone: 'accent' },
+            ],
+            rightAngleMarkers: [{ vertex: { x: 0, y: 0 }, arm1: { x: 2, y: 1 }, arm2: { x: -1, y: 2 } }],
+            points: [
+              { x: 2, y: 1, label: 'd=(2;1)', tone: 'ink', labelPos: 'right' },
+              { x: -1, y: 2, label: 'n=(−1;2)', tone: 'accent', labelPos: 'left' },
+            ],
+            caption: 'vecteur directeur d=(2;1) d\'une droite et son vecteur normal n=(−1;2), obtenu par rotation de 90° de d',
+          },
+        },
+        {
           kind: 'attention',
           label: "Piège classique — parallélisme et perpendicularité ne s'échangent jamais",
           text:
             'Pour deux droites de normales $(a_1;b_1)$ et $(a_2;b_2)$ : $a_1b_2-a_2b_1=0$ ⟺ ' +
             'droites **parallèles** ; $a_1a_2+b_1b_2=0$ ⟺ droites **perpendiculaires**. Confondre ' +
             "les deux critères est l'erreur la plus fréquente de ce chapitre.",
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'vectorPlane',
+              xMin: -3, xMax: 3, yMin: -2, yMax: 4,
+              vectors: [
+                { from: { x: -3, y: -1.5 }, to: { x: 3, y: 1.5 }, tone: 'ink', arrow: false },
+                { from: { x: -3, y: 0.5 }, to: { x: 3, y: 3.5 }, tone: 'accent', arrow: false },
+              ],
+              caption: 'deux droites parallèles : $a_1b_2-a_2b_1=0$',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -3, xMax: 3, yMin: -2.8125, yMax: 2.8125,
+              vectors: [
+                { from: { x: -3, y: -1.5 }, to: { x: 3, y: 1.5 }, tone: 'ink', arrow: false },
+                { from: { x: -1.2, y: 2.4 }, to: { x: 1.2, y: -2.4 }, tone: 'accent', arrow: false },
+              ],
+              rightAngleMarkers: [{ vertex: { x: 0, y: 0 }, arm1: { x: 3, y: 1.5 }, arm2: { x: -1.2, y: 2.4 } }],
+              caption: 'deux droites perpendiculaires : $a_1a_2+b_1b_2=0$ — ne jamais confondre les deux critères',
+            },
+          ],
         },
         { kind: 'subheading', text: 'Caractériser une droite par sa pente' },
         {
@@ -91,12 +161,39 @@ export const lieuxGeometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3, xMax: 3, yMin: -2.8125, yMax: 2.8125,
+            vectors: [
+              { from: { x: -3, y: -0.9 }, to: { x: 2.6, y: 0.78 }, tone: 'ink', arrow: false },
+              { from: { x: -1.5, y: 2.25 }, to: { x: 1.5, y: -2.25 }, tone: 'accent', arrow: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: -56.3, toDeg: 16.7, radiusPx: 26, tone: 'good', label: 'θ' }],
+            points: [
+              { x: 2.6, y: 0.78, label: 'm₁', tone: 'ink', labelPos: 'above' },
+              { x: 1.5, y: -2.25, label: 'm₂', tone: 'accent', labelPos: 'right' },
+            ],
+            caption: 'deux droites sécantes de pentes m₁ et m₂, formant un angle θ',
+          },
+        },
+        {
           kind: 'attention',
           label: "Piège classique — une droite verticale n'a pas de pente",
           text:
             'Une droite $x=k$ (verticale, $b=0$) n\'a pas de pente définie — toujours traiter ce ' +
             'cas à part (ou raisonner uniquement avec les normales $(a;b)$, qui n\'ont, elles, ' +
             'jamais de cas particulier).',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -2, xMax: 4, yMin: -2, yMax: 2,
+            vectors: [{ from: { x: 2, y: -2 }, to: { x: 2, y: 2 }, tone: 'accent', arrow: false }],
+            points: [{ x: 2, y: 0, label: 'x=k', tone: 'accent', node: false, labelPos: 'right' }],
+            caption: 'droite verticale x=k : aucune pente n\'est définie',
+          },
         },
         { kind: 'subheading', text: "Distance d'un point à une droite" },
         {
@@ -539,6 +636,28 @@ export const lieuxGeometriques: ChapterContent = {
             'pondère chaque sommet par le côté opposé (a, b, c), une moyenne pondérée, jamais une ' +
             'moyenne simple. Les deux points ne coïncident que pour un triangle équilatéral.',
         },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -2, xMax: 5, yMin: -1.5, yMax: 5.5,
+            circle: { cx: 1, cy: 1, r: 1, tone: 'faint' },
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: 3, y: 0 }, to: { x: 0, y: 4 }, tone: 'ink', arrow: false },
+              { from: { x: 0, y: 4 }, to: { x: 0, y: 0 }, tone: 'ink', arrow: false },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 3, y: 0, label: 'B', tone: 'ink', labelPos: 'right' },
+              { x: 0, y: 4, label: 'C', tone: 'ink', labelPos: 'left' },
+              { x: 1, y: 1, label: 'I (incentre)', tone: 'accent', labelPos: 'right' },
+              { x: 1, y: 4 / 3, label: 'G (gravité)', tone: 'good', labelPos: 'above' },
+            ],
+            caption:
+              "l'incentre I(1;1) (moyenne pondérée par les côtés opposés) et le centre de gravité G(1;4/3) (moyenne simple) sont deux points distincts",
+          },
+        },
         { kind: 'subheading', text: "Tangentes à un cercle depuis un point extérieur" },
         {
           kind: 'methode',
@@ -838,6 +957,42 @@ export const lieuxGeometriques: ChapterContent = {
             'point M, rayon nul — et strictement en dessous du seuil, le lieu est réellement ' +
             '**vide** (aucune tolérance). Ces trois régimes ne se mélangent jamais.',
         },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'vectorPlane',
+              xMin: -6, xMax: 4, yMin: -4, yMax: 6,
+              circle: { cx: -1, cy: 1, r: 3, tone: 'accent' },
+              points: [
+                { x: 2, y: -2, label: 'A', tone: 'ink', labelPos: 'right' },
+                { x: -4, y: 4, label: 'B', tone: 'ink', labelPos: 'left' },
+                { x: -1, y: 1, label: 'M', tone: 'accent', labelPos: 'above' },
+              ],
+              caption: 'k=54 > seuil=36 : cercle centré M, rayon 3',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -6, xMax: 4, yMin: -4, yMax: 6,
+              points: [
+                { x: 2, y: -2, label: 'A', tone: 'ink', labelPos: 'right' },
+                { x: -4, y: 4, label: 'B', tone: 'ink', labelPos: 'left' },
+                { x: -1, y: 1, label: 'M (seul)', tone: 'accent', labelPos: 'above' },
+              ],
+              caption: 'k=36 = seuil : le lieu est exactement le point M, rayon nul',
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -6, xMax: 4, yMin: -4, yMax: 6,
+              points: [
+                { x: 2, y: -2, label: 'A', tone: 'ink', labelPos: 'right' },
+                { x: -4, y: 4, label: 'B', tone: 'ink', labelPos: 'left' },
+                { x: -1, y: 1.6, label: '∅ (vide)', tone: 'bad', node: false, labelPos: 'above' },
+              ],
+              caption: 'k=20 < seuil=36 : le lieu est vide, aucun point ne convient',
+            },
+          ],
+        },
         { kind: 'subheading', text: "Cercle d'Apollonius" },
         {
           kind: 'definition',
@@ -882,6 +1037,26 @@ export const lieuxGeometriques: ChapterContent = {
             'côtés vaut $4c^2$ (comme le théorème de la médiane ci-dessus) ; le seuil de la somme ' +
             'des distances **simples** (non élevées au carré) vaut $4c$ — ne jamais confondre ces ' +
             'deux formules qui se ressemblent.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3, xMax: 3, yMin: -2.8125, yMax: 2.8125,
+            vectors: [
+              { from: { x: -2, y: -2 }, to: { x: 2, y: -2 }, tone: 'ink', arrow: false },
+              { from: { x: 2, y: -2 }, to: { x: 2, y: 2 }, tone: 'ink', arrow: false },
+              { from: { x: 2, y: 2 }, to: { x: -2, y: 2 }, tone: 'ink', arrow: false },
+              { from: { x: -2, y: 2 }, to: { x: -2, y: -2 }, tone: 'ink', arrow: false },
+              { from: { x: 0.5, y: -0.7 }, to: { x: 0.5, y: 2 }, tone: 'accent', dashed: true, arrow: false },
+              { from: { x: 0.5, y: -0.7 }, to: { x: 0.5, y: -2 }, tone: 'accent', dashed: true, arrow: false },
+              { from: { x: 0.5, y: -0.7 }, to: { x: 2, y: -0.7 }, tone: 'accent', dashed: true, arrow: false },
+              { from: { x: 0.5, y: -0.7 }, to: { x: -2, y: -0.7 }, tone: 'accent', dashed: true, arrow: false },
+            ],
+            points: [{ x: 0.5, y: -0.7, label: 'P', tone: 'accent', labelPos: 'below' }],
+            caption:
+              "les 4 distances perpendiculaires d'un point P aux côtés du carré [−c;c]² : leur somme au carré et leur somme simple ont deux seuils différents",
+          },
         },
         {
           kind: 'exemple',

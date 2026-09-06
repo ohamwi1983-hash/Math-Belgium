@@ -52,6 +52,13 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
   chaque étiquette RADIALEMENT (le long de l'angle du point, à un rayon élargi) plutôt que par
   décalage x/y de quadrant — nécessaire dès qu'un diagramme a beaucoup de points proches en angle
   (< 20° d'écart) avec des étiquettes à 2 lignes, sous peine de chevauchement entre points voisins.
+- `vectorPlane.circle`/`circles` — **ne peut jamais rendre une ellipse**, même sur un domaine
+  anisotrope (`xMax-xMin ≠ yMax-yMin`) : `VectorPlane.tsx` calcule le rayon pixel en **moyennant**
+  le rayon mis à l'échelle en x et celui mis à l'échelle en y, et dessine toujours un `<circle>` SVG
+  vrai (rayon pixel unique). Pour illustrer visuellement un domaine affine/non orthonormé (où un
+  cercle devrait paraître écrasé), utiliser `grid: true` à la place — les lignes de grille SONT
+  mises à l'échelle x/y indépendamment et rendent fidèlement des cellules rectangulaires sur un
+  domaine anisotrope (vérifié par capture d'écran, `lieux-geometriques`).
 - `unitCircleArc` — cercle trigonométrique + rayon + arc + projection, pour arcsin/arccos/arctan.
   `mode` distingue une géométrie de projection réellement différente (horizontale sur l'axe y
   pour sin, verticale sur l'axe x pour cos, sur la tangente géométrique verticale pour tan) —
