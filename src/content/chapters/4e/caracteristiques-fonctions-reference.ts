@@ -20,7 +20,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         text:
           'Une **fonction de référence** est une forme de base, la plus simple de sa famille — ' +
           'toutes les fonctions qu\'on rencontrera dans ce chapitre s\'obtiennent en ' +
-          '*transformant* l\'une de ces six-là.',
+          '**transformant** l\'une de ces six-là.',
       },
       {
         kind: 'rappel',

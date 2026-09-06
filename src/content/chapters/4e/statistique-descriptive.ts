@@ -156,7 +156,7 @@ export const statistiqueDescriptive: ChapterContent = {
           text:
             'Convention utilisée dans tout ce chapitre : une classe [borne inf ; borne sup[ ' +
             'contient sa borne inférieure mais **pas** sa borne supérieure — une donnée ' +
-            '*exactement* sur une frontière appartient toujours à la classe **suivante**. Seule ' +
+            '**exactement** sur une frontière appartient toujours à la classe **suivante**. Seule ' +
             'exception : la **toute dernière classe** du tableau inclut aussi sa borne ' +
             'supérieure, pour ne perdre aucune donnée.',
         },
@@ -321,7 +321,7 @@ export const statistiqueDescriptive: ChapterContent = {
           kind: 'piege',
           label: '« Strictement supérieur », jamais « supérieur ou égal »',
           text:
-            'C\'est l\'erreur la plus fréquente : si l\'effectif cumulé est *exactement* égal au ' +
+            'C\'est l\'erreur la plus fréquente : si l\'effectif cumulé est **exactement** égal au ' +
             'seuil, ce n\'est **pas encore** la bonne valeur — il faut prendre la **suivante**. ' +
             'Preuve sur l\'exemple ci-dessous : seuil médiane = 10, effectif cumulé de x=2 vaut ' +
             '5 (trop petit), de x=6 vaut 13 (13 > 10, c\'est elle) — jamais x=2 même si un ' +
