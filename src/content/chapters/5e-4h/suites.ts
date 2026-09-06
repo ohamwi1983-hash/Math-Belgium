@@ -4,134 +4,196 @@ export const suites: ChapterContent = {
   level: '5e (4h)',
   levelSlug: '5e-4h',
   chapterNumber: 3,
-  title: 'Les suites',
+  title: 'Suites',
   slug: 'suites',
   lede:
-    'Une suite numérique associe à chaque rang $n$ un nombre $u_n$ — le premier terme est ' +
-    'toujours $u_1$, jamais $u_0$. Ce chapitre étudie les deux familles de référence — ' +
-    'arithmétique (on ajoute toujours la même raison) et géométrique (on multiplie toujours par ' +
-    'la même raison) —, leur comportement à long terme (convergence ou divergence), des ' +
-    "problèmes concrets qui s'y ramènent, la comparaison de deux suites terme à terme, et enfin " +
-    'les suites récurrentes affines, qui se stabilisent — ou non — autour d\'un régime permanent.',
+    "Une suite numérique décrit une grandeur qui évolue pas à pas, indice entier après indice " +
+    "entier — une population qui change d'année en année, un capital qui fructifie mois après " +
+    'mois, une dose qui se dilue prise après prise. Ce chapitre couvre les deux familles de ' +
+    'référence (arithmétique, de raison additive ; géométrique, de raison multiplicative), leur ' +
+    "comportement à l'infini (convergence, divergence), quelques problèmes classiques qui ont " +
+    "façonné l'histoire des suites, la comparaison numérique de deux suites concurrentes, et se " +
+    'termine par les suites récurrentes affines et leur régime permanent.',
 
   sections: [
     {
       id: 'suites-arithmetiques',
       number: 1,
-      title: 'Suites arithmétiques, formule générale et termes',
-      kicker: 'u_(n+1) = u_n + r — terme général et somme des n premiers termes',
+      title: 'Suites numériques et suites arithmétiques',
+      kicker: 'notation u_n, raison r, formule générale, moyenne et somme',
       blocks: [
-        {
-          kind: 'rappel',
-          label: 'Rappel — définition et notations d\'une suite numérique',
-          items: [
-            'Une **suite numérique** est une liste ordonnée de nombres réels, notée ' +
-              '$(u_n)_{n \\in \\mathbb{N}_0}$ — le premier terme est toujours $u_1$, jamais ' +
-              '$u_0$. Le terme d\'indice n se note aussi parfois $u(n)$, comme une valeur de ' +
-              'fonction en n.',
-            'Une suite est définie soit de façon **explicite** ($u_n$ directement en fonction ' +
-              'de n, ex. $u_n=3n-1$), soit par **récurrence** (un terme en fonction du ou des ' +
-              'précédents, ex. $u_{n+1}=u_n+r$) — dans ce dernier cas, il faut aussi connaître ' +
-              'un premier terme pour pouvoir calculer tous les autres.',
-          ],
-        },
+        { kind: 'subheading', text: "Qu'est-ce qu'une suite numérique ?" },
         {
           kind: 'para',
           text:
-            'Une suite est **arithmétique** lorsqu\'on passe d\'un terme au suivant en ajoutant ' +
-            'toujours le **même nombre** $r$, appelé la **raison** : $u_{n+1} = u_n + r$. À ' +
-            'partir du premier terme $u_1$, chaque terme s\'obtient donc en ajoutant $r$ autant ' +
-            'de fois que de « pas » depuis le rang 1.',
+            'Une **suite numérique** est une liste ordonnée, finie ou infinie, de nombres réels. ' +
+            'Chaque nombre de cette liste est un **terme** de la suite. Le premier terme est noté ' +
+            '$u_1$, le terme d\'indice $n$ (ou terme de **rang** n) est noté $u_n$ — on lit « u ' +
+            'indice n ». La suite tout entière se note $(u_n)$.',
         },
         {
           kind: 'rappel',
-          label: 'Rappel — les deux formules à retenir',
+          label: 'Rappel — deux façons de définir une suite',
           items: [
-            '**Terme général** — $u_n = u_1 + (n-1)r$ (n−1 pas depuis le rang 1, jamais n pas).',
-            '**Somme des n premiers termes** — $S_n = \\dfrac{n(u_1+u_n)}{2}$ (n fois la ' +
-              'moyenne du premier et du dernier terme).',
-            '**Terme comme moyenne** — sauf le premier et le dernier, tout terme est la ' +
-              '**moyenne arithmétique** de ses deux voisins : $u_n = \\dfrac{u_{n-1}+u_{n+1}}{2}$ (n≥2).',
+            '**Explicite** : le terme général $u_n$ est directement exprimé en fonction de ' +
+              'l\'indice n — ex. $u_n=\\dfrac{n}{n+1}$ donne la suite $(\\frac{1}{2};\\frac{2}{3};\\frac{3}{4};...)$.',
+            '**Par récurrence** : un terme est exprimé en fonction du (ou des) terme(s) ' +
+              'précédent(s) — il faut alors aussi connaître un terme de départ, en général $u_1$. ' +
+              'Ex. $u_{n+1}=\\dfrac{u_n}{1+u_n}$ avec $u_1=2$ donne la suite $(2;\\frac{2}{3};\\frac{2}{5};...)$.',
           ],
         },
+        { kind: 'subheading', text: 'Suite arithmétique — raison additive' },
         {
           kind: 'para',
           text:
-            'Le signe de $r$ gouverne entièrement le sens de variation : si $r > 0$, la suite ' +
-            'est croissante ; si $r < 0$, elle est décroissante ; si $r = 0$, elle est ' +
-            'constante. Deux données suffisent toujours à reconstruire toute la suite — peu ' +
-            'importe lesquelles.',
+            'Une suite est **arithmétique** si chacun de ses termes, à partir du deuxième, ' +
+            "s'obtient en **ajoutant** au précédent un même nombre constant, appelé la **raison** " +
+            'et notée $r$ (positive ou négative). Si $r > 0$ la suite est croissante, si $r < 0$ ' +
+            'elle est décroissante.',
+        },
+        {
+          kind: 'rappel',
+          label: "Formule générale d'une suite arithmétique",
+          items: [
+            '$u_n = u_1 + (n-1)r$ ($n \\in \\mathbb{N}_0$) — pour vérifier qu\'une suite donnée ' +
+              'est arithmétique, il faut établir que $u_n - u_{n-1} = r$ pour tout $n \\geq 2$, ' +
+              'une valeur constante indépendante de n.',
+          ],
         },
         {
           kind: 'exemple',
-          badge: 'retrouver r et u₁ à partir de deux termes',
-          formula: 'Une suite arithmétique vérifie $u_3 = 11$ et $u_7 = 27$. Détermine sa raison, son premier terme, puis calcule $u_{20}$ et $S_{20}$.',
+          badge: 'retrouver la raison',
+          formula: "Le premier terme d'une suite arithmétique est $u_1 = 7$ ; son sixième terme est $u_6 = 22$. Calcule la raison $r$.",
           steps: [
-            { tag: 'raison — entre les rangs 3 et 7, il y a 7−3 = 4 pas', text: '$r = \\dfrac{u_7-u_3}{7-3} = \\dfrac{27-11}{4} = \\dfrac{16}{4} = 4$' },
-            { tag: 'premier terme — revenir de u₃ à u₁, soit 2 pas en arrière', text: '$u_1 = u_3 - (3-1) \\times 4 = 11-8 = 3$' },
-            { tag: 'terme général', text: '$u_n = 3+(n-1) \\times 4 = 4n-1$' },
-            { tag: 'u₂₀ — u_n = u₁ + (n−1)r', text: '$u_{20} = 3+(20-1) \\times 4 = 3+76 = 79$' },
+            { tag: 'poser la formule générale pour n = 6', text: '$u_6 = u_1 + (6-1)r \\implies 22 = 7 + 5r$' },
+            { tag: 'isoler r', text: '$5r = 22 - 7 = 15 \\implies r = 3$' },
           ],
-          result: {
-            tag: 'S₂₀ — somme des 20 premiers termes',
-            text: '$S_{20} = \\dfrac{20 \\times (u_1+u_{20})}{2} = \\dfrac{20 \\times 82}{2} = 820$',
-          },
-          illustration: {
-            kind: 'sequencePlot',
-            points: [
-              { n: 1, value: 3, label: '3' },
-              { n: 2, value: 7, label: '7' },
-              { n: 3, value: 11, label: '11' },
-              { n: 4, value: 15, label: '15' },
-              { n: 5, value: 19, label: '19' },
-              { n: 6, value: 23, label: '23' },
-            ],
-            connector: 'straight',
-            stepIndicator: { fromIndex: 1, toIndex: 2, label: '+r' },
-            xAxisLabel: 'n',
-            yAxisLabel: 'u_n',
-            caption: 'points de la suite u₁=3, r=4 — chaque pas vers la droite ajoute exactement r en hauteur',
-          },
+          result: { tag: 'résultat', text: 'r = 3 — la suite est (7 ; 10 ; 13 ; 16 ; 19 ; 22 ; ...)' },
         },
         {
           kind: 'attention',
-          label: 'Attention — n−1 pas, pas n',
+          label: "Attention — l'exposant est toujours (n−1), jamais n",
           text:
-            'Pour passer de $u_1$ à $u_n$, on effectue $n-1$ pas de raison $r$ — pas $n$ pas. ' +
-            'L\'erreur classique est d\'écrire $u_n = u_1 + n \\times r$ : elle décale tous les ' +
-            'résultats d\'un cran. Vérifie toujours sur $u_1$ lui-même : la formule doit ' +
-            'redonner $u_1$ exactement pour n=1, ce qui n\'est vrai qu\'avec $(n-1)$.',
+            'Pour passer de $u_1$ à $u_n$, on ajoute la raison $r$ exactement $n-1$ fois (jamais ' +
+            'n fois) : de $u_1$ à $u_2$, un seul pas ; de $u_1$ à $u_6$, cinq pas. Écrire ' +
+            '$u_n = u_1 + nr$ (sans le −1) est l\'erreur la plus fréquente sur cette formule.',
+        },
+        { kind: 'subheading', text: 'Représentation graphique — discrète et linéaire' },
+        {
+          kind: 'para',
+          text:
+            "Le graphique d'une suite arithmétique est formé de **points isolés et alignés** — " +
+            "jamais reliés par un trait continu, puisque la suite n'est définie que pour des " +
+            'indices entiers. On dit que sa croissance est **discrète** (points isolés) et ' +
+            '**linéaire** (points alignés).',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [],
+            xMin: 0.5, xMax: 7.5,
+            xTicks: [1, 2, 3, 4, 5, 6, 7],
+            fixedYRange: { min: 0, max: 12 },
+            points: [
+              { x: 1, y: 2, label: '', tone: 'accent' },
+              { x: 2, y: 3.5, label: '', tone: 'accent' },
+              { x: 3, y: 5, label: '', tone: 'accent' },
+              { x: 4, y: 6.5, label: '', tone: 'accent' },
+              { x: 5, y: 8, label: '', tone: 'accent' },
+              { x: 6, y: 9.5, label: '', tone: 'accent' },
+              { x: 7, y: 11, label: '(u_n) r>0', tone: 'accent', labelPos: 'above' },
+              { x: 1, y: 11, label: '', tone: 'bad' },
+              { x: 2, y: 9.5, label: '', tone: 'bad' },
+              { x: 3, y: 8, label: '', tone: 'bad' },
+              { x: 4, y: 6.5, label: '', tone: 'bad' },
+              { x: 5, y: 5, label: '', tone: 'bad' },
+              { x: 6, y: 3.5, label: '', tone: 'bad' },
+              { x: 7, y: 2, label: '(v_n) r<0', tone: 'bad', labelPos: 'below' },
+            ],
+            xAxisLabel: 'n',
+            yAxisLabel: 'u_n',
+            caption:
+              '(u_n) : u1=2, r=1,5 (croissante) — (v_n) : v1=11, r=−1,5 (décroissante) — les deux ' +
+              'suites se croisent exactement au rang 4',
+          },
+        },
+        { kind: 'subheading', text: 'Moyenne arithmétique et somme des termes' },
+        {
+          kind: 'rappel',
+          label: 'Un terme est la moyenne arithmétique de ses deux voisins',
+          items: [
+            "Tout terme d'une suite arithmétique (sauf le premier et le dernier) est la " +
+              '**moyenne arithmétique** des deux termes qui l\'encadrent : ' +
+              '$u_n = \\dfrac{u_{n-1}+u_{n+1}}{2}$ (n ≥ 2).',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — la « double échelle », pour établir la formule de la somme',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Note $S_n = u_1+u_2+u_3+\\ldots+u_n$ la somme des n premiers termes. Écris-la ' +
+                'une seconde fois, **à l\'envers**, puis additionne les deux lignes colonne par colonne :',
+            },
+            {
+              kind: 'para',
+              text:
+                '**1.** $S_n = u_1 + u_2 + u_3 + \\ldots + u_{n-1} + u_n$ et $S_n = u_n + u_{n-1} + u_{n-2} + \\ldots + u_2 + u_1$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** en additionnant, colonne par colonne : $2S_n = (u_1+u_n) + (u_2+u_{n-1}) + (u_3+u_{n-2}) + \\ldots + (u_n+u_1)$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** reste à prouver que **chaque** parenthèse vaut exactement $u_1+u_n$ — ' +
+                'prends la k-ième parenthèse quelconque, qui associe $u_k$ (k-ième terme depuis le ' +
+                'début) à $u_{n+1-k}$ (k-ième terme depuis la fin). Avec $u_k = u_1+(k-1)r$ et ' +
+                '$u_{n+1-k} = u_1+(n-k)r$ : $u_k + u_{n+1-k} = 2u_1 + [(k-1)+(n-k)]r = 2u_1 + ' +
+                '(n-1)r = u_1 + [u_1+(n-1)r] = u_1+u_n$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** Le résultat $u_1+u_n$ ne dépend pas de k (le $+(k-1)r$ de $u_k$ ' +
+                'et le $-kr$ caché dans $u_{n+1-k}$ s\'annulent toujours) : les n parenthèses ' +
+                'valent **toutes** exactement $u_1+u_n$, donc $2S_n = n(u_1+u_n)$, d\'où ' +
+                '$S_n = \\dfrac{n(u_1+u_n)}{2}$.',
+            },
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: "Somme des n premiers termes d'une suite arithmétique",
+          items: ['$S_n = \\dfrac{n(u_1+u_n)}{2}$ — n fois la moyenne du premier et du dernier terme.'],
+        },
+        {
+          kind: 'exemple',
+          badge: 'somme des 20 premiers termes',
+          formula: "Calcule la somme des 20 premiers termes de la suite arithmétique de premier terme $u_1 = 4$ et de raison $r = 3$.",
+          steps: [{ tag: 'terme u20 — formule générale', text: '$u_{20} = 4 + (20-1)\\times3 = 4 + 57 = 61$' }],
+          result: { tag: 'somme S20', text: '$S_{20} = \\dfrac{20\\times(4+61)}{2} = 10\\times65 = 650$' },
         },
         {
           kind: 'astuce',
-          label: 'Astuce — deux données, dans n\'importe quel ordre',
           text:
-            'Que l\'énoncé donne u₁ et un autre terme, deux termes quelconques, ou un terme et ' +
-            'une somme $S_n$, la méthode reste la même : isoler d\'abord ce qui peut l\'être ' +
-            '(souvent r, par soustraction de deux termes), puis substituer pour trouver le ' +
-            'reste. Une seule exception à retenir : si l\'énoncé donne un terme $u_n$ ET la ' +
-            'somme $S_n$ au même rang, on retrouve u₁ **avant** r (via $S_n=n(u_1+u_n)/2$), ' +
-            'l\'ordre inverse de d\'habitude.',
-        },
-        {
-          kind: 'methode',
-          label: 'Démonstration — d\'où vient la formule de S_n ?',
-          items: [
-            'On écrit la somme normalement, puis à l\'envers, et on additionne les deux termes ' +
-              'à termes : $2S_n = (u_1+u_n) + (u_2+u_{n-1}) + (u_3+u_{n-2}) + \\ldots + (u_n+u_1)$.',
-            'Chaque parenthèse vaut exactement $u_1+u_n$ : par exemple $u_2+u_{n-1} = ' +
-              '(u_1+r)+(u_n-r) = u_1+u_n$, et de même pour chaque paire suivante. Il y a n ' +
-              'parenthèses, toutes identiques, d\'où :',
-            '$2S_n = n \\times (u_1+u_n) \\implies S_n = \\dfrac{n(u_1+u_n)}{2}$',
-          ],
+            'Le terme $u_n$ nécessaire à la formule de la somme n\'est presque jamais donné ' +
+            'directement dans l\'énoncé — calcule-le toujours d\'abord par la formule générale ' +
+            'avant de l\'utiliser dans $S_n$.',
         },
         {
           kind: 'entrainement',
           title: 'Suites arithmétiques, formule générale et termes',
           generatorId: '5gen14',
           description: [
-            'Retrouve la raison, le premier terme, un terme quelconque ou la somme des n ' +
-              'premiers termes d\'une suite arithmétique à partir de deux données au choix.',
+            "Retrouve un terme, la raison ou le premier terme d'une suite arithmétique à partir " +
+              'de données variées, calcule une somme de termes, ou vérifie la cohérence de ' +
+              'données sur-spécifiées.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 14. Suites arithmétiques, formule générale et termes »',
@@ -141,103 +203,165 @@ export const suites: ChapterContent = {
     {
       id: 'suites-geometriques',
       number: 2,
-      title: 'Suites géométriques, formule générale et termes',
-      kicker: 'u_(n+1) = u_n × q — somme finie et somme infinie',
+      title: 'Suites géométriques',
+      kicker: 'raison multiplicative q, formule générale, moyenne et somme',
       blocks: [
         {
           kind: 'para',
           text:
-            'Une suite est **géométrique** lorsqu\'on passe d\'un terme au suivant en ' +
-            'multipliant toujours par le **même nombre** $q$, appelé la **raison** : ' +
-            '$u_{n+1} = u_n \\times q$.',
+            'Une suite est **géométrique** si chacun de ses termes, à partir du deuxième, ' +
+            "s'obtient en **multipliant** le précédent par un même nombre constant non nul et " +
+            'différent de 1, appelé la **raison** et noté $q$.',
+        },
+        {
+          kind: 'featureTable',
+          headers: ['', '0 < q < 1', 'q > 1', 'q < 0'],
+          rows: [
+            ['u₁ > 0', 'suite décroissante', 'suite croissante', 'suite oscillante'],
+            ['u₁ < 0', 'suite croissante', 'suite décroissante', 'suite oscillante'],
+          ],
         },
         {
           kind: 'rappel',
-          label: 'Rappel — les formules à retenir',
+          label: "Formule générale d'une suite géométrique",
           items: [
-            '**Terme général** — $u_n = u_1 \\times q^{n-1}$.',
-            '**Somme des n premiers termes** (q≠1) — $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$.',
-            '**Somme infinie** — $S_\\infty = \\dfrac{u_1}{1-q}$, **seulement si** $|q| < 1$.',
-            '**Terme comme moyenne** — sauf le premier et le dernier, tout terme (positif) est ' +
-              'la **moyenne géométrique** de ses deux voisins : $u_n = \\sqrt{u_{n-1} \\times u_{n+1}}$ (n≥2).',
+            '$u_n = u_1 \\times q^{n-1}$ — pour vérifier qu\'une suite est géométrique, il faut ' +
+              'établir que le **rapport** entre deux termes consécutifs quelconques est constant : ' +
+              '$\\dfrac{u_n}{u_{n-1}} = q$ (n ≥ 2).',
           ],
         },
         {
           kind: 'exemple',
-          badge: 'terme général et somme finie',
-          formula: 'Une suite géométrique a pour premier terme $u_1 = 2$ et pour raison $q = 3$. Calcule $u_5$ et $S_5$.',
-          steps: [{ tag: 'terme général — u_n = u₁ × q^(n−1)', text: '$u_5 = 2 \\times 3^4 = 2 \\times 81 = 162$' }],
-          result: {
-            tag: 'somme des 5 premiers termes',
-            text: '$S_5 = 2 \\times \\dfrac{1-3^5}{1-3} = 2 \\times \\dfrac{-242}{-2} = 2 \\times 121 = 242$',
-          },
+          badge: 'retrouver la raison',
+          formula: "Le premier terme d'une suite géométrique est $u_1 = \\frac{1}{2}$ ; son septième terme est $u_7 = 32$. Calcule la raison $q$ (positive).",
+          steps: [
+            { tag: 'poser la formule générale pour n = 7', text: '$u_7 = u_1 \\times q^6 \\implies 32 = \\dfrac{1}{2} \\times q^6$' },
+            { tag: 'isoler q⁶ puis extraire la racine 6e', text: '$q^6 = 64 \\implies q = \\sqrt[6]{64} = 2$' },
+          ],
+          result: { tag: 'résultat', text: 'q = 2 — la suite est (0,5 ; 1 ; 2 ; 4 ; 8 ; 16 ; 32 ; ...)' },
         },
         {
-          kind: 'astuce',
-          text: 'Vérification directe : $2+6+18+54+162 = 242$ ✓ — un bon réflexe pour confirmer un résultat de somme finie.',
-        },
-        {
-          kind: 'piege',
-          label: 'Piège classique — la somme infinie n\'existe pas toujours quand la suite converge',
+          kind: 'attention',
+          label: 'Attention — racine d\'exposant PAIR : jamais une solution unique par réflexe',
           text:
-            'Si $q = 1$, la suite $u_n = u_1$ est constante, donc elle **converge** — mais sa ' +
-            'somme $S_n = n \\times u_1$ tend vers l\'infini : la somme infinie **n\'existe ' +
-            'pas**. Exemple : $u_1 = 5$, $q = 1$ — la suite 5, 5, 5, 5, … converge bien vers 5, ' +
-            'mais $S_n = 5n$ ne cesse de grandir. La condition « $|q| < 1$ strictement » pour ' +
-            '$S_\\infty$ est donc plus stricte que la simple convergence de la suite (qui, elle, ' +
-            'tolère aussi q = 1).',
+            'Résoudre $q^k = a$ revient à chercher une racine k-ième — quand $k$ est **pair**, ' +
+            'il existe **deux** solutions opposées $\\pm\\sqrt[k]{a}$ dès que $a > 0$ (car ' +
+            '$(-q)^k = q^k$ quand k est pair), et **aucune** solution réelle si $a < 0$ (aucune ' +
+            'puissance paire d\'un réel n\'est négative). Ne retiens la solution positive seule ' +
+            'que si l\'énoncé l\'exige explicitement — sinon, vérifie toujours la parité de ' +
+            'l\'exposant avant de conclure.',
+        },
+        { kind: 'subheading', text: 'Représentation graphique — croissance exponentielle discrète' },
+        {
+          kind: 'para',
+          text:
+            "La croissance d'une suite géométrique de raison positive supérieure à 1 est dite " +
+            '**exponentielle discrète** : les points restent isolés (suite discrète), mais ' +
+            "s'écartent de plus en plus vite de l'axe horizontal, contrairement à l'alignement " +
+            "d'une suite arithmétique.",
         },
         {
-          kind: 'exemple',
-          badge: 'somme infinie, |q| < 1',
-          formula: '$u_1 = 8$, $q = \\dfrac{1}{2}$. Comme |q| = 0,5 < 1, $S_\\infty$ existe.',
-          steps: [],
-          result: { tag: 'somme infinie', text: '$S_\\infty = \\dfrac{8}{1-0{,}5} = \\dfrac{8}{0{,}5} = 16$' },
+          kind: 'illustration',
           illustration: {
-            kind: 'sequencePlot',
+            kind: 'curvePlot',
+            curves: [],
+            xMin: 0.5, xMax: 7.5,
+            xTicks: [1, 2, 3, 4, 5, 6, 7],
+            fixedYRange: { min: 0, max: 3.7 },
             points: [
-              { n: 1, value: 8, label: '8' },
-              { n: 2, value: 4, label: '4' },
-              { n: 3, value: 2, label: '2' },
-              { n: 4, value: 1, label: '1' },
-              { n: 5, value: 0.5, label: '0,5' },
-              { n: 6, value: 0.25, label: '0,25' },
+              { x: 1, y: 1, label: '', tone: 'accent' },
+              { x: 2, y: 1.4, label: '', tone: 'accent' },
+              { x: 3, y: 1.96, label: '', tone: 'accent' },
+              { x: 4, y: 2.744, label: '', tone: 'accent' },
+              { x: 5, y: 3.8416, label: '', tone: 'accent' },
+              { x: 6, y: 3.7, label: '', tone: 'accent' },
+              { x: 7, y: 3.7, label: '(u_n) q=1,4', tone: 'accent', labelPos: 'above' },
+              { x: 1, y: 3.5, label: '', tone: 'bad' },
+              { x: 2, y: 2.1, label: '', tone: 'bad' },
+              { x: 3, y: 1.26, label: '', tone: 'bad' },
+              { x: 4, y: 0.756, label: '', tone: 'bad' },
+              { x: 5, y: 0.4536, label: '', tone: 'bad' },
+              { x: 6, y: 0.27216, label: '', tone: 'bad' },
+              { x: 7, y: 0.163296, label: '(v_n) q=0,6', tone: 'bad', labelPos: 'left' },
             ],
-            connector: 'smooth',
-            trendLabel: { afterIndex: 5, text: 'u_n → 0' },
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
-            caption: 'termes de la suite u₁=8, q=0,5 — chaque terme est la moitié du précédent, la suite tend vers 0',
+            caption:
+              '(u_n) : u1=1, q=1,4 (croissante, tronquée ici à partir de n=6 pour rester lisible) ' +
+              '— (v_n) : v1=3,5, q=0,6 (décroissante, tend vers 0)',
           },
+        },
+        { kind: 'subheading', text: 'Moyenne géométrique et somme des termes' },
+        {
+          kind: 'rappel',
+          label: 'Un terme est la moyenne géométrique de ses deux voisins',
+          items: [
+            "Tout terme d'une suite géométrique (sauf le premier et le dernier) est la " +
+              '**moyenne géométrique** des deux termes qui l\'encadrent : ' +
+              '$u_n = \\sqrt{u_{n-1} \\times u_{n+1}}$ (n ≥ 2).',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — établir la formule de la somme',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**1.** écris $S_n$ en remplaçant chaque terme par sa formule générale ' +
+                '$u_1q^{k-1}$ : $S_n = u_1 + u_1q + u_1q^2 + \\ldots + u_1q^{n-2} + u_1q^{n-1}$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** multiplie cette égalité, terme à terme, par $q$ — chaque exposant ' +
+                'augmente de 1 : $qS_n = u_1q + u_1q^2 + u_1q^3 + \\ldots + u_1q^{n-1} + u_1q^n$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** soustrais la ligne 2 de la ligne 1 : chaque terme $u_1q$, $u_1q^2$, …, ' +
+                '$u_1q^{n-1}$ apparaît une fois dans chaque ligne — il disparaît donc de la ' +
+                "différence — et il ne reste que le tout premier terme de la ligne 1 et le tout " +
+                'dernier de la ligne 2 : $S_n - qS_n = u_1 - u_1q^n$',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** En factorisant chaque membre — $S_n(1-q)$ à gauche, ' +
+                '$u_1(1-q^n)$ à droite — puis en divisant par $1-q$ (licite car $q \\neq 1$) : ' +
+                '$S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$.',
+            },
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: "Somme des n premiers termes d'une suite géométrique (q ≠ 1)",
+          items: ['$S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$'],
+        },
+        {
+          kind: 'exemple',
+          badge: 'somme des 8 premiers termes',
+          formula: "Calcule la somme des 8 premiers termes de la suite géométrique de premier terme $u_1 = 3$ et de raison $q = 2$.",
+          steps: [{ tag: 'application directe de la formule, n = 8', text: '$S_8 = 3 \\times \\dfrac{1-2^8}{1-2} = 3 \\times \\dfrac{1-256}{-1} = 3 \\times 255$' }],
+          result: { tag: 'résultat', text: '$S_8 = 765$' },
         },
         {
           kind: 'astuce',
-          label: 'Astuce — le signe de q gouverne l\'alternance',
+          label: 'Astuce — et si |q| < 1 ?',
           text:
-            'Si $q > 0$, tous les termes gardent le signe de $u_1$. Si $q < 0$, le signe ' +
-            'alterne à chaque terme ($u_1$, $-|u_1q|$, $+|u_1q^2|$, …) : c\'est un excellent ' +
-            'indice visuel pour repérer q négatif rien qu\'en lisant une liste de termes.',
-        },
-        {
-          kind: 'methode',
-          label: 'Démonstration — d\'où vient la formule de S_n ?',
-          items: [
-            'On multiplie la somme par q, puis on soustrait : presque tous les termes ' +
-              's\'annulent. $S_n = u_1+u_2+\\ldots+u_n$ et $q \\times S_n = u_2+u_3+\\ldots+u_n+u_{n+1}$.',
-            'En soustrayant terme à terme, tous les termes du milieu ($u_2$ à $u_n$) ' +
-              's\'annulent — il ne reste que le tout premier et le tout dernier : ' +
-              '$S_n(1-q) = u_1 - u_{n+1} = u_1 - u_1q^n = u_1(1-q^n)$.',
-            '$S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$ (q≠1)',
-          ],
+            'Quand $-1 < q < 1$, la formule de la somme reste valable pour n\'importe quel $n$ ' +
+            'fini, mais elle prend en plus un sens quand $n$ devient très grand : c\'est le point ' +
+            'de départ de la **somme infinie**, étudiée juste après dans la section sur la convergence.',
         },
         {
           kind: 'entrainement',
           title: 'Suites géométriques, formule générale et termes',
           generatorId: '5gen15',
           description: [
-            'Retrouve la raison, le premier terme, un terme quelconque, la somme finie ou la ' +
-              'somme infinie (quand elle existe) d\'une suite géométrique à partir de deux ' +
-              'données au choix.',
+            "Retrouve un terme, la raison ou le premier terme d'une suite géométrique — dont le " +
+              'piège de la racine paire (0, 1 ou 2 solutions) —, calcule une somme finie ou ' +
+              'infinie, ou entraîne-toi sur la moyenne géométrique.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 15. Suites géométriques, formule générale et termes »',
@@ -245,76 +369,131 @@ export const suites: ChapterContent = {
       ],
     },
     {
-      id: 'convergence-divergence',
+      id: 'convergence',
       number: 3,
       title: 'Convergence et divergence des suites',
-      kicker: 'classer une suite arithmétique, géométrique ou rationnelle selon son comportement à l\'infini',
+      kicker: "limite à l'infini, arithmétique, géométrique, et le cas d'une suite quelconque",
       blocks: [
         {
           kind: 'para',
           text:
-            'Une suite **converge** quand ses termes se rapprochent d\'une valeur fixe lorsque ' +
-            'n devient très grand ; sinon, elle **diverge** (vers +∞, vers −∞, ou sans limite ' +
-            'du tout, en oscillant). Le classement se fait différemment selon la famille de la suite.',
+            'Lorsque $n$ tend vers $+\\infty$, la valeur des termes d\'une suite peut suivre ' +
+            "l'un de quatre comportements : devenir de plus en plus grande, sans borne " +
+            'supérieure ($\\lim_{n\\to+\\infty} u_n = +\\infty$) ; devenir de plus en plus ' +
+            'petite, sans borne inférieure ($\\lim_{n\\to+\\infty} u_n = -\\infty$) ; se ' +
+            'rapprocher indéfiniment d\'un réel $a$ ($\\lim_{n\\to+\\infty} u_n = a$) ; ou ne ' +
+            "répondre à aucune de ces trois situations (la suite **oscille** sans jamais se stabiliser).",
+        },
+        {
+          kind: 'rappel',
+          label: 'Convergence et divergence',
+          items: [
+            'Si $\\lim_{n\\to+\\infty} u_n$ est un nombre réel $a$, la suite **converge** vers ' +
+              'a. Si cette limite est infinie ou n\'existe pas, la suite est **divergente**.',
+          ],
+        },
+        { kind: 'subheading', text: 'Limite d\'une suite arithmétique — tout dépend du signe de r' },
+        {
+          kind: 'featureTable',
+          headers: ['raison r', 'comportement', 'limite'],
+          rows: [
+            ['r = 0', 'suite constante', '$\\lim u_n = u_1$'],
+            ['r > 0', 'croissante, sans borne', '$\\lim u_n = +\\infty$'],
+            ['r < 0', 'décroissante, sans borne', '$\\lim u_n = -\\infty$'],
+          ],
+        },
+        { kind: 'subheading', text: 'Limite d\'une suite géométrique — tout dépend de q' },
+        {
+          kind: 'featureTable',
+          headers: ['raison q', 'comportement', 'limite'],
+          rows: [
+            ['q = 1', 'suite constante', '$\\lim u_n = u_1$'],
+            ['|q| < 1 (q≠0)', 'décroissante en valeur absolue', '$\\lim u_n = 0$'],
+            ['q > 1', 'croissante en valeur absolue', '$\\lim u_n = \\pm\\infty$ (signe de $u_1$)'],
+            ['q = −1', 'oscille entre u₁ et −u₁', "n'existe pas (ne diverge pas vers l'infini)"],
+            ['q < −1', 'oscille, amplitude croissante', "n'existe pas"],
+          ],
+        },
+        {
+          kind: 'attention',
+          label: "Attention — q = −1 ne diverge PAS vers l'infini",
+          text:
+            'Une suite géométrique de raison $q = -1$ (ex. 3 ; −3 ; 3 ; −3 ; ...) reste bornée ' +
+            'entre $u_1$ et $-u_1$ : elle ne tend ni vers $+\\infty$ ni vers $-\\infty$, et ne se ' +
+            "stabilise sur aucune valeur non plus — sa limite n'existe tout simplement pas. Ne " +
+            'jamais la classer avec les cas $q > 1$ ni avec les cas convergents.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'sequencePlot',
+            points: [
+              { n: 1, value: 6, label: '6' },
+              { n: 2, value: 3.9, label: '3,9' },
+              { n: 3, value: 2.535, label: '2,54' },
+              { n: 4, value: 1.648, label: '1,65' },
+              { n: 5, value: 1.071, label: '1,07' },
+              { n: 6, value: 0.696, label: '0,70' },
+              { n: 7, value: 0.453, label: '0,45' },
+              { n: 8, value: 0.294, label: '0,29' },
+              { n: 9, value: 0.191, label: '0,19' },
+            ],
+            connector: 'smooth',
+            referenceLine: { value: 0, label: 'L=0' },
+            trendLabel: { afterIndex: 6, text: 'w_n → 0' },
+            xAxisLabel: 'n',
+            yAxisLabel: 'w_n',
+            caption: "w_n = 6×0,65^(n−1) — suite géométrique de raison 0<q<1, convergente vers 0",
+          },
+        },
+        { kind: 'subheading', text: "Le cas d'une suite quelconque — comparer les degrés" },
+        {
+          kind: 'para',
+          text:
+            'Pour une suite définie par un quotient de polynômes en n, $u_n = \\dfrac{P(n)}{Q(n)}$, ' +
+            'on divise numérateur et dénominateur par la plus haute puissance de n **au ' +
+            'dénominateur**, puis on compare les degrés de P et de Q.',
         },
         {
           kind: 'methode',
-          label: 'Méthode — classer selon la famille',
+          label: 'Méthode — comparaison des degrés',
           items: [
-            '**Arithmétique** — seul le signe de r compte : r=0 (constante) converge ; r≠0 ' +
-              'diverge (vers +∞ si r>0, vers −∞ si r<0).',
-            '**Géométrique** — |q|<1 converge vers 0 ; q=1 (constante) converge ; q>1 diverge ' +
-              'vers ±∞ (selon le signe de u₁) ; q=−1 oscille entre u₁ et −u₁ sans converger ; ' +
-              'q<−1 oscille avec une amplitude qui grandit indéfiniment.',
-            '**Rationnelle** $u_n=P(n)/Q(n)$ — comparer les degrés de P et Q.',
+            'degré(P) < degré(Q) : $\\lim_{n\\to+\\infty} u_n = 0$ (le dénominateur « grandit plus vite »).',
+            'degré(P) = degré(Q) : la limite est le **rapport des coefficients dominants** (les ' +
+              'deux termes de plus haut degré l\'emportent, tout le reste devient négligeable).',
+            'degré(P) > degré(Q) : $\\lim_{n\\to+\\infty} u_n = \\pm\\infty$, le signe dépend des ' +
+              'coefficients dominants de P et de Q.',
           ],
         },
         {
           kind: 'exemple',
-          badge: 'les 3 cas d\'une suite rationnelle',
+          badge: 'degrés égaux',
+          formula: 'Calcule $\\lim_{n\\to+\\infty} u_n$ pour $u_n = \\dfrac{3n-1}{2n+5}$.',
           steps: [
-            {
-              tag: 'degré(P) < degré(Q) — la limite est 0',
-              text: '$u_n = \\dfrac{2n+1}{n^2+3}$ — à n=100 : $\\dfrac{201}{10\\,003} \\approx 0{,}0201$, de plus en plus proche de 0',
-            },
-            {
-              tag: 'degré(P) = degré(Q) — la limite est le rapport des coefficients dominants',
-              text: '$u_n = \\dfrac{3n^2+2}{n^2+5}$ — limite = $3/1=3$ ; à n=100 : $\\dfrac{30\\,002}{10\\,005} \\approx 2{,}9987$',
-            },
+            { tag: 'diviser numérateur ET dénominateur par n (plus haute puissance au dénominateur)', text: '$u_n = \\dfrac{3-\\frac{1}{n}}{2+\\frac{5}{n}}$' },
+            { tag: 'quand n→+∞, 1/n→0 et 5/n→0', text: '$u_n \\to \\dfrac{3-0}{2+0} = \\dfrac{3}{2}$' },
           ],
           result: {
-            tag: 'degré(P) > degré(Q) — la suite diverge (ici vers +∞)',
-            text: '$u_n = \\dfrac{n^2+1}{n+2}$ — à n=100 : $\\dfrac{10\\,001}{102} \\approx 98{,}05$, en croissance sans borne',
+            tag: 'résultat',
+            text: '$\\lim_{n\\to+\\infty} u_n = \\dfrac{3}{2} = 1{,}5$ — même degré (1) au numérateur et au dénominateur, la limite est le rapport 3/2 des coefficients dominants',
           },
         },
         {
-          kind: 'attention',
-          label: 'Attention — q=−1 n\'est ni « converge » ni « diverge vers l\'infini »',
-          text:
-            'Une suite géométrique de raison $q = -1$ (par exemple $u_1=5$ : 5, −5, 5, −5, …) ' +
-            'reste toujours bornée entre u₁ et −u₁ — elle ne part donc jamais vers l\'infini — ' +
-            'mais elle ne se stabilise pas non plus sur une seule valeur : elle **oscille**, ' +
-            'sans converger. Ne classe jamais ce cas dans « diverge vers +∞ » ou « diverge vers ' +
-            '−∞ » : la bonne catégorie est « oscille, ne converge pas ». Pour $q < -1$, ' +
-            'l\'amplitude de l\'oscillation grandit en plus indéfiniment — la suite diverge, ' +
-            'mais toujours sans limite signée.',
-        },
-        {
           kind: 'astuce',
-          label: 'Astuce — pour une suite rationnelle, diviser par la puissance dominante de n',
           text:
-            'Pour retrouver la limite d\'une suite $u_n=P(n)/Q(n)$, divise numérateur ET ' +
-            'dénominateur par la plus haute puissance de n **au dénominateur** : tous les ' +
-            'termes en 1/n, 1/n² … tendent alors vers 0, et il ne reste que le rapport des ' +
-            'coefficients dominants (ou 0, ou une croissance sans borne selon les degrés restants).',
+            "Diviser par n'importe quelle puissance de n cohérente entre le numérateur et le " +
+            'dénominateur ne change jamais la valeur de l\'expression — mais diviser par la ' +
+            '**bonne** puissance (celle du dénominateur) est ce qui fait apparaître directement ' +
+            'des termes en 1/n qui s\'annulent à la limite, sans calcul supplémentaire.',
         },
         {
           kind: 'entrainement',
           title: 'Convergence et divergence des suites',
           generatorId: '5gen16',
           description: [
-            'Classe des suites arithmétiques, géométriques et rationnelles selon leur ' +
-              'comportement à l\'infini : convergente, divergente vers +∞/−∞, ou oscillante sans limite.',
+            'Classe la limite d\'une suite arithmétique, géométrique (dont les pièges q=−1 et ' +
+              'q<−1), ou d\'une suite quelconque un=P(n)/Q(n) en comparant les degrés du ' +
+              'numérateur et du dénominateur.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 16. Convergence et divergence des suites »',
@@ -325,69 +504,121 @@ export const suites: ChapterContent = {
       id: 'problemes-classiques',
       number: 4,
       title: 'Problèmes classiques sur les suites',
-      kicker: 'traduire une mise en situation en suite arithmétique ou géométrique',
+      kicker: 'des énigmes historiques qui se résolvent avec les mêmes outils',
       blocks: [
         {
           kind: 'para',
           text:
-            'De nombreuses situations concrètes se ramènent à une suite arithmétique ou ' +
-            'géométrique — à condition de bien identifier ce qui joue le rôle de raison, et si ' +
-            'celle-ci s\'ajoute ou se multiplie d\'une étape à l\'autre.',
+            "Les suites arithmétiques et géométriques ne sont pas qu'un exercice scolaire : " +
+            "plusieurs problèmes célèbres, parfois vieux de plusieurs millénaires, se résolvent " +
+            'avec exactement les formules déjà vues dans ce chapitre. Voici le plus connu ' +
+            "d'entre eux, résolu en détail, puis un aperçu des autres classiques.",
         },
         {
           kind: 'exemple',
-          badge: 'légende du jeu d\'échecs — grains de blé',
+          badge: "la légende de l'échiquier",
           formula:
-            'Selon la légende, l\'inventeur du jeu d\'échecs demande pour récompense un grain ' +
-            'de blé sur la première case de l\'échiquier, deux sur la deuxième, quatre sur la ' +
-            'troisième, et ainsi de suite en doublant à chaque case, jusqu\'à la 64ᵉ. Combien de ' +
-            'grains sur la 64ᵉ case ? Et au total sur les 64 cases ?',
+            "Une légende raconte qu'un roi, voulant récompenser l'inventeur du jeu d'échecs, lui " +
+            'proposa de choisir sa récompense : un grain de blé sur la première case de ' +
+            "l'échiquier, deux sur la deuxième, quatre sur la troisième, et ainsi de suite en " +
+            "doublant à chaque case, jusqu'à la 64ᵉ. Combien de grains de blé cela " +
+            'représente-t-il au total ?',
           steps: [
-            { tag: 'reconnaître la suite — chaque case double la précédente : géométrique de raison q=2', text: '$u_1 = 1,\\ q = 2$' },
-            { tag: 'petit cas de contrôle, 4 cases — S₄ = (2⁴−1)/(2−1)', text: '$1+2+4+8 = 15 = 2^4-1$ ✓' },
-            { tag: 'grains sur la 64ᵉ case — u_n = u₁ × q^(n−1)', text: '$u_{64} = 1 \\times 2^{63} = 9\\,223\\,372\\,036\\,854\\,775\\,808$' },
+            { tag: 'reconnaître la suite — géométrique, u1=1, q=2', text: 'Le nombre de grains sur la case n est $u_n = 1\\times2^{n-1}$.' },
+            { tag: 'le total est la somme des 64 premiers termes', text: '$S_{64} = u_1 \\times \\dfrac{1-q^{64}}{1-q} = 1 \\times \\dfrac{1-2^{64}}{1-2} = 2^{64}-1$' },
           ],
           result: {
-            tag: 'total sur les 64 cases — S_n = u₁(1−qⁿ)/(1−q)',
-            text: '$S_{64} = \\dfrac{1-2^{64}}{1-2} = 2^{64}-1 = 18\\,446\\,744\\,073\\,709\\,551\\,615$ grains',
+            tag: 'résultat',
+            text: '$S_{64} = 2^{64}-1 \\approx 1{,}8446744\\times10^{19}$ grains — plusieurs centaines de fois la production mondiale annuelle actuelle de blé.',
           },
         },
         {
-          kind: 'astuce',
-          text:
-            'Un nombre qui dépasse largement toute la production mondiale de blé — l\'exemple ' +
-            'classique pour montrer à quel point une croissance géométrique explose vite, même ' +
-            'avec la plus petite raison entière possible (q=2).',
-        },
-        { kind: 'video', title: 'Visualiser la croissance de l\'échiquier de blé' },
-        {
           kind: 'attention',
-          label: 'Attention — identifier ce qui varie AVANT de choisir le modèle',
+          label: "Attention — une croissance géométrique dépasse vite l'intuition",
           text:
-            'Un capital qui gagne « 3 % d\'intérêt chaque année » est **géométrique** (on ' +
-            'multiplie par 1,03 à chaque étape), alors qu\'un capital qui gagne « 30 € chaque ' +
-            'année » est **arithmétique** (on ajoute toujours 30). Un même mot — « augmente » ' +
-            '— peut donc cacher les deux mécanismes : c\'est la formulation précise de ' +
-            'l\'énoncé (« pourcentage » vs « montant fixe ») qui tranche, jamais une habitude ' +
-            'de lecture rapide.',
+            "Le piège de ce problème n'est pas le calcul, mais l'intuition : doubler semble " +
+            'anodin case après case, mais après seulement 20 cases on dépasse déjà le million de ' +
+            'grains, et après 64 cases la quantité dépasse toute réserve de blé imaginable. Une ' +
+            "suite géométrique de raison supérieure à 1 grandit toujours plus vite qu'une suite " +
+            'arithmétique, même avec une raison additive énorme — c\'est une différence de ' +
+            '**nature**, pas seulement de vitesse.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [],
+            xMin: 0.5, xMax: 13.7,
+            xTicks: [1, 3, 5, 7, 9, 11],
+            fixedYRange: { min: 0, max: 48 },
+            points: [
+              { x: 1, y: 3, label: '', tone: 'good' },
+              { x: 2, y: 7, label: '', tone: 'good' },
+              { x: 3, y: 11, label: '', tone: 'good' },
+              { x: 4, y: 15, label: '', tone: 'good' },
+              { x: 5, y: 19, label: '', tone: 'good' },
+              { x: 6, y: 23, label: '', tone: 'good' },
+              { x: 7, y: 27, label: '', tone: 'good' },
+              { x: 8, y: 31, label: '', tone: 'good' },
+              { x: 9, y: 35, label: '', tone: 'good' },
+              { x: 10, y: 39, label: '', tone: 'good' },
+              { x: 11, y: 43, label: '', tone: 'good' },
+              { x: 12, y: 47, label: 'u_n arithmétique (r=4)', tone: 'good', labelPos: 'above' },
+              { x: 1, y: 1, label: '', tone: 'accent' },
+              { x: 2, y: 1.6, label: '', tone: 'accent' },
+              { x: 3, y: 2.56, label: '', tone: 'accent' },
+              { x: 4, y: 4.096, label: '', tone: 'accent' },
+              { x: 5, y: 6.554, label: '', tone: 'accent' },
+              { x: 6, y: 10.486, label: '', tone: 'accent' },
+              { x: 7, y: 16.777, label: '', tone: 'accent' },
+              { x: 8, y: 26.844, label: '', tone: 'accent' },
+              { x: 9, y: 42.95, label: 'v_n géométrique (q=1,6)', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 'n',
+            yAxisLabel: '',
+            caption:
+              'u_n = 3+(n−1)×4 (points, croissance linéaire) contre v_n = 1×1,6^(n−1) (points ' +
+              'accent, croissance exponentielle) — v_n rattrape puis dépasse u_n dès le rang 9, ' +
+              'malgré un départ beaucoup plus lent',
+          },
+        },
+        { kind: 'subheading', text: "D'autres grands classiques" },
+        {
+          kind: 'para',
+          text: "Le générateur d'exercices propose sept mises en situation historiques ou géométriques différentes :",
+        },
+        {
+          kind: 'list',
+          items: [
+            '**Le papyrus de Rhind** — un partage de pains en parts formant une suite ' +
+              "arithmétique, l'un des plus anciens problèmes de mathématiques connus (Égypte antique).",
+            '**La suite de Fibonacci** — chaque terme est la somme des deux précédents ; son ' +
+              "rapport de termes successifs converge vers le nombre d'or.",
+            '**Les triangles en zigzag** et **les carrés emboîtés** — des suites géométriques de ' +
+              "longueurs ou d'aires qui décroissent à chaque étape d'une construction " +
+              'géométrique répétée, dont la somme infinie a une valeur finie.',
+            '**Les suites combinées** — une suite arithmétique et une suite géométrique ' +
+              "partageant certains termes, à démêler par un système d'équations.",
+            '**Position et vitesse** — une distance parcourue par intervalles de temps égaux, ' +
+              'modélisée par une suite.',
+          ],
         },
         {
           kind: 'astuce',
-          label: 'Astuce — vérifier sur un petit cas avant de calculer le grand',
           text:
-            'Avant de te lancer dans $u_{64}$ ou $S_{64}$, vérifie ta formule sur un petit ' +
-            'nombre de termes que tu peux additionner à la main (voir la ligne « petit cas de ' +
-            'contrôle » ci-dessus) — une erreur de formule se voit tout de suite sur 4 termes, ' +
-            'jamais sur 64.',
+            'Face à un problème « habillé » (contexte historique, géométrique ou concret), la ' +
+            "première étape est toujours la même : identifier ce qui varie d'une étape à " +
+            "l'autre — une addition (suite arithmétique) ou une multiplication (suite " +
+            'géométrique) — avant de choisir la formule à appliquer.',
         },
         {
           kind: 'entrainement',
           title: 'Problèmes classiques sur les suites',
           generatorId: '5gen17',
           description: [
-            'Traduis des mises en situation concrètes (échiquier de blé, épargne, population, ' +
-              'triangles emboîtés, suite de Fibonacci…) en suite arithmétique ou géométrique, ' +
-              'puis résous à plusieurs inconnues.',
+            'Sept mises en situation historiques ou géométriques classiques (échiquier, papyrus ' +
+              'de Rhind, Fibonacci, triangles en zigzag, carrés emboîtés, suites combinées, ' +
+              'vitesse) à résoudre pas à pas avec les outils du chapitre.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 17. Problèmes classiques sur les suites »',
@@ -395,89 +626,116 @@ export const suites: ChapterContent = {
       ],
     },
     {
-      id: 'comparaison-numerique',
+      id: 'comparaison-suites',
       number: 5,
       title: 'Comparaison numérique de deux suites',
-      kicker: 'tableau de valeurs, rang de bascule, traduire l\'indice dans l\'unité du contexte',
+      kicker: 'balayage numérique, tableau, rang de bascule',
       blocks: [
         {
           kind: 'para',
           text:
-            'Comparer deux suites ne demande pas toujours de résoudre une équation : on peut ' +
-            'simplement calculer les deux suites terme à terme, dans un tableau, jusqu\'à ' +
-            'repérer le rang à partir duquel une condition (par exemple « $u_n > v_n$ ») ' +
-            'devient vraie et le reste ensuite.',
+            'Certaines situations comparent deux suites concurrentes — deux populations, deux ' +
+            "stocks, deux capitaux — et demandent à partir de quel rang l'une dépasse l'autre. " +
+            "Il n'existe pas toujours de formule fermée pour cela : la méthode la plus fiable " +
+            'est un **balayage numérique**, en calculant les deux suites terme après terme ' +
+            'jusqu\'à repérer le rang où la condition bascule.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — trouver le rang de bascule',
+          items: [
+            'Écris les deux formules générales (une pour chaque suite).',
+            'Calcule les deux suites terme après terme (à la main pour un petit tableau, ou en ' +
+              'repérant le motif si le rang cherché est grand).',
+            'Repère le **premier** rang n où la condition demandée devient vraie — et vérifie ' +
+              "qu'elle était bien fausse au rang précédent (n−1), pour être certain de ne pas " +
+              'avoir manqué le vrai point de bascule.',
+          ],
         },
         {
           kind: 'exempleLibre',
-          label: 'Exemple résolu — deux villes, deux modèles de croissance',
+          label: 'Exemple résolu — deux villes, deux croissances',
           blocks: [
             {
               kind: 'para',
               text:
-                'En l\'an 2000, la ville A compte 2000 habitants et croît de 10 % par an ' +
-                '(géométrique, $u_1$=2000, q=1,1). La même année, la ville B compte 5000 ' +
-                'habitants et croît de 200 habitants par an (arithmétique, $v_1$=5000, r=200). ' +
-                'À partir de quelle année la ville A dépasse-t-elle la ville B ?',
+                'En 2020, la ville A compte 50 000 habitants et croît de 2 000 habitants par an ' +
+                '(croissance arithmétique). La même année, la ville B compte 30 000 habitants et ' +
+                'croît de 8 % par an (croissance géométrique). À partir de quelle année la ' +
+                "population de B dépasse-t-elle celle de A ?",
+            },
+            {
+              kind: 'para',
+              text:
+                "**Les deux formules** (n=1 correspond à 2020) : $A_n = 50000 + (n-1)\\times2000$ " +
+                'et $B_n = 30000\\times1{,}08^{n-1}$.',
             },
             {
               kind: 'featureTable',
-              headers: ['n (année)', 'uₙ (ville A)', 'vₙ (ville B)', 'uₙ > vₙ ?'],
+              headers: ['n', 'année', 'Aₙ', 'Bₙ', 'B>A ?'],
               rows: [
-                ['15 (2014)', '≈ 7 595', '7 800', 'non'],
-                ['**16 (2015)**', '**≈ 8 354**', '**8 000**', '**oui — bascule ici**'],
-                ['17 (2016)', '≈ 9 190', '8 200', 'oui'],
+                ['12', '2031', '72 000', '69 949', 'non'],
+                ['**13**', '**2032**', '**74 000**', '**75 545**', '**oui — bascule ici**'],
+                ['14', '2033', '76 000', '81 589', 'oui'],
               ],
             },
-            { kind: 'para', text: 'Conclusion : n = 16, ce qui correspond à l\'année 2000 + (16−1) = **2015**.' },
+            {
+              kind: 'para',
+              text:
+                'Conclusion : n = 13 est le premier rang où $B_n > A_n$ (75 545 > 74 000), alors ' +
+                "qu'au rang 12 ce n'était pas encore le cas (69 949 < 72 000) — la ville B " +
+                'dépasse la ville A **à partir de 2032**.',
+            },
             {
               kind: 'illustration',
               illustration: {
                 kind: 'curvePlot',
-                curves: [
-                  { fn: (n) => 2000 * Math.pow(1.1, n - 1), tone: 'accent' },
-                  { fn: (n) => 5000 + 200 * (n - 1), tone: 'good' },
+                curves: [],
+                xMin: 0.5, xMax: 16.5,
+                xTicks: [1, 4, 7, 10, 13, 16],
+                xTickLabels: { 1: '2020', 4: '2023', 7: '2026', 10: '2029', 13: '2032', 16: '2035' },
+                fixedYRange: { min: 25000, max: 100000 },
+                points: [
+                  { x: 1, y: 50000, label: '', tone: 'good' },
+                  { x: 4, y: 56000, label: '', tone: 'good' },
+                  { x: 7, y: 62000, label: '', tone: 'good' },
+                  { x: 10, y: 68000, label: '', tone: 'good' },
+                  { x: 13, y: 74000, label: 'A_n (+2000/an)', tone: 'good', labelPos: 'above' },
+                  { x: 16, y: 80000, label: '', tone: 'good' },
+                  { x: 1, y: 30000, label: '', tone: 'accent' },
+                  { x: 4, y: 37791, label: '', tone: 'accent' },
+                  { x: 7, y: 47606, label: '', tone: 'accent' },
+                  { x: 10, y: 59973, label: 'B_n (+8%/an)', tone: 'accent', labelPos: 'above' },
+                  { x: 13, y: 75545, label: '', tone: 'accent' },
+                  { x: 16, y: 95165, label: '', tone: 'accent' },
                 ],
-                xMin: 1,
-                xMax: 17,
-                xTicks: [1, 5, 10, 15],
-                fixedYRange: { min: 0, max: 9500 },
-                points: [{ x: 16, y: 2000 * Math.pow(1.1, 15), label: 'bascule (n=16)', tone: 'accent' }],
-                xAxisLabel: 'n',
+                xAxisLabel: 'année',
                 yAxisLabel: 'habitants',
-                caption: 'A (géométrique, en accent) accélère et finit par dépasser B (arithmétique, en vert), au rang n=16',
+                caption:
+                  'population de 2020 à 2035 — A croît de façon arithmétique, B de façon ' +
+                  'géométrique et la dépasse en 2032',
               },
             },
           ],
         },
         {
-          kind: 'piege',
-          label: 'Piège du second champ — ne pas laisser la réponse en simple numéro de rang',
-          text:
-            'Trouver $n = 16$ ne répond qu\'à moitié à la question « à partir de quelle ' +
-            '**année** ». Le second champ — la traduction de n dans l\'unité du contexte (ici, ' +
-            'l\'année réelle) — fait partie intégrante de la réponse : oublier de convertir ' +
-            'l\'indice n en année, en mois, ou en toute autre unité du contexte est une erreur ' +
-            'aussi grave que de se tromper sur n lui-même.',
-        },
-        {
           kind: 'attention',
-          label: 'Attention — vérifier que le cran précédent ne satisfait pas déjà la condition',
+          label: 'Attention — deux pièges fréquents',
           text:
-            'Un rang n qui satisfait $u_n > v_n$ ne suffit pas à conclure que c\'est le ' +
-            '**bon** rang de bascule : il faut aussi vérifier que la condition est encore ' +
-            '**fausse** au rang précédent (n−1). Dans l\'exemple ci-dessus, n=17 vérifie bien ' +
-            '$u_{17}>v_{17}$, mais ce n\'est pas le premier rang à le faire — c\'est n=16, ' +
-            'puisqu\'à n=15 la condition est encore fausse (7 595 < 7 800).',
+            'Le **cran de bascule** : donner un rang n qui vérifie bien la condition mais sans ' +
+            "avoir vérifié que n−1 ne la vérifie pas déjà — le vrai premier rang pourrait être " +
+            'plus petit. **La traduction en unité du contexte** : une fois n trouvé, l\'énoncé ' +
+            'demande presque toujours une **année**, un **nombre de mois** ou une autre grandeur ' +
+            'concrète — jamais seulement l\'indice n brut, qui n\'a de sens que dans le calcul intermédiaire.',
         },
         {
           kind: 'entrainement',
           title: 'Comparaison numérique de deux suites',
           generatorId: '5gen18',
           description: [
-            'Complète un tableau de valeurs pour deux suites en situation concrète, détermine ' +
-              'le rang exact de bascule d\'une condition, puis traduis ce rang dans l\'unité du ' +
-              'contexte (année, mois…).',
+            'Complète un tableau de valeurs pour deux suites concurrentes (villes, stocks, ' +
+              "comptes d'épargne) et détermine le rang exact où l'une dépasse l'autre, puis " +
+              'traduis ce rang dans l\'unité du contexte.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 18. Comparaison numérique de deux suites »',
@@ -488,83 +746,124 @@ export const suites: ChapterContent = {
       id: 'recurrente-affine',
       number: 6,
       title: 'Suite récurrente affine et régime permanent',
-      kicker: 'u_(n+1) = a×u_n + b — point fixe L = b/(1−a), convergence si |a| < 1',
+      kicker: 'u_(n+1) = a·u_n + b — ni arithmétique, ni géométrique',
       blocks: [
         {
           kind: 'para',
           text:
-            'Une suite **récurrente affine** combine les deux mécanismes précédents dans une ' +
-            'seule relation : $u_{n+1} = a \\times u_n + b$, avec $a \\neq 1$ (sinon c\'est une ' +
-            'suite arithmétique) et $b \\neq 0$ (sinon c\'est une suite géométrique). Si elle ' +
-            'converge, elle se stabilise autour d\'une valeur particulière : le **régime permanent**.',
+            'Une suite peut être définie par une récurrence de la forme $u_{n+1} = a\\times u_n + ' +
+            'b$, avec $a \\neq 1$ (sinon elle serait arithmétique de raison b) et $b \\neq 0$ ' +
+            '(sinon elle serait géométrique de raison a) : c\'est une **suite récurrente ' +
+            'affine**, une famille à part entière. On la rencontre dans tout contexte où une ' +
+            'grandeur perd ou gagne une fraction d\'elle-même à chaque étape, tout en recevant ' +
+            '(ou perdant) en plus une quantité fixe — une dose de médicament partiellement ' +
+            'éliminée puis renouvelée, un capital taxé puis abondé, une pollution partiellement ' +
+            'filtrée puis réémise.',
         },
         {
           kind: 'rappel',
-          label: 'Rappel — le point fixe L',
+          label: 'Régime permanent — la valeur vers laquelle la suite se stabilise',
           items: [
-            'Si la suite converge, sa limite $L$ vérifie $L = a \\times L + b$ (le terme ' +
-              'suivant est identique au terme lui-même, à l\'équilibre) — d\'où ' +
-              '$L = \\dfrac{b}{1-a}$ (a≠1). Cette convergence n\'a lieu que si $|a| < 1$ ; ' +
-              'sinon L n\'existe pas.',
+            'Si $|a| < 1$, la suite converge vers une valeur limite $L$ appelée **régime ' +
+              'permanent**, point fixe de la récurrence ($L = a\\times L+b$) : $L = ' +
+              '\\dfrac{b}{1-a}$. Si $|a| \\geq 1$, ce régime permanent **n\'existe pas** — la ' +
+              'suite diverge.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — pourquoi L = b/(1−a)',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                '**1.** suppose que la suite converge vers une limite $L$ (c\'est ce que garantit ' +
+                '$|a| < 1$, admis à ce niveau). Puisque $(u_{n+1})$ est la même suite que ' +
+                '$(u_n)$, simplement décalée d\'un rang, elle a **la même limite** : $u_n \\to L$ ' +
+                'et $u_{n+1} \\to L$ également.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**2.** passe à la limite dans la relation de récurrence $u_{n+1} = a\\times ' +
+                'u_n+b$, valable pour tout n : chaque membre tend vers sa propre limite, donc ' +
+                '$L = a\\times L + b$ — L est un **point fixe** de la récurrence.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**3.** isole $L$ : $L - aL = b$, soit $L(1-a) = b$. Comme $a \\neq 1$ par ' +
+                'définition d\'une suite récurrente affine, on peut diviser par $1-a$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Conclusion.** $L = \\dfrac{b}{1-a}$ — cette valeur est la **seule candidate ' +
+                'possible** pour la limite ; c\'est la condition $|a| < 1$ (admise, non ' +
+                'démontrée à ce niveau) qui garantit que la suite converge réellement vers elle.',
+            },
           ],
         },
         {
           kind: 'exemple',
-          badge: 'dilution — régime convergent',
+          badge: 'dilution répétée',
           formula:
-            'Un réservoir contient 5 L d\'un produit dilué. Chaque jour, 25 % du contenu est ' +
-            'retiré et remplacé par 4 L de produit pur : $u_{n+1} = 0{,}75 \\times u_n + 4$, ' +
-            'avec $u_1 = 5$.',
-          steps: [
-            { tag: 'condition de convergence', text: '$|a| = |0{,}75| < 1 \\implies$ la suite converge' },
-            { tag: 'premiers termes — u_(n+1) = 0,75×u_n + 4, calculés un par un', text: '$u_1=5 \\to u_2=7{,}75 \\to u_3=9{,}8125 \\to u_4 \\approx 11{,}36$' },
-          ],
-          result: { tag: 'régime permanent — L = b/(1−a)', text: '$L = \\dfrac{4}{1-0{,}75} = \\dfrac{4}{0{,}25} = 16$' },
+            'Un aquarium contient un produit dont la concentration, exprimée en mg/L, suit la ' +
+            'récurrence $u_{n+1} = 0{,}7\\times u_n + 3$ (30 % du produit est filtré chaque ' +
+            'semaine, puis 3 mg/L sont réintroduits par un apport extérieur constant), avec ' +
+            '$u_1 = 1$. Vers quelle concentration la situation se stabilise-t-elle à long terme ?',
+          steps: [{ tag: '|a| = 0,7 < 1 — le régime permanent existe', text: '$L = \\dfrac{b}{1-a} = \\dfrac{3}{1-0{,}7} = \\dfrac{3}{0{,}3}$' }],
+          result: {
+            tag: 'résultat',
+            text:
+              'L = 10 mg/L — quelle que soit la concentration de départ, la suite se rapproche ' +
+              'indéfiniment de 10 mg/L sans jamais la dépasser (ici, en partant de 1, elle y ' +
+              'monte par en dessous).',
+          },
           illustration: {
             kind: 'sequencePlot',
             points: [
-              { n: 1, value: 5, label: '5' },
-              { n: 2, value: 7.75, label: '7,75' },
-              { n: 3, value: 9.8125, label: '9,81' },
-              { n: 4, value: 11.359375, label: '11,36' },
-              { n: 5, value: 12.51953125, label: '12,52' },
-              { n: 6, value: 13.3896484375, label: '13,39' },
+              { n: 1, value: 1, label: '1' },
+              { n: 2, value: 3.7, label: '3,7' },
+              { n: 3, value: 5.59, label: '5,59' },
+              { n: 4, value: 6.913, label: '6,91' },
+              { n: 5, value: 7.839, label: '7,84' },
+              { n: 6, value: 8.487, label: '8,49' },
+              { n: 7, value: 8.941, label: '8,94' },
+              { n: 8, value: 9.259, label: '9,26' },
+              { n: 9, value: 9.481, label: '9,48' },
             ],
             connector: 'smooth',
-            referenceLine: { value: 16, label: 'L=16' },
+            referenceLine: { value: 10, label: 'L=10' },
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
-            caption: 'les termes se rapprochent de plus en plus de L=16, sans jamais tout à fait l\'atteindre',
+            caption: 'u_(n+1) = 0,7×u_n + 3, u1=1 — les termes se rapprochent du régime permanent L=10 sans jamais l\'atteindre',
           },
         },
         {
           kind: 'attention',
-          label: 'Attention — vérifier |a| < 1 avant même de calculer L',
+          label: 'Attention — toujours vérifier |a| < 1 avant de calculer L',
           text:
-            'Si $|a| \\ge 1$ (par exemple $a=1{,}2$), la formule $L=b/(1-a)$ donne encore un ' +
-            'nombre — mais ce nombre **n\'est pas une limite** : la suite diverge. Avec ' +
-            'a=1,2, b=3, u₁=2 : $u_2=1{,}2\\times2+3=5{,}4$ ; $u_3=1{,}2\\times5{,}4+3=9{,}48$ ; ' +
-            '$u_4=1{,}2\\times9{,}48+3=14{,}376$ — les termes s\'éloignent de plus en plus, ils ' +
-            'ne se rapprochent d\'aucune valeur. La bonne réponse ici est « le régime permanent ' +
-            'n\'existe pas », jamais une valeur numérique calculée à partir d\'un a qui ne le permet pas.',
+            'Calculer $L = \\dfrac{b}{1-a}$ sans vérifier au préalable que $|a| < 1$ est une ' +
+            'erreur fréquente : si $|a| \\geq 1$, cette formule produit quand même un nombre, ' +
+            'mais ce nombre n\'est **pas** une limite — la suite diverge et son régime permanent ' +
+            'n\'existe pas, quelle que soit la valeur calculée par la formule.',
         },
         {
           kind: 'astuce',
-          label: 'Astuce — les cas limites sont des suites déjà connues',
           text:
-            'Si $a=1$, la relation devient $u_{n+1}=u_n+b$ — une suite arithmétique de raison ' +
-            'b, déguisée. Si $b=0$, elle devient $u_{n+1}=a \\times u_n$ — une suite ' +
-            'géométrique de raison a, déguisée. Reconnaître ces deux cas particuliers permet de ' +
-            'retomber directement sur les formules déjà connues, sans repasser par L.',
+            'Pour calculer les premiers termes après $u_1$, applique la récurrence pas à pas ' +
+            '(jamais une formule fermée en fonction de n, qui n\'existe pas simplement pour ' +
+            'cette famille) : $u_2 = a\\times u_1+b$, puis $u_3 = a\\times u_2+b$, et ainsi de suite.',
         },
         {
           kind: 'entrainement',
           title: 'Suite récurrente affine et régime permanent',
           generatorId: '5gen19',
           description: [
-            'Pose une relation de récurrence affine à partir d\'un contexte de dosage, ' +
-              'détermine si un régime permanent existe et calcule-le le cas échéant, puis ' +
-              'calcule les premiers termes de la suite.',
+            'Pose la récurrence u_(n+1)=a·u_n+b à partir d\'un contexte de dosage ou de ' +
+              'dilution, détermine si le régime permanent existe et calcule-le, puis calcule ' +
+              'les termes suivants pas à pas.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 19. Suite récurrente affine et régime permanent »',
@@ -575,50 +874,45 @@ export const suites: ChapterContent = {
 
   recap: {
     items: [
-      '**Suite arithmétique** — $u_{n+1}=u_n+r$, $u_n=u_1+(n-1)r$ (jamais n×r), ' +
-        '$S_n=n(u_1+u_n)/2$ (démontrée par la double somme) ; le signe de r fixe le sens de ' +
-        'variation ; tout terme est la moyenne arithmétique de ses voisins.',
-      '**Suite géométrique** — $u_{n+1}=u_n \\times q$, $u_n=u_1 \\times q^{n-1}$, ' +
-        '$S_n=u_1(1-q^n)/(1-q)$ (démontrée par télescopage $S_n-qS_n$) ; ' +
-        '$S_\\infty=u_1/(1-q)$ seulement si $|q|<1$ STRICTEMENT (q=1 converge mais $S_\\infty$ ' +
-        'n\'existe pas) ; tout terme positif est la moyenne géométrique de ses voisins.',
-      '**Convergence/divergence** — arithmétique : signe de r ; géométrique : |q| et signe de ' +
-        'q (attention à q=−1, qui oscille sans converger ni diverger vers l\'infini) ; ' +
-        'rationnelle $P(n)/Q(n)$ : comparer les degrés.',
-      '**Problèmes classiques** — bien distinguer « ajoute un montant fixe » (arithmétique) de ' +
-        '« multiplie par un facteur fixe » (géométrique) avant de choisir le modèle.',
-      '**Comparaison numérique** — tableau de valeurs jusqu\'au rang de bascule ; vérifier que ' +
-        'la condition est fausse au rang précédent ; toujours traduire n dans l\'unité du contexte.',
-      '**Suite récurrente affine** — $u_{n+1}=a \\times u_n+b$, $L=b/(1-a)$ si $|a|<1$ ' +
-        'STRICTEMENT ; sinon le régime permanent n\'existe pas, quel que soit ce que donnerait la formule.',
+      '**Suite arithmétique** — $u_n = u_1 + (n-1)r$ ; croissante si $r>0$, décroissante si ' +
+        '$r<0$ ; somme $S_n = n(u_1+u_n)/2$.',
+      '**Suite géométrique** — $u_n = u_1\\times q^{n-1}$ ; somme $S_n = u_1(1-q^n)/(1-q)$ ; ' +
+        'retrouver q depuis $q^k=a$ exige de vérifier la parité de k (0, 1 ou 2 solutions).',
+      '**Convergence** — arithmétique : $\\pm\\infty$ selon le signe de r (jamais convergente ' +
+        'sauf r=0) ; géométrique : 0 si $|q|<1$, $\\pm\\infty$ si $q>1$, n\'existe pas si ' +
+        '$q\\leq-1$ ; suite $P(n)/Q(n)$ : comparer les degrés de P et Q.',
+      '**Problèmes classiques** — reconnaître d\'abord la nature de la suite (raison additive ' +
+        'ou multiplicative) avant de choisir la formule.',
+      '**Comparaison de deux suites** — balayage numérique jusqu\'au rang de bascule, en ' +
+        'vérifiant que la condition est bien fausse au rang précédent ; toujours traduire le ' +
+        'rang trouvé dans l\'unité du contexte.',
+      '**Suite récurrente affine** — $u_{n+1}=a\\times u_n+b$ ; régime permanent $L=b/(1-a)$ ' +
+        'seulement si $|a|<1$, sinon la suite diverge et L n\'existe pas.',
     ],
     checklist: {
+      label: 'Astuce — avant de rendre ta copie',
       items: [
-        'Pour $u_n$ : ai-je bien utilisé (n−1) pas depuis $u_1$, jamais n pas ?',
-        'Pour $S_\\infty$ ou pour L : ai-je vérifié |q|<1 (ou |a|<1) STRICTEMENT, pas seulement ' +
-          'que la suite elle-même converge ?',
-        'Pour un rang de bascule : ai-je vérifié que la condition est fausse juste avant, et ' +
-          'traduit n dans l\'unité du contexte ?',
-        'Pour un problème concret : ai-je bien identifié si la variation est un montant fixe ' +
-          '(arithmétique) ou un facteur fixe (géométrique) ?',
+        'Ai-je bien utilisé (n−1) et non n dans la formule générale, aussi bien pour une suite arithmétique que géométrique ?',
+        'Pour une raison géométrique retrouvée par une racine d\'exposant pair : ai-je considéré les deux solutions possibles, ou vérifié qu\'aucune n\'existe ?',
+        'Pour une limite géométrique : ai-je bien distingué q=−1 (borné, oscillant, pas de limite) de q<−1 (diverge) ?',
+        'Pour un régime permanent : ai-je vérifié |a|<1 avant de calculer L, et pas seulement après ?',
       ],
     },
     forward:
-      'Ces mêmes suites reviendront comme point de départ du chapitre suivant, où l\'on ' +
-      'cherchera cette fois le comportement d\'une fonction — plutôt que d\'une liste de ' +
-      'termes — lorsque la variable devient très grande.',
+      'Le prochain chapitre relie les suites aux limites de fonctions : la notion de ' +
+      'convergence vue ici, pour un indice entier n qui tend vers l\'infini, se généralise à ' +
+      'une variable réelle x qui tend vers l\'infini ou vers une valeur précise.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai ou faux — tout le chapitre',
       generatorId: '5gen41',
       description: [
-        '7 thèmes de 20 affirmations chacun (suites arithmétiques, suites géométriques, ' +
-          'convergence et divergence, problèmes classiques, comparaison numérique, suite ' +
-          'récurrente affine, transversal) — choisis un thème, réponds vrai ou faux, la ' +
-          'justification est toujours révélée.',
+        'Affirmations sur les suites arithmétiques et géométriques, la convergence, les ' +
+          'problèmes classiques et les suites récurrentes affines — choisis un thème, réponds ' +
+          'vrai ou faux, la justification est toujours révélée.',
       ],
       chantier: '5e-4h',
-      whereLabel: '5e (4h) → « 41. Suites — quiz vrai/faux »',
+      whereLabel: '5e (4h) → « 41. Les suites — quiz vrai/faux »',
     },
   },
 }

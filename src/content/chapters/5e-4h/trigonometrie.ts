@@ -29,67 +29,6 @@ export const trigonometrie: ChapterContent = {
     "phénomènes périodiques : la hauteur d'une nacelle de grande roue, une marée, une tension " +
     'électrique.',
 
-  intro: {
-    title: 'Comment encadrer le nombre π ?',
-    blocks: [
-      {
-        kind: 'para',
-        text:
-          'Avant même de calculer avec π, on peut l\'**encadrer** — le coincer entre deux valeurs ' +
-          'de plus en plus proches, sans aucune formule toute faite. Soit un cercle de centre $C$ ' +
-          'et de rayon $1$ : sa circonférence vaut exactement $2\\pi$. Les hexagones réguliers ' +
-          '**inscrit** et **circonscrit** à ce cercle ont des périmètres qui encadrent cette ' +
-          'circonférence — l\'inscrit est plus court qu\'elle, le circonscrit plus long.',
-      },
-      {
-        kind: 'illustration',
-        illustration: {
-          kind: 'circleDiagram',
-          inscribedPolygon: 6,
-          circumscribedPolygon: 6,
-          centerLabel: 'C',
-          caption:
-            'hexagone inscrit (sommets sur le cercle) et hexagone circonscrit (côtés tangents au ' +
-            'cercle) — leurs périmètres encadrent la circonférence $2\\pi$',
-        },
-      },
-      {
-        kind: 'para',
-        text:
-          'Avec $n=6$ côtés, un demi-angle au centre $\\alpha = 30°$ donne, par trigonométrie dans ' +
-          'le triangle rectangle formé par un rayon, une demi-corde et une demi-tangente : ' +
-          '$6\\sin(30°) \\le \\pi \\le 6\\tan(30°)$, soit $3 \\le \\pi \\le 3 \\cdot \\dfrac{2\\sqrt{3}}{3} = 2\\sqrt{3}$.',
-      },
-      {
-        kind: 'methode',
-        label: "Généralisation — doubler le nombre de côtés",
-        items: [
-          "À chaque étape, on double le nombre de côtés des polygones ; l'angle α est alors la " +
-            'moitié du précédent.',
-          'Avec $n$ côtés et $\\alpha = 180°/n$ (le demi-angle au centre) : ' +
-            '$n\\sin\\alpha \\le \\pi \\le n\\tan\\alpha$.',
-          'Plus $n$ grandit, plus les deux bornes se resserrent autour de π.',
-        ],
-      },
-      {
-        kind: 'featureTable',
-        caption: 'Encadrement de π selon le nombre de côtés n',
-        headers: ['n', 'α', 'n·sin α', 'n·tan α'],
-        rows: [
-          ['6', '30°', '3', '2√3 ≈ 3,46'],
-          ['12', '15°', '≈ 3,11', '≈ 3,22'],
-          ['96', '1,875°', '≈ 3,14103', '≈ 3,14271'],
-        ],
-      },
-      {
-        kind: 'astuce',
-        text:
-          'Archimède avait obtenu cet encadrement dès l\'Antiquité, sans aucun moyen de calcul ' +
-          'moderne : $3 + \\dfrac{10}{71} < \\pi < 3 + \\dfrac{1}{7}$, soit $3{,}14084\\ldots < \\pi < 3{,}14285\\ldots$',
-      },
-    ],
-  },
-
   sections: [
     {
       id: 'arcs-secteurs',
@@ -97,6 +36,95 @@ export const trigonometrie: ChapterContent = {
       title: 'Arcs et secteurs',
       kicker: "radian, longueur d'arc s = rθ, aire de secteur A = ½r²θ",
       blocks: [
+        { kind: 'subheading', text: 'Comment encadrer le nombre π ?' },
+        {
+          kind: 'para',
+          text:
+            'Le nombre π est défini comme le rapport constant entre la circonférence d\'un cercle ' +
+            "et son diamètre. Mais comment en obtenir une valeur approchée sans instrument de " +
+            'mesure ? Dès l\'Antiquité, **Archimède** (3e siècle av. J.-C.) a eu l\'idée d\'encadrer ' +
+            'le cercle entre deux polygones réguliers à $n$ côtés : un **inscrit** (à l\'intérieur ' +
+            'du cercle, sommets sur le cercle) et un **circonscrit** (à l\'extérieur, côtés ' +
+            'tangents au cercle). Le périmètre du cercle est nécessairement compris entre les deux.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -2.6, xMax: 3.3, yMin: -2.4, yMax: 3.13,
+            showAxes: false,
+            circle: { cx: 0, cy: 0, r: 2, tone: 'faint' },
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 0, y: 2 }, tone: 'ink', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 1.732, y: 1 }, tone: 'ink', arrow: false },
+              { from: { x: 1.732, y: 1 }, to: { x: 0, y: 2 }, tone: 'good', arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 0.866, y: 1.5 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 1, y: 1.732 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 2.309 }, to: { x: 2, y: 1.155 }, tone: 'accent', arrow: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 30, toDeg: 90, radiusPx: 22, tone: 'accent', label: 'α' }],
+            rightAngleMarkers: [
+              { vertex: { x: 0.866, y: 1.5 }, arm1: { x: 0, y: 0 }, arm2: { x: 0, y: 2 } },
+              { vertex: { x: 1, y: 1.732 }, arm1: { x: 0, y: 0 }, arm2: { x: 0, y: 2.309 } },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'C', tone: 'ink', labelPos: 'below' },
+              { x: 0, y: 2, label: 'B', tone: 'ink', labelPos: 'above' },
+              { x: 1.732, y: 1, label: 'A', tone: 'ink', labelPos: 'right' },
+              { x: 0.866, y: 1.5, label: 'H', tone: 'ink', labelPos: 'left' },
+              { x: 1, y: 1.732, label: 'F', tone: 'ink', labelPos: 'above' },
+              { x: 0, y: 2.309, label: 'D', tone: 'accent', labelPos: 'above' },
+              { x: 2, y: 1.155, label: 'E', tone: 'accent', labelPos: 'right' },
+              { x: 1.3, y: 1.78, label: 'AB=2r sinα', tone: 'good', node: false, labelPos: 'right' },
+              { x: 1.55, y: 1.95, label: 'DE=2r tanα', tone: 'accent', node: false, labelPos: 'right' },
+            ],
+            caption:
+              'hexagone inscrit (côté AB, en vert) et hexagone circonscrit (côté DE, tangent en F, ' +
+              'en accent) — le périmètre du cercle est encadré entre les deux',
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Pour un polygone régulier à $n$ côtés construit autour d\'un cercle de rayon $r$, ' +
+            'chacun des $n$ triangles au centre a un angle au sommet $\\alpha = 180°/n$ (la moitié ' +
+            'de l\'angle total du triangle isocèle CAB). Le côté du polygone **inscrit** vaut ' +
+            '$|AB| = 2r\\sin\\alpha$ et le côté du polygone **circonscrit** (tangent au cercle en ' +
+            'F) vaut $|DE| = 2r\\tan\\alpha$. En multipliant par $n$ et en comparant au périmètre ' +
+            'du cercle $2\\pi r$ :',
+        },
+        {
+          kind: 'rappel',
+          label: "Rappel — encadrement de π par les polygones d'Archimède",
+          items: [
+            '$n \\cdot 2r\\sin\\alpha \\leq 2\\pi r \\leq n \\cdot 2r\\tan\\alpha$, soit, après ' +
+              'simplification par $2r$ : $n\\sin\\alpha \\leq \\pi \\leq n\\tan\\alpha$ avec ' +
+              '$\\alpha = 180°/n$.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Plus $n$ est grand, plus les deux polygones se rapprochent du cercle et plus ' +
+            "l'encadrement se resserre :",
+        },
+        {
+          kind: 'featureTable',
+          headers: ['n côtés', 'α = 180°/n', 'minorant n·sin α', 'majorant n·tan α'],
+          rows: [
+            ['6', '30°', '3,000', '3,464'],
+            ['12', '15°', '3,106', '3,215'],
+            ['96', '1,875°', '3,141', '3,143'],
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            "En partant d'un hexagone ($n=6$) et en doublant six fois le nombre de côtés jusqu'à " +
+            'un polygone à 96 côtés, Archimède est parvenu à l\'encadrement historique ' +
+            '$3 + \\frac{10}{71} < \\pi < 3 + \\frac{1}{7}$, soit environ $3{,}1408 < \\pi < ' +
+            '3{,}1429$ — un résultat obtenu sans aucune calculatrice, uniquement par géométrie.',
+        },
         {
           kind: 'para',
           text:
@@ -120,17 +148,8 @@ export const trigonometrie: ChapterContent = {
             'Les formules $s = r\\theta$ (longueur d\'arc) et $A = \\frac{1}{2}r^2\\theta$ (aire de ' +
             'secteur) n\'utilisent **que** des angles en **radians**. Si l\'énoncé donne un angle ' +
             'en degrés, la toute première étape — avant même de penser au rayon — est de le ' +
-            'convertir en radians.',
-        },
-        {
-          kind: 'rappel',
-          label: 'Les mêmes formules, directement en degrés',
-          items: [
-            'Longueur d\'arc : $l = \\dfrac{\\alpha°}{360°} \\cdot 2\\pi r = \\dfrac{\\alpha°}{180°} \\cdot \\pi r$.',
-            'Aire de secteur : $A = \\dfrac{\\alpha°}{360°} \\cdot \\pi r^2$.',
-            'Ce sont les **mêmes** formules que $s=r\\theta$ et $A=\\frac{1}{2}r^2\\theta$ — ' +
-              'seulement réécrites pour un angle donné directement en degrés, sans conversion préalable.',
-          ],
+            'convertir en radians. Un θ laissé en degrés dans ces formules donne un résultat sans ' +
+            'aucun sens.',
         },
         {
           kind: 'exemple',
@@ -165,6 +184,23 @@ export const trigonometrie: ChapterContent = {
           text: 'Retiens ces six correspondances degré/radian : elles reviennent dans presque tous les exercices.',
         },
         {
+          kind: 'rappel',
+          label: 'Rappel — cercle trigonométrique',
+          items: [
+            'Le **cercle trigonométrique** est le cercle de rayon 1, centré à l\'origine d\'un ' +
+              'repère orthonormé. On l\'oriente dans le **sens positif** (le sens anti-horloger). ' +
+              'Mesurer un angle en radians revient à **enrouler** la droite réelle autour de ce ' +
+              'cercle : à chaque réel $x$ correspond un unique point $M$ du cercle, son **point ' +
+              'image**, obtenu en parcourant une longueur d\'arc $x$ depuis le point $(1;0)$ (dans ' +
+              'le sens positif si $x > 0$, dans le sens négatif sinon). Comme le cercle a pour ' +
+              'périmètre $2\\pi$, deux réels qui diffèrent d\'un multiple de $2\\pi$ ont le même ' +
+              'point image.',
+            'Sur ce cercle, l\'abscisse du point image de x est $\\cos x$ et son ordonnée est ' +
+              '$\\sin x$ — c\'est la définition même des lignes trigonométriques pour un réel ' +
+              'quelconque, plus seulement pour un angle aigu d\'un triangle rectangle.',
+          ],
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'circleAngles',
@@ -179,17 +215,17 @@ export const trigonometrie: ChapterContent = {
               { angle: 0, label: '0°', sublabel: '0', tone: 'ink' },
               { angle: PI / 6, label: '30°', sublabel: 'π/6', tone: 'sky' },
               { angle: PI / 4, label: '45°', sublabel: 'π/4', tone: 'plan' },
-              { angle: PI / 3, label: '60°', sublabel: 'π/3', tone: 'bad' },
+              { angle: PI / 3, label: '60°', sublabel: 'π/3', tone: 'rose' },
               { angle: PI / 2, label: '90°', sublabel: 'π/2', tone: 'good' },
-              { angle: 2 * (PI / 3), label: '120°', sublabel: '2π/3', tone: 'bad' },
+              { angle: 2 * (PI / 3), label: '120°', sublabel: '2π/3', tone: 'rose' },
               { angle: 3 * (PI / 4), label: '135°', sublabel: '3π/4', tone: 'plan' },
               { angle: 5 * (PI / 6), label: '150°', sublabel: '5π/6', tone: 'sky' },
               { angle: PI, label: '180°', sublabel: 'π', tone: 'bad' },
               { angle: 7 * (PI / 6), label: '210°', sublabel: '7π/6', tone: 'sky' },
               { angle: 5 * (PI / 4), label: '225°', sublabel: '5π/4', tone: 'plan' },
-              { angle: 4 * (PI / 3), label: '240°', sublabel: '4π/3', tone: 'bad' },
+              { angle: 4 * (PI / 3), label: '240°', sublabel: '4π/3', tone: 'rose' },
               { angle: 3 * (PI / 2), label: '270°', sublabel: '3π/2', tone: 'accent' },
-              { angle: 5 * (PI / 3), label: '300°', sublabel: '5π/3', tone: 'bad' },
+              { angle: 5 * (PI / 3), label: '300°', sublabel: '5π/3', tone: 'rose' },
               { angle: 7 * (PI / 4), label: '315°', sublabel: '7π/4', tone: 'plan' },
               { angle: 11 * (PI / 6), label: '330°', sublabel: '11π/6', tone: 'sky' },
             ],
@@ -199,6 +235,16 @@ export const trigonometrie: ChapterContent = {
               '(pointillé) donne cos, la projection horizontale donne sin ; valeurs exactes dans ' +
               'le tableau ci-dessous',
           },
+        },
+        {
+          kind: 'featureTable',
+          headers: ['angle', '0°', '30°', '45°', '60°', '90°', '180°', '270°', '360°'],
+          rows: [
+            ['en radians', '0', 'π/6', 'π/4', 'π/3', 'π/2', 'π', '3π/2', '2π'],
+            ['cos', '1', '√3/2', '√2/2', '1/2', '0', '−1', '0', '1'],
+            ['sin', '0', '1/2', '√2/2', '√3/2', '1', '0', '−1', '0'],
+            ['tan', '0', '√3/3', '1', '√3', 'non définie', '0', 'non définie', '0'],
+          ],
         },
         {
           kind: 'entrainement',
@@ -278,15 +324,18 @@ export const trigonometrie: ChapterContent = {
             'L\'angle au centre d\'**un côté** du polygone vaut toujours $2\\pi/n$, mais le ' +
             'secteur dont on te demande l\'aire ne correspond pas forcément à un seul côté : ' +
             's\'il s\'étend sur deux côtés consécutifs, son angle vaut $2 \\times 2\\pi/n$, pas ' +
-            '$2\\pi/n$.',
+            '$2\\pi/n$. Compte toujours, sur la figure, le nombre exact de côtés couverts par le ' +
+            'secteur en question avant de calculer son angle — ne suppose jamais qu\'il s\'agit ' +
+            'automatiquement de l\'angle élémentaire du polygone.',
         },
         {
           kind: 'astuce',
+          label: 'Astuce — vérifier par l\'aire totale',
           text:
             'Une bonne façon de contrôler ce type de résultat : l\'aire du cercle moins l\'aire du ' +
             'polygone régulier doit valoir exactement $n$ fois l\'aire d\'un seul segment. Ici, ' +
             '$6 \\times 1{,}45 \\approx 8{,}70$ cm², à comparer à $\\pi r^2 - \\text{aire hexagone} ' +
-            '\\approx 8{,}70$ cm² — ça correspond.',
+            '= 16\\pi - 24\\sqrt{3} \\approx 50{,}27 - 41{,}57 \\approx 8{,}70$ cm² — ça correspond.',
         },
         {
           kind: 'entrainement',
@@ -294,7 +343,8 @@ export const trigonometrie: ChapterContent = {
           generatorId: '5gen7',
           description: [
             'Lis un diagramme combinant un polygone régulier inscrit dans un cercle et un ou ' +
-              'plusieurs secteurs/arcs, puis calcule l\'aire d\'une figure composée.',
+              'plusieurs secteurs/arcs, puis calcule l\'aire d\'une figure composée en décomposant ' +
+              'en triangles et secteurs élémentaires.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 7. Polygones, arcs et secteurs »',
@@ -302,29 +352,108 @@ export const trigonometrie: ChapterContent = {
       ],
     },
     {
-      id: 'parametres',
+      id: 'geometrie-cercle',
       number: 3,
-      title: "Paramètres d'une fonction sinusoïdale",
-      kicker: 'les fonctions de référence, puis f(x) = A sin(ωx+φ) + b',
+      title: 'Problèmes de géométrie du cercle',
+      kicker: 'secteurs, segments circulaires, et la loi des cosinus',
       blocks: [
-        { kind: 'subheading', text: 'Les fonctions de référence sin, cos et tan' },
         {
           kind: 'para',
           text:
-            'Avant de paramétrer une sinusoïde, il faut connaître ses deux fonctions de départ — ' +
-            'et la fonction tangente, qui leur est apparentée mais se comporte très différemment.',
+            'Certains problèmes de géométrie combinent secteurs, **segments circulaires** (la ' +
+            'région comprise entre une corde et l\'arc qu\'elle délimite) et, parfois, la **loi ' +
+            'des cosinus** pour retrouver la longueur d\'une corde ou d\'un rayon à partir d\'un ' +
+            'angle au centre.',
+        },
+        {
+          kind: 'rappel',
+          label: "Rappel — aire d'un segment circulaire",
+          items: [
+            'Un segment circulaire d\'angle au centre θ (radians) et de rayon r s\'obtient en ' +
+              'retirant, du secteur, le triangle formé par les deux rayons et la corde : ' +
+              '$A_{segment} = \\frac{1}{2}r^2\\theta - \\frac{1}{2}r^2\\sin(\\theta) = \\frac{1}{2}r^2(\\theta - \\sin\\theta)$.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'segment circulaire + corde',
+          formula:
+            'Un cercle de centre O et de rayon $r = 10$ cm ; deux rayons OA et OB forment un ' +
+            'angle $\\theta = \\dfrac{2\\pi}{3}$ (120°). Calcule l\'aire du segment circulaire ' +
+            'délimité par la corde [AB], puis la longueur de cette corde.',
+          steps: [
+            { tag: 'aire du secteur OAB — A = ½r²θ', text: '$A_{secteur} = \\frac{1}{2} \\times 100 \\times \\dfrac{2\\pi}{3} \\approx 104{,}72$ cm²' },
+            { tag: 'aire du triangle OAB — deux côtés r, angle inclus θ : A = ½r²sin(θ)', text: '$A_{triangle} = 50\\sin(120°) = 25\\sqrt{3} \\approx 43{,}30$ cm²' },
+            { tag: 'corde AB — loi des cosinus, AB² = r²+r²−2r²cos(θ)', text: '$AB^2 = 200 \\times (1 - \\cos(120°)) = 200 \\times 1{,}5 = 300$' },
+          ],
+          result: {
+            tag: 'résultat',
+            text: '$A_{segment} \\approx 61{,}42$ cm² et $AB = \\sqrt{300} = 10\\sqrt{3} \\approx 17{,}32$ cm',
+          },
+          illustration: {
+            kind: 'circleDiagram',
+            startAngle: 2 * (PI / 3),
+            sectorAngle: 2 * (PI / 3),
+            highlight: 'segment',
+            showChord: true,
+            centerLabel: 'O',
+            pointALabel: 'A',
+            pointBLabel: 'B',
+            angleLabel: 'θ',
+            caption: 'secteur OAB en contour, segment circulaire (entre la corde AB et l\'arc) en couleur',
+          },
+        },
+        {
+          kind: 'astuce',
+          text:
+            'Le triangle OAB d\'un secteur est toujours isocèle (deux côtés valent r) — sa ' +
+            'surface se calcule directement par $\\frac{1}{2}r^2\\sin(\\theta)$ (aire d\'un ' +
+            'triangle via deux côtés et l\'angle inclus), sans jamais avoir besoin de connaître la ' +
+            'hauteur ni la base.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Problèmes de géométrie du cercle',
+          generatorId: '5gen12',
+          description: [
+            'Combine secteurs, segments circulaires et loi des cosinus pour retrouver une corde, ' +
+              'un rayon ou une aire dans des figures géométriques variées.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 12. Problèmes de géométrie du cercle »',
+        },
+      ],
+    },
+    {
+      id: 'parametres',
+      number: 4,
+      title: "Paramètres d'une fonction sinusoïdale",
+      kicker: 'f(x) = A sin(ωx+φ) + b — le sens de chaque lettre',
+      blocks: [
+        { kind: 'subheading', text: 'Les trois fonctions de référence : sinus, cosinus, tangente' },
+        {
+          kind: 'para',
+          text:
+            'Avant de généraliser à la forme paramétrée, rappelons les propriétés des trois ' +
+            'fonctions trigonométriques de base — celles dont le point image sur le cercle ' +
+            'trigonométrique donne directement les valeurs.',
         },
         {
           kind: 'featureTable',
           caption: 'Caractéristiques des fonctions de référence (x en radians)',
-          headers: ['Caractéristique', 'sin x', 'cos x', 'tan x'],
+          headers: ['fonction', 'domaine', 'image (ensemble des valeurs)', 'période', 'parité'],
           rows: [
-            ['Domaine', 'ℝ', 'ℝ', 'ℝ \\ {π/2 + kπ, k∈ℤ}'],
-            ['Période', '2π', '2π', 'π'],
-            ['Ensemble-image', '[−1 ; 1]', '[−1 ; 1]', 'ℝ'],
-            ['Racines', 'x = kπ (k∈ℤ)', 'x = π/2 + kπ (k∈ℤ)', 'x = kπ (k∈ℤ)'],
-            ['Asymptotes verticales', '—', '—', 'x = π/2 + kπ (k∈ℤ)'],
+            ['sin x', 'ℝ', '[−1 ; 1]', '2π', 'impaire'],
+            ['cos x', 'ℝ', '[−1 ; 1]', '2π', 'paire'],
+            ['tan x', 'ℝ \\ {π/2 + kπ, k∈ℤ}', 'ℝ', 'π', 'impaire'],
           ],
+        },
+        {
+          kind: 'para',
+          text:
+            '**Paire** : $\\cos(-x) = \\cos x$ (symétrie par rapport à l\'axe des ordonnées). ' +
+            '**Impaire** : $\\sin(-x) = -\\sin x$ et $\\tan(-x) = -\\tan x$ (symétrie par rapport à ' +
+            "l'origine).",
         },
         {
           kind: 'illustration',
@@ -352,7 +481,7 @@ export const trigonometrie: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'x → sin x — périodique de période 2π, amplitude 1, s\'annule en tout multiple de π',
+            caption: 'y = sin x — impaire, symétrique par rapport à l\'origine ; image [−1;1], période 2π',
           },
         },
         {
@@ -381,7 +510,7 @@ export const trigonometrie: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'x → cos x — même période et amplitude que sin, s\'annule en tout multiple impair de π/2',
+            caption: 'y = cos x — paire, symétrique par rapport à l\'axe des ordonnées ; image [−1;1], période 2π',
           },
         },
         {
@@ -398,10 +527,9 @@ export const trigonometrie: ChapterContent = {
             fixedYRange: { min: -10, max: 10 },
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'x → tan x — périodique de période π (deux fois plus courte que sin/cos), non définie aux asymptotes',
+            caption: 'y = tan x — impaire ; asymptotes verticales en x=π/2+kπ (là où cos x = 0), période π',
           },
         },
-        { kind: 'subheading', text: 'La forme paramétrée f(x) = A sin(ωx+φ) + b' },
         {
           kind: 'para',
           text:
@@ -444,7 +572,9 @@ export const trigonometrie: ChapterContent = {
           text:
             'La pulsation $\\omega$ est le nombre qui apparaît directement dans la formule, ' +
             'multiplié par x. La période $T$ ne s\'obtient **qu\'en passant par la formule** ' +
-            '$T = 2\\pi/\\omega$ — ce n\'est ni l\'inverse direct de ω, ni égal à ω.',
+            '$T = 2\\pi/\\omega$ — ce n\'est ni l\'inverse direct de ω, ni égal à ω. Une confusion ' +
+            'fréquente : croire que « ω = 3 » signifie « la courbe se répète tous les 3 » — en ' +
+            'réalité, elle se répète tous les $2\\pi/3$.',
         },
         {
           kind: 'exemple',
@@ -462,7 +592,8 @@ export const trigonometrie: ChapterContent = {
           kind: 'astuce',
           text:
             'Pour ne jamais confondre A et b : A se lit par une **soustraction** (max − min, ' +
-            'divisé par 2), b se lit par une **addition** (max + min, divisé par 2).',
+            'divisé par 2), b se lit par une **addition** (max + min, divisé par 2). Si tu obtiens ' +
+            'la même formule pour les deux, relis l\'énoncé — c\'est le signe d\'une erreur.',
         },
         { kind: 'subheading', text: 'Construction pas à pas du graphique' },
         {
@@ -526,7 +657,7 @@ export const trigonometrie: ChapterContent = {
     },
     {
       id: 'lecture-graphique',
-      number: 4,
+      number: 5,
       title: "Paramètres d'une fonction sinusoïdale — lecture graphique",
       kicker: 'retrouver A, ω, φ, b sans aucune formule de départ',
       blocks: [
@@ -544,9 +675,10 @@ export const trigonometrie: ChapterContent = {
           label: 'Méthode — lire un graphique de sinusoïde',
           items: [
             'Repère le maximum et le minimum visibles : $A = (max-min)/2$, $b = (max+min)/2$.',
-            'Mesure la distance horizontale entre deux maximums consécutifs : c\'est T. Puis $\\omega = 2\\pi/T$.',
+            'Mesure la distance horizontale entre deux maximums consécutifs (ou deux motifs ' +
+              'identiques) : c\'est T. Puis $\\omega = 2\\pi/T$.',
             'Repère la position $x_0$ où la courbe traverse la ligne moyenne **en montant** — ' +
-              'alors $\\varphi = -\\omega \\cdot x_0$.',
+              'c\'est là que $\\sin(\\omega x+\\varphi)$ vaut 0 en croissant. Alors $\\varphi = -\\omega \\cdot x_0$.',
           ],
         },
         {
@@ -555,7 +687,7 @@ export const trigonometrie: ChapterContent = {
           steps: [
             { tag: 'maximum lu : (1,5 ; 5) — minimum lu : (3,5 ; −1)', text: '$A = 3,\\ b = 2$' },
             { tag: 'deux maximums consécutifs : x=1,5 puis x=5,5', text: '$T = 4 \\implies \\omega = \\pi/2$' },
-            { tag: 'traversée montante de la ligne moyenne en x₀ = 0,5', text: '$\\varphi = -\\omega \\cdot x_0 = -\\pi/4$' },
+            { tag: 'traversée montante de la ligne moyenne (y=2) en x₀ = 0,5', text: '$\\varphi = -\\omega \\cdot x_0 = -\\pi/4$' },
           ],
           result: { tag: 'résultat', text: '$f(x) = 3\\sin(\\dfrac{\\pi}{2}x - \\dfrac{\\pi}{4}) + 2$' },
           illustration: {
@@ -572,7 +704,7 @@ export const trigonometrie: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
-            caption: 'max en x=1,5, min en x=3,5, traversée montante de la ligne moyenne en x₀=0,5, période T=4',
+            caption: 'max en x=1,5, min en x=3,5, traversée montante de la ligne moyenne en x₀=0,5, période T=4 (entre les deux max)',
           },
         },
         {
@@ -581,166 +713,29 @@ export const trigonometrie: ChapterContent = {
           text:
             'La convention « φ se lit à la traversée **montante** de la ligne moyenne » suppose ' +
             '$A > 0$. Si la courbe part au contraire d\'un minimum juste après avoir traversé la ' +
-            'ligne moyenne en **descendant**, c\'est le signe de repérer plutôt un $A$ négatif.',
+            'ligne moyenne en **descendant**, c\'est le signe de repérer plutôt un $A$ négatif (ou ' +
+            'de choisir la traversée descendante comme point de référence). Vérifie toujours le ' +
+            'sens de variation juste après le point que tu choisis, avant de lire φ — sinon la ' +
+            'phase trouvée est fausse d\'un demi-tour.',
         },
         {
           kind: 'astuce',
           text:
             'Mesurer la période entre deux **maximums** consécutifs est en général plus fiable que ' +
             'de la mesurer entre deux traversées de la ligne moyenne : un maximum est un point ' +
-            'isolé et net sur le graphique.',
+            'isolé et net sur le graphique, alors qu\'une traversée de ligne moyenne est plus ' +
+            'facile à mal pointer au pixel près.',
         },
         {
           kind: 'entrainement',
           title: 'Paramètres — lecture graphique',
           generatorId: '5gen9',
           description: [
-            'Retrouve l\'amplitude, la période, la pulsation, le déphasage et le décalage ' +
-              'vertical d\'une fonction sinusoïdale directement à partir de son graphique.',
+            'Retrouve l\'amplitude, la période, la pulsation, la phase et le décalage vertical ' +
+              'd\'une fonction sinusoïdale directement à partir de son graphique, sans formule de départ.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 9. Paramètres — lecture graphique »',
-        },
-      ],
-    },
-    {
-      id: 'equations',
-      number: 5,
-      title: 'Équations trigonométriques trig(ax+b) = k',
-      kicker: "sin x=t, cos x=t, tan x=t d'abord, puis le cas général",
-      blocks: [
-        { kind: 'subheading', text: 'Résoudre sin x = t, cos x = t, tan x = t' },
-        {
-          kind: 'para',
-          text:
-            'Pour que $\\sin x = t$ ou $\\cos x = t$ ait une solution, il faut $-1 \\le t \\le 1$ ' +
-            '— aucune condition pour $\\tan x = t$. Dans les trois cas, on détermine d\'abord un ' +
-            'angle $\\alpha$ (à la calculatrice ou par une valeur remarquable), puis on utilise la ' +
-            'symétrie du cercle trigonométrique pour écrire **toutes** les solutions.',
-        },
-        {
-          kind: 'rappel',
-          label: 'sin x = t',
-          items: [
-            'Radians : $x = \\alpha + 2k\\pi$ ou $x = (\\pi - \\alpha) + 2k\\pi$, $k \\in \\mathbb{Z}$.',
-            'Degrés : $x = \\alpha + k \\cdot 360°$ ou $x = (180° - \\alpha) + k \\cdot 360°$.',
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'circleAngles',
-            points: [
-              { angle: 0.6, label: 'α', tone: 'accent' },
-              { angle: PI - 0.6, label: 'π−α', tone: 'accent' },
-            ],
-            connectPoints: true,
-            horizontalLine: { y: Math.sin(0.6), label: 'y = t' },
-            caption: 'sin x = t : deux points de même ordonnée, symétriques par rapport à l\'axe vertical',
-          },
-        },
-        {
-          kind: 'rappel',
-          label: 'cos x = t',
-          items: [
-            'Radians : $x = \\alpha + 2k\\pi$ ou $x = -\\alpha + 2k\\pi$, $k \\in \\mathbb{Z}$.',
-            'Degrés : $x = \\alpha + k \\cdot 360°$ ou $x = -\\alpha + k \\cdot 360°$.',
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'circleAngles',
-            points: [
-              { angle: 0.6, label: 'α', tone: 'accent' },
-              { angle: -0.6, label: '−α', tone: 'accent' },
-            ],
-            connectPoints: true,
-            verticalLine: { x: Math.cos(0.6), label: 'x = t' },
-            caption: 'cos x = t : deux points de même abscisse, symétriques par rapport à l\'axe horizontal',
-          },
-        },
-        {
-          kind: 'rappel',
-          label: 'tan x = t',
-          items: ['Radians : $x = \\alpha + k\\pi$. Degrés : $x = \\alpha + k \\cdot 180°$, $k \\in \\mathbb{Z}$ — **une seule** famille.'],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'circleAngles',
-            points: [
-              { angle: 0.6, label: 'α', tone: 'accent' },
-              { angle: PI + 0.6, label: 'π+α', tone: 'accent' },
-            ],
-            connectPoints: true,
-            caption: 'tan x = t : deux points diamétralement opposés, une seule famille de solutions (période π)',
-          },
-        },
-        { kind: 'subheading', text: 'Le cas général — trig(ax+b) = k' },
-        {
-          kind: 'para',
-          text:
-            'Résoudre $\\sin(ax+b) = k$ (ou avec un cosinus) suit toujours la même démarche en ' +
-            'trois temps : on isole l\'argument $u = ax+b$, on résout $trig(u) = k$ à l\'aide du ' +
-            'cercle trigonométrique (ci-dessus), puis on revient à x en divisant **toute ' +
-            'l\'équation en u** — y compris le terme de période — par a.',
-        },
-        {
-          kind: 'methode',
-          label: 'Méthode',
-          items: [
-            'Poser $u = ax + b$, et réécrire l\'équation en u.',
-            'Résoudre $trig(u) = k$ au cercle trigonométrique.',
-            'Remplacer u par ax+b, isoler x en divisant **tout** — constante ET terme périodique — par a.',
-          ],
-        },
-        {
-          kind: 'exemple',
-          badge: 'deux familles de solutions',
-          formula: 'Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans ℝ.',
-          steps: [
-            { tag: 'isoler cos(u), avec u = 3x − π/4', text: '$\\cos(u) = \\dfrac{1}{2}$' },
-            { tag: 'cercle trigonométrique — deux familles', text: '$u = \\pi/3 + 2k\\pi$ ou $u = -\\pi/3 + 2k\\pi$' },
-            { tag: 'remplacer u par 3x−π/4, diviser TOUT par 3', text: '$3x-\\pi/4 = \\pi/3+2k\\pi \\implies x = 7\\pi/36 + (2\\pi/3)k$' },
-          ],
-          result: { tag: 'résultat — deux familles', text: '$x = 7\\pi/36 + (2\\pi/3)k$ ou $x = -\\pi/36 + (2\\pi/3)k$, $k\\in\\mathbb{Z}$' },
-          illustration: {
-            kind: 'circleAngles',
-            points: [
-              { angle: PI / 3, label: 'u=π/3', tone: 'accent' },
-              { angle: -PI / 3, label: 'u=−π/3', tone: 'accent' },
-            ],
-            connectPoints: true,
-            verticalLine: { x: 0.5, label: 'cos(u)=1/2' },
-            caption: 'les deux points du cercle où le cosinus vaut 1/2 — symétriques par rapport à l\'axe horizontal',
-          },
-        },
-        {
-          kind: 'piege',
-          text:
-            'Diviser **seulement** le terme constant par a, en oubliant de diviser aussi le ' +
-            '« +2kπ » : ça donne une famille de solutions avec la mauvaise période (2π au lieu de ' +
-            '2π/a).',
-        },
-        {
-          kind: 'attention',
-          label: 'Attention — |k| > 1 : aucune solution',
-          text:
-            '$\\cos(u) = 1{,}5$ n\'a **aucune** solution : cosinus (comme sinus) ne prend jamais ' +
-            'de valeur en dehors de [−1 ; 1]. Ce n\'est pas une erreur à corriger — c\'est une ' +
-            'réponse valable : l\'ensemble des solutions est vide.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Équations trigonométriques trig(ax+b)=k',
-          generatorId: '5gen10',
-          description: [
-            'Résous des équations de la forme sin(ax+b)=k, cos(ax+b)=k ou tan(ax+b)=k, en isolant ' +
-              'l\'argument puis en revenant à x — y compris les cas sans solution.',
-          ],
-          chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 10. Équations trigonométriques trig(ax+b)=k »',
         },
       ],
     },
@@ -764,7 +759,9 @@ export const trigonometrie: ChapterContent = {
           text:
             'Ne confonds jamais **« sin(u) = 1 seul »** (une seule famille, période $2\\pi$ — les ' +
             'maximums uniquement) avec **« sin(u) = ±1 réunis »** (maximums ET minimums ' +
-            'ensemble, période effective $\\pi$).',
+            'ensemble, période effective $\\pi$). Les deux formules sont différentes, et répondre ' +
+            'à « donne tous les extremums » avec la formule d\'un seul type d\'extremum est une ' +
+            'erreur très fréquente.',
         },
         {
           kind: 'exemple',
@@ -789,15 +786,17 @@ export const trigonometrie: ChapterContent = {
             ],
             xAxisLabel: '',
             yAxisLabel: '',
-            caption: 'maximums et minimums alternent tous les π/3 — la période effective des extremums réunis',
+            caption: 'maximums et minimums alternent tous les π/3 — c\'est la période effective des extremums réunis',
           },
         },
         {
           kind: 'astuce',
           text:
-            'Relis toujours la question : « donne les maximums » (période 2π/a) n\'appelle pas la ' +
-            'même formule que « donne tous les extremums » (période π/a). En cas de doute, ' +
-            'calcule les deux familles séparément.',
+            'Relis toujours la question : « donne les maximums » (une seule famille, période 2π/a) ' +
+            'n\'appelle pas la même formule que « donne tous les extremums » (les deux familles ' +
+            'réunies, période π/a). En cas de doute, calcule les deux familles séparément — c\'est ' +
+            'plus long, mais toujours juste — et ne les réunis qu\'à la toute fin, si la question ' +
+            'le demande explicitement.',
         },
         {
           kind: 'entrainement',
@@ -805,7 +804,7 @@ export const trigonometrie: ChapterContent = {
           generatorId: '5gen11',
           description: [
             'Détermine les maximums, les minimums, ou tous les extremums réunis d\'une fonction ' +
-              'sinusoïdale.',
+              'sinusoïdale — l\'exercice précise à chaque fois lequel des trois est demandé.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 11. Extremums d\'une fonction sinusoïdale »',
@@ -813,98 +812,19 @@ export const trigonometrie: ChapterContent = {
       ],
     },
     {
-      id: 'geometrie-cercle',
-      number: 7,
-      title: 'Problèmes de géométrie du cercle',
-      kicker: 'secteurs, segments circulaires, et la loi des cosinus',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Certains problèmes de géométrie combinent secteurs, **segments circulaires** (la ' +
-            'région comprise entre une corde et l\'arc qu\'elle délimite) et, parfois, la **loi ' +
-            'des cosinus** pour retrouver la longueur d\'une corde ou d\'un rayon à partir d\'un ' +
-            'angle au centre.',
-        },
-        {
-          kind: 'rappel',
-          label: "Rappel — aire d'un segment circulaire",
-          items: [
-            'Un segment circulaire d\'angle au centre θ (radians) et de rayon r s\'obtient en ' +
-              'retirant, du secteur, le triangle formé par les deux rayons et la corde : ' +
-              '$A_{segment} = \\frac{1}{2}r^2\\theta - \\frac{1}{2}r^2\\sin(\\theta) = \\frac{1}{2}r^2(\\theta - \\sin\\theta)$.',
-          ],
-        },
-        {
-          kind: 'exemple',
-          badge: 'segment circulaire + corde',
-          formula:
-            'Un cercle de centre O et de rayon $r = 10$ cm ; deux rayons OA et OB forment un ' +
-            'angle $\\theta = \\dfrac{2\\pi}{3}$ (120°). Calcule l\'aire du segment circulaire ' +
-            'délimité par la corde [AB], puis la longueur de cette corde.',
-          steps: [
-            { tag: 'aire du secteur OAB — A = ½r²θ', text: '$A_{secteur} = \\frac{1}{2} \\times 100 \\times \\dfrac{2\\pi}{3} \\approx 104{,}72$ cm²' },
-            { tag: 'aire du triangle OAB — A = ½r²sin(θ)', text: '$A_{triangle} = 50\\sin(120°) = 25\\sqrt{3} \\approx 43{,}30$ cm²' },
-            { tag: 'corde AB — loi des cosinus, AB² = 2r²(1−cos θ)', text: '$AB^2 = 200 \\times 1{,}5 = 300$' },
-          ],
-          result: {
-            tag: 'résultat',
-            text: '$A_{segment} \\approx 61{,}42$ cm² et $AB = \\sqrt{300} = 10\\sqrt{3} \\approx 17{,}32$ cm',
-          },
-          illustration: {
-            kind: 'circleDiagram',
-            startAngle: 2 * (PI / 3),
-            sectorAngle: 2 * (PI / 3),
-            highlight: 'segment',
-            showChord: true,
-            centerLabel: 'O',
-            pointALabel: 'A',
-            pointBLabel: 'B',
-            angleLabel: 'θ',
-            caption: 'secteur OAB en contour, segment circulaire (entre la corde AB et l\'arc) en couleur',
-          },
-        },
-        {
-          kind: 'astuce',
-          text:
-            'Le triangle OAB d\'un secteur est toujours isocèle (deux côtés valent r) — sa ' +
-            'surface se calcule directement par $\\frac{1}{2}r^2\\sin(\\theta)$, sans jamais ' +
-            'avoir besoin de connaître la hauteur ni la base.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Problèmes de géométrie du cercle',
-          generatorId: '5gen12',
-          description: [
-            'Combine secteurs, segments circulaires et loi des cosinus pour retrouver une corde, ' +
-              'un rayon ou une aire dans des figures géométriques variées.',
-          ],
-          chantier: '5e-4h',
-          whereLabel: '5e (4h) → « 12. Problèmes de géométrie du cercle »',
-        },
-      ],
-    },
-    {
       id: 'modeliser',
-      number: 8,
+      number: 7,
       title: 'Modéliser une fonction sinusoïdale en contexte',
       kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale',
       blocks: [
         {
           kind: 'para',
           text:
-            'Une fonction de la forme $A\\sin(\\omega x + \\varphi) + b$ décrit naturellement un ' +
-            'mouvement d\'**oscillation** (pendule), un **mouvement circulaire** (une grande roue ' +
-            'dans un parc d\'attraction) ou l\'intensité d\'un **signal électrique sinusoïdal** — ' +
-            'trois situations très différentes, mais construites avec exactement la même méthode.',
-        },
-        {
-          kind: 'para',
-          text:
-            'Face à une situation concrète et périodique, construire le modèle se fait toujours ' +
-            'dans le **même ordre** : amplitude et décalage vertical d\'abord (à partir des ' +
-            'valeurs extrêmes), période ensuite (donc pulsation), et enfin la phase — la seule ' +
-            'qui nécessite une **condition initiale** précise donnée par l\'énoncé.',
+            'Face à une situation concrète et périodique (grande roue, marée, température ' +
+            'saisonnière…), construire le modèle sinusoïdal se fait toujours dans le **même ' +
+            'ordre** : amplitude et décalage vertical d\'abord (à partir des valeurs extrêmes), ' +
+            'période ensuite (donc pulsation), et enfin la phase — la seule qui nécessite une ' +
+            '**condition initiale** précise donnée par l\'énoncé.',
         },
         {
           kind: 'methode',
@@ -912,9 +832,10 @@ export const trigonometrie: ChapterContent = {
           items: [
             'A = (valeur max − valeur min) / 2.',
             'b = (valeur max + valeur min) / 2.',
-            'T = durée d\'un cycle complet ⟹ ω = 2π/T.',
-            'φ : injecter la condition initiale dans $A\\sin(\\omega t+\\varphi)+b$, puis résoudre ' +
-              'en φ — en choisissant la solution la plus simple.',
+            'T = durée d\'un cycle complet (donnée par l\'énoncé) ⟹ ω = 2π/T.',
+            'φ : injecter la condition initiale (une valeur connue à un instant connu) dans ' +
+              '$A\\sin(\\omega t+\\varphi)+b$, puis résoudre en φ — en choisissant la solution la ' +
+              'plus simple parmi l\'infinité de solutions possibles.',
           ],
         },
         {
@@ -981,7 +902,8 @@ export const trigonometrie: ChapterContent = {
               kind: 'para',
               text:
                 'Vérification : $hauteur(4) = 15\\sin(\\pi - \\pi/2) + 17 = 15\\sin(\\pi/2)+17 = ' +
-                '32$ m — exactement le point le plus haut, cohérent.',
+                '32$ m — exactement le point le plus haut, atteint après un demi-tour (4 minutes), ' +
+                'ce qui est cohérent.',
             },
           ],
         },
@@ -992,14 +914,15 @@ export const trigonometrie: ChapterContent = {
             'L\'équation $\\sin(\\varphi) = -1$ a une infinité de solutions ($\\varphi = -\\pi/2 + ' +
             '2k\\pi$). On choisit conventionnellement la plus simple — en général celle qui ' +
             'appartient à $]-\\pi\\,;\\,\\pi]$ — mais toute autre valeur de cette famille donnerait ' +
-            'exactement la même fonction.',
+            'exactement la même fonction, puisque le sinus est périodique de période 2π.',
         },
         {
           kind: 'astuce',
           text:
             'Une fois le modèle construit, vérifie-le toujours sur **une deuxième donnée** de ' +
-            'l\'énoncé (ici, le point haut à t=4). Une erreur de signe sur φ se détecte ' +
-            'immédiatement si la vérification donne un minimum au lieu d\'un maximum.',
+            'l\'énoncé (ici, le point haut à t=4, un demi-tour plus tard) — comme dans l\'exemple ' +
+            'ci-dessus. Une erreur de signe sur φ se détecte immédiatement si la vérification ' +
+            'donne un minimum au lieu d\'un maximum, ou inversement.',
         },
         {
           kind: 'entrainement',
@@ -1014,37 +937,179 @@ export const trigonometrie: ChapterContent = {
         },
       ],
     },
+    {
+      id: 'equations',
+      number: 8,
+      title: 'Équations trigonométriques trig(ax+b) = k',
+      kicker: 'isoler l\'argument, résoudre au cercle trigonométrique, puis diviser par a',
+      blocks: [
+        { kind: 'subheading', text: 'Résoudre sin x = t, cos x = t, tan x = t' },
+        {
+          kind: 'para',
+          text:
+            'Pour que $\\sin x = t$ ou $\\cos x = t$ ait une solution, il faut $-1 \\le t \\le 1$ ' +
+            '— aucune condition pour $\\tan x = t$. Dans les trois cas, on détermine d\'abord un ' +
+            'angle $\\alpha$ (à la calculatrice ou par une valeur remarquable), puis on utilise la ' +
+            '**symétrie du cercle trigonométrique** pour écrire toutes les solutions.',
+        },
+        {
+          kind: 'rappel',
+          label: 'sin x = t',
+          items: [
+            '$x = \\alpha + 2k\\pi$ ou $x = (\\pi - \\alpha) + 2k\\pi$, $k \\in \\mathbb{Z}$ (en ' +
+              'degrés : $x = \\alpha + k \\cdot 360°$ ou $x = (180° - \\alpha) + k \\cdot 360°$).',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: 0.6, label: 'α', tone: 'accent' },
+              { angle: PI - 0.6, label: 'π−α', tone: 'accent' },
+            ],
+            connectPoints: true,
+            horizontalLine: { y: Math.sin(0.6), label: 'y = t' },
+            caption: 'sin x = t : deux points de même ordonnée, symétriques par rapport à l\'axe vertical',
+          },
+        },
+        {
+          kind: 'rappel',
+          label: 'cos x = t',
+          items: [
+            '$x = \\alpha + 2k\\pi$ ou $x = -\\alpha + 2k\\pi$, $k \\in \\mathbb{Z}$ (en degrés : ' +
+              '$x = \\alpha + k \\cdot 360°$ ou $x = -\\alpha + k \\cdot 360°$).',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: 0.6, label: 'α', tone: 'accent' },
+              { angle: -0.6, label: '−α', tone: 'accent' },
+            ],
+            connectPoints: true,
+            verticalLine: { x: Math.cos(0.6), label: 'x = t' },
+            caption: 'cos x = t : deux points de même abscisse, symétriques par rapport à l\'axe horizontal',
+          },
+        },
+        {
+          kind: 'rappel',
+          label: 'tan x = t',
+          items: ['$x = \\alpha + k\\pi$, $k \\in \\mathbb{Z}$ (en degrés : $x = \\alpha + k \\cdot 180°$) — **une seule** famille.'],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: 0.6, label: 'α', tone: 'accent' },
+              { angle: PI + 0.6, label: 'π+α', tone: 'accent' },
+            ],
+            connectPoints: true,
+            caption: 'tan x = t : deux points diamétralement opposés — une seule famille de solutions (période π)',
+          },
+        },
+        { kind: 'subheading', text: 'Le cas général — trig(ax+b) = k' },
+        {
+          kind: 'para',
+          text:
+            'Résoudre $\\sin(ax+b) = k$ (ou avec un cosinus) suit toujours la même démarche en ' +
+            'trois temps : on isole l\'argument $u = ax+b$, on résout $trig(u) = k$ à l\'aide du ' +
+            'cercle trigonométrique (ci-dessus), puis on revient à x en divisant **toute ' +
+            'l\'équation en u** — y compris le terme de période — par a.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Poser $u = ax + b$, et réécrire l\'équation en u : $trig(u) = k$.',
+            'Résoudre $trig(u) = k$ au cercle trigonométrique — pour cos et sin, deux familles de ' +
+              'solutions en général (une seule pour tan) ; aucune solution si $|k| > 1$ pour sin/cos.',
+            'Remplacer u par ax+b, isoler x en divisant **tout** — constante ET terme périodique — ' +
+              'par a.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'deux familles de solutions',
+          formula: 'Résous $2\\cos(3x - \\dfrac{\\pi}{4}) = 1$ dans ℝ.',
+          steps: [
+            { tag: 'isoler cos(u), avec u = 3x − π/4', text: '$\\cos(u) = \\dfrac{1}{2}$' },
+            { tag: 'cercle trigonométrique — cos(u)=1/2 : deux familles', text: '$u = \\pi/3 + 2k\\pi$ ou $u = -\\pi/3 + 2k\\pi$' },
+            { tag: 'remplacer u par 3x−π/4, isoler x — diviser TOUT par 3', text: '$3x-\\pi/4 = \\pi/3+2k\\pi \\implies x = 7\\pi/36 + (2\\pi/3)k$' },
+          ],
+          result: { tag: 'résultat — deux familles de solutions', text: '$x = 7\\pi/36 + (2\\pi/3)k$ ou $x = -\\pi/36 + (2\\pi/3)k$, $k\\in\\mathbb{Z}$' },
+          illustration: {
+            kind: 'circleAngles',
+            points: [
+              { angle: PI / 3, label: 'u=π/3', tone: 'accent' },
+              { angle: -PI / 3, label: 'u=−π/3', tone: 'accent' },
+            ],
+            connectPoints: true,
+            verticalLine: { x: 0.5, label: 'cos(u)=1/2' },
+            caption: 'les deux points du cercle où l\'abscisse (cosinus) vaut 1/2 — symétriques par rapport à l\'axe horizontal',
+          },
+        },
+        {
+          kind: 'piege',
+          text:
+            'Diviser **seulement** le terme constant par a, en oubliant de diviser aussi le ' +
+            '« +2kπ » : ça donne une famille de solutions avec la mauvaise période (2π au lieu de ' +
+            '2π/a). Toute l\'équation en u — terme constant ET terme périodique — passe par la ' +
+            'même division.',
+        },
+        {
+          kind: 'attention',
+          label: 'Attention — |k| > 1 : aucune solution',
+          text:
+            '$\\cos(u) = 1{,}5$ n\'a **aucune** solution, car cosinus (comme sinus) ne prend ' +
+            'jamais de valeur en dehors de [−1 ; 1]. Ce n\'est pas une erreur de calcul à corriger ' +
+            '— c\'est une réponse valable : l\'ensemble des solutions est vide.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Équations trigonométriques trig(ax+b)=k',
+          generatorId: '5gen10',
+          description: [
+            'Résous des équations de la forme sin(ax+b)=k, cos(ax+b)=k ou tan(ax+b)=k, en isolant ' +
+              'l\'argument puis en revenant à x — y compris les cas sans solution.',
+          ],
+          chantier: '5e-4h',
+          whereLabel: '5e (4h) → « 10. Équations trigonométriques trig(ax+b)=k »',
+        },
+      ],
+    },
   ],
 
   recap: {
     items: [
       '**Radian** — $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\pi/180$ ; les formules ' +
-        '$s=r\\theta$ et $A=\\frac{1}{2}r^2\\theta$ n\'utilisent que des radians (les versions en ' +
-        'degrés existent aussi, directement).',
-      '**Fonctions de référence** — sin et cos : domaine ℝ, période 2π, image [−1;1] ; tan : ' +
-        'période π, image ℝ, asymptotes en π/2+kπ.',
+        '$s=r\\theta$ et $A=\\frac{1}{2}r^2\\theta$ n\'utilisent que des radians.',
       '**Figures composées** — décomposer en triangles et secteurs élémentaires, additionner ou ' +
-        'soustraire ; l\'angle d\'un polygone régulier vaut 2π/n par côté.',
-      '**Paramètres d\'une sinusoïde** — $A=(max-min)/2$, $b=(max+min)/2$, $T=2\\pi/\\omega$ ; ' +
-        'φ (déphasage, additif dans l\'argument) ≠ Φ (décalage horizontal, $\\Phi=-\\varphi/\\omega$).',
-      '**Lecture graphique** — max/min pour A et b, distance entre deux maximums pour T, ' +
-        'traversée montante de la ligne moyenne pour φ.',
-      '**Équations** — d\'abord sin x=t / cos x=t / tan x=t au cercle trigonométrique, puis ' +
-        'trig(ax+b)=k en isolant l\'argument et en divisant TOUT (constante et période) par a.',
-      '**Extremums** — sin(u)=1 seul (période 2π, maximums) ≠ sin(u)=±1 réunis (période π, tous ' +
-        'les extremums).',
+        'soustraire selon la figure ; l\'angle d\'un polygone régulier vaut 2π/n par côté, mais un ' +
+        'secteur peut en couvrir plusieurs.',
       '**Géométrie du cercle** — aire d\'un segment = aire du secteur − aire du triangle ' +
-        '($\\frac{1}{2}r^2\\sin\\theta$) ; loi des cosinus pour une corde.',
+        '($\\frac{1}{2}r^2\\sin\\theta$) ; loi des cosinus pour une corde : $c^2 = 2r^2(1-\\cos\\theta)$.',
+      '**Paramètres d\'une sinusoïde** — $A=(max-min)/2$, $b=(max+min)/2$, $T=2\\pi/\\omega$ ' +
+        '(jamais l\'inverse), φ décale horizontalement.',
+      '**Lecture graphique** — max/min pour A et b, distance entre deux maximums pour T, ' +
+        'traversée montante de la ligne moyenne pour φ (en vérifiant le sens de variation).',
+      '**Extremums** — sin(u)=1 seul (période 2π, maximums) ≠ sin(u)=±1 réunis (période π, tous ' +
+        'les extremums) : ne jamais confondre les deux formules.',
       '**Modéliser en contexte** — A et b à partir des extrêmes, T (donc ω) à partir de la durée ' +
         'd\'un cycle, φ en dernier à partir d\'une condition initiale précise.',
+      '**Équations trig(ax+b)=k** — isoler l\'argument, résoudre au cercle trigonométrique, ' +
+        'diviser TOUT (constante et période) par a ; $|k|>1$ pour sin/cos ⟹ aucune solution.',
     ],
     checklist: {
+      label: 'Astuce — avant de rendre ta copie',
       items: [
         'Ai-je bien converti tout angle en degrés vers les radians avant d\'utiliser s=rθ ou A=½r²θ ?',
-        'Pour une sinusoïde : ai-je distingué la pulsation ω de la période T (T=2π/ω) ?',
-        'Ai-je bien distingué φ (déphasage, additif) et Φ (décalage horizontal, Φ=−φ/ω) ?',
+        'Pour une sinusoïde : ai-je distingué la pulsation ω de la période T (T=2π/ω, jamais l\'inverse) ?',
         'Pour une équation trig(ax+b)=k : ai-je divisé par a le terme constant ET le terme périodique en 2kπ ?',
-        'Pour des extremums : la question porte-t-elle sur les maximums seuls, les minimums seuls, ou tous les extremums réunis ?',
+        'Pour des extremums : la question porte-t-elle sur les maximums seuls, les minimums seuls, ou tous les extremums réunis — et ai-je pris la bonne période (2π/a ou π/a) ?',
       ],
     },
     forward:

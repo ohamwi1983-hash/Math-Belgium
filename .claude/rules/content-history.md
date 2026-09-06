@@ -580,3 +580,65 @@ paths:
   table des matières, et le tableau de synthèse ; sitewide `regress_all.mjs` sur les 23 chapitres :
   `0` erreur console, `0` `NaN`/`undefined`, `0` signe `$` isolé restant, partout. `npm run
   build`/`npm run lint` propres (aucun avertissement nouveau au-delà des préexistants).
+
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : remplacement intégral du contenu à
+  partir d'un nouvel artifact fourni par l'utilisateur (pas un patch — la demande était "remplace
+  par les chapitres actuels"). Changements réels par rapport à la version précédente : (1)
+  réordonnancement des sections — « Problèmes de géométrie du cercle » remonte de la position 7 à
+  la position 3 (juste après « Polygones »), « Équations trigonométriques » descend de la position
+  5 à la dernière position 8 ; (2) le bloc `intro` séparé ("Comment encadrer π ?") est supprimé et
+  son contenu migré à l'intérieur de la section 1 elle-même (`subheading` + illustration + table),
+  enrichi d'une dérivation explicite $AB=2r\sin\alpha$/$DE=2r\tan\alpha$ absente de la version
+  précédente ; (3) ajout d'un rappel "cercle trigonométrique" (point image, enroulement) et d'une
+  table des valeurs exactes (0°→360°, radians/cos/sin/tan) avant le diagramme à 16 angles déjà
+  existant ; (4) la table des fonctions de référence (section « Paramètres ») gagne une colonne
+  "parité" + un paragraphe paire/impaire.
+  **Nouveau diagramme construit avec `vectorPlane` générique** (aucune extension de schéma) pour la
+  preuve géométrique d'Archimède (hexagone inscrit/circonscrit, triangle CHB rectangle en H donnant
+  $AB=2r\sin\alpha$, triangle CFD rectangle en F donnant $DE=2r\tan\alpha$) : points, segments,
+  `angleArcs`, `rightAngleMarkers` — même esprit que le diagramme de Dandelin du chapitre précédent.
+  **Bug de couleur trouvé et corrigé sur le diagramme à 16 angles déjà existant** : l'artifact veut
+  7 couleurs VRAIMENT distinctes (4 axes 0°/90°/180°/270° chacun sa propre teinte + 3 familles de
+  référence 30°/45°/60°), mais `circleAngles` n'avait que 6 tons (`accent/good/bad/plan/sky/ink`) —
+  la version précédente de ce diagramme (écrite plus tôt dans la session) faisait donc
+  involontairement partager le ton `'bad'` (rouge) entre l'axe 180° ET la famille de référence 60°,
+  deux groupes que l'artifact veut visuellement distincts. Corrigé en ajoutant un **7e ton
+  `'rose'`** à `circleAngles.points[].tone` (nouveau token `--rose` dans `index.css`, sur le modèle
+  exact de `--sky`/`--plan` — même commentaire justifiant pourquoi un nouveau token est nécessaire
+  plutôt que de réutiliser une teinte existante) et en réassignant la famille 60° à `'rose'`,
+  libérant `'bad'` pour l'axe 180° seul.
+  Vérifié par rendu navigateur réel (clair et sombre) des 17 figures ; sitewide `regress_all.mjs` :
+  `0` erreur, `0` `NaN`, `0` signe `$` isolé, sur les 23 chapitres (y compris
+  `4e/cercle-trigonometrique-triangles`, seul autre chapitre utilisant `circleAngles`, confirmé
+  sans régression). `npm run build`/`npm run lint` propres.
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`, titre renommé de « Les suites » à « Suites ») :
+  remplacement intégral du contenu à partir d'un nouvel artifact, même consigne "remplace par les
+  chapitres actuels". Contrairement au chapitre 2 (surtout un réordonnancement), ce chapitre est une
+  réécriture substantiellement plus riche section par section, à structure globale inchangée (6
+  sections, même ordre, mêmes 6 liens générateur `5gen14`-`5gen19` + quiz `5gen41`) : nouvelles
+  sous-sections ("Qu'est-ce qu'une suite numérique ?", "Représentation graphique — discrète et
+  linéaire/exponentielle discrète", "Moyenne arithmétique/géométrique et somme des termes"),
+  démonstrations de $S_n$ nettement plus détaillées et généralisées (preuve par $u_k+u_{n+1-k}$
+  quelconque, pas seulement illustrée sur un exemple), un nouveau tableau de croissance par signe de
+  $q$/$u_1$, un nouveau piège sur la racine d'exposant pair ($q^k=a$, 0/1/2 solutions), deux
+  nouvelles tables de convergence (arithmétique, géométrique) séparées au lieu d'un seul bloc
+  `methode`, une nouvelle liste de "grands classiques" (papyrus de Rhind, Fibonacci, triangles en
+  zigzag, carrés emboîtés, suites combinées, position/vitesse), et des données numériques différentes
+  dans plusieurs exemples résolus (ex. la comparaison de 2 villes est passée de 2000→5000 habitants
+  à 50 000→30 000 habitants, avec des rangs de bascule différents — vérifié par calcul direct des
+  formules, pas recopié depuis le SVG source, et les deux valeurs de contrôle du tableau (B₁₂≈69 949,
+  B₁₃≈75 545) recoupées avec succès).
+  **5 nouveaux diagrammes de comparaison à deux séries discrètes**, construits avec `curvePlot` en
+  passant `curves: []` (aucune courbe continue) et seulement `points[]` avec deux tons distincts —
+  seule façon de représenter deux suites juxtaposées (pas de champ dédié "deuxième série" sur
+  `sequencePlot`, qui reste mono-série) ; conforme à la convention d'étendre un kind générique
+  existant plutôt que d'en créer un nouveau, `points[].tone` de `curvePlot` couvrant déjà ce besoin.
+  **Piège de positionnement d'étiquette trouvé et corrigé par capture d'écran réelle, à 3 reprises** :
+  une étiquette de fin de série placée en bord de cadre (`labelPos:'right'` sur le dernier point,
+  domaine `xMax` trop proche) est coupée par le viewBox — corrigé à chaque fois soit en élargissant
+  `xMax`/`fixedYRange`, soit (plus robuste) en rattachant l'étiquette à un point interne avec
+  `labelPos:'above'` plutôt qu'au dernier point avec `'right'`.
+  Vérifié par rendu navigateur réel (clair et sombre) des 6 illustrations et des 4 tableaux ; sitewide
+  `regress_all.mjs` : `0` erreur, `0` `NaN`, `0` signe `$` isolé, sur les 23 chapitres. `npm run
+  build`/`npm run lint` propres.

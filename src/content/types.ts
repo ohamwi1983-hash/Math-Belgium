@@ -234,7 +234,7 @@ export type IllustrationSpec =
          * degrés) — rendue en `<tspan>`, jamais concaténée dans `label` (une seule ligne de texte
          * n'aurait pas la place pour "270°" et "3π/2" à la fois sur un diagramme dense). */
         sublabel?: string
-        tone: 'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink'
+        tone: 'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink' | 'rose'
         dashed?: boolean
       }[]
       /** Police des étiquettes de points : `'italic'` (Fraunces italique, par défaut — un seul

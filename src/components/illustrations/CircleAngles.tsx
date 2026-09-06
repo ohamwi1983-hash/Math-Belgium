@@ -8,12 +8,13 @@ const CX = 150
 const CY = 150
 const R = 100
 
-const TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink', string> = {
+const TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink' | 'rose', string> = {
   accent: 'svg-accent',
   good: 'svg-good',
   bad: 'svg-bad',
   plan: 'svg-plan',
   sky: 'svg-sky',
+  rose: 'svg-rose',
   // .svg-ink est fill-only (~100 <text> en dépendent, voir le commentaire dans index.css) — un
   // point (ligne + cercle) a besoin d'un stroke, donc .svg-ink-stroke ici, jamais .svg-ink.
   ink: 'svg-ink-stroke',

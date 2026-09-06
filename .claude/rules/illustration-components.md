@@ -43,7 +43,7 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
 - `circleAngles` — place 1 à N points sur le cercle trigonométrique par leur angle, avec
   accessoires optionnels (corde/sécante étendue via `connectPoints`, projections sur les axes,
   quadrants, arcs d'angle, étiquettes libres, construction de la tangente). `points[].tone` :
-  `'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink'` — 6 couleurs distinctes, réutilisables pour
+  `'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink' | 'rose'` — 7 couleurs distinctes, réutilisables pour
   coder n'importe quel regroupement visuel (ex. par angle de référence sur un diagramme à
   plusieurs points), pas seulement une paire ou un triplet sémantique good/bad ; `'ink'` pointe
   vers `.svg-ink-stroke` (jamais `.svg-ink`, fill-only). `points[].sublabel` ajoute une 2e ligne

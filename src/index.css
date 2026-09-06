@@ -28,6 +28,11 @@
      angle de référence) — aucun autre token existant n'est bleu (accent/attn/tip sont tous des
      tons chauds proches, good/bad/plan sont déjà pris par d'autres significations). */
   --sky: #2f6fb0;
+  /* Rose dédié au même usage que --sky (groupe de couleurs multiples sur un diagramme, ex. cercle
+     trigonométrique à 16 angles codé par 7 familles) — nécessaire dès qu'un diagramme a besoin d'une
+     7e couleur distincte des 6 tons existants (accent/good/bad/plan/sky/ink), qui sont déjà tous pris
+     par ailleurs sur ce même diagramme. */
+  --rose: #b23a7a;
   --on-accent: #fff8f0;
   --radius: 3px;
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
@@ -61,6 +66,7 @@
     --plan: #a494e8;
     --plan-ink: #c3b8f2;
     --sky: #6ea8e8;
+    --rose: #e07fb8;
     --on-accent: #201404;
     color-scheme: dark;
   }
@@ -353,6 +359,7 @@ figcaption {
 .svg-plan-ink { fill: var(--plan-ink); }
 .svg-plan { stroke: var(--plan); fill: var(--plan); }
 .svg-sky { stroke: var(--sky); fill: var(--sky); }
+.svg-rose { stroke: var(--rose); fill: var(--rose); }
 
 /* ---------- carte générateur ---------- */
 .generator-card {
