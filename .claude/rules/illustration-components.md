@@ -40,6 +40,12 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
   `chain-arrow`, `fg-arrow`, `domain-arrow`) utilisent encore un id fixe ; ça reste sans
   symptôme visible tant que tous les marqueurs partageant l'id ont un rendu identique, mais
   `useId()` est la bonne pratique à suivre pour tout nouveau composant à marqueur.
+- `circleAngles` — place 1 à N points sur le cercle trigonométrique par leur angle, avec
+  accessoires optionnels (corde/sécante étendue via `connectPoints`, projections sur les axes,
+  quadrants, arcs d'angle, étiquettes libres, construction de la tangente). `points[].tone` :
+  `'accent' | 'good' | 'bad' | 'plan'` — 4 couleurs distinctes (orange/vert/rouge/violet),
+  réutilisables pour coder n'importe quel regroupement visuel (ex. par angle de référence sur un
+  diagramme à plusieurs points), pas seulement une paire ou un triplet sémantique good/bad.
 - `unitCircleArc` — cercle trigonométrique + rayon + arc + projection, pour arcsin/arccos/arctan.
   `mode` distingue une géométrie de projection réellement différente (horizontale sur l'axe y
   pour sin, verticale sur l'axe x pour cos, sur la tangente géométrique verticale pour tan) —

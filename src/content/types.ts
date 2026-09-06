@@ -227,7 +227,7 @@ export type IllustrationSpec =
        * sin/cos/tan, pas de deux points arbitraires reliés.
        */
       kind: 'circleAngles'
-      points: { angle: number; label: string; tone: 'accent' | 'good' | 'bad'; dashed?: boolean }[]
+      points: { angle: number; label: string; tone: 'accent' | 'good' | 'bad' | 'plan'; dashed?: boolean }[]
       /** Trace la droite passant par les points (étendue aux bords du cadre, pas juste le segment
        * entre eux) — sert de corde pour sin/cos, et de sécante prolongée jusqu'à la tangente pour tan. */
       connectPoints?: boolean

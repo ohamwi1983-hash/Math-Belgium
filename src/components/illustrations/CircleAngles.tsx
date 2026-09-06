@@ -8,10 +8,11 @@ const CX = 150
 const CY = 150
 const R = 100
 
-const TONE_CLASS: Record<'accent' | 'good' | 'bad', string> = {
+const TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'plan', string> = {
   accent: 'svg-accent',
   good: 'svg-good',
   bad: 'svg-bad',
+  plan: 'svg-plan',
 }
 
 const TONE_OUTLINE_CLASS: Record<'accent' | 'good' | 'bad', string> = {

@@ -476,3 +476,33 @@ paths:
   Vérifié par rendu navigateur réel (13 titres de section dans l'ordre attendu, `0` `.katex-error`,
   aucun `$...$` ni astérisque isolé non résolu, illustration du cône de vision capturée à l'écran) ;
   re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run build`/`npm run lint` propres.
+
+- **4e, Chapitre 5 — Cercle trigonométrique & triangles quelconques** (`cercle-trigonometrique-triangles`) :
+  section « Les valeurs remarquables » enrichie d'un diagramme récapitulatif à 16 points (les 4
+  quadrants), ajouté juste après le méthode/exemple « Étendre aux 3 autres quadrants » — demande
+  reçue au départ comme une patch au format HTML/SVG brut d'un artifact `plateforme-maths` distinct
+  (fichier `trigonometrie.html`, inexistant dans ce dépôt), donc **pas appliquée telle quelle** :
+  investigation confirmant que 4 des 5 diagrammes touchés par cette patch corrigeaient des erreurs
+  d'arrondi de coordonnées propres à du SVG écrit à la main (`circleDiagram`, le composant réel de
+  `5e-4h/trigonometrie.ts`, calcule ces coordonnées programmatiquement depuis `startAngle`/
+  `sectorAngle` — cette classe de bug n'existe donc pas ici), et que le diagramme à 5 points déjà en
+  place dans ce chapitre (`remarquables`) est un choix de conception délibéré (quadrant I seul,
+  extension aux 3 autres par symétrie dans une section séparée) — élargir ce diagramme précis à 16
+  points aurait cassé son rôle dans la démonstration Pythagore qui le précède directement. Décision
+  de l'utilisateur, après explication : ajouter le diagramme à 16 points comme **nouveau** bloc
+  plutôt que remplacer l'existant.
+  **Extension de type nécessaire** : `IllustrationSpec.circleAngles.points[].tone` n'acceptait que
+  `'accent' | 'good' | 'bad'` (3 couleurs) ; élargi à 4 avec `'plan'` (violet, déjà utilisé ailleurs
+  pour `geometrie-dans-espace` — `--plan`/`--plan-ink` existaient déjà en light/dark, seule la
+  classe CSS `.svg-plan` — fill+stroke, sur le modèle de `.svg-attn`/`.svg-tip` — manquait et a été
+  ajoutée) pour représenter 4 groupes visuellement très distincts (angles sur un axe = orange,
+  référence 30°/45°/60° = vert/violet/rouge) sans jamais utiliser de couleur hors palette de thème
+  (contrairement à la patch d'origine, qui codait des hex bruts non adaptatifs au thème sombre).
+  Composant `CircleAngles.tsx` mis à jour (`TONE_CLASS`) en conséquence.
+  Espacement le plus serré du nouveau diagramme : 15° entre deux points adjacents (ex. 30°/45°) —
+  vérifié par capture d'écran réelle (clair et sombre) qu'aucune étiquette ne se chevauche malgré
+  cette densité, avant de considérer le rendu acceptable.
+  Vérifié par rendu navigateur réel (clair et sombre) : diagramme à 16 points capturé et relu dans
+  les deux thèmes, `0` `.katex-error`, aucun `$...$` non résolu ; re-rendu des 22 chapitres du site
+  sans régression. `tsc -b`/`npm run build`/`npm run lint` propres (un avertissement `erasing-op`
+  auto-introduit sur `0 * D2R` corrigé en écrivant directement `0`).

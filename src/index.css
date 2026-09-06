@@ -346,6 +346,7 @@ figcaption {
 .svg-plan-fill { fill: var(--plan); fill-opacity: 0.22; stroke: var(--plan); stroke-width: 1.3; stroke-linejoin: round; }
 .svg-plan-outline { fill: none; stroke: var(--plan); }
 .svg-plan-ink { fill: var(--plan-ink); }
+.svg-plan { stroke: var(--plan); fill: var(--plan); }
 
 /* ---------- carte générateur ---------- */
 .generator-card {
