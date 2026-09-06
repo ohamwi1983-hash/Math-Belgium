@@ -39,8 +39,582 @@ export const calculVectoriel: ChapterContent = {
 
   sections: [
     {
-      id: 'relation',
+      id: 'definition',
       number: 1,
+      title: "Qu'est-ce qu'un vecteur ?",
+      kicker: 'direction, sens, longueur — notation AB ou u (vecteurs)',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Un vecteur se note de deux façons : $\\vec{AB}$ quand on le rattache à deux points ' +
+            '(A son **origine**, B son **extrémité**), ou $\\vec{u}$, $\\vec{v}$… quand seules sa ' +
+            'direction, son sens et sa longueur comptent, sans point particulier associé. Les ' +
+            "deux notations désignent le même type d'objet et se combinent librement dans un même " +
+            'calcul.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 6,
+            yMin: -0.5,
+            yMax: 4,
+            vectors: [{ from: { x: 1, y: 1 }, to: { x: 5, y: 3 }, tone: 'accent' }],
+            points: [
+              { x: 1, y: 1, label: 'A', tone: 'ink', labelPos: 'left' },
+              { x: 5, y: 3, label: 'B', tone: 'ink', labelPos: 'right' },
+            ],
+            caption: '$\\vec{AB}$ : origine A, extrémité B, direction (AB), sens de A vers B',
+          },
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — la norme, une longueur',
+          items: [
+            "La **norme** d'un vecteur, notée $\\|\\vec{u}\\|$ ou AB pour $\\vec{AB}$, est sa " +
+              "longueur : un nombre toujours positif ou nul, qui se mesure à la règle sur une " +
+              "figure avant même de disposer d'un repère.",
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Un vecteur, pas un segment',
+          text:
+            'Deux représentants $\\vec{AB}$ et $\\vec{CD}$ d\'un même vecteur $\\vec{u}$ ne sont ' +
+            "pas superposés sur la figure — ils sont **égaux** dès qu'ils partagent direction, " +
+            "sens et longueur, indépendamment de l'endroit où on choisit de les dessiner.",
+        },
+      ],
+    },
+
+    {
+      id: 'oppose',
+      number: 2,
+      title: 'Vecteurs opposés',
+      kicker: 'même direction, même longueur, sens contraires',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Deux vecteurs de **même direction**, **même longueur** mais de **sens contraires** ' +
+            'sont des vecteurs **opposés**. L\'opposé de $\\vec{u}$ se note $-\\vec{u}$ ; ' +
+            "l'opposé de $\\vec{AB}$ se note $-\\vec{AB}$ ou, de façon équivalente, $\\vec{BA}$.",
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 6,
+            yMin: -0.5,
+            yMax: 4,
+            vectors: [
+              { from: { x: 0.5, y: 3 }, to: { x: 4.5, y: 3 }, tone: 'accent' },
+              { from: { x: 4.5, y: 1 }, to: { x: 0.5, y: 1 }, tone: 'bad' },
+            ],
+            points: [
+              { x: 2.5, y: 3.3, vectorLabel: [{ text: 'u', vector: true }], tone: 'accent', node: false },
+              { x: 2.5, y: 0.7, vectorLabel: [{ text: '−' }, { text: 'u', vector: true }], tone: 'bad', node: false },
+            ],
+            caption: 'même longueur, même direction, sens opposé',
+          },
+        },
+      ],
+    },
+
+    {
+      id: 'multiplicationGeometrique',
+      number: 3,
+      title: 'Multiplier un vecteur par un réel : colinéarité et alignement',
+      kicker: 'k > 1 allonge, 0 < k < 1 raccourcit, k < 0 inverse le sens — colinéaires : même direction',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Multiplier un vecteur par un nombre k ne change jamais sa **direction** : seuls sa ' +
+            'longueur et, si k est négatif, son sens sont modifiés.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -3,
+            xMax: 5,
+            yMin: -2,
+            yMax: 3,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 2, y: 1 }, tone: 'ink' },
+              { from: { x: 0, y: 0 }, to: { x: 4, y: 2 }, tone: 'good' },
+              { from: { x: 0, y: 0 }, to: { x: 1, y: 0.5 }, tone: 'tip' },
+              { from: { x: 0, y: 0 }, to: { x: -2, y: -1 }, tone: 'bad' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 2.2, y: 1.1, vectorLabel: [{ text: 'AB', vector: true }], tone: 'ink', node: false },
+              { x: 4.2, y: 2.1, vectorLabel: [{ text: '2·' }, { text: 'AB', vector: true }], tone: 'good', node: false },
+              { x: 1.1, y: 0.65, vectorLabel: [{ text: '0,5·' }, { text: 'AB', vector: true }], tone: 'tip', node: false, labelPos: 'above' },
+              { x: -2.2, y: -1.1, vectorLabel: [{ text: '−' }, { text: 'AB', vector: true }], tone: 'bad', node: false },
+            ],
+            caption: 'même direction pour les 4 vecteurs — seules la longueur et, pour $-\\vec{AB}$, le sens changent',
+          },
+        },
+        {
+          kind: 'featureTable',
+          headers: ['Valeur de k', 'Effet sur AB'],
+          rows: [
+            ['k > 1', 'même sens, plus long'],
+            ['0 < k < 1', 'même sens, plus court'],
+            ['k = 0', 'vecteur nul (pas de direction)'],
+            ['−1 < k < 0', 'sens opposé, plus court'],
+            ['k = −1', 'sens opposé, même longueur (vecteur opposé)'],
+            ['k < −1', 'sens opposé, plus long'],
+          ],
+        },
+        {
+          kind: 'astuce',
+          text:
+            'Pour construire $k \\cdot \\vec{AB}$ à la règle : reporter la longueur de [AB] |k| ' +
+            'fois le long de la droite (AB), dans le même sens que AB si k > 0, dans le sens ' +
+            'opposé si k < 0.',
+        },
+        { kind: 'subheading', text: 'Vecteurs colinéaires et points alignés' },
+        {
+          kind: 'para',
+          text:
+            'Deux vecteurs sont **colinéaires** quand ils partagent la même direction — portés ' +
+            'par des droites parallèles, ou la même droite. Trois points sont **alignés** ' +
+            'exactement quand deux vecteurs formés à partir de ces points sont colinéaires.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 7,
+            yMin: -0.5,
+            yMax: 4,
+            vectors: [{ from: { x: 0, y: 0.3 }, to: { x: 6.3, y: 3.5 }, tone: 'accent' }],
+            points: [
+              { x: 0, y: 0.3, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 2, y: 1.3, label: 'B', tone: 'ink', labelPos: 'above' },
+              { x: 6, y: 3.3, label: 'C', tone: 'ink', labelPos: 'above' },
+            ],
+            caption: 'A, B et C alignés — $\\vec{AB}$ et $\\vec{AC}$ sont colinéaires',
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Alignement de 3 points — A, B, C alignés ⟺ $\\vec{AB}$ et $\\vec{AC}$ colinéaires, ' +
+              "c'est-à-dire $\\vec{AC} = k \\cdot \\vec{AB}$ pour un certain nombre k.",
+          ],
+        },
+        {
+          kind: 'entrainement',
+          title: 'Construction graphique de vecteurs',
+          generatorId: 'gen23',
+          description: ['Trace coefficient·AB par glisser-déposer sur une grille magnétique.'],
+          chantier: '4e',
+          whereLabel: '4e → « 23. Construction graphique de vecteurs »',
+        },
+      ],
+    },
+
+    {
+      id: 'additionGeometrique',
+      number: 4,
+      title: 'Additionner deux vecteurs',
+      kicker: 'méthode du triangle (Chasles) ou du parallélogramme',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Deux vecteurs s\'additionnent de deux façons équivalentes, selon la façon dont ils ' +
+            'sont placés l\'un par rapport à l\'autre.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 6,
+            yMin: -0.5,
+            yMax: 5,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 1 }, tone: 'good' },
+              { from: { x: 3, y: 1 }, to: { x: 4.5, y: 4 }, tone: 'attn' },
+              { from: { x: 0, y: 0 }, to: { x: 4.5, y: 4 }, tone: 'accent' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
+              { x: 1.5, y: 0.9, vectorLabel: [{ text: 'u', vector: true }], tone: 'good', node: false },
+              { x: 4, y: 2.6, vectorLabel: [{ text: 'v', vector: true }], tone: 'attn', node: false },
+              { x: 2.5, y: 2.4, vectorLabel: [{ text: 'u', vector: true }, { text: ' + ' }, { text: 'v', vector: true }], tone: 'accent', node: false },
+            ],
+            caption:
+              'méthode du triangle : en plaçant $\\vec{v}$ à la suite de $\\vec{u}$, le vecteur ' +
+              "somme relie directement le point de départ au point d'arrivée",
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Méthode du triangle — vecteurs consécutifs (l\'origine de $\\vec{v}$ est ' +
+              "l'extrémité de $\\vec{u}$) : c'est la relation de Chasles (section 6).",
+            'Méthode du parallélogramme — vecteurs de même origine (utilisée en physique, ' +
+              "section 17) : la somme est la diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$.",
+          ],
+        },
+      ],
+    },
+
+    {
+      id: 'soustractionGeometrique',
+      number: 5,
+      title: 'Soustraire un vecteur',
+      kicker: 'retrancher un vecteur, c\'est ajouter son opposé',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            "Retrancher un vecteur, c'est ajouter son opposé : $\\vec{u} - \\vec{v} = \\vec{u} + " +
+            '(-\\vec{v})$. Quand $\\vec{u}$ et $\\vec{v}$ partent d\'une même origine, leur ' +
+            'différence $\\vec{w} = \\vec{u} - \\vec{v}$ relie l\'extrémité de $\\vec{v}$ à ' +
+            "l'extrémité de $\\vec{u}$ — dans ce sens précis, puisque $\\vec{w} + \\vec{v} = \\vec{u}$.",
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 7,
+            yMin: -0.5,
+            yMax: 5,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 2.5, y: 4 }, tone: 'good' },
+              { from: { x: 0, y: 0 }, to: { x: 6, y: 1.3 }, tone: 'attn' },
+              { from: { x: 6, y: 1.3 }, to: { x: 2.5, y: 4 }, tone: 'accent' },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
+              { x: 1.2, y: 2.2, vectorLabel: [{ text: 'u', vector: true }], tone: 'good', node: false, labelPos: 'left' },
+              { x: 3.5, y: 1.1, vectorLabel: [{ text: 'v', vector: true }], tone: 'attn', node: false, labelPos: 'below' },
+              { x: 4.6, y: 2.9, vectorLabel: [{ text: 'u', vector: true }, { text: ' − ' }, { text: 'v', vector: true }], tone: 'accent', node: false, labelPos: 'right' },
+            ],
+            caption: '$\\vec{w} = \\vec{u} - \\vec{v}$ part de l\'extrémité de $\\vec{v}$ et arrive à l\'extrémité de $\\vec{u}$',
+          },
+        },
+      ],
+    },
+
+    {
+      id: 'chasles',
+      number: 6,
+      title: 'Réduire une somme de vecteurs : la relation de Chasles',
+      kicker: 'AB + BC = AC',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            "Dès qu'une chaîne de vecteurs se relaie point par point — le point d'arrivée de " +
+            "l'un est le point de départ du suivant — elle se réduit à un seul vecteur, celui " +
+            'qui va directement du tout premier point au tout dernier.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 7,
+            yMin: -0.5,
+            yMax: 4.5,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 3.5 }, tone: 'good' },
+              { from: { x: 3, y: 3.5 }, to: { x: 6.5, y: 1.2 }, tone: 'attn' },
+              { from: { x: 0, y: 0 }, to: { x: 6.5, y: 1.2 }, tone: 'accent', dashed: true },
+            ],
+            points: [
+              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 3, y: 3.5, label: 'B', tone: 'ink', labelPos: 'above' },
+              { x: 6.5, y: 1.2, label: 'C', tone: 'ink', labelPos: 'right' },
+              { x: 1.3, y: 2, vectorLabel: [{ text: 'AB', vector: true }], tone: 'good', node: false },
+              { x: 5, y: 2.7, vectorLabel: [{ text: 'BC', vector: true }], tone: 'attn', node: false },
+              { x: 3.3, y: 0.5, vectorLabel: [{ text: 'AB', vector: true }, { text: ' + ' }, { text: 'BC', vector: true }, { text: ' = ' }, { text: 'AC', vector: true }], tone: 'accent', node: false },
+            ],
+            caption: 'le point B, commun aux deux vecteurs, disparaît dans la somme',
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            '$A_1A_2 + A_2A_3 + \\ldots + A_{n-1}A_n = A_1A_n$.',
+            'Une chaîne **fermée** (qui revient à son point de départ) se réduit toujours au vecteur nul.',
+            'Un vecteur écrit « à l\'envers » ($\\vec{CB}$ au lieu de $\\vec{BC}$) doit d\'abord être ' +
+              'remplacé par son opposé ($-\\vec{BC}$) avant de télescoper.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'réduire une chaîne de 3 vecteurs',
+          formula: 'Réduire $\\vec{AB} + \\vec{BC} + \\vec{CD}$.',
+          steps: [
+            { tag: '1er télescopage', text: '$\\vec{AB} + \\vec{BC} = \\vec{AC}$' },
+            { tag: '2e télescopage', text: '$\\vec{AC} + \\vec{CD} = \\vec{AD}$' },
+          ],
+          result: { tag: 'résultat', text: '$\\vec{AB} + \\vec{BC} + \\vec{CD} = \\vec{AD}$' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Réduction d\'une somme de vecteurs (Chasles)',
+          generatorId: 'gen27',
+          description: ['Réduis une chaîne télescopique de vecteurs sur 4 figures fixes (hexagone, étoile, trapèze, triangle et médianes).'],
+          chantier: '4e',
+          whereLabel: '4e → « 27. Réduction d\'une somme de vecteurs (Chasles) »',
+        },
+      ],
+    },
+
+    {
+      id: 'decompositionGeometrique',
+      number: 7,
+      title: 'Décomposer un vecteur selon deux directions',
+      kicker: 'méthode du parallélogramme, en sens inverse',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Réciproquement, tout vecteur peut se décomposer en une somme de deux vecteurs de ' +
+            'directions imposées (deux droites non parallèles) : c\'est encore la méthode du ' +
+            'parallélogramme, utilisée en sens inverse.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 7,
+            yMin: -0.5,
+            yMax: 5,
+            vectors: [
+              { from: { x: 1, y: 0.5 }, to: { x: 6, y: 4.5 }, tone: 'accent' },
+              { from: { x: 1, y: 0.5 }, to: { x: 3, y: 2 }, tone: 'good' },
+              { from: { x: 1, y: 0.5 }, to: { x: 4, y: 1.3 }, tone: 'attn' },
+              { from: { x: 3, y: 2 }, to: { x: 6, y: 4.5 }, tone: 'faint', dashed: true },
+              { from: { x: 4, y: 1.3 }, to: { x: 6, y: 4.5 }, tone: 'faint', dashed: true },
+            ],
+            points: [
+              { x: 2.5, y: 1.3, vectorLabel: [{ text: 'v', vector: true }], tone: 'good', node: false },
+              { x: 3, y: 0.7, vectorLabel: [{ text: 'w', vector: true }], tone: 'attn', node: false },
+              { x: 4.2, y: 3, vectorLabel: [{ text: 'u', vector: true }], tone: 'accent', node: false },
+            ],
+            caption: '$\\vec{u} = \\vec{v} + \\vec{w}$, avec $\\vec{v}$ et $\\vec{w}$ portés par deux directions distinctes',
+          },
+        },
+      ],
+    },
+
+    {
+      id: 'composantes',
+      number: 8,
+      title: 'Caractériser un vecteur dans un repère : les composantes',
+      kicker: 'AB(x_B−x_A ; y_B−y_A)',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            "Une fois un repère choisi, un vecteur n'a plus besoin d'être dessiné pour être " +
+            'décrit : deux nombres — ses **composantes** — résument à eux seuls sa direction, ' +
+            'son sens et sa longueur.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — composantes de AB',
+          items: [
+            'Pour $A(x_A ; y_A)$ et $B(x_B ; y_B)$ : $\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ ' +
+              'y_B-y_A \\end{pmatrix}$. Deux vecteurs sont égaux si et seulement si ils ont les ' +
+              'mêmes composantes.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'composantes de AB',
+          formula: 'A(2 ; −1), B(5 ; 3).',
+          steps: [{ tag: 'composantes', text: '$\\begin{pmatrix} 5-2 \\\\ 3-(-1) \\end{pmatrix}$' }],
+          result: { tag: 'résultat', text: '$\\vec{AB}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$' },
+        },
+      ],
+    },
+
+    {
+      id: 'additionReperes',
+      number: 9,
+      title: 'Additionner deux vecteurs dans un repère',
+      kicker: 'u + v = (x_u+x_v ; y_u+y_v)',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'En repère, additionner deux vecteurs — ou un vecteur nommé et un vecteur ' +
+            'point-à-point — revient à additionner leurs composantes une à une.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'En repère — $\\vec{u} + \\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$.',
+            'Vecteurs mixtes — un vecteur nommé ($\\vec{u}$) et un vecteur point-à-point ' +
+              '($\\vec{AB}$) se combinent librement, une fois leurs composantes calculées séparément.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'somme de deux vecteurs',
+          formula: '$\\vec{u} = \\begin{pmatrix} 2 \\\\ 3 \\end{pmatrix}$, $\\vec{v} = \\begin{pmatrix} -1 \\\\ 4 \\end{pmatrix}$.',
+          steps: [{ tag: 'composante par composante', text: '$\\begin{pmatrix} 2+(-1) \\\\ 3+4 \\end{pmatrix}$' }],
+          result: { tag: 'résultat', text: '$\\vec{u} + \\vec{v} = \\begin{pmatrix} 1 \\\\ 7 \\end{pmatrix}$' },
+        },
+      ],
+    },
+
+    {
+      id: 'multiplicationReperes',
+      number: 10,
+      title: 'Multiplier un vecteur par un réel dans un repère',
+      kicker: 'k·u = (k·x_u ; k·y_u)',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Multiplier un vecteur par un réel en repère revient à multiplier chacune de ses ' +
+            'composantes par ce nombre — y compris pour retrouver l\'opposé, cas particulier ' +
+            'k = −1.',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Multiplication par un scalaire — $k \\cdot \\vec{u} = \\begin{pmatrix} k \\cdot x_u \\\\ k \\cdot y_u \\end{pmatrix}$.',
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — composantes opposées',
+          items: [
+            'Si $\\vec{u}$ a pour composantes $\\begin{pmatrix} x \\\\ y \\end{pmatrix}$, alors ' +
+              '$-\\vec{u}$ a pour composantes $\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$ — ' +
+              'chaque composante change de signe, rien d\'autre.',
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'vecteur nommé + vecteur point-à-point',
+          formula: '$\\vec{u} = \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$, A(3 ; 5), B(6 ; 2). Calculer $3\\vec{u} - \\vec{AB}$.',
+          steps: [
+            { tag: 'composantes de AB', text: '$\\vec{AB} = \\begin{pmatrix} 6-3 \\\\ 2-5 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ -3 \\end{pmatrix}$' },
+            { tag: '3u', text: '$3 \\cdot \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix} = \\begin{pmatrix} 6 \\\\ -3 \\end{pmatrix}$' },
+          ],
+          result: { tag: 'résultat', text: '$3\\vec{u} - \\vec{AB} = \\begin{pmatrix} 6-3 \\\\ -3-(-3) \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 0 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Composantes de combinaisons linéaires',
+          generatorId: 'gen22',
+          description: ['Réduis une expression vectorielle (vecteurs nommés et points en sens opposé) puis calcule ses composantes.'],
+          chantier: '4e',
+          whereLabel: '4e → « 22. Calcul de composantes de combinaisons linéaires »',
+        },
+      ],
+    },
+
+    {
+      id: 'norme',
+      number: 11,
+      title: "Norme d'un vecteur et distance entre deux points",
+      kicker: '‖u‖ = √(x_u² + y_u²)',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'La **norme** d\'un vecteur est sa longueur — toujours positive ou nulle. La distance ' +
+            'entre deux points n\'est rien d\'autre que la norme du vecteur qui les relie.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -0.5,
+            xMax: 5,
+            yMin: -0.5,
+            yMax: 5,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 4 }, tone: 'accent' },
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: 3, y: 0 }, to: { x: 3, y: 4 }, tone: 'faint', dashed: true },
+            ],
+            points: [
+              { x: 1.5, y: -0.3, label: '3', tone: 'ink', node: false },
+              { x: 3.35, y: 2, label: '4', tone: 'ink', node: false },
+            ],
+            rightAngleMarkers: [{ vertex: { x: 3, y: 0 }, arm1: { x: 0, y: 0 }, arm2: { x: 3, y: 4 } }],
+            caption: '$\\vec{u} = (3 ; 4)$ : $\\|\\vec{u}\\| = \\sqrt{3^2+4^2} = \\sqrt{25} = 5$',
+          },
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode',
+          items: [
+            'Norme — $\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$.',
+            'Distance entre deux points — $AB = \\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$.',
+            'Classer un triangle — isocèle : (au moins) deux côtés de même longueur ; scalène : les trois longueurs sont différentes.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration — le théorème de Pythagore, encore lui',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'Pour $A(x_A ; y_A)$ et $B(x_B ; y_B)$, le point C de coordonnées $(x_B ; y_A)$ ' +
+                'forme avec A et B un triangle rectangle en C — le côté [AC] est horizontal, de ' +
+                'longueur $|x_B-x_A|$, le côté [CB] est vertical, de longueur $|y_B-y_A|$. Le ' +
+                'théorème de Pythagore donne alors : $\\|\\vec{AB}\\|^2 = AC^2 + CB^2 = (x_B-x_A)^2 + (y_B-y_A)^2$',
+            },
+            {
+              kind: 'para',
+              text:
+                'd\'où $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$ — exactement la ' +
+                'formule de la norme, puisque $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$ ' +
+                'sont les composantes $\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ de $\\vec{AB}$.',
+            },
+          ],
+        },
+        {
+          kind: 'exemple',
+          badge: 'distance entre deux points',
+          formula: 'A(1 ; 1), B(4 ; 5).',
+          steps: [{ tag: 'composantes de AB', text: '$\\begin{pmatrix} 4-1 \\\\ 5-1 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$' }],
+          result: { tag: 'distance AB', text: '$\\sqrt{3^2 + 4^2} = \\sqrt{25} = 5$' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'Norme d\'un vecteur et distance entre 2 points',
+          generatorId: 'gen26',
+          description: ['Calcule une norme ou une distance sous 5 variantes (vecteur donné, distance entre points, triangle isocèle/scalène, paramètre x, Pythagore en méthode alternative).'],
+          chantier: '4e',
+          whereLabel: '4e → « 26. Norme d\'un vecteur et distance entre 2 points »',
+        },
+      ],
+    },
+
+    {
+      id: 'relation',
+      number: 12,
       title: 'Vecteurs, translation et milieu',
       kicker: 'B = A + u — milieu M = ((x_A+x_B)/2 ; (y_A+y_B)/2)',
       blocks: [
@@ -118,271 +692,16 @@ export const calculVectoriel: ChapterContent = {
     },
 
     {
-      id: 'combinaison',
-      number: 2,
-      title: 'Combinaisons linéaires de vecteurs',
-      kicker: 'additionner, multiplier par un scalaire, réduire à un seul vecteur',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Une fois les composantes de chaque vecteur connues, les combiner — les additionner, ' +
-            'les multiplier par un nombre, mélanger des vecteurs nommés et des vecteurs ' +
-            'point-à-point — se ramène toujours à des opérations composante par composante.',
-        },
-        { kind: 'subheading', text: 'Vecteur opposé' },
-        {
-          kind: 'para',
-          text:
-            'Deux vecteurs de **même direction**, **même longueur** mais de **sens contraires** ' +
-            'sont des vecteurs **opposés**. L\'opposé de $\\vec{u}$ se note $-\\vec{u}$ ; ' +
-            "l'opposé de $\\vec{AB}$ se note $-\\vec{AB}$ ou, de façon équivalente, $\\vec{BA}$.",
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 6,
-            yMin: -0.5,
-            yMax: 4,
-            vectors: [
-              { from: { x: 0.5, y: 3 }, to: { x: 4.5, y: 3 }, tone: 'accent' },
-              { from: { x: 4.5, y: 1 }, to: { x: 0.5, y: 1 }, tone: 'bad' },
-            ],
-            points: [
-              { x: 2.5, y: 3.3, vectorLabel: [{ text: 'u', vector: true }], tone: 'accent', node: false },
-              { x: 2.5, y: 0.7, vectorLabel: [{ text: '−' }, { text: 'u', vector: true }], tone: 'bad', node: false },
-            ],
-            caption: 'même longueur, même direction, sens opposé',
-          },
-        },
-        {
-          kind: 'rappel',
-          label: 'Rappel — composantes opposées',
-          items: [
-            'Si $\\vec{u}$ a pour composantes $\\begin{pmatrix} x \\\\ y \\end{pmatrix}$, alors ' +
-              '$-\\vec{u}$ a pour composantes $\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$ — ' +
-              'chaque composante change de signe, rien d\'autre.',
-          ],
-        },
-        { kind: 'subheading', text: 'Additionner deux vecteurs' },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 6,
-            yMin: -0.5,
-            yMax: 5,
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 3, y: 1 }, tone: 'good' },
-              { from: { x: 3, y: 1 }, to: { x: 4.5, y: 4 }, tone: 'attn' },
-              { from: { x: 0, y: 0 }, to: { x: 4.5, y: 4 }, tone: 'accent' },
-            ],
-            points: [
-              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
-              { x: 1.5, y: 0.9, vectorLabel: [{ text: 'u', vector: true }], tone: 'good', node: false },
-              { x: 4, y: 2.6, vectorLabel: [{ text: 'v', vector: true }], tone: 'attn', node: false },
-              { x: 2.5, y: 2.4, vectorLabel: [{ text: 'u', vector: true }, { text: ' + ' }, { text: 'v', vector: true }], tone: 'accent', node: false },
-            ],
-            caption:
-              'méthode du triangle : en plaçant $\\vec{v}$ à la suite de $\\vec{u}$, le vecteur ' +
-              "somme relie directement le point de départ au point d'arrivée",
-          },
-        },
-        {
-          kind: 'methode',
-          label: 'Méthode',
-          items: [
-            'Méthode du triangle — vecteurs consécutifs (l\'origine de $\\vec{v}$ est ' +
-              "l'extrémité de $\\vec{u}$) : c'est la relation de Chasles (section 8).",
-            'Méthode du parallélogramme — vecteurs de même origine (utilisée en physique, ' +
-              "section 10) : la somme est la diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$.",
-            'En repère — $\\vec{u} + \\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$.',
-            'Multiplication par un scalaire — $k \\cdot \\vec{u} = \\begin{pmatrix} k \\cdot x_u \\\\ k \\cdot y_u \\end{pmatrix}$.',
-            'Vecteurs mixtes — un vecteur nommé ($\\vec{u}$) et un vecteur point-à-point ' +
-              '($\\vec{AB}$) se combinent librement, une fois leurs composantes calculées séparément.',
-          ],
-        },
-        { kind: 'subheading', text: 'Soustraire un vecteur' },
-        {
-          kind: 'para',
-          text:
-            "Retrancher un vecteur, c'est ajouter son opposé : $\\vec{u} - \\vec{v} = \\vec{u} + " +
-            '(-\\vec{v})$. Quand $\\vec{u}$ et $\\vec{v}$ partent d\'une même origine, leur ' +
-            'différence $\\vec{w} = \\vec{u} - \\vec{v}$ relie l\'extrémité de $\\vec{v}$ à ' +
-            "l'extrémité de $\\vec{u}$ — dans ce sens précis, puisque $\\vec{w} + \\vec{v} = \\vec{u}$.",
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 7,
-            yMin: -0.5,
-            yMax: 5,
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 2.5, y: 4 }, tone: 'good' },
-              { from: { x: 0, y: 0 }, to: { x: 6, y: 1.3 }, tone: 'attn' },
-              { from: { x: 6, y: 1.3 }, to: { x: 2.5, y: 4 }, tone: 'accent' },
-            ],
-            points: [
-              { x: 0, y: 0, label: 'O', tone: 'ink', labelPos: 'left' },
-              { x: 1.2, y: 2.2, vectorLabel: [{ text: 'u', vector: true }], tone: 'good', node: false, labelPos: 'left' },
-              { x: 3.5, y: 1.1, vectorLabel: [{ text: 'v', vector: true }], tone: 'attn', node: false, labelPos: 'below' },
-              { x: 4.6, y: 2.9, vectorLabel: [{ text: 'u', vector: true }, { text: ' − ' }, { text: 'v', vector: true }], tone: 'accent', node: false, labelPos: 'right' },
-            ],
-            caption: '$\\vec{w} = \\vec{u} - \\vec{v}$ part de l\'extrémité de $\\vec{v}$ et arrive à l\'extrémité de $\\vec{u}$',
-          },
-        },
-        { kind: 'subheading', text: 'Décomposer un vecteur selon deux directions' },
-        {
-          kind: 'para',
-          text:
-            'Réciproquement, tout vecteur peut se décomposer en une somme de deux vecteurs de ' +
-            'directions imposées (deux droites non parallèles) : c\'est encore la méthode du ' +
-            'parallélogramme, utilisée en sens inverse.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 7,
-            yMin: -0.5,
-            yMax: 5,
-            vectors: [
-              { from: { x: 1, y: 0.5 }, to: { x: 6, y: 4.5 }, tone: 'accent' },
-              { from: { x: 1, y: 0.5 }, to: { x: 3, y: 2 }, tone: 'good' },
-              { from: { x: 1, y: 0.5 }, to: { x: 4, y: 1.3 }, tone: 'attn' },
-              { from: { x: 3, y: 2 }, to: { x: 6, y: 4.5 }, tone: 'faint', dashed: true },
-              { from: { x: 4, y: 1.3 }, to: { x: 6, y: 4.5 }, tone: 'faint', dashed: true },
-            ],
-            points: [
-              { x: 2.5, y: 1.3, vectorLabel: [{ text: 'v', vector: true }], tone: 'good', node: false },
-              { x: 3, y: 0.7, vectorLabel: [{ text: 'w', vector: true }], tone: 'attn', node: false },
-              { x: 4.2, y: 3, vectorLabel: [{ text: 'u', vector: true }], tone: 'accent', node: false },
-            ],
-            caption: '$\\vec{u} = \\vec{v} + \\vec{w}$, avec $\\vec{v}$ et $\\vec{w}$ portés par deux directions distinctes',
-          },
-        },
-        {
-          kind: 'exemple',
-          badge: 'vecteur nommé + vecteur point-à-point',
-          formula: '$\\vec{u} = \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix}$, A(3 ; 5), B(6 ; 2). Calculer $3\\vec{u} - \\vec{AB}$.',
-          steps: [
-            { tag: 'composantes de AB', text: '$\\vec{AB} = \\begin{pmatrix} 6-3 \\\\ 2-5 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ -3 \\end{pmatrix}$' },
-            { tag: '3u', text: '$3 \\cdot \\begin{pmatrix} 2 \\\\ -1 \\end{pmatrix} = \\begin{pmatrix} 6 \\\\ -3 \\end{pmatrix}$' },
-          ],
-          result: { tag: 'résultat', text: '$3\\vec{u} - \\vec{AB} = \\begin{pmatrix} 6-3 \\\\ -3-(-3) \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 0 \\end{pmatrix}$' },
-        },
-        {
-          kind: 'entrainement',
-          title: 'Composantes de combinaisons linéaires',
-          generatorId: 'gen22',
-          description: ['Réduis une expression vectorielle (vecteurs nommés et points en sens opposé) puis calcule ses composantes.'],
-          chantier: '4e',
-          whereLabel: '4e → « 22. Calcul de composantes de combinaisons linéaires »',
-        },
-      ],
-    },
-
-    {
-      id: 'construction',
-      number: 3,
-      title: 'Construire un vecteur : multiplier par un scalaire',
-      kicker: 'k > 1 allonge, 0 < k < 1 raccourcit, k < 0 inverse le sens',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Multiplier un vecteur par un nombre k ne change jamais sa **direction** : seuls sa ' +
-            'longueur et, si k est négatif, son sens sont modifiés.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -3,
-            xMax: 5,
-            yMin: -2,
-            yMax: 3,
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 2, y: 1 }, tone: 'ink' },
-              { from: { x: 0, y: 0 }, to: { x: 4, y: 2 }, tone: 'good' },
-              { from: { x: 0, y: 0 }, to: { x: 1, y: 0.5 }, tone: 'tip' },
-              { from: { x: 0, y: 0 }, to: { x: -2, y: -1 }, tone: 'bad' },
-            ],
-            points: [
-              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
-              { x: 2.2, y: 1.1, vectorLabel: [{ text: 'AB', vector: true }], tone: 'ink', node: false },
-              { x: 4.2, y: 2.1, vectorLabel: [{ text: '2·' }, { text: 'AB', vector: true }], tone: 'good', node: false },
-              { x: 1.1, y: 0.65, vectorLabel: [{ text: '0,5·' }, { text: 'AB', vector: true }], tone: 'tip', node: false, labelPos: 'above' },
-              { x: -2.2, y: -1.1, vectorLabel: [{ text: '−' }, { text: 'AB', vector: true }], tone: 'bad', node: false },
-            ],
-            caption: 'même direction pour les 4 vecteurs — seules la longueur et, pour $-\\vec{AB}$, le sens changent',
-          },
-        },
-        {
-          kind: 'featureTable',
-          headers: ['Valeur de k', 'Effet sur AB'],
-          rows: [
-            ['k > 1', 'même sens, plus long'],
-            ['0 < k < 1', 'même sens, plus court'],
-            ['k = 0', 'vecteur nul (pas de direction)'],
-            ['−1 < k < 0', 'sens opposé, plus court'],
-            ['k = −1', 'sens opposé, même longueur (vecteur opposé)'],
-            ['k < −1', 'sens opposé, plus long'],
-          ],
-        },
-        {
-          kind: 'astuce',
-          text:
-            'Pour construire $k \\cdot \\vec{AB}$ à la règle : reporter la longueur de [AB] |k| ' +
-            'fois le long de la droite (AB), dans le même sens que AB si k > 0, dans le sens ' +
-            'opposé si k < 0.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Construction graphique de vecteurs',
-          generatorId: 'gen23',
-          description: ['Trace coefficient·AB par glisser-déposer sur une grille magnétique.'],
-          chantier: '4e',
-          whereLabel: '4e → « 23. Construction graphique de vecteurs »',
-        },
-      ],
-    },
-
-    {
       id: 'colinearite',
-      number: 4,
+      number: 13,
       title: 'Colinéarité de vecteurs et alignement de points',
       kicker: 'x_u·y_v − y_u·x_v = 0',
       blocks: [
         {
           kind: 'para',
           text:
-            'Deux vecteurs sont **colinéaires** quand ils partagent la même direction — portés ' +
-            'par des droites parallèles, ou la même droite. Trois points sont **alignés** ' +
-            'exactement quand deux vecteurs formés à partir de ces points sont colinéaires.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 7,
-            yMin: -0.5,
-            yMax: 4,
-            vectors: [{ from: { x: 0, y: 0.3 }, to: { x: 6.3, y: 3.5 }, tone: 'accent' }],
-            points: [
-              { x: 0, y: 0.3, label: 'A', tone: 'ink', labelPos: 'below' },
-              { x: 2, y: 1.3, label: 'B', tone: 'ink', labelPos: 'above' },
-              { x: 6, y: 3.3, label: 'C', tone: 'ink', labelPos: 'above' },
-            ],
-            caption: 'A, B et C alignés — $\\vec{AB}$ et $\\vec{AC}$ sont colinéaires',
-          },
+            'Une fois les vecteurs décrits par leurs composantes, la colinéarité définie plus ' +
+            'haut (section 3) se teste par un calcul, sans même faire de dessin.',
         },
         {
           kind: 'methode',
@@ -439,7 +758,7 @@ export const calculVectoriel: ChapterContent = {
           label: "Ne pas confondre avec l'orthogonalité",
           text:
             '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ teste la **colinéarité**. ' +
-            '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 6) — deux ' +
+            '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 14) — deux ' +
             'formules qui se ressemblent, pour deux relations opposées.',
         },
         {
@@ -454,68 +773,8 @@ export const calculVectoriel: ChapterContent = {
     },
 
     {
-      id: 'directeur',
-      number: 5,
-      title: "Vecteurs directeurs d'une droite",
-      kicker: 'tout vecteur défini par deux points distincts de la droite',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Un **vecteur directeur** d\'une droite d est un vecteur défini par deux points ' +
-            'distincts de d — n\'importe lesquels. Comme deux points quelconques d\'une même ' +
-            'droite donnent toujours des vecteurs colinéaires (section 4), une droite a une ' +
-            'infinité de vecteurs directeurs, mais tous colinéaires entre eux.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 7,
-            yMin: -0.5,
-            yMax: 4.5,
-            vectors: [
-              { from: { x: 0.5, y: 0.4 }, to: { x: 6.5, y: 3.8 }, tone: 'faint' },
-              { from: { x: 1, y: 0.7 }, to: { x: 3, y: 1.8 }, tone: 'accent' },
-              { from: { x: 3, y: 1.8 }, to: { x: 5, y: 2.9 }, tone: 'good' },
-              { from: { x: 1.5, y: 0.3 }, to: { x: 4.5, y: 2 }, tone: 'attn', dashed: true },
-            ],
-            points: [
-              { x: 1, y: 0.7, label: 'A', tone: 'ink', labelPos: 'below' },
-              { x: 3, y: 1.8, label: 'B', tone: 'ink', labelPos: 'below' },
-              { x: 5, y: 2.9, label: 'C', tone: 'ink', labelPos: 'above' },
-              { x: 6.7, y: 4, label: 'd', tone: 'ink', node: false },
-              { x: 1.5, y: 0.3, label: 'E', tone: 'ink', labelPos: 'below' },
-              { x: 4.5, y: 2, label: 'F', tone: 'ink', labelPos: 'right' },
-            ],
-            caption: '$\\vec{AB}$, $\\vec{BC}$ et $\\vec{EF}$ sont trois vecteurs directeurs différents de la même droite d (avec $\\vec{EF} \\parallel d$)',
-          },
-        },
-        {
-          kind: 'methode',
-          label: 'Méthode',
-          items: [
-            'AB, BC, CB… sont tous des vecteurs directeurs de d dès que A, B, C ∈ d.',
-            'Si une droite EF est parallèle à d, alors $\\vec{EF}$ est aussi un vecteur directeur de d.',
-            'Droite parallèle à l\'axe des x (horizontale) — vecteur directeur $\\begin{pmatrix} k \\\\ 0 \\end{pmatrix}$, k ≠ 0.',
-            'Droite parallèle à l\'axe des y (verticale) — vecteur directeur $\\begin{pmatrix} 0 \\\\ k \\end{pmatrix}$, k ≠ 0.',
-          ],
-        },
-        {
-          kind: 'rappel',
-          label: 'Rappel — vers le chapitre suivant',
-          items: [
-            'Le vecteur directeur est l\'outil qui permet de décrire une droite par une équation ' +
-              'paramétrique ou cartésienne — la notion revient au centre du chapitre consacré aux droites.',
-          ],
-        },
-      ],
-    },
-
-    {
       id: 'orthogonalite',
-      number: 6,
+      number: 14,
       title: 'Orthogonalité et Pythagore généralisé',
       kicker: 'x_u·x_v + y_u·y_v = 0',
       blocks: [
@@ -624,98 +883,18 @@ export const calculVectoriel: ChapterContent = {
     },
 
     {
-      id: 'norme',
-      number: 7,
-      title: "Norme d'un vecteur et distance entre deux points",
-      kicker: '‖u‖ = √(x_u² + y_u²)',
+      id: 'directeur',
+      number: 15,
+      title: "Vecteurs directeurs d'une droite",
+      kicker: 'tout vecteur défini par deux points distincts de la droite',
       blocks: [
         {
           kind: 'para',
           text:
-            'La **norme** d\'un vecteur est sa longueur — toujours positive ou nulle. La distance ' +
-            'entre deux points n\'est rien d\'autre que la norme du vecteur qui les relie.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -0.5,
-            xMax: 5,
-            yMin: -0.5,
-            yMax: 5,
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 3, y: 4 }, tone: 'accent' },
-              { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'faint', dashed: true },
-              { from: { x: 3, y: 0 }, to: { x: 3, y: 4 }, tone: 'faint', dashed: true },
-            ],
-            points: [
-              { x: 1.5, y: -0.3, label: '3', tone: 'ink', node: false },
-              { x: 3.35, y: 2, label: '4', tone: 'ink', node: false },
-            ],
-            rightAngleMarkers: [{ vertex: { x: 3, y: 0 }, arm1: { x: 0, y: 0 }, arm2: { x: 3, y: 4 } }],
-            caption: '$\\vec{u} = (3 ; 4)$ : $\\|\\vec{u}\\| = \\sqrt{3^2+4^2} = \\sqrt{25} = 5$',
-          },
-        },
-        {
-          kind: 'methode',
-          label: 'Méthode',
-          items: [
-            'Norme — $\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$.',
-            'Distance entre deux points — $AB = \\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$.',
-            'Classer un triangle — isocèle : (au moins) deux côtés de même longueur ; scalène : les trois longueurs sont différentes.',
-          ],
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Démonstration — le théorème de Pythagore, encore lui',
-          blocks: [
-            {
-              kind: 'para',
-              text:
-                'Pour $A(x_A ; y_A)$ et $B(x_B ; y_B)$, le point C de coordonnées $(x_B ; y_A)$ ' +
-                'forme avec A et B un triangle rectangle en C — le côté [AC] est horizontal, de ' +
-                'longueur $|x_B-x_A|$, le côté [CB] est vertical, de longueur $|y_B-y_A|$. Le ' +
-                'théorème de Pythagore donne alors : $\\|\\vec{AB}\\|^2 = AC^2 + CB^2 = (x_B-x_A)^2 + (y_B-y_A)^2$',
-            },
-            {
-              kind: 'para',
-              text:
-                'd\'où $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$ — exactement la ' +
-                'formule de la norme, puisque $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$ ' +
-                'sont les composantes $\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ de $\\vec{AB}$.',
-            },
-          ],
-        },
-        {
-          kind: 'exemple',
-          badge: 'distance entre deux points',
-          formula: 'A(1 ; 1), B(4 ; 5).',
-          steps: [{ tag: 'composantes de AB', text: '$\\begin{pmatrix} 4-1 \\\\ 5-1 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$' }],
-          result: { tag: 'distance AB', text: '$\\sqrt{3^2 + 4^2} = \\sqrt{25} = 5$' },
-        },
-        {
-          kind: 'entrainement',
-          title: 'Norme d\'un vecteur et distance entre 2 points',
-          generatorId: 'gen26',
-          description: ['Calcule une norme ou une distance sous 5 variantes (vecteur donné, distance entre points, triangle isocèle/scalène, paramètre x, Pythagore en méthode alternative).'],
-          chantier: '4e',
-          whereLabel: '4e → « 26. Norme d\'un vecteur et distance entre 2 points »',
-        },
-      ],
-    },
-
-    {
-      id: 'chasles',
-      number: 8,
-      title: 'Réduire une somme de vecteurs : la relation de Chasles',
-      kicker: 'AB + BC = AC',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            "Dès qu'une chaîne de vecteurs se relaie point par point — le point d'arrivée de " +
-            "l'un est le point de départ du suivant — elle se réduit à un seul vecteur, celui " +
-            'qui va directement du tout premier point au tout dernier.',
+            'Un **vecteur directeur** d\'une droite d est un vecteur défini par deux points ' +
+            'distincts de d — n\'importe lesquels. Comme deux points quelconques d\'une même ' +
+            'droite donnent toujours des vecteurs colinéaires (section 13), une droite a une ' +
+            'infinité de vecteurs directeurs, mais tous colinéaires entre eux.',
         },
         {
           kind: 'illustration',
@@ -726,55 +905,46 @@ export const calculVectoriel: ChapterContent = {
             yMin: -0.5,
             yMax: 4.5,
             vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 3, y: 3.5 }, tone: 'good' },
-              { from: { x: 3, y: 3.5 }, to: { x: 6.5, y: 1.2 }, tone: 'attn' },
-              { from: { x: 0, y: 0 }, to: { x: 6.5, y: 1.2 }, tone: 'accent', dashed: true },
+              { from: { x: 0.5, y: 0.4 }, to: { x: 6.5, y: 3.8 }, tone: 'faint' },
+              { from: { x: 1, y: 0.7 }, to: { x: 3, y: 1.8 }, tone: 'accent' },
+              { from: { x: 3, y: 1.8 }, to: { x: 5, y: 2.9 }, tone: 'good' },
+              { from: { x: 1.5, y: 0.3 }, to: { x: 4.5, y: 2 }, tone: 'attn', dashed: true },
             ],
             points: [
-              { x: 0, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
-              { x: 3, y: 3.5, label: 'B', tone: 'ink', labelPos: 'above' },
-              { x: 6.5, y: 1.2, label: 'C', tone: 'ink', labelPos: 'right' },
-              { x: 1.3, y: 2, vectorLabel: [{ text: 'AB', vector: true }], tone: 'good', node: false },
-              { x: 5, y: 2.7, vectorLabel: [{ text: 'BC', vector: true }], tone: 'attn', node: false },
-              { x: 3.3, y: 0.5, vectorLabel: [{ text: 'AB', vector: true }, { text: ' + ' }, { text: 'BC', vector: true }, { text: ' = ' }, { text: 'AC', vector: true }], tone: 'accent', node: false },
+              { x: 1, y: 0.7, label: 'A', tone: 'ink', labelPos: 'below' },
+              { x: 3, y: 1.8, label: 'B', tone: 'ink', labelPos: 'below' },
+              { x: 5, y: 2.9, label: 'C', tone: 'ink', labelPos: 'above' },
+              { x: 6.7, y: 4, label: 'd', tone: 'ink', node: false },
+              { x: 1.5, y: 0.3, label: 'E', tone: 'ink', labelPos: 'below' },
+              { x: 4.5, y: 2, label: 'F', tone: 'ink', labelPos: 'right' },
             ],
-            caption: 'le point B, commun aux deux vecteurs, disparaît dans la somme',
+            caption: '$\\vec{AB}$, $\\vec{BC}$ et $\\vec{EF}$ sont trois vecteurs directeurs différents de la même droite d (avec $\\vec{EF} \\parallel d$)',
           },
         },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            '$A_1A_2 + A_2A_3 + \\ldots + A_{n-1}A_n = A_1A_n$.',
-            'Une chaîne **fermée** (qui revient à son point de départ) se réduit toujours au vecteur nul.',
-            'Un vecteur écrit « à l\'envers » ($\\vec{CB}$ au lieu de $\\vec{BC}$) doit d\'abord être ' +
-              'remplacé par son opposé ($-\\vec{BC}$) avant de télescoper.',
+            'AB, BC, CB… sont tous des vecteurs directeurs de d dès que A, B, C ∈ d.',
+            'Si une droite EF est parallèle à d, alors $\\vec{EF}$ est aussi un vecteur directeur de d.',
+            'Droite parallèle à l\'axe des x (horizontale) — vecteur directeur $\\begin{pmatrix} k \\\\ 0 \\end{pmatrix}$, k ≠ 0.',
+            'Droite parallèle à l\'axe des y (verticale) — vecteur directeur $\\begin{pmatrix} 0 \\\\ k \\end{pmatrix}$, k ≠ 0.',
           ],
         },
         {
-          kind: 'exemple',
-          badge: 'réduire une chaîne de 3 vecteurs',
-          formula: 'Réduire $\\vec{AB} + \\vec{BC} + \\vec{CD}$.',
-          steps: [
-            { tag: '1er télescopage', text: '$\\vec{AB} + \\vec{BC} = \\vec{AC}$' },
-            { tag: '2e télescopage', text: '$\\vec{AC} + \\vec{CD} = \\vec{AD}$' },
+          kind: 'rappel',
+          label: 'Rappel — vers le chapitre suivant',
+          items: [
+            'Le vecteur directeur est l\'outil qui permet de décrire une droite par une équation ' +
+              'paramétrique ou cartésienne — la notion revient au centre du chapitre consacré aux droites.',
           ],
-          result: { tag: 'résultat', text: '$\\vec{AB} + \\vec{BC} + \\vec{CD} = \\vec{AD}$' },
-        },
-        {
-          kind: 'entrainement',
-          title: 'Réduction d\'une somme de vecteurs (Chasles)',
-          generatorId: 'gen27',
-          description: ['Réduis une chaîne télescopique de vecteurs sur 4 figures fixes (hexagone, étoile, trapèze, triangle et médianes).'],
-          chantier: '4e',
-          whereLabel: '4e → « 27. Réduction d\'une somme de vecteurs (Chasles) »',
         },
       ],
     },
 
     {
       id: 'comparaison',
-      number: 9,
+      number: 16,
       title: 'Comparer des vecteurs : longueur, direction, sens',
       kicker: '3 propriétés indépendantes — chacune peut coïncider ou non',
       blocks: [
@@ -837,7 +1007,7 @@ export const calculVectoriel: ChapterContent = {
 
     {
       id: 'applications',
-      number: 10,
+      number: 17,
       title: 'Applications physiques : la résultante',
       kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (loi des cosinus, chapitre 5)',
       blocks: [
@@ -917,7 +1087,7 @@ export const calculVectoriel: ChapterContent = {
 
     {
       id: 'revision',
-      number: 11,
+      number: 18,
       title: 'Révision — quiz vrai/faux',
       kicker: '180 affirmations en 9 thèmes',
       blocks: [
@@ -935,24 +1105,24 @@ export const calculVectoriel: ChapterContent = {
   recap: {
     items: [
       'Vecteur — direction, sens, longueur ; composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, indépendantes du point d\'application.',
-      'Points — translation B = A + u ; milieu = moyenne des coordonnées ; relation générale ' +
-        '$\\vec{AM} = k \\cdot \\vec{AB}$, toujours sur la droite (AB).',
       'Combiner — addition (triangle ou parallélogramme) et multiplication par un scalaire, ' +
         'composante par composante ; k>0 conserve le sens, k<0 l\'inverse ; opposé ' +
         '$-\\vec{u} = (-1) \\cdot \\vec{u}$ ; soustraire, c\'est ajouter l\'opposé.',
+      'Chasles — une chaîne de vecteurs se réduit du premier point au dernier ; une chaîne fermée se réduit au vecteur nul.',
+      'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours ≥ 0 ; distance entre deux points = norme du vecteur qui les relie.',
+      'Points — translation B = A + u ; milieu = moyenne des coordonnées ; relation générale ' +
+        '$\\vec{AM} = k \\cdot \\vec{AB}$, toujours sur la droite (AB).',
       'Colinéarité — $x_uy_v-y_ux_v=0$ ; orthogonalité — $x_ux_v+y_uy_v=0$ — deux tests à ne jamais confondre.',
       'Vecteur directeur — tout vecteur défini par 2 points d\'une droite ; tous colinéaires entre eux, pour une même droite.',
-      'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours ≥ 0 ; distance entre deux points = norme du vecteur qui les relie.',
-      'Chasles — une chaîne de vecteurs se réduit du premier point au dernier ; une chaîne fermée se réduit au vecteur nul.',
       'Résultante — somme vectorielle de deux forces ou vitesses, norme obtenue par la loi des cosinus.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
       items: [
+        'Ai-je bien vérifié que les vecteurs se relaient point par point avant d\'appliquer Chasles ?',
+        'Ma norme est-elle bien positive ou nulle, jamais négative ?',
         'Ai-je bien calculé le milieu comme une moyenne, jamais comme une différence de coordonnées ?',
         'Ai-je utilisé la bonne formule — déterminant pour la colinéarité, produit scalaire pour l\'orthogonalité ?',
-        'Ma norme est-elle bien positive ou nulle, jamais négative ?',
-        'Ai-je bien vérifié que les vecteurs se relaient point par point avant d\'appliquer Chasles ?',
       ],
     },
     forward:

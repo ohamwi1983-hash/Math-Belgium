@@ -359,3 +359,51 @@ paths:
   laissé inchangé. Aucun contenu ajouté ou retiré. Vérifié par rendu navigateur réel (table des
   matières et récapitulatif dans le nouvel ordre), re-rendu des 22 chapitres du site sans
   régression, `tsc -b`/`npm run build`/`npm run lint` propres.
+
+- **4e, Chapitre 6 — Calcul vectoriel** (`calcul-vectoriel`) : **restructuré en profondeur** (pas un
+  simple réordonnancement) pour suivre l'ordre exact d'une page « Synthèse » de manuel en 15 points —
+  choix explicite de l'utilisateur après qu'un simple réordonnancement se soit révélé impossible : la
+  source traite chaque opération vectorielle en deux passes complètes (géométrique d'abord, sans
+  repère ; puis en repère, par composantes), alors que le chapitre ne traitait chaque sujet qu'une
+  seule fois, directement en repère. 11 sections d'origine éclatées en 18 : l'ancienne section
+  « Combinaisons linéaires de vecteurs » (qui mélangeait déjà informellement les deux approches en
+  sous-titres) a fourni le matériau des nouvelles sections géométriques (`oppose`, `additionGeometrique`,
+  `soustractionGeometrique`, `decompositionGeometrique`) et de deux des trois nouvelles sections
+  repère (`additionReperes`, `multiplicationReperes` — capstone : l'exemple mixte `3u − AB` et
+  l'entraînement gen22 s'y retrouvent, déplacés tels quels) ; l'ancienne section « Construire un
+  vecteur : multiplier par un scalaire » (déjà purement géométrique) a été conservée et étendue
+  avec la définition géométrique de la colinéarité/alignement (reprise de l'ancienne section
+  colinéarité, dont le paragraphe d'ouverture ne mentionnait déjà aucun repère). Les sections
+  `chasles`, `norme`, `relation` (translation/milieu), `colinearite` (déterminant), `orthogonalite`,
+  `directeur`, `comparaison`, `applications` et `revision` sont des déplacements à l'identique (texte,
+  illustrations, exemples et `entrainement` inchangés caractère pour caractère), seul leur `number`
+  change. Deux nouvelles sections sans équivalent préalable : `definition` (section 1 — vocabulaire,
+  notation AB/u, norme comme longueur géométrique, avant tout repère) et `composantes` (section 8 —
+  formalise les composantes d'un vecteur en repère, contenu jusque-là seulement esquissé dans
+  l'`intro` du chapitre, laissée inchangée par ailleurs). **Piège découvert pendant ce chantier,
+  distinct de celui du chapitre 5** : les champs `kicker` (sous-titre de section) et `label` (titre
+  d'un bloc `rappel`/`methode`/`piege`) ne sont **jamais** rendus par KaTeX — contrairement à `text`,
+  `formula`, `badge`, etc. Écrire `$\vec{AB}$` dans un `kicker` ou un `label` affiche le code LaTeX
+  brut à l'écran (en majuscules, via la CSS) au lieu d'un symbole — détecté par capture d'écran
+  Playwright, jamais par `tsc`/`build`/`lint` qui ne valident que la syntaxe TypeScript. Toujours
+  écrire ces deux champs en texte brut (ex. `'AB(x_B−x_A ; y_B−y_A)'`, jamais `'$\vec{AB}(...)$'`).
+  Tous les renvois littéraux « (section N) » retrouvés par `grep -n "section [0-9]"` mis à jour vers
+  les nouveaux numéros (ex. Chasles 8→6, applications 10→17, orthogonalité 6→14, colinéarité 4→13/3)
+  — vérifié un par un contre la nouvelle numérotation, les 5 occurrences correctes.
+  **Même bug que les chapitres 3 et 5 ci-dessus, en bien plus grave ici vu l'ampleur du
+  remaniement (11→18 sections) — trouvé dans ce patch aussi, sans y être mentionné** : `recap.items`
+  n'avait pas été touché par le patch et suivait donc encore l'ANCIEN ordre des 11 sections (ex.
+  l'item « Points » — relié à la section `relation`, désormais 12e sur 18 — apparaissait en 2e
+  position, avant l'item « Combiner » qui couvre pourtant les sections 2 à 10) ; réordonné pour
+  suivre le nouvel enchaînement (Vecteur → Combiner → Chasles → Norme → Points → Colinéarité/
+  orthogonalité → Vecteur directeur → Résultante), en conservant le principe déjà en vigueur avant
+  ce patch qu'un item de synthèse peut regrouper plusieurs sections sous un même thème sans copier
+  leur découpage exact. **Contrairement aux chapitres 3 et 5, `recap.checklist` a aussi dû être
+  corrigé** : dans ce chapitre precis, avant le patch, ses 4 items suivaient déjà l'ordre des
+  sections (contrairement aux deux autres chapitres, où ce n'était pas le cas) ; le patch l'a donc
+  cassé de la même façon que `recap.items` — réordonné à son tour (Chasles → Norme → Milieu →
+  Colinéarité/orthogonalité) pour rester cohérent avec le nouvel enchaînement.
+  Vérifié par rendu navigateur réel : les 18 sections dans le bon ordre (table des matières et corps
+  de page), récapitulatif et checklist dans l'ordre corrigé, `0` `.katex-error`, aucun `$...$` non
+  résolu ; re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run build`/`npm run lint`
+  propres.
