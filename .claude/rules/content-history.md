@@ -286,3 +286,38 @@ paths:
   Playwright réel sur le build de production : les 11 sections dans le nouvel ordre, le récapitulatif
   final réordonné à l'identique, aucun `$...$` non résolu, chaque nouvelle illustration capturée et
   relue individuellement (dont la correction du débordement ci-dessus).
+
+- **5e (4h), Chapitre 4 — Limites et asymptotes** (`limites-asymptotes`) : enrichi depuis une
+  version plus ancienne du même artifact `plateforme-maths` (5e/4h) ; aucune section n'a dû être
+  réordonnée (l'ordre était déjà conforme au manuel FWB source — théorie/théorie/3 volets
+  d'application), l'écart portait sur des points numérotés de la synthèse absents à l'intérieur des
+  sections 1 et 2. Ajouté en section 1 : un rappel « bornes du domaine » avec une illustration
+  `domainLine` (domaine de $f(x)=(x-1)/(x^2-x-6)$, deux points exclus) ; un rappel « limite à
+  gauche, limite à droite » — sans illustration, aucun kind existant ne représente des flèches
+  d'approche convergentes, omission assumée plutôt qu'un kind ad hoc pour ce seul besoin ; un
+  nouvel exemple résolu « vraie asymptote verticale — le numérateur ne s'annule PAS »
+  ($f(x)=(2x-5)/(x+3)$, asymptote verticale ET horizontale simultanées, absent de l'ancienne
+  version qui ne traitait que le cas point vide) ; et un nouvel exemple « quand la limite n'existe
+  pas » illustré (`curves` à deux branches avec un point `style: 'filled'` et un point `style:
+  'open'` au même x, pour visualiser le saut). Trois exemples déjà existants ont reçu une
+  illustration `curvePlot` qu'ils n'avaient pas encore (forme 0/0 — point vide y=x−3, forme ∞−∞ —
+  $\sqrt{x^2+1}-x$ approchant y=0, forme ∞/∞ déjà illustrée inchangée). Ajouté en section 2 : un
+  callout `definition` « définir une asymptote (cas général) » (AV/AH/AO par limite, avant la
+  méthode par comparaison de degrés qui n'est qu'un cas particulier rationnel) suivi d'un
+  `illustrationGroup` de 3 `curvePlot` compacts (`showYAxis: false`, sans grille) — chacun une
+  vraie fonction échantillonnée démontrant un seul type d'asymptote (AV : $1/(x-1)$ ; AH :
+  $2-1/(x+2)$ ; AO : $x+1/(x+2)$), plutôt qu'un schéma dessiné à la main. Ajouté en section 3 : un
+  second exemple de lecture graphique avec DEUX asymptotes verticales simultanées
+  ($g(x)=1/((x+1)(x-2))$, x=−1 et x=2, plus une horizontale y=0), pour montrer qu'un graphique peut
+  porter plusieurs asymptotes verticales à la fois. Ajouté en section 4 (qui n'avait auparavant
+  aucune illustration) : le graphe de $C_u(x)=8+240/x$ approchant son plancher y=8. Aucun nouveau
+  kind d'illustration nécessaire — `domainLine`, `curvePlot` (`points.style: 'open'`/`'filled'`,
+  courbes multi-branches par `xMin`/`xMax`) et `illustrationGroup` existaient déjà et ont suffi.
+  Deux bugs de chevauchement d'étiquette trouvés en inspectant les captures Playwright (pas visibles
+  en relisant le code seul) : sur l'exemple de la vraie asymptote verticale, un point échantillon
+  trop proche du bord gauche du cadre faisait chevaucher son étiquette avec celle de l'asymptote
+  horizontale — corrigé en éloignant le point de l'abscisse concernée et en ajustant son
+  `labelPos`. Vérifié par `npm run build`/`tsc -b`/`npm run lint` propres et rendu Playwright réel
+  sur `vite preview` (clair et sombre) : les 15 illustrations du chapitre capturées et relues
+  individuellement, aucun `$...$` non résolu, aucune régression sur les illustrations déjà en
+  place.
