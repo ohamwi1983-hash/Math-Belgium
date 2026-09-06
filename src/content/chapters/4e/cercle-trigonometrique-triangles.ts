@@ -156,7 +156,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           text:
             'Cette construction rend visible, sans aucun calcul, deux faits déjà connus : tan θ ' +
             'grandit sans limite quand θ se rapproche de 90° (le point P s\'échappe vers le ' +
-            'haut de la figure), et tan θ n\'est pas définie *en* 90° (le rayon OM devient ' +
+            'haut de la figure), et tan θ n\'est pas définie **en** 90° (le rayon OM devient ' +
             'parallèle à la tangente — il ne la coupe plus jamais).',
         },
         {

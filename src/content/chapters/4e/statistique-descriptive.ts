@@ -355,7 +355,7 @@ export const statistiqueDescriptive: ChapterContent = {
               'exacte s\'obtient ensuite par interpolation linéaire le long de cette classe : ' +
               '$\\text{valeur} = L + \\dfrac{\\text{seuil} - CF_{avant}}{n_{classe}} \\cdot \\text{amplitude}$, ' +
               'où L est la borne inférieure de la classe et $CF_{avant}$ l\'effectif cumulé ' +
-              '*juste avant* cette classe.',
+              '**juste avant** cette classe.',
             'Sur les mêmes effectifs regroupés en classes [0;4[/[4;8[/[8;12[/[12;16[ : le seuil ' +
               'médiane=10 tombe dans [4;8[ (cumulés 5→13) → médiane = 4 + ((10−5)/8)×4 = 6,5.',
           ],
@@ -410,7 +410,7 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La **boîte à moustaches** (ou *box-plot*) résume une série en cinq nombres ' +
+            'La **boîte à moustaches** (ou **box-plot**) résume une série en cinq nombres ' +
             'seulement : minimum, Q1, médiane, Q3, maximum. La **boîte** couvre l\'intervalle ' +
             '[Q1 ; Q3] — elle contient donc la moitié « centrale » de la série — et les ' +
             '**moustaches** s\'étendent jusqu\'au minimum et au maximum.',
@@ -739,7 +739,7 @@ export const statistiqueDescriptive: ChapterContent = {
       '**Moyenne** — $\\bar{x} = \\Sigma(x_i \\cdot n_i)/\\Sigma n_i$, jamais la moyenne des ' +
         'valeurs distinctes seules.',
       '**Position** — médiane/Q1/Q3 = première valeur dont l\'effectif cumulé dépasse ' +
-        '*strictement* le seuil n/2, n/4, 3n/4 ; interpolation linéaire pour des classes.',
+        '**strictement** le seuil n/2, n/4, 3n/4 ; interpolation linéaire pour des classes.',
       '**Dispersion** — étendue = max−min ; variance = $\\Sigma(x_i-\\bar{x})^2 \\cdot n_i/n$ ' +
         '(division par n) ; écart-type = √variance, calculé depuis la variance déjà arrondie.',
       '**Bienaymé-Tchebychev** — au moins (1−1/k²)×100% des valeurs dans ' +

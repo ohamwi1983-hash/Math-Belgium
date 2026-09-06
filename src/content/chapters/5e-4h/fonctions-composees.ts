@@ -57,7 +57,7 @@ export const fonctionsComposees: ChapterContent = {
           kind: 'para',
           text:
             '**dom f** est l’ensemble de toutes les valeurs de **x** pour lesquelles **f(x)** peut ' +
-            'réellement être calculé. La plupart du temps, une expression est calculable pour *tout* réel ' +
+            'réellement être calculé. La plupart du temps, une expression est calculable pour **tout** réel ' +
             '— le travail consiste à repérer les quelques opérations qui, elles, imposent une **condition ' +
             "d'existence** (CE).",
         },

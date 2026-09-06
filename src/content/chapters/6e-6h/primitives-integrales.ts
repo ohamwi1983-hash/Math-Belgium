@@ -189,7 +189,7 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             'Le choix inverse — $f(x)=e^x$, $g\'(x)=x$ — n\'est pas faux mathématiquement, mais ' +
-            'mène à une intégrale *plus compliquée* ($\\int e^x \\cdot x^2/2 \\, dx$), pas plus ' +
+            'mène à une intégrale **plus compliquée** ($\\int e^x \\cdot x^2/2 \\, dx$), pas plus ' +
             'simple : dériver la partie qui se « simplifie » en dérivant (ici x → 1) est ' +
             'presque toujours le bon réflexe.',
         },

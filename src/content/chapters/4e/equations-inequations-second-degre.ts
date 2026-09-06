@@ -326,7 +326,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'astuce',
           text:
             'Aucun crochet ne se déduit automatiquement du symbole : une inégalité **large** ' +
-            '(≤/≥) inclut la borne *seulement si* cette borne est effectivement une racine — ' +
+            '(≤/≥) inclut la borne **seulement si** cette borne est effectivement une racine — ' +
             'pose toujours la question consciemment plutôt que de réagir par réflexe.',
         },
         {
@@ -507,7 +507,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'piege',
           label: 'Un carré parfait au dénominateur ne se simplifie jamais complètement',
           text:
-            'Si le dénominateur s\'écrit $(x-p)^2$ (racine double), simplifier *une* occurrence ' +
+            'Si le dénominateur s\'écrit $(x-p)^2$ (racine double), simplifier **une** occurrence ' +
             'de $(x-p)$ avec le numérateur laisse toujours $(x-p)$ au dénominateur restant — la ' +
             'valeur $x=p$ reste donc exclue, et la fraction n\'est **jamais** réductible à une ' +
             'expression polynomiale pure sur ce facteur.',
