@@ -47,14 +47,22 @@ export const lieuxGeometriques: ChapterContent = {
             {
               kind: 'vectorPlane',
               xMin: -3, xMax: 3, yMin: -2.8125, yMax: 2.8125,
-              grid: true,
+              vectors: [-3, -2, -1, 0, 1, 2, 3].map((gx) => ({
+                from: { x: gx, y: -2.8125 }, to: { x: gx, y: 2.8125 }, tone: 'faint' as const, arrow: false,
+              })).concat([-2, -1, 0, 1, 2].map((gy) => ({
+                from: { x: -3, y: gy }, to: { x: 3, y: gy }, tone: 'faint' as const, arrow: false,
+              }))),
               circle: { cx: 0, cy: 0, r: 2, tone: 'accent' },
               caption: 'repère ORTHONORMÉ : un cercle y reste rond, distances et angles se calculent avec les formules usuelles',
             },
             {
               kind: 'vectorPlane',
               xMin: -3, xMax: 3, yMin: -1, yMax: 1,
-              grid: true,
+              vectors: [-3, -2, -1, 0, 1, 2, 3].map((gx) => ({
+                from: { x: gx, y: -1 }, to: { x: gx, y: 1 }, tone: 'faint' as const, arrow: false,
+              })).concat([-1, 0, 1].map((gy) => ({
+                from: { x: -3, y: gy }, to: { x: 3, y: gy }, tone: 'faint' as const, arrow: false,
+              }))),
               caption:
                 "repère seulement AFFINE (ici, unités différentes sur les deux axes) : le carreau du quadrillage n'est plus carré — distance, angle, cercle perdent leur sens usuel",
             },
@@ -171,8 +179,8 @@ export const lieuxGeometriques: ChapterContent = {
             ],
             angleArcs: [{ cx: 0, cy: 0, fromDeg: -56.3, toDeg: 16.7, radiusPx: 26, tone: 'good', label: 'θ' }],
             points: [
-              { x: 2.6, y: 0.78, label: 'm₁', tone: 'ink', labelPos: 'above' },
-              { x: 1.5, y: -2.25, label: 'm₂', tone: 'accent', labelPos: 'right' },
+              { x: 2.6, y: 0.78, label: 'm₁', tone: 'ink', labelPos: 'above', node: false },
+              { x: 1.5, y: -2.25, label: 'm₂', tone: 'accent', labelPos: 'right', node: false },
             ],
             caption: 'deux droites sécantes de pentes m₁ et m₂, formant un angle θ',
           },
@@ -1262,18 +1270,18 @@ export const lieuxGeometriques: ChapterContent = {
               { from: { x: 0, y: 0 }, to: { x: 6, y: 0 }, tone: 'faint', arrow: false },
               { from: { x: 6, y: 0 }, to: { x: 0, y: 4 }, tone: 'faint', arrow: false },
               { from: { x: 0, y: 4 }, to: { x: 3, y: 0 }, tone: 'accent', arrow: false },
-              { from: { x: 0, y: 0 }, to: { x: 3, y: 1 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 4.5, y: 1 }, tone: 'faint', dashed: true, arrow: false },
               { from: { x: 6, y: 0 }, to: { x: 0, y: 1 }, tone: 'faint', dashed: true, arrow: false },
-              { from: { x: 0, y: 0 }, to: { x: 1.8, y: 2.4 }, tone: 'faint', dashed: true, arrow: false },
-              { from: { x: 6, y: 0 }, to: { x: 0, y: 2.4 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 2 }, tone: 'faint', dashed: true, arrow: false },
+              { from: { x: 6, y: 0 }, to: { x: 0, y: 2 }, tone: 'faint', dashed: true, arrow: false },
             ],
             points: [
               { x: 0, y: 4, label: 'A', tone: 'ink', labelPos: 'above' },
               { x: 0, y: 0, label: 'B', tone: 'ink', labelPos: 'left' },
               { x: 6, y: 0, label: 'C', tone: 'ink', labelPos: 'right' },
               { x: 3, y: 0, label: 'milieu BC', tone: 'ink', labelPos: 'below' },
-              { x: 0.75, y: 3, tone: 'accent', node: true },
-              { x: 1.8, y: 1.6, tone: 'accent', node: true },
+              { x: 18 / 7, y: 4 / 7, tone: 'accent', node: true },
+              { x: 2, y: 4 / 3, tone: 'accent', node: true },
             ],
             caption:
               'pour 2 hauteurs de la parallèle à (BC), les céviennes (BE) et (CD) se coupent toujours sur la médiane issue de A',
@@ -1309,7 +1317,7 @@ export const lieuxGeometriques: ChapterContent = {
             yMin: -5,
             yMax: 4,
             vectors: [
-              { from: { x: 1, y: -5 }, to: { x: 1, y: 4 }, tone: 'accent', arrow: false },
+              { from: { x: 1, y: -5 }, to: { x: 1, y: 4 }, tone: 'good', arrow: false },
               { from: { x: 3, y: 0 }, to: { x: 0, y: 2 }, tone: 'faint', dashed: true, arrow: false },
               { from: { x: -2, y: 0 }, to: { x: 0, y: 2 }, tone: 'faint', dashed: true, arrow: false },
               { from: { x: 3, y: 0 }, to: { x: 0, y: -3 }, tone: 'faint', dashed: true, arrow: false },
@@ -1320,8 +1328,8 @@ export const lieuxGeometriques: ChapterContent = {
               { x: -2, y: 0, label: 'B', tone: 'ink', labelPos: 'above' },
               { x: 0, y: 2, tone: 'ink', node: true },
               { x: 0, y: -3, tone: 'ink', node: true },
-              { x: 1, y: -3, tone: 'accent', node: true },
-              { x: 1, y: 2, tone: 'accent', node: true },
+              { x: 1, y: -3, tone: 'good', node: true },
+              { x: 1, y: 2, tone: 'good', node: true },
               { x: 1, y: 0, label: '(1;0) exclu', tone: 'bad', labelPos: 'below' },
             ],
             caption:
