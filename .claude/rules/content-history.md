@@ -321,3 +321,20 @@ paths:
   sur `vite preview` (clair et sombre) : les 15 illustrations du chapitre capturées et relues
   individuellement, aucun `$...$` non résolu, aucune régression sur les illustrations déjà en
   place.
+
+- **4e, Chapitre 3 — Caractéristiques d'une fonction et fonctions de référence**
+  (`caracteristiques-fonctions-reference`) : réordonné pour suivre l'ordre d'une page « Synthèse »
+  de manuel (fonction/domaine/outils de lecture graphique → 6 fonctions de référence → comment
+  moduler l'expression analytique en transformation graphique) — la section « Transformer une
+  fonction de référence » (les 8 paramètres TH/TV/CH/EH/EV/CV/SOX/SOY, dernier point de la source)
+  était en tête du chapitre, déplacée en dernière position (juste avant la révision) ; « Lire les
+  caractéristiques sur un graphique » passe en premier. Aucun contenu ajouté/retiré, seul l'ordre
+  des `sections` (et leur `number`) change — `intro` (fonctions de référence, déjà en tête) reste
+  inchangé. **Erreur trouvée dans la demande elle-même** : `recap.items` était donné pour « déjà
+  cohérent avec cet ordre », mais listait en réalité « Formule unifiée »/« Parité et redondance »
+  (sujets de la section Transformer) AVANT « Lecture graphique »/« Étude algébrique » — un ordre qui
+  suivait l'ANCIEN agencement des sections (transformer → lire → algébrique), pas le nouveau ;
+  réordonné pour suivre le nouvel ordre des sections (lecture graphique → étude algébrique →
+  formule unifiée → parité et redondance), `recap.checklist` (déjà sans ordre strict par section)
+  laissé inchangé. Vérifié par rendu navigateur réel : table des matières et corps de page dans le
+  nouvel ordre, `tsc -b`/`npm run build`/`npm run lint` propres.

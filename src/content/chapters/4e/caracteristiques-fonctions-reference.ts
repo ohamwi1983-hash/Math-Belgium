@@ -214,8 +214,203 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
 
   sections: [
     {
-      id: 'transformer',
+      id: 'lire',
       number: 1,
+      title: 'Lire les caractéristiques sur un graphique',
+      kicker: 'domaine, zéros, variations, ordonnée à l\'origine, valeur en un point, asymptotes',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Une courbe composite — assemblée de plusieurs morceaux de familles différentes — se ' +
+            'lit toujours dans le même ordre, sans jamais avoir besoin de sa formule algébrique :',
+        },
+        {
+          kind: 'methode',
+          label: 'Méthode — l\'ordre de lecture',
+          items: [
+            '**Domaine** — repérer d\'abord toute valeur exclue (point creux, coupure ' +
+              'verticale) avant de décrire le reste.',
+            '**Zéros** — les abscisses où la courbe traverse l\'axe des x.',
+            '**Variations** — croissante, décroissante ou constante, intervalle par intervalle.',
+            '**Ordonnée à l\'origine** — la valeur en x = 0, si elle existe.',
+            '**Valeur en un point précis** — lire f(v) pour un v donné.',
+            '**Asymptotes** — les droites (verticale et/ou horizontale) que la courbe approche ' +
+              'sans jamais les toucher.',
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'Définitions précises — le vocabulaire de chaque question',
+          items: [
+            '**Zéro** — un réel dont l\'image vaut 0 ; abscisse d\'un point d\'intersection avec l\'axe Ox.',
+            '**Ordonnée à l\'origine** — la valeur f(0), si elle existe ; ordonnée du point ' +
+              'd\'intersection avec l\'axe Oy.',
+            '**Fonction paire** — pour tout réel a du domaine, −a aussi, et f(−a) = f(a) ; le ' +
+              'graphique admet Oy comme axe de symétrie.',
+            '**Fonction impaire** — pour tout réel a du domaine, −a aussi, et f(−a) = −f(a) ; ' +
+              'le graphique admet l\'origine (0 ; 0) comme centre de symétrie.',
+            '**Croissante sur un intervalle** — pour tous x₁, x₂ de cet intervalle : ' +
+              'x₁ ≤ x₂ ⟹ f(x₁) ≤ f(x₂) (l\'ordre est conservé).',
+            '**Décroissante sur un intervalle** — pour tous x₁, x₂ de cet intervalle : ' +
+              'x₁ ≤ x₂ ⟹ f(x₁) ≥ f(x₂) (l\'ordre s\'inverse).',
+            '**Maximum de f sur [c ; d]** — une valeur f(a) telle que f(a) ≥ f(x) pour tout x de [c ; d].',
+            '**Minimum de f sur [c ; d]** — une valeur f(a) telle que f(a) ≤ f(x) pour tout x de [c ; d].',
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Astuce — un maximum dépend toujours de l\'intervalle choisi',
+          text:
+            'Le maximum ou le minimum d\'une fonction n\'est jamais une propriété absolue : il ' +
+            'se définit toujours **par rapport à un intervalle précis**. Une même courbe peut ' +
+            'avoir un maximum de 3 sur [−9 ; 2] et, restreinte à [−8 ; 0], un maximum tout ' +
+            'différent — parce que le point le plus haut de la première fenêtre peut tomber ' +
+            'hors de la seconde.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => 1 - x * x, tone: 'accent', xMin: -2, xMax: -0.02 },
+              { fn: (x) => 1 / (x - 2) + 1, tone: 'accent', xMin: 0.02, xMax: 1.85 },
+              { fn: (x) => 1 / (x - 2) + 1, tone: 'accent', xMin: 2.15, xMax: 5 },
+            ],
+            xMin: -2,
+            xMax: 5,
+            xTicks: [-1],
+            verticalAsymptotes: [{ x: 2, label: 'x = 2 (AV)' }],
+            horizontalAsymptotes: [{ y: 1, label: 'y = 1 (AH)' }],
+            points: [
+              { x: -1, y: 0, label: 'zéro', tone: 'good', labelPos: 'below' },
+              { x: 0, y: 1, label: '', tone: 'bad', style: 'open' },
+            ],
+            fixedYRange: { min: -3, max: 4 },
+            xAxisLabel: 'x',
+            yAxisLabel: 'y',
+            caption:
+              'domaine : ℝ \\ {0 ; 2} — un point creux exclu en x=0 (rond) et une asymptote ' +
+              'verticale en x=2 ; courbe reconstruite à titre illustratif, forme non tirée d\'une ' +
+              'fonction de référence unique',
+          },
+        },
+        {
+          kind: 'attention',
+          label: 'Trois façons différentes d\'être « exclu » en un point',
+          text: 'Un même symbole (un cercle) sur un graphique peut signifier trois choses très différentes :',
+          items: [
+            '**Trou** — cercle vide des deux côtés : la valeur est réellement exclue du domaine.',
+            '**Point plein** — cercle plein : la courbe est bien définie et continue en ce ' +
+              'point, rien à signaler.',
+            '**Point redéfini** — cercles vides de part et d\'autre **plus** un point plein ' +
+              'isolé ailleurs sur la même verticale : le point appartient bien au domaine, mais ' +
+              'sa valeur ne suit pas la continuité apparente de la courbe.',
+          ],
+        },
+        {
+          kind: 'para',
+          text:
+            'Pour l\'ordonnée à l\'origine comme pour la valeur en un point précis, deux ' +
+            'réponses sont possibles : soit la valeur demandée **existe** (elle se lit ' +
+            'directement sur la courbe), soit elle **n\'existe pas** — parce que le point tombe ' +
+            'justement sur une valeur exclue du domaine.',
+        },
+        {
+          kind: 'entrainement',
+          title: 'Caractéristiques d\'une fonction (lecture graphique)',
+          generatorId: 'gen12',
+          description: [
+            'Décris une courbe composite (domaine, zéros, croissance/décroissance/constance, ' +
+              'ordonnée à l\'origine, valeur en un point, asymptotes) toujours affichée à ' +
+              'l\'écran, sans formule algébrique.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 12. Caractéristiques d\'une fonction (lecture graphique) »',
+        },
+      ],
+    },
+    {
+      id: 'algebrique',
+      number: 2,
+      title: 'Étudier algébriquement une fonction de référence',
+      kicker: 'f(x) = [famille](ax + b) + k — CE, domaine, isolement, zéros',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Sans aucun graphique cette fois : à partir de l\'écriture algébrique ' +
+            '$f(x) = [famille](ax+b) + k$, il faut poser la condition d\'existence, en déduire ' +
+            'le domaine, isoler la famille pour trouver les zéros.',
+        },
+        {
+          kind: 'attention',
+          label: 'Le sens de l\'inégalité peut s\'inverser',
+          text:
+            'Pour la racine carrée, isoler $x$ dans $ax+b \\ge 0$ demande de diviser par $a$ — ' +
+            'et diviser par un nombre **négatif** inverse le sens de l\'inégalité. D\'où les ' +
+            'deux cas : domaine $[p\\,;\\,+\\infty[$ si $a > 0$, mais $]-\\infty\\,;\\,p]$ si $a < 0$.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'inverse',
+          formula: '$f(x) = \\dfrac{1}{2x+4} - \\dfrac{1}{3}$',
+          steps: [
+            { tag: 'CE', text: '$2x+4 \\neq 0 \\iff x \\neq -2$' },
+            { tag: 'domaine', text: 'ℝ \\ {−2}' },
+            { tag: 'isolement — résoudre f(x) = 0', text: '$\\dfrac{1}{2x+4} = \\dfrac{1}{3}$' },
+            { tag: 'se débarrasser du dénominateur (produit en croix)', text: '$2x+4 = 3$' },
+          ],
+          result: { tag: 'zéro', text: '$x = -1/2$' },
+        },
+        {
+          kind: 'exemple',
+          badge: 'racine carrée',
+          formula: '$f(x) = \\sqrt{2x-4} - \\dfrac{1}{2}$',
+          steps: [
+            { tag: 'CE', text: '$2x-4 \\ge 0 \\iff x \\ge 2$ (a = 2 > 0, le sens ne change pas)' },
+            { tag: 'domaine', text: '$[2\\,;\\,+\\infty[$' },
+            { tag: 'isolement — résoudre f(x) = 0', text: '$\\sqrt{2x-4} = \\dfrac{1}{2}$' },
+            { tag: 'se débarrasser de la racine carrée (élever au carré)', text: '$2x-4 = 1/4$' },
+          ],
+          result: { tag: 'zéro', text: '$x = 17/8$' },
+        },
+        {
+          kind: 'featureTable',
+          caption: 'Nombre de zéros de [famille](ax+b) = K, selon le signe de K',
+          headers: ['Famille', 'K < 0', 'K > 0'],
+          rows: [
+            ['Carrée / Valeur absolue', '0 zéro', '2 zéros'],
+            ['Racine carrée', '0 zéro', '1 zéro'],
+            ['Cube / Racine cubique / Inverse', 'toujours exactement 1 zéro', 'toujours exactement 1 zéro'],
+          ],
+        },
+        {
+          kind: 'astuce',
+          label: 'Astuce — carrée et valeur absolue se séparent en deux équations',
+          text:
+            'Isoler la carrée ou la valeur absolue mène à une expression du type $P(x)^2 = K$ ' +
+            'ou $|P(x)| = K$ (K > 0) : dans les deux cas, il faut séparer en **deux** équations ' +
+            'linéaires distinctes — $P(x) = \\sqrt{K}$ et $P(x) = -\\sqrt{K}$ pour le carré, ' +
+            '$P(x) = K$ et $P(x) = -K$ pour la valeur absolue — jamais une seule.',
+        },
+        { kind: 'video', title: 'Caractéristiques algébriques d\'une fonction de référence', youtubeId: 'l4-QfH7ZPXU' },
+        {
+          kind: 'entrainement',
+          title: 'Caractéristiques algébriques d\'une fonction de référence',
+          generatorId: 'gen13',
+          description: [
+            'Détermine CE, domaine, isole la famille de référence et trouve les zéros de ' +
+              'f(x) = [famille](ax+b) + k, pour les 6 familles.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 13. Caractéristiques algébriques d\'une fonction de référence »',
+        },
+      ],
+    },
+    {
+      id: 'transformer',
+      number: 3,
       title: 'Transformer une fonction de référence',
       kicker: 'une seule formule pour les 8 transformations, généralisée aux 6 familles',
       blocks: [
@@ -368,201 +563,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       ],
     },
     {
-      id: 'lire',
-      number: 2,
-      title: 'Lire les caractéristiques sur un graphique',
-      kicker: 'domaine, zéros, variations, ordonnée à l\'origine, valeur en un point, asymptotes',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Une courbe composite — assemblée de plusieurs morceaux de familles différentes — se ' +
-            'lit toujours dans le même ordre, sans jamais avoir besoin de sa formule algébrique :',
-        },
-        {
-          kind: 'methode',
-          label: 'Méthode — l\'ordre de lecture',
-          items: [
-            '**Domaine** — repérer d\'abord toute valeur exclue (point creux, coupure ' +
-              'verticale) avant de décrire le reste.',
-            '**Zéros** — les abscisses où la courbe traverse l\'axe des x.',
-            '**Variations** — croissante, décroissante ou constante, intervalle par intervalle.',
-            '**Ordonnée à l\'origine** — la valeur en x = 0, si elle existe.',
-            '**Valeur en un point précis** — lire f(v) pour un v donné.',
-            '**Asymptotes** — les droites (verticale et/ou horizontale) que la courbe approche ' +
-              'sans jamais les toucher.',
-          ],
-        },
-        {
-          kind: 'rappel',
-          label: 'Définitions précises — le vocabulaire de chaque question',
-          items: [
-            '**Zéro** — un réel dont l\'image vaut 0 ; abscisse d\'un point d\'intersection avec l\'axe Ox.',
-            '**Ordonnée à l\'origine** — la valeur f(0), si elle existe ; ordonnée du point ' +
-              'd\'intersection avec l\'axe Oy.',
-            '**Fonction paire** — pour tout réel a du domaine, −a aussi, et f(−a) = f(a) ; le ' +
-              'graphique admet Oy comme axe de symétrie.',
-            '**Fonction impaire** — pour tout réel a du domaine, −a aussi, et f(−a) = −f(a) ; ' +
-              'le graphique admet l\'origine (0 ; 0) comme centre de symétrie.',
-            '**Croissante sur un intervalle** — pour tous x₁, x₂ de cet intervalle : ' +
-              'x₁ ≤ x₂ ⟹ f(x₁) ≤ f(x₂) (l\'ordre est conservé).',
-            '**Décroissante sur un intervalle** — pour tous x₁, x₂ de cet intervalle : ' +
-              'x₁ ≤ x₂ ⟹ f(x₁) ≥ f(x₂) (l\'ordre s\'inverse).',
-            '**Maximum de f sur [c ; d]** — une valeur f(a) telle que f(a) ≥ f(x) pour tout x de [c ; d].',
-            '**Minimum de f sur [c ; d]** — une valeur f(a) telle que f(a) ≤ f(x) pour tout x de [c ; d].',
-          ],
-        },
-        {
-          kind: 'astuce',
-          label: 'Astuce — un maximum dépend toujours de l\'intervalle choisi',
-          text:
-            'Le maximum ou le minimum d\'une fonction n\'est jamais une propriété absolue : il ' +
-            'se définit toujours **par rapport à un intervalle précis**. Une même courbe peut ' +
-            'avoir un maximum de 3 sur [−9 ; 2] et, restreinte à [−8 ; 0], un maximum tout ' +
-            'différent — parce que le point le plus haut de la première fenêtre peut tomber ' +
-            'hors de la seconde.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'curvePlot',
-            curves: [
-              { fn: (x) => 1 - x * x, tone: 'accent', xMin: -2, xMax: -0.02 },
-              { fn: (x) => 1 / (x - 2) + 1, tone: 'accent', xMin: 0.02, xMax: 1.85 },
-              { fn: (x) => 1 / (x - 2) + 1, tone: 'accent', xMin: 2.15, xMax: 5 },
-            ],
-            xMin: -2,
-            xMax: 5,
-            xTicks: [-1],
-            verticalAsymptotes: [{ x: 2, label: 'x = 2 (AV)' }],
-            horizontalAsymptotes: [{ y: 1, label: 'y = 1 (AH)' }],
-            points: [
-              { x: -1, y: 0, label: 'zéro', tone: 'good', labelPos: 'below' },
-              { x: 0, y: 1, label: '', tone: 'bad', style: 'open' },
-            ],
-            fixedYRange: { min: -3, max: 4 },
-            xAxisLabel: 'x',
-            yAxisLabel: 'y',
-            caption:
-              'domaine : ℝ \\ {0 ; 2} — un point creux exclu en x=0 (rond) et une asymptote ' +
-              'verticale en x=2 ; courbe reconstruite à titre illustratif, forme non tirée d\'une ' +
-              'fonction de référence unique',
-          },
-        },
-        {
-          kind: 'attention',
-          label: 'Trois façons différentes d\'être « exclu » en un point',
-          text: 'Un même symbole (un cercle) sur un graphique peut signifier trois choses très différentes :',
-          items: [
-            '**Trou** — cercle vide des deux côtés : la valeur est réellement exclue du domaine.',
-            '**Point plein** — cercle plein : la courbe est bien définie et continue en ce ' +
-              'point, rien à signaler.',
-            '**Point redéfini** — cercles vides de part et d\'autre **plus** un point plein ' +
-              'isolé ailleurs sur la même verticale : le point appartient bien au domaine, mais ' +
-              'sa valeur ne suit pas la continuité apparente de la courbe.',
-          ],
-        },
-        {
-          kind: 'para',
-          text:
-            'Pour l\'ordonnée à l\'origine comme pour la valeur en un point précis, deux ' +
-            'réponses sont possibles : soit la valeur demandée **existe** (elle se lit ' +
-            'directement sur la courbe), soit elle **n\'existe pas** — parce que le point tombe ' +
-            'justement sur une valeur exclue du domaine.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Caractéristiques d\'une fonction (lecture graphique)',
-          generatorId: 'gen12',
-          description: [
-            'Décris une courbe composite (domaine, zéros, croissance/décroissance/constance, ' +
-              'ordonnée à l\'origine, valeur en un point, asymptotes) toujours affichée à ' +
-              'l\'écran, sans formule algébrique.',
-          ],
-          chantier: '4e',
-          whereLabel: '4e → « 12. Caractéristiques d\'une fonction (lecture graphique) »',
-        },
-      ],
-    },
-    {
-      id: 'algebrique',
-      number: 3,
-      title: 'Étudier algébriquement une fonction de référence',
-      kicker: 'f(x) = [famille](ax + b) + k — CE, domaine, isolement, zéros',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Sans aucun graphique cette fois : à partir de l\'écriture algébrique ' +
-            '$f(x) = [famille](ax+b) + k$, il faut poser la condition d\'existence, en déduire ' +
-            'le domaine, isoler la famille pour trouver les zéros.',
-        },
-        {
-          kind: 'attention',
-          label: 'Le sens de l\'inégalité peut s\'inverser',
-          text:
-            'Pour la racine carrée, isoler $x$ dans $ax+b \\ge 0$ demande de diviser par $a$ — ' +
-            'et diviser par un nombre **négatif** inverse le sens de l\'inégalité. D\'où les ' +
-            'deux cas : domaine $[p\\,;\\,+\\infty[$ si $a > 0$, mais $]-\\infty\\,;\\,p]$ si $a < 0$.',
-        },
-        {
-          kind: 'exemple',
-          badge: 'inverse',
-          formula: '$f(x) = \\dfrac{1}{2x+4} - \\dfrac{1}{3}$',
-          steps: [
-            { tag: 'CE', text: '$2x+4 \\neq 0 \\iff x \\neq -2$' },
-            { tag: 'domaine', text: 'ℝ \\ {−2}' },
-            { tag: 'isolement — résoudre f(x) = 0', text: '$\\dfrac{1}{2x+4} = \\dfrac{1}{3}$' },
-            { tag: 'se débarrasser du dénominateur (produit en croix)', text: '$2x+4 = 3$' },
-          ],
-          result: { tag: 'zéro', text: '$x = -1/2$' },
-        },
-        {
-          kind: 'exemple',
-          badge: 'racine carrée',
-          formula: '$f(x) = \\sqrt{2x-4} - \\dfrac{1}{2}$',
-          steps: [
-            { tag: 'CE', text: '$2x-4 \\ge 0 \\iff x \\ge 2$ (a = 2 > 0, le sens ne change pas)' },
-            { tag: 'domaine', text: '$[2\\,;\\,+\\infty[$' },
-            { tag: 'isolement — résoudre f(x) = 0', text: '$\\sqrt{2x-4} = \\dfrac{1}{2}$' },
-            { tag: 'se débarrasser de la racine carrée (élever au carré)', text: '$2x-4 = 1/4$' },
-          ],
-          result: { tag: 'zéro', text: '$x = 17/8$' },
-        },
-        {
-          kind: 'featureTable',
-          caption: 'Nombre de zéros de [famille](ax+b) = K, selon le signe de K',
-          headers: ['Famille', 'K < 0', 'K > 0'],
-          rows: [
-            ['Carrée / Valeur absolue', '0 zéro', '2 zéros'],
-            ['Racine carrée', '0 zéro', '1 zéro'],
-            ['Cube / Racine cubique / Inverse', 'toujours exactement 1 zéro', 'toujours exactement 1 zéro'],
-          ],
-        },
-        {
-          kind: 'astuce',
-          label: 'Astuce — carrée et valeur absolue se séparent en deux équations',
-          text:
-            'Isoler la carrée ou la valeur absolue mène à une expression du type $P(x)^2 = K$ ' +
-            'ou $|P(x)| = K$ (K > 0) : dans les deux cas, il faut séparer en **deux** équations ' +
-            'linéaires distinctes — $P(x) = \\sqrt{K}$ et $P(x) = -\\sqrt{K}$ pour le carré, ' +
-            '$P(x) = K$ et $P(x) = -K$ pour la valeur absolue — jamais une seule.',
-        },
-        { kind: 'video', title: 'Caractéristiques algébriques d\'une fonction de référence', youtubeId: 'l4-QfH7ZPXU' },
-        {
-          kind: 'entrainement',
-          title: 'Caractéristiques algébriques d\'une fonction de référence',
-          generatorId: 'gen13',
-          description: [
-            'Détermine CE, domaine, isole la famille de référence et trouve les zéros de ' +
-              'f(x) = [famille](ax+b) + k, pour les 6 familles.',
-          ],
-          chantier: '4e',
-          whereLabel: '4e → « 13. Caractéristiques algébriques d\'une fonction de référence »',
-        },
-      ],
-    },
-    {
       id: 'revision',
       number: 4,
       title: 'Révision — vrai ou faux',
@@ -603,17 +603,17 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
     items: [
       '**6 familles** — carrée (x²), cube (x³), racine carrée (√x, domaine [0;+∞[), racine ' +
         'cubique (∛x), inverse (1/x, domaine privé de 0), valeur absolue (|x|).',
+      '**Lecture graphique** — toujours dans l\'ordre domaine → zéros → variations → ordonnée ' +
+        'à l\'origine → valeur en un point → asymptotes ; distinguer trou, point plein et point redéfini.',
+      '**Étude algébrique** — CE selon la famille (aucune, ≠0 pour l\'inverse, ≥0 ou ≤0 selon ' +
+        'le signe de a pour la racine carrée), puis isoler pour trouver les zéros — carrée et ' +
+        'valeur absolue se séparent toujours en deux équations.',
       '**Formule unifiée** — $f(x) = SOX \\cdot (EV/CV) \\cdot g(SOY \\cdot (CH/EH) \\cdot ' +
         '(x-TH)) + TV$ ; TH toujours soustrait, TV toujours ajouté ; le point caractéristique ' +
         'reste toujours en x=TH.',
       '**Parité et redondance** — SOY invisible pour une famille paire ; SOX et SOY ' +
         'interchangeables pour une famille impaire ; seule la racine carrée donne à SOY un rôle ' +
         'vraiment indépendant.',
-      '**Lecture graphique** — toujours dans l\'ordre domaine → zéros → variations → ordonnée ' +
-        'à l\'origine → valeur en un point → asymptotes ; distinguer trou, point plein et point redéfini.',
-      '**Étude algébrique** — CE selon la famille (aucune, ≠0 pour l\'inverse, ≥0 ou ≤0 selon ' +
-        'le signe de a pour la racine carrée), puis isoler pour trouver les zéros — carrée et ' +
-        'valeur absolue se séparent toujours en deux équations.',
     ],
     checklist: {
       items: [
