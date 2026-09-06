@@ -1,13 +1,13 @@
 import type { ChapterContent } from '../../content/types'
 
 /**
- * Export HTML (A4) — quatrième format, à côté de docx/pdf/pptx. Contrairement aux trois autres,
- * `runExport.ts` ne passe JAMAIS par `captureBlocks.ts`/`html2canvas` pour ce format : une formule
- * reste du vrai HTML KaTeX (sélectionnable, net à toute résolution d'impression), pas une image
- * rasterisée — même principe que `genererFeuilleExercicesHtml.ts` côté plateforme-maths (projet
- * jumeau du même auteur), adapté ici pour reprendre l'INTÉGRALITÉ du CSS du site (typographie,
- * `.diagram-frame`, `.callout`, `.exemple`, tableaux...) plutôt qu'un CSS minimal reconstruit à la
- * main, puisqu'on exporte un chapitre déjà mis en forme et pas une feuille d'exercices générée.
+ * Export HTML (A4) — seul format d'export du site. Le fichier téléchargé reste du vrai DOM/CSS,
+ * jamais rasterisé : une formule reste du vrai HTML KaTeX (sélectionnable, net à toute résolution
+ * d'impression), pas une image — même principe que `genererFeuilleExercicesHtml.ts` côté
+ * plateforme-maths (projet jumeau du même auteur), adapté ici pour reprendre l'INTÉGRALITÉ du CSS
+ * du site (typographie, `.diagram-frame`, `.callout`, `.exemple`, tableaux...) plutôt qu'un CSS
+ * minimal reconstruit à la main, puisqu'on exporte un chapitre déjà mis en forme et pas une
+ * feuille d'exercices générée.
  */
 
 /** Toutes les règles CSS déjà chargées par le site (Vite bundle `index.css` + `katex.min.css` dans
@@ -29,13 +29,9 @@ function toutesLesReglesCss(): string {
   return regles.join('\n')
 }
 
-/** Retire le bloc de préférence sombre du CSS copié. L'export est TOUJOURS en thème clair — même
- * intention que `withLightTheme()` dans `captureBlocks.ts` pour les 3 autres formats — mais le
- * mécanisme diffère : un fichier HTML téléchargé n'a plus le JS de ce site pour poser
- * `data-theme="light"` à l'ouverture, donc on retire la règle plutôt que de compter sur un
- * attribut qui ne sera jamais posé. (Cette règle ne teste de toute façon aujourd'hui aucun
- * `data-theme` dans `src/index.css` — voir le bug séparé sur `captureBlocks.ts`/`withLightTheme()`,
- * sans rapport avec cet export.) */
+/** Retire le bloc de préférence sombre du CSS copié. L'export est TOUJOURS en thème clair : un
+ * fichier HTML téléchargé n'a plus le JS de ce site pour forcer un thème à l'ouverture, donc on
+ * retire directement la règle plutôt que de compter sur un attribut/mécanisme runtime. */
 function retirerPreferenceSombre(css: string): string {
   return css.replace(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{[\s\S]*?\n\}\n?/g, '')
 }
@@ -126,10 +122,8 @@ const STYLE_IMPRESSION = `
  * d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur propre colonne de grille, un
  * second rétrécissement à 40% de cette largeur les rendrait illisibles.
  *
- * Contrairement à l'ancien mécanisme équivalent pour Word/PDF/PowerPoint (retiré : voir
- * `.claude/rules/content-history.md`), ce format HTML (A4) reste du vrai DOM/CSS — jamais rasterisé
- * via html2canvas — donc un `width` en `%` sur un `<svg>` s'y résout normalement, sans le risque de
- * mauvaise résolution/déformation propre à html2canvas qui avait motivé ce retrait. */
+ * Ce format reste du vrai DOM/CSS — jamais rasterisé — donc un `width` en `%` sur un `<svg>` s'y
+ * résout normalement, sans risque de mauvaise résolution/déformation. */
 const ECHELLE_DIAGRAMMES_HTML = 40
 const STYLE_DIAGRAMMES = `
 .diagram-frame { width: ${ECHELLE_DIAGRAMMES_HTML}% !important; margin: 0 auto !important; }
@@ -142,9 +136,8 @@ function echapperHtml(texte: string): string {
 }
 
 /** Construit le fichier HTML A4 complet (`Blob`, type `text/html`) à partir du chapitre déjà
- * affiché à l'écran. `.no-export` (nav, cartes vers les générateurs) est retiré du clone AVANT
- * capture du HTML — même filtre que `collectBlocks.ts` pour les 3 autres formats, mais appliqué
- * directement en DOM plutôt qu'élément par élément puisqu'aucune rasterisation n'a lieu ici. */
+ * affiché à l'écran. `.no-export` (nav, cartes vers les générateurs, widgets interactifs) est
+ * retiré du clone AVANT sérialisation. */
 export async function buildHtmlBlob(chapter: ChapterContent): Promise<Blob> {
   const page = document.querySelector('.page')
   if (!page) throw new Error('buildHtmlBlob : .page introuvable dans le DOM')

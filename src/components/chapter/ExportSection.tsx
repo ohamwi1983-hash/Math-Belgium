@@ -1,34 +1,24 @@
 import { useRef, useState } from 'react'
 import type { ChapterContent } from '../../content/types'
-import type { ExportFormat } from '../../lib/export/types'
 import { runExport } from '../../lib/export/runExport'
 
-const FORMATS: { format: ExportFormat; icon: string; label: string; sub: string }[] = [
-  { format: 'docx', icon: '📄', label: 'Word', sub: '.docx — A4' },
-  { format: 'pdf', icon: '🖨️', label: 'PDF', sub: '.pdf — A4' },
-  { format: 'pptx', icon: '🖥️', label: 'PowerPoint', sub: '.pptx — diapositives' },
-  { format: 'html', icon: '🌐', label: 'HTML (A4)', sub: '.html — imprimable, hors ligne' },
-]
-
-const FORMAT_LABEL: Record<ExportFormat, string> = { docx: 'Word', pdf: 'PDF', pptx: 'PowerPoint', html: 'HTML (A4)' }
-
-/** Section "Télécharger ce chapitre" — export Word/PDF/PowerPoint, en bas de chaque page de chapitre. */
+/** Section "Télécharger ce chapitre" — export HTML (A4), en bas de chaque page de chapitre. */
 export function ExportSection({ chapter }: { chapter: ChapterContent }) {
-  const [busyFormat, setBusyFormat] = useState<ExportFormat | null>(null)
+  const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('')
   const [isError, setIsError] = useState(false)
   // Évite d'afficher le statut d'une génération déjà abandonnée si l'utilisateur relance vite.
   const requestId = useRef(0)
 
-  async function handleClick(format: ExportFormat) {
+  async function handleClick() {
     const id = ++requestId.current
-    setBusyFormat(format)
+    setBusy(true)
     setIsError(false)
-    setStatus(`Préparation (${FORMAT_LABEL[format]})…`)
+    setStatus('Préparation…')
     try {
-      await runExport(format, chapter, ({ done, total }) => {
+      await runExport(chapter, ({ done, total }) => {
         if (requestId.current !== id) return
-        setStatus(total > 0 ? `Génération ${FORMAT_LABEL[format]}… (${done}/${total})` : `Assemblage du document ${FORMAT_LABEL[format]}…`)
+        setStatus(total > 0 ? `Génération… (${done}/${total})` : 'Assemblage du document…')
       })
       if (requestId.current !== id) return
       setStatus('Téléchargé ✓')
@@ -41,7 +31,7 @@ export function ExportSection({ chapter }: { chapter: ChapterContent }) {
       setIsError(true)
       setStatus('Le téléchargement a échoué — réessaie.')
     } finally {
-      if (requestId.current === id) setBusyFormat(null)
+      if (requestId.current === id) setBusy(false)
     }
   }
 
@@ -53,21 +43,13 @@ export function ExportSection({ chapter }: { chapter: ChapterContent }) {
         sans jamais couper un exemple ou un graphique en changeant de page.
       </p>
       <div className="export-buttons">
-        {FORMATS.map(({ format, icon, label, sub }) => (
-          <button
-            key={format}
-            type="button"
-            className="export-btn"
-            disabled={busyFormat !== null}
-            onClick={() => handleClick(format)}
-          >
-            <span className="export-icon" aria-hidden="true">
-              {icon}
-            </span>
-            <span className="export-label">{label}</span>
-            <span className="export-sub">{sub}</span>
-          </button>
-        ))}
+        <button type="button" className="export-btn" disabled={busy} onClick={handleClick}>
+          <span className="export-icon" aria-hidden="true">
+            🌐
+          </span>
+          <span className="export-label">HTML (A4)</span>
+          <span className="export-sub">.html — imprimable, hors ligne</span>
+        </button>
       </div>
       <p className={`export-status${isError ? ' is-error' : ''}`}>{status}</p>
     </div>

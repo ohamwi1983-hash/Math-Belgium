@@ -31,8 +31,9 @@ l'artifact), un `register-<tag>.js` qui l'importe en effet de bord (garantit l'O
 ES module — un widget dépendant d'un module partagé, ex. `gen8-widget` lisant `window.Gen7Core`,
 doit l'importer AVANT son propre fichier), une entrée dans `InteractiveWidgetTag` (liste fermée),
 et son cas dans `InteractiveWidget.tsx`. `.atelier-frame-wrap`/`.widget-host` (`index.css`) et le
-sélecteur d'export Word/PDF/PPTX (`.no-export`, déjà posé sur ces conteneurs) suivent le même
-principe que les autres blocs non exportables.
+sélecteur d'export HTML (A4) (`.no-export`, déjà posé sur ces conteneurs) suivent le même principe
+que les autres blocs non exportables — un Shadow DOM n'est de toute façon pas repris par un
+`cloneNode`/`outerHTML` classique.
 
 **Piège vérifié en pratique** : un fichier `.js` porté verbatim depuis un artifact suit souvent un
 motif d'export UMD (`if (typeof module !== "undefined" && module.exports) module.exports = X; else

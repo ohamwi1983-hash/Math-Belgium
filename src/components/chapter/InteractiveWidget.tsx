@@ -14,8 +14,8 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
 /**
  * Monte un Web Component autonome (Shadow DOM) porté depuis l'artifact d'origine. Le composant
  * gère entièrement son propre état interne (React ne fait que le poser dans le DOM une fois) —
- * jamais capturé par l'export (voir `.no-export` sur le conteneur appelant, `iframe`/Shadow DOM
- * ne peuvent pas être rendus par html2canvas).
+ * jamais capturé par l'export HTML (A4) (voir `.no-export` sur le conteneur appelant : un Shadow
+ * DOM n'est de toute façon pas repris par un `cloneNode`/`outerHTML` classique).
  */
 export function InteractiveWidget({ tag }: { tag: InteractiveWidgetTag }) {
   const hostRef = useRef<HTMLDivElement>(null)
