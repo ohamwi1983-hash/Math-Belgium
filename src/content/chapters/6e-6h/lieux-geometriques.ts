@@ -46,25 +46,38 @@ export const lieuxGeometriques: ChapterContent = {
           items: [
             {
               kind: 'vectorPlane',
-              xMin: -3, xMax: 3, yMin: -2.8125, yMax: 2.8125,
-              vectors: [-3, -2, -1, 0, 1, 2, 3].map((gx) => ({
-                from: { x: gx, y: -2.8125 }, to: { x: gx, y: 2.8125 }, tone: 'faint' as const, arrow: false,
-              })).concat([-2, -1, 0, 1, 2].map((gy) => ({
-                from: { x: -3, y: gy }, to: { x: 3, y: gy }, tone: 'faint' as const, arrow: false,
-              }))),
-              circle: { cx: 0, cy: 0, r: 2, tone: 'accent' },
+              xMin: -2.5, xMax: 3.5, yMin: -2.1875, yMax: 3.4375,
+              showAxes: false,
+              circle: { cx: 0, cy: 0, r: 1.8, tone: 'accent' },
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'ink', arrow: true },
+                { from: { x: 0, y: 0 }, to: { x: 0, y: 2.8 }, tone: 'ink', arrow: true },
+              ],
+              rightAngleMarkers: [{ vertex: { x: 0, y: 0 }, arm1: { x: 3, y: 0 }, arm2: { x: 0, y: 2.8 } }],
+              angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 90, radiusPx: 16, tone: 'good', label: '90°' }],
+              points: [
+                { x: 3.05, y: 0, label: 'x', tone: 'ink', node: false, labelPos: 'right' },
+                { x: 0, y: 2.9, label: 'y', tone: 'ink', node: false, labelPos: 'right' },
+                { x: -2.3, y: 3.0, label: 'orthonormé ✓', tone: 'good', node: false, labelPos: 'right' },
+              ],
               caption: 'repère ORTHONORMÉ : un cercle y reste rond, distances et angles se calculent avec les formules usuelles',
             },
             {
               kind: 'vectorPlane',
-              xMin: -3, xMax: 3, yMin: -1, yMax: 1,
-              vectors: [-3, -2, -1, 0, 1, 2, 3].map((gx) => ({
-                from: { x: gx, y: -1 }, to: { x: gx, y: 1 }, tone: 'faint' as const, arrow: false,
-              })).concat([-1, 0, 1].map((gy) => ({
-                from: { x: -3, y: gy }, to: { x: 3, y: gy }, tone: 'faint' as const, arrow: false,
-              }))),
+              xMin: -2.5, xMax: 3.5, yMin: -2.1875, yMax: 3.4375,
+              showAxes: false,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'ink', arrow: true },
+                { from: { x: 0, y: 0 }, to: { x: 1.3, y: 2.7 }, tone: 'ink', arrow: true },
+              ],
+              angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 64.3, radiusPx: 18, tone: 'accent', label: '≠90°' }],
+              points: [
+                { x: 3.05, y: 0, label: 'x', tone: 'ink', node: false, labelPos: 'right' },
+                { x: 1.3, y: 2.75, label: 'y', tone: 'ink', node: false, labelPos: 'above' },
+                { x: -2.3, y: 3.0, label: 'affine — unités ≠', tone: 'accent', node: false, labelPos: 'right' },
+              ],
               caption:
-                "repère seulement AFFINE (ici, unités différentes sur les deux axes) : le carreau du quadrillage n'est plus carré — distance, angle, cercle perdent leur sens usuel",
+                "repère seulement AFFINE (axes non perpendiculaires et/ou unités différentes) : distance, angle, cercle perdent leur sens usuel",
             },
           ],
         },
