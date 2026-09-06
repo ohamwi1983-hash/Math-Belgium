@@ -119,6 +119,24 @@ const STYLE_IMPRESSION = `
 }
 `
 
+/** Diagrammes réduits à 40% de leur taille réelle — demande explicite, propre à ce format. Réduit
+ * le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre, pas seulement le SVG à
+ * l'intérieur (sinon le cadre resterait pleine largeur avec le dessin flottant au milieu, entouré
+ * de vide) ; le SVG repasse à 100% pour remplir son cadre déjà réduit. Exclut les mini-diagrammes
+ * d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur propre colonne de grille, un
+ * second rétrécissement à 40% de cette largeur les rendrait illisibles.
+ *
+ * Contrairement à l'ancien mécanisme équivalent pour Word/PDF/PowerPoint (retiré : voir
+ * `.claude/rules/content-history.md`), ce format HTML (A4) reste du vrai DOM/CSS — jamais rasterisé
+ * via html2canvas — donc un `width` en `%` sur un `<svg>` s'y résout normalement, sans le risque de
+ * mauvaise résolution/déformation propre à html2canvas qui avait motivé ce retrait. */
+const ECHELLE_DIAGRAMMES_HTML = 40
+const STYLE_DIAGRAMMES = `
+.diagram-frame { width: ${ECHELLE_DIAGRAMMES_HTML}% !important; margin: 0 auto !important; }
+.diagram-frame svg { width: 100% !important; margin: 0 !important; }
+.diag-multi .diagram-frame { width: 100% !important; margin: 0 !important; }
+`
+
 function echapperHtml(texte: string): string {
   return texte.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
@@ -143,7 +161,7 @@ export async function buildHtmlBlob(chapter: ChapterContent): Promise<Blob> {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${titre}</title>
-<style>${css}${STYLE_IMPRESSION}</style>
+<style>${css}${STYLE_IMPRESSION}${STYLE_DIAGRAMMES}</style>
 </head>
 <body>
 ${clone.outerHTML}
