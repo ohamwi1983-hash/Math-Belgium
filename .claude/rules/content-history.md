@@ -521,3 +521,62 @@ paths:
   chevauchement, aucun chevauchement avec "sin"/"cos", `0` `.katex-error`, aucun `$...$` non résolu ;
   diagramme original à 5 points de `4e/cercle-trigonometrique-triangles.ts` confirmé pixel identique
   à avant ; re-rendu des 22 chapitres du site sans régression. `npm run build`/`npm run lint` propres.
+
+- **6e (6h), Chapitre 10 — Les coniques** (`coniques`, nouveau fichier) : chapitre entièrement
+  nouveau (pas un patch), migré depuis un artifact HTML autonome fourni par l'utilisateur (fichier
+  `lesconiquessource.html`, ~1730 lignes, mise en page/CSS/diagrammes JS from scratch — même type de
+  source que les chapitres 1-9 à l'origine du site). 6 sections (identifier/caractériser, excentricité
+  + foyers/directrices + réduction d'équation + théorème de Dandelin-Quételet, aire/rayons focaux,
+  intersection droite-conique, tangentes, propriétés optiques) + une synthèse purement tabulaire
+  (`recap.table`, 26 lignes Notion/Point clé, sur le modèle de `lieux-geometriques`) ; 6 liens
+  générateur par section (`6gen58`-`6gen63`) + un quiz de synthèse (`6gen73`).
+  **Aucune extension de schéma nécessaire** : les ~17 diagrammes du chapitre (parabole avec
+  foyer/directrice, 4 orientations, ellipse et hyperbole avec foyers/sommets/asymptotes, comparaison
+  cercle/ellipse, hyperbole équilatère et sa forme `xy=k`, 3 coniques de même foyer superposées, coupe
+  d'un cône avec 2 sphères de Dandelin, translation d'axes, triangle focal avec aire, angle droit au
+  sommet non focal, intersection droite-conique, tangente, 3 miroirs optiques avec rayons réfléchis)
+  tiennent tous dans le `vectorPlane` générique existant — une ellipse/hyperbole se trace en deux
+  `curves`/`curvesOfY` (moitiés `y=±b√(1-x²/a²)` etc., même procédé que l'astroïde de
+  `lieux-geometriques`), directrices/asymptotes/tangentes/rayons sont de simples `vectors` (segments
+  calculés aux bords du cadre, `dashed`/`arrow:false` selon le cas), la coupe de cône n'est qu'un
+  schéma statique de segments + `circles`. Conforme à la convention déjà établie : étendre
+  `vectorPlane`/`curvePlot`/`circleAngles` plutôt que créer un nouveau `kind` tant que les champs
+  génériques existants suffisent — ici, ils suffisaient intégralement. Garde `r(x) = Math.sqrt(Math.max(0,x))`
+  ajoutée en tête de fichier : l'échantillonnage à 60 points de `VectorPlane` peut tomber juste sous 0
+  par erreur d'arrondi flottant en bord de domaine d'une expression sous racine (ellipse/hyperbole/
+  parabole/caractérisation focale), ce qui casserait le path SVG en `NaN` sans ce garde-fou.
+  **Trois pièges de rendu texte trouvés et corrigés au premier passage navigateur réel** (39 signes
+  `$` isolés détectés par `regress_all.mjs`, tous corrigés) : (1) usage systématique erroné de
+  `$$latex$$` (display math) pour toutes les équations "mises en avant" — syntaxe inexistante sur ce
+  site (voir piège ajouté à `.claude/rules/content-authoring.md`), corrigé par un remplacement global
+  `$$`→`$` puisque la seule paire `$...$` restante suffit et rend déjà l'équation sur sa propre ligne
+  dans un `para`/`exemple` isolé ; (2) deux `tag` de `steps` d'un bloc `exemple` contenant du
+  `$latex$` (`tag` est rendu en texte BRUT, jamais passé par `RichText`) — corrigés en unicode simple
+  (`b²=a²−c²`, sans délimiteurs) ; (3) un `$R_2$` imbriqué à l'intérieur d'un span `**gras**`
+  (piège déjà documenté : le tokenizer capture tout le `**...**` comme gras littéral et ne réanalyse
+  jamais son contenu) — corrigé en sortant le `$R_2$` du span gras. Une quatrième chaîne (le contrôle
+  par la formule de Héron) avait une accolade `$` d'ouverture jamais refermée (faute de frappe lors de
+  la rédaction, pas un piège du renderer) — corrigée en fermant le mode math avant le "— résultat
+  identique." final.
+  **Bug géométrique trouvé et corrigé par inspection visuelle réelle, pas par simple absence
+  d'erreur console** : le diagramme du théorème de Dandelin-Quételet (coupe du cône, 2 sphères
+  inscrites) avait un domaine `xMin/xMax/yMin/yMax` dont le rapport ne respectait pas le ratio
+  320/300 du viewBox de `VectorPlane` (seul cas où ce ratio compte vraiment : un cercle non conforme
+  au ratio s'affiche ellipsé) — corrigé en imposant exactement ce ratio. Plus grave : les points F/F′
+  (foyers) et M/M′ (tangence à la génératrice) avaient été placés à l'œil plutôt que calculés, si bien
+  que F/F′ ne tombaient pas réellement sur une droite sécante tangente aux deux cercles — recalculé
+  analytiquement (rayons des 2 cercles inscrits proportionnels à la distance à l'apex du cône,
+  tangente commune "interne" aux deux cercles par produit scalaire avec la normale, point de
+  génératrice-cercle par projection orthogonale, `P` par intersection droite-droite) puis vérifié
+  numériquement (chaque point de tangence recalculé est bien à distance exactement `r` du centre de
+  son cercle) avant d'écrire les coordonnées dans le contenu — capture d'écran de confirmation après
+  coup montrant la sécante réellement tangente aux deux cercles cette fois.
+  **Une couleur de légende incohérente avec le thème réel** : une figcaption annonçait la parabole
+  "bleu" dans le diagramme à 3 coniques superposées, alors que le ton `'accent'` de ce site rend en
+  orange/rouille (`--accent: #b65c1f`, jamais bleu — vérifié dans `src/index.css`, pas supposé) ;
+  texte corrigé en "orange".
+  Vérifié par rendu navigateur réel (clair ET sombre) des ~20 figures une par une (captures
+  individuelles par élément `<figure>`), page d'accueil (lien vers le chapitre présent), en-tête et
+  table des matières, et le tableau de synthèse ; sitewide `regress_all.mjs` sur les 23 chapitres :
+  `0` erreur console, `0` `NaN`/`undefined`, `0` signe `$` isolé restant, partout. `npm run
+  build`/`npm run lint` propres (aucun avertissement nouveau au-delà des préexistants).

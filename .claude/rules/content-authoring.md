@@ -62,6 +62,17 @@ retrouvé dans plusieurs chapitres déjà en production (`caracteristiques-fonct
 gras littéral, dollars compris, et KaTeX ne s'exécute jamais dessus. Toujours écrire le gras et
 le math comme deux segments adjacents, jamais l'un dans l'autre.
 
+**Piège vérifié en pratique** : il n'existe **aucune** syntaxe de math "display"/bloc — `$$latex$$`
+n'est pas un délimiteur reconnu. `TOKEN_RE` (`/\$([^$]+)\$|\*\*([^*]+)\*\*/g`) ne matche que des
+paires `$...$` dont le contenu ne contient aucun `$` : sur `$$y^2=2px$$`, le moteur ne peut pas
+matcher depuis le tout premier `$` (le caractère suivant est aussi `$`, donc `[^$]+` échoue) ; il
+matche en revanche depuis le **second** `$` jusqu'à l'avant-dernier, laissant le tout premier et le
+tout dernier `$` comme texte littéral non reconnu — deux `$` isolés qui s'affichent verbatim de
+part et d'autre de la formule (repéré au premier rendu réel : `$$` dupliqués sur toute la
+maquette). Toujours écrire une seule paire `$...$`, même pour une équation qu'on voudrait "mise en
+avant" (elle reste inline, sur sa propre ligne si elle est seule dans un `para`/`exemple`/`step`) —
+jamais `$$...$$`.
+
 **Piège confirmé en pratique** : seuls `text`/`items`/`formula`/`caption` passent par `RichText`.
 Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section, `description` de bloc
 `entrainement` et en-têtes de `featureTable` sont rendus en texte BRUT — y écrire `$...$` affiche
