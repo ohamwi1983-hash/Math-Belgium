@@ -50,7 +50,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'horizontal : son cosinus se rapproche de 1, son sinus se rapproche de 0. À ' +
             'l\'inverse, quand θ se rapproche de 90°, M(θ) se rapproche de l\'axe vertical : son ' +
             'cosinus se rapproche de 0, son sinus se rapproche de 1 — une façon utile de ' +
-            'retrouver de tête le sens d\'une valeur remarquable sans recalculer (section 2).',
+            'retrouver de tête le sens d\'une valeur remarquable sans recalculer (section 3).',
         ],
       },
     ],
@@ -173,8 +173,85 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       ],
     },
     {
-      id: 'remarquables',
+      id: 'identite',
       number: 2,
+      title: 'L\'identité fondamentale : retrouver sin ou cos',
+      kicker: 'cos²θ + sin²θ = 1 — un théorème de Pythagore déguisé',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Le point M(θ) = (cos θ ; sin θ) est, par définition, sur le cercle de rayon 1 : le ' +
+            'triangle rectangle formé par O, M et le pied de sa projection sur l\'axe ' +
+            'horizontal donne directement Pythagore.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            points: [{ angle: 55 * D2R, label: 'M', tone: 'accent' }],
+            projectToXAxis: true,
+            rightAngleMarkers: [{ x: Math.cos(55 * D2R), y: 0 }],
+            angleArcs: [{ from: 0, to: 55 * D2R, tone: 'accent', radiusPx: 30, arrow: true, label: 'θ' }],
+            freeLabels: [
+              { x: -0.08, y: -0.1, text: 'O' },
+              { x: Math.cos(55 * D2R) + 0.1, y: -0.1, text: 'P' },
+              { x: Math.cos(55 * D2R) / 2, y: -0.11, text: 'cos θ' },
+              { x: Math.cos(55 * D2R) + 0.14, y: Math.sin(55 * D2R) / 2, text: 'sin θ' },
+            ],
+            caption: 'OP² + PM² = OM² devient cos²θ + sin²θ = 1² — vrai pour tout angle θ, dans n\'importe quel quadrant',
+          },
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Formule',
+          blocks: [
+            { kind: 'para', text: '$\\cos^2\\theta + \\sin^2\\theta = 1$' },
+            { kind: 'para', text: 'Connaître l\'un des deux (sin θ ou cos θ) permet donc de retrouver l\'autre — à un signe près, tranché par le quadrant.' },
+          ],
+        },
+        {
+          kind: 'methode',
+          items: [
+            'Isoler le terme cherché : $\\cos^2\\theta = 1-\\sin^2\\theta$ (ou l\'inverse).',
+            'Prendre la racine carrée : $\\cos\\theta = \\pm\\sqrt{1-\\sin^2\\theta}$ — **deux** valeurs possibles à ce stade.',
+            'Trancher le signe grâce au quadrant (ou à l\'intervalle) donné dans l\'énoncé pour θ.',
+            'Si besoin, en déduire $\\tan\\theta = \\sin\\theta/\\cos\\theta$.',
+          ],
+        },
+        {
+          kind: 'piege',
+          label: 'Oublier le ±',
+          text:
+            'Une racine carrée donne toujours deux possibilités de signe. Répondre directement ' +
+            '$\\cos\\theta = \\sqrt{1-\\sin^2\\theta}$ (sans le ±, ni la vérification du ' +
+            'quadrant) revient à supposer, sans le dire, que θ est dans un quadrant où cos θ ' +
+            'est positif — faux une fois sur deux.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'sin θ = 3/5, θ ∈ ]90° ; 180°[',
+          steps: [
+            { tag: 'quadrant de θ', text: ']90°;180°[ → quadrant II → cos négatif' },
+            { tag: 'isoler cos²θ', text: 'cos²θ = 1 − (3/5)² = 1 − 9/25 = 16/25' },
+            { tag: 'racine, signe imposé par le quadrant', text: 'cos θ = −√(16/25) = −4/5' },
+            { tag: 'tan θ', text: 'tan θ = sin θ / cos θ = (3/5) / (−4/5) = −3/4' },
+          ],
+          result: { tag: 'résultat', text: 'cos θ = −4/5, tan θ = −3/4' },
+        },
+        {
+          kind: 'entrainement',
+          title: 'L\'un sans l\'autre',
+          generatorId: 'gen16',
+          description: ['Retrouve sin θ ou cos θ à partir de l\'autre et d\'un intervalle sur θ, puis tan θ.'],
+          chantier: '4e',
+          whereLabel: '4e → « 16. L\'un sans l\'autre »',
+        },
+      ],
+    },
+    {
+      id: 'remarquables',
+      number: 3,
       title: 'Les valeurs remarquables',
       kicker: '0°, 30°, 45°, 60°, 90° — à connaître par cœur, puis étendre par symétrie',
       blocks: [
@@ -312,83 +389,6 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       ],
     },
     {
-      id: 'identite',
-      number: 3,
-      title: 'L\'identité fondamentale : retrouver sin ou cos',
-      kicker: 'cos²θ + sin²θ = 1 — un théorème de Pythagore déguisé',
-      blocks: [
-        {
-          kind: 'para',
-          text:
-            'Le point M(θ) = (cos θ ; sin θ) est, par définition, sur le cercle de rayon 1 : le ' +
-            'triangle rectangle formé par O, M et le pied de sa projection sur l\'axe ' +
-            'horizontal donne directement Pythagore.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'circleAngles',
-            points: [{ angle: 55 * D2R, label: 'M', tone: 'accent' }],
-            projectToXAxis: true,
-            rightAngleMarkers: [{ x: Math.cos(55 * D2R), y: 0 }],
-            angleArcs: [{ from: 0, to: 55 * D2R, tone: 'accent', radiusPx: 30, arrow: true, label: 'θ' }],
-            freeLabels: [
-              { x: -0.08, y: -0.1, text: 'O' },
-              { x: Math.cos(55 * D2R) + 0.1, y: -0.1, text: 'P' },
-              { x: Math.cos(55 * D2R) / 2, y: -0.11, text: 'cos θ' },
-              { x: Math.cos(55 * D2R) + 0.14, y: Math.sin(55 * D2R) / 2, text: 'sin θ' },
-            ],
-            caption: 'OP² + PM² = OM² devient cos²θ + sin²θ = 1² — vrai pour tout angle θ, dans n\'importe quel quadrant',
-          },
-        },
-        {
-          kind: 'exempleLibre',
-          label: 'Formule',
-          blocks: [
-            { kind: 'para', text: '$\\cos^2\\theta + \\sin^2\\theta = 1$' },
-            { kind: 'para', text: 'Connaître l\'un des deux (sin θ ou cos θ) permet donc de retrouver l\'autre — à un signe près, tranché par le quadrant.' },
-          ],
-        },
-        {
-          kind: 'methode',
-          items: [
-            'Isoler le terme cherché : $\\cos^2\\theta = 1-\\sin^2\\theta$ (ou l\'inverse).',
-            'Prendre la racine carrée : $\\cos\\theta = \\pm\\sqrt{1-\\sin^2\\theta}$ — **deux** valeurs possibles à ce stade.',
-            'Trancher le signe grâce au quadrant (ou à l\'intervalle) donné dans l\'énoncé pour θ.',
-            'Si besoin, en déduire $\\tan\\theta = \\sin\\theta/\\cos\\theta$.',
-          ],
-        },
-        {
-          kind: 'piege',
-          label: 'Oublier le ±',
-          text:
-            'Une racine carrée donne toujours deux possibilités de signe. Répondre directement ' +
-            '$\\cos\\theta = \\sqrt{1-\\sin^2\\theta}$ (sans le ±, ni la vérification du ' +
-            'quadrant) revient à supposer, sans le dire, que θ est dans un quadrant où cos θ ' +
-            'est positif — faux une fois sur deux.',
-        },
-        {
-          kind: 'exemple',
-          badge: 'sin θ = 3/5, θ ∈ ]90° ; 180°[',
-          steps: [
-            { tag: 'quadrant de θ', text: ']90°;180°[ → quadrant II → cos négatif' },
-            { tag: 'isoler cos²θ', text: 'cos²θ = 1 − (3/5)² = 1 − 9/25 = 16/25' },
-            { tag: 'racine, signe imposé par le quadrant', text: 'cos θ = −√(16/25) = −4/5' },
-            { tag: 'tan θ', text: 'tan θ = sin θ / cos θ = (3/5) / (−4/5) = −3/4' },
-          ],
-          result: { tag: 'résultat', text: 'cos θ = −4/5, tan θ = −3/4' },
-        },
-        {
-          kind: 'entrainement',
-          title: 'L\'un sans l\'autre',
-          generatorId: 'gen16',
-          description: ['Retrouve sin θ ou cos θ à partir de l\'autre et d\'un intervalle sur θ, puis tan θ.'],
-          chantier: '4e',
-          whereLabel: '4e → « 16. L\'un sans l\'autre »',
-        },
-      ],
-    },
-    {
       id: 'associes',
       number: 4,
       title: 'Les angles associés',
@@ -492,7 +492,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           kind: 'methode',
           items: [
             'Trouver l\'angle de référence α₀ tel que sin/cos/tan de α₀ vaille |k| (table des ' +
-              'valeurs remarquables, section 2).',
+              'valeurs remarquables, section 3).',
             'En déduire les 2 solutions par la symétrie adaptée : pour sin α = k, α₀ et ' +
               '180° − α₀ si k > 0 (ou 180° + α₀ et 360° − α₀ si k < 0) ; pour cos α = k, α₀ et ' +
               '360° − α₀ si k > 0 (ou 180° − α₀ et 180° + α₀ si k < 0).',
@@ -661,7 +661,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           blocks: [
             { kind: 'para', text: 'Pythagore, hypoténuse BC = a : $a^2 = (c-b\\cos \\hat{A})^2 + (b\\sin \\hat{A})^2$' },
             { kind: 'para', text: 'Développer : $a^2 = c^2 - 2bc\\cos \\hat{A} + b^2\\cos^2 \\hat{A} + b^2\\sin^2 \\hat{A}$' },
-            { kind: 'para', text: 'Identité fondamentale (section 3) : $b^2\\cos^2 \\hat{A} + b^2\\sin^2 \\hat{A} = b^2(\\cos^2 \\hat{A}+\\sin^2 \\hat{A}) = b^2$' },
+            { kind: 'para', text: 'Identité fondamentale (section 2) : $b^2\\cos^2 \\hat{A} + b^2\\sin^2 \\hat{A} = b^2(\\cos^2 \\hat{A}+\\sin^2 \\hat{A}) = b^2$' },
             { kind: 'para', text: 'Résultat : $a^2 = b^2+c^2-2bc\\cos \\hat{A}$' },
           ],
         },
@@ -821,9 +821,9 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
     items: [
       '**Cercle trigonométrique** — M(θ) = (cos θ ; sin θ), rayon 1 ; quadrant → signe de ' +
         'sin/cos/tan ; angle du premier quadrant = θ, 180°−θ, θ−180° ou 360°−θ selon le quadrant.',
+      '**Identité fondamentale** — cos²θ + sin²θ = 1, toujours accompagnée d\'un ± tranché par le quadrant.',
       '**Valeurs remarquables** — 0/30/45/60/90° à connaître exactement, étendues à tout angle ' +
         'via l\'angle du premier quadrant + le signe du quadrant.',
-      '**Identité fondamentale** — cos²θ + sin²θ = 1, toujours accompagnée d\'un ± tranché par le quadrant.',
       '**Angles associés** — 4 familles (90°−θ, 180°−θ, 180°+θ, −θ), chacune sa propre règle ' +
         'de signe sur sin/cos/tan.',
       '**Équations trigonométriques** — en général 2 solutions sur [0°;360°[ (1 pour sin/cos ' +

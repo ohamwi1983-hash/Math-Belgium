@@ -338,3 +338,24 @@ paths:
   formule unifiée → parité et redondance), `recap.checklist` (déjà sans ordre strict par section)
   laissé inchangé. Vérifié par rendu navigateur réel : table des matières et corps de page dans le
   nouvel ordre, `tsc -b`/`npm run build`/`npm run lint` propres.
+
+- **4e, Chapitre 5 — Cercle trigonométrique & triangles quelconques**
+  (`cercle-trigonometrique-triangles`) : réordonné pour suivre l'ordre d'une page « Synthèse » de
+  manuel — la source traite l'identité fondamentale ($\cos^2\theta+\sin^2\theta=1$) comme faisant
+  partie du même premier point que l'extension du cercle trigonométrique au-delà de 90°, avant les
+  valeurs particulières ; la section « L'identité fondamentale » était en 3e position (après « Les
+  valeurs remarquables »), déplacée en 2e (juste après « Le cercle trigonométrique »). **Piège
+  vérifié en pratique** : plusieurs blocs de texte du chapitre référencent une autre section par son
+  numéro littéral (« section 2 », « section 3 »...) plutôt que par son nom — un simple déplacement
+  de section sans grep préalable sur `section [0-9]` aurait laissé ces renvois pointer vers le
+  mauvais contenu. Les 3 occurrences trouvées (intro → section identité, section équations →
+  section valeurs remarquables, section triangle → section identité) mises à jour en conséquence ;
+  vérifié aussi qu'aucune des références restantes (« section précédente », « angles associés,
+  section 4 », etc.) n'était affectée par CE déplacement précis (seul l'ordre relatif de identité et
+  remarquables change, les 5 autres sections gardent leur position). **Même bug que le chapitre 3
+  ci-dessus, trouvé dans ce patch aussi, sans y être mentionné cette fois** : `recap.items` listait
+  « Valeurs remarquables » avant « Identité fondamentale » — l'ANCIEN ordre des sections, pas le
+  nouveau ; les deux items intervertis. `recap.checklist` (déjà sans ordre strict par section)
+  laissé inchangé. Aucun contenu ajouté ou retiré. Vérifié par rendu navigateur réel (table des
+  matières et récapitulatif dans le nouvel ordre), re-rendu des 22 chapitres du site sans
+  régression, `tsc -b`/`npm run build`/`npm run lint` propres.
