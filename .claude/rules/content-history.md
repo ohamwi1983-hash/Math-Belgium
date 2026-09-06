@@ -407,3 +407,40 @@ paths:
   de page), récapitulatif et checklist dans l'ordre corrigé, `0` `.katex-error`, aucun `$...$` non
   résolu ; re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run build`/`npm run lint`
   propres.
+
+- **4e, Chapitre 7 — Géométrie analytique plane** (`geometrie-analytique-plane`, `chapterNumber: 7` —
+  seule fois où le numéro annoncé par l'utilisateur correspondait déjà au `chapterNumber` réel) :
+  réordonné pour suivre l'ordre d'une page « Synthèse » de manuel en 11 points. Contrairement au
+  chapitre 6 (vecteurs), un simple réordonnancement a suffi — les 10 sections d'origine
+  correspondaient déjà, une à une ou groupées, aux points de la source et étaient déjà dans le bon
+  ordre relatif — sauf le point « Qu'est-ce qu'un lieu ? », que la source place juste avant
+  cercle/parabole (préambule conceptuel dont cercle et parabole sont ensuite présentés comme des cas
+  particuliers), alors que l'ancienne section `lieux` (qui *contenait* cette définition) était
+  positionnée juste APRÈS parabole, comme synthèse applicative (« intersection de deux courbes »,
+  dont l'exemple et l'entraînement `gen54` supposent déjà connues les équations du cercle et de la
+  parabole). Seul point nécessitant un éclatement (à la différence des autres reorders, qui n'ont
+  jamais touché le contenu d'une section) : la section `lieux` scindée en deux — une nouvelle
+  section `notion-lieu` (n°7, avant `cercle`) reprenant tel quel le préambule générique (para,
+  `definition`, illustration des 2 droites parallèles, `list` des 2 exemples classiques — rien qui
+  dépende de cercle/parabole), et la section `lieux` restante (renommée en position 10, après
+  `parabole`) gardant tout le reste (le `featureTable` droite/cercle/parabole, `methode`,
+  illustrations, exemple, `entrainement` gen54). Sections 1 à 6 gardent exactement leur numéro —
+  aucun renvoi littéral « (section N) » à corriger (vérifié : les 2 seuls renvois du fichier,
+  « section 4 »/« section 5 » dans la section `distance`, pointent bien vers `relations`/
+  `intersection`, tous deux inchangés).
+  **Bug trouvé dans la nouvelle prose de transition ajoutée en tête de la section `lieux` restante,
+  absent des trois patches de reorder précédents** : le paragraphe affirmait « Droite, cercle et
+  parabole sont chacun des lieux géométriques particuliers — leurs équations viennent des deux
+  sections précédentes », ce qui n'est vrai QUE pour cercle et parabole (les deux sections
+  immédiatement précédentes, 8 et 9) — l'équation d'une droite a été établie bien plus tôt (section
+  1 et suivantes), pas dans « les deux sections précédentes ». Corrigé en distinguant les deux cas :
+  « l'équation d'une droite a été vue plus tôt dans ce chapitre, celles du cercle et de la parabole
+  dans les deux sections précédentes ». **`recap.items`/`recap.checklist`, contrairement aux
+  chapitres 3/5/6 ci-dessus, n'ont eu besoin d'AUCUNE correction** : l'insertion de `notion-lieu`
+  (sans item de synthèse dédié, comme `lire-tracer`) tombe entre deux items déjà consécutifs
+  (Distance → Cercle), donc l'ordre des 8 items de `recap.items` restait déjà parfaitement
+  monotone avec la nouvelle numérotation (1,3,4,5,6,8,9,10) — vérifié un par un plutôt que supposé,
+  vu que ce même contrôle avait révélé un bug dans les 3 chantiers précédents.
+  Vérifié par rendu navigateur réel (11 titres de section dans le nouvel ordre, `0` `.katex-error`,
+  aucun `$...$` non résolu), re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run
+  build`/`npm run lint` propres.

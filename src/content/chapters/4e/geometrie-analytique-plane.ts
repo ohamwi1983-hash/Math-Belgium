@@ -718,8 +718,64 @@ export const geometrieAnalytiquePlane: ChapterContent = {
     },
 
     {
-      id: 'cercle',
+      id: 'notion-lieu',
       number: 7,
+      title: "Qu'est-ce qu'un lieu géométrique ?",
+      kicker: 'propriété caractéristique — tous les points qui la partagent, et eux seuls',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Un **lieu géométrique** est un ensemble de points défini par une phrase — pas par ' +
+            "une équation donnée d'emblée. La première étape, souvent la plus délicate, consiste " +
+            "à reconnaître de quelle figure (droite, cercle ou parabole) il s'agit, puis à en " +
+            'extraire les paramètres.',
+        },
+        {
+          kind: 'definition',
+          label: 'Définition formelle',
+          items: [
+            'Un lieu géométrique est un ensemble de points qui partagent tous une **propriété ' +
+              'commune** — et qui sont les **seuls** à la partager. Deux exemples classiques, à ' +
+              'connaître avant même de traduire une phrase en équation :',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'vectorPlane',
+            xMin: -1,
+            xMax: 8,
+            yMin: -0.5,
+            yMax: 2.5,
+            showAxes: false,
+            vectors: [
+              { from: { x: -1, y: 2 }, to: { x: 7.5, y: 2 }, tone: 'ink', arrow: false },
+              { from: { x: -1, y: 1 }, to: { x: 7.5, y: 1 }, tone: 'accent', arrow: false },
+              { from: { x: -1, y: 0 }, to: { x: 7.5, y: 0 }, tone: 'ink', arrow: false },
+              { from: { x: 3, y: 2.15 }, to: { x: 3, y: -0.15 }, tone: 'faint', dashed: true, arrow: false },
+            ],
+            points: [
+              { x: 7.7, y: 2, label: 'a', tone: 'ink', node: false },
+              { x: 7.7, y: 1, label: 'c', tone: 'accent', node: false },
+              { x: 7.7, y: 0, label: 'b', tone: 'ink', node: false },
+            ],
+            caption: 'c, équidistante de a et b — le lieu des points équidistants de deux parallèles est la parallèle médiane',
+          },
+        },
+        {
+          kind: 'list',
+          items: [
+            '**Équidistant de deux droites parallèles** — le lieu est la droite **parallèle**, exactement à mi-chemin entre les deux.',
+            '**À une distance donnée d\'une droite** — le lieu est la **réunion** de deux droites parallèles à celle-ci (une de chaque côté), jamais une seule des deux : chacune prise isolément ne contient pas tous les points situés à cette distance.',
+          ],
+        },
+      ],
+    },
+
+    {
+      id: 'cercle',
+      number: 8,
       title: 'Le cercle',
       kicker: "(x−x₀)² + (y−y₀)² = r² — depuis un graphe, ou depuis l'équation développée",
       blocks: [
@@ -847,7 +903,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
 
     {
       id: 'parabole',
-      number: 8,
+      number: 9,
       title: 'La parabole : foyer, directrice et équation',
       kicker: 'équidistance d\'un point (foyer) et d\'une droite (directrice)',
       blocks: [
@@ -1040,56 +1096,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
 
     {
       id: 'lieux',
-      number: 9,
+      number: 10,
       title: 'Lieux géométriques : intersection de deux courbes',
       kicker: 'traduire, écrire l\'équation, résoudre le système',
       blocks: [
         {
           kind: 'para',
           text:
-            'Un **lieu géométrique** est un ensemble de points défini par une phrase — pas par ' +
-            "une équation donnée d'emblée. La première étape, souvent la plus délicate, consiste " +
-            "à reconnaître de quelle figure (droite, cercle ou parabole) il s'agit, puis à en " +
-            'extraire les paramètres.',
-        },
-        {
-          kind: 'definition',
-          label: 'Définition formelle',
-          items: [
-            'Un lieu géométrique est un ensemble de points qui partagent tous une **propriété ' +
-              'commune** — et qui sont les **seuls** à la partager. Deux exemples classiques, à ' +
-              'connaître avant même de traduire une phrase en équation :',
-          ],
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'vectorPlane',
-            xMin: -1,
-            xMax: 8,
-            yMin: -0.5,
-            yMax: 2.5,
-            showAxes: false,
-            vectors: [
-              { from: { x: -1, y: 2 }, to: { x: 7.5, y: 2 }, tone: 'ink', arrow: false },
-              { from: { x: -1, y: 1 }, to: { x: 7.5, y: 1 }, tone: 'accent', arrow: false },
-              { from: { x: -1, y: 0 }, to: { x: 7.5, y: 0 }, tone: 'ink', arrow: false },
-              { from: { x: 3, y: 2.15 }, to: { x: 3, y: -0.15 }, tone: 'faint', dashed: true, arrow: false },
-            ],
-            points: [
-              { x: 7.7, y: 2, label: 'a', tone: 'ink', node: false },
-              { x: 7.7, y: 1, label: 'c', tone: 'accent', node: false },
-              { x: 7.7, y: 0, label: 'b', tone: 'ink', node: false },
-            ],
-            caption: 'c, équidistante de a et b — le lieu des points équidistants de deux parallèles est la parallèle médiane',
-          },
-        },
-        {
-          kind: 'list',
-          items: [
-            '**Équidistant de deux droites parallèles** — le lieu est la droite **parallèle**, exactement à mi-chemin entre les deux.',
-            '**À une distance donnée d\'une droite** — le lieu est la **réunion** de deux droites parallèles à celle-ci (une de chaque côté), jamais une seule des deux : chacune prise isolément ne contient pas tous les points situés à cette distance.',
-          ],
+            'Droite, cercle et parabole sont chacun des lieux géométriques particuliers — ' +
+            "l'équation d'une droite a été vue plus tôt dans ce chapitre, celles du cercle et " +
+            'de la parabole dans les deux sections précédentes. Reste à savoir résoudre un ' +
+            'problème où **deux** lieux, chacun décrit par une phrase, sont mis en jeu ensemble.',
         },
         {
           kind: 'featureTable',
@@ -1197,7 +1214,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
 
     {
       id: 'revision',
-      number: 10,
+      number: 11,
       title: 'Révision — quiz vrai/faux',
       kicker: '260 affirmations en 13 thèmes',
       blocks: [
