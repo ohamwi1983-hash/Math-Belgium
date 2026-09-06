@@ -34,29 +34,6 @@ async function withLightTheme<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-/**
- * html2canvas ne résout pas de façon fiable une largeur CSS en pourcentage sur un `<svg>` (confirmé
- * sur `.chapter-geometrie-analytique-plane .diagram-frame svg { width: 60% }` : capturé à sa taille
- * quasi complète, pas 60%). Fige la taille RENDUE (déjà correcte, lue sur la page en direct) en
- * pixels explicites juste avant la capture, pour ne plus dépendre de la résolution CSS par
- * html2canvas — restaure l'état d'origine juste après, quoi qu'il arrive.
- */
-function pinSvgSizes(block: HTMLElement): () => void {
-  const svgs = Array.from(block.querySelectorAll('svg'))
-  const restores = svgs.map((svg) => {
-    const prevWidth = svg.style.width
-    const prevHeight = svg.style.height
-    const rect = svg.getBoundingClientRect()
-    svg.style.width = `${rect.width}px`
-    svg.style.height = `${rect.height}px`
-    return () => {
-      svg.style.width = prevWidth
-      svg.style.height = prevHeight
-    }
-  })
-  return () => restores.forEach((restore) => restore())
-}
-
 /** Débordement RÉEL mesuré (diagnostic uniquement, jamais utilisé pour dimensionner la capture —
  * voir le commentaire sur OVERFLOW_MARGIN_RATIO). Sert à logguer une anomalie (ex. un transform
  * cassé sur un composant d'illustration) sans jamais tenter de l'absorber. */
@@ -82,32 +59,26 @@ export async function captureBlocks(
     const images: CapturedBlock[] = []
     for (let i = 0; i < blocks.length; i++) {
       onProgress({ done: i, total: blocks.length })
-      const unpin = pinSvgSizes(blocks[i])
-      let canvas
-      try {
-        const box = blocks[i].getBoundingClientRect()
-        const margin = Math.min(Math.max(box.width, box.height) * OVERFLOW_MARGIN_RATIO, MAX_OVERFLOW_MARGIN_PX)
-        const measured = debugMeasureOverflow(blocks[i])
-        if (measured > margin) {
-          console.warn(
-            `[export] débordement de ${Math.round(measured)}px sur un bloc dont la marge de sécurité n'est que ${Math.round(margin)}px — probable bug de rendu distinct (transform cassé ?), pas absorbé par ce mécanisme.`,
-            blocks[i],
-          )
-        }
-        canvas = await html2canvas(blocks[i], {
-          scale: RENDER_SCALE,
-          backgroundColor: '#ffffff',
-          useCORS: true,
-          logging: false,
-          windowWidth: CAPTURE_WINDOW_WIDTH,
-          x: -margin,
-          y: -margin,
-          width: box.width + margin * 2,
-          height: box.height + margin * 2,
-        })
-      } finally {
-        unpin()
+      const box = blocks[i].getBoundingClientRect()
+      const margin = Math.min(Math.max(box.width, box.height) * OVERFLOW_MARGIN_RATIO, MAX_OVERFLOW_MARGIN_PX)
+      const measured = debugMeasureOverflow(blocks[i])
+      if (measured > margin) {
+        console.warn(
+          `[export] débordement de ${Math.round(measured)}px sur un bloc dont la marge de sécurité n'est que ${Math.round(margin)}px — probable bug de rendu distinct (transform cassé ?), pas absorbé par ce mécanisme.`,
+          blocks[i],
+        )
       }
+      const canvas = await html2canvas(blocks[i], {
+        scale: RENDER_SCALE,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        windowWidth: CAPTURE_WINDOW_WIDTH,
+        x: -margin,
+        y: -margin,
+        width: box.width + margin * 2,
+        height: box.height + margin * 2,
+      })
       images.push({
         dataUrl: canvas.toDataURL('image/jpeg', JPEG_QUALITY),
         widthPx: canvas.width / RENDER_SCALE,
