@@ -20,8 +20,46 @@ export const limitesAsymptotes: ChapterContent = {
       id: 'limites-calcul',
       number: 1,
       title: 'Limites, reconnaissance et calcul',
-      kicker: 'définition intuitive, limites de référence, formes indéterminées et techniques de levée',
+      kicker:
+        'bornes du domaine, définition intuitive, limite à gauche/à droite, limites de référence, ' +
+        'formes indéterminées et techniques de levée',
       blocks: [
+        {
+          kind: 'rappel',
+          label: 'Rappel — bornes du domaine',
+          items: [
+            'On appelle **bornes du domaine** les extrémités des intervalles sur lesquels une ' +
+              'fonction est définie. Pour une fonction rationnelle, ce sont les valeurs qui ' +
+              'annulent le dénominateur, ainsi que $-\\infty$ et $+\\infty$ si le domaine part à ' +
+              "l'infini. Exemple : $f(x) = \\dfrac{x-1}{x^2-x-6}$ a pour domaine $\\mathbb{R} " +
+              '\\setminus \\{-2\\,;3\\}$ — ses bornes sont −2, 3, −∞ et +∞. Pour calculer une ' +
+              'limite en un réel ou en l\'infini, il faut toujours que la fonction soit définie ' +
+              'pour des valeurs très proches de ce réel ou de l\'infini — c\'est-à-dire que la ' +
+              'cible soit une borne du domaine, ou lui appartienne.',
+          ],
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'domainLine',
+            min: -6,
+            max: 7,
+            segments: [
+              { from: 'min', to: -2 },
+              { from: -2, to: 3 },
+              { from: 3, to: 'max' },
+            ],
+            points: [
+              { value: -2, closed: false, label: '−2', tone: 'bad' },
+              { value: 3, closed: false, label: '3', tone: 'bad' },
+            ],
+            extraTicks: [{ value: 0, label: '0' }],
+            axisLabel: 'dom f',
+            caption:
+              'domaine de f(x)=(x−1)/(x²−x−6) — la droite réelle privée des deux points −2 et 3, ' +
+              'qui annulent le dénominateur',
+          },
+        },
         {
           kind: 'rappel',
           label: 'Rappel — définition intuitive d\'une limite',
@@ -32,6 +70,19 @@ export const limitesAsymptotes: ChapterContent = {
               'être un nombre réel ou $\\pm\\infty$ — les 4 combinaisons existent (limite finie ' +
               'en un point, limite infinie en un point, limite finie à l\'infini, limite infinie ' +
               'à l\'infini).',
+          ],
+        },
+        {
+          kind: 'rappel',
+          label: 'Rappel — limite à gauche, limite à droite',
+          items: [
+            'La **limite à gauche** de f en a (notée $\\displaystyle\\lim_{x \\to a^-} f(x)$) ne ' +
+              'considère que des valeurs de x proches de a et strictement INFÉRIEURES à a. La ' +
+              '**limite à droite** ($\\displaystyle\\lim_{x \\to a^+} f(x)$) ne considère que des ' +
+              'valeurs strictement SUPÉRIEURES à a. Si ces deux limites diffèrent, ' +
+              '$\\displaystyle\\lim_{x \\to a} f(x)$ n\'existe pas — mais on peut toujours donner ' +
+              'séparément la limite à gauche et la limite à droite (voir l\'exemple ci-dessous, ' +
+              'et les deux exemples d\'asymptote verticale plus loin).',
           ],
         },
         {
@@ -109,6 +160,20 @@ export const limitesAsymptotes: ChapterContent = {
             { tag: 'simplifier, valable pour x≠2', text: '$\\dfrac{(x-2)(x-3)}{x-2} = x-3$' },
           ],
           result: { tag: 'conclusion — limite', text: '$\\displaystyle\\lim_{x \\to 2} \\dfrac{x^2-5x+6}{x-2} = 2-3 = -1$' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => x - 3, tone: 'accent' }],
+            xMin: -2,
+            xMax: 6,
+            xTicks: [2],
+            fixedYRange: { min: -6, max: 3 },
+            points: [{ x: 2, y: -1, label: '(2;−1)', tone: 'good', style: 'open', labelPos: 'right' }],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              'f(x)=(x²−5x+6)/(x−2) — une droite y=x−3 avec un point vide en (2;−1), même ' +
+              'mécanisme que le point vide vu plus loin',
+          },
         },
         {
           kind: 'exemple',
@@ -151,6 +216,24 @@ export const limitesAsymptotes: ChapterContent = {
             },
           ],
           result: { tag: 'passer à la limite — le dénominateur tend vers +∞', text: '$\\displaystyle\\lim_{x \\to +\\infty} = 0$' },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => Math.sqrt(x * x + 1) - x, tone: 'accent' }],
+            xMin: 0,
+            xMax: 20,
+            xTicks: [10],
+            fixedYRange: { min: 0, max: 1.1 },
+            horizontalAsymptotes: [{ y: 0, label: 'y=0' }],
+            points: [
+              { x: 0, y: 1, label: 'f(0)=1', tone: 'accent', labelPos: 'above' },
+              { x: 10, y: Math.sqrt(101) - 10, label: 'f(10)≈0,05', tone: 'accent', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              'f(x)=√(x²+1)−x — la courbe décroît et se rapproche d\'autant plus de 0 (l\'axe des ' +
+              'x lui-même) que x augmente',
+          },
         },
         {
           kind: 'exemple',
@@ -164,6 +247,25 @@ export const limitesAsymptotes: ChapterContent = {
             tag: 'conclusion',
             text: '$f(2)=5$ mais $\\displaystyle\\lim_{x \\to 2^+} f(x)=-1$ : les deux valeurs ne coïncident pas, donc $\\displaystyle\\lim_{x \\to 2} f(x)$ n\'existe pas (la courbe fait un saut en x=2).',
           },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => x + 3, tone: 'accent', xMin: -2, xMax: 2 },
+              { fn: (x) => x - 3, tone: 'accent', xMin: 2, xMax: 7 },
+            ],
+            xMin: -2,
+            xMax: 7,
+            xTicks: [2],
+            points: [
+              { x: 2, y: 5, label: '(2;5)', tone: 'accent', style: 'filled', labelPos: 'above' },
+              { x: 2, y: -1, label: '(2;−1)', tone: 'bad', style: 'open', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              'f(x)=x+3 si x≤2, f(x)=x−3 si x>2 — un saut en x=2 : la limite à droite (point ' +
+              'vide en −1) ne rejoint pas f(2)=5',
+          },
         },
         {
           kind: 'attention',
@@ -174,6 +276,53 @@ export const limitesAsymptotes: ChapterContent = {
             '« trou » dans son domaine) et pourtant ne pas avoir de limite en un point précis, ' +
             'dès que les limites à gauche et à droite de ce point diffèrent — c\'est le cas ' +
             'd\'un **saut** dans la courbe.',
+        },
+        {
+          kind: 'exemple',
+          badge: 'vraie asymptote verticale — le numérateur ne s\'annule PAS',
+          formula: '$\\displaystyle\\lim_{x \\to -3} \\dfrac{2x-5}{x+3}$, à gauche puis à droite de −3.',
+          steps: [
+            {
+              tag: 'vérifier la forme — dénominateur nul, numérateur non nul',
+              text:
+                'numérateur(−3)=2(−3)−5=−11≠0, dénominateur(−3)=−3+3=0 → forme $-11/0$, PAS une ' +
+                'forme indéterminée : la limite est infinie, reste à trouver son signe',
+            },
+            {
+              tag: 'signe du dénominateur de chaque côté de −3',
+              text:
+                'x→−3⁻ (ex. x=−3,1) : x+3=−0,1 (négatif) — x→−3⁺ (ex. x=−2,9) : x+3=0,1 (positif)',
+            },
+          ],
+          result: {
+            tag: 'conclusion — limites à gauche et à droite, de signes opposés',
+            text:
+              '$\\displaystyle\\lim_{x \\to -3^-} \\dfrac{2x-5}{x+3} = \\dfrac{-11}{0^-} = +\\infty$ ; ' +
+              '$\\displaystyle\\lim_{x \\to -3^+} \\dfrac{2x-5}{x+3} = \\dfrac{-11}{0^+} = -\\infty$ — ' +
+              'la droite x=−3 est bien une **asymptote verticale**.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => (2 * x - 5) / (x + 3), tone: 'accent', xMin: -13, xMax: -3.2 },
+              { fn: (x) => (2 * x - 5) / (x + 3), tone: 'accent', xMin: -2.8, xMax: 20 },
+            ],
+            xMin: -13,
+            xMax: 20,
+            xTicks: [-5, 7],
+            fixedYRange: { min: -12, max: 14 },
+            verticalAsymptotes: [{ x: -3, label: 'x=−3' }],
+            horizontalAsymptotes: [{ y: 2, label: 'y=2' }],
+            points: [
+              { x: -5, y: (2 * -5 - 5) / (-5 + 3), label: 'f(−5)=7,5', tone: 'accent', labelPos: 'above' },
+              { x: 7, y: (2 * 7 - 5) / (7 + 3), label: 'f(7)=0,9', tone: 'accent', labelPos: 'above' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'f(x)',
+            caption:
+              'f(x)=(2x−5)/(x+3) — asymptote verticale x=−3 (+∞ à gauche, −∞ à droite) et ' +
+              'asymptote horizontale y=2 (car deg(N)=deg(D))',
+          },
         },
         {
           kind: 'exemple',
@@ -233,8 +382,75 @@ export const limitesAsymptotes: ChapterContent = {
       id: 'asymptote-oblique',
       number: 2,
       title: 'Asymptote oblique',
-      kicker: 'y=ax+b, avec a=lim f(x)/x et b=lim[f(x)−ax] — lien avec le degré de N et D',
+      kicker:
+        'définir une asymptote (AV/AH/AO, cas général) ; y=ax+b, avec a=lim f(x)/x et ' +
+        'b=lim[f(x)−ax] — lien avec le degré de N et D',
       blocks: [
+        {
+          kind: 'definition',
+          label: 'Rappel — définir une asymptote (cas général)',
+          items: [
+            'Une droite est **asymptote** au graphique d\'une fonction f lorsque ce graphique ' +
+              's\'approche de plus en plus près de cette droite, à mesure que x (ou f(x)) tend ' +
+              'vers l\'infini. Cette définition vaut pour TOUTE fonction f — la comparaison des ' +
+              'degrés, plus bas, n\'est qu\'une méthode pratique valable uniquement pour les ' +
+              'fonctions rationnelles.',
+            'Une **asymptote verticale (AV)** d\'équation x=a existe si ' +
+              '$\\displaystyle\\lim_{x \\to a^+} f(x) = \\pm\\infty$ ou ' +
+              '$\\displaystyle\\lim_{x \\to a^-} f(x) = \\pm\\infty$.',
+            'Une **asymptote horizontale (AH)** d\'équation y=b existe si ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} f(x) = b$ ou ' +
+              '$\\displaystyle\\lim_{x \\to -\\infty} f(x) = b$.',
+            'Une **asymptote oblique (AO)** d\'équation y=mx+p existe si ' +
+              '$\\displaystyle\\lim_{x \\to +\\infty} [f(x)-(mx+p)] = 0$ ou ' +
+              '$\\displaystyle\\lim_{x \\to -\\infty} [f(x)-(mx+p)] = 0$.',
+          ],
+        },
+        {
+          kind: 'illustrationGroup',
+          items: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (x) => 1 / (x - 1), tone: 'accent', xMin: -2, xMax: 0.8 },
+                { fn: (x) => 1 / (x - 1), tone: 'accent', xMin: 1.2, xMax: 4 },
+              ],
+              xMin: -2,
+              xMax: 4,
+              xTicks: [],
+              fixedYRange: { min: -6, max: 6 },
+              verticalAsymptotes: [{ x: 1 }],
+              showYAxis: false,
+              xAxisLabel: '',
+              yAxisLabel: '',
+              caption: 'asymptote verticale',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => 2 - 1 / (x + 2), tone: 'accent' }],
+              xMin: -1,
+              xMax: 8,
+              xTicks: [],
+              horizontalAsymptotes: [{ y: 2 }],
+              showYAxis: false,
+              xAxisLabel: '',
+              yAxisLabel: '',
+              caption: 'asymptote horizontale',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => x + 1 / (x + 2), tone: 'accent' }],
+              xMin: 0,
+              xMax: 8,
+              xTicks: [],
+              obliqueAsymptotes: [{ a: 1, b: 0 }],
+              showYAxis: false,
+              xAxisLabel: '',
+              yAxisLabel: '',
+              caption: 'asymptote oblique',
+            },
+          ],
+        },
         {
           kind: 'rappel',
           label: 'Rappel — condition d\'existence d\'une asymptote oblique',
@@ -387,6 +603,56 @@ export const limitesAsymptotes: ChapterContent = {
           },
         },
         {
+          kind: 'exemple',
+          badge: 'lecture directe — plusieurs asymptotes verticales',
+          formula: 'Le graphique ci-dessous représente une fonction g. Lis toutes les limites et toutes les asymptotes visibles.',
+          steps: [
+            {
+              tag: 'asymptote verticale x=−1',
+              text: '$\\displaystyle\\lim_{x \\to -1^-} g(x) = +\\infty$ ; $\\displaystyle\\lim_{x \\to -1^+} g(x) = -\\infty$',
+            },
+            {
+              tag: 'asymptote verticale x=2',
+              text: '$\\displaystyle\\lim_{x \\to 2^-} g(x) = -\\infty$ ; $\\displaystyle\\lim_{x \\to 2^+} g(x) = +\\infty$',
+            },
+            {
+              tag: 'asymptote horizontale y=0 — aux deux extrémités',
+              text: '$\\displaystyle\\lim_{x \\to -\\infty} g(x) = 0$ et $\\displaystyle\\lim_{x \\to +\\infty} g(x) = 0$',
+            },
+          ],
+          result: {
+            tag: 'conclusion',
+            text:
+              '3 asymptotes lues directement — deux verticales (x=−1 et x=2, chacune avec un ' +
+              'signe différent de chaque côté) et une horizontale (y=0, la même des deux côtés) ' +
+              '— un graphique peut porter plusieurs asymptotes verticales à la fois, chacune ' +
+              's\'étudiant séparément.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [
+              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: -6, xMax: -1.15 },
+              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: -0.85, xMax: 1.85 },
+              { fn: (x) => 1 / ((x + 1) * (x - 2)), tone: 'accent', xMin: 2.15, xMax: 7 },
+            ],
+            xMin: -6,
+            xMax: 7,
+            xTicks: [-1, 2],
+            fixedYRange: { min: -6, max: 6 },
+            verticalAsymptotes: [{ x: -1, label: 'x=−1' }, { x: 2, label: 'x=2' }],
+            horizontalAsymptotes: [{ y: 0, label: 'y=0' }],
+            textLabels: [
+              { x: -1.05, y: 5.6, text: '+∞', tone: 'faint', anchor: 'middle' },
+              { x: -0.95, y: -5.6, text: '−∞', tone: 'faint', anchor: 'middle' },
+              { x: 1.9, y: -5.6, text: '−∞', tone: 'faint', anchor: 'middle' },
+              { x: 2.1, y: 5.6, text: '+∞', tone: 'faint', anchor: 'middle' },
+            ],
+            xAxisLabel: 'x',
+            yAxisLabel: 'g(x)',
+            caption: 'deux asymptotes verticales x=−1 et x=2, et une asymptote horizontale y=0 aux deux extrémités',
+          },
+        },
+        {
           kind: 'piege',
           label: 'Les deux côtés d\'une même asymptote verticale n\'ont pas forcément le même signe',
           text:
@@ -451,6 +717,24 @@ export const limitesAsymptotes: ChapterContent = {
               'Le coût unitaire se rapproche d\'autant plus de 8 € que la production augmente, ' +
               'MAIS ne descend jamais en dessous — 240/x reste strictement positif pour tout ' +
               'x≥1. L\'asymptote horizontale y=8 est donc un plancher, jamais atteint.',
+          },
+          illustration: {
+            kind: 'curvePlot',
+            curves: [{ fn: (x) => 8 + 240 / x, tone: 'accent' }],
+            xMin: 5,
+            xMax: 120,
+            xTicks: [10, 100],
+            fixedYRange: { min: 6, max: 56 },
+            horizontalAsymptotes: [{ y: 8, label: 'y=8' }],
+            points: [
+              { x: 10, y: 32, label: 'Cᵤ(10)≈32€', tone: 'accent', labelPos: 'above' },
+              { x: 100, y: 10.4, label: 'Cᵤ(100)≈10,4€', tone: 'accent', labelPos: 'below' },
+            ],
+            xAxisLabel: 'x (unités)',
+            yAxisLabel: 'Cᵤ(x) (€)',
+            caption:
+              'Cᵤ(x)=8+240/x — le coût unitaire décroît et se rapproche d\'autant plus de 8 € ' +
+              'que la production augmente, sans jamais l\'atteindre',
           },
         },
         { kind: 'video', title: 'Visualiser la baisse du coût unitaire vers son plancher' },
