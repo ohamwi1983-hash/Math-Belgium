@@ -8,11 +8,15 @@ const CX = 150
 const CY = 150
 const R = 100
 
-const TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'plan', string> = {
+const TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink', string> = {
   accent: 'svg-accent',
   good: 'svg-good',
   bad: 'svg-bad',
   plan: 'svg-plan',
+  sky: 'svg-sky',
+  // .svg-ink est fill-only (~100 <text> en dépendent, voir le commentaire dans index.css) — un
+  // point (ligne + cercle) a besoin d'un stroke, donc .svg-ink-stroke ici, jamais .svg-ink.
+  ink: 'svg-ink-stroke',
 }
 
 const TONE_OUTLINE_CLASS: Record<'accent' | 'good' | 'bad', string> = {
@@ -33,6 +37,7 @@ const LABEL_TONE_CLASS: Record<'accent' | 'good' | 'bad' | 'ink', string> = {
  * arcs d'angle avec flèche de sens, étiquettes libres, construction de la tangente). */
 export function CircleAngles({
   points,
+  pointLabelStyle = 'italic',
   connectPoints,
   projectToXAxis,
   projectToYAxis,
@@ -171,20 +176,39 @@ export function CircleAngles({
         )
       })}
 
-      {coords.map((p, i) => (
-        <text
-          key={i}
-          x={p.x + (p.x > CX ? 10 : -10)}
-          y={p.y + (p.y > CY ? 14 : -8)}
-          textAnchor={p.x > CX ? 'start' : 'end'}
-          className={TONE_CLASS[p.tone]}
-          fontFamily="Fraunces, serif"
-          fontStyle="italic"
-          fontSize="14"
-        >
-          {p.label}
-        </text>
-      ))}
+      {coords.map((p, i) => {
+        // Le style 'mono' sert des diagrammes denses (beaucoup de points, souvent proches en
+        // angle, avec une 2e ligne de sous-étiquette) : la position par quadrant simple (utilisée
+        // par 'italic', jamais retouchée ici) fait alors se chevaucher les étiquettes de deux
+        // points voisins. Projeter l'étiquette RADIALEMENT (le long de l'angle du point, à un
+        // rayon plus grand) écarte proportionnellement deux points d'angles proches, plutôt que de
+        // les regrouper par quadrant.
+        const cosA = Math.cos(p.angle)
+        const sinA = Math.sin(p.angle)
+        const lx = pointLabelStyle === 'mono' ? CX + (R + 34) * cosA : p.x + (p.x > CX ? 10 : -10)
+        const ly = pointLabelStyle === 'mono' ? CY - (R + 34) * sinA + (p.sublabel ? 3 : 0) : p.y + (p.y > CY ? 14 : -8)
+        const anchor =
+          pointLabelStyle === 'mono' ? (cosA > 0.15 ? 'start' : cosA < -0.15 ? 'end' : 'middle') : p.x > CX ? 'start' : 'end'
+        return (
+          <text
+            key={i}
+            x={lx}
+            y={ly}
+            textAnchor={anchor}
+            className={TONE_CLASS[p.tone]}
+            fontFamily={pointLabelStyle === 'mono' ? 'IBM Plex Mono, monospace' : 'Fraunces, serif'}
+            fontStyle={pointLabelStyle === 'mono' ? undefined : 'italic'}
+            fontSize={pointLabelStyle === 'mono' ? '11' : '14'}
+          >
+            {p.label}
+            {p.sublabel && (
+              <tspan x={lx} dy="12">
+                {p.sublabel}
+              </tspan>
+            )}
+          </text>
+        )
+      })}
       {horizontalLine && (
         <text
           x={CX - R + 15}

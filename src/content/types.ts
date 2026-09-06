@@ -227,7 +227,20 @@ export type IllustrationSpec =
        * sin/cos/tan, pas de deux points arbitraires reliés.
        */
       kind: 'circleAngles'
-      points: { angle: number; label: string; tone: 'accent' | 'good' | 'bad' | 'plan'; dashed?: boolean }[]
+      points: {
+        angle: number
+        label: string
+        /** Seconde ligne d'étiquette sous `label` (ex. l'équivalent en radians d'un angle en
+         * degrés) — rendue en `<tspan>`, jamais concaténée dans `label` (une seule ligne de texte
+         * n'aurait pas la place pour "270°" et "3π/2" à la fois sur un diagramme dense). */
+        sublabel?: string
+        tone: 'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink'
+        dashed?: boolean
+      }[]
+      /** Police des étiquettes de points : `'italic'` (Fraunces italique, par défaut — un seul
+       * angle mis en avant) ou `'mono'` (IBM Plex Mono, sans italique — pour un diagramme dense à
+       * beaucoup de points, où la lisibilité prime sur le style). */
+      pointLabelStyle?: 'italic' | 'mono'
       /** Trace la droite passant par les points (étendue aux bords du cadre, pas juste le segment
        * entre eux) — sert de corde pour sin/cos, et de sécante prolongée jusqu'à la tangente pour tan. */
       connectPoints?: boolean

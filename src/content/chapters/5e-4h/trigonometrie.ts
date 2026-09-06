@@ -165,6 +165,42 @@ export const trigonometrie: ChapterContent = {
           text: 'Retiens ces six correspondances degré/radian : elles reviennent dans presque tous les exercices.',
         },
         {
+          kind: 'illustration',
+          illustration: {
+            kind: 'circleAngles',
+            pointLabelStyle: 'mono',
+            projectToXAxis: true,
+            projectToYAxis: true,
+            freeLabels: [
+              { x: 0.34, y: 1.46, text: 'sin', tone: 'ink' },
+              { x: 1.28, y: 0.16, text: 'cos', tone: 'ink' },
+            ],
+            points: [
+              { angle: 0, label: '0°', sublabel: '0', tone: 'ink' },
+              { angle: PI / 6, label: '30°', sublabel: 'π/6', tone: 'sky' },
+              { angle: PI / 4, label: '45°', sublabel: 'π/4', tone: 'plan' },
+              { angle: PI / 3, label: '60°', sublabel: 'π/3', tone: 'bad' },
+              { angle: PI / 2, label: '90°', sublabel: 'π/2', tone: 'good' },
+              { angle: 2 * (PI / 3), label: '120°', sublabel: '2π/3', tone: 'bad' },
+              { angle: 3 * (PI / 4), label: '135°', sublabel: '3π/4', tone: 'plan' },
+              { angle: 5 * (PI / 6), label: '150°', sublabel: '5π/6', tone: 'sky' },
+              { angle: PI, label: '180°', sublabel: 'π', tone: 'bad' },
+              { angle: 7 * (PI / 6), label: '210°', sublabel: '7π/6', tone: 'sky' },
+              { angle: 5 * (PI / 4), label: '225°', sublabel: '5π/4', tone: 'plan' },
+              { angle: 4 * (PI / 3), label: '240°', sublabel: '4π/3', tone: 'bad' },
+              { angle: 3 * (PI / 2), label: '270°', sublabel: '3π/2', tone: 'accent' },
+              { angle: 5 * (PI / 3), label: '300°', sublabel: '5π/3', tone: 'bad' },
+              { angle: 7 * (PI / 4), label: '315°', sublabel: '7π/4', tone: 'plan' },
+              { angle: 11 * (PI / 6), label: '330°', sublabel: '11π/6', tone: 'sky' },
+            ],
+            caption:
+              'les angles particuliers des quatre quadrants, placés sur le cercle trigonométrique ' +
+              '(même couleur que leur angle de référence 30°/45°/60°) — la projection verticale ' +
+              '(pointillé) donne cos, la projection horizontale donne sin ; valeurs exactes dans ' +
+              'le tableau ci-dessous',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Arcs et secteurs',
           generatorId: '5gen6',

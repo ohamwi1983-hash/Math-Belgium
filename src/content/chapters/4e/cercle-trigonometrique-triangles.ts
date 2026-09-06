@@ -376,34 +376,6 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'cos 210° = −√3/2' },
         },
         {
-          kind: 'illustration',
-          illustration: {
-            kind: 'circleAngles',
-            points: [
-              { angle: 0, label: '0°', tone: 'accent' as const },
-              { angle: 30 * D2R, label: '30°', tone: 'good' as const },
-              { angle: 45 * D2R, label: '45°', tone: 'plan' as const },
-              { angle: 60 * D2R, label: '60°', tone: 'bad' as const },
-              { angle: 90 * D2R, label: '90°', tone: 'accent' as const },
-              { angle: 120 * D2R, label: '120°', tone: 'bad' as const },
-              { angle: 135 * D2R, label: '135°', tone: 'plan' as const },
-              { angle: 150 * D2R, label: '150°', tone: 'good' as const },
-              { angle: 180 * D2R, label: '180°', tone: 'accent' as const },
-              { angle: 210 * D2R, label: '210°', tone: 'good' as const },
-              { angle: 225 * D2R, label: '225°', tone: 'plan' as const },
-              { angle: 240 * D2R, label: '240°', tone: 'bad' as const },
-              { angle: 270 * D2R, label: '270°', tone: 'accent' as const },
-              { angle: 300 * D2R, label: '300°', tone: 'bad' as const },
-              { angle: 315 * D2R, label: '315°', tone: 'plan' as const },
-              { angle: 330 * D2R, label: '330°', tone: 'good' as const },
-            ],
-            caption:
-              'les 16 angles remarquables des 4 quadrants — même couleur pour un même angle de ' +
-              'référence (orange : angle sur un axe ; vert : référence 30° ; violet : référence ' +
-              '45° ; rouge : référence 60°)',
-          },
-        },
-        {
           kind: 'entrainement',
           title: 'Valeurs remarquables',
           generatorId: 'gen15',

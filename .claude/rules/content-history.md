@@ -477,32 +477,47 @@ paths:
   aucun `$...$` ni astérisque isolé non résolu, illustration du cône de vision capturée à l'écran) ;
   re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run build`/`npm run lint` propres.
 
-- **4e, Chapitre 5 — Cercle trigonométrique & triangles quelconques** (`cercle-trigonometrique-triangles`) :
-  section « Les valeurs remarquables » enrichie d'un diagramme récapitulatif à 16 points (les 4
-  quadrants), ajouté juste après le méthode/exemple « Étendre aux 3 autres quadrants » — demande
-  reçue au départ comme une patch au format HTML/SVG brut d'un artifact `plateforme-maths` distinct
-  (fichier `trigonometrie.html`, inexistant dans ce dépôt), donc **pas appliquée telle quelle** :
-  investigation confirmant que 4 des 5 diagrammes touchés par cette patch corrigeaient des erreurs
-  d'arrondi de coordonnées propres à du SVG écrit à la main (`circleDiagram`, le composant réel de
-  `5e-4h/trigonometrie.ts`, calcule ces coordonnées programmatiquement depuis `startAngle`/
-  `sectorAngle` — cette classe de bug n'existe donc pas ici), et que le diagramme à 5 points déjà en
-  place dans ce chapitre (`remarquables`) est un choix de conception délibéré (quadrant I seul,
-  extension aux 3 autres par symétrie dans une section séparée) — élargir ce diagramme précis à 16
-  points aurait cassé son rôle dans la démonstration Pythagore qui le précède directement. Décision
-  de l'utilisateur, après explication : ajouter le diagramme à 16 points comme **nouveau** bloc
-  plutôt que remplacer l'existant.
-  **Extension de type nécessaire** : `IllustrationSpec.circleAngles.points[].tone` n'acceptait que
-  `'accent' | 'good' | 'bad'` (3 couleurs) ; élargi à 4 avec `'plan'` (violet, déjà utilisé ailleurs
-  pour `geometrie-dans-espace` — `--plan`/`--plan-ink` existaient déjà en light/dark, seule la
-  classe CSS `.svg-plan` — fill+stroke, sur le modèle de `.svg-attn`/`.svg-tip` — manquait et a été
-  ajoutée) pour représenter 4 groupes visuellement très distincts (angles sur un axe = orange,
-  référence 30°/45°/60° = vert/violet/rouge) sans jamais utiliser de couleur hors palette de thème
-  (contrairement à la patch d'origine, qui codait des hex bruts non adaptatifs au thème sombre).
-  Composant `CircleAngles.tsx` mis à jour (`TONE_CLASS`) en conséquence.
-  Espacement le plus serré du nouveau diagramme : 15° entre deux points adjacents (ex. 30°/45°) —
-  vérifié par capture d'écran réelle (clair et sombre) qu'aucune étiquette ne se chevauche malgré
-  cette densité, avant de considérer le rendu acceptable.
-  Vérifié par rendu navigateur réel (clair et sombre) : diagramme à 16 points capturé et relu dans
-  les deux thèmes, `0` `.katex-error`, aucun `$...$` non résolu ; re-rendu des 22 chapitres du site
-  sans régression. `tsc -b`/`npm run build`/`npm run lint` propres (un avertissement `erasing-op`
-  auto-introduit sur `0 * D2R` corrigé en écrivant directement `0`).
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : section « Arcs et secteurs » enrichie
+  d'un grand diagramme du cercle trigonométrique à 16 angles (les 4 quadrants, en radians ET en
+  degrés), ajouté juste après l'astuce « les angles remarquables par cœur ». Demande reçue au
+  départ comme une patch au format HTML/SVG brut d'un artifact `plateforme-maths` distinct (fichier
+  `trigonometrie.html`, inexistant dans ce dépôt) — **d'abord mal placée par erreur** dans
+  `4e/cercle-trigonometrique-triangles.ts` (chapitre voisin, même sujet en apparence), avant que
+  l'utilisateur ne corrige explicitement : la patch concernait en réalité le chapitre 2 de la filière
+  5e (4h), pas le chapitre 4e — le diagramme ajouté par erreur là-bas a été entièrement retiré. Le
+  reste de l'investigation initiale reste valable : 4 des 5 diagrammes touchés par la patch d'origine
+  corrigeaient des erreurs d'arrondi de coordonnées propres à du SVG écrit à la main — les diagrammes
+  réels de `trigonometrie.ts` (`circleDiagram`) calculent ces coordonnées programmatiquement, cette
+  classe de bug n'existe donc pas ici ; seul le 5e diagramme (le grand cercle) valait la peine d'être
+  porté, comme nouvelle illustration.
+  **Rendu fidèle à une capture d'écran fournie par l'utilisateur** (le rendu attendu, pas la patch
+  HTML source) : chaque point porte une étiquette à deux lignes (degrés, puis radians en `<tspan>`),
+  les axes sont nommés « sin »/« cos » (`freeLabels`), et chaque point projette un pointillé vers
+  chaque axe (`projectToXAxis`/`projectToYAxis`) — la projection verticale donne cos, l'horizontale
+  donne sin.
+  **Extensions de type nécessaires sur `circleAngles`** : `points[].sublabel` (2e ligne d'étiquette,
+  jamais concaténée dans `label`), `pointLabelStyle?: 'italic' | 'mono'` (bascule d'apparence pour un
+  diagramme dense, n'affecte JAMAIS le rendu par défaut `'italic'` des diagrammes déjà en place —
+  vérifié par capture d'écran que `4e/cercle-trigonometrique-triangles.ts` reste pixel identique),
+  et `points[].tone` élargi de 3 à 6 couleurs (`'plan'`, `'sky'`, `'ink'` en plus de
+  `accent`/`good`/`bad`) pour distinguer 7 groupes (angle sur un axe pour 0°/90°/180°/270°, chacun sa
+  propre couleur ; référence 30°/45°/60° pour le reste) sans jamais utiliser un hex brut hors palette
+  de thème (contrairement à la patch d'origine, non adaptative au thème sombre) — `--sky` est un tout
+  nouveau token (aucune teinte bleue n'existait déjà) ajouté en light/dark sur le modèle de `--plan`;
+  `'ink'` réutilise `.svg-ink-stroke` (jamais `.svg-ink`, fill-only — voir le bug historique du même
+  nom dans ce fichier) pour un point neutre avec un vrai contour. `CircleAngles.tsx` mis à jour en
+  conséquence (`TONE_CLASS`, rendu du `sublabel`, positionnement radial des étiquettes en mode
+  `'mono'` — jamais utilisé par le mode `'italic'` par défaut).
+  **Piège rencontré en construisant ce diagramme, résolu par itérations visuelles** : à 15°
+  d'écart angulaire entre deux points adjacents, le positionnement d'étiquette existant (décalage
+  fixe par quadrant, pensé pour 1-2 points) faisait chevaucher les étiquettes à deux lignes de
+  points voisins — corrigé en projetant chaque étiquette RADIALEMENT (le long de l'angle du point,
+  à un rayon élargi) plutôt que par un simple décalage x/y de quadrant, ce qui écarte
+  proportionnellement deux points d'angles proches ; plusieurs allers-retours captures d'écran
+  réelles (taille de police, rayon d'étiquette, position des `freeLabels` sin/cos) ont été
+  nécessaires avant d'obtenir un rendu sans chevauchement, y compris pour "90°" qui chevauchait
+  initialement "sin", et "0°" qui chevauchait initialement "cos".
+  Vérifié par rendu navigateur réel (clair et sombre) : les 16 étiquettes à deux lignes lisibles sans
+  chevauchement, aucun chevauchement avec "sin"/"cos", `0` `.katex-error`, aucun `$...$` non résolu ;
+  diagramme original à 5 points de `4e/cercle-trigonometrique-triangles.ts` confirmé pixel identique
+  à avant ; re-rendu des 22 chapitres du site sans régression. `npm run build`/`npm run lint` propres.

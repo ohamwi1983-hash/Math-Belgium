@@ -43,9 +43,15 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
 - `circleAngles` — place 1 à N points sur le cercle trigonométrique par leur angle, avec
   accessoires optionnels (corde/sécante étendue via `connectPoints`, projections sur les axes,
   quadrants, arcs d'angle, étiquettes libres, construction de la tangente). `points[].tone` :
-  `'accent' | 'good' | 'bad' | 'plan'` — 4 couleurs distinctes (orange/vert/rouge/violet),
-  réutilisables pour coder n'importe quel regroupement visuel (ex. par angle de référence sur un
-  diagramme à plusieurs points), pas seulement une paire ou un triplet sémantique good/bad.
+  `'accent' | 'good' | 'bad' | 'plan' | 'sky' | 'ink'` — 6 couleurs distinctes, réutilisables pour
+  coder n'importe quel regroupement visuel (ex. par angle de référence sur un diagramme à
+  plusieurs points), pas seulement une paire ou un triplet sémantique good/bad ; `'ink'` pointe
+  vers `.svg-ink-stroke` (jamais `.svg-ink`, fill-only). `points[].sublabel` ajoute une 2e ligne
+  d'étiquette (`<tspan>`, ex. l'équivalent en radians d'un angle en degrés). `pointLabelStyle:
+  'mono'` (défaut `'italic'`, jamais retouché) bascule vers IBM Plex Mono sans italique ET projette
+  chaque étiquette RADIALEMENT (le long de l'angle du point, à un rayon élargi) plutôt que par
+  décalage x/y de quadrant — nécessaire dès qu'un diagramme a beaucoup de points proches en angle
+  (< 20° d'écart) avec des étiquettes à 2 lignes, sous peine de chevauchement entre points voisins.
 - `unitCircleArc` — cercle trigonométrique + rayon + arc + projection, pour arcsin/arccos/arctan.
   `mode` distingue une géométrie de projection réellement différente (horizontale sur l'axe y
   pour sin, verticale sur l'axe x pour cos, sur la tangente géométrique verticale pour tan) —

@@ -24,6 +24,10 @@
      chapitre — un plan ET une droite sécante apparaissent souvent sur la même figure). */
   --plan: #5b4ea3;
   --plan-ink: #443a80;
+  /* Bleu dédié aux diagrammes à groupes de couleurs multiples (ex. cercle trigonométrique codé par
+     angle de référence) — aucun autre token existant n'est bleu (accent/attn/tip sont tous des
+     tons chauds proches, good/bad/plan sont déjà pris par d'autres significations). */
+  --sky: #2f6fb0;
   --on-accent: #fff8f0;
   --radius: 3px;
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
@@ -56,6 +60,7 @@
     --tip-soft: #302c10;
     --plan: #a494e8;
     --plan-ink: #c3b8f2;
+    --sky: #6ea8e8;
     --on-accent: #201404;
     color-scheme: dark;
   }
@@ -347,6 +352,7 @@ figcaption {
 .svg-plan-outline { fill: none; stroke: var(--plan); }
 .svg-plan-ink { fill: var(--plan-ink); }
 .svg-plan { stroke: var(--plan); fill: var(--plan); }
+.svg-sky { stroke: var(--sky); fill: var(--sky); }
 
 /* ---------- carte générateur ---------- */
 .generator-card {
