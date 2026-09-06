@@ -78,30 +78,9 @@ export const geometrieDansEspace: ChapterContent = {
             '(ou « perspective à point de fuite ») : toutes les droites parallèles situées dans un ' +
             'même plan horizontal semblent alors converger vers un unique point, le **point de ' +
             'fuite**, posé sur une ligne d\'horizon à hauteur d\'œil — exactement l\'effet que ' +
-            'produit une route ou une voie ferrée qui semble se refermer au loin.',
-        },
-        {
-          kind: 'illustration',
-          illustration: {
-            kind: 'planeSketch',
-            width: 340,
-            height: 180,
-            lines: [
-              { points: [{ x: 10, y: 160 }, { x: 170, y: 70 }], tone: 'ink' },
-              { points: [{ x: 330, y: 160 }, { x: 170, y: 70 }], tone: 'ink' },
-              { points: [{ x: 50, y: 160 }, { x: 170, y: 70 }], tone: 'faint', dashed: true },
-              { points: [{ x: 290, y: 160 }, { x: 170, y: 70 }], tone: 'faint', dashed: true },
-              { points: [{ x: 0, y: 70 }, { x: 340, y: 70 }], tone: 'faint', dashed: true },
-            ],
-            points: [{ x: 170, y: 70, tone: 'accent' }],
-            freeLabels: [
-              { x: 130, y: 50, text: 'point de fuite', tone: 'accent' },
-              { x: 128, y: 88, text: "ligne d'horizon", tone: 'ink' },
-            ],
-            caption:
-              'en perspective centrale, des rails pourtant parallèles dans la réalité convergent ' +
-              'visuellement vers un seul point',
-          },
+            'produit une route ou une voie ferrée qui semble se refermer au loin. Le dispositif et ' +
+            'le principe de cette convention sont détaillés dans les sections 10 et 11 de ce ' +
+            'chapitre.',
         },
         {
           kind: 'para',
@@ -724,8 +703,154 @@ export const geometrieDansEspace: ChapterContent = {
     },
 
     {
-      id: 'ombre',
+      id: 'fenetre-durer',
       number: 10,
+      title: 'La fenêtre de Dürer : le dispositif de la perspective centrale',
+      kicker: 'vision monoculaire à travers une vitre quadrillée — un cadre inventé par Dürer',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'Les règles de la perspective centrale ont été élaborées par des peintres de la ' +
+            'Renaissance à l\'aide d\'un **perspectographe**, un dispositif inventé par le peintre ' +
+            'allemand Dürer. Sa « fenêtre de Dürer » (1471-1528) est composée d\'un cadre en bois ' +
+            'et d\'une vitre quadrillée, placée devant la scène à représenter.',
+        },
+        {
+          kind: 'para',
+          text:
+            'Le peintre regarde la scène à travers un « œilleton », en fermant un œil : sa vision ' +
+            'est donc **monoculaire** — ce qu\'il peint ne correspond jamais tout à fait à ce que ' +
+            'perçoivent normalement ses deux yeux ensemble (la vision binoculaire).',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'planeSketch',
+            width: 340,
+            height: 200,
+            lines: [
+              { points: [{ x: 20, y: 100 }, { x: 280, y: 48 }], tone: 'accent' },
+              { points: [{ x: 20, y: 100 }, { x: 280, y: 152 }], tone: 'accent' },
+              { points: [{ x: 140, y: 60 }, { x: 140, y: 140 }], tone: 'ink' },
+              { points: [{ x: 200, y: 64 }, { x: 200, y: 136 }], tone: 'good' },
+              { points: [{ x: 280, y: 48 }, { x: 280, y: 152 }], tone: 'bad' },
+            ],
+            points: [{ x: 20, y: 100, tone: 'ink' }],
+            freeLabels: [
+              { x: 8, y: 116, text: 'œil', tone: 'ink' },
+              { x: 128, y: 50, text: 'vitre', tone: 'ink' },
+              { x: 172, y: 150, text: 'objet proche', tone: 'good' },
+              { x: 255, y: 168, text: 'objet éloigné', tone: 'bad' },
+            ],
+            caption:
+              'un objet proche et petit (vert) et un objet éloigné et grand (rouge) traversent la ' +
+              'vitre exactement au même endroit — d\'où la même taille apparente à travers la fenêtre',
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Après avoir repéré où les lignes de vision, issues de l\'œil, coupent le quadrillage ' +
+            'de la vitre, le peintre reporte ce qu\'il voit sur une feuille quadrillée identique — ' +
+            'c\'est là toute la méthode. Le mot « perspective » vient d\'ailleurs du latin ' +
+            '**perspectiva**, qui signifie « voir au travers ».',
+        },
+        {
+          kind: 'piege',
+          label: 'Une vision volontairement appauvrie',
+          text:
+            'En fermant un œil, le peintre renonce à la vision binoculaire (celle des deux yeux ' +
+            'ensemble, qui perçoit un peu de relief) — un choix nécessaire pour que toute la ' +
+            'scène se projette de façon cohérente sur une seule vitre plane.',
+        },
+        {
+          kind: 'para',
+          text:
+            'L\'image qui se forme à travers l\'objectif d\'un appareil photo suit le même ' +
+            'principe que celle qui se forme sur la rétine de l\'œil — pas tout à fait la même, ' +
+            'puisque le globe oculaire est sphérique et non plan. Les règles de la perspective ' +
+            'centrale s\'observent donc directement sur une photographie.',
+        },
+      ],
+    },
+
+    {
+      id: 'point-de-fuite',
+      number: 11,
+      title: 'Point de fuite et construction en perspective centrale',
+      kicker: 'toutes les parallèles d\'un plan horizontal convergent vers un point, sur la ligne d\'horizon',
+      blocks: [
+        {
+          kind: 'para',
+          text:
+            'La **ligne d\'horizon** d\'une image (peinture ou photo) se situe à la hauteur de ' +
+            'l\'œil du peintre, ou de l\'objectif de l\'appareil photo.',
+        },
+        {
+          kind: 'illustration',
+          illustration: {
+            kind: 'planeSketch',
+            width: 340,
+            height: 180,
+            lines: [
+              { points: [{ x: 10, y: 160 }, { x: 170, y: 70 }], tone: 'ink' },
+              { points: [{ x: 330, y: 160 }, { x: 170, y: 70 }], tone: 'ink' },
+              { points: [{ x: 50, y: 160 }, { x: 170, y: 70 }], tone: 'faint', dashed: true },
+              { points: [{ x: 290, y: 160 }, { x: 170, y: 70 }], tone: 'faint', dashed: true },
+              { points: [{ x: 0, y: 70 }, { x: 340, y: 70 }], tone: 'faint', dashed: true },
+            ],
+            points: [{ x: 170, y: 70, tone: 'accent' }],
+            freeLabels: [
+              { x: 130, y: 50, text: 'point de fuite', tone: 'accent' },
+              { x: 128, y: 88, text: "ligne d'horizon", tone: 'ink' },
+            ],
+            caption:
+              'en perspective centrale, des rails pourtant parallèles dans la réalité convergent ' +
+              'visuellement vers un seul point',
+          },
+        },
+        {
+          kind: 'para',
+          text:
+            'Toutes les droites parallèles situées dans un même plan horizontal se coupent en un ' +
+            'même point de cette ligne, appelé **point de fuite** — un point qu\'on peut imaginer ' +
+            '« à l\'infini », comme le point de concours commun à toute une famille de parallèles.',
+        },
+        {
+          kind: 'para',
+          text:
+            'Les procédés de construction découlent directement de ce principe, combiné aux ' +
+            'propriétés déjà connues des plans, des droites et des figures planes — en particulier ' +
+            'celles du trapèze.',
+        },
+        {
+          kind: 'methode',
+          label: 'Exemple de construction — le toit d\'une maison',
+          items: [
+            'Tracer d\'abord le parallélépipède de la maison en perspective à point de fuite, ' +
+              'comme n\'importe quel solide.',
+            'Sur la face avant (le pignon), tracer les deux diagonales du rectangle : leur ' +
+              'intersection donne l\'axe vertical sur lequel se trouve le sommet du toit.',
+            'Placer le sommet du toit sur cette verticale, à la hauteur voulue — les deux pans ' +
+              'du toit rejoignent alors ce sommet depuis les arêtes du faîtage.',
+          ],
+        },
+        {
+          kind: 'attention',
+          label: 'Deux perspectives, deux résultats différents',
+          text:
+            'Un même solide dessiné en perspective cavalière et en perspective à point de fuite ' +
+            'ne donne jamais le même dessin : la première conserve le parallélisme des arêtes ' +
+            '(deux arêtes parallèles le restent sur le papier), la seconde ne le fait jamais — ' +
+            'les arêtes parallèles convergent vers leur point de fuite commun.',
+        },
+      ],
+    },
+
+    {
+      id: 'ombre',
+      number: 12,
       title: 'Ombre au soleil — projection parallèle',
       kicker: 'la direction n\'est jamais donnée en nombres — seulement par un exemple déjà résolu',
       blocks: [
@@ -872,7 +997,7 @@ export const geometrieDansEspace: ChapterContent = {
 
     {
       id: 'revision',
-      number: 11,
+      number: 13,
       title: 'Révision — quiz vrai/faux',
       kicker: '60 affirmations en 3 thèmes',
       blocks: [
@@ -915,6 +1040,10 @@ export const geometrieDansEspace: ChapterContent = {
         'face traversée fournit exactement 2 sommets ; segment direct si 2 points connus sur une ' +
         'face, sinon construction d\'un point auxiliaire par intersection de deux droites ' +
         'coplanaires (ou, sur un parallélépipède, par une parallèle).',
+      'Perspective centrale — un dispositif (la fenêtre de Dürer, vision monoculaire à travers ' +
+        'une vitre quadrillée) puis un principe (toutes les parallèles d\'un même plan horizontal ' +
+        'convergent vers un point de fuite, sur la ligne d\'horizon) ; contrairement à la ' +
+        'cavalière, ne conserve jamais le parallélisme des arêtes.',
       'Ombre au soleil — direction jamais donnée en nombres, déduite d\'un exemple déjà résolu ; ' +
         'projection oblique, jamais verticale ; sensible au sens, pas seulement à la direction ; ' +
         'relier les points-ombres pour reconstituer l\'ombre complète.',

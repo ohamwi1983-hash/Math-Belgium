@@ -444,3 +444,35 @@ paths:
   Vérifié par rendu navigateur réel (11 titres de section dans le nouvel ordre, `0` `.katex-error`,
   aucun `$...$` non résolu), re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run
   build`/`npm run lint` propres.
+
+- **4e, Chapitre 8 — Géométrie dans l'espace** (`geometrie-dans-espace`, `chapterNumber: 8` —
+  correspond au numéro annoncé) : d'abord vérifié contre une page « Synthèse » de manuel en 12
+  points — contrairement aux chapitres précédents, **aucun réordonnancement n'était nécessaire** :
+  les 9 premières sections suivaient déjà, une à une ou groupées, exactement l'ordre de la source.
+  Seul écart réel : les points 11 et 12 de la source (perspective centrale — dispositif de Dürer,
+  puis point de fuite) n'étaient couverts nulle part, à l'exception d'un court paragraphe de
+  contraste dans la section 1 (« pourquoi la cavalière plutôt que la centrale »). Un manque de
+  contenu n'est pas un problème d'ordre — signalé tel quel sans y toucher, avant qu'une demande
+  explicite de l'utilisateur (« ajoute les ») ne déclenche l'ajout. Deux nouvelles sections créées,
+  insérées entre `section` (9) et `ombre` (qui devient 12, avec `revision` en 13) : `fenetre-durer`
+  (10 — dispositif, vision monoculaire, illustration originale d'un cône de vision avec un objet
+  proche/petit et un objet éloigné/grand traversant la vitre au même endroit) et `point-de-fuite`
+  (11 — principe, ligne d'horizon, méthode de construction du toit d'une maison). La section 1
+  (`cavaliere`) reste inchangée dans le fond, avec juste un renvoi ajouté (« sections 10 et 11 ») ;
+  son illustration rails/point de fuite déjà existante a été **déplacée** (pas dupliquée) vers la
+  nouvelle section 11, qui en est le traitement approfondi. Recap étendu d'une puce pour couvrir
+  les 2 nouvelles sections — insertion tombant juste avant l'item « Ombre au soleil », déjà en
+  dernière position : l'ordre des 9 items restait donc déjà monotone avec la nouvelle numérotation,
+  vérifié plutôt que supposé (`recap.checklist`, sans référence numérique littérale et déjà sans
+  ordre strict par section avant ce patch, laissé inchangé).
+  **Piège découvert en écrivant ce contenu, distinct de celui du chapitre 6** : l'emphase markdown
+  à un seul astérisque (`*mot*`) n'est **jamais** interprétée par le renderer (`RichText`,
+  `src/components/Math.tsx` — `TOKEN_RE` ne reconnaît que `$latex$` et `**gras**`) ; elle s'affiche
+  verbatim avec ses astérisques — règle ajoutée à `.claude/rules/content-authoring.md`. Confirmé
+  par grep qu'il s'agit d'un bug latent PRÉEXISTANT sur plusieurs chapitres déjà en production
+  (`*transformant*` dans `caracteristiques-fonctions-reference.ts`, `*exactement*` ×2 dans
+  `statistique-descriptive.ts`) — signalé à l'utilisateur, laissé en l'état car hors du champ de ce
+  patch (aucun de ces 2 fichiers n'y est touché).
+  Vérifié par rendu navigateur réel (13 titres de section dans l'ordre attendu, `0` `.katex-error`,
+  aucun `$...$` ni astérisque isolé non résolu, illustration du cône de vision capturée à l'écran) ;
+  re-rendu des 22 chapitres du site sans régression. `tsc -b`/`npm run build`/`npm run lint` propres.

@@ -49,6 +49,14 @@ Le texte de tous les champs `text`/`items`/`formula` supporte une mini-syntaxe :
 une formule KaTeX inline, `**gras**` pour l'emphase — voir `RichText`/`MathInline`/`RichParagraph`
 dans `src/components/Math.tsx`.
 
+**Piège vérifié en pratique** : l'emphase à un seul astérisque (`*mot*`, convention Markdown
+courante) n'est **jamais** interprétée — `TOKEN_RE` ne reconnaît que `$latex$` et `**gras**`, rien
+d'autre. Un seul astérisque s'affiche donc verbatim à l'écran (ex. `*exactement*`) — détecté
+uniquement au rendu navigateur, jamais par `tsc`/`build`/`lint`. Toujours écrire `**gras**`, jamais
+`*mot*`, y compris pour un mot isolé (terme latin, mise en relief d'un seul mot). Bug latent
+retrouvé dans plusieurs chapitres déjà en production (`caracteristiques-fonctions-reference.ts`,
+`statistique-descriptive.ts`) — à corriger au passage si l'un de ces fichiers est retouché.
+
 **Piège vérifié en pratique** : `$latex$` imbriqué à l'intérieur de `**gras**` (ex.
 `'**$a > 0$**'`) n'est PAS reparsé — le tokenizer capture tout le texte entre `**...**` comme
 gras littéral, dollars compris, et KaTeX ne s'exécute jamais dessus. Toujours écrire le gras et
