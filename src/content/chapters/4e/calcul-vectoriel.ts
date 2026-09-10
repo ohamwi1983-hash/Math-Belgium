@@ -7,11 +7,11 @@ export const calculVectoriel: ChapterContent = {
   title: 'Calcul vectoriel',
   slug: 'calcul-vectoriel',
   lede:
-    "Un vecteur n'est pas un segment : c'est une direction, un sens et une longueur, totalement " +
-    "indépendants du point où on choisit de le représenter. Ce chapitre part de cette définition " +
-    "pour construire, outil après outil, tout ce qu'il faut pour manipuler des vecteurs — les " +
-    "relier à des points, les combiner, tester leurs relations entre eux, mesurer leur longueur, et " +
-    "les utiliser pour modéliser des situations concrètes.",
+    "Un vecteur, ce n'est pas un segment. C'est une **direction**, un **sens** et une " +
+    "**longueur** — rien de plus. Peu importe où tu le dessines sur la feuille ! Dans ce " +
+    "chapitre, tu vas apprendre à manipuler les vecteurs, outil après outil : les relier à des " +
+    "points, les combiner, tester leurs relations entre eux, mesurer leur longueur. Et enfin, " +
+    "les utiliser pour des situations concrètes.",
 
   intro: {
     title: "Avant de commencer : qu'est-ce qu'un vecteur ?",
@@ -19,19 +19,19 @@ export const calculVectoriel: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Un vecteur $\\vec{AB}$ porte trois informations, et seulement trois : une ' +
-          '**direction** (la droite (AB)), un **sens** (de A vers B) et une **longueur** (la ' +
-          "distance AB). Deux vecteurs qui partagent ces trois informations sont **égaux** — " +
-          "même s'ils ne sont pas dessinés au même endroit du plan.",
+          'Un vecteur $\\vec{AB}$ porte trois informations. Rien de plus : une **direction** ' +
+          '(la droite (AB)), un **sens** (de A vers B), une **longueur** (la distance AB). ' +
+          "Deux vecteurs sont **égaux** dès qu'ils ont ces trois informations en commun. Même " +
+          "s'ils ne sont pas dessinés au même endroit du plan !",
       },
       {
         kind: 'rappel',
         label: "Rappel — composantes d'un vecteur",
         items: [
           'Dans un repère, $\\vec{AB}$ a pour composantes ' +
-            '$\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}$ — c\'est ce couple de ' +
-            "nombres, et lui seul, qui résume entièrement la direction, le sens et la longueur du " +
-            'vecteur. Deux vecteurs sont égaux si et seulement si ils ont les mêmes composantes.',
+            '$\\begin{pmatrix} x_B - x_A \\\\ y_B - y_A \\end{pmatrix}$. Ce couple de nombres ' +
+            'résume à lui seul la direction, le sens et la longueur du vecteur. Deux vecteurs ' +
+            'sont égaux exactement quand ils ont les mêmes composantes.',
         ],
       },
     ],
@@ -42,16 +42,16 @@ export const calculVectoriel: ChapterContent = {
       id: 'definition',
       number: 1,
       title: "Qu'est-ce qu'un vecteur ?",
-      kicker: 'direction, sens, longueur — notation AB ou u (vecteurs)',
+      kicker: 'direction, sens, longueur — les deux façons de noter un vecteur',
       blocks: [
         {
           kind: 'para',
           text:
-            'Un vecteur se note de deux façons : $\\vec{AB}$ quand on le rattache à deux points ' +
-            '(A son **origine**, B son **extrémité**), ou $\\vec{u}$, $\\vec{v}$… quand seules sa ' +
-            'direction, son sens et sa longueur comptent, sans point particulier associé. Les ' +
-            "deux notations désignent le même type d'objet et se combinent librement dans un même " +
-            'calcul.',
+            'Un vecteur se note de deux façons. $\\vec{AB}$ : il est rattaché à deux points, A ' +
+            "son **origine** et B son **extrémité**. $\\vec{u}$, $\\vec{v}$… : là, seules " +
+            'comptent la direction, le sens et la longueur — sans point particulier associé. ' +
+            "Les deux notations désignent le même type d'objet. Tu peux les mélanger librement " +
+            'dans un même calcul.',
         },
         {
           kind: 'illustration',
@@ -73,9 +73,9 @@ export const calculVectoriel: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — la norme, une longueur',
           items: [
-            "La **norme** d'un vecteur, notée $\\|\\vec{u}\\|$ ou AB pour $\\vec{AB}$, est sa " +
-              "longueur : un nombre toujours positif ou nul, qui se mesure à la règle sur une " +
-              "figure avant même de disposer d'un repère.",
+            "La **norme** d'un vecteur, c'est sa longueur. On la note $\\|\\vec{u}\\|$, ou " +
+              'simplement AB pour $\\vec{AB}$. Elle est toujours positive ou nulle. Tu peux la ' +
+              "mesurer à la règle sur une figure, même avant d'avoir un repère.",
           ],
         },
         {
@@ -83,8 +83,9 @@ export const calculVectoriel: ChapterContent = {
           label: 'Un vecteur, pas un segment',
           text:
             'Deux représentants $\\vec{AB}$ et $\\vec{CD}$ d\'un même vecteur $\\vec{u}$ ne sont ' +
-            "pas superposés sur la figure — ils sont **égaux** dès qu'ils partagent direction, " +
-            "sens et longueur, indépendamment de l'endroit où on choisit de les dessiner.",
+            'pas forcément superposés sur la figure. Ils sont **égaux** quand même, dès qu\'ils ' +
+            'ont la même direction, le même sens et la même longueur. Peu importe où tu choisis ' +
+            'de les dessiner !',
         },
       ],
     },
@@ -98,9 +99,10 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux vecteurs de **même direction**, **même longueur** mais de **sens contraires** ' +
-            'sont des vecteurs **opposés**. L\'opposé de $\\vec{u}$ se note $-\\vec{u}$ ; ' +
-            "l'opposé de $\\vec{AB}$ se note $-\\vec{AB}$ ou, de façon équivalente, $\\vec{BA}$.",
+            'Deux vecteurs sont **opposés** quand ils ont la **même direction**, la **même ' +
+            'longueur**, mais des **sens contraires**. L\'opposé de $\\vec{u}$ se note ' +
+            '$-\\vec{u}$. L\'opposé de $\\vec{AB}$ se note $-\\vec{AB}$ — ou, ce qui revient au ' +
+            'même, $\\vec{BA}$.',
         },
         {
           kind: 'illustration',
@@ -133,8 +135,8 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Multiplier un vecteur par un nombre k ne change jamais sa **direction** : seuls sa ' +
-            'longueur et, si k est négatif, son sens sont modifiés.',
+            'Multiplier un vecteur par un nombre k ne change **jamais** sa **direction**. ' +
+            'Seules sa longueur, et son sens si k est négatif, sont modifiés.',
         },
         {
           kind: 'illustration',
@@ -175,17 +177,18 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Pour construire $k \\cdot \\vec{AB}$ à la règle : reporter la longueur de [AB] |k| ' +
-            'fois le long de la droite (AB), dans le même sens que AB si k > 0, dans le sens ' +
-            'opposé si k < 0.',
+            'Pour construire $k \\cdot \\vec{AB}$ à la règle : reporte la longueur de [AB] |k| ' +
+            'fois sur la droite (AB). Dans le même sens que AB si k > 0, dans le sens opposé si ' +
+            'k < 0.',
         },
         { kind: 'subheading', text: 'Vecteurs colinéaires et points alignés' },
         {
           kind: 'para',
           text:
-            'Deux vecteurs sont **colinéaires** quand ils partagent la même direction — portés ' +
-            'par des droites parallèles, ou la même droite. Trois points sont **alignés** ' +
-            'exactement quand deux vecteurs formés à partir de ces points sont colinéaires.',
+            'Deux vecteurs sont **colinéaires** quand ils ont la même direction. Ils sont ' +
+            'portés par des droites parallèles, ou par la même droite. Trois points sont ' +
+            '**alignés** exactement quand deux vecteurs formés à partir de ces points sont ' +
+            'colinéaires.',
         },
         {
           kind: 'illustration',
@@ -208,15 +211,15 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Alignement de 3 points — A, B, C alignés ⟺ $\\vec{AB}$ et $\\vec{AC}$ colinéaires, ' +
-              "c'est-à-dire $\\vec{AC} = k \\cdot \\vec{AB}$ pour un certain nombre k.",
+            'Alignement de 3 points — A, B, C alignés ⟺ $\\vec{AB}$ et $\\vec{AC}$ colinéaires. ' +
+              "Autrement dit, $\\vec{AC} = k \\cdot \\vec{AB}$ pour un certain nombre k.",
           ],
         },
         {
           kind: 'entrainement',
           title: 'Construction graphique de vecteurs',
           generatorId: 'gen23',
-          description: ['Trace coefficient·AB par glisser-déposer sur une grille magnétique.'],
+          description: ['Trace k·AB par glisser-déposer sur une grille magnétique.'],
           chantier: '4e',
           whereLabel: '4e → « 23. Construction graphique de vecteurs »',
         },
@@ -232,8 +235,8 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux vecteurs s\'additionnent de deux façons équivalentes, selon la façon dont ils ' +
-            'sont placés l\'un par rapport à l\'autre.',
+            "Il y a deux façons d'additionner deux vecteurs. Le résultat est le même — tout " +
+            "dépend de la façon dont ils sont placés l'un par rapport à l'autre.",
         },
         {
           kind: 'illustration',
@@ -255,7 +258,7 @@ export const calculVectoriel: ChapterContent = {
               { x: 2.5, y: 2.4, vectorLabel: [{ text: 'u', vector: true }, { text: ' + ' }, { text: 'v', vector: true }], tone: 'accent', node: false },
             ],
             caption:
-              'méthode du triangle : en plaçant $\\vec{v}$ à la suite de $\\vec{u}$, le vecteur ' +
+              'méthode du triangle : $\\vec{v}$ placé à la suite de $\\vec{u}$ — le vecteur ' +
               "somme relie directement le point de départ au point d'arrivée",
           },
         },
@@ -263,10 +266,11 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Méthode du triangle — vecteurs consécutifs (l\'origine de $\\vec{v}$ est ' +
-              "l'extrémité de $\\vec{u}$) : c'est la relation de Chasles (section 6).",
-            'Méthode du parallélogramme — vecteurs de même origine (utilisée en physique, ' +
-              "section 17) : la somme est la diagonale du parallélogramme construit sur $\\vec{u}$ et $\\vec{v}$.",
+            "Méthode du triangle — les vecteurs sont consécutifs : l'origine de $\\vec{v}$ est " +
+              "l'extrémité de $\\vec{u}$. C'est la relation de Chasles (section 6).",
+            'Méthode du parallélogramme — les vecteurs ont la même origine. Utilisée en ' +
+              'physique (section 17). La somme est la diagonale du parallélogramme construit ' +
+              'sur $\\vec{u}$ et $\\vec{v}$.',
           ],
         },
       ],
@@ -282,9 +286,10 @@ export const calculVectoriel: ChapterContent = {
           kind: 'para',
           text:
             "Retrancher un vecteur, c'est ajouter son opposé : $\\vec{u} - \\vec{v} = \\vec{u} + " +
-            '(-\\vec{v})$. Quand $\\vec{u}$ et $\\vec{v}$ partent d\'une même origine, leur ' +
-            'différence $\\vec{w} = \\vec{u} - \\vec{v}$ relie l\'extrémité de $\\vec{v}$ à ' +
-            "l'extrémité de $\\vec{u}$ — dans ce sens précis, puisque $\\vec{w} + \\vec{v} = \\vec{u}$.",
+            '(-\\vec{v})$. Place $\\vec{u}$ et $\\vec{v}$ à partir de la même origine. Leur ' +
+            "différence $\\vec{w} = \\vec{u} - \\vec{v}$ relie alors l'extrémité de $\\vec{v}$ " +
+            "à l'extrémité de $\\vec{u}$ — dans ce sens précis ! Vérifie : " +
+            '$\\vec{w} + \\vec{v} = \\vec{u}$.',
         },
         {
           kind: 'illustration',
@@ -320,9 +325,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Dès qu'une chaîne de vecteurs se relaie point par point — le point d'arrivée de " +
-            "l'un est le point de départ du suivant — elle se réduit à un seul vecteur, celui " +
-            'qui va directement du tout premier point au tout dernier.',
+            "Une chaîne de vecteurs se relaie point par point : le point d'arrivée de l'un est " +
+            "le point de départ du suivant. Elle se réduit alors à un seul vecteur — celui qui " +
+            'va directement du tout premier point au tout dernier.',
         },
         {
           kind: 'illustration',
@@ -354,8 +359,8 @@ export const calculVectoriel: ChapterContent = {
           items: [
             '$A_1A_2 + A_2A_3 + \\ldots + A_{n-1}A_n = A_1A_n$.',
             'Une chaîne **fermée** (qui revient à son point de départ) se réduit toujours au vecteur nul.',
-            'Un vecteur écrit « à l\'envers » ($\\vec{CB}$ au lieu de $\\vec{BC}$) doit d\'abord être ' +
-              'remplacé par son opposé ($-\\vec{BC}$) avant de télescoper.',
+            'Un vecteur écrit « à l\'envers » ($\\vec{CB}$ au lieu de $\\vec{BC}$) ? ' +
+              'Remplace-le d\'abord par son opposé ($-\\vec{BC}$), avant de télescoper.',
           ],
         },
         {
@@ -388,9 +393,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Réciproquement, tout vecteur peut se décomposer en une somme de deux vecteurs de ' +
-            'directions imposées (deux droites non parallèles) : c\'est encore la méthode du ' +
-            'parallélogramme, utilisée en sens inverse.',
+            "Tu peux aussi faire l'inverse : décomposer un vecteur en une somme de deux " +
+            'vecteurs, chacun avec une direction imposée (deux droites non parallèles). ' +
+            "C'est encore la méthode du parallélogramme — utilisée cette fois en sens inverse.",
         },
         {
           kind: 'illustration',
@@ -427,16 +432,16 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Une fois un repère choisi, un vecteur n'a plus besoin d'être dessiné pour être " +
-            'décrit : deux nombres — ses **composantes** — résument à eux seuls sa direction, ' +
-            'son sens et sa longueur.',
+            "Une fois un repère choisi, tu n'as plus besoin de dessiner un vecteur pour le " +
+            'décrire. Deux nombres suffisent : ses **composantes**. Ils résument à eux seuls sa ' +
+            'direction, son sens et sa longueur.',
         },
         {
           kind: 'rappel',
           label: 'Rappel — composantes de AB',
           items: [
             'Pour $A(x_A ; y_A)$ et $B(x_B ; y_B)$ : $\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ ' +
-              'y_B-y_A \\end{pmatrix}$. Deux vecteurs sont égaux si et seulement si ils ont les ' +
+              'y_B-y_A \\end{pmatrix}$. Deux vecteurs sont égaux exactement quand ils ont les ' +
               'mêmes composantes.',
           ],
         },
@@ -459,8 +464,8 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'En repère, additionner deux vecteurs — ou un vecteur nommé et un vecteur ' +
-            'point-à-point — revient à additionner leurs composantes une à une.',
+            "En repère, additionner deux vecteurs, c'est facile : additionne leurs composantes " +
+            'une à une. Ça marche aussi entre un vecteur nommé et un vecteur point-à-point.',
         },
         {
           kind: 'methode',
@@ -468,7 +473,7 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'En repère — $\\vec{u} + \\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$.',
             'Vecteurs mixtes — un vecteur nommé ($\\vec{u}$) et un vecteur point-à-point ' +
-              '($\\vec{AB}$) se combinent librement, une fois leurs composantes calculées séparément.',
+              '($\\vec{AB}$) se combinent librement. Calcule juste leurs composantes séparément d\'abord.',
           ],
         },
         {
@@ -490,9 +495,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Multiplier un vecteur par un réel en repère revient à multiplier chacune de ses ' +
-            'composantes par ce nombre — y compris pour retrouver l\'opposé, cas particulier ' +
-            'k = −1.',
+            "Multiplier un vecteur par un réel en repère, c'est simple : multiplie chacune de " +
+            'ses composantes par ce nombre. Ça marche aussi pour retrouver l\'opposé — c\'est ' +
+            'juste le cas particulier k = −1.',
         },
         {
           kind: 'methode',
@@ -506,8 +511,8 @@ export const calculVectoriel: ChapterContent = {
           label: 'Rappel — composantes opposées',
           items: [
             'Si $\\vec{u}$ a pour composantes $\\begin{pmatrix} x \\\\ y \\end{pmatrix}$, alors ' +
-              '$-\\vec{u}$ a pour composantes $\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$ — ' +
-              'chaque composante change de signe, rien d\'autre.',
+              '$-\\vec{u}$ a pour composantes $\\begin{pmatrix} -x \\\\ -y \\end{pmatrix}$. ' +
+              'Chaque composante change juste de signe — rien d\'autre ne bouge.',
           ],
         },
         {
@@ -540,8 +545,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La **norme** d\'un vecteur est sa longueur — toujours positive ou nulle. La distance ' +
-            'entre deux points n\'est rien d\'autre que la norme du vecteur qui les relie.',
+            'La **norme** d\'un vecteur, c\'est sa longueur. Elle est toujours positive ou ' +
+            'nulle. La distance entre deux points, ce n\'est rien d\'autre que la norme du ' +
+            'vecteur qui les relie.',
         },
         {
           kind: 'illustration',
@@ -570,7 +576,8 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'Norme — $\\|\\vec{u}\\| = \\sqrt{x_u^2 + y_u^2}$.',
             'Distance entre deux points — $AB = \\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$.',
-            'Classer un triangle — isocèle : (au moins) deux côtés de même longueur ; scalène : les trois longueurs sont différentes.',
+            'Classer un triangle — isocèle : au moins deux côtés ont la même longueur. ' +
+              'Scalène : les trois longueurs sont toutes différentes.',
           ],
         },
         {
@@ -580,17 +587,18 @@ export const calculVectoriel: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Pour $A(x_A ; y_A)$ et $B(x_B ; y_B)$, le point C de coordonnées $(x_B ; y_A)$ ' +
-                'forme avec A et B un triangle rectangle en C — le côté [AC] est horizontal, de ' +
-                'longueur $|x_B-x_A|$, le côté [CB] est vertical, de longueur $|y_B-y_A|$. Le ' +
-                'théorème de Pythagore donne alors : $\\|\\vec{AB}\\|^2 = AC^2 + CB^2 = (x_B-x_A)^2 + (y_B-y_A)^2$',
+                'Prends $A(x_A ; y_A)$ et $B(x_B ; y_B)$. Le point C de coordonnées ' +
+                '$(x_B ; y_A)$ forme avec A et B un triangle rectangle en C. Le côté [AC] est ' +
+                'horizontal, de longueur $|x_B-x_A|$. Le côté [CB] est vertical, de longueur ' +
+                '$|y_B-y_A|$. Le théorème de Pythagore donne alors : ' +
+                '$\\|\\vec{AB}\\|^2 = AC^2 + CB^2 = (x_B-x_A)^2 + (y_B-y_A)^2$',
             },
             {
               kind: 'para',
               text:
-                'd\'où $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$ — exactement la ' +
-                'formule de la norme, puisque $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$ ' +
-                'sont les composantes $\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ de $\\vec{AB}$.',
+                'D\'où $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$. C\'est exactement ' +
+                'la formule de la norme ! Puisque $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$ ' +
+                'sont bien les composantes $\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ de $\\vec{AB}$.',
             },
           ],
         },
@@ -621,9 +629,10 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux relations reviennent sans cesse entre un vecteur et des points : la ' +
-            '**translation** (retrouver un point à partir d\'un autre et d\'un vecteur) et le ' +
-            '**milieu** d\'un segment. Une troisième, plus générale, les contient toutes les deux.',
+            'Deux relations reviennent tout le temps entre un vecteur et des points. La ' +
+            '**translation** : retrouver un point à partir d\'un autre et d\'un vecteur. Le ' +
+            '**milieu** d\'un segment. Il existe une troisième relation, plus générale, qui ' +
+            'contient les deux.',
         },
         {
           kind: 'illustration',
@@ -646,12 +655,12 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Translation — B est le translaté de A par $\\vec{u}$ : B = A + $\\vec{u}$, donc ' +
+            'Translation — B est le translaté de A par $\\vec{u}$ : B = A + $\\vec{u}$. Donc ' +
               '$x_B=x_A+x_u$ et $y_B=y_A+y_u$.',
-            'Milieu — M milieu de [AB] : $x_M=(x_A+x_B)/2$ et $y_M=(y_A+y_B)/2$ ; de façon ' +
-              'équivalente, $\\vec{AM} = \\vec{MB} = \\frac{1}{2}\\vec{AB}$.',
+            'Milieu — M milieu de [AB] : $x_M=(x_A+x_B)/2$ et $y_M=(y_A+y_B)/2$. De façon ' +
+              'équivalente : $\\vec{AM} = \\vec{MB} = \\frac{1}{2}\\vec{AB}$.',
             'Relation générale — $\\vec{AM} = k \\cdot \\vec{AB}$ place toujours M sur la droite ' +
-              '(AB) ; k=1/2 redonne le milieu, k=1 redonne B, k=0 redonne A.',
+              '(AB). k=1/2 redonne le milieu, k=1 redonne B, k=0 redonne A.',
           ],
         },
         {
@@ -668,9 +677,9 @@ export const calculVectoriel: ChapterContent = {
           kind: 'piege',
           label: 'Milieu ≠ différence de coordonnées',
           text:
-            'Les coordonnées du milieu sont la **moyenne** des coordonnées de A et B — pas leur ' +
-            'différence. La différence $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$ ' +
-            'donne les composantes de $\\vec{AB}$, un objet complètement différent du milieu.',
+            'Les coordonnées du milieu, c\'est la **moyenne** des coordonnées de A et B. ' +
+            'Jamais leur différence ! La différence $\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$ ' +
+            'donne les composantes de $\\vec{AB}$ — un objet complètement différent du milieu.',
         },
         {
           kind: 'entrainement',
@@ -700,8 +709,8 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une fois les vecteurs décrits par leurs composantes, la colinéarité définie plus ' +
-            'haut (section 3) se teste par un calcul, sans même faire de dessin.',
+            'Une fois les vecteurs décrits par leurs composantes, tu peux tester la ' +
+            'colinéarité définie plus haut (section 3) par un simple calcul. Pas besoin de dessin !',
         },
         {
           kind: 'methode',
@@ -709,7 +718,7 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'Colinéarité de deux vecteurs — $\\vec{u}\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ ' +
               'et $\\vec{v}\\begin{pmatrix} x_v \\\\ y_v \\end{pmatrix}$ sont colinéaires ⟺ ' +
-              '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ (déterminant nul).',
+              '$x_u \\cdot y_v - y_u \\cdot x_v = 0$. On dit que le déterminant est nul.',
             'Alignement de 3 points — A, B, C alignés ⟺ $\\vec{AB}$ et $\\vec{AC}$ colinéaires.',
           ],
         },
@@ -734,22 +743,22 @@ export const calculVectoriel: ChapterContent = {
                 'Par définition, $\\vec{u}\\begin{pmatrix} x_u \\\\ y_u \\end{pmatrix}$ et ' +
                 '$\\vec{v}\\begin{pmatrix} x_v \\\\ y_v \\end{pmatrix}$ sont colinéaires s\'il ' +
                 'existe un nombre k tel que $\\vec{v} = k \\cdot \\vec{u}$. Composante par ' +
-                'composante, cela donne $x_v = k \\cdot x_u$ et $y_v = k \\cdot y_u$, donc — ' +
-                'tant que $x_u$ et $y_u$ sont non nuls — $k = x_v/x_u$ et $k = y_v/y_u$.',
+                'composante, ça donne $x_v = k \\cdot x_u$ et $y_v = k \\cdot y_u$. Donc, tant ' +
+                'que $x_u$ et $y_u$ ne sont pas nuls : $k = x_v/x_u$ et $k = y_v/y_u$.',
             },
             {
               kind: 'para',
               text:
-                'Ces deux expressions de k étant égales, $x_v/x_u = y_v/y_u$, soit, en ' +
-                'multipliant les deux membres par $x_u \\cdot y_u$ : $x_u \\cdot y_v = y_u \\cdot ' +
-                'x_v$, c\'est-à-dire $x_u \\cdot y_v - y_u \\cdot x_v = 0$.',
+                'Ces deux expressions de k sont égales : $x_v/x_u = y_v/y_u$. Multiplie les ' +
+                'deux membres par $x_u \\cdot y_u$ : $x_u \\cdot y_v = y_u \\cdot x_v$. ' +
+                'Autrement dit, $x_u \\cdot y_v - y_u \\cdot x_v = 0$.',
             },
             {
               kind: 'para',
               text:
-                'Cette forme a l\'avantage de rester valable même quand $x_u$ ou $y_u$ vaut 0 — ' +
-                "c'est elle qu'on utilise en pratique, jamais l'égalité de deux quotients (qui " +
-                "exigerait de vérifier au préalable qu'aucun dénominateur n'est nul).",
+                'Cette forme reste valable même quand $x_u$ ou $y_u$ vaut 0. C\'est elle ' +
+                'qu\'on utilise en pratique — jamais l\'égalité de deux quotients ! Il faudrait ' +
+                'sinon vérifier d\'abord qu\'aucun dénominateur n\'est nul.',
             },
           ],
         },
@@ -758,8 +767,8 @@ export const calculVectoriel: ChapterContent = {
           label: "Ne pas confondre avec l'orthogonalité",
           text:
             '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ teste la **colinéarité**. ' +
-            '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 14) — deux ' +
-            'formules qui se ressemblent, pour deux relations opposées.',
+            '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 14). ' +
+            'Ces deux formules se ressemblent, mais attention : elles testent deux relations opposées !',
         },
         {
           kind: 'entrainement',
@@ -781,8 +790,8 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux vecteurs sont **orthogonaux** quand ils forment un angle droit. Ce test sert ' +
-            "aussi bien à comparer deux vecteurs directement qu'à prouver qu'un triangle est " +
+            'Deux vecteurs sont **orthogonaux** quand ils forment un angle droit. Ce test a ' +
+            'deux usages : comparer deux vecteurs directement, ou prouver qu\'un triangle est ' +
             'rectangle en l\'un de ses sommets.',
         },
         {
@@ -812,9 +821,10 @@ export const calculVectoriel: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Orthogonalité de deux vecteurs — $\\vec{u} \\perp \\vec{v}$ ⟺ $x_u \\cdot x_v + y_u \\cdot y_v = 0$ (produit scalaire nul).',
-            'Triangle rectangle en A — ⟺ $\\vec{AB} \\cdot \\vec{AC} = 0$ ; méthode alternative ' +
-              'équivalente : $BC^2 = AB^2 + AC^2$ (Pythagore).',
+            'Orthogonalité de deux vecteurs — $\\vec{u} \\perp \\vec{v}$ ⟺ ' +
+              '$x_u \\cdot x_v + y_u \\cdot y_v = 0$. On dit que le produit scalaire est nul.',
+            'Triangle rectangle en A — ⟺ $\\vec{AB} \\cdot \\vec{AC} = 0$. Autre méthode ' +
+              'possible, tout aussi valable : $BC^2 = AB^2 + AC^2$ (Pythagore).',
           ],
         },
         {
@@ -833,20 +843,20 @@ export const calculVectoriel: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Faire pivoter un vecteur $\\vec{OA}\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ ' +
-                'd\'un quart de tour donne un vecteur $\\vec{OA\'}\\begin{pmatrix} -y \\\\ x ' +
+                'Fais pivoter un vecteur $\\vec{OA}\\begin{pmatrix} x \\\\ y \\end{pmatrix}$ ' +
+                'd\'un quart de tour. Tu obtiens un vecteur $\\vec{OA\'}\\begin{pmatrix} -y \\\\ x ' +
                 '\\end{pmatrix}$, perpendiculaire à $\\vec{OA}$ par construction. Tout vecteur ' +
-                '$\\vec{v}$ colinéaire à $\\vec{OA\'}$ — donc lui aussi perpendiculaire à ' +
-                '$\\vec{OA}$ — s\'écrit $\\vec{v} = k \\cdot \\begin{pmatrix} -y \\\\ x ' +
+                '$\\vec{v}$ colinéaire à $\\vec{OA\'}$ est donc lui aussi perpendiculaire à ' +
+                '$\\vec{OA}$. Il s\'écrit $\\vec{v} = k \\cdot \\begin{pmatrix} -y \\\\ x ' +
                 '\\end{pmatrix} = \\begin{pmatrix} -ky \\\\ kx \\end{pmatrix}$ pour un certain k.',
             },
             {
               kind: 'para',
               text:
-                'En notant $\\begin{pmatrix} x\' \\\\ y\' \\end{pmatrix}$ les composantes de ' +
-                '$\\vec{v}$, cela donne $x\'=-ky$ et $y\'=kx$, d\'où $x \\cdot x\' + y \\cdot y\' ' +
-                '= x(-ky) + y(kx) = -kxy + kxy = 0$ : le produit scalaire de deux vecteurs ' +
-                'perpendiculaires est toujours nul.',
+                'Note $\\begin{pmatrix} x\' \\\\ y\' \\end{pmatrix}$ les composantes de ' +
+                '$\\vec{v}$. Ça donne $x\'=-ky$ et $y\'=kx$. D\'où $x \\cdot x\' + y \\cdot y\' ' +
+                '= x(-ky) + y(kx) = -kxy + kxy = 0$. Le produit scalaire de deux vecteurs ' +
+                'perpendiculaires est donc toujours nul.',
             },
           ],
         },
@@ -891,10 +901,10 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un **vecteur directeur** d\'une droite d est un vecteur défini par deux points ' +
-            'distincts de d — n\'importe lesquels. Comme deux points quelconques d\'une même ' +
-            'droite donnent toujours des vecteurs colinéaires (section 13), une droite a une ' +
-            'infinité de vecteurs directeurs, mais tous colinéaires entre eux.',
+            'Un **vecteur directeur** d\'une droite d, c\'est un vecteur défini par deux ' +
+            'points distincts de d — n\'importe lesquels ! Deux points quelconques d\'une même ' +
+            'droite donnent toujours des vecteurs colinéaires (section 13). Une droite a donc ' +
+            'une infinité de vecteurs directeurs. Mais ils sont tous colinéaires entre eux.',
         },
         {
           kind: 'illustration',
@@ -935,8 +945,8 @@ export const calculVectoriel: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — vers le chapitre suivant',
           items: [
-            'Le vecteur directeur est l\'outil qui permet de décrire une droite par une équation ' +
-              'paramétrique ou cartésienne — la notion revient au centre du chapitre consacré aux droites.',
+            'Le vecteur directeur sert à décrire une droite par une équation paramétrique ou ' +
+              'cartésienne. Tu le retrouveras au centre du chapitre consacré aux droites.',
           ],
         },
       ],
@@ -951,9 +961,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Deux vecteurs peuvent partager n'importe quel sous-ensemble de ces trois " +
-            'propriétés : leur **longueur**, leur **direction** et leur **sens**. Seule ' +
-            "l'égalité ($\\vec{u} = \\vec{v}$) exige les trois à la fois.",
+            'Deux vecteurs ont trois propriétés : leur **longueur**, leur **direction**, leur ' +
+            '**sens**. Ils peuvent en partager une seule, deux, ou les trois. Seule l\'égalité ' +
+            '($\\vec{u} = \\vec{v}$) exige les trois à la fois.',
         },
         {
           kind: 'illustration',
@@ -991,14 +1001,14 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Même longueur ne signifie **jamais** colinéaire : deux vecteurs peuvent avoir ' +
-            'exactement la même norme tout en pointant dans des directions complètement différentes.',
+            'Même longueur ne veut **jamais** dire colinéaire ! Deux vecteurs peuvent avoir ' +
+            'exactement la même norme, tout en pointant dans des directions complètement différentes.',
         },
         {
           kind: 'entrainement',
           title: 'Comparaison visuelle de vecteurs sur figure',
           generatorId: 'gen28',
-          description: ['Sélectionne, parmi des vecteurs dérivés d\'un ou deux vecteurs de base, ceux qui partagent une propriété (longueur, direction ou sens) avec une référence.'],
+          description: ['Parmi plusieurs vecteurs dérivés d\'un ou deux vecteurs de base, sélectionne ceux qui partagent une propriété (longueur, direction ou sens) avec une référence.'],
           chantier: '4e',
           whereLabel: '4e → « 28. Comparaison visuelle de vecteurs sur figure »',
         },
@@ -1014,9 +1024,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux forces ou deux vitesses s\'additionnent comme des vecteurs. Leur **résultante** ' +
-            'se calcule avec la loi des cosinus, vue au chapitre précédent — le triangle formé ' +
-            'par les deux vecteurs et leur somme n\'est presque jamais rectangle.',
+            'Deux forces ou deux vitesses s\'additionnent comme des vecteurs. Leur ' +
+            '**résultante** se calcule avec la loi des cosinus, vue au chapitre précédent. Le ' +
+            'triangle formé par les deux vecteurs et leur somme n\'est presque jamais rectangle !',
         },
         {
           kind: 'illustration',
@@ -1049,9 +1059,9 @@ export const calculVectoriel: ChapterContent = {
           items: [
             'Repérer l\'angle θ entre les deux vecteurs, mesuré depuis leur origine commune.',
             'Calculer la norme de la résultante : $R^2 = F_1^2 + F_2^2 + 2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$.',
-            'Si besoin, calculer la **déviation** (l\'écart angulaire entre la résultante et l\'un ' +
-              'des deux vecteurs) par la loi des sinus, puis la traduire en direction cardinale ' +
-              'selon le contexte de la figure.',
+            'Si besoin, calcule la **déviation** — l\'écart angulaire entre la résultante et ' +
+              'l\'un des deux vecteurs — par la loi des sinus. Traduis-la ensuite en direction ' +
+              'cardinale, selon le contexte de la figure.',
           ],
         },
         {
@@ -1069,8 +1079,8 @@ export const calculVectoriel: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — notation contexte-aware',
           items: [
-            'La notation suit toujours le contexte : des forces se notent $\\vec{F_1}$, ' +
-              '$\\vec{F_2}$, $\\vec{F_R}$ ; des vitesses (par exemple avion et vent) se notent ' +
+            'La notation suit toujours le contexte. Des forces se notent $\\vec{F_1}$, ' +
+              '$\\vec{F_2}$, $\\vec{F_R}$. Des vitesses (par exemple avion et vent) se notent ' +
               '$\\vec{v_1}$, $\\vec{v_2}$, $\\vec{v_R}$.',
           ],
         },
@@ -1094,9 +1104,9 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre transversalement les dix générateurs de ce chapitre — ' +
-            'un thème par générateur, sauf pour les deux premiers (relation vectorielle), qui ' +
-            'partagent une seule banque puisqu\'ils testent exactement le même contenu mathématique.',
+            'Un quiz vrai/faux qui couvre tout le chapitre, générateur par générateur. Un ' +
+            'thème par générateur — sauf les deux premiers (relation vectorielle), qui ' +
+            'partagent une seule banque de questions. Ils testent exactement le même contenu mathématique.',
         },
       ],
     },
@@ -1104,17 +1114,17 @@ export const calculVectoriel: ChapterContent = {
 
   recap: {
     items: [
-      'Vecteur — direction, sens, longueur ; composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, indépendantes du point d\'application.',
+      'Vecteur — direction, sens, longueur. Composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, toujours indépendantes du point où tu le dessines.',
       'Combiner — addition (triangle ou parallélogramme) et multiplication par un scalaire, ' +
-        'composante par composante ; k>0 conserve le sens, k<0 l\'inverse ; opposé ' +
-        '$-\\vec{u} = (-1) \\cdot \\vec{u}$ ; soustraire, c\'est ajouter l\'opposé.',
-      'Chasles — une chaîne de vecteurs se réduit du premier point au dernier ; une chaîne fermée se réduit au vecteur nul.',
-      'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours ≥ 0 ; distance entre deux points = norme du vecteur qui les relie.',
-      'Points — translation B = A + u ; milieu = moyenne des coordonnées ; relation générale ' +
+        'composante par composante. k>0 conserve le sens, k<0 l\'inverse. Opposé : ' +
+        '$-\\vec{u} = (-1) \\cdot \\vec{u}$. Soustraire, c\'est ajouter l\'opposé.',
+      'Chasles — une chaîne de vecteurs se réduit du premier point au dernier. Une chaîne fermée se réduit au vecteur nul.',
+      'Norme — $\\|\\vec{u}\\|=\\sqrt{x_u^2+y_u^2}$, toujours ≥ 0. Distance entre deux points = norme du vecteur qui les relie.',
+      'Points — translation B = A + u. Milieu = moyenne des coordonnées. Relation générale ' +
         '$\\vec{AM} = k \\cdot \\vec{AB}$, toujours sur la droite (AB).',
-      'Colinéarité — $x_uy_v-y_ux_v=0$ ; orthogonalité — $x_ux_v+y_uy_v=0$ — deux tests à ne jamais confondre.',
-      'Vecteur directeur — tout vecteur défini par 2 points d\'une droite ; tous colinéaires entre eux, pour une même droite.',
-      'Résultante — somme vectorielle de deux forces ou vitesses, norme obtenue par la loi des cosinus.',
+      'Colinéarité — $x_uy_v-y_ux_v=0$. Orthogonalité — $x_ux_v+y_uy_v=0$. Deux tests à ne jamais confondre !',
+      'Vecteur directeur — tout vecteur défini par 2 points d\'une droite. Pour une même droite, ils sont tous colinéaires entre eux.',
+      'Résultante — somme vectorielle de deux forces ou vitesses. Sa norme s\'obtient par la loi des cosinus.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
@@ -1126,13 +1136,13 @@ export const calculVectoriel: ChapterContent = {
       ],
     },
     forward:
-      "Composantes, norme et produit scalaire reviendront tels quels dès qu'un vecteur apparaît " +
-      "en trois dimensions, dans la géométrie de l'espace — avec une troisième composante en plus.",
+      "Composantes, norme et produit scalaire reviennent tels quels dès qu'un vecteur a trois " +
+      "dimensions, dans la géométrie de l'espace. Il y a juste une troisième composante en plus.",
     entrainement: {
       kind: 'entrainement',
       title: 'Calcul vectoriel — quiz vrai/faux',
       generatorId: 'gen64',
-      description: ['180 affirmations pré-écrites réparties en 9 thèmes (20 par thème) qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.'],
+      description: ['Choisis un thème et teste-toi : 180 affirmations pré-écrites réparties en 9 thèmes (20 par thème), qui reprennent tout le chapitre. Une seule tentative par question, justification toujours révélée.'],
       chantier: '4e',
       whereLabel: '4e → « 64. Calcul vectoriel — quiz vrai/faux »',
     },
