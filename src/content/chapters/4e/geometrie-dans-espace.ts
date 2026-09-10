@@ -7,17 +7,17 @@ export const geometrieDansEspace: ChapterContent = {
   title: "Géométrie dans l'espace",
   slug: 'geometrie-dans-espace',
   lede:
-    "Un solide ne tient pas sur une feuille plane — il faut d'abord apprendre à le **dessiner** " +
-    'avant de pouvoir raisonner dessus. Ce chapitre commence par la perspective cavalière, la ' +
-    "convention qui permet de représenter un cube ou un prisme sur papier sans en fausser la " +
-    "lecture, pose ensuite le vocabulaire commun à toute la géométrie dans l'espace — déterminer " +
-    'un plan, situer deux droites ou deux plans l\'un par rapport à l\'autre, reconnaître un ' +
-    "parallélisme, construire un point de percée — puis l'applique à trois questions concrètes : " +
-    "où se situe une droite par rapport à un plan, quelle forme prend la section d'un solide " +
-    "coupé par un plan, et comment reconstituer l'ombre d'un objet éclairé obliquement. " +
-    'Contrairement au chapitre sur les droites et les cercles du plan, aucune coordonnée ' +
-    "numérique n'intervient dans ces trois derniers exercices : tout s'y lit et se justifie " +
-    "directement sur le dessin, jamais par un calcul chiffré.",
+    "Un solide a trois dimensions. Une feuille de papier n'en a que deux. Il faut donc d'abord " +
+    "apprendre à **dessiner** un solide, avant de pouvoir raisonner dessus. Ce chapitre commence " +
+    "par la perspective cavalière : la convention qui te permet de dessiner un cube ou un prisme " +
+    "sur papier, sans fausser sa lecture. Tu apprends ensuite le vocabulaire de base de la " +
+    "géométrie dans l'espace : déterminer un plan, situer deux droites ou deux plans l'un par " +
+    "rapport à l'autre, reconnaître un parallélisme, construire un point de percée. Tu utilises " +
+    "enfin tout ça pour répondre à trois questions concrètes : où se situe une droite par " +
+    "rapport à un plan ? quelle forme a la section d'un solide coupé par un plan ? comment " +
+    "reconstituer l'ombre d'un objet éclairé de travers ? Contrairement au chapitre sur les " +
+    "droites et les cercles du plan, il n'y a ici aucune coordonnée numérique. Tout se lit et se " +
+    "justifie directement sur le dessin — jamais par un calcul chiffré.",
 
   sections: [
     {
@@ -29,12 +29,12 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Un solide a trois dimensions ; une feuille n'en a que deux. La **perspective " +
-            "cavalière** résout ce problème par une convention simple, utilisée pour tous les " +
-            "dessins de ce chapitre : l'axe x reste horizontal à l'échelle réelle, l'axe z (la " +
-            "hauteur) reste vertical à l'échelle réelle, et l'axe y (la profondeur, ce qui « " +
-            'rentre » dans la feuille) part en diagonale à 45°, mais **réduit de moitié** — sans ' +
-            'cette réduction, un cube semblerait étiré vers l\'arrière.',
+            "Un solide a trois dimensions. Une feuille de papier n'en a que deux. La " +
+            '**perspective cavalière** résout ce problème. C\'est une convention simple, utilisée ' +
+            "pour tous les dessins de ce chapitre. L'axe x reste horizontal, à l'échelle réelle. " +
+            "L'axe z (la hauteur) reste vertical, à l'échelle réelle. L'axe y (la profondeur, ce " +
+            'qui « rentre » dans la feuille) part en diagonale à 45°, mais **réduit de moitié**. ' +
+            'Sans cette réduction, un cube semblerait étiré vers l\'arrière !',
         },
         {
           kind: 'illustration',
@@ -43,8 +43,8 @@ export const geometrieDansEspace: ChapterContent = {
             size: 'large',
             showAxes: true,
             caption:
-              'le sommet arrière-bas-gauche est caché derrière le solide : ses 3 arêtes se ' +
-              'tracent en pointillé, jamais en trait plein',
+              'le sommet arrière-bas-gauche est caché derrière le solide. Ses 3 arêtes se ' +
+              'tracent en pointillé — jamais en trait plein',
           },
         },
         {
@@ -52,46 +52,45 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Une longueur en profondeur ne se lit jamais sur le dessin',
           text:
             "À cause de la réduction de moitié, un segment porté par l'axe y paraît deux fois " +
-            'plus court qu\'il ne l\'est réellement — une face perpendiculaire à y se dessine ' +
-            "même comme un parallélogramme, jamais comme un rectangle. C'est pourquoi aucun " +
-            'exercice de ce chapitre ne demande jamais de mesurer une longueur à la règle sur le ' +
-            'croquis : tout se raisonne sur les **sommets nommés** et les relations qu\'ils ' +
-            'entretiennent (appartenance, parallélisme, intersection), jamais sur une distance ' +
-            'lue à l\'œil.',
+            'plus court qu\'il ne l\'est réellement ! Une face perpendiculaire à y se dessine ' +
+            "même comme un parallélogramme — jamais comme un rectangle. C'est pourquoi aucun " +
+            "exercice de ce chapitre ne te demande de mesurer une longueur à la règle sur le " +
+            'croquis. Tu raisonnes toujours sur les **sommets nommés** et sur leurs relations ' +
+            '(appartenance, parallélisme, intersection) — jamais sur une distance lue à l\'œil.',
         },
         {
           kind: 'para',
           text:
-            'Trois familles de solides reviennent dans ce chapitre : le **parallélépipède** et le ' +
-            '**cube** (un cas particulier du premier), le **prisme** (deux faces parallèles ' +
-            'superposables reliées par des rectangles) et le **tétraèdre** (quatre sommets, ' +
-            'quatre faces triangulaires). Chacun est toujours dessiné avec les mêmes coordonnées ' +
-            'de référence — seuls les éléments choisis dessus (un plan, une droite, des points de ' +
-            'section) varient d\'un exercice à l\'autre.',
+            'Trois familles de solides reviennent dans ce chapitre. Le **parallélépipède** et le ' +
+            '**cube** (un cas particulier du parallélépipède). Le **prisme** : deux faces ' +
+            'parallèles et superposables, reliées par des rectangles. Le **tétraèdre** : quatre ' +
+            'sommets, quatre faces triangulaires. Chaque solide est toujours dessiné avec les ' +
+            'mêmes coordonnées de référence. Seuls les éléments qu\'on choisit dessus (un plan, ' +
+            'une droite, des points de section) changent d\'un exercice à l\'autre.',
         },
         { kind: 'subheading', text: 'Une autre convention : la perspective centrale' },
         {
           kind: 'para',
           text:
             "La perspective cavalière n'est pas la seule façon de représenter l'espace sur une " +
-            'feuille. Les peintres de la Renaissance ont mis au point la **perspective centrale** ' +
-            '(ou « perspective à point de fuite ») : toutes les droites parallèles situées dans un ' +
-            'même plan horizontal semblent alors converger vers un unique point, le **point de ' +
-            'fuite**, posé sur une ligne d\'horizon à hauteur d\'œil — exactement l\'effet que ' +
-            'produit une route ou une voie ferrée qui semble se refermer au loin. Le dispositif et ' +
-            'le principe de cette convention sont détaillés dans les sections 10 et 11 de ce ' +
-            'chapitre.',
+            'feuille. Les peintres de la Renaissance ont inventé la **perspective centrale** (ou ' +
+            '« perspective à point de fuite »). Dans cette perspective, toutes les droites ' +
+            'parallèles d\'un même plan horizontal semblent converger vers un seul point : le ' +
+            '**point de fuite**. Il est posé sur une ligne d\'horizon, à hauteur d\'œil. C\'est ' +
+            'exactement l\'effet que produit une route ou une voie ferrée, qui semble se ' +
+            'refermer au loin. Tu retrouves le dispositif et le principe de cette convention dans ' +
+            'les sections 10 et 11 de ce chapitre.',
         },
         {
           kind: 'para',
           text:
-            'Cette convention est plus fidèle à la vision humaine (elle imite ce qu\'un objectif ' +
-            'photo ou un œil capture réellement), mais bien plus lourde à construire à la main — ' +
-            'elle exige de placer un ou plusieurs points de fuite avant de tracer la moindre ' +
-            "arête. C'est pourquoi tous les dessins de ce chapitre restent en perspective " +
-            'cavalière : plus simple à tracer, elle conserve le parallélisme des droites (deux ' +
-            'arêtes parallèles du solide le restent sur le dessin), ce que la perspective ' +
-            'centrale ne fait jamais.',
+            'Cette perspective est plus fidèle à la vision humaine : elle imite ce qu\'un ' +
+            'objectif photo ou un œil capture réellement. Mais elle est bien plus lourde à ' +
+            'construire à la main. Il faut placer un ou plusieurs points de fuite avant de tracer ' +
+            "la moindre arête. C'est pourquoi tous les dessins de ce chapitre restent en " +
+            'perspective cavalière. Elle est plus simple à tracer, et elle conserve le ' +
+            'parallélisme des droites : deux arêtes parallèles du solide le restent sur le ' +
+            'dessin. La perspective centrale, elle, ne le fait jamais.',
         },
       ],
     },
@@ -105,9 +104,9 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Comme une droite est fixée par un point et une direction, un plan est fixé par une ' +
-            'donnée minimale — toujours l\'une de ces 4 formes, jamais une équation à trois ' +
-            'inconnues dans ce chapitre.',
+            'Une droite est fixée par un point et une direction. Un plan, lui, est fixé par une ' +
+            'donnée minimale : toujours l\'une de ces 4 formes. Jamais une équation à trois ' +
+            'inconnues dans ce chapitre !',
         },
         {
           kind: 'illustrationGroup',
@@ -165,10 +164,11 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Repère',
           items: [
             "Comme dans le plan, une droite de l'espace reste déterminée par 2 points distincts. " +
-              'Un plan se désigne le plus souvent par 3 de ses points (« le plan (ABC) ») ou, plus ' +
-              'rarement, par une lettre grecque (α, β, π…). Tout théorème de géométrie plane déjà ' +
-              "connu reste vrai à l'intérieur d'un plan de l'espace — un plan de l'espace n'est " +
-              'jamais qu\'une copie du plan habituel, posée quelque part en 3D.',
+              'Un plan se désigne le plus souvent par 3 de ses points : « le plan (ABC) ». Plus ' +
+              'rarement, on le désigne par une lettre grecque (α, β, π…). Tout théorème de ' +
+              'géométrie plane que tu connais déjà reste vrai à l\'intérieur d\'un plan de ' +
+              'l\'espace. Un plan de l\'espace n\'est jamais qu\'une copie du plan habituel, ' +
+              'posée quelque part en 3D.',
           ],
         },
       ],
@@ -184,10 +184,10 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'para',
           text:
             'Dans le plan, deux droites distinctes sont toujours soit sécantes, soit parallèles. ' +
-            'Dans l\'espace, une troisième situation apparaît, impossible à obtenir sur une seule ' +
-            'feuille : deux droites peuvent n\'avoir **aucun plan commun**. On dit alors qu\'elles ' +
-            'sont **gauches** — ni sécantes, ni parallèles, elles ne se croisent jamais et ne sont ' +
-            'jamais parallèles non plus.',
+            'Dans l\'espace, une troisième situation apparaît — impossible sur une seule feuille : ' +
+            'deux droites peuvent n\'avoir **aucun plan commun**. On dit alors qu\'elles sont ' +
+            '**gauches**. Elles ne sont ni sécantes ni parallèles : elles ne se croisent jamais, ' +
+            'et elles ne sont jamais parallèles non plus.',
         },
         {
           kind: 'illustrationGroup',
@@ -226,9 +226,9 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'methode',
           label: 'Propriété',
           items: [
-            'Deux droites distinctes de l\'espace sont soit **coplanaires** (et alors soit ' +
+            'Deux droites distinctes de l\'espace sont soit **coplanaires** (dans ce cas, soit ' +
               'parallèles, soit sécantes), soit **gauches**. Deux droites parallèles sont ' +
-              '**toujours** coplanaires — même quand elles semblent appartenir à deux faces ' +
+              '**toujours** coplanaires ! Même quand elles semblent appartenir à deux faces ' +
               'différentes du solide, comme (AB) et (HG) ci-dessus.',
           ],
         },
@@ -237,9 +237,9 @@ export const geometrieDansEspace: ChapterContent = {
           label: "Pourquoi ce cas n'existe pas dans le plan",
           items: [
             "Sur une feuille, deux droites tracées appartiennent forcément à cette même feuille " +
-              '— donc à un même plan. « Gauches » n\'a de sens qu\'en trois dimensions, exactement ' +
-              'comme le montre (AB)/(CG) ci-dessus : l\'une est portée par la base, l\'autre grimpe ' +
-              'verticalement à l\'arrière du cube, sans jamais partager ni point, ni direction, ni ' +
+              '— donc à un même plan. « Gauches » n\'a de sens qu\'en trois dimensions. Regarde ' +
+              '(AB) et (CG) ci-dessus : l\'une est portée par la base, l\'autre grimpe ' +
+              'verticalement à l\'arrière du cube. Elles ne partagent ni point, ni direction, ni ' +
               'plan.',
           ],
         },
@@ -255,11 +255,11 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un plan est désigné par **3 sommets** du solide, une droite par **2 sommets** — ' +
-            'jamais par une équation. La question posée admet toujours exactement une des trois ' +
-            'réponses suivantes, jamais une quatrième : la droite est **incluse** dans le plan, ' +
-            '**parallèle** au plan (sans y être incluse), ou **sécante** au plan (elle le coupe en ' +
-            'un point unique).',
+            'Un plan est désigné par **3 sommets** du solide. Une droite est désignée par **2 ' +
+            'sommets**. Jamais par une équation. La question posée a toujours exactement une des ' +
+            'trois réponses suivantes — jamais une quatrième. La droite est **incluse** dans le ' +
+            'plan. Ou elle est **parallèle** au plan, sans y être incluse. Ou elle est ' +
+            '**sécante** au plan : elle le coupe en un point unique.',
         },
         {
           kind: 'illustration',
@@ -288,13 +288,14 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Méthode — 3 questions, toujours dans cet ordre',
           items: [
             'Les 2 points de la droite appartiennent-ils tous les deux au plan ? Si oui → **incluse**.',
-            'Sinon : la direction de la droite est-elle parallèle au plan ? (portée par une ' +
-              'combinaison des directions de deux droites non parallèles du plan) Si oui → ' +
-              '**parallèle** — elle ne rencontre jamais le plan.',
-            'Sinon → **sécante**. Le plan étant considéré **infini** (jamais borné aux arêtes ' +
-              'dessinées du solide), elle le coupe en un point unique, qui peut tomber exactement ' +
-              'sur un sommet nommé, strictement à l\'intérieur d\'une arête, ou même en dehors du ' +
-              'solide représenté.',
+            'Sinon, pose la question suivante : la direction de la droite est-elle parallèle au ' +
+              'plan ? (c\'est le cas si elle est portée par une combinaison des directions de deux ' +
+              'droites non parallèles du plan) Si oui → **parallèle**. Elle ne rencontre jamais ' +
+              'le plan.',
+            'Sinon → **sécante**. Le plan est toujours considéré **infini** — jamais limité aux ' +
+              'arêtes dessinées du solide. La droite le coupe donc en un point unique. Ce point ' +
+              'peut tomber exactement sur un sommet nommé, à l\'intérieur d\'une arête, ou même ' +
+              'en dehors du solide dessiné.',
           ],
         },
         {
@@ -328,43 +329,43 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'exemple',
           badge: 'cube ABCDEFGH',
           formula:
-            'Plan (EFGH), la face supérieure. Droite (AG), la grande diagonale du cube. Position ' +
-            'de (AG) par rapport à (EFGH) ?',
+            'Plan (EFGH) — la face supérieure. Droite (AG) — la grande diagonale du cube. Quelle ' +
+            'est la position de (AG) par rapport à (EFGH) ?',
           steps: [
             {
               tag: 'question 1 — inclusion',
-              text: 'A appartient-il à (EFGH) ? Non, A est un sommet de la base. Donc pas d\'inclusion.',
+              text: 'A appartient-il à (EFGH) ? Non : A est un sommet de la base. Donc pas d\'inclusion.',
             },
             {
               tag: 'question 2 — parallélisme',
               text:
-                'la direction (AG) traverse-t-elle toute la hauteur du cube, de la base au sommet ? ' +
-                'Oui : elle n\'est portée par aucune direction du plan supérieur. Donc pas de ' +
-                'parallélisme.',
+                'La direction (AG) traverse-t-elle toute la hauteur du cube, de la base au sommet ? ' +
+                'Oui. Elle n\'est portée par aucune direction du plan supérieur. Donc pas de ' +
+                'parallélisme non plus.',
             },
           ],
           result: {
             tag: 'conclusion',
-            text: '(AG) est sécante à (EFGH) — l\'intersection tombe exactement sur le sommet G, déjà nommé sur le solide.',
+            text: '(AG) est donc sécante à (EFGH). L\'intersection tombe exactement sur le sommet G, déjà nommé sur le solide.',
           },
         },
         {
           kind: 'piege',
           label: 'Le plan dessiné n\'est qu\'un extrait du vrai plan, infini',
           text:
-            'Le plan reste toujours considéré infini, même si le dessin ne montre que la face du ' +
-            'solide qui le porte : une droite peut donc être sécante en un point situé **en ' +
-            'dehors** du solide représenté. Vocabulaire à connaître mais jamais employé dans les ' +
-            'questions posées : « déterminant », « produit scalaire » restent des outils de calcul ' +
-            'internes, jamais des mots que l\'énoncé utilise.',
+            'Le plan reste toujours infini, même si le dessin ne montre que la face du solide qui ' +
+            'le porte ! Une droite peut donc être sécante en un point situé **en dehors** du ' +
+            'solide dessiné. Deux mots à connaître, mais jamais utilisés dans les énoncés : « ' +
+            'déterminant » et « produit scalaire » restent des outils de calcul internes — jamais ' +
+            'des mots que l\'énoncé emploie.',
         },
         {
           kind: 'entrainement',
           title: "Position d'une droite par rapport à un plan",
           generatorId: 'gen39',
           description: [
-            'Classe la position d\'une droite par rapport à un plan sur un solide en perspective ' +
-              'cavalière (parallélépipède, cube ou prisme), puis justifie ce choix par une ' +
+            'Classe la position d\'une droite par rapport à un plan, sur un solide en perspective ' +
+              'cavalière (parallélépipède, cube ou prisme). Justifie ensuite ton choix, avec une ' +
               'sélection structurée adaptée au cas trouvé.',
           ],
           chantier: '4e',
@@ -382,10 +383,11 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux plans distincts sont soit **parallèles** (aucun point commun), soit **sécants** ' +
-            '— et dans ce cas, leur intersection n\'est jamais un point isolé mais toujours une ' +
-            '**droite entière**. Dès que deux plans distincts partagent ne serait-ce qu\'un seul ' +
-            'point commun, ils partagent en réalité toute une droite passant par ce point.',
+            'Deux plans distincts sont soit **parallèles** (aucun point commun), soit ' +
+            '**sécants**. S\'ils sont sécants, leur intersection n\'est jamais un point isolé : ' +
+            'c\'est toujours une **droite entière**. Dès que deux plans distincts partagent ' +
+            'ne serait-ce qu\'un seul point commun, ils partagent en réalité toute une droite qui ' +
+            'passe par ce point.',
         },
         {
           kind: 'illustrationGroup',
@@ -427,11 +429,11 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'rappel',
           label: 'Pour les curieux — la démonstration par l\'absurde',
           items: [
-            'Ces deux propriétés se démontrent classiquement **par l\'absurde** : on suppose le ' +
-              'contraire de ce qu\'on veut prouver, puis on montre que cette supposition contredit ' +
-              'une hypothèse déjà connue — ce qui est impossible, donc la supposition de départ ' +
-              'était fausse, donc la propriété annoncée est vraie. Une technique de raisonnement à ' +
-              'retenir, au-delà de la seule géométrie de l\'espace.',
+            'Ces deux propriétés se démontrent classiquement **par l\'absurde**. On suppose le ' +
+              'contraire de ce qu\'on veut prouver. Puis on montre que cette supposition contredit ' +
+              'une hypothèse déjà connue — ce qui est impossible. La supposition de départ était ' +
+              'donc fausse, donc la propriété annoncée est vraie. C\'est une technique de ' +
+              'raisonnement à retenir, bien au-delà de la seule géométrie de l\'espace.',
           ],
         },
       ],
@@ -446,9 +448,9 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Si trois plans sont sécants deux à deux, les trois droites d\'intersection qui en ' +
-            'résultent ne sont jamais quelconques : elles sont soit toutes les trois **sécantes en ' +
-            'un même point**, soit toutes les trois **parallèles entre elles**.',
+            'Si trois plans sont sécants deux à deux, les trois droites d\'intersection obtenues ' +
+            'ne sont jamais quelconques. Elles sont soit toutes les trois **sécantes en un même ' +
+            'point**, soit toutes les trois **parallèles entre elles**.',
         },
         {
           kind: 'illustrationGroup',
@@ -493,21 +495,20 @@ export const geometrieDansEspace: ChapterContent = {
           items: [
             '**Unicité** — par un point donné de l\'espace, il ne passe qu\'**une seule** droite ' +
               'parallèle à une droite donnée.',
-            '**Droite ∥ plan** — une droite est parallèle à un plan si et seulement si elle est ' +
-              'parallèle à **une droite de ce plan** (déjà illustré au cas « parallèle » de la ' +
-              'section 4).',
-            '**Plan ∥ plan** — deux plans sont parallèles si et seulement si deux droites sécantes ' +
-              'de l\'un sont respectivement parallèles à deux droites sécantes de l\'autre.',
+            '**Droite ∥ plan** — une droite est parallèle à un plan si elle est parallèle à ' +
+              '**une droite de ce plan**. Tu as déjà vu ce cas dans la section 4 (le cas « parallèle »).',
+            '**Plan ∥ plan** — deux plans sont parallèles si deux droites sécantes du premier ' +
+              'sont parallèles, chacune, à une droite sécante du second.',
           ],
         },
         {
           kind: 'astuce',
           label: 'Toujours ramener à une comparaison de directions',
           text:
-            'Les trois critères partagent la même logique : prouver un parallélisme dans ' +
-            'l\'espace, c\'est toujours prouver un parallélisme entre deux **droites** — jamais un ' +
-            'parallélisme « au jugé » entre deux plans entiers, qui ne se compare qu\'à travers les ' +
-            'droites qu\'ils contiennent.',
+            'Les trois critères partagent la même logique. Prouver un parallélisme dans ' +
+            'l\'espace, c\'est toujours prouver un parallélisme entre deux **droites** ! Ce n\'est ' +
+            'jamais un parallélisme « au jugé » entre deux plans entiers : un plan ne se compare ' +
+            'à un autre qu\'à travers les droites qu\'il contient.',
         },
       ],
     },
@@ -523,9 +524,9 @@ export const geometrieDansEspace: ChapterContent = {
           text:
             'Trouver où une droite d traverse un plan α — son **point de percée** — n\'est en ' +
             'général pas direct sur le dessin. La méthode classique construit un **plan ' +
-            'auxiliaire** π, choisi pour contenir d tout en étant sécant à α ; la droite commune à ' +
-            'π et à α ramène alors le problème à une simple intersection de deux droites ' +
-            'coplanaires.',
+            'auxiliaire** π. On le choisit pour qu\'il contienne d, tout en étant sécant à α. La ' +
+            'droite commune à π et à α ramène alors le problème à une simple intersection de deux ' +
+            'droites coplanaires.',
         },
         {
           kind: 'illustration',
@@ -550,7 +551,7 @@ export const geometrieDansEspace: ChapterContent = {
               { x: 122, y: 128, text: 'point de percée', tone: 'ink' },
             ],
             caption:
-              'π contient d et coupe α suivant b ; le point de percée cherché est l\'intersection ' +
+              'π contient d et coupe α suivant b. Le point de percée cherché est l\'intersection ' +
               'de d et b, coplanaires dans π',
           },
         },
@@ -558,29 +559,29 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — point de percée de d dans α',
           items: [
-            'Choisir un plan auxiliaire π qui **contient d** et qui soit **sécant à α** — le choix ' +
+            'Choisis un plan auxiliaire π qui **contient d** et qui est **sécant à α**. Le choix ' +
               'concret dépend des données du problème.',
-            'Déterminer la droite b, commune aux plans π et α.',
-            'Le point cherché, s\'il existe, est l\'intersection des droites d et b — un problème ' +
-              '2D, puisque d et b sont désormais coplanaires dans π.',
+            'Détermine la droite b, commune aux plans π et α.',
+            'Le point cherché, s\'il existe, est l\'intersection des droites d et b. C\'est un ' +
+              'problème 2D : d et b sont maintenant coplanaires dans π.',
           ],
         },
         { kind: 'subheading', text: 'Intersection de deux plans' },
         {
           kind: 'para',
           text:
-            'Trouver la droite commune à deux plans sécants revient, symétriquement, à repérer ' +
-            'deux points distincts communs aux deux plans.',
+            'Trouver la droite commune à deux plans sécants, c\'est le problème symétrique : il ' +
+            'revient à repérer deux points distincts, communs aux deux plans.',
         },
         {
           kind: 'methode',
           label: '2 méthodes',
           items: [
-            'Repérer **deux points distincts** dont on peut montrer qu\'ils appartiennent chacun ' +
-              'aux deux plans — ce qui revient parfois à chercher les points de percée de deux ' +
-              'droites d\'un même plan dans l\'autre plan.',
-            'Repérer **un point commun** aux deux plans, puis la direction de la droite ' +
-              'd\'intersection en s\'appuyant sur les propriétés connues de la figure ' +
+            'Repère **deux points distincts** dont tu peux montrer qu\'ils appartiennent chacun ' +
+              'aux deux plans. Ça revient parfois à chercher les points de percée de deux droites ' +
+              'd\'un même plan dans l\'autre plan.',
+            'Repère **un point commun** aux deux plans. Trouve ensuite la direction de la droite ' +
+              'd\'intersection, en t\'appuyant sur les propriétés connues de la figure ' +
               '(parallélisme, symétrie…).',
           ],
         },
@@ -596,11 +597,11 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Couper un solide convexe par un plan transversal (qui ne touche aucun sommet ' +
-            'exactement) donne toujours **un unique polygone fermé** — jamais deux morceaux ' +
-            'séparés. Chaque face réellement traversée y contribue **exactement deux sommets** : ' +
-            'le tracé du plan de coupe sur une face convexe la traverse en exactement deux points, ' +
-            'jamais un ni trois.',
+            'Coupe un solide convexe par un plan transversal (qui ne touche aucun sommet ' +
+            'exactement). Tu obtiens toujours **un unique polygone fermé** — jamais deux morceaux ' +
+            'séparés. Chaque face réellement traversée y apporte **exactement deux sommets**. Le ' +
+            'plan de coupe traverse toujours une face convexe en exactement deux points — jamais ' +
+            'un seul, jamais trois.',
         },
         {
           kind: 'illustration',
@@ -628,31 +629,30 @@ export const geometrieDansEspace: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — 2 coups possibles, répétés jusqu\'à fermeture',
           items: [
-            '**Segment direct** — dès qu\'une face a ses **2** points de section déjà connus, on ' +
-              'peut relier ces deux points : c\'est un côté du polygone de section.',
-            '**Point auxiliaire** — quand plus aucune face n\'a ses 2 points connus, on prolonge ' +
+            '**Segment direct** — dès qu\'une face a ses **2** points de section déjà connus, ' +
+              'relie-les. Tu obtiens un côté du polygone de section.',
+            '**Point auxiliaire** — quand plus aucune face n\'a ses 2 points connus, prolonge ' +
               'deux droites coplanaires du solide (arêtes, diagonales, ou segments déjà tracés de ' +
-              'la section) jusqu\'à leur intersection ; ce nouveau point auxiliaire permet de ' +
-              'débloquer une face encore à moitié connue.',
-            'On répète jusqu\'à ce que **tous les côtés attendus** du polygone soient tracés — la ' +
-              'fermeture complète.',
+              'la section) jusqu\'à leur intersection. Ce nouveau point auxiliaire débloque une ' +
+              'face encore à moitié connue.',
+            'Répète ces deux étapes jusqu\'à ce que **tous les côtés attendus** du polygone soient ' +
+              'tracés : c\'est la fermeture complète.',
           ],
         },
         {
           kind: 'piege',
           label: 'Piège central — un seul point connu ne suffit jamais',
           text:
-            'Tenter de tracer directement le segment de section d\'une face qui n\'a **qu\'un ' +
-            'seul** point de section connu est l\'erreur la plus fréquente de cet exercice : il ' +
-            'faut toujours les deux points de la même face avant de pouvoir relier.',
+            'L\'erreur la plus fréquente de cet exercice : tracer directement le segment de ' +
+            'section d\'une face qui n\'a **qu\'un seul** point de section connu ! Il faut ' +
+            'toujours les deux points de la même face, avant de pouvoir les relier.',
         },
         {
           kind: 'exemple',
           badge: '4 faces traversées',
           formula:
-            'P (face avant) et Q (face avant) sont déjà connus au départ, ainsi que R (face ' +
-            'droite). La face arrière et la face gauche n\'ont encore qu\'un seul point connu ' +
-            'chacune (R et P respectivement).',
+            'P et Q (face avant) sont déjà connus au départ, ainsi que R (face droite). La face ' +
+            'arrière n\'a qu\'un seul point connu (R), et la face gauche aussi (P).',
           steps: [
             { tag: '1 — segment direct', text: 'la face avant a ses 2 points connus (P et Q) → on trace [PQ].' },
             {
@@ -662,29 +662,30 @@ export const geometrieDansEspace: ChapterContent = {
             {
               tag: '3 — point auxiliaire',
               text:
-                'on prolonge deux droites du solide jusqu\'à leur intersection : le point obtenu, ' +
+                'on prolonge deux droites du solide jusqu\'à leur intersection. Le point obtenu, ' +
                 'une fois relié à R, tombe exactement sur le point de section manquant de la face ' +
-                'arrière — le nouveau point S est trouvé.',
+                'arrière : c\'est le nouveau point S.',
             },
           ],
           result: {
             tag: 'conclusion',
             text:
-              'les 4 côtés [PQ], [QR], [RS] et [SP] ferment le polygone de section — chaque face ' +
-              'traversée y a bien contribué exactement 2 sommets.',
+              'les 4 côtés [PQ], [QR], [RS] et [SP] ferment le polygone de section. Chaque face ' +
+              'traversée y a bien apporté exactement 2 sommets.',
           },
         },
         {
           kind: 'rappel',
           label: 'Une autre construction classique, par parallèles',
           items: [
-            'Sur un **parallélépipède**, une deuxième technique construit le même point auxiliaire ' +
-              'autrement, en s\'appuyant sur le parallélisme des faces opposées : par le point déjà ' +
-              'connu sur la face opposée, on mène la parallèle au premier côté déjà tracé de la ' +
-              'section — elle coupe l\'arête cherchée exactement où il faut. Les deux méthodes ' +
-              '(point auxiliaire par intersection, ou construction par parallèle) mènent toujours ' +
-              'au même point ; seule la seconde exploite spécifiquement les faces parallèles d\'un ' +
-              'parallélépipède, quand la première fonctionne aussi sur un tétraèdre.',
+            'Sur un **parallélépipède**, il existe une deuxième technique pour construire le même ' +
+              'point auxiliaire. Elle s\'appuie sur le parallélisme des faces opposées. Par le ' +
+              'point déjà connu sur la face opposée, mène la parallèle au premier côté déjà tracé ' +
+              'de la section. Elle coupe l\'arête cherchée exactement où il faut. Les deux ' +
+              'méthodes (point auxiliaire par intersection, ou construction par parallèle) mènent ' +
+              'toujours au même point. Seule la seconde exploite spécifiquement les faces ' +
+              'parallèles d\'un parallélépipède — la première, elle, fonctionne aussi sur un ' +
+              'tétraèdre.',
           ],
         },
         {
@@ -693,8 +694,8 @@ export const geometrieDansEspace: ChapterContent = {
           generatorId: 'gen40',
           description: [
             'Reconstruis progressivement le polygone de section d\'un solide en perspective ' +
-              'cavalière, un point ou un segment à la fois — segment direct dès que 2 points ' +
-              'd\'une face sont connus, sinon construction d\'un point auxiliaire.',
+              'cavalière, un point ou un segment à la fois. Segment direct dès que 2 points d\'une ' +
+              'face sont connus, sinon construction d\'un point auxiliaire.',
           ],
           chantier: '4e',
           whereLabel: "4e → « 40. Section plane d'un solide »",
@@ -711,17 +712,17 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Les règles de la perspective centrale ont été élaborées par des peintres de la ' +
-            'Renaissance à l\'aide d\'un **perspectographe**, un dispositif inventé par le peintre ' +
-            'allemand Dürer. Sa « fenêtre de Dürer » (1471-1528) est composée d\'un cadre en bois ' +
-            'et d\'une vitre quadrillée, placée devant la scène à représenter.',
+            'Les peintres de la Renaissance ont élaboré les règles de la perspective centrale à ' +
+            'l\'aide d\'un **perspectographe** : un dispositif inventé par le peintre allemand ' +
+            'Dürer (1471-1528). Sa « fenêtre de Dürer » est composée d\'un cadre en bois et d\'une ' +
+            'vitre quadrillée, placée devant la scène à représenter.',
         },
         {
           kind: 'para',
           text:
-            'Le peintre regarde la scène à travers un « œilleton », en fermant un œil : sa vision ' +
-            'est donc **monoculaire** — ce qu\'il peint ne correspond jamais tout à fait à ce que ' +
-            'perçoivent normalement ses deux yeux ensemble (la vision binoculaire).',
+            'Le peintre regarde la scène à travers un « œilleton », en fermant un œil. Sa vision ' +
+            'est donc **monoculaire**. Ce qu\'il peint ne correspond jamais tout à fait à ce que ' +
+            'perçoivent normalement ses deux yeux ensemble — la vision binoculaire.',
         },
         {
           kind: 'illustration',
@@ -745,31 +746,32 @@ export const geometrieDansEspace: ChapterContent = {
             ],
             caption:
               'un objet proche et petit (vert) et un objet éloigné et grand (rouge) traversent la ' +
-              'vitre exactement au même endroit — d\'où la même taille apparente à travers la fenêtre',
+              'vitre exactement au même endroit : ils ont donc la même taille apparente, à ' +
+              'travers la fenêtre',
           },
         },
         {
           kind: 'para',
           text:
-            'Après avoir repéré où les lignes de vision, issues de l\'œil, coupent le quadrillage ' +
-            'de la vitre, le peintre reporte ce qu\'il voit sur une feuille quadrillée identique — ' +
-            'c\'est là toute la méthode. Le mot « perspective » vient d\'ailleurs du latin ' +
-            '**perspectiva**, qui signifie « voir au travers ».',
+            'Le peintre repère où les lignes de vision, issues de l\'œil, coupent le quadrillage ' +
+            'de la vitre. Il reporte ensuite ce qu\'il voit sur une feuille quadrillée identique — ' +
+            'c\'est toute la méthode ! Le mot « perspective » vient d\'ailleurs du latin ' +
+            '**perspectiva**, qui veut dire « voir au travers ».',
         },
         {
           kind: 'piege',
           label: 'Une vision volontairement appauvrie',
           text:
-            'En fermant un œil, le peintre renonce à la vision binoculaire (celle des deux yeux ' +
-            'ensemble, qui perçoit un peu de relief) — un choix nécessaire pour que toute la ' +
-            'scène se projette de façon cohérente sur une seule vitre plane.',
+            'En fermant un œil, le peintre renonce à la vision binoculaire — celle des deux yeux ' +
+            'ensemble, qui perçoit un peu de relief. C\'est un choix nécessaire : toute la scène ' +
+            'doit se projeter de façon cohérente sur une seule vitre plane.',
         },
         {
           kind: 'para',
           text:
             'L\'image qui se forme à travers l\'objectif d\'un appareil photo suit le même ' +
-            'principe que celle qui se forme sur la rétine de l\'œil — pas tout à fait la même, ' +
-            'puisque le globe oculaire est sphérique et non plan. Les règles de la perspective ' +
+            'principe que celle qui se forme sur la rétine de l\'œil. Pas tout à fait la même, ' +
+            'quand même : le globe oculaire est sphérique, pas plan. Les règles de la perspective ' +
             'centrale s\'observent donc directement sur une photographie.',
         },
       ],
@@ -806,33 +808,33 @@ export const geometrieDansEspace: ChapterContent = {
               { x: 128, y: 88, text: "ligne d'horizon", tone: 'ink' },
             ],
             caption:
-              'en perspective centrale, des rails pourtant parallèles dans la réalité convergent ' +
-              'visuellement vers un seul point',
+              'en perspective centrale, des rails pourtant parallèles dans la réalité semblent ' +
+              'converger vers un seul point',
           },
         },
         {
           kind: 'para',
           text:
-            'Toutes les droites parallèles situées dans un même plan horizontal se coupent en un ' +
-            'même point de cette ligne, appelé **point de fuite** — un point qu\'on peut imaginer ' +
-            '« à l\'infini », comme le point de concours commun à toute une famille de parallèles.',
+            'Toutes les droites parallèles d\'un même plan horizontal se coupent en un même ' +
+            'point de cette ligne. On l\'appelle le **point de fuite**. Tu peux l\'imaginer « à ' +
+            'l\'infini » : c\'est le point de concours commun à toute une famille de parallèles.',
         },
         {
           kind: 'para',
           text:
-            'Les procédés de construction découlent directement de ce principe, combiné aux ' +
-            'propriétés déjà connues des plans, des droites et des figures planes — en particulier ' +
-            'celles du trapèze.',
+            'Les procédés de construction découlent directement de ce principe. On les combine ' +
+            'aux propriétés déjà connues des plans, des droites et des figures planes — en ' +
+            'particulier celles du trapèze.',
         },
         {
           kind: 'methode',
           label: 'Exemple de construction — le toit d\'une maison',
           items: [
-            'Tracer d\'abord le parallélépipède de la maison en perspective à point de fuite, ' +
+            'Trace d\'abord le parallélépipède de la maison en perspective à point de fuite, ' +
               'comme n\'importe quel solide.',
-            'Sur la face avant (le pignon), tracer les deux diagonales du rectangle : leur ' +
+            'Sur la face avant (le pignon), trace les deux diagonales du rectangle. Leur ' +
               'intersection donne l\'axe vertical sur lequel se trouve le sommet du toit.',
-            'Placer le sommet du toit sur cette verticale, à la hauteur voulue — les deux pans ' +
+            'Place le sommet du toit sur cette verticale, à la hauteur voulue. Les deux pans ' +
               'du toit rejoignent alors ce sommet depuis les arêtes du faîtage.',
           ],
         },
@@ -841,9 +843,10 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Deux perspectives, deux résultats différents',
           text:
             'Un même solide dessiné en perspective cavalière et en perspective à point de fuite ' +
-            'ne donne jamais le même dessin : la première conserve le parallélisme des arêtes ' +
-            '(deux arêtes parallèles le restent sur le papier), la seconde ne le fait jamais — ' +
-            'les arêtes parallèles convergent vers leur point de fuite commun.',
+            'ne donne jamais le même dessin ! La perspective cavalière conserve le parallélisme ' +
+            'des arêtes : deux arêtes parallèles le restent sur le papier. La perspective à point ' +
+            'de fuite, elle, ne le fait jamais — ses arêtes parallèles convergent vers leur point ' +
+            'de fuite commun.',
         },
       ],
     },
@@ -857,20 +860,21 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Le soleil éclaire selon une **direction fixe**, jamais montrée numériquement : elle ' +
-            'doit être identifiée depuis un exemple déjà résolu (un point et son ombre déjà ' +
-            'connue), affiché sur le même dessin. Une fois cette direction retrouvée, projeter ' +
-            'n\'importe quel autre point suit toujours le même raisonnement en 4 temps.',
+            'Le soleil éclaire selon une **direction fixe**. Cette direction n\'est jamais donnée ' +
+            'numériquement. Tu dois l\'identifier à partir d\'un exemple déjà résolu (un point et ' +
+            'son ombre déjà connue), affiché sur le même dessin. Une fois cette direction ' +
+            'retrouvée, tu peux projeter n\'importe quel autre point. Le raisonnement suit ' +
+            'toujours les 4 mêmes temps.',
         },
         {
           kind: 'methode',
           label: 'Méthode — 4 temps',
           items: [
-            'Identifier la direction du soleil depuis l\'exemple déjà résolu (le point et son ' +
-              'ombre connue).',
-            'Pour chaque point à projeter, tracer la droite parallèle à cette direction.',
-            'Trouver où cette droite rencontre le sol — ou un solide-obstacle placé avant le sol.',
-            'Relier les points-ombres trouvés entre eux pour reconstituer l\'ombre complète de ' +
+            'Identifie la direction du soleil, à partir de l\'exemple déjà résolu (le point et ' +
+              'son ombre déjà connue).',
+            'Pour chaque point à projeter, trace la droite parallèle à cette direction.',
+            'Trouve où cette droite rencontre le sol — ou un solide-obstacle placé avant le sol.',
+            'Relie les points-ombres trouvés entre eux, pour reconstituer l\'ombre complète de ' +
               'l\'objet.',
           ],
         },
@@ -909,10 +913,10 @@ export const geometrieDansEspace: ChapterContent = {
           label: 'Le sens compte, pas seulement la direction',
           text:
             'Une direction de sens **opposé** à la vraie direction du soleil reste ' +
-            'mathématiquement parallèle à elle — mais projette l\'ombre du mauvais côté du piquet ' +
-            ': elle est rejetée exactement comme la confusion verticale. Contrairement à un simple ' +
-            'test de parallélisme, la vérification ici est **sensible au sens**, jamais seulement à ' +
-            'la direction.',
+            'mathématiquement parallèle à elle ! Mais elle projette l\'ombre du mauvais côté du ' +
+            'piquet — elle est donc rejetée, exactement comme la confusion avec la verticale. Ce ' +
+            'n\'est pas un simple test de parallélisme : ici, la vérification est **sensible au ' +
+            'sens**, pas seulement à la direction.',
         },
         {
           kind: 'illustration',
@@ -952,7 +956,7 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'objet à 2 points',
-          formula: 'Une barre rigide relie le sommet de deux piquets plantés dans le sol. Reconstituer son ombre complète.',
+          formula: 'Une barre rigide relie le sommet de deux piquets plantés dans le sol. Reconstitue son ombre complète.',
           steps: [
             { tag: '1 — direction', text: 'identifiée depuis l\'exemple déjà résolu affiché sur le même dessin.' },
             {
@@ -963,21 +967,21 @@ export const geometrieDansEspace: ChapterContent = {
           ],
           result: {
             tag: '4 — reconstitution',
-            text: 'le segment reliant les deux points-ombres est l\'ombre complète de la barre — jamais l\'ombre de chaque piquet prise isolément.',
+            text: 'le segment qui relie les deux points-ombres est l\'ombre complète de la barre — jamais l\'ombre de chaque piquet pris isolément.',
           },
         },
         {
           kind: 'astuce',
           label: '3 variantes du même raisonnement',
-          text: 'Le même raisonnement en 4 temps se décline en 3 variantes, selon les données de l\'énoncé.',
+          text: 'Le même raisonnement en 4 temps se décline en 3 variantes, selon ce que donne l\'énoncé.',
           items: [
             '**Un seul piquet, sol plat** — un seul point à projeter, sélection directe.',
             '**Avec obstacles** — la direction n\'est confirmée qu\'une seule fois pour toute la ' +
-              'scène ; l\'ombre peut ensuite « casser » sur un à trois solides-obstacles avant ' +
+              'scène. L\'ombre peut ensuite « casser » sur un à trois solides-obstacles, avant ' +
               'd\'atteindre le sol.',
-            '**Direction inconnue** — la direction elle-même doit d\'abord être déduite d\'un ' +
-              'sommet réel du solide et de son ombre déjà connue, avant de projeter les autres ' +
-              'sommets.',
+            '**Direction inconnue** — il faut d\'abord déduire la direction elle-même, à partir ' +
+              'd\'un sommet réel du solide et de son ombre déjà connue. Ensuite seulement, tu ' +
+              'projettes les autres sommets.',
           ],
         },
         {
@@ -985,9 +989,9 @@ export const geometrieDansEspace: ChapterContent = {
           title: 'Ombre au soleil',
           generatorId: 'gen41',
           description: [
-            'Retrouve la direction de la lumière depuis un exemple déjà résolu, puis projette un ' +
-              'ou plusieurs points pour reconstituer une ombre — au sol, ou en la faisant casser ' +
-              'sur des solides-obstacles.',
+            'Retrouve la direction de la lumière à partir d\'un exemple déjà résolu. Projette ' +
+              'ensuite un ou plusieurs points pour reconstituer une ombre — au sol, ou en la ' +
+              'faisant casser sur des solides-obstacles.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 41. Ombre au soleil »',
@@ -1004,12 +1008,12 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre transversalement les trois générateurs de ce chapitre — ' +
-            'un thème par générateur, sans fusion. Contrairement au chapitre sur les droites et ' +
-            'cercles du plan, aucune affirmation ne porte sur une coordonnée numérique précise : ' +
-            'les trois générateurs d\'origine ne montrent eux-mêmes jamais de coordonnées 3D à ' +
-            'l\'élève, donc les affirmations testent les définitions et le raisonnement ' +
-            'géométrique, jamais un calcul chiffré.',
+            'Un quiz vrai/faux qui couvre les trois générateurs de ce chapitre — un thème par ' +
+            'générateur, sans les mélanger. Contrairement au chapitre sur les droites et cercles ' +
+            'du plan, aucune affirmation ne porte sur une coordonnée numérique précise. Les trois ' +
+            'générateurs d\'origine ne montrent d\'ailleurs jamais de coordonnées 3D à l\'élève. ' +
+            'Les affirmations testent donc les définitions et le raisonnement géométrique — ' +
+            'jamais un calcul chiffré.',
         },
       ],
     },
@@ -1017,36 +1021,38 @@ export const geometrieDansEspace: ChapterContent = {
 
   recap: {
     items: [
-      'Perspective cavalière — x et z à l\'échelle réelle, y en diagonale à 45° réduit de moitié ; ' +
-        'jamais de longueur en profondeur lue à la règle sur le dessin. La perspective centrale ' +
-        '(point de fuite) est plus réaliste mais ne conserve pas le parallélisme — inutilisable à ' +
-        'main levée.',
-      'Déterminer un plan — 3 points non alignés, ou une droite + un point extérieur, ou 2 ' +
-        'droites sécantes, ou 2 droites parallèles distinctes : 4 façons équivalentes, jamais une ' +
+      'Perspective cavalière — x et z restent à l\'échelle réelle. y part en diagonale à 45°, ' +
+        'réduit de moitié. On ne lit jamais une longueur en profondeur à la règle sur le dessin. ' +
+        'La perspective centrale (point de fuite) est plus réaliste, mais elle ne conserve pas le ' +
+        'parallélisme — trop lourde à main levée.',
+      'Déterminer un plan — 4 façons équivalentes : 3 points non alignés, ou une droite + un ' +
+        'point extérieur, ou 2 droites sécantes, ou 2 droites parallèles distinctes. Jamais une ' +
         'équation.',
       'Deux droites — sécantes ou parallèles (toujours coplanaires), ou **gauches** (aucun plan ' +
-        'commun) — un troisième cas impossible dans le plan.',
-      'Position droite/plan — 3 questions dans l\'ordre (les 2 points dans le plan ? direction ' +
-        'parallèle au plan ? sinon sécante) ; le plan reste toujours infini, jamais borné au ' +
-        'solide dessiné.',
-      'Deux plans — parallèles, ou sécants suivant une droite entière (jamais un point isolé) ; ' +
-        'trois plans sécants deux à deux donnent 3 droites sécantes en un point ou parallèles ' +
-        'entre elles.',
-      'Parallélisme — toujours ramené à une comparaison de directions (droite ∥ droite d\'un ' +
-        'plan ; 2 droites sécantes d\'un plan ∥ 2 droites sécantes de l\'autre).',
-      'Point de percée — construire un plan auxiliaire contenant la droite, sécant au plan cible ' +
-        '; le point cherché devient une intersection 2D dans ce plan auxiliaire.',
-      'Section plane — un solide convexe coupé donne toujours un unique polygone fermé ; chaque ' +
-        'face traversée fournit exactement 2 sommets ; segment direct si 2 points connus sur une ' +
-        'face, sinon construction d\'un point auxiliaire par intersection de deux droites ' +
+        'commun). C\'est un troisième cas, impossible dans le plan.',
+      'Position droite/plan — 3 questions, toujours dans le même ordre : les 2 points sont-ils ' +
+        'dans le plan ? La direction est-elle parallèle au plan ? Sinon, c\'est sécant. Le plan ' +
+        'reste toujours infini — jamais limité au solide dessiné.',
+      'Deux plans — parallèles, ou sécants suivant une droite entière (jamais un point isolé). ' +
+        'Trois plans sécants deux à deux donnent 3 droites : soit sécantes en un même point, ' +
+        'soit parallèles entre elles.',
+      'Parallélisme — toujours ramené à une comparaison de directions : droite ∥ droite d\'un ' +
+        'plan, ou 2 droites sécantes d\'un plan ∥ 2 droites sécantes de l\'autre.',
+      'Point de percée — construis un plan auxiliaire qui contient la droite et qui est sécant ' +
+        'au plan cible. Le point cherché devient alors une simple intersection 2D, dans ce plan ' +
+        'auxiliaire.',
+      'Section plane — un solide convexe coupé donne toujours un unique polygone fermé. Chaque ' +
+        'face traversée fournit exactement 2 sommets. Segment direct si les 2 points d\'une face ' +
+        'sont déjà connus ; sinon, construis un point auxiliaire par intersection de deux droites ' +
         'coplanaires (ou, sur un parallélépipède, par une parallèle).',
-      'Perspective centrale — un dispositif (la fenêtre de Dürer, vision monoculaire à travers ' +
-        'une vitre quadrillée) puis un principe (toutes les parallèles d\'un même plan horizontal ' +
-        'convergent vers un point de fuite, sur la ligne d\'horizon) ; contrairement à la ' +
-        'cavalière, ne conserve jamais le parallélisme des arêtes.',
-      'Ombre au soleil — direction jamais donnée en nombres, déduite d\'un exemple déjà résolu ; ' +
-        'projection oblique, jamais verticale ; sensible au sens, pas seulement à la direction ; ' +
-        'relier les points-ombres pour reconstituer l\'ombre complète.',
+      'Perspective centrale — un dispositif d\'abord (la fenêtre de Dürer, vision monoculaire à ' +
+        'travers une vitre quadrillée), puis un principe : toutes les parallèles d\'un même plan ' +
+        'horizontal convergent vers un point de fuite, sur la ligne d\'horizon. Contrairement à ' +
+        'la cavalière, elle ne conserve jamais le parallélisme des arêtes.',
+      'Ombre au soleil — la direction n\'est jamais donnée en nombres : tu la déduis d\'un ' +
+        'exemple déjà résolu. La projection est toujours oblique, jamais verticale. Elle est ' +
+        'sensible au sens, pas seulement à la direction. Relie les points-ombres pour ' +
+        'reconstituer l\'ombre complète.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
@@ -1063,16 +1069,17 @@ export const geometrieDansEspace: ChapterContent = {
     },
     forward:
       'Un même réflexe traverse tout le chapitre : ramener une question 3D à une comparaison de ' +
-      'directions ou à une intersection 2D dans un plan bien choisi — identifier la position ' +
-      'relative avant tout calcul, décomposer une construction complexe en étapes vérifiables une ' +
-      'à une, et ne jamais confondre l\'intuition visuelle avec la vraie propriété géométrique.',
+      'directions, ou à une intersection 2D dans un plan bien choisi. Identifie toujours la ' +
+      'position relative avant de calculer quoi que ce soit. Décompose une construction complexe ' +
+      'en étapes vérifiables, une à une. Et ne confonds jamais l\'intuition visuelle avec la vraie ' +
+      'propriété géométrique.',
     entrainement: {
       kind: 'entrainement',
       title: "Géométrie dans l'espace — quiz vrai/faux",
       generatorId: 'gen66',
       description: [
-        '60 affirmations pré-écrites réparties en 3 thèmes (20 par thème) qui reprennent ce ' +
-          'chapitre. Un seul essai par question, la justification est toujours révélée.',
+        '60 affirmations pré-écrites, réparties en 3 thèmes (20 par thème), qui reprennent tout ' +
+          'ce chapitre. Un seul essai par question ; la justification est toujours révélée.',
       ],
       chantier: '4e',
       whereLabel: "4e → « 66. Géométrie dans l'espace — quiz vrai/faux »",
