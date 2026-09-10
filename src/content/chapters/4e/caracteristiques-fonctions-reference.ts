@@ -7,10 +7,11 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
   title: 'Caractéristiques d\'une fonction et fonctions de référence',
   slug: 'caracteristiques-fonctions-reference',
   lede:
-    'Six courbes reviennent sans cesse : la parabole, la cubique, les deux racines, l\'hyperbole ' +
-    'et le « V » de la valeur absolue. Ce chapitre les fixe une bonne fois — leur allure, leurs ' +
-    'transformations, comment les lire sur un graphique et les manipuler algébriquement — pour ' +
-    'pouvoir ensuite reconnaître n\'importe laquelle d\'entre elles derrière une écriture inhabituelle.',
+    'Six courbes reviennent tout le temps : la parabole, la cubique, les deux racines, ' +
+    'l\'hyperbole et le « V » de la valeur absolue. Dans ce chapitre, tu vas les fixer une bonne ' +
+    'fois pour toutes. Tu vas apprendre leur allure, leurs transformations, comment les lire sur ' +
+    'un graphique et comment les manipuler par le calcul. Ensuite, tu sauras reconnaître ' +
+    'n\'importe laquelle d\'entre elles, même écrite de façon inhabituelle.',
 
   intro: {
     title: 'Avant de commencer : les 6 fonctions de référence',
@@ -18,22 +19,22 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Une **fonction de référence** est une forme de base, la plus simple de sa famille — ' +
-          'toutes les fonctions qu\'on rencontrera dans ce chapitre s\'obtiennent en ' +
-          '**transformant** l\'une de ces six-là.',
+          'Une **fonction de référence**, c\'est une forme de base : la plus simple de sa ' +
+          'famille. Toutes les fonctions de ce chapitre viennent d\'une **transformation** de ' +
+          'l\'une de ces six-là.',
       },
       {
         kind: 'rappel',
         label: 'Rappel — qu\'est-ce qu\'une fonction ?',
         items: [
-          'Une **fonction d\'une variable réelle** est une relation qui à tout réel fait ' +
-            'correspondre **au plus un** réel — jamais deux ou plus. C\'est cette condition, et ' +
-            'elle seule, qui distingue une fonction d\'une relation quelconque.',
+          'Une **fonction d\'une variable réelle**, c\'est une relation qui associe à chaque ' +
+            'réel **au plus un** réel — jamais deux ou plus. C\'est la seule condition qui ' +
+            'distingue une fonction d\'une relation quelconque.',
           'La relation « $y = x^2$ » est une fonction : un réel n\'a jamais plus d\'un carré. ' +
-            'La relation « $y^2 = x$ » n\'en est **pas** une : pour $x = 4$, aussi bien $y = 2$ ' +
-            'que $y = -2$ conviennent — deux réels pour un seul x. Sur un graphique, ce test se ' +
-            'voit d\'un coup d\'œil : une droite verticale ne doit jamais couper la courbe ' +
-            'd\'une fonction en plus d\'un point.',
+            'La relation « $y^2 = x$ » n\'en est **pas** une. Pour $x = 4$, $y = 2$ convient, ' +
+            'mais $y = -2$ aussi : deux réels pour un seul x. Sur un graphique, ce test se voit ' +
+            'd\'un coup d\'œil. Une droite verticale ne doit jamais couper la courbe d\'une ' +
+            'fonction en plus d\'un point.',
         ],
       },
       {
@@ -184,10 +185,11 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'astuce',
         label: 'Astuce — deux paires de fonctions réciproques',
         text:
-          '$x^2$ et $\\sqrt{x}$ sont réciproques l\'une de l\'autre sur ℝ⁺ ; $x^3$ et $\\sqrt[3]{x}$ ' +
-          'le sont sur ℝ tout entier. Dans un repère orthonormé, les courbes de deux fonctions ' +
-          'réciproques sont toujours symétriques par rapport à la droite d\'équation $y = x$ — un ' +
-          'bon moyen de vérifier une courbe de racine carrée ou de racine cubique tracée à la main.',
+          '$x^2$ et $\\sqrt{x}$ sont réciproques l\'une de l\'autre sur ℝ⁺. $x^3$ et ' +
+          '$\\sqrt[3]{x}$ le sont sur ℝ tout entier. Dans un repère orthonormé, les courbes de ' +
+          'deux fonctions réciproques sont toujours symétriques par rapport à la droite ' +
+          'd\'équation $y = x$. C\'est un bon moyen de vérifier une courbe de racine carrée ou ' +
+          'de racine cubique tracée à la main.',
       },
       {
         kind: 'rappel',
@@ -195,8 +197,8 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         items: [
           'Le point où une courbe change de concavité (elle passe de « tournée vers le haut » à ' +
             '« tournée vers le bas », ou l\'inverse) s\'appelle un **point d\'inflexion**. Pour ' +
-            '$x^3$ et $\\sqrt[3]{x}$, ce point est toujours l\'origine — tangente verticale pour ' +
-            '$\\sqrt[3]{x}$, horizontale pour $x^3$.',
+            '$x^3$ et $\\sqrt[3]{x}$, ce point est toujours l\'origine. La tangente y est ' +
+            'verticale pour $\\sqrt[3]{x}$, horizontale pour $x^3$.',
         ],
       },
       {
@@ -204,10 +206,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         label: 'Piège classique — l\'inverse n\'est pas décroissante « sur ℝ \\ {0} »',
         text:
           '$f(x) = 1/x$ est bien décroissante **sur chaque branche prise séparément** ' +
-          '(]−∞ ; 0[ et ]0 ; +∞[), mais **pas** globalement : prends $f(-1) = -1$ et $f(1) = 1$ ' +
-          '— bien que $-1 < 1$, on a $f(-1) < f(1)$, ce qui respecterait une croissance, pas une ' +
-          'décroissance. La monotonie d\'une fonction ne se prolonge jamais automatiquement à ' +
-          'travers une valeur interdite du domaine.',
+          '(]−∞ ; 0[ et ]0 ; +∞[). Mais elle ne l\'est **pas** globalement ! Prends ' +
+          '$f(-1) = -1$ et $f(1) = 1$. Bien que $-1 < 1$, on a $f(-1) < f(1)$ : ça, c\'est le ' +
+          'signe d\'une croissance, pas d\'une décroissance. La monotonie d\'une fonction ne se ' +
+          'prolonge jamais automatiquement à travers une valeur interdite du domaine.',
       },
     ],
   },
@@ -222,19 +224,20 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une courbe composite — assemblée de plusieurs morceaux de familles différentes — se ' +
-            'lit toujours dans le même ordre, sans jamais avoir besoin de sa formule algébrique :',
+            'Une courbe composite — assemblée de plusieurs morceaux de familles différentes — ' +
+            'se lit toujours dans le même ordre. Et tu n\'as même pas besoin de sa formule ' +
+            'algébrique !',
         },
         {
           kind: 'methode',
           label: 'Méthode — l\'ordre de lecture',
           items: [
-            '**Domaine** — repérer d\'abord toute valeur exclue (point creux, coupure ' +
-              'verticale) avant de décrire le reste.',
+            '**Domaine** — repère d\'abord toute valeur exclue (point creux, coupure ' +
+              'verticale). Décris le reste seulement après.',
             '**Zéros** — les abscisses où la courbe traverse l\'axe des x.',
             '**Variations** — croissante, décroissante ou constante, intervalle par intervalle.',
             '**Ordonnée à l\'origine** — la valeur en x = 0, si elle existe.',
-            '**Valeur en un point précis** — lire f(v) pour un v donné.',
+            '**Valeur en un point précis** — lis f(v) pour un v donné.',
             '**Asymptotes** — les droites (verticale et/ou horizontale) que la courbe approche ' +
               'sans jamais les toucher.',
           ],
@@ -246,10 +249,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             '**Zéro** — un réel dont l\'image vaut 0 ; abscisse d\'un point d\'intersection avec l\'axe Ox.',
             '**Ordonnée à l\'origine** — la valeur f(0), si elle existe ; ordonnée du point ' +
               'd\'intersection avec l\'axe Oy.',
-            '**Fonction paire** — pour tout réel a du domaine, −a aussi, et f(−a) = f(a) ; le ' +
+            '**Fonction paire** — pour tout réel a du domaine, −a aussi, et f(−a) = f(a). Le ' +
               'graphique admet Oy comme axe de symétrie.',
-            '**Fonction impaire** — pour tout réel a du domaine, −a aussi, et f(−a) = −f(a) ; ' +
-              'le graphique admet l\'origine (0 ; 0) comme centre de symétrie.',
+            '**Fonction impaire** — pour tout réel a du domaine, −a aussi, et f(−a) = −f(a). ' +
+              'Le graphique admet l\'origine (0 ; 0) comme centre de symétrie.',
             '**Croissante sur un intervalle** — pour tous x₁, x₂ de cet intervalle : ' +
               'x₁ ≤ x₂ ⟹ f(x₁) ≤ f(x₂) (l\'ordre est conservé).',
             '**Décroissante sur un intervalle** — pour tous x₁, x₂ de cet intervalle : ' +
@@ -262,11 +265,11 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           kind: 'astuce',
           label: 'Astuce — un maximum dépend toujours de l\'intervalle choisi',
           text:
-            'Le maximum ou le minimum d\'une fonction n\'est jamais une propriété absolue : il ' +
+            'Le maximum ou le minimum d\'une fonction n\'est jamais une propriété absolue. Il ' +
             'se définit toujours **par rapport à un intervalle précis**. Une même courbe peut ' +
-            'avoir un maximum de 3 sur [−9 ; 2] et, restreinte à [−8 ; 0], un maximum tout ' +
-            'différent — parce que le point le plus haut de la première fenêtre peut tomber ' +
-            'hors de la seconde.',
+            'avoir un maximum de 3 sur [−9 ; 2]. Restreinte à [−8 ; 0], elle peut avoir un ' +
+            'maximum tout différent — parce que le point le plus haut de la première fenêtre ' +
+            'peut tomber hors de la seconde.',
         },
         {
           kind: 'illustration',
@@ -303,17 +306,17 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             '**Trou** — cercle vide des deux côtés : la valeur est réellement exclue du domaine.',
             '**Point plein** — cercle plein : la courbe est bien définie et continue en ce ' +
               'point, rien à signaler.',
-            '**Point redéfini** — cercles vides de part et d\'autre **plus** un point plein ' +
-              'isolé ailleurs sur la même verticale : le point appartient bien au domaine, mais ' +
+            '**Point redéfini** — cercles vides de part et d\'autre, **plus** un point plein ' +
+              'isolé ailleurs sur la même verticale. Le point appartient bien au domaine, mais ' +
               'sa valeur ne suit pas la continuité apparente de la courbe.',
           ],
         },
         {
           kind: 'para',
           text:
-            'Pour l\'ordonnée à l\'origine comme pour la valeur en un point précis, deux ' +
-            'réponses sont possibles : soit la valeur demandée **existe** (elle se lit ' +
-            'directement sur la courbe), soit elle **n\'existe pas** — parce que le point tombe ' +
+            'Pour l\'ordonnée à l\'origine, comme pour la valeur en un point précis, deux ' +
+            'réponses sont possibles. Soit la valeur demandée **existe** — elle se lit ' +
+            'directement sur la courbe. Soit elle **n\'existe pas**, parce que le point tombe ' +
             'justement sur une valeur exclue du domaine.',
         },
         {
@@ -339,16 +342,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Sans aucun graphique cette fois : à partir de l\'écriture algébrique ' +
-            '$f(x) = [famille](ax+b) + k$, il faut poser la condition d\'existence, en déduire ' +
-            'le domaine, isoler la famille pour trouver les zéros.',
+            'Cette fois, pas de graphique du tout. Tu pars directement de l\'écriture ' +
+            'algébrique $f(x) = [famille](ax+b) + k$. Il faut poser la condition d\'existence, ' +
+            'en déduire le domaine, puis isoler la famille pour trouver les zéros.',
         },
         {
           kind: 'attention',
           label: 'Le sens de l\'inégalité peut s\'inverser',
           text:
-            'Pour la racine carrée, isoler $x$ dans $ax+b \\ge 0$ demande de diviser par $a$ — ' +
-            'et diviser par un nombre **négatif** inverse le sens de l\'inégalité. D\'où les ' +
+            'Pour la racine carrée, isoler $x$ dans $ax+b \\ge 0$ demande de diviser par $a$. ' +
+            'Or diviser par un nombre **négatif** inverse le sens de l\'inégalité ! D\'où les ' +
             'deux cas : domaine $[p\\,;\\,+\\infty[$ si $a > 0$, mais $]-\\infty\\,;\\,p]$ si $a < 0$.',
         },
         {
@@ -390,9 +393,9 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           label: 'Astuce — carrée et valeur absolue se séparent en deux équations',
           text:
             'Isoler la carrée ou la valeur absolue mène à une expression du type $P(x)^2 = K$ ' +
-            'ou $|P(x)| = K$ (K > 0) : dans les deux cas, il faut séparer en **deux** équations ' +
-            'linéaires distinctes — $P(x) = \\sqrt{K}$ et $P(x) = -\\sqrt{K}$ pour le carré, ' +
-            '$P(x) = K$ et $P(x) = -K$ pour la valeur absolue — jamais une seule.',
+            'ou $|P(x)| = K$ (K > 0). Dans les deux cas, il faut séparer en **deux** équations ' +
+            'linéaires distinctes — jamais une seule ! Pour le carré : $P(x) = \\sqrt{K}$ et ' +
+            '$P(x) = -\\sqrt{K}$. Pour la valeur absolue : $P(x) = K$ et $P(x) = -K$.',
         },
         { kind: 'video', title: 'Caractéristiques algébriques d\'une fonction de référence', youtubeId: 'l4-QfH7ZPXU' },
         {
@@ -417,10 +420,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Comme au chapitre 1 pour la parabole, on peut translater, étirer, comprimer et ' +
-            'réfléchir n\'importe laquelle des 6 fonctions de référence — avec, cette fois, deux ' +
-            'transformations supplémentaires (horizontales) qui n\'avaient pas besoin d\'être ' +
-            'distinguées pour une parabole seule.',
+            'Comme au chapitre 1 pour la parabole, tu peux translater, étirer, comprimer et ' +
+            'réfléchir n\'importe laquelle des 6 fonctions de référence. Cette fois, il y a deux ' +
+            'transformations en plus (horizontales). Pour une parabole seule, elles n\'avaient ' +
+            'pas besoin d\'être distinguées.',
         },
         {
           kind: 'rappel',
@@ -464,8 +467,8 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'point d\'inflexion pour cube/racine cubique, l\'intersection des asymptotes pour ' +
             'l\'inverse, l\'origine du domaine pour la racine carrée) se situe **toujours ' +
             'exactement en x = TH** — quels que soient CH, EH et SOY. Seule la translation ' +
-            'horizontale déplace ce point ; les étirements et symétries le laissent immobile et ' +
-            'transforment la courbe autour de lui.',
+            'horizontale déplace ce point. Les étirements et symétries le laissent immobile : ' +
+            'ils transforment la courbe autour de lui.',
         },
         {
           kind: 'exemple',
@@ -478,17 +481,17 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           kind: 'attention',
           label: 'Le piège du signe — toujours le même qu\'au chapitre 1',
           text:
-            '$f(x) = (x+3)^3$ se lit $g(x-TH)$ avec $x-TH = x+3$, donc $TH = -3$ — une ' +
-            'translation de 3 vers la **gauche**, pas vers la droite. Le signe à l\'intérieur de ' +
-            'la parenthèse est toujours opposé au sens du déplacement, quelle que soit la famille.',
+            '$f(x) = (x+3)^3$ se lit $g(x-TH)$ avec $x-TH = x+3$, donc $TH = -3$. C\'est une ' +
+            'translation de 3 vers la **gauche**, pas vers la droite ! Le signe à l\'intérieur ' +
+            'de la parenthèse est toujours opposé au sens du déplacement, quelle que soit la famille.',
         },
         {
           kind: 'astuce',
           label: 'Astuce — SOX et SOY se confondent parfois',
           text:
-            'Pour une fonction **paire** (carrée, valeur absolue), $g(-u) = g(u)$ : SOY seul ne ' +
+            'Pour une fonction **paire** (carrée, valeur absolue) : $g(-u) = g(u)$. SOY seul ne ' +
             'change strictement **rien** à la courbe. Pour une fonction **impaire** (cube, ' +
-            'racine cubique, inverse), $g(-u) = -g(u)$ : activer SOY seul produit alors ' +
+            'racine cubique, inverse) : $g(-u) = -g(u)$. Activer SOY seul donne alors ' +
             'exactement **la même courbe** qu\'activer SOX seul — les deux symétries deviennent ' +
             'interchangeables. Seule la racine carrée (domaine à sens unique) donne à SOY un ' +
             'rôle réellement indépendant : il détermine de quel côté du point caractéristique le ' +
@@ -511,7 +514,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           kind: 'para',
           text:
             'Une fonction de référence transformée n\'est pas toujours donnée directement sous ' +
-            'la forme unifiée : chaque famille a sa propre « forme de départ » habituelle, à ' +
+            'la forme unifiée. Chaque famille a sa propre « forme de départ » habituelle, à ' +
             'ramener à la forme canonique avant de pouvoir lire les 8 paramètres.',
         },
         {
@@ -571,18 +574,18 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'para',
           text:
-            '140 affirmations réparties en 7 thèmes qui reprennent tout ce chapitre — ' +
-            'vocabulaire et lecture graphique, les 6 fonctions de référence (domaine et allure), ' +
-            'fonction carrée et fonction cube, fonction racine carrée et fonction racine ' +
-            'cubique, fonction inverse (asymptotes et comportement), fonction valeur absolue, ' +
-            'transformations et forme canonique. Un seul essai par question, la justification ' +
+            '140 affirmations. 7 thèmes. Ils reprennent tout ce chapitre : vocabulaire et ' +
+            'lecture graphique, les 6 fonctions de référence (domaine et allure), fonction ' +
+            'carrée et fonction cube, fonction racine carrée et fonction racine cubique, ' +
+            'fonction inverse (asymptotes et comportement), fonction valeur absolue, ' +
+            'transformations et forme canonique. Un seul essai par question. La justification ' +
             'est toujours révélée.',
         },
         {
           kind: 'astuce',
           text:
             'Le thème « inverse » revient explicitement sur le piège de monotonie signalé au ' +
-            'début de ce chapitre — décroissante sur chaque branche séparément, jamais globalement.',
+            'début de ce chapitre : décroissante sur chaque branche séparément, jamais globalement.',
         },
         {
           kind: 'entrainement',
@@ -604,15 +607,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       '**6 familles** — carrée (x²), cube (x³), racine carrée (√x, domaine [0;+∞[), racine ' +
         'cubique (∛x), inverse (1/x, domaine privé de 0), valeur absolue (|x|).',
       '**Lecture graphique** — toujours dans l\'ordre domaine → zéros → variations → ordonnée ' +
-        'à l\'origine → valeur en un point → asymptotes ; distinguer trou, point plein et point redéfini.',
+        'à l\'origine → valeur en un point → asymptotes. Distingue bien trou, point plein et ' +
+        'point redéfini.',
       '**Étude algébrique** — CE selon la famille (aucune, ≠0 pour l\'inverse, ≥0 ou ≤0 selon ' +
-        'le signe de a pour la racine carrée), puis isoler pour trouver les zéros — carrée et ' +
+        'le signe de a pour la racine carrée), puis isole pour trouver les zéros. Carrée et ' +
         'valeur absolue se séparent toujours en deux équations.',
       '**Formule unifiée** — $f(x) = SOX \\cdot (EV/CV) \\cdot g(SOY \\cdot (CH/EH) \\cdot ' +
-        '(x-TH)) + TV$ ; TH toujours soustrait, TV toujours ajouté ; le point caractéristique ' +
-        'reste toujours en x=TH.',
-      '**Parité et redondance** — SOY invisible pour une famille paire ; SOX et SOY ' +
-        'interchangeables pour une famille impaire ; seule la racine carrée donne à SOY un rôle ' +
+        '(x-TH)) + TV$. TH est toujours soustrait, TV toujours ajouté. Le point caractéristique ' +
+        'reste toujours en x = TH.',
+      '**Parité et redondance** — SOY est invisible pour une famille paire. SOX et SOY sont ' +
+        'interchangeables pour une famille impaire. Seule la racine carrée donne à SOY un rôle ' +
         'vraiment indépendant.',
     ],
     checklist: {
@@ -625,7 +629,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
     },
     forward:
       'Ces 6 familles reviennent telles quelles dans les chapitres sur les limites et les ' +
-      'asymptotes : savoir reconnaître leur forme canonique d\'un coup d\'œil y fait gagner ' +
+      'asymptotes. Savoir reconnaître leur forme canonique d\'un coup d\'œil te fait gagner ' +
       'l\'essentiel du temps de calcul.',
   },
 }

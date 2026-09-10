@@ -7,11 +7,12 @@ export const geometrieAnalytiquePlane: ChapterContent = {
   title: 'Géométrie analytique plane',
   slug: 'geometrie-analytique-plane',
   lede:
-    "Décrire une figure géométrique avec des nombres, pas seulement avec un dessin : c'est tout " +
-    "l'objet de ce chapitre. Une droite devient une équation à deux inconnues ; un cercle, une " +
-    'relation entre x et y ; une parabole, la trace de tous les points équidistants d\'un point et ' +
-    "d'une droite. Une fois cette traduction en main, calculer une intersection, une distance ou " +
-    'une relation entre deux figures devient une question d\'algèbre — plus de dessin à l\'œil.',
+    "Dans ce chapitre, tu vas décrire une figure géométrique avec des nombres — pas seulement " +
+    "avec un dessin. Une droite devient une équation à deux inconnues. Un cercle devient une " +
+    "relation entre x et y. Une parabole devient l'ensemble des points situés à la même distance " +
+    "d'un point et d'une droite. Une fois cette traduction faite, tu n'as plus besoin de dessiner " +
+    "à l'œil : calculer une intersection, une distance ou un lien entre deux figures devient une " +
+    "question d'algèbre.",
 
   sections: [
     {
@@ -23,11 +24,12 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une droite est entièrement déterminée par **un point qu\'elle traverse** et **une ' +
-            'direction** — un vecteur directeur $\\vec{u}$, non nul, porté par la droite. Peu ' +
-            "importe comment l'énoncé donne cette information au départ (deux points, un point " +
-            'et un vecteur, un point et un angle, un point et une pente) : la première étape est ' +
-            'toujours de la ramener à ce couple (point, vecteur directeur), qui reste ensuite la ' +
+            'Une droite est entièrement déterminée par deux choses : **un point qu\'elle ' +
+            'traverse**, et **une direction**. Cette direction, c\'est un vecteur directeur ' +
+            '$\\vec{u}$, non nul, porté par la droite. L\'énoncé peut te donner cette ' +
+            'information de plusieurs façons : deux points, un point et un vecteur, un point et ' +
+            'un angle, un point et une pente. Peu importe le point de départ ! La première étape ' +
+            'est toujours la même : ramener ça à un point et un vecteur directeur. C\'est la ' +
             'seule vérité géométrique de la droite.',
         },
         {
@@ -49,8 +51,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 7.7, y: 3.3, label: 'd', tone: 'ink', node: false },
             ],
             caption:
-              "la droite d (pointillés) est entièrement fixée par A et par la direction de $\\vec{u}$ — " +
-              "un multiple de $\\vec{u}$ reste porté par d, un vecteur non parallèle à d, jamais",
+              "la droite d (pointillés) est fixée par A et par la direction de $\\vec{u}$ : un " +
+              "multiple de $\\vec{u}$ reste porté par d, un vecteur non parallèle à d, jamais",
           },
         },
         {
@@ -125,18 +127,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une fois (point, vecteur directeur) connus, la même droite s\'écrit sous 4 formes ' +
-            'équivalentes — chacune utile dans un contexte différent.',
+            'Tu connais un point et le vecteur directeur ? Alors tu peux écrire la même droite ' +
+            'de 4 façons différentes. Chacune est utile dans un contexte différent.',
         },
         {
           kind: 'rappel',
           label: "D'où vient la forme paramétrique ? — l'équation vectorielle",
           items: [
             'Un point M(x ; y) appartient à la droite (A, $\\vec{u}$) exactement quand $\\vec{AM}$ ' +
-              'et $\\vec{u}$ sont colinéaires — c\'est-à-dire quand il existe un nombre t tel que ' +
-              '$\\vec{AM} = t \\cdot \\vec{u}$, l\'**équation vectorielle** de la droite. En ' +
-              "l'écrivant composante par composante, $\\begin{pmatrix} x-x_0 \\\\ y-y_0 " +
-              '\\end{pmatrix} = t \\cdot \\begin{pmatrix} a \\\\ b \\end{pmatrix}$, on retrouve ' +
+              'et $\\vec{u}$ sont colinéaires. Autrement dit : il existe un nombre t tel que ' +
+              '$\\vec{AM} = t \\cdot \\vec{u}$. C\'est l\'**équation vectorielle** de la droite. ' +
+              "Écris-la composante par composante : $\\begin{pmatrix} x-x_0 \\\\ y-y_0 " +
+              '\\end{pmatrix} = t \\cdot \\begin{pmatrix} a \\\\ b \\end{pmatrix}$. Tu retrouves ' +
               'exactement le système paramétrique $\\begin{cases} x = x_0+t \\cdot a \\\\ y = ' +
               'y_0+t \\cdot b \\end{cases}$.',
           ],
@@ -145,28 +147,31 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'methode',
           label: 'Les 4 formes',
           items: [
-            '**Implicite** — $a \\cdot x + b \\cdot y + c = 0$, où $\\begin{pmatrix} a \\\\ b ' +
-              '\\end{pmatrix}$ est un vecteur **normal** (perpendiculaire au vecteur directeur ' +
-              '$\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$ — on peut prendre ' +
-              '$a=-\\beta$, $b=\\alpha$). **Toujours possible**, quelle que soit la droite.',
+            '**Implicite** — $a \\cdot x + b \\cdot y + c = 0$. Le vecteur $\\begin{pmatrix} a ' +
+              '\\\\ b \\end{pmatrix}$ est un vecteur **normal** : il est perpendiculaire au ' +
+              'vecteur directeur $\\begin{pmatrix} \\alpha \\\\ \\beta \\end{pmatrix}$. Tu peux ' +
+              'prendre $a=-\\beta$, $b=\\alpha$. Cette forme est **toujours possible**, pour ' +
+              "n'importe quelle droite.",
             '**Explicite en y** — $y = m \\cdot x + p$ (m = pente, p = ordonnée à l\'origine). ' +
-              '**Impossible** si la droite est verticale (vecteur directeur $\\begin{pmatrix} 0 ' +
-              '\\\\ \\beta \\end{pmatrix}$).',
+              '**Impossible** si la droite est verticale, c\'est-à-dire si son vecteur directeur ' +
+              'est $\\begin{pmatrix} 0 \\\\ \\beta \\end{pmatrix}$.',
             '**Explicite en x** — $x = n \\cdot y + q$. **Impossible** si la droite est ' +
-              'horizontale (vecteur directeur $\\begin{pmatrix} \\alpha \\\\ 0 \\end{pmatrix}$).',
+              'horizontale, c\'est-à-dire si son vecteur directeur est $\\begin{pmatrix} \\alpha ' +
+              '\\\\ 0 \\end{pmatrix}$.',
             '**Paramétrique** — $\\begin{cases} x = x_0+t \\cdot \\alpha \\\\ y = y_0+t \\cdot ' +
-              '\\beta \\end{cases}$, une équation par variable, un paramètre t commun. **Toujours ' +
-              'possible**, y compris pour une verticale ou une horizontale.',
+              '\\beta \\end{cases}$. Une équation par variable, avec le même paramètre t dans les ' +
+              'deux. **Toujours possible**, même pour une verticale ou une horizontale.',
           ],
         },
         {
           kind: 'attention',
           label: 'Verticale et horizontale — les deux cas particuliers',
           text:
-            'Une droite **verticale** ($x = $ constante) n\'a pas de pente et pas de forme ' +
-            'explicite en y. Une droite **horizontale** ($y = $ constante) n\'a pas de forme ' +
-            "explicite en x. Dans les deux cas, l'implicite et la paramétrique restent toujours " +
-            'disponibles — ce sont les deux seules formes qui ne demandent jamais de condition.',
+            'Une droite **verticale** ($x = $ constante) n\'a pas de pente. Elle n\'a pas non ' +
+            'plus de forme explicite en y. Une droite **horizontale** ($y = $ constante) n\'a ' +
+            'pas de forme explicite en x. Mais dans les deux cas, l\'implicite et la ' +
+            'paramétrique marchent toujours ! Ce sont les deux seules formes qui ne demandent ' +
+            'jamais aucune condition.',
         },
         {
           kind: 'illustration',
@@ -184,14 +189,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 2.2, y: 1.75, vectorLabel: [{ text: 'u', vector: true }], tone: 'accent', node: false },
             ],
             caption:
-              'B = A + $\\vec{u}$, avec $\\vec{u} = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ — le ' +
-              "point de départ de l'exemple ci-dessous",
+              'B = A + $\\vec{u}$, avec $\\vec{u} = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$ — ' +
+              "c'est le point de départ de l'exemple ci-dessous",
           },
         },
         {
           kind: 'exemple',
           badge: 'point + vecteur → 4 formes',
-          formula: 'A(1 ; 1), vecteur directeur $\\vec{u} = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$. Écrire les 4 formes.',
+          formula: 'A(1 ; 1), vecteur directeur $\\vec{u} = \\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$. Écris les 4 formes.',
           steps: [
             { tag: 'vecteur normal', text: 'on tourne u de 90° : $\\begin{pmatrix} a \\\\ b \\end{pmatrix} = \\begin{pmatrix} -1 \\\\ 2 \\end{pmatrix}$' },
             { tag: 'implicite', text: '$-1 \\cdot (x-1) + 2 \\cdot (y-1) = 0 \\to -x+2y-1=0$, soit $x-2y+1=0$' },
@@ -203,17 +208,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            "Passer directement du paramétrique à l'implicite — en isolant t dans chaque équation " +
-            'paramétrique puis en égalant : $t = \\frac{x-1}{2} = \\frac{y-1}{1}$, d\'où $1 \\cdot ' +
-            '(x-1) = 2 \\cdot (y-1)$, soit $x-2y+1=0$ — exactement le même résultat que par le ' +
-            'vecteur normal, sans avoir besoin de le construire.',
+            'Tu peux passer directement du paramétrique à l\'implicite. Isole t dans chaque ' +
+            'équation paramétrique, puis égale les deux : $t = \\frac{x-1}{2} = ' +
+            '\\frac{y-1}{1}$. Tu obtiens $1 \\cdot (x-1) = 2 \\cdot (y-1)$, soit $x-2y+1=0$. ' +
+            "C'est exactement le même résultat que par le vecteur normal — sans avoir besoin de " +
+            'le construire !',
         },
         {
           kind: 'entrainement',
           title: "Équation d'une droite",
           generatorId: 'gen42',
           description: [
-            "Pars de l'un des 5 types de données, extrais le point et le vecteur directeur, puis écris la forme demandée.",
+            "Pars de l'un des 5 types de données. Extrais le point et le vecteur directeur. Puis écris la forme demandée.",
           ],
           chantier: '4e',
           whereLabel: "4e → « 42. Équation d'une droite »",
@@ -230,18 +236,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Deux compétences symétriques : partir d'un dessin pour en écrire l'équation, ou " +
-            "partir d'une équation pour la dessiner. Dans les deux sens, tout repose sur les " +
-            'mêmes deux points à coordonnées entières.',
+            'Il y a deux compétences symétriques. Tu peux partir d\'un dessin pour en écrire ' +
+            "l'équation. Ou partir d'une équation pour la dessiner. Dans les deux sens, tout " +
+            'repose sur les mêmes deux points à coordonnées entières.',
         },
         { kind: 'subheading', text: 'Lire une droite sur un graphe' },
         {
           kind: 'para',
           text:
-            'Repérer deux points de la droite dont les coordonnées sont entières (le quadrillage ' +
-            'les rend visibles directement), puis calculer le vecteur directeur reliant ces deux ' +
-            'points. Pour éviter des composantes inutilement grandes, on le réduit toujours à sa ' +
-            'forme **primitive** — on divise ses deux composantes par leur PGCD.',
+            'Repère deux points de la droite dont les coordonnées sont entières. Le quadrillage ' +
+            'les rend visibles directement. Calcule ensuite le vecteur directeur reliant ces deux ' +
+            'points. Pour éviter des composantes inutilement grandes, réduis-le toujours à sa ' +
+            'forme **primitive** : divise ses deux composantes par leur PGCD.',
         },
         {
           kind: 'illustration',
@@ -267,17 +273,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           },
         },
         { kind: 'subheading', text: 'Tracer une droite depuis son équation' },
-        { kind: 'para', text: "Dans l'autre sens, il suffit de produire deux points, quelle que soit la forme de départ." },
+        { kind: 'para', text: "Dans l'autre sens, il suffit de trouver deux points, quelle que soit la forme de départ." },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            "**Implicite ou explicite** — choisir une valeur de x (ou de y), calculer l'autre " +
-              'coordonnée ; répéter avec une deuxième valeur. Les **intersections avec les axes** ' +
+            "**Implicite ou explicite** — choisis une valeur de x (ou de y), calcule l'autre " +
+              'coordonnée. Répète avec une deuxième valeur. Les **intersections avec les axes** ' +
               '(x=0, puis y=0) donnent souvent les deux points les plus simples à lire.',
-            "**Paramétrique** — le point de départ s'obtient avec t=0 ; un second point, avec " +
-              "n'importe quelle autre valeur de t (t=1 donne directement le point translaté du " +
-              'vecteur directeur).',
+            "**Paramétrique** — le point de départ s'obtient avec t=0. Pour un second point, " +
+              "prends n'importe quelle autre valeur de t (t=1 donne directement le point " +
+              'translaté du vecteur directeur).',
           ],
         },
         {
@@ -303,7 +309,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           title: 'Lecture graphique',
           generatorId: 'gen43',
           description: [
-            "Lis deux points entiers sur un graphe et retrouve l'équation de la droite (cartésienne ou paramétrique).",
+            "Lis deux points entiers sur un graphe. Puis retrouve l'équation de la droite (cartésienne ou paramétrique).",
           ],
           chantier: '4e',
           whereLabel: "4e → « 43. Lecture graphique — équation d'une droite »",
@@ -313,7 +319,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           title: 'Construction graphique',
           generatorId: 'gen44',
           description: [
-            "Pars d'une équation, sous l'une des 4 formes, et place les deux points qui permettent de la tracer.",
+            "Pars d'une équation, sous l'une des 4 formes. Place les deux points qui permettent de la tracer.",
           ],
           chantier: '4e',
           whereLabel: '4e → « 44. Construction graphique — tracer une droite »',
@@ -330,8 +336,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            "La pente, l'angle avec Ox et l'ordonnée à l'origine décrivent chacun un aspect de la " +
-            "même droite — l'inclinaison pour les deux premiers, la position pour le troisième.",
+            "La pente, l'angle avec Ox et l'ordonnée à l'origine décrivent chacun un aspect de " +
+            'la même droite. Les deux premiers décrivent son inclinaison. Le troisième décrit sa ' +
+            'position.',
         },
         {
           kind: 'illustration',
@@ -355,10 +362,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            '**Pente** — $m = \\frac{\\Delta y}{\\Delta x}$, le rapport des composantes du vecteur directeur. **N\'existe pas** pour une verticale.',
-            '**Angle avec Ox** — $m = \\tan\\theta$, avec θ dans $[0°;180°[$. Pour une verticale, θ = 90° (la pente n\'existe pas, l\'angle si).',
-            '**Angle avec Oy** — angle complémentaire du précédent : $\\theta_{Oy} = 90° - \\theta_{Ox}$ (ramené dans $[0°;180°[$ si négatif).',
-            "**Ordonnée à l'origine** — p = valeur de y quand x = 0 (le point où la droite coupe Oy). N'existe pas pour une verticale.",
+            '**Pente** — $m = \\frac{\\Delta y}{\\Delta x}$. C\'est le rapport des composantes du vecteur directeur. Elle **n\'existe pas** pour une verticale.',
+            '**Angle avec Ox** — $m = \\tan\\theta$, avec θ dans $[0°;180°[$. Pour une verticale, θ = 90° : la pente n\'existe pas, mais l\'angle si.',
+            '**Angle avec Oy** — c\'est l\'angle complémentaire du précédent : $\\theta_{Oy} = 90° - \\theta_{Ox}$ (ramené dans $[0°;180°[$ si négatif).',
+            "**Ordonnée à l'origine** — p, c'est la valeur de y quand x = 0. C'est le point où la droite coupe Oy. Elle n'existe pas pour une verticale.",
           ],
         },
         {
@@ -376,15 +383,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'piege',
           label: "Piège — l'angle n'est pas toujours la pente",
           text:
-            'Une pente négative correspond à un angle avec Ox **obtus** (entre 90° et 180°), ' +
-            'jamais à un angle négatif : θ reste toujours mesuré dans $[0°;180°[$, dans le sens ' +
+            'Une pente négative correspond à un angle avec Ox **obtus** (entre 90° et 180°) — ' +
+            'jamais à un angle négatif ! θ reste toujours mesuré dans $[0°;180°[$, dans le sens ' +
             'trigonométrique depuis le demi-axe positif de Ox.',
         },
         {
           kind: 'entrainement',
           title: "Caractéristiques d'une droite",
           generatorId: 'gen46',
-          description: ["Pars de n'importe quelle forme d'équation et retrouve la pente, un angle ou l'ordonnée à l'origine."],
+          description: ["Pars de n'importe quelle forme d'équation. Retrouve la pente, un angle ou l'ordonnée à l'origine."],
           chantier: '4e',
           whereLabel: "4e → « 46. Caractéristiques d'une droite »",
         },
@@ -400,8 +407,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Deux critères, sur les vecteurs directeurs, à ne jamais confondre — les mêmes que ' +
-            'pour la colinéarité et l\'orthogonalité de vecteurs, appliqués ici à des droites.',
+            'Il y a deux critères sur les vecteurs directeurs, à ne jamais confondre. Ce sont ' +
+            'les mêmes que pour la colinéarité et l\'orthogonalité de vecteurs, appliqués ici à ' +
+            'des droites.',
         },
         {
           kind: 'illustrationGroup',
@@ -456,10 +464,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Pour deux vecteurs directeurs $\\vec{u}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ et ' +
-              "$\\vec{v}\\begin{pmatrix} a' \\\\ b' \\end{pmatrix}$ :",
-            "**Parallèles** ⟺ déterminant nul : $a \\cdot b' - b \\cdot a' = 0$. En pentes (si les deux existent) : $m = m'$.",
-            "**Perpendiculaires** ⟺ produit scalaire nul : $a \\cdot a' + b \\cdot b' = 0$. En pentes (si les deux existent) : $m \\cdot m' = -1$.",
+            'Prends deux vecteurs directeurs $\\vec{u}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ ' +
+              "et $\\vec{v}\\begin{pmatrix} a' \\\\ b' \\end{pmatrix}$ :",
+            "**Parallèles** ⟺ déterminant nul : $a \\cdot b' - b \\cdot a' = 0$. En pentes (si les deux existent), ça donne $m = m'$.",
+            "**Perpendiculaires** ⟺ produit scalaire nul : $a \\cdot a' + b \\cdot b' = 0$. En pentes (si les deux existent), ça donne $m \\cdot m' = -1$.",
           ],
         },
         {
@@ -467,7 +475,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           badge: 'perpendiculaire par un point',
           formula:
             'd : x − 2y + 1 = 0 (vecteur directeur $\\begin{pmatrix} 2 \\\\ 1 \\end{pmatrix}$). ' +
-            "Trouver d′, perpendiculaire à d, passant par C(3 ; −1).",
+            "Trouve d′, perpendiculaire à d, passant par C(3 ; −1).",
           steps: [
             {
               tag: 'vecteur directeur de d′',
@@ -502,27 +510,28 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'astuce',
           text:
             '$\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ tourné de 90° donne $\\begin{pmatrix} -b ' +
-            '\\\\ a \\end{pmatrix}$ ou $\\begin{pmatrix} b \\\\ -a \\end{pmatrix}$ selon le sens — ' +
-            'les deux sont perpendiculaires à $\\begin{pmatrix} a \\\\ b \\end{pmatrix}$, un ' +
-            "multiple négatif l'un de l'autre. N'importe lequel des deux convient pour construire une perpendiculaire.",
+            '\\\\ a \\end{pmatrix}$ ou $\\begin{pmatrix} b \\\\ -a \\end{pmatrix}$, selon le sens ' +
+            'du tour. Les deux sont perpendiculaires à $\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ ' +
+            "— ce sont juste des multiples négatifs l'un de l'autre. N'importe lequel des deux " +
+            'convient pour construire une perpendiculaire.',
         },
         { kind: 'subheading', text: "Démonstration — d'où vient m·m′ = −1 ?" },
         {
           kind: 'para',
           text:
             'Si $\\vec{u}\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ et ' +
-            "$\\vec{v}\\begin{pmatrix} a' \\\\ b' \\end{pmatrix}$ sont perpendiculaires, on peut " +
+            "$\\vec{v}\\begin{pmatrix} a' \\\\ b' \\end{pmatrix}$ sont perpendiculaires, tu peux " +
             "toujours écrire $\\vec{v} = \\begin{pmatrix} -k \\cdot b \\\\ k \\cdot a \\end{pmatrix}$ " +
-            'pour un certain $k \\neq 0$ (produit scalaire : $a \\cdot (-kb) + b \\cdot (ka) = 0$, ' +
-            'toujours vrai, quel que soit k). Les pentes valent alors $m = \\frac{b}{a}$ et ' +
-            "$m' = \\frac{ka}{-kb} = \\frac{a}{-b}$. Leur produit : $m \\cdot m' = \\frac{b}{a} " +
-            '\\cdot \\frac{a}{-b} = -1$, quels que soient a, b et k.',
+            'pour un certain $k \\neq 0$ (le produit scalaire $a \\cdot (-kb) + b \\cdot (ka) = ' +
+            '0$ est toujours vrai, quel que soit k). Les pentes valent alors $m = \\frac{b}{a}$ ' +
+            "et $m' = \\frac{ka}{-kb} = \\frac{a}{-b}$. Leur produit vaut $m \\cdot m' = " +
+            '\\frac{b}{a} \\cdot \\frac{a}{-b} = -1$, quels que soient a, b et k.',
         },
         {
           kind: 'entrainement',
           title: 'Relations entre droites',
           generatorId: 'gen45',
-          description: ['Construis la droite parallèle ou perpendiculaire à une droite donnée, passant par un point imposé.'],
+          description: ['Construis la droite parallèle ou perpendiculaire à une droite donnée. Elle doit passer par un point imposé.'],
           chantier: '4e',
           whereLabel: '4e → « 45. Relations entre droites (parallèle/perpendiculaire) »',
         },
@@ -535,14 +544,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Intersection de deux droites',
       kicker: 'sécantes (1 point) — parallèles distinctes (0 point) — confondues (une infinité)',
       blocks: [
-        { kind: 'para', text: "Trois issues possibles, à distinguer **avant** de se lancer dans un calcul inutile." },
+        { kind: 'para', text: "Il y a trois issues possibles. Distingue-les **avant** de te lancer dans un calcul inutile." },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Comparer les vecteurs directeurs. **Non colinéaires** → les droites sont **sécantes**, un seul point d\'intersection : passer à l\'étape 2.',
-            '**Colinéaires** → vérifier si un point de l\'une appartient à l\'autre. Si oui, elles sont **confondues** (une infinité de points communs) ; sinon, **parallèles distinctes** (aucun point commun).',
-            'Pour des sécantes, résoudre le système des deux équations (substitution ou combinaison linéaire) pour obtenir les coordonnées du point commun.',
+            'Compare les vecteurs directeurs. **Non colinéaires** → les droites sont **sécantes**, un seul point d\'intersection : passe à l\'étape 2.',
+            '**Colinéaires** → vérifie si un point de l\'une appartient à l\'autre. Si oui, elles sont **confondues** (une infinité de points communs). Sinon, **parallèles distinctes** (aucun point commun).',
+            'Pour des sécantes, résous le système des deux équations (par substitution ou par combinaison linéaire) pour obtenir les coordonnées du point commun.',
           ],
         },
         {
@@ -612,7 +621,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'exemple',
           badge: 'résolution par substitution',
-          formula: 'd₁ : x − 2y + 1 = 0, d₂ : 2x + y − 5 = 0 (les deux droites de l\'exemple précédent).',
+          formula: 'd₁ : x − 2y + 1 = 0, d₂ : 2x + y − 5 = 0 — ce sont les deux droites de l\'exemple précédent.',
           steps: [
             {
               tag: 'directeurs non colinéaires',
@@ -627,7 +636,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Intersection entre deux droites',
           generatorId: 'gen48',
-          description: ['Diagnostique le cas (sécantes/parallèles/confondues) puis calcule le point commun quand il existe.'],
+          description: ['Diagnostique le cas (sécantes, parallèles ou confondues). Puis calcule le point commun quand il existe.'],
           chantier: '4e',
           whereLabel: '4e → « 48. Intersection entre deux droites »',
         },
@@ -643,17 +652,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            "La distance d'un point à une droite se construit, elle ne se lit pas dans une formule " +
-            "apprise par cœur : c'est un enchaînement de trois compétences déjà vues dans ce chapitre.",
+            "La distance d'un point à une droite se construit. Elle ne se lit pas dans une " +
+            "formule apprise par cœur ! C'est un enchaînement de trois compétences que tu as " +
+            'déjà vues dans ce chapitre.',
         },
         {
           kind: 'methode',
           label: 'Méthode — point à une droite',
           items: [
-            'Construire la droite **perpendiculaire** à d, passant par le point donné (section 4).',
-            'Calculer son **intersection** avec d — c\'est le pied de la perpendiculaire (section 5).',
-            "La distance cherchée est la **norme** du vecteur qui relie le point de départ à ce pied.",
-            'Pour la distance entre **deux droites parallèles**, même méthode : choisir n\'importe quel point sur l\'une des deux, puis appliquer les 3 étapes vers l\'autre.',
+            'Construis la droite **perpendiculaire** à d, passant par le point donné (section 4).',
+            'Calcule son **intersection** avec d — c\'est le pied de la perpendiculaire (section 5).',
+            "La distance cherchée, c'est la **norme** du vecteur qui relie le point de départ à ce pied.",
+            'Pour la distance entre **deux droites parallèles**, même méthode : choisis n\'importe quel point sur l\'une des deux, puis applique les 3 étapes vers l\'autre.',
           ],
         },
         {
@@ -700,7 +710,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           label: 'deux raccourcis, sans aucune construction',
           text:
             "Dans ces deux cas seulement, le pied de la perpendiculaire s'obtient sans aucun " +
-            "calcul — c'est déjà l'une des deux coordonnées du point de départ.",
+            "calcul ! C'est déjà l'une des deux coordonnées du point de départ.",
           items: [
             'Distance d\'un point P à une droite **verticale** $x = k$ : $|x_P - k|$ — un simple écart d\'abscisses.',
             'Distance d\'un point P à une droite **horizontale** $y = k$ : $|y_P - k|$ — un simple écart d\'ordonnées.',
@@ -710,7 +720,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Distance point-droite et droite-droite',
           generatorId: 'gen47',
-          description: ['Exercice de synthèse : construis la perpendiculaire, trouve le pied, mesure la distance — sans jamais utiliser de formule directe.'],
+          description: ['Exercice de synthèse : construis la perpendiculaire, trouve le pied, mesure la distance. Sans jamais utiliser de formule directe.'],
           chantier: '4e',
           whereLabel: '4e → « 47. Distance point-droite et droite-droite »',
         },
@@ -727,8 +737,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'para',
           text:
             'Un **lieu géométrique** est un ensemble de points défini par une phrase — pas par ' +
-            "une équation donnée d'emblée. La première étape, souvent la plus délicate, consiste " +
-            "à reconnaître de quelle figure (droite, cercle ou parabole) il s'agit, puis à en " +
+            "une équation déjà donnée. La première étape, souvent la plus délicate, c'est de " +
+            "reconnaître de quelle figure il s'agit (droite, cercle ou parabole), puis d'en " +
             'extraire les paramètres.',
         },
         {
@@ -736,8 +746,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           label: 'Définition formelle',
           items: [
             'Un lieu géométrique est un ensemble de points qui partagent tous une **propriété ' +
-              'commune** — et qui sont les **seuls** à la partager. Deux exemples classiques, à ' +
-              'connaître avant même de traduire une phrase en équation :',
+              'commune** — et qui sont les **seuls** à la partager. Voici deux exemples ' +
+              'classiques, à connaître avant même de traduire une phrase en équation :',
           ],
         },
         {
@@ -760,14 +770,14 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 7.7, y: 1, label: 'c', tone: 'accent', node: false },
               { x: 7.7, y: 0, label: 'b', tone: 'ink', node: false },
             ],
-            caption: 'c, équidistante de a et b — le lieu des points équidistants de deux parallèles est la parallèle médiane',
+            caption: 'c, équidistante de a et b — le lieu des points équidistants de deux parallèles, c\'est la parallèle médiane',
           },
         },
         {
           kind: 'list',
           items: [
-            '**Équidistant de deux droites parallèles** — le lieu est la droite **parallèle**, exactement à mi-chemin entre les deux.',
-            '**À une distance donnée d\'une droite** — le lieu est la **réunion** de deux droites parallèles à celle-ci (une de chaque côté), jamais une seule des deux : chacune prise isolément ne contient pas tous les points situés à cette distance.',
+            '**Équidistant de deux droites parallèles** — le lieu, c\'est la droite **parallèle**, exactement à mi-chemin entre les deux.',
+            '**À une distance donnée d\'une droite** — le lieu, c\'est la **réunion** de deux droites parallèles à celle-ci (une de chaque côté). Jamais une seule des deux ! Chacune prise isolément ne contient pas tous les points situés à cette distance.',
           ],
         },
       ],
@@ -782,17 +792,18 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un cercle de centre $(x_0 ; y_0)$ et de rayon r est l\'ensemble des points situés ' +
-            'exactement à distance r du centre — ce qui donne directement son équation, par Pythagore.',
+            'Un cercle de centre $(x_0 ; y_0)$ et de rayon r, c\'est l\'ensemble des points ' +
+            'situés exactement à distance r du centre. Ça donne directement son équation, par ' +
+            'Pythagore.',
         },
         {
           kind: 'rappel',
           label: "D'où vient l'équation (x−x₀)² + (y−y₀)² = r² ?",
           items: [
             'Un point P(x ; y) appartient au cercle exactement quand sa distance au centre ' +
-              '$C(x_0 ; y_0)$ vaut r : $\\sqrt{(x-x_0)^2+(y-y_0)^2} = r$. En élevant les deux ' +
-              "membres au carré (une distance est déjà positive, aucune solution n'est perdue), " +
-              'on obtient directement $(x-x_0)^2+(y-y_0)^2=r^2$.',
+              '$C(x_0 ; y_0)$ vaut r : $\\sqrt{(x-x_0)^2+(y-y_0)^2} = r$. Élève les deux membres ' +
+              "au carré. Une distance est déjà positive, donc aucune solution n'est perdue. Tu " +
+              'obtiens directement $(x-x_0)^2+(y-y_0)^2=r^2$.',
             '**Cas particulier** — cercle centré à l\'origine : $x^2+y^2=r^2$.',
           ],
         },
@@ -813,7 +824,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 1.434, y: 2.048, label: 'point marqué', tone: 'good', labelPos: 'right' },
               { x: 0.9, y: 1.2, label: 'r', tone: 'good', node: false },
             ],
-            caption: 'rayon direct si le point marqué est aligné avec le centre, indirect (Pythagore) sinon',
+            caption: 'rayon direct si le point marqué est aligné avec le centre, indirect (par Pythagore) sinon',
           },
         },
         {
@@ -851,17 +862,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'En développant $(x-a)^2+(y-b)^2=r^2$, on obtient une équation de la forme ' +
-            '$k \\cdot x^2 + k \\cdot y^2 + b_x \\cdot x + b_y \\cdot y = c$ — **le même coefficient ' +
-            'k devant x² et devant y²**. Retrouver le centre et le rayon revient à faire le chemin ' +
-            'inverse : regrouper, puis compléter le carré.',
+            'En développant $(x-a)^2+(y-b)^2=r^2$, tu obtiens une équation de la forme ' +
+            '$k \\cdot x^2 + k \\cdot y^2 + b_x \\cdot x + b_y \\cdot y = c$. Remarque : c\'est ' +
+            '**le même coefficient k devant x² et devant y²**. Retrouver le centre et le rayon, ' +
+            "c'est faire le chemin inverse : regrouper, puis compléter le carré.",
         },
         {
           kind: 'attention',
           label: 'Condition — un cercle, pas une ellipse',
           text:
-            'Si les coefficients de x² et de y² sont **différents**, l\'équation ne décrit pas un ' +
-            "cercle (mais une ellipse) — cette méthode ne s'applique qu'avec un coefficient " +
+            'Si les coefficients de x² et de y² sont **différents**, l\'équation ne décrit pas ' +
+            'un cercle, mais une ellipse ! Cette méthode ne marche que si le coefficient est ' +
             'identique sur les deux carrés.',
         },
         {
@@ -878,15 +889,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            "Rayon rationnel ou irrationnel — le nombre obtenu au second membre après complétion " +
-            "du carré n'est pas toujours un carré parfait : le rayon peut alors rester sous forme " +
-            'de racine (par exemple $r = \\sqrt{18} = 3\\sqrt{2}$), exactement comme une norme de vecteur.',
+            "Rayon rationnel ou irrationnel — le nombre que tu obtiens au second membre après " +
+            "avoir complété le carré n'est pas toujours un carré parfait. Le rayon peut alors " +
+            'rester sous forme de racine (par exemple $r = \\sqrt{18} = 3\\sqrt{2}$) — exactement comme une norme de vecteur.',
         },
         {
           kind: 'entrainement',
           title: 'Équation depuis un graphe',
           generatorId: 'gen49',
-          description: ["Lis le centre et un point du cercle sur un graphe, puis écris l'équation non développée."],
+          description: ["Lis le centre et un point du cercle sur un graphe. Puis écris l'équation non développée."],
           chantier: '4e',
           whereLabel: "4e → « 49. Équation d'un cercle depuis un graphe »",
         },
@@ -894,7 +905,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Centre et rayon',
           generatorId: 'gen50',
-          description: ["Pars de l'équation développée, complète le carré et retrouve le centre et le rayon exacts."],
+          description: ["Pars de l'équation développée. Complète le carré et retrouve le centre et le rayon exacts."],
           chantier: '4e',
           whereLabel: "4e → « 50. Centre et rayon d'un cercle »",
         },
@@ -910,10 +921,11 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une parabole est l\'ensemble des points P équidistants d\'un point fixe F, le ' +
-            '**foyer**, et d\'une droite fixe d, la **directrice** : $PF = distance(P, d)$, ' +
-            'toujours. Le **sommet** S de la parabole est le milieu du segment qui relie F au ' +
-            "point de d le plus proche — exactement à mi-chemin entre le foyer et la directrice.",
+            'Une parabole, c\'est l\'ensemble des points P situés à la même distance d\'un ' +
+            'point fixe F, le **foyer**, et d\'une droite fixe d, la **directrice**. Toujours ' +
+            '$PF = distance(P, d)$. Le **sommet** S de la parabole est le milieu du segment qui ' +
+            "relie F au point de d le plus proche — exactement à mi-chemin entre le foyer et la " +
+            'directrice.',
         },
         {
           kind: 'illustration',
@@ -936,15 +948,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 2, y: 1, label: 'P', tone: 'ink', labelPos: 'right' },
               { x: -2.6, y: -1.35, label: 'directrice d', tone: 'ink', node: false, labelPos: 'below' },
             ],
-            caption: 'PF = distance(P, d) — vrai pour **tout** point P de la courbe, c\'est la définition même de la parabole',
+            caption: 'PF = distance(P, d) — vrai pour **tout** point P de la courbe : c\'est la définition même de la parabole',
           },
         },
         { kind: 'subheading', text: "L'équation" },
         {
           kind: 'para',
           text:
-            'Le paramètre **p est signé** — jamais une distance non signée : il porte à la fois ' +
-            "la taille et l'orientation de l'ouverture de la parabole.",
+            'Attention : le paramètre **p est signé**. Ce n\'est jamais une simple distance ' +
+            "positive ! Il porte à la fois la taille et l'orientation de l'ouverture de la " +
+            'parabole.',
         },
         {
           kind: 'featureTable',
@@ -958,8 +971,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Foyer $F(0 ; p/2)$, directrice $d : y=-p/2$. Un point P(x ; y) est sur la parabole ' +
-            'exactement quand $dist(P,F) = dist(P,d)$ :',
+            'Prends le foyer $F(0 ; p/2)$ et la directrice $d : y=-p/2$. Un point P(x ; y) est ' +
+            'sur la parabole exactement quand $dist(P,F) = dist(P,d)$ :',
         },
         {
           kind: 'exemple',
@@ -972,17 +985,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Décaler le sommet en $S(x_S ; y_S)$ plutôt qu\'à l\'origine (translation) donne ' +
-            "directement la forme générale $(x-x_S)^2=2p(y-y_S)$ du tableau ci-dessus ; l'axe " +
-            "horizontal s'obtient en échangeant les rôles de x et y.",
+            'Décale maintenant le sommet en $S(x_S ; y_S)$ plutôt qu\'à l\'origine (une simple ' +
+            'translation) : tu obtiens directement la forme générale $(x-x_S)^2=2p(y-y_S)$ du ' +
+            "tableau ci-dessus. L'axe horizontal s'obtient en échangeant les rôles de x et y.",
         },
         {
           kind: 'piege',
           label: 'Piège — un p négatif inverse foyer et directrice',
           text:
-            'Un p positif place le foyer **au-dessus** du sommet (axe vertical) ou **à droite** ' +
-            '(axe horizontal) ; un p négatif les place de l\'autre côté. Se tromper de signe ' +
-            "échange purement et simplement les rôles du foyer et de la directrice.",
+            'Un p positif place le foyer **au-dessus** du sommet (axe vertical), ou **à droite** ' +
+            '(axe horizontal). Un p négatif les place de l\'autre côté. Si tu te trompes de ' +
+            "signe, tu échanges purement et simplement les rôles du foyer et de la directrice !",
         },
         {
           kind: 'exemple',
@@ -1010,7 +1023,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
               { x: 1, y: 0, label: 'F', tone: 'good', labelPos: 'above' },
               { x: -1.5, y: -3.1, label: 'd', tone: 'ink', node: false },
             ],
-            caption: 'axe horizontal : $(y-y_S)^2=2p(x-x_S)$ — mêmes rôles que ci-dessus, x et y échangés',
+            caption: 'axe horizontal : $(y-y_S)^2=2p(x-x_S)$ — les mêmes rôles que ci-dessus, avec x et y échangés',
           },
         },
         {
@@ -1028,12 +1041,12 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            "La définition par équidistance permet de construire la parabole point par point, " +
-            "sans jamais lire ni écrire de coordonnées : pour un rayon r choisi (assez grand), le " +
-            "**cercle centré en F de rayon r** et la **droite parallèle à la directrice, à " +
-            "distance r de celle-ci** se coupent en 0, 1 ou 2 points. Chacun de ces points est, " +
-            "par construction, à la fois à distance r de F et à distance r de la directrice — " +
-            "donc exactement sur la parabole.",
+            "La définition par équidistance te permet de construire la parabole point par " +
+            "point, sans jamais lire ni écrire de coordonnées. Choisis un rayon r (assez " +
+            "grand) : le **cercle centré en F de rayon r** et la **droite parallèle à la " +
+            "directrice, à distance r de celle-ci** se coupent en 0, 1 ou 2 points. Chacun de " +
+            "ces points est, par construction, à la fois à distance r de F et à distance r de " +
+            "la directrice. Il est donc exactement sur la parabole !",
         },
         {
           kind: 'illustration',
@@ -1062,16 +1075,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Tracer toute la courbe — répéter cette construction pour plusieurs valeurs de r ' +
+            'Pour tracer toute la courbe, répète cette construction pour plusieurs valeurs de r ' +
             '(toujours strictement supérieures à la moitié de la distance entre F et la ' +
-            'directrice) fait apparaître autant de points de la parabole — assez pour en tracer ' +
-            "l'allure complète à main levée.",
+            'directrice). Tu fais apparaître autant de points de la parabole — assez pour en ' +
+            "tracer l'allure complète à main levée.",
         },
         {
           kind: 'entrainement',
           title: 'Équation depuis un graphe',
           generatorId: 'gen51',
-          description: ['Lis le sommet et le foyer sur un graphe, calcule p et écris l\'équation.'],
+          description: ['Lis le sommet et le foyer sur un graphe. Calcule p et écris l\'équation.'],
           chantier: '4e',
           whereLabel: "4e → « 51. Équation d'une parabole depuis un graphe »",
         },
@@ -1079,7 +1092,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Sommet, foyer, p, directrice',
           generatorId: 'gen52',
-          description: ["Pars de l'équation développée et retrouve tous les éléments caractéristiques de la parabole."],
+          description: ["Pars de l'équation développée. Retrouve tous les éléments caractéristiques de la parabole."],
           chantier: '4e',
           whereLabel: '4e → « 52. Sommet, foyer, p et directrice »',
         },
@@ -1087,7 +1100,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Construction graphique de la parabole',
           generatorId: 'gen53',
-          description: ['Construis la parabole au compas et à l\'équerre, à partir du foyer et de la directrice seuls — sans aucune coordonnée à calculer.'],
+          description: ['Construis la parabole au compas et à l\'équerre, à partir du foyer et de la directrice seuls. Sans aucune coordonnée à calculer.'],
           chantier: '4e',
           whereLabel: '4e → « 53. Construction graphique de la parabole »',
         },
@@ -1103,10 +1116,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Droite, cercle et parabole sont chacun des lieux géométriques particuliers — ' +
-            "l'équation d'une droite a été vue plus tôt dans ce chapitre, celles du cercle et " +
-            'de la parabole dans les deux sections précédentes. Reste à savoir résoudre un ' +
-            'problème où **deux** lieux, chacun décrit par une phrase, sont mis en jeu ensemble.',
+            'Droite, cercle et parabole sont chacun des lieux géométriques particuliers. Tu as ' +
+            "vu l'équation d'une droite plus tôt dans ce chapitre, et celles du cercle et de la " +
+            'parabole dans les deux sections précédentes. Reste à savoir résoudre un problème où ' +
+            '**deux** lieux, chacun décrit par une phrase, sont mis en jeu ensemble.',
         },
         {
           kind: 'featureTable',
@@ -1121,10 +1134,10 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            '**Identifier** le type de chacun des deux lieux, puis en extraire les paramètres.',
-            '**Écrire** l\'équation de chaque lieu.',
-            '**Résoudre** le système par substitution — cela mène toujours à une équation **quadratique** à une seule inconnue.',
-            '**Dénombrer** les solutions (0, 1 ou 2), puis remonter aux coordonnées de chaque point d\'intersection.',
+            '**Identifie** le type de chacun des deux lieux, puis extrais-en les paramètres.',
+            '**Écris** l\'équation de chaque lieu.',
+            '**Résous** le système par substitution — ça mène toujours à une équation **quadratique** à une seule inconnue.',
+            '**Dénombre** les solutions (0, 1 ou 2), puis remonte aux coordonnées de chaque point d\'intersection.',
           ],
         },
         {
@@ -1205,7 +1218,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           kind: 'entrainement',
           title: 'Lieux géométriques',
           generatorId: 'gen54',
-          description: ['Reconnais deux lieux décrits par une phrase, écris leurs équations, puis trouve leur(s) point(s) commun(s).'],
+          description: ['Reconnais deux lieux décrits par une phrase. Écris leurs équations. Puis trouve leur(s) point(s) commun(s).'],
           chantier: '4e',
           whereLabel: '4e → « 54. Lieux géométriques »',
         },
@@ -1221,9 +1234,9 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un quiz vrai/faux qui couvre transversalement les treize générateurs de ce chapitre ' +
-            '— un thème par générateur, sans fusion : contrairement au chapitre sur les vecteurs, ' +
-            "chaque générateur d'ici teste une compétence réellement distincte.",
+            'Un quiz vrai/faux qui couvre les treize générateurs de ce chapitre. Un thème par ' +
+            'générateur, sans fusion : contrairement au chapitre sur les vecteurs, chaque ' +
+            "générateur d'ici teste une compétence vraiment distincte.",
         },
       ],
     },
@@ -1231,38 +1244,38 @@ export const geometrieAnalytiquePlane: ChapterContent = {
 
   recap: {
     items: [
-      'Droite — point + vecteur directeur, la seule vérité géométrique ; 4 formes équivalentes ' +
-        '(implicite, explicite en y, explicite en x, paramétrique), les deux dernières parfois ' +
-        'impossibles (verticale/horizontale).',
-      'Pente et angle — $m=\\tan\\theta$, $\\theta \\in [0°;180°[$ ; angle avec Oy = 90° − angle ' +
-        'avec Ox ; ni pente ni angle avec Oy ne se calculent négativement.',
+      'Droite — un point + un vecteur directeur, c\'est la seule vérité géométrique. 4 formes ' +
+        'équivalentes (implicite, explicite en y, explicite en x, paramétrique) ; les deux ' +
+        'formes explicites sont parfois impossibles (verticale/horizontale).',
+      'Pente et angle — $m=\\tan\\theta$, $\\theta \\in [0°;180°[$. Angle avec Oy = 90° − angle ' +
+        'avec Ox. Ni la pente ni l\'angle avec Oy ne se calculent négativement.',
       'Parallèles / perpendiculaires — déterminant nul ↔ colinéaires ; produit scalaire nul ↔ ' +
-        'orthogonaux ; en pentes, $m=m\'$ ou $m \\cdot m\'=-1$.',
-      "Intersection — comparer d'abord les directeurs (sécantes/colinéaires), avant tout calcul de système.",
+        'orthogonaux. En pentes : $m=m\'$ ou $m \\cdot m\'=-1$.',
+      "Intersection — compare d'abord les vecteurs directeurs (sécantes ou colinéaires), avant tout calcul de système.",
       'Distance — jamais de formule directe : perpendiculaire, intersection, puis norme du vecteur obtenu.',
-      'Cercle — $(x-x_0)^2+(y-y_0)^2=r^2$ ; en développée, coefficient de x² et de y² ' +
-        '**identique**, puis complétion du carré pour retrouver centre et rayon.',
-      'Parabole — PF = distance(P, directrice) ; p **signé**, sommet à mi-chemin entre foyer et ' +
-        'directrice ; 2 orientations symétriques.',
-      'Lieux géométriques — traduire la phrase en équation, résoudre le système (toujours une quadratique), dénombrer 0, 1 ou 2 solutions.',
+      'Cercle — $(x-x_0)^2+(y-y_0)^2=r^2$. En développée, le coefficient de x² et de y² doit ' +
+        'être **identique**, puis tu complètes le carré pour retrouver centre et rayon.',
+      'Parabole — PF = distance(P, directrice). p est **signé**, le sommet est à mi-chemin entre ' +
+        'foyer et directrice, et il y a 2 orientations symétriques.',
+      'Lieux géométriques — traduis la phrase en équation, résous le système (toujours une quadratique), dénombre 0, 1 ou 2 solutions.',
     ],
     checklist: {
       label: 'Avant de rendre ta copie',
       items: [
         "Ai-je bien vérifié qu'une droite verticale ou horizontale n'admet pas les deux formes explicites ?",
-        'Le p de ma parabole est-il bien signé, jamais une distance donnée en positif par défaut ?',
-        'Le coefficient de x² et de y² de mon cercle sont-ils bien identiques avant de compléter le carré ?',
+        'Le p de ma parabole est-il bien signé — jamais une distance donnée en positif par défaut ?',
+        'Le coefficient de x² et de y² de mon cercle sont-ils bien identiques avant que je complète le carré ?',
         'Ai-je diagnostiqué le cas (sécantes/parallèles/confondues, 0/1/2 points) avant de me lancer dans un calcul ?',
       ],
     },
     forward:
-      "Les mêmes équations de droite et de cercle reviendront telles quelles en géométrie de " +
+      "Les mêmes équations de droite et de cercle reviennent telles quelles en géométrie de " +
       "l'espace — avec une troisième coordonnée en plus, et un plan à la place d'une droite.",
     entrainement: {
       kind: 'entrainement',
       title: 'Géométrie analytique plane — quiz vrai/faux',
       generatorId: 'gen65',
-      description: ['260 affirmations pré-écrites réparties en 13 thèmes (20 par thème) qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.'],
+      description: ['260 affirmations pré-écrites réparties en 13 thèmes (20 par thème), qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.'],
       chantier: '4e',
       whereLabel: '4e → « 65. Géométrie analytique plane — quiz vrai/faux »',
     },
