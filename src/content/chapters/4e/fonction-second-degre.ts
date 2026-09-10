@@ -7,10 +7,9 @@ export const fonctionSecondDegre: ChapterContent = {
   title: 'La fonction du second degré',
   slug: 'fonction-second-degre',
   lede:
-    'Une fonction $f(x) = ax^2 + bx + c$ dessine toujours la même famille de courbes : une ' +
-    "parabole. Ce chapitre parcourt les trois choses qu'on en fait — la **lire**, la " +
-    "**transformer**, puis s'en **servir** — avec, à la fin de chaque partie, l'exercice " +
-    "interactif pour s'entraîner tout de suite.",
+    '$f(x) = ax^2 + bx + c$ : le graphique, c\'est toujours une parabole. Dans ce chapitre, tu ' +
+    'vas apprendre trois choses : la **lire**, la **transformer**, puis t\'en **servir**. À la ' +
+    'fin de chaque partie, tu as un exercice pour t\'entraîner tout de suite.',
 
   intro: {
     title: "Avant de commencer : qu'est-ce qu'une fonction du second degré ?",
@@ -18,24 +17,23 @@ export const fonctionSecondDegre: ChapterContent = {
       {
         kind: 'para',
         text:
-          "Avant d'attaquer le second degré, un rappel s'impose : la fonction définie par " +
-          '$f(x) = mx + p$ est une fonction du **premier degré**, et son graphique est toujours ' +
-          'une **droite**.',
+          'Avant d\'attaquer le second degré, un petit rappel. La fonction $f(x) = mx + p$ est ' +
+          'une fonction du **premier degré**. Son graphique, c\'est toujours une **droite**.',
       },
       {
         kind: 'rappel',
         label: 'Paramètres m et p',
         items: [
-          "$m$ est le **taux d'accroissement** de f, la **pente** de la droite : " +
+          'm, c\'est le **taux d\'accroissement** de f. C\'est la pente de la droite : ' +
             '$m = \\dfrac{f(x_2) - f(x_1)}{x_2 - x_1}$.',
-          "$p$ est l'**ordonnée à l'origine** : la valeur de f quand $x = 0$, donc $f(0) = p$.",
+          'p, c\'est l\'**ordonnée à l\'origine**. C\'est la valeur de f quand $x = 0$. Donc $f(0) = p$.',
         ],
       },
       {
         kind: 'para',
         text:
-          "Le **zéro** de f — là où la droite coupe l'axe des x — se retrouve en résolvant " +
-          '$mx + p = 0$, soit $x = -p/m$.',
+          'Le **zéro** de f, c\'est là où la droite coupe l\'axe des x. Pour le trouver, résous ' +
+          '$mx + p = 0$. Tu obtiens $x = -p/m$.',
       },
       {
         kind: 'exemple',
@@ -49,8 +47,8 @@ export const fonctionSecondDegre: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Le graphique de la fonction de référence $f(x) = x^2$ est une **parabole P** ' +
-          'tournée vers le haut, dont le sommet est l’origine du repère.',
+          'Le graphique de la fonction de référence $f(x) = x^2$ s\'appelle une **parabole**. On ' +
+          'l\'appelle P. Elle est tournée vers le haut. Son sommet, c\'est l\'origine du repère.',
       },
       {
         kind: 'illustration',
@@ -64,7 +62,7 @@ export const fonctionSecondDegre: ChapterContent = {
           points: [{ x: 0, y: 0, label: '(0 ; 0)', tone: 'good' }],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
-          caption: 'f(x) = x² : sommet (0 ; 0), concavité tournée vers le haut',
+          caption: 'f(x) = x² : sommet (0 ; 0), tournée vers le haut',
         },
       },
       {
@@ -74,7 +72,7 @@ export const fonctionSecondDegre: ChapterContent = {
         rows: [
           ['Domaine de f', 'ℝ'],
           ['Sommet de P', '(0 ; 0)'],
-          ['Concavité de P', 'vers le haut'],
+          ['Tournée vers', 'le haut'],
           ['Racine de f', 'x = 0'],
           ['Axe de symétrie de P', 'x = 0'],
         ],
@@ -82,30 +80,29 @@ export const fonctionSecondDegre: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Une fonction du second degré (ou fonction quadratique) est une fonction qui peut ' +
-          "s'écrire sous la **forme développée** :",
+          'Une fonction du second degré (ou fonction quadratique), c\'est une fonction qu\'on ' +
+          'peut écrire sous cette forme :',
       },
       {
         kind: 'rappel',
         label: 'Forme générale',
-        items: ['$f(x) = ax^2 + bx + c$, avec $a, b, c$ réels et $a \\neq 0$.'],
+        items: ['$f(x) = ax^2 + bx + c$, avec a, b, c des nombres réels, et $a \\neq 0$.'],
       },
       {
         kind: 'para',
         text:
-          'Le coefficient $a$ ne peut jamais être nul : sans lui, il ne resterait que $bx + c$, ' +
-          'une fonction du premier degré. Le graphique d’une fonction du second degré est ' +
-          'toujours une **parabole** — jamais un segment, jamais une courbe irrégulière. Son ' +
-          'domaine de définition est toujours l’ensemble des réels : $\\operatorname{dom} f = ' +
-          '\\mathbb{R}$, sans aucune exception, quels que soient $a$, $b$ et $c$.',
+          'Le coefficient a ne peut **jamais** être nul. Sans lui, il ne reste que $bx + c$ : ' +
+          'une fonction du premier degré ! Le graphique d\'une fonction du second degré, c\'est ' +
+          '**toujours** une parabole — jamais un segment, jamais une courbe bizarre. Son ' +
+          'domaine, c\'est toujours ℝ (tous les réels), sans exception, quels que soient a, b et c.',
       },
       {
         kind: 'exemple',
         badge: 'reconnaître a, b, c',
         formula: '$f(x) = -2x^2 + 5x - 3$',
         steps: [
-          { tag: 'a — coefficient du terme en x²', text: '$a = -2$' },
-          { tag: 'b — coefficient du terme en x', text: '$b = 5$' },
+          { tag: 'a — coefficient de x²', text: '$a = -2$' },
+          { tag: 'b — coefficient de x', text: '$b = 5$' },
         ],
         result: { tag: 'c — terme constant', text: '$c = -3$' },
       },
@@ -113,10 +110,10 @@ export const fonctionSecondDegre: ChapterContent = {
         kind: 'attention',
         label: 'Attention — développer avant de conclure',
         text:
-          'Une expression peut **ressembler** à une fonction du second degré sans en être une, ' +
-          'si ses termes en $x^2$ s’annulent une fois développés. Par exemple $f(x) = (x+2)^2 - ' +
-          'x^2$ développe en $f(x) = 4x + 4$ : le $x^2$ a disparu, c’est une fonction du premier ' +
-          'degré. Toujours développer avant de conclure.',
+          'Une expression peut **ressembler** à une fonction du second degré, sans en être une ! ' +
+          'Ça arrive quand les termes en $x^2$ s\'annulent une fois développés. Exemple : ' +
+          '$f(x) = (x+2)^2 - x^2$ se développe en $f(x) = 4x + 4$. Le $x^2$ a disparu : c\'est ' +
+          'une fonction du **premier** degré ! Développe toujours avant de conclure.',
       },
     ],
   },
@@ -132,16 +129,16 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Le signe et la valeur de $a$ déterminent entièrement la forme générale de la ' +
-            'parabole, avant même de connaître $b$ et $c$ :',
+            'Le signe et la valeur de a donnent la forme générale de la parabole. Tu le sais ' +
+            'avant même de connaître b et c !',
         },
         {
           kind: 'list',
           items: [
-            '**Signe de a** — si $a > 0$, la parabole est ouverte vers le haut (elle possède un ' +
-              '**minimum**) ; si $a < 0$, elle est ouverte vers le bas (elle possède un **maximum**).',
-            '**Valeur absolue de a** — plus $|a|$ est grand, plus la parabole est **resserrée** ; ' +
-              'plus $|a|$ est proche de 0, plus elle est **aplatie**.',
+            '**Signe de a** — si $a > 0$, la parabole est ouverte vers le haut : elle a un ' +
+              '**minimum**. Si $a < 0$, elle est ouverte vers le bas : elle a un **maximum**.',
+            '**Valeur de |a|** — plus |a| est grand, plus la parabole est **resserrée**. Plus ' +
+              '|a| est proche de 0, plus elle est **aplatie**.',
           ],
         },
         {
@@ -160,31 +157,29 @@ export const fonctionSecondDegre: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'trois valeurs de a, trois allures : positive et grande (étroite), positive et ' +
-              'petite (large), négative (renversée)',
+              'trois valeurs de a : positive et grande (étroite), positive et petite (large), ' +
+              'négative (renversée)',
           },
         },
         {
           kind: 'piege',
           text:
-            '$b$ et $c$ n’ont **aucune influence** sur le fait que la parabole soit ouverte vers ' +
-            'le haut ou vers le bas : seul le signe de $a$ compte. Un grand $c$ ne fait que ' +
-            'décaler la courbe, jamais la retourner.',
+            'b et c n\'ont **aucune influence** sur le sens d\'ouverture ! Seul le signe de a ' +
+            'compte. Un grand c décale juste la courbe — il ne la retourne jamais.',
         },
-        { kind: 'subheading', text: 'Reconnaître une fonction à partir d’un tableau de valeurs' },
+        { kind: 'subheading', text: "Reconnaître une fonction à partir d'un tableau de valeurs" },
         {
           kind: 'para',
           text:
-            'Lorsqu’on ne connaît une grandeur que par un tableau de valeurs (accroissements de x ' +
-            'toujours identiques), on peut reconnaître le type de fonction sans en connaître ' +
-            'l’équation, en observant les **accroissements** successifs de f(x) :',
+            'Parfois, tu ne connais une fonction que par un tableau de valeurs (avec des x ' +
+            'régulièrement espacés). Tu peux quand même reconnaître son type, sans connaître son ' +
+            'équation. Regarde les **accroissements** de f(x) :',
         },
         {
           kind: 'list',
           items: [
-            'si les **accroissements** de f(x) sont constants → f est du **premier degré** ;',
-            'si les **accroissements des accroissements** de f(x) sont constants → f est du ' +
-              '**second degré**.',
+            'accroissements de f(x) constants → f est du **premier degré**',
+            'accroissements des accroissements constants → f est du **second degré**',
           ],
         },
         {
@@ -196,7 +191,7 @@ export const fonctionSecondDegre: ChapterContent = {
               headers: ['x', '0', '1', '2', '3', '4'],
               rows: [['f(x)', '1', '2', '5', '10', '17']],
             },
-            { kind: 'para', text: 'Accroissements de f(x) : 1, 3, 5, 7 — pas constants.' },
+            { kind: 'para', text: 'Accroissements de f(x) : 1, 3, 5, 7. Pas constants.' },
             {
               kind: 'rappel',
               label: 'Accroissements des accroissements',
@@ -208,9 +203,9 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Toute parabole est **symétrique** par rapport à une droite verticale qui passe par ' +
-            'son point le plus bas (si $a > 0$) ou le plus haut (si $a < 0$) : le **sommet** ' +
-            '$S(x_S\\,;\\,y_S)$. Cette droite est l’**axe de symétrie**, d’équation $x = x_S$.',
+            'Toute parabole est **symétrique**. Elle a un axe de symétrie : une droite verticale. ' +
+            'Cette droite passe par le point le plus bas (si $a > 0$) ou le plus haut (si ' +
+            '$a < 0$) : le **sommet** $S(x_S\\,;\\,y_S)$. L\'axe de symétrie a pour équation $x = x_S$.',
         },
         {
           kind: 'illustration',
@@ -226,52 +221,51 @@ export const fonctionSecondDegre: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'le sommet S(2 ; −1) est le minimum de la parabole ; l’axe x = 2 partage la courbe ' +
-              'en deux moitiés identiques',
+              'le sommet S(2 ; −1) est le minimum de la parabole ; l’axe x = 2 partage la ' +
+              'courbe en deux moitiés identiques',
           },
         },
         {
           kind: 'astuce',
-          label: 'Astuce — retrouver l’axe sans a, b, c',
+          label: "Astuce — retrouver l'axe sans a, b, c",
           text:
-            'La symétrie se retourne aussi contre le problème : dès qu’on connaît deux points de ' +
-            'même hauteur $f(x_1) = f(x_2)$, l’axe de symétrie passe forcément par leur **milieu** ' +
-            '$\\dfrac{x_1+x_2}{2}$. Par exemple, si $f(0) = 5$ et $f(6) = 5$, l’axe est $x = ' +
-            '\\dfrac{0+6}{2} = 3$ — sans avoir besoin de connaître $a$, $b$ ni $c$.',
+            'Tu connais deux points de même hauteur ? $f(x_1) = f(x_2)$ ? Alors l\'axe de ' +
+            'symétrie passe par leur **milieu** : $\\dfrac{x_1+x_2}{2}$. Exemple : $f(0) = 5$ et ' +
+            '$f(6) = 5$. L\'axe est $x = \\dfrac{0+6}{2} = 3$ — sans avoir besoin de connaître ' +
+            'a, b ni c !',
         },
-        { kind: 'subheading', text: 'D’où vient la formule $x_S = -b/(2a)$ ?' },
+        { kind: 'subheading', text: "D'où vient la formule x_S = -b/(2a) ?" },
         {
           kind: 'para',
           text:
-            'Cette même astuce du milieu permet de retrouver l’abscisse du sommet $x_S$ ' +
-            '**directement** à partir de $a$, $b$ et $c$, sans passer par la forme canonique. ' +
-            'Partons d’une parabole générale $f(x) = ax^2+bx+c$, et comparons-la à ' +
-            '$g(x) = ax^2+bx$ — la même parabole, mais avec $c$ remplacé par $0$. Pour tout $x$, ' +
-            '$f(x) = g(x) + c$ : les deux courbes ont exactement la même forme, seulement ' +
-            'décalées verticalement de $c$.',
+            'Cette même astuce du milieu permet de retrouver $x_S$ directement, à partir de a, b ' +
+            'et c. Regarde une parabole générale $f(x) = ax^2+bx+c$. Compare-la à ' +
+            '$g(x) = ax^2+bx$ — la même parabole, mais avec c remplacé par 0. Pour tout x : ' +
+            '$f(x) = g(x) + c$. Les deux courbes ont exactement la même forme. Elles sont juste ' +
+            'décalées verticalement de c.',
         },
         {
           kind: 'para',
           text:
-            'Un décalage vertical ne change jamais l’abscisse du sommet — seule son ordonnée ' +
-            'bouge. Donc $x_S(f) = x_S(g)$ : trouver $x_S$ de **n’importe quelle** parabole ' +
+            'Un décalage vertical ne change **jamais** l\'abscisse du sommet — seule son ' +
+            'ordonnée bouge. Donc $x_S(f) = x_S(g)$. Trouver $x_S$ de n\'importe quelle parabole ' +
             'revient à trouver $x_S$ de $g(x)=ax^2+bx$, où $c=0$.',
         },
         {
           kind: 'para',
           text:
-            'Or $g(x)=ax^2+bx=0$ se résout par mise en évidence de $x$ (section précédente) : ' +
+            '$g(x)=ax^2+bx=0$ se résout par mise en évidence de x (chapitre 2) : ' +
             '$x(ax+b)=0 \\iff x_1 = 0$ ou $x_2 = -\\dfrac{b}{a}$ — deux racines, donc deux points ' +
-            'de même hauteur (0), exactement la situation de l’astuce ci-dessus. Leur milieu ' +
+            'de même hauteur (0) ! Exactement la situation de l\'astuce du dessus. Leur milieu ' +
             'donne $x_S$ :',
         },
         { kind: 'para', text: '$x_S = \\dfrac{0 + (-b/a)}{2} = -\\dfrac{b}{2a}$' },
         {
           kind: 'para',
           text:
-            'Cette valeur de $x_S$ vaut pour $f$ tout autant que pour $g$ (le décalage vertical ' +
-            'ne l’affecte pas) — mais $y_S$, lui, dépend bien de $c$ : il se calcule en ' +
-            'substituant $x_S$ dans le $f$ **original**.',
+            'Cette valeur de $x_S$ est la même pour f et pour g : le décalage vertical ne la ' +
+            'change pas. Mais $y_S$, lui, dépend bien de c ! Pour le calculer, remplace x par ' +
+            '$x_S$ dans le f **original**.',
         },
         {
           kind: 'rappel',
@@ -308,7 +302,7 @@ export const fonctionSecondDegre: ChapterContent = {
             yAxisLabel: 'y',
             caption:
               'g(x) = x² − 4x (racines 0 et 4) et f(x) = x² − 4x + 6 (aucune racine réelle) : ' +
-              'ajouter c translate la courbe verticalement, sans jamais déplacer $x_S = 2$',
+              'ajouter c translate la courbe verticalement, sans jamais déplacer x_S = 2',
           },
         },
         {
@@ -318,7 +312,8 @@ export const fonctionSecondDegre: ChapterContent = {
           steps: [{ tag: 'abscisse du sommet', text: '$x_S = -\\dfrac{-8}{2 \\cdot 2} = 2$' }],
           result: {
             tag: 'ordonnée et sommet',
-            text: '$y_S = f(2) = 8-16+3 = -5 \\to S(2\\,;\\,-5)$ — le même résultat que par la ' +
+            text:
+              '$y_S = f(2) = 8-16+3 = -5 \\to S(2\\,;\\,-5)$ — le même résultat qu\'avec la ' +
               'forme canonique, plus loin dans ce chapitre.',
           },
         },
@@ -334,15 +329,15 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Le **domaine** est toujours $\\mathbb{R}$ — l’un des rares faits de ce chapitre qui ' +
-            'ne dépend d’aucun coefficient. L’**image**, elle, dépend directement du sommet ' +
-            '$S(x_S\\,;\\,y_S)$ et du signe de $a$ :',
+            'Le domaine, c\'est toujours ℝ. C\'est l\'un des rares faits de ce chapitre qui ne ' +
+            'dépend d\'aucun coefficient ! L\'image, elle, dépend du sommet $S(x_S\\,;\\,y_S)$ et ' +
+            'du signe de a :',
         },
         {
           kind: 'list',
           items: [
-            'Si $a > 0$ — le sommet est un minimum ; $\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$.',
-            'Si $a < 0$ — le sommet est un maximum ; $\\operatorname{im} f = ]{-\\infty}\\,;\\,y_S]$.',
+            '$a > 0$ — le sommet est un minimum ; $\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$.',
+            '$a < 0$ — le sommet est un maximum ; $\\operatorname{im} f = ]{-\\infty}\\,;\\,y_S]$.',
           ],
         },
         {
@@ -381,9 +376,9 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Les **zéros** de $f$ sont les valeurs de $x$ pour lesquelles $f(x) = 0$ — les ' +
-            'abscisses des points où la courbe coupe l’axe des $x$. Selon la position du sommet ' +
-            'par rapport à cet axe, une parabole en possède **0, 1 ou 2**.',
+            'Les **zéros** de f, ce sont les valeurs de x où $f(x) = 0$. Ce sont les abscisses ' +
+            'des points où la courbe coupe l\'axe des x. Une parabole peut en avoir **0, 1 ou 2** ' +
+            '— ça dépend de la position du sommet par rapport à cet axe.',
         },
         {
           kind: 'illustrationGroup',
@@ -430,37 +425,38 @@ export const fonctionSecondDegre: ChapterContent = {
         },
         {
           kind: 'para',
-          text: 'Quand $f(x)$ se factorise facilement, les zéros se lisent directement dans la forme factorisée :',
+          text: 'f(x) se factorise facilement ? Alors les zéros se lisent directement dans la forme factorisée :',
         },
         {
           kind: 'exemple',
           badge: 'zéros par factorisation',
           formula: '$f(x) = (x-1)(x-4)$',
-          steps: [{ tag: "un produit est nul si l'un de ses facteurs l'est", text: '$x-1=0$ ou $x-4=0$' }],
+          steps: [{ tag: "un produit est nul si un de ses facteurs l'est", text: '$x-1=0$ ou $x-4=0$' }],
           result: { tag: 'zéros de f', text: '$x=1$ et $x=4$' },
         },
         {
           kind: 'astuce',
           label: 'Astuce — le lien avec le sommet',
           text:
-            'Puisque la parabole est symétrique, deux zéros $x_1$ et $x_2$ sont toujours à égale ' +
-            'distance de l’axe : leur milieu donne directement l’abscisse du sommet. Pour ' +
-            '$f(x) = (x-1)(x-4)$ : axe de symétrie $\\dfrac{1+4}{2} = 2{,}5$ — sans aucun autre calcul.',
+            'La parabole est symétrique. Deux zéros $x_1$ et $x_2$ sont donc toujours à la même ' +
+            'distance de l\'axe. Leur milieu donne directement l\'abscisse du sommet ! Pour ' +
+            '$f(x) = (x-1)(x-4)$ : axe de symétrie $= \\dfrac{1+4}{2} = 2{,}5$ — sans aucun ' +
+            'autre calcul.',
         },
         { kind: 'subheading', text: 'Tableau de signes et tableau de variation' },
         {
           kind: 'para',
           text:
-            'Une fois les zéros connus, le **tableau de signes** découle directement du signe de ' +
-            '$a$ : entre ses zéros, une parabole a le signe opposé à $a$ ; à l’extérieur, elle a ' +
-            'le signe de $a$.',
+            'Tu connais les zéros ? Le tableau de signes en découle directement, grâce au signe ' +
+            'de a. Entre les zéros, la parabole a le signe opposé à a. À l\'extérieur, elle a le ' +
+            'signe de a.',
         },
         {
           kind: 'methode',
           items: [
-            "Placer les zéros (s'il y en a) sur une ligne graduée, dans l'ordre croissant.",
-            'Déterminer le signe **à l’extérieur** des zéros : c’est celui de a.',
-            'Déterminer le signe **entre** les zéros (s’il y en a deux) : c’est l’opposé de celui de a.',
+            "Place les zéros (s'il y en a) sur une ligne graduée, dans l'ordre croissant.",
+            'Trouve le signe **à l’extérieur** des zéros : c’est celui de a.',
+            'Trouve le signe **entre** les zéros (s’il y en a deux) : c’est l’opposé de a.',
           ],
         },
         {
@@ -526,9 +522,9 @@ export const fonctionSecondDegre: ChapterContent = {
           generatorId: 'gen7',
           widgetTag: 'gen7-widget',
           description: [
-            'Coefficients, allure, axe et sommet, domaine/image, racines, tableau de signes et de ' +
-              'variation — les six notions de cette partie, réunies en un seul exercice, ' +
-              'activables individuellement par le professeur.',
+            'Les 6 notions de cette partie, réunies en un seul exercice : coefficients, allure, ' +
+              'axe et sommet, domaine/image, racines, tableau de signes et de variation. Ton ' +
+              'professeur peut les activer une par une.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 7. Analyse d’une fonction du second degré »',
@@ -544,24 +540,24 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Toutes les paraboles sont des versions déplacées, étirées ou retournées d’une seule ' +
-            'courbe de départ : $y = x^2$, sommet à l’origine $(0\\,;\\,0)$.',
+            'Toutes les paraboles viennent d\'une seule courbe de départ : $y = x^2$, sommet à ' +
+            'l\'origine $(0\\,;\\,0)$. Elles sont juste déplacées, étirées ou retournées.',
         },
         { kind: 'subheading', text: 'Les translations' },
         {
           kind: 'list',
           items: [
-            '**Translation horizontale (TH)** — $y = (x-p)^2$ déplace la courbe de $p$ unités horizontalement.',
-            '**Translation verticale (TV)** — $y = x^2 + q$ déplace la courbe de $q$ unités verticalement.',
+            '**Translation horizontale (TH)** — $y = (x-p)^2$ déplace la courbe de p unités, à l\'horizontale.',
+            '**Translation verticale (TV)** — $y = x^2 + q$ déplace la courbe de q unités, à la verticale.',
           ],
         },
         {
           kind: 'attention',
           label: 'Le piège du signe',
           text:
-            '$y = (x-3)^2$ déplace la courbe de **3 unités vers la droite**, pas vers la gauche — ' +
-            'le signe à l’intérieur de la parenthèse est opposé au sens du déplacement. À ' +
-            'l’inverse, $y = (x+3)^2$ déplace vers la **gauche**.',
+            '$y = (x-3)^2$ déplace la courbe de **3 unités vers la droite** — pas vers la ' +
+            'gauche ! Le signe dans la parenthèse est l\'opposé du sens du déplacement. À ' +
+            'l\'inverse, $y = (x+3)^2$ déplace vers la **gauche**.',
         },
         {
           kind: 'illustrationGroup',
@@ -606,14 +602,17 @@ export const fonctionSecondDegre: ChapterContent = {
           result: { tag: 'image de x = 5', text: '$(5-3)^2+2 = 4+2 = 6$' },
         },
         { kind: 'subheading', text: 'Étirement, compression et symétrie' },
-        { kind: 'para', text: 'Le coefficient devant le carré change la **forme** de la courbe, pas seulement sa position :' },
+        {
+          kind: 'para',
+          text: 'Le coefficient devant le carré change la **forme** de la courbe — pas seulement sa position !',
+        },
         {
           kind: 'list',
           items: [
-            '**Étirement vertical (EV)** — si $|a| > 1$, la courbe se resserre autour de son axe.',
-            '**Compression verticale (CV)** — si $0 < |a| < 1$, la courbe s’aplatit.',
-            '**Symétrie d’axe Ox (SOX)** — si $a$ devient négatif, la courbe se retourne : symétrie ' +
-              'orthogonale par rapport à l’axe des $x$.',
+            '**Étirement vertical (EV)** — si $|a| > 1$, la courbe se resserre.',
+            '**Compression verticale (CV)** — si $0 < |a| < 1$, la courbe s\'aplatit.',
+            '**Symétrie d\'axe Ox (SOX)** — si a devient négatif, la courbe se retourne : ' +
+              'symétrie par rapport à l\'axe des x.',
           ],
         },
         {
@@ -635,8 +634,8 @@ export const fonctionSecondDegre: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'le sommet passe de (0 ; 0) à (3 ; 2) : la courbe est translatée, sans changement de ' +
-              'forme (a reste égal à 1 ici)',
+              'le sommet passe de (0 ; 0) à (3 ; 2) : la courbe est translatée, sans changer de ' +
+              'forme (a=1 ici)',
           },
         },
         {
@@ -654,8 +653,8 @@ export const fonctionSecondDegre: ChapterContent = {
           generatorId: 'gen8',
           widgetTag: 'gen8-widget',
           description: [
-            'Lis p, q, l’étirement/la compression (EV/CV) et la symétrie (SOX) directement sur un ' +
-              'graphe Mafs interactif.',
+            'Lis p, q, l’étirement/la compression (EV/CV) et la symétrie (SOX) directement sur ' +
+              'un graphe Mafs interactif.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 8. Transformations graphiques »',
@@ -664,9 +663,9 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Réunir les deux translations et l’étirement dans une seule écriture donne la **forme ' +
-            'canonique** — la véritable carte d’identité d’une parabole, puisqu’elle affiche ' +
-            'directement son sommet :',
+            'Réunis les deux translations et l\'étirement dans une seule écriture. Tu obtiens la ' +
+            '**forme canonique** — la vraie carte d\'identité d\'une parabole : elle affiche ' +
+            'directement son sommet !',
         },
         {
           kind: 'rappel',
@@ -679,33 +678,33 @@ export const fonctionSecondDegre: ChapterContent = {
           badge: 'a = 1',
           steps: [
             { tag: '1 — forme développée', text: '$f(x) = x^2-6x+5$' },
-            { tag: '2 — moitié du coefficient de x, au carré, ajoutée puis retranchée', text: '$f(x)=x^2-6x+9-9+5$' },
-            { tag: '3 — carré parfait reconnu', text: '$f(x)=(x-3)^2-4$' },
+            { tag: '2 — on ajoute puis on retranche la moitié du coefficient de x, au carré', text: '$f(x)=x^2-6x+9-9+5$' },
+            { tag: '3 — on reconnaît un carré parfait', text: '$f(x)=(x-3)^2-4$' },
           ],
           result: { tag: 'sommet', text: '$S(3\\,;\\,-4)$' },
         },
         {
           kind: 'para',
           text:
-            'Dès que $a \\neq 1$, il faut d’abord le **mettre en évidence** devant les deux premiers ' +
-            'termes avant de compléter le carré :',
+            'a ≠ 1 ? Alors il faut d\'abord le **mettre en évidence**, sur les deux premiers ' +
+            'termes. Ensuite seulement, tu complètes le carré :',
         },
         {
           kind: 'exemple',
           badge: 'a ≠ 1',
           steps: [
             { tag: '1 — a mis en évidence sur x² et x', text: '$f(x)=2x^2-8x+3=2(x^2-4x)+3$' },
-            { tag: '2 — carré complété à l’intérieur de la parenthèse', text: '$f(x)=2(x^2-4x+4-4)+3=2[(x-2)^2-4]+3$' },
-            { tag: '3 — a redistribué sur les deux termes de la parenthèse', text: '$f(x)=2(x-2)^2-8+3=2(x-2)^2-5$' },
+            { tag: '2 — carré complété dans la parenthèse', text: '$f(x)=2(x^2-4x+4-4)+3=2[(x-2)^2-4]+3$' },
+            { tag: '3 — a redistribué sur les deux termes', text: '$f(x)=2(x-2)^2-8+3=2(x-2)^2-5$' },
           ],
           result: { tag: 'sommet', text: '$S(2\\,;\\,-5)$' },
         },
         {
           kind: 'piege',
           text:
-            'À l’étape 3, le $-4$ sorti de la parenthèse doit être **multiplié par a** avant d’être ' +
-            'ajouté au $c$ d’origine — l’erreur la plus fréquente est de le ressortir tel quel, en ' +
-            'oubliant ce facteur.',
+            'À l\'étape 3 : le $-4$ sorti de la parenthèse doit être **multiplié par a** ! Avant ' +
+            'd\'être ajouté au c d\'origine. L\'erreur la plus fréquente : le ressortir tel quel, ' +
+            'sans multiplier par a.',
         },
         { kind: 'video', title: 'Forme canonique et transformations', youtubeId: 'BOhdODKAigg' },
         {
@@ -731,23 +730,23 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La fonction du second degré n’est pas qu’un objet d’étude abstrait : elle modélise ' +
-            'des situations concrètes — une aire à optimiser, un revenu selon un prix, la ' +
-            'trajectoire d’un objet — où il faut savoir en tirer un maximum, un minimum, ou ' +
-            'résoudre une contrainte.',
+            'La fonction du second degré, ce n\'est pas juste un objet abstrait ! Elle modélise ' +
+            'des situations concrètes : une aire à optimiser, un revenu selon un prix, la ' +
+            'trajectoire d\'un objet. Il faut savoir en tirer un maximum, un minimum. Ou résoudre ' +
+            'une contrainte.',
         },
         { kind: 'subheading', text: 'Modéliser une situation concrète' },
         {
           kind: 'para',
-          text: 'Modéliser, c’est traduire un énoncé en une fonction $f(x)=ax^2+bx+c$, en trois étapes systématiques :',
+          text: 'Modéliser, c\'est traduire un énoncé en une fonction $f(x)=ax^2+bx+c$. Toujours en 3 étapes :',
         },
         {
           kind: 'methode',
           items: [
-            'Choisir une variable x pour la quantité qui varie (une longueur, un prix, un temps…).',
-            'Exprimer la grandeur à étudier (une aire, un revenu, une hauteur…) en fonction de cette seule variable.',
-            'Définir le **domaine de validité** : les valeurs de x qui ont un sens dans la ' +
-              'situation réelle — jamais une longueur négative, par exemple.',
+            'Choisis une variable x. C’est la quantité qui varie (une longueur, un prix, un temps…).',
+            'Exprime la grandeur à étudier (une aire, un revenu, une hauteur…) avec cette seule variable.',
+            'Définis le **domaine de validité** : les valeurs de x qui ont un sens dans la vraie ' +
+              'situation. Jamais une longueur négative, par exemple !',
           ],
         },
         {
@@ -758,13 +757,13 @@ export const fonctionSecondDegre: ChapterContent = {
             sideLabel: 'x',
             baseLabel: 'L − 2x',
             caption:
-              'un enclos rectangulaire adossé à un mur : avec une longueur de clôture L fixée, ' +
+              'un enclos rectangulaire, adossé à un mur : avec une longueur de clôture L fixée, ' +
               'l’aire A(x) = x(L − 2x) est une fonction du second degré de la largeur x',
           },
         },
         {
           kind: 'exemple',
-          badge: 'en contexte — aire d’un enclos',
+          badge: "en contexte — aire d'un enclos",
           steps: [
             { tag: '1 — variable', text: 'x = la largeur des deux côtés perpendiculaires au mur (en mètres)' },
             { tag: '2 — fonction, avec L = 40 m de clôture disponible', text: '$A(x) = x(40-2x) = -2x^2+40x$' },
@@ -774,19 +773,20 @@ export const fonctionSecondDegre: ChapterContent = {
             text: '$x>0$ (une largeur) et $40-2x>0$ (une longueur) → $x \\in\\ ]0\\,;\\,20[$',
           },
         },
-        { kind: 'subheading', text: 'Trouver l’optimum' },
+        { kind: 'subheading', text: "Trouver l'optimum" },
         {
           kind: 'para',
           text:
-            'Une fois la fonction posée, l’optimum mathématique est simplement son **sommet** — ' +
-            'mais il faut toujours vérifier qu’il tombe **dans** le domaine de validité défini juste avant :',
+            'La fonction est posée ? L\'optimum mathématique, c\'est simplement son **sommet**. ' +
+            'Mais attention : il faut toujours vérifier qu\'il tombe **dans** le domaine de ' +
+            'validité !',
         },
         {
           kind: 'list',
           items: [
-            'Si l’abscisse du sommet appartient au domaine de validité, l’optimum réel est atteint au sommet.',
-            'Sinon, la fonction est monotone sur tout le domaine : l’optimum réel se situe à l’une ' +
-              'des **bornes** du domaine, jamais au sommet théorique.',
+            "L'abscisse du sommet appartient au domaine de validité ? Alors l'optimum réel est au sommet.",
+            'Sinon, la fonction est monotone sur tout le domaine. L\'optimum réel est à une des ' +
+              '**bornes** du domaine — jamais au sommet théorique !',
           ],
         },
         {
@@ -800,22 +800,22 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'astuce',
           label: 'Astuce — quand le sommet tombe hors du domaine',
           text:
-            'Avec une contrainte supplémentaire imposant $x \\in [12\\,;\\,20[$ (un massif de fleurs ' +
-            'qui empêche x de descendre sous 12), le sommet théorique $x=10$ n’appartient plus au ' +
-            'domaine restreint : sur $[12\\,;\\,20[$, la fonction est entièrement **décroissante** ' +
-            '(on est déjà passé le sommet). L’aire maximale est alors atteinte à la borne ' +
-            '**gauche** : $A(12) = -288+480 = 192$ m² — moins que les 200 m² du cas précédent, ' +
-            'jamais plus, puisqu’on s’est éloigné du sommet théorique.',
+            'Imagine une contrainte en plus : $x \\in [12\\,;\\,20[$ (un massif de fleurs ' +
+            'empêche x de descendre sous 12). Le sommet théorique $x=10$ n\'appartient plus au ' +
+            'domaine restreint ! Sur $[12\\,;\\,20[$, la fonction est entièrement ' +
+            '**décroissante** — le sommet est déjà passé. L\'aire maximale est donc à la borne ' +
+            '**gauche** : $A(12) = -288+480 = 192$ m² — moins que les 200 m² d\'avant. Toujours ' +
+            'moins, jamais plus : on s\'est éloigné du sommet théorique.',
         },
         { kind: 'video', title: 'Optimisation avec la fonction du second degré' },
         {
           kind: 'entrainement',
-          title: 'Problèmes d’optimisation',
+          title: "Problèmes d'optimisation",
           generatorId: 'gen55',
           description: [
-            'Modélise une grandeur du second degré à partir d’un contexte narratif (aire, revenu, ' +
-              'trajectoire, coût de production…), détermine son domaine de validité, puis décide ' +
-              'si l’optimum réel est au sommet ou à une borne.',
+            'Modélise une grandeur du second degré à partir d’une histoire (aire, revenu, ' +
+              'trajectoire, coût de production…). Trouve son domaine de validité. Puis décide : ' +
+              'l’optimum réel est-il au sommet ou à une borne ?',
           ],
           chantier: '4e',
           whereLabel: '4e → « 55. Problèmes d’optimisation »',
@@ -824,8 +824,8 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une situation concrète se traduit souvent par une question du type « à partir de ' +
-            'quand… ? » ou « quand la grandeur atteint-elle exactement… ? ». Cela revient à résoudre :',
+            'Une situation concrète pose souvent une question du genre « à partir de quand… ? » ' +
+            'ou « quand la grandeur atteint-elle exactement… ? ». Ça revient à résoudre :',
         },
         {
           kind: 'list',
@@ -837,16 +837,15 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Chaque solution mathématique doit ensuite être confrontée au domaine de validité ' +
-            'établi au départ : une racine correcte **algébriquement** peut très bien être ' +
-            '**physiquement impossible** (un temps négatif, une longueur trop grande…) — et doit ' +
-            'alors être rejetée.',
+            'Chaque solution mathématique doit ensuite être confrontée au domaine de validité de ' +
+            'départ. Une racine correcte en calcul peut être **impossible** dans la réalité ! ' +
+            '(un temps négatif, une longueur trop grande…) Il faut alors la rejeter.',
         },
         {
           kind: 'para',
           text:
-            'Contexte pour les deux exemples suivants : un ballon est lancé depuis une hauteur de ' +
-            '25 m, sa hauteur (en mètres) après $t$ secondes vaut $h(t) = -5t^2+20t+25$, avec $t \\ge 0$.',
+            'Contexte pour les deux exemples suivants. Un ballon est lancé depuis 25 m de haut. ' +
+            'Sa hauteur (en mètres), après t secondes, vaut $h(t) = -5t^2+20t+25$, avec $t \\ge 0$.',
         },
         {
           kind: 'exemple',
@@ -854,7 +853,7 @@ export const fonctionSecondDegre: ChapterContent = {
           steps: [{ tag: 'h(t) = 0, factorisée', text: '$-5(t-5)(t+1) = 0 \\to t=5$ ou $t=-1$' }],
           result: {
             tag: 'confrontation au domaine t ≥ 0',
-            text: '$t=-1$ est rejeté (un temps négatif n’a pas de sens) : il ne reste que $t=5$ secondes',
+            text: '$t=-1$ est rejeté (un temps négatif n\'existe pas). Il ne reste que **t = 5 secondes**.',
           },
         },
         {
@@ -864,12 +863,12 @@ export const fonctionSecondDegre: ChapterContent = {
             {
               tag: 'h(t) > 25',
               text:
-                '$-5t^2+20t>0 \\iff -5t(t-4)>0 \\iff t(t-4)<0$ (division par −5, l’inégalité change de sens)',
+                '$-5t^2+20t>0 \\iff -5t(t-4)>0 \\iff t(t-4)<0$ (division par −5, l\'inégalité change de sens)',
             },
           ],
           result: {
             tag: 'le produit est négatif entre les zéros 0 et 4',
-            text: 'le ballon reste au-dessus de 25 m pendant $0<t<4$ secondes, avant de redescendre',
+            text: 'le ballon reste au-dessus de 25 m pendant **0 < t < 4 secondes**, avant de redescendre',
           },
         },
         {
@@ -877,8 +876,8 @@ export const fonctionSecondDegre: ChapterContent = {
           title: 'Équations/inéquations en contexte',
           generatorId: 'gen57',
           description: [
-            'Pose puis résous une équation ou une inéquation issue d’un contexte narratif, valide ' +
-              'chaque solution contre le domaine de validité, puis interprète le résultat.',
+            'Pose puis résous une équation ou une inéquation, à partir d’une histoire. Vérifie ' +
+              'chaque solution avec le domaine de validité. Puis interprète le résultat.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 57. Équations/inéquations du second degré en contexte »',
@@ -894,25 +893,25 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            '140 affirmations réparties en 7 thèmes qui reprennent exactement les trois parties ' +
-            'de ce chapitre — coefficients et allure, forme canonique et sommet, transformations, ' +
-            'racines par factorisation, domaine/image et tableaux, optimisation, équations et ' +
-            'inéquations en contexte. Un seul essai par question, la justification est toujours révélée.',
+            '140 affirmations. 7 thèmes. Ils reprennent les 3 parties de ce chapitre : ' +
+            'coefficients et allure, forme canonique et sommet, transformations, racines par ' +
+            'factorisation, domaine/image et tableaux, optimisation, équations et inéquations ' +
+            'en contexte. Un seul essai par question. La justification est toujours donnée.',
         },
         {
           kind: 'astuce',
           text:
-            'Aucune affirmation ne suppose le discriminant Δ, pas encore vu à ce stade du ' +
-            'programme : toutes les racines s’obtiennent par factorisation ou par un raisonnement ' +
-            'sur la position du sommet.',
+            'Aucune affirmation n\'utilise le discriminant Δ. Tu ne l\'as pas encore vu à ce ' +
+            'stade ! Toutes les racines s\'obtiennent par factorisation. Ou en réfléchissant à ' +
+            'la position du sommet.',
         },
         {
           kind: 'entrainement',
           title: 'La fonction du second degré — quiz vrai/faux',
           generatorId: 'gen60',
           description: [
-            'Choisis un thème et teste-toi : 140 affirmations pré-écrites, une seule tentative par ' +
-              'question, justification toujours révélée.',
+            'Choisis un thème et teste-toi : 140 affirmations pré-écrites, une seule tentative ' +
+              'par question, justification toujours révélée.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 60. Quiz vrai/faux — La fonction du second degré »',
@@ -923,32 +922,32 @@ export const fonctionSecondDegre: ChapterContent = {
 
   recap: {
     items: [
-      '**Coefficient a** — son signe donne le sens d’ouverture (minimum ou maximum), sa valeur ' +
-        'absolue donne l’allure (resserrée ou aplatie) ; b et c n’y changent rien.',
-      '**Sommet et axe** — $S(x_S\\,;\\,y_S)$ est le point extrémal, $x=x_S$ son axe de symétrie ; ' +
-        '$x_S = -b/(2a)$, $y_S = f(x_S)$ ; deux points de même hauteur suffisent aussi à le ' +
-        'retrouver par leur milieu.',
-      '**Domaine et image** — $\\operatorname{dom} f = \\mathbb{R}$ toujours ; $\\operatorname{im} ' +
-        'f = [y_S\\,;\\,{+\\infty}[$ si $a>0$, $]{-\\infty}\\,;\\,y_S]$ si $a<0$.',
-      '**Zéros et signe** — 0, 1 ou 2 racines réelles ; entre les racines, signe opposé à a ; à ' +
-        'l’extérieur, signe de a.',
-      '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$ s’obtient en complétant le carré ; a se met en ' +
-        'évidence avant de compléter si $a \\neq 1$.',
-      '**En contexte** — modéliser (variable → grandeur → domaine de validité), puis vérifier si ' +
-        'le sommet théorique tombe dans ce domaine avant de conclure à un optimum réel.',
+      '**Coefficient a** — son signe donne le sens d\'ouverture (minimum ou maximum). Sa valeur ' +
+        'absolue donne l\'allure (resserrée ou aplatie). b et c n\'y changent rien.',
+      '**Sommet et axe** — $S(x_S\\,;\\,y_S)$ est le point extrémal, $x=x_S$ son axe de ' +
+        'symétrie. $x_S = -b/(2a)$, $y_S = f(x_S)$. Deux points de même hauteur suffisent aussi ' +
+        'à le retrouver par leur milieu.',
+      '**Domaine et image** — $\\operatorname{dom} f = \\mathbb{R}$, toujours. ' +
+        '$\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$ si $a>0$, $]{-\\infty}\\,;\\,y_S]$ si $a<0$.',
+      '**Zéros et signe** — 0, 1 ou 2 racines réelles. Entre les racines : signe opposé à a. À ' +
+        'l\'extérieur : signe de a.',
+      '**Forme canonique** — $f(x)=a(x-x_S)^2+y_S$. On l\'obtient en complétant le carré. Si ' +
+        '$a \\neq 1$, on met a en évidence avant.',
+      '**En contexte** — modélise (variable → grandeur → domaine de validité). Puis vérifie si ' +
+        'le sommet théorique tombe dans ce domaine, avant de conclure à un optimum réel.',
     ],
     checklist: {
       items: [
-        'Ai-je développé l’expression avant de conclure qu’il s’agit bien d’une fonction du second degré ?',
-        'Ai-je vérifié le signe de a avant de parler de minimum ou de maximum ?',
+        "Ai-je développé l'expression, avant de dire que c'est bien une fonction du second degré ?",
+        'Ai-je vérifié le signe de a, avant de parler de minimum ou de maximum ?',
         'En complétant le carré, ai-je bien redistribué a sur le terme sorti de la parenthèse ?',
-        'En contexte, ai-je confronté chaque solution algébrique au domaine de validité réel — ' +
-          'pas seulement au domaine mathématique ?',
+        'En contexte, ai-je vérifié chaque solution avec le domaine de validité réel — pas ' +
+          'seulement le domaine mathématique ?',
       ],
     },
     forward:
-      'La forme canonique et les racines reviennent au premier plan dans le chapitre sur les ' +
-      'équations du second degré : le discriminant Δ y généralise la recherche des zéros à toute ' +
-      'parabole, même quand la factorisation directe n’est pas évidente.',
+      'La forme canonique et les racines reviennent dans le chapitre sur les équations du ' +
+      'second degré. Le discriminant Δ y généralise la recherche des zéros, même quand la ' +
+      'factorisation directe n\'est pas évidente.',
   },
 }

@@ -7,10 +7,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
   title: 'Équations et inéquations du second degré',
   slug: 'equations-inequations-second-degre',
   lede:
-    'Le chapitre 1 a appris à lire une parabole. Celui-ci apprend à résoudre — vite et sans se ' +
-    'tromper : reconnaître la bonne technique pour une équation $ax^2+bx+c=0$, en déduire le ' +
-    "signe d'un trinôme ou d'un produit de facteurs, puis étendre ces outils aux expressions et " +
-    'inéquations rationnelles.',
+    'Au chapitre 1, tu as appris à lire une parabole. Dans ce chapitre-ci, tu vas apprendre à ' +
+    'résoudre — vite et sans te tromper. Tu vas reconnaître la bonne technique pour une ' +
+    'équation $ax^2+bx+c=0$, en déduire le signe d\'un trinôme ou d\'un produit de facteurs, ' +
+    'puis utiliser ces outils avec des fractions et des inéquations.',
 
   intro: {
     title: 'Avant de commencer : équation, racine, solution',
@@ -18,24 +18,28 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       {
         kind: 'para',
         text:
-          'Résoudre $ax^2+bx+c=0$, c\'est trouver toutes les valeurs de $x$ qui annulent le ' +
-          'trinôme — exactement les **zéros** étudiés au chapitre 1, mais cette fois calculés ' +
-          'systématiquement plutôt que lus sur un graphique. Une équation ou une inéquation peut ' +
-          'en réalité cacher ce trinôme derrière une fraction, un carré déjà développé ou un ' +
-          'membre non nul : la compétence centrale de ce chapitre est de reconnaître, sous ' +
-          'chaque écriture, la bonne méthode à appliquer — la plus rapide d\'abord, le ' +
-          'discriminant en dernier recours.',
+          'Résoudre $ax^2+bx+c=0$, c\'est trouver les valeurs de x qui donnent 0 quand on les ' +
+          'remplace dans l\'expression. Au chapitre 1, tu trouvais ces valeurs en lisant un ' +
+          'graphique — on les appelait les **zéros**. Ici, tu vas les calculer directement, ' +
+          'sans dessiner.',
+      },
+      {
+        kind: 'para',
+        text:
+          'Attention : l\'équation ne se présente pas toujours sous cette forme toute simple. ' +
+          'Elle peut être cachée derrière une fraction, un carré déjà développé, ou un membre ' +
+          'qui n\'est pas nul. Le vrai objectif de ce chapitre : reconnaître, à chaque fois, la ' +
+          'méthode la plus efficace.',
       },
       {
         kind: 'rappel',
         label: 'Vocabulaire',
         items: [
-          'Une **racine** annule un polynôme intermédiaire apparu en cours de résolution (un ' +
-            'facteur, un numérateur) ; une **solution** vérifie l\'équation ou l\'inéquation ' +
-            'complète de l\'énoncé. Les deux coïncident pour une équation polynomiale simple ' +
-            'comme $ax^2+bx+c=0$ — mais divergent dès qu\'un dénominateur entre en jeu : une ' +
-            'racine du numérateur qui annule aussi le dénominateur n\'est **pas** une solution ' +
-            '(section « L\'inconnue au dénominateur »).',
+          'Une **racine** annule une expression qu\'on rencontre en cours de calcul (un facteur, ' +
+            'un numérateur…). Une **solution** vérifie vraiment l\'équation ou l\'inéquation de ' +
+            'l\'énoncé. Le plus souvent, c\'est la même chose — mais pas toujours : une racine ' +
+            'peut aussi annuler un dénominateur, et devenir alors une **racine étrangère**, à ' +
+            'rejeter. Tu verras ça dans la section « L\'inconnue au dénominateur ».',
         ],
       },
     ],
@@ -46,24 +50,24 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'resoudre',
       number: 1,
       title: 'Résoudre une équation du second degré',
-      kicker: 'reconnaître la technique la plus rapide, le discriminant en dernier recours',
+      kicker: '4 raccourcis à connaître, le discriminant seulement en dernier recours',
       blocks: [
         {
           kind: 'para',
           text:
-            'Appliquer systématiquement la formule du discriminant fonctionne toujours, mais ' +
-            "c'est souvent la méthode la plus lente. Avant de s'y résoudre, quatre situations se " +
-            'reconnaissent d\'un coup d\'œil sur $a$, $b$ et $c$ :',
+            'Il y a une méthode qui marche à chaque fois : le discriminant. Mais elle demande ' +
+            'beaucoup de calculs. Avant de l\'utiliser, regarde toujours si tu es dans un des 4 ' +
+            'cas plus rapides ci-dessous.',
         },
         {
           kind: 'featureTable',
           caption: 'Reconnaître la technique avant de calculer quoi que ce soit',
-          headers: ['Condition sur a, b, c', 'Technique'],
+          headers: ['Ce que tu vois dans l\'équation', 'Ce que tu fais'],
           rows: [
-            ['c = 0', 'mise en évidence de x'],
-            ['b = 0, a et c de signes opposés', 'binôme conjugué'],
-            ['b ≠ 0, c = b²/(4a) (Δ = 0)', 'produit remarquable'],
-            ['aucune des conditions ci-dessus', 'cas général — discriminant'],
+            ['c = 0 — pas de terme constant', 'tu mets x en évidence'],
+            ['b = 0, et a et c de signes opposés', 'différence de deux carrés'],
+            ['b ≠ 0, c = b²/(4a) → Δ = 0', 'c\'est un carré parfait'],
+            ['aucune des conditions ci-dessus', 'cas général — le discriminant'],
           ],
         },
         {
@@ -76,24 +80,23 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Le facteur $x$ doit apparaître **explicitement** : $-2x^2+6x=0$ se factorise ' +
-            '$2x(3-x)=0$ ou, de façon équivalente mais souvent source d\'erreur, $-2x(x-3)=0$ — ' +
-            'jamais $-x(2x-6)=0$ avec le signe collé devant le $x$ comme s\'il ne comptait pas : ' +
-            'absorbe-le toujours dans l\'autre facteur.',
+            'Le facteur x doit être bien visible. $-2x^2+6x=0$ devient $2x(3-x)=0$, ou ' +
+            '$-2x(x-3)=0$. Mais jamais $-x(2x-6)=0$ ! Le signe moins doit toujours être dans un ' +
+            'des facteurs — pas oublié devant le x.',
         },
         {
           kind: 'exemple',
-          badge: 'binôme conjugué — b = 0',
+          badge: 'différence de deux carrés — b = 0',
           formula: '$2x^2 - 18 = 0$',
           steps: [{ tag: 'différence de deux carrés', text: '$2(x^2-9) = 2(x-3)(x+3) = 0$' }],
           result: { tag: 'solutions', text: '$x = -3$ ou $x = 3$' },
         },
         {
           kind: 'exemple',
-          badge: 'produit remarquable — Δ = 0',
+          badge: 'carré parfait — Δ = 0',
           formula:
-            '$2x^2-12x+18=0$ — ici $b^2=144$ et $4ac=4 \\cdot 2 \\cdot 18=144$, donc $c=b^2/(4a)$ : ' +
-            'Δ = 0 annoncé avant tout calcul',
+            '$2x^2-12x+18=0$ — ici $b^2=144$ et $4ac=4 \\cdot 2 \\cdot 18=144$. Donc Δ = 0, ' +
+            'sans même le calculer !',
           steps: [{ tag: 'carré parfait', text: '$2(x^2-6x+9) = 2(x-3)^2 = 0$' }],
           result: { tag: 'solution (racine double)', text: '$x = 3$' },
         },
@@ -101,21 +104,19 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Quand aucune des trois situations ci-dessus ne s\'applique, aucune factorisation ' +
-            'directe ne saute aux yeux. La formule du discriminant fonctionne alors ' +
-            '**toujours** — elle se redémontre en complétant le carré sur la forme générale :',
+            'Si aucun des 3 cas ci-dessus ne marche, pas de souci : utilise la formule du ' +
+            'discriminant. Elle marche **toujours**. Voici comment on la retrouve, étape par étape.',
         },
         {
           kind: 'methode',
-          label: 'Démonstration — de la forme générale à la formule',
+          label: 'Démonstration — étape par étape',
           items: [
-            'Mettre a en évidence sur les deux premiers termes seulement : ' +
+            'On met a en évidence. Mais seulement sur les deux premiers termes : ' +
               '$ax^2+bx+c = a[x^2 + \\dfrac{b}{a}x] + c$.',
-            'Compléter le carré à l\'intérieur des crochets — **attention**, la moitié de b/a ' +
-              'est b/(2a), pas b/a : $a(x+\\dfrac{b}{2a})^2 - \\dfrac{\\Delta}{4a}$, avec ' +
-              '$\\Delta = b^2-4ac$.',
-            'Isoler le carré : $a(x+\\dfrac{b}{2a})^2 = \\dfrac{\\Delta}{4a}$.',
-            'Racine carrée des deux côtés (possible seulement si Δ ≥ 0) : ' +
+            'On complète le carré. **Attention** : la moitié de b/a, c\'est b/(2a) — pas b/a ! ' +
+              'On obtient : $a(x+\\dfrac{b}{2a})^2 - \\dfrac{\\Delta}{4a}$, avec $\\Delta = b^2-4ac$.',
+            'On isole le carré : $a(x+\\dfrac{b}{2a})^2 = \\dfrac{\\Delta}{4a}$.',
+            'On prend la racine carrée des deux côtés. C\'est possible seulement si Δ ≥ 0 : ' +
               '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$.',
           ],
         },
@@ -133,17 +134,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'piege',
           label: 'Erreur de signe classique',
           text:
-            'La formule contient $-b$, pas $b$ : écrire $x = \\dfrac{b \\pm \\sqrt{\\Delta}}{2a}$ ' +
-            '(sans inverser le signe de b) donne, dans l\'exemple ci-dessus, $x=-4$ ou $x=-1$ : ' +
-            'deux valeurs fausses, alors même que le calcul de Δ était correct.',
+            'Regarde bien : c\'est **−b**, pas b ! Si tu oublies le signe moins, tu écris ' +
+            '$x = \\dfrac{b \\pm \\sqrt{\\Delta}}{2a}$. Ici, ça donne $x=-4$ ou $x=-1$ : deux ' +
+            'réponses fausses, même si Δ était bien calculé.',
         },
-        { kind: 'subheading', text: 'Le cas caché — mise en évidence généralisée' },
+        { kind: 'subheading', text: 'Le cas caché — mettre une expression entière en évidence' },
         {
           kind: 'para',
           text:
-            'Une cinquième situation ne se reconnaît **pas** sur les coefficients a, b, c une ' +
-            'fois l\'équation développée : c\'est la forme de l\'énoncé lui-même, avant tout ' +
-            'développement, qui trahit une mise en évidence généralisée.',
+            'Il y a une 5e situation. Tu ne la vois pas en regardant a, b et c une fois ' +
+            'l\'équation développée. Tu la vois dans la **forme de l\'énoncé**, avant de développer.',
         },
         {
           kind: 'exemple',
@@ -151,7 +151,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           formula: '$(x+2)^2 = 3(x+2)$',
           steps: [
             {
-              tag: 'jamais développer — (x+2) est un facteur commun',
+              tag: 'ne développe jamais — (x+2) est un facteur commun',
               text: '$(x+2)^2-3(x+2)=0 \\iff (x+2)[(x+2)-3]=0=(x+2)(x-1)=0$',
             },
           ],
@@ -160,17 +160,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Dès qu\'une même expression entre parenthèses apparaît des deux côtés de l\'égalité ' +
-            '— ici $(x+2)$ — ne développe jamais le carré : ramène tout d\'un côté et mets cette ' +
-            'expression commune en évidence, exactement comme $x$ dans le tout premier exemple ' +
-            'de cette section.',
+            'Tu vois la même expression entre parenthèses des deux côtés du signe = ? Ici, ' +
+            'c\'est $(x+2)$. Alors ne développe pas le carré ! Passe tout d\'un côté, et mets ' +
+            'cette expression en facteur commun — exactement comme tu l\'as fait avec x, dans ' +
+            'le tout premier exemple.',
         },
         { kind: 'subheading', text: 'Somme et produit des racines (relations de Viète)' },
         {
           kind: 'para',
           text:
-            'Connaître la somme et le produit des racines, sans les avoir calculées, permet de ' +
-            'vérifier des solutions déjà trouvées ou de retrouver l\'une d\'elles quand on connaît l\'autre.',
+            'Connaître la somme et le produit des racines, ça sert à vérifier une solution. Ou ' +
+            'à retrouver une racine si tu connais déjà l\'autre. Pas besoin de refaire tout le ' +
+            'calcul du discriminant !',
         },
         {
           kind: 'rappel',
@@ -185,11 +186,11 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'methode',
           label: 'Démonstration',
           items: [
-            'Partir des deux racines données par la formule du discriminant : ' +
-              '$x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$, $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$.',
-            'Additionner : les termes en $\\sqrt{\\Delta}$ s\'annulent, ' +
+            'On part des deux racines de la formule : $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et ' +
+              '$x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$.',
+            'On les additionne. Les termes en $\\sqrt{\\Delta}$ s\'annulent. Il reste : ' +
               '$x_1+x_2 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}+\\dfrac{-b-\\sqrt{\\Delta}}{2a} = -\\dfrac{b}{a}$.',
-            'Multiplier : $x_1 \\cdot x_2 = \\dfrac{(-b+\\sqrt{\\Delta})(-b-\\sqrt{\\Delta})}{4a^2} = ' +
+            'On les multiplie. On obtient : $x_1 \\cdot x_2 = \\dfrac{(-b+\\sqrt{\\Delta})(-b-\\sqrt{\\Delta})}{4a^2} = ' +
               '\\dfrac{b^2-(b^2-4ac)}{4a^2} = \\dfrac{c}{a}$.',
           ],
         },
@@ -198,22 +199,22 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'rappel',
           label: 'Forme factorisée',
           items: [
-            'Si $x_1$ et $x_2$ sont solutions d\'une équation du second degré, cette équation ' +
-              'est de la forme $a(x-x_1)(x-x_2)=0$ avec $a \\neq 0$.',
+            'Si $x_1$ et $x_2$ sont les solutions d\'une équation du second degré, alors cette ' +
+              'équation s\'écrit : $a(x-x_1)(x-x_2)=0$, avec $a \\neq 0$.',
           ],
         },
         {
           kind: 'para',
           text:
-            'Par exemple, si $3$ et $-7$ sont solutions d\'une équation du second degré, alors ' +
-            'cette équation est de la forme $a(x-3)(x+7)=0$ avec $a \\neq 0$.',
+            'Par exemple : 3 et −7 sont solutions ? Alors l\'équation est $a(x-3)(x+7)=0$, avec ' +
+            '$a \\neq 0$.',
         },
         {
           kind: 'rappel',
           label: 'Forme x² − Sx + P = 0',
           items: [
-            'Si $S$ est la somme des racines et $P$ leur produit, l\'équation $ax^2+bx+c=0$ ' +
-              'peut s\'écrire, à un facteur $a$ près, $x^2 - Sx + P = 0$.',
+            'S, c\'est la somme des racines. P, c\'est leur produit. On peut aussi écrire ' +
+              'l\'équation comme ça, à un facteur a près : $x^2 - Sx + P = 0$.',
           ],
         },
         {
@@ -232,8 +233,8 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           generatorId: 'gen1',
           description: [
             'Reconnais la technique la plus rapide pour résoudre une équation du second degré ' +
-              'donnée (mise en évidence, binôme conjugué, produit remarquable, cas général, mise ' +
-              'en évidence généralisée), puis résous-la.',
+              'donnée (mise en évidence, différence de deux carrés, carré parfait, cas général, ' +
+              'mise en évidence généralisée), puis résous-la.',
           ],
           chantier: '4e',
           whereLabel: '4e → « 1. Méthode la plus rapide »',
@@ -244,20 +245,20 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'signe-trinome',
       number: 2,
       title: "Étudier le signe d'un trinôme",
-      kicker: 'tableau de signes de ax² + bx + c, en 3 étapes fixes',
+      kicker: 'un tableau de signes en 3 étapes, toujours dans le même ordre',
       blocks: [
         {
           kind: 'para',
           text:
-            'Une inéquation $ax^2+bx+c \\lozenge 0$ (avec ◇ l\'un des symboles $<, >, \\le, \\ge$) ' +
-            'se résout toujours dans le même ordre :',
+            'Pour résoudre $ax^2+bx+c \\lozenge 0$ (◇ veut dire $<, >, \\le, \\ge$), fais ' +
+            'toujours les 3 mêmes étapes :',
         },
         {
           kind: 'methode',
           items: [
-            'Calculer les racines du trinôme (s\'il y en a) — chapitre 1 ou section précédente.',
-            'Noter le signe de a : c\'est le signe du trinôme **à l\'extérieur** des racines.',
-            'En déduire l\'intervalle-solution demandé par le symbole ◇.',
+            "Calcule les racines du trinôme, s'il y en a.",
+            'Regarde le signe de a. C\'est le signe du trinôme **à l\'extérieur** des racines.',
+            'Trouve l\'intervalle-solution, selon le symbole ◇.',
           ],
         },
         {
@@ -274,11 +275,12 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un ensemble-solution s\'écrit toujours en intervalles, jamais en parenthèses à la ' +
-            'française : un crochet **ouvert vers l\'intérieur** de l\'intervalle exclut la ' +
-            'borne, un crochet **ouvert vers l\'extérieur** l\'inclut. Les bornes sont séparées ' +
-            'par un point-virgule ; la virgule reste réservée à l\'écriture décimale ($2{,}5$). ' +
-            '$-\\infty$ et $+\\infty$ verrouillent toujours leur crochet en position ouverte.',
+            'Une solution s\'écrit toujours avec des intervalles. Jamais avec des parenthèses ' +
+            '( ) comme en français. Un crochet ouvert **vers l\'intérieur** de l\'intervalle : ' +
+            'la borne est exclue. Un crochet ouvert **vers l\'extérieur** : la borne est ' +
+            'incluse. Entre deux bornes, on met un point-virgule — la virgule sert seulement ' +
+            'aux nombres décimaux, comme 2,5. $-\\infty$ et $+\\infty$ ont toujours un crochet ' +
+            'ouvert vers l\'extérieur : on ne les atteint jamais !',
         },
         {
           kind: 'rappel',
@@ -297,7 +299,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             { tag: '1 — racines', text: '$\\Delta = 1+24=25$, $x=(1\\pm5)/2 \\to x_1=-2, x_2=3$' },
             { tag: '2 — signe de a', text: '$a = 1 > 0$ : positif à l\'extérieur des racines' },
           ],
-          result: { tag: '3 — solution (≥, donc bornes incluses)', text: ']−∞ ; −2] ∪ [3 ; +∞[' },
+          result: { tag: '3 — solution (≥, bornes incluses)', text: ']−∞ ; −2] ∪ [3 ; +∞[' },
         },
         {
           kind: 'illustration',
@@ -325,9 +327,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Aucun crochet ne se déduit automatiquement du symbole : une inégalité **large** ' +
-            '(≤/≥) inclut la borne **seulement si** cette borne est effectivement une racine — ' +
-            'pose toujours la question consciemment plutôt que de réagir par réflexe.',
+            'Le symbole ne te dit pas automatiquement le crochet à utiliser ! Une inégalité ' +
+            '**large** (≤/≥) inclut la borne **seulement si** cette borne est une vraie racine. ' +
+            'Pose-toi toujours la question — ne réponds pas par automatisme.',
         },
         {
           kind: 'entrainement',
@@ -346,16 +348,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'signe-produit',
       number: 3,
       title: 'Signe d\'un produit de plusieurs facteurs',
-      kicker: 'généraliser le tableau de signes à 2 ou 3 facteurs',
+      kicker: 'le même principe, appliqué à 2 ou 3 facteurs à la fois',
       blocks: [
         {
           kind: 'para',
           text:
-            'Le principe reste le même quand le produit compte plusieurs facteurs — linéaires, ' +
-            'quadratiques factorisables ou **quadratiques irréductibles** (Δ < 0, donc de signe ' +
-            'constant, toujours celui de leur propre coefficient a) : chaque facteur reçoit sa ' +
-            'propre ligne de signe, la ligne du produit se lit ensuite en multipliant les signes ' +
-            'colonne par colonne.',
+            'Le principe reste le même avec plusieurs facteurs. Ils peuvent être linéaires. Ou ' +
+            'quadratiques (qu\'on peut factoriser). Ou quadratiques **irréductibles** (Δ < 0 : ' +
+            'ce facteur ne s\'annule jamais, il garde toujours le signe de son propre a). ' +
+            'Chaque facteur a sa ligne dans le tableau. Le produit se lit en multipliant les ' +
+            'signes, colonne par colonne.',
         },
         {
           kind: 'exempleLibre',
@@ -446,20 +448,20 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — compter les signes négatifs',
           items: [
-            'Sur chaque colonne, le produit est négatif si un **nombre impair** de facteurs y ' +
-              'sont négatifs, positif sinon — pas besoin de multiplier littéralement les signes ' +
-              'un par un : compte-les. Une colonne où un facteur vaut 0 rend tout le produit nul, ' +
-              'quels que soient les autres facteurs.',
+            'Sur chaque colonne, compte les facteurs négatifs. Un nombre **impair** de facteurs ' +
+              'négatifs → le produit est négatif. Sinon → il est positif. Pas besoin de ' +
+              'multiplier les signes un par un : compte-les ! Un facteur vaut 0 dans une ' +
+              'colonne ? Alors tout le produit vaut 0 — peu importe les autres facteurs.',
           ],
         },
         {
           kind: 'attention',
           label: 'Facteur quadratique irréductible',
           text:
-            'Un facteur du type $x^2+2x+5$ (Δ = 4 − 20 = −16 < 0) ne s\'annule **jamais** : sa ' +
-            'ligne dans le tableau garde un signe constant sur toute la droite, celui de son ' +
-            'propre a — **aucune** colonne supplémentaire à créer pour ce facteur, contrairement ' +
-            'à un facteur factorisable qui, lui, ajoute ses propres racines aux colonnes du tableau.',
+            '$x^2+2x+5$ (Δ = 4 − 20 = −16 < 0) ne s\'annule **jamais**. Sa ligne garde le même ' +
+            'signe partout : celui de son propre a. Pas de colonne en plus pour ce facteur ! ' +
+            'C\'est différent d\'un facteur qu\'on peut factoriser : lui, il ajoute ses propres ' +
+            'racines au tableau.',
         },
         {
           kind: 'entrainement',
@@ -478,16 +480,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'simplifier',
       number: 4,
       title: 'Simplifier une fraction rationnelle',
-      kicker: 'factoriser numérateur et dénominateur pour éliminer un facteur commun',
+      kicker: 'tout factoriser d\'abord, éliminer ensuite ce qui est identique',
       blocks: [
         {
           kind: 'para',
           text:
-            'Une fraction rationnelle ne se simplifie **jamais** en biffant des termes isolés — ' +
-            'seulement en factorisant complètement le numérateur et le dénominateur, puis en ' +
-            'éliminant tout facteur strictement identique entre les deux. La condition ' +
-            'd\'existence (CE), elle, porte toujours sur le dénominateur **avant** ' +
-            'simplification : un facteur éliminé reste une valeur interdite.',
+            'On ne simplifie **jamais** une fraction en effaçant des termes au hasard. On ' +
+            'factorise d\'abord tout : le numérateur **et** le dénominateur. Ensuite, on enlève ' +
+            'un facteur identique des deux côtés. La condition d\'existence (CE) — les valeurs ' +
+            'de x interdites — se pose sur le dénominateur, **avant** de simplifier. Un facteur ' +
+            'qu\'on enlève reste quand même interdit !',
         },
         {
           kind: 'exemple',
@@ -496,7 +498,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           steps: [
             { tag: 'numérateur factorisé', text: '$2x^2-6x = 2x(x-3)$' },
             { tag: 'dénominateur factorisé', text: '$x^2-x-6 = (x-3)(x+2)$' },
-            { tag: 'CE — posée sur le dénominateur non simplifié', text: '$x \\neq 3$ et $x \\neq -2$' },
+            { tag: 'CE — sur le dénominateur non simplifié', text: '$x \\neq 3$ et $x \\neq -2$' },
           ],
           result: {
             tag: 'fraction simplifiée',
@@ -507,18 +509,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           kind: 'piege',
           label: 'Un carré parfait au dénominateur ne se simplifie jamais complètement',
           text:
-            'Si le dénominateur s\'écrit $(x-p)^2$ (racine double), simplifier **une** occurrence ' +
-            'de $(x-p)$ avec le numérateur laisse toujours $(x-p)$ au dénominateur restant — la ' +
-            'valeur $x=p$ reste donc exclue, et la fraction n\'est **jamais** réductible à une ' +
-            'expression polynomiale pure sur ce facteur.',
+            'Le dénominateur est $(x-p)^2$ ? Si tu simplifies **une seule fois** $(x-p)$ avec le ' +
+            'numérateur, il en reste encore un au dénominateur. Donc $x=p$ reste toujours ' +
+            'interdit. La fraction ne devient jamais un simple polynôme sur ce facteur.',
         },
         {
           kind: 'astuce',
           label: 'Astuce — forme de référence',
           text:
-            'Une fois simplifiée, affiche toujours la fraction sous sa forme la plus réduite : ' +
-            'coefficients divisés par leur PGCD (jamais $2(x-3)/4$, toujours $\\dfrac{x-3}{2}$), ' +
-            'et une racine nulle écrite $x$ tout court, jamais $(x-0)$.',
+            'Une fois la fraction simplifiée, mets-la sous sa forme la plus simple. Divise les ' +
+            'coefficients par leur PGCD (jamais $2(x-3)/4$, toujours $\\dfrac{x-3}{2}$). Une ' +
+            'racine égale à 0 s\'écrit x tout court, jamais $(x-0)$.',
         },
         {
           kind: 'entrainement',
@@ -537,23 +538,23 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       id: 'inconnue-denominateur',
       number: 5,
       title: 'L\'inconnue au dénominateur',
-      kicker: 'résoudre une équation rationnelle, puis écarter les racines étrangères',
+      kicker: 'résoudre, puis toujours écarter les racines étrangères',
       blocks: [
         {
           kind: 'para',
           text:
-            'Résoudre une équation où $x$ apparaît au dénominateur suit toujours le même ' +
-            'schéma : poser la condition d\'existence, mettre les deux membres au même ' +
-            'dénominateur ou les multiplier en croix, résoudre l\'équation polynomiale obtenue, ' +
-            'puis confronter **chaque** solution trouvée à la CE posée au départ.',
+            'Résoudre une équation avec x au dénominateur suit toujours le même chemin : pose ' +
+            'la condition d\'existence. Mets les deux membres au même dénominateur, ou ' +
+            'multiplie en croix. Résous l\'équation obtenue. Puis vérifie **chaque** solution ' +
+            'avec la CE de départ.',
         },
         {
           kind: 'methode',
           items: [
-            'Poser la CE : chaque dénominateur ≠ 0.',
-            'Multiplier en croix (ou réduire au même dénominateur), sans jamais perdre de vue la CE.',
-            'Résoudre l\'équation polynomiale obtenue (chapitre 2, section 1 si elle est du second degré).',
-            'Rejeter toute solution qui viole la CE — une **racine étrangère**.',
+            'Pose la CE : chaque dénominateur ≠ 0.',
+            'Multiplie en croix (ou réduis au même dénominateur). N\'oublie jamais la CE.',
+            'Résous l\'équation polynomiale obtenue.',
+            'Rejette toute solution qui ne respecte pas la CE. On l\'appelle une **racine étrangère**.',
           ],
         },
         {
@@ -573,25 +574,23 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           result: {
             tag: 'confrontation à la CE',
-            text: '$x=2$ viole la CE — **racine étrangère, rejetée**. Seule $x=-4$ est une solution valide.',
+            text: '$x=2$ viole la CE — **racine étrangère, rejetée**. Seule $x=-4$ est une solution valable.',
           },
         },
         {
           kind: 'piege',
           label: 'Pourquoi une racine étrangère apparaît',
           text:
-            'Multiplier en croix revient à multiplier les deux membres par les dénominateurs — ' +
-            'y compris, implicitement, par une expression qui peut valoir zéro en $x=2$. ' +
-            'L\'équation polynomiale obtenue est donc « plus large » que l\'équation de départ : ' +
-            'elle peut accepter des valeurs que l\'équation rationnelle originale, elle, ' +
-            'refusait déjà d\'admettre.',
+            'Multiplier en croix, c\'est multiplier les deux membres par les dénominateurs. ' +
+            'Mais une de ces expressions peut valoir 0, en $x=2$ ! L\'équation obtenue accepte ' +
+            'alors des valeurs que l\'équation de départ refusait déjà.',
         },
         {
           kind: 'astuce',
           text:
-            'Vérifie la CE **après** avoir résolu, jamais seulement en la notant au départ pour ' +
-            'l\'oublier ensuite — c\'est l\'étape la plus souvent sautée, alors qu\'elle fait ' +
-            'toute la différence entre une solution correcte et une solution fausse.',
+            'Vérifie la CE **après** avoir résolu. Pas seulement au début, pour l\'oublier ' +
+            'ensuite ! C\'est l\'étape qu\'on saute le plus souvent. Et c\'est elle qui fait la ' +
+            'différence entre une bonne et une mauvaise réponse.',
         },
         {
           kind: 'entrainement',
@@ -615,10 +614,10 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une inéquation rationnelle se traite comme un produit de facteurs (section 3), à ' +
-            'une différence près : le dénominateur peut annuler le quotient **sans que ' +
-            'celui-ci vaille 0** — il devient **non défini**. Cette valeur reçoit sa propre ' +
-            'marque dans la grille, prioritaire sur tout le reste.',
+            'Une inéquation rationnelle se traite comme un produit de facteurs (section 3), ' +
+            'avec une différence : le dénominateur peut annuler le quotient **sans que le ' +
+            'quotient vaille 0**. Dans ce cas, il devient **non défini**. Cette valeur a sa ' +
+            'propre marque dans le tableau. Elle est prioritaire sur tout le reste.',
         },
         {
           kind: 'exempleLibre',
@@ -706,16 +705,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           label: 'Une valeur de CE reste toujours exclue',
           text:
             'Même avec un symbole large (≤/≥), une valeur qui annule le dénominateur ne peut ' +
-            '**jamais** appartenir à la solution — le quotient n\'y est pas défini, ni positif, ' +
-            'ni négatif, ni nul. Son crochet reste ouvert quelle que soit l\'inégalité de l\'énoncé.',
+            '**jamais** être une solution. Le quotient n\'y existe pas : ni positif, ni négatif, ' +
+            'ni nul. Son crochet reste toujours ouvert, quel que soit le symbole de l\'énoncé.',
         },
         {
           kind: 'para',
           text:
-            'Le même principe s\'applique quand le second membre n\'est pas 0 : on l\'isole ' +
-            'd\'abord ($... - k \\lozenge 0$), on réduit au même dénominateur, puis on retrouve ' +
-            'un quotient de la même forme — parfois avec un numérateur du second degré à ' +
-            'factoriser au passage.',
+            'Le second membre n\'est pas 0 ? Le principe reste pareil. Isole-le d\'abord ' +
+            '($... - k \\lozenge 0$). Réduis au même dénominateur. Tu retrouves un quotient de ' +
+            'la même forme — parfois avec un numérateur du second degré à factoriser.',
         },
         {
           kind: 'entrainement',
@@ -740,20 +738,19 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'para',
           text:
-            '140 affirmations réparties en 7 thèmes qui reprennent tout ce chapitre — ' +
-            'vocabulaire et généralités, résolution sans discriminant, le discriminant Δ, ' +
-            'démonstration de la formule du discriminant, somme et produit des racines, ' +
-            'factorisation par la méthode générale, inéquations et tableau de signes. Un seul ' +
-            'essai par question, la justification est toujours révélée.',
+            '140 affirmations. 7 thèmes. Ils reprennent tout le chapitre : le vocabulaire, la ' +
+            'résolution sans discriminant, le discriminant Δ, sa démonstration, la somme et le ' +
+            'produit des racines, la méthode générale de factorisation, les inéquations et le ' +
+            'tableau de signes. Un seul essai par question. La justification est toujours donnée.',
         },
         {
           kind: 'astuce',
           label: 'Astuce — nouveau depuis le chapitre 1',
           text:
-            'Contrairement au quiz du chapitre 1, celui-ci mobilise pleinement le discriminant ' +
-            '$\\Delta = b^2-4ac$, sa formule $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$, et les ' +
-            'relations de Viète — somme des racines $S = -b/a$, produit $P = c/a$ — puisque ce ' +
-            'chapitre les introduit pour la première fois.',
+            'Ce quiz utilise beaucoup le discriminant $\\Delta = b^2-4ac$, sa formule ' +
+            '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$, et les relations de Viète ' +
+            '($S = -b/a$, $P = c/a$). Le quiz du chapitre 1 ne les utilisait pas : c\'est la ' +
+            'première fois que tu les vois.',
         },
         {
           kind: 'entrainement',
@@ -772,34 +769,33 @@ export const equationsInequationsSecondDegre: ChapterContent = {
 
   recap: {
     items: [
-      '**Résoudre** — reconnaître d\'abord mise en évidence (c=0), binôme conjugué (b=0), ' +
-        'produit remarquable (Δ=0) ou mise en évidence généralisée (facteur commun visible ' +
-        'avant développement) ; le discriminant sert au cas général, jamais par défaut.',
-      '**Discriminant** — $\\Delta = b^2-4ac$, $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ ; ' +
+      '**Résoudre** — regarde d\'abord si c=0, ou b=0, ou Δ=0 (carré parfait), ou si une ' +
+        'expression identique apparaît des deux côtés. Le discriminant, c\'est pour le cas ' +
+        'général — jamais par défaut !',
+      '**Discriminant** — $\\Delta = b^2-4ac$, $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$. ' +
         'Viète : $S = x_1+x_2 = -b/a$, $P = x_1 \\cdot x_2 = c/a$.',
-      '**Écrire une équation à partir de ses racines** — $a(x-x_1)(x-x_2)=0$ ($a \\neq 0$), ou, ' +
-        'à un facteur $a$ près, $x^2 - Sx + P = 0$.',
-      '**Signe d\'un trinôme** — racines → signe de a → intervalle, avec la notation à ' +
-        'crochets inversés (jamais des parenthèses).',
-      '**Produit de facteurs** — une ligne par facteur, produit négatif si un nombre impair de ' +
-        'facteurs y est négatif ; un facteur irréductible (Δ<0) garde un signe constant, ' +
-        'aucune racine à ajouter.',
-      '**Fractions rationnelles** — simplifier seulement après factorisation complète ; la CE ' +
-        'se pose sur le dénominateur avant simplification, jamais après.',
-      '**Équation/inéquation rationnelle** — toute solution doit être confrontée à la CE après ' +
-        'résolution ; une valeur de CE reste toujours exclue de la solution d\'une inéquation, ' +
-        'même pour un symbole large.',
+      '**Écrire une équation à partir des racines** — $a(x-x_1)(x-x_2)=0$ ($a \\neq 0$). Ou, à ' +
+        'un facteur a près : $x^2 - Sx + P = 0$.',
+      '**Signe d\'un trinôme** — racines → signe de a → intervalle. Toujours avec des crochets ' +
+        'inversés, jamais des parenthèses.',
+      '**Produit de facteurs** — une ligne par facteur. Nombre impair de facteurs négatifs → ' +
+        'produit négatif. Un facteur irréductible (Δ<0) garde toujours le même signe — pas de ' +
+        'racine à ajouter.',
+      '**Fractions rationnelles** — simplifie seulement après avoir tout factorisé. La CE se ' +
+        'pose sur le dénominateur avant de simplifier, jamais après.',
+      '**Équation ou inéquation rationnelle** — vérifie chaque solution avec la CE, après ' +
+        'résolution. Une valeur de CE est toujours exclue de la solution, même avec un symbole large.',
     ],
     checklist: {
       items: [
-        'Ai-je cherché une technique plus rapide que le discriminant avant de me lancer dedans ?',
-        'Ai-je bien écrit −b, pas b, au numérateur de la formule du discriminant ?',
-        'Ai-je posé la CE sur chaque dénominateur avant toute simplification ou mise en croix ?',
-        'Ai-je confronté chaque solution trouvée à la CE — pas seulement notée en début d\'exercice ?',
+        'Ai-je cherché une méthode plus rapide que le discriminant ?',
+        'Ai-je bien mis −b, et pas b, dans la formule du discriminant ?',
+        'Ai-je posé la CE sur chaque dénominateur, avant de simplifier ou de multiplier en croix ?',
+        'Ai-je vérifié chaque solution trouvée avec la CE ?',
       ],
     },
     forward:
-      'Le discriminant et les racines reviennent au chapitre 3 (cercle trigonométrique) sous ' +
-      'une autre forme — la même exigence de méthode, reconnaître avant de calculer, y reste valable.',
+      'Le discriminant et les racines reviennent au chapitre 3 (cercle trigonométrique), sous ' +
+      'une autre forme. La même règle reste vraie : réfléchis avant de calculer.',
   },
 }
