@@ -11,13 +11,15 @@
    * ================================================================ */
 
   var N_MIN = 3, N_MAX = 30, N_DEFAUT = 6;
-  var LARGEUR = 360, HAUTEUR = 360, MARGE = 26;
-  // Rayon pixel FIXE du polygone circonscrit (toujours le même, quel que soit n) : le polygone
-  // inscrit et le cercle rétrécissent à l'intérieur pour n petit, et grandissent jusqu'à presque
-  // le rejoindre pour n grand — rend la convergence visible d'un coup d'œil, plutôt que de garder
-  // le cercle à taille fixe (le circonscrit débordant alors largement du cadre pour n=3, où son
-  // rayon vaut le double de celui du cercle).
-  var R_OUT_PX = (Math.min(LARGEUR, HAUTEUR) - 2 * MARGE) / 2;
+  var LARGEUR = 380, HAUTEUR = 380, MARGE = 18;
+  // Rayon pixel FIXE du cercle (et donc du polygone inscrit, dont les sommets sont dessus) —
+  // le cercle ne doit JAMAIS changer de taille quand n varie, c'est lui la référence fixe de la
+  // figure. Seul le polygone circonscrit grandit/rétrécit autour de lui (rayon = r/cos α, voir
+  // _rendre ci-dessous). Le pire cas est n=3 (facteur 1/cos 60° = 2, le circonscrit a alors deux
+  // fois le rayon du cercle) : R_CERCLE_PX est choisi pour que MÊME ce cas tienne dans le cadre —
+  // demi-espace disponible divisé par ce facteur 2.
+  var DEMI_CADRE_PX = (Math.min(LARGEUR, HAUTEUR) - 2 * MARGE) / 2;
+  var R_CERCLE_PX = DEMI_CADRE_PX / 2;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -35,19 +37,20 @@
     '.cercle{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
     '.poly-inscrit{stroke:var(--good,#2f7a4f);stroke-width:2.4;fill:var(--good,#2f7a4f);fill-opacity:0.08;}' +
     '.poly-circonscrit{stroke:var(--accent,#a8471f);stroke-width:2;stroke-dasharray:5 4;fill:none;}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;}' +
-    '.stat{flex:1 1 128px;max-width:160px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:10px 8px;text-align:center;background:var(--surface,#fff);}' +
-    '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-faint,#9c9083);margin-bottom:6px;}' +
-    '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:1.05rem;font-weight:600;color:var(--ink,#241f1a);}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:5px;flex-wrap:nowrap;margin-bottom:20px;}' +
+    '.stat{flex:1 1 0;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 3px;text-align:center;background:var(--surface,#fff);}' +
+    '.stat-label{display:block;font-family:var(--mono,monospace);font-size:9.5px;letter-spacing:0.02em;text-transform:uppercase;color:var(--ink-faint,#9c9083);margin-bottom:5px;line-height:1.25;}' +
+    '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.92rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
     '.stat-in{border-color:var(--good,#2f7a4f);}' +
     '.stat-in .stat-value{color:var(--good,#2f7a4f);}' +
     '.stat-out{border-color:var(--accent-soft-line,#e8c4a4);}' +
     '.stat-out .stat-value{color:var(--accent,#a8471f);}' +
-    '.stat-rel{align-self:center;font-family:var(--serif,serif);font-size:1.3rem;color:var(--ink-soft,#6b6055);}' +
-    '.curseur-n{display:flex;align-items:center;gap:12px;}' +
-    '.curseur-n label{font-family:var(--serif,serif);font-style:italic;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
-    '.curseur-n input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
-    '.n-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent-ink,#7a3212);min-width:76px;text-align:right;}' +
+    '.stat-rel{flex:0 0 auto;align-self:center;font-family:var(--serif,serif);font-size:1.15rem;color:var(--ink-soft,#6b6055);padding:0 1px;}' +
+    '.curseur-n{display:flex;flex-direction:column;gap:8px;}' +
+    '.curseur-n label{font-family:var(--serif,serif);font-style:italic;font-weight:600;color:var(--ink,#241f1a);}' +
+    '.curseur-row{display:flex;align-items:center;gap:12px;}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
+    '.n-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent-ink,#7a3212);min-width:64px;text-align:right;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<div class="stats">' +
@@ -59,8 +62,10 @@
     '</div>' +
     '<div class="curseur-n">' +
     '<label for="n">Nombre de côtés n</label>' +
+    '<div class="curseur-row">' +
     '<input type="range" id="n" min="' + N_MIN + '" max="' + N_MAX + '" step="1" value="' + N_DEFAUT + '">' +
     '<span class="n-valeur" id="n-valeur"></span>' +
+    '</div>' +
     '</div>';
 
   class ArchimedeWidgetClass extends HTMLElement {
@@ -99,7 +104,11 @@
   ArchimedeWidgetClass.prototype._rendre = function () {
     var n = this._n;
     var alpha = Math.PI / n;
-    var rIn = R_OUT_PX * Math.cos(alpha);
+    // Le cercle (et le polygone inscrit, dont les sommets sont dessus) garde TOUJOURS le même
+    // rayon R_CERCLE_PX — seul le polygone circonscrit change de taille autour de lui, avec le
+    // rayon r/cos α attendu (même formule que le rappel du chapitre, R = r/cosα).
+    var rCercle = R_CERCLE_PX;
+    var rOut = R_CERCLE_PX / Math.cos(alpha);
     var cx = LARGEUR / 2, cy = HAUTEUR / 2;
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
@@ -115,17 +124,17 @@
     }
 
     var polyOut = document.createElementNS(ns, "polygon");
-    polyOut.setAttribute("points", sommets(R_OUT_PX));
+    polyOut.setAttribute("points", sommets(rOut));
     polyOut.setAttribute("class", "poly-circonscrit");
     svg.appendChild(polyOut);
 
     var cercle = document.createElementNS(ns, "circle");
-    cercle.setAttribute("cx", cx); cercle.setAttribute("cy", cy); cercle.setAttribute("r", rIn);
+    cercle.setAttribute("cx", cx); cercle.setAttribute("cy", cy); cercle.setAttribute("r", rCercle);
     cercle.setAttribute("class", "cercle");
     svg.appendChild(cercle);
 
     var polyIn = document.createElementNS(ns, "polygon");
-    polyIn.setAttribute("points", sommets(rIn));
+    polyIn.setAttribute("points", sommets(rCercle));
     polyIn.setAttribute("class", "poly-inscrit");
     svg.appendChild(polyIn);
 
