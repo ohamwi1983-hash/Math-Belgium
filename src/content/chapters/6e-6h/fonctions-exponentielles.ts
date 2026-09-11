@@ -194,7 +194,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => Math.pow(2, x), tone: 'accent' }],
             xMin: -3,
             xMax: 3,
@@ -214,7 +213,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => Math.pow(0.5, x), tone: 'accent' }],
             xMin: -3,
             xMax: 3,
@@ -265,7 +263,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => x * x, tone: 'faint' },
               { fn: Math.exp, tone: 'accent' },
@@ -615,7 +612,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => Math.pow(2, x), tone: 'accent' },
               { fn: (x) => Math.LN2 * Math.pow(2, x), tone: 'good' },
@@ -639,7 +635,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => Math.pow(0.5, x), tone: 'accent' },
               { fn: (x) => Math.log(0.5) * Math.pow(0.5, x), tone: 'good' },
@@ -705,7 +700,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => (Math.exp(x) + Math.exp(-x)) / 2, tone: 'accent' },
               { fn: (x) => (Math.exp(x) - Math.exp(-x)) / 2, tone: 'faint' },
@@ -1247,7 +1241,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => x * Math.exp(x), tone: 'accent' }],
             xMin: -4.5,
             xMax: 2,
@@ -1413,7 +1406,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => Math.exp(-x * x), tone: 'accent' }],
             xMin: -2.6,
             xMax: 2.6,
@@ -1613,7 +1605,6 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (t) => 1 - Math.exp(-0.15 * t), tone: 'accent', xMin: 0, xMax: 30 }],
             xMin: -1,
             xMax: 30,

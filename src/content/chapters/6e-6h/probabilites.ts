@@ -122,8 +122,8 @@ export const probabilites: ChapterContent = {
         {
           kind: 'illustrationGroup',
           items: [
-            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightUnion', compact: true, caption: '« A ou B » = $A \\cup B$ : réalisé dès que l\'UN AU MOINS des deux se réalise.' },
-            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightIntersection', compact: true, caption: '« A et B » = $A \\cap B$ : réalisé seulement si les DEUX se réalisent en même temps.' },
+            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightUnion', caption: '« A ou B » = $A \\cup B$ : réalisé dès que l\'UN AU MOINS des deux se réalise.' },
+            { kind: 'vennDiagram', labelA: 'A', labelB: 'B', mode: 'highlightIntersection', caption: '« A et B » = $A \\cap B$ : réalisé seulement si les DEUX se réalisent en même temps.' },
           ],
         },
         {
@@ -134,7 +134,6 @@ export const probabilites: ChapterContent = {
             labelB: 'B',
             mode: 'counts',
             counts: { aOnly: '12', both: '6', bOnly: '9', neither: '13' },
-            compact: true,
             caption: 'Groupe de 40 personnes, $n(A)$=18, $n(B)$=15, $n(A \\cap B)$=6 : les 4 régions se partagent les 40 personnes sans chevauchement.',
           },
         },

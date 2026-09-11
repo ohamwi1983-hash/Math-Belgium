@@ -99,7 +99,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           items: [
             {
               kind: 'curvePlot',
-              compact: true,
               curves: [{ fn: (x) => (x * x * x) / 4, tone: 'accent' }],
               xMin: -2,
               xMax: 2,
@@ -111,7 +110,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             },
             {
               kind: 'curvePlot',
-              compact: true,
               curves: [{ fn: (x) => x * x - 1, tone: 'accent' }],
               xMin: -2,
               xMax: 2,
@@ -222,7 +220,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => x * x, tone: 'accent', xMin: -Math.sqrt(2), xMax: Math.sqrt(2) },
               { fn: (x) => Math.sqrt(Math.max(0, x)), tone: 'good', xMin: 0, xMax: 2 },
@@ -283,7 +280,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => 2 * x + 1, tone: 'accent', xMin: -2.5, xMax: 1.5 },
               { fn: (x) => (x - 1) / 2, tone: 'good' },
@@ -465,7 +461,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'illustration',
               illustration: {
                 kind: 'curvePlot',
-                compact: true,
                 curves: [
                   { fn: (x) => x * x, tone: 'faint', xMin: -1, xMax: 0 },
                   { fn: (x) => x * x, tone: 'accent', xMin: 0, xMax: 1.75 },
@@ -495,7 +490,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'illustration',
               illustration: {
                 kind: 'curvePlot',
-                compact: true,
                 curves: [
                   { fn: (x) => x * x * x, tone: 'accent', xMin: -2.2, xMax: 2.2 },
                   { fn: Math.cbrt, tone: 'good', xMin: -2.2, xMax: 2.2 },
@@ -631,7 +625,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'illustration',
               illustration: {
                 kind: 'curvePlot',
-                compact: true,
                 curves: [
                   { fn: (x) => 5 / (x - 1), tone: 'accent' },
                   { fn: (x) => 1 + 5 / x, tone: 'good' },
@@ -707,7 +700,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: Math.sin, tone: 'faint', xMin: -2 * PI, xMax: 2 * PI },
               { fn: Math.sin, tone: 'accent', xMin: -PI / 2, xMax: PI / 2 },
@@ -726,7 +718,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: Math.cos, tone: 'faint', xMin: -2 * PI, xMax: 2 * PI },
               { fn: Math.cos, tone: 'accent', xMin: 0, xMax: PI },
@@ -745,7 +736,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: Math.tan, tone: 'faint', xMin: -PI + 0.18, xMax: -PI / 2 - 0.06 },
               { fn: Math.tan, tone: 'accent', xMin: -PI / 2 + 0.06, xMax: PI / 2 - 0.06 },
@@ -789,7 +779,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: Math.sin, tone: 'accent', xMin: -PI / 2, xMax: PI / 2 },
               { fn: Math.asin, tone: 'good', xMin: -1, xMax: 1 },
@@ -881,7 +870,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.asin, tone: 'accent', xMin: -1, xMax: 1 }],
             xMin: -1.3,
             xMax: 1.3,
@@ -900,7 +888,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.acos, tone: 'accent', xMin: -1, xMax: 1 }],
             xMin: -1.3,
             xMax: 1.3,
@@ -919,7 +906,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.atan, tone: 'accent' }],
             xMin: -10,
             xMax: 10,
@@ -1565,7 +1551,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.asin, tone: 'accent', xMin: -1, xMax: 1 }],
             xMin: -1.3,
             xMax: 1.3,
@@ -1584,7 +1569,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.acos, tone: 'accent', xMin: -1, xMax: 1 }],
             xMin: -1.3,
             xMax: 1.3,
@@ -1603,7 +1587,6 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.atan, tone: 'accent' }],
             xMin: -10,
             xMax: 10,

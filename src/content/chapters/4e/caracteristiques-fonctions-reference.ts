@@ -74,7 +74,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
-          compact: true,
           curves: [{ fn: (x) => x * x, tone: 'accent' }],
           xMin: -2.2,
           xMax: 2.2,
@@ -95,7 +94,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
-          compact: true,
           curves: [{ fn: (x) => x * x * x, tone: 'accent' }],
           xMin: -2.2,
           xMax: 2.2,
@@ -116,7 +114,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
-          compact: true,
           curves: [{ fn: Math.sqrt, tone: 'accent', xMin: 0, xMax: 4.3 }],
           xMin: -1,
           xMax: 4.3,
@@ -137,7 +134,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
-          compact: true,
           curves: [{ fn: (x) => Math.sign(x) * Math.pow(Math.abs(x), 1 / 3), tone: 'accent' }],
           xMin: -9,
           xMax: 9,
@@ -168,7 +164,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
-          compact: true,
           curves: [
             { fn: (x) => 1 / x, tone: 'accent', xMin: -3, xMax: -0.12 },
             { fn: (x) => 1 / x, tone: 'accent', xMin: 0.12, xMax: 3 },
@@ -194,7 +189,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
-          compact: true,
           curves: [{ fn: Math.abs, tone: 'accent' }],
           xMin: -2.5,
           xMax: 2.5,

@@ -73,7 +73,6 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => Math.log(x) / Math.log(2), tone: 'accent', xMin: 0.03, xMax: 6 }],
             xMin: -0.6,
             xMax: 6,
@@ -93,7 +92,6 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => Math.log(x) / Math.log(0.5), tone: 'accent', xMin: 0.03, xMax: 6 }],
             xMin: -0.6,
             xMax: 6,
@@ -1979,7 +1977,6 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => (Math.exp(x) + Math.exp(-x)) / 2, tone: 'accent' },
               { fn: (x) => (Math.exp(x) - Math.exp(-x)) / 2, tone: 'good' },
@@ -2069,7 +2066,6 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: (x) => x - Math.log(x), tone: 'accent', xMin: 0.04 }],
             xMin: -0.4,
             xMax: 4,

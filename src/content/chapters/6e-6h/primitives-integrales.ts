@@ -61,7 +61,6 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => x * x - 2, tone: 'faint' },
               { fn: (x) => x * x, tone: 'accent' },
@@ -280,7 +279,6 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: (x) => x * x + 1, tone: 'faint' },
               { fn: (x) => x * x + 5, tone: 'faint' },
@@ -1054,7 +1052,6 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [
               { fn: Math.sqrt, tone: 'accent', xMin: 0.3, xMax: 3.5 },
               { fn: () => Math.sqrt(1.5), tone: 'faint', xMin: 1.5, xMax: 1.9 },
