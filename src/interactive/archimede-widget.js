@@ -11,15 +11,28 @@
    * ================================================================ */
 
   var N_MIN = 3, N_MAX = 30, N_DEFAUT = 6;
-  var LARGEUR = 380, HAUTEUR = 380, MARGE = 18;
-  // Rayon pixel FIXE du cercle (et donc du polygone inscrit, dont les sommets sont dessus) —
-  // le cercle ne doit JAMAIS changer de taille quand n varie, c'est lui la référence fixe de la
-  // figure. Seul le polygone circonscrit grandit/rétrécit autour de lui (rayon = r/cos α, voir
-  // _rendre ci-dessous). Le pire cas est n=3 (facteur 1/cos 60° = 2, le circonscrit a alors deux
-  // fois le rayon du cercle) : R_CERCLE_PX est choisi pour que MÊME ce cas tienne dans le cadre —
-  // demi-espace disponible divisé par ce facteur 2.
-  var DEMI_CADRE_PX = (Math.min(LARGEUR, HAUTEUR) - 2 * MARGE) / 2;
-  var R_CERCLE_PX = DEMI_CADRE_PX / 2;
+  // Rayon pixel FIXE du cercle (et donc du polygone inscrit, dont les sommets sont dessus) — le
+  // cercle ne doit JAMAIS changer de taille quand n varie. Choisi GRAND (127) pour remplir le
+  // cadre visuel, pas timidement réservé en fonction du pire cas n=3 (piège de la version
+  // précédente : réserver la moitié du cadre pour n=3 faisait paraître le cercle minuscule à tout
+  // le reste de la plage, avec une grande marge grise inutilisée autour — repéré sur capture
+  // d'écran réelle, pas en relisant le code).
+  var R_CERCLE_PX = 127;
+  // Cadre visuel gris (rectangle dessiné, PAS le fond CSS du <svg>) : juste un peu plus grand que
+  // le cercle, pour qu'il le remplisse presque entièrement — dimensionné sur le cas n=6 (référence
+  // par défaut, coïncide presque exactement avec le facteur 1/cos(30°)≈1,155 du polygone
+  // circonscrit à 6 côtés).
+  var PAD_CADRE_PX = 20;
+  var DEMI_CADRE_PX = R_CERCLE_PX + PAD_CADRE_PX;
+  // Zone de dessin RÉELLE (viewBox), plus grande que le cadre gris : pour n petit (3, 4), le
+  // polygone circonscrit dépasse largement le cadre gris — volontairement laissé déborder SUR LE
+  // FOND DE LA CARTE (jamais rogné/coupé net) plutôt que rétréci pour rentrer dans le cadre, ce qui
+  // aurait fait reculer le cercle à chaque changement de n (le bug initialement signalé). Le pire
+  // cas n=3 (facteur 1/cos 60°=2, le circonscrit vaut deux fois le rayon du cercle) fixe la marge
+  // de sécurité nécessaire pour qu'il ne soit JAMAIS rogné par le bord réel du SVG.
+  var MARGE_SECURITE_PX = 16;
+  var DEMI_VIEWBOX_PX = R_CERCLE_PX * 2 + MARGE_SECURITE_PX;
+  var LARGEUR = DEMI_VIEWBOX_PX * 2, HAUTEUR = DEMI_VIEWBOX_PX * 2;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -33,7 +46,8 @@
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:18px;}' +
-    'svg{width:100%;max-width:460px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
+    'svg{width:100%;max-width:460px;height:auto;}' +
+    '.cadre-fond{fill:var(--surface-2,#faf6f0);stroke:var(--line,#e2d8c8);stroke-width:1;}' +
     '.cercle{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
     '.poly-inscrit{stroke:var(--good,#2f7a4f);stroke-width:2.4;fill:var(--good,#2f7a4f);fill-opacity:0.08;}' +
     '.poly-circonscrit{stroke:var(--accent,#a8471f);stroke-width:2;stroke-dasharray:5 4;fill:none;}' +
@@ -113,6 +127,17 @@
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
     svg.innerHTML = "";
+
+    // Cadre gris dessiné en SVG (pas un fond CSS sur tout le <svg>) : dimensionné autour du
+    // cercle, PAS de la zone de dessin entière — pour n petit, le polygone circonscrit déborde
+    // volontairement dessus, sur le fond de la carte (jamais rogné, voir les constantes en tête de
+    // fichier).
+    var fond = document.createElementNS(ns, "rect");
+    fond.setAttribute("x", cx - DEMI_CADRE_PX); fond.setAttribute("y", cy - DEMI_CADRE_PX);
+    fond.setAttribute("width", 2 * DEMI_CADRE_PX); fond.setAttribute("height", 2 * DEMI_CADRE_PX);
+    fond.setAttribute("rx", 3);
+    fond.setAttribute("class", "cadre-fond");
+    svg.appendChild(fond);
 
     function sommets(rayon) {
       var pts = [];
