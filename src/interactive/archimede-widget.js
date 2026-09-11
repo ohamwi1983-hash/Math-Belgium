@@ -33,7 +33,7 @@
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:18px;}' +
-    'svg{width:100%;max-width:320px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
+    'svg{width:100%;max-width:460px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.cercle{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
     '.poly-inscrit{stroke:var(--good,#2f7a4f);stroke-width:2.4;fill:var(--good,#2f7a4f);fill-opacity:0.08;}' +
     '.poly-circonscrit{stroke:var(--accent,#a8471f);stroke-width:2;stroke-dasharray:5 4;fill:none;}' +
