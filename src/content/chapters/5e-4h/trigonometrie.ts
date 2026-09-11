@@ -142,6 +142,16 @@ export const trigonometrie: ChapterContent = {
             'géométrie !',
         },
         {
+          kind: 'atelier',
+          tag: 'archimede-widget',
+          label: 'Manipule toi-même — fais varier le nombre de côtés n',
+          caption:
+            'Cercle de rayon 1/2 (périmètre = π exactement). Fais glisser le curseur de 3 à 30 ' +
+            'côtés et regarde les deux polygones se resserrer autour du cercle — et les deux ' +
+            "périmètres encadrer π de plus en plus étroitement, exactement comme dans le tableau " +
+            'ci-dessus.',
+        },
+        {
           kind: 'intuition',
           label: 'Pourquoi ne pas garder les degrés ?',
           text:

@@ -684,3 +684,26 @@ paths:
   Vérifié par rendu navigateur réel (clair et sombre) des 9 nouvelles illustrations (33 figures au
   total sur la page) ; sitewide `regress_all.mjs` : `0` erreur, `0` `NaN`, `0` signe `$` isolé, sur
   les 23 chapitres. `npm run build`/`npm run lint` propres.
+
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : nouveau widget interactif porté
+  (`archimede-widget`, voir `.claude/rules/interactive-widgets.md` pour le mécanisme général),
+  inséré en section 1 juste après le paragraphe sur l'encadrement historique d'Archimède, avant le
+  premier callout `intuition` sur les radians. Cercle de rayon $r=1/2$ (choisi pour que le périmètre
+  du cercle vaille exactement $\pi$, sans facteur à traîner) avec polygone régulier inscrit et
+  circonscrit à $n$ côtés superposés, $n$ réglable de 3 à 30 par un curseur ; trois valeurs
+  affichées en direct — périmètre du polygone inscrit ($n\sin\alpha$), du cercle ($\pi$, fixe), du
+  circonscrit ($n\tan\alpha$), $\alpha=\pi/n$ — reprenant exactement la formule déjà donnée dans le
+  `rappel` juste au-dessus.
+  **Choix d'échelle du dessin** : le rayon pixel du polygone **circonscrit** reste fixe (toujours le
+  même cercle-cadre), et le rayon du cercle/polygone inscrit est calculé comme une fraction de
+  celui-ci ($r_{px} = R_{px}\cos\alpha$) — plutôt que l'inverse (cercle à taille fixe, circonscrit
+  débordant du cadre). Ce choix rend la convergence visuellement immédiate : le polygone inscrit
+  part petit et se resserre contre le cadre extérieur à mesure que $n$ grandit, au lieu d'un cercle
+  fixe autour duquel le circonscrit grossirait sans limite visible (son rayon vaut le double de
+  celui du cercle pour $n=3$).
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction réelle du curseur (Playwright,
+  navigation clavier sur le `range` à travers la frontière du Shadow DOM) : valeurs recalculées à
+  chaque pas et recoupées à la main pour $n=3$ (2,59808 ≤ π ≤ 5,19615), $n=6$ (3,00000 ≤ π ≤
+  3,46410) et $n=30$ (3,13585 ≤ π ≤ 3,15313) — exactement les valeurs attendues ; `0` erreur
+  console, `0` `$` isolé. `tsc -b`/`npm run build`/`npm run lint` propres ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

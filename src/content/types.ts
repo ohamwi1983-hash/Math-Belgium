@@ -5,7 +5,12 @@
  * complet dans `src/interactive/`, monté via `InteractiveWidget`, voir `components/chapter/
  * InteractiveWidget.tsx`). Liste fermée — un nouveau widget porté ajoute son propre module
  * `register-*.js` et sa propre entrée ici, jamais une chaîne libre. */
-export type InteractiveWidgetTag = 'gen7-widget' | 'gen8-widget' | 'parabole-widget' | 'transformations-widget'
+export type InteractiveWidgetTag =
+  | 'gen7-widget'
+  | 'gen8-widget'
+  | 'parabole-widget'
+  | 'transformations-widget'
+  | 'archimede-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
