@@ -7,10 +7,10 @@ export const lieuxGeometriques: ChapterContent = {
   title: 'Lieux géométriques',
   slug: 'lieux-geometriques',
   lede:
-    "Retrouver un triangle à partir de ses milieux, construire le cercle qui passe par " +
-    "trois points, décrire par une équation l'ensemble des points vérifiant une condition donnée, " +
-    "ou suivre la trajectoire du point d'intersection de deux droites mobiles : ce chapitre relie " +
-    "l'algèbre des droites (forme implicite $ax+by+c=0$) et des cercles à la question centrale de " +
+    "Retrouve un triangle à partir de ses milieux. Construis le cercle qui passe par trois " +
+    "points. Traduis en équation l'ensemble des points qui vérifient une même condition. Ou " +
+    "suis la trajectoire du point où se croisent deux droites mobiles : ce chapitre relie " +
+    "l'algèbre des droites (forme implicite $ax+by+c=0$) et des cercles à la grande question de " +
     'la géométrie analytique — quelle équation caractérise un ensemble de points défini géométriquement ?',
 
   sections: [
@@ -23,22 +23,31 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Un triangle porte plusieurs points remarquables — pied d'une bissectrice, sommets " +
-            "retrouvés depuis leurs milieux, symétrique d'un point — que la géométrie analytique " +
-            "retrouve tous par le même outil : une droite écrite sous forme implicite, jamais sous " +
-            'forme explicite.',
+            "Un triangle cache plusieurs points remarquables : le pied d'une bissectrice, les " +
+            "sommets retrouvés à partir de leurs milieux, le symétrique d'un point. La géométrie " +
+            "analytique les retrouve tous avec le même outil : une droite écrite sous forme " +
+            'implicite — jamais sous forme explicite.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Le prolongement direct de 4e',
+          text:
+            "Tu as déjà tout l'outillage : une droite en $ax+by+c=0$, un vecteur directeur, une " +
+            'normale — exactement ce que tu as construit en géométrie analytique plane, en 4e. Ce ' +
+            'chapitre ne réinvente rien : il réutilise ces mêmes outils sur des figures plus ' +
+            'riches (triangle, cercle, lieu) plutôt que sur une seule droite isolée.',
         },
         {
           kind: 'definition',
           label: 'Repère affine ou orthonormé ?',
           items: [
-            'Un repère est dit **orthonormé** quand ses deux axes sont perpendiculaires et munis ' +
-              "de la même unité de longueur — le seul type de repère où une distance (Pythagore), " +
-              "un angle (produit scalaire) ou une équation de cercle se calculent avec les formules usuelles.",
-            'Un repère seulement **affine** (axes quelconques, unités éventuellement différentes) ' +
-              'reste valable pour tout ce qui est invariant par affinité — alignement, ' +
-              'parallélisme, milieu, barycentre — mais jamais pour une distance, un angle ou un ' +
-              "cercle, notions qui n'ont alors plus de sens.",
+            'Un repère **orthonormé** a deux axes perpendiculaires, avec la même unité sur les ' +
+              "deux — le seul repère où une distance (Pythagore), un angle (produit scalaire) ou " +
+              'une équation de cercle se calculent avec les formules habituelles.',
+            'Un repère seulement **affine** (axes quelconques, unités parfois différentes) reste ' +
+              "valable pour tout ce qui ne change pas par affinité : alignement, parallélisme, " +
+              'milieu, barycentre. Mais jamais pour une distance, un angle ou un cercle — ces ' +
+              "notions n'y ont tout simplement plus de sens.",
           ],
         },
         {
@@ -85,19 +94,19 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'astuce',
           text:
             "Avant d'écrire $dist(P;d)=\\ldots$ ou une équation de cercle " +
-            '$x^2+y^2+Dx+Ey+F=0$, toujours vérifier que le repère de l\'énoncé est bien annoncé ' +
-            '**orthonormé** — tout ce chapitre (cercles, distances, angles) suppose ce repère, sauf ' +
+            '$x^2+y^2+Dx+Ey+F=0$, vérifie toujours que l\'énoncé annonce bien un repère ' +
+            '**orthonormé** ! Tout ce chapitre (cercles, distances, angles) suppose ce repère, sauf ' +
             'mention contraire explicite.',
         },
         {
           kind: 'definition',
           label: 'Convention — toute droite en forme implicite',
           items: [
-            "Tout au long de ce chapitre, une droite s'écrit $ax+by+c=0$ — jamais $y=mx+p$. Cette " +
-              "forme n'a aucun cas particulier pour une droite verticale, et réduit toute " +
-              'intersection de deux droites à un système 2×2.',
-            'Comparer deux équations de la même droite se fait par **proportionnalité** du ' +
-              'triplet $(a;b;c)$, jamais coefficient par coefficient : $4x+6y-10=0$ et ' +
+            "Dans tout ce chapitre, une droite s'écrit $ax+by+c=0$ — jamais $y=mx+p$. Cette forme " +
+              "n'a aucun cas particulier pour une droite verticale, et ramène toute intersection " +
+              'de deux droites à un simple système 2×2.',
+            'Pour comparer deux équations de la même droite, compare le triplet $(a;b;c)$ par ' +
+              '**proportionnalité** — jamais coefficient par coefficient. $4x+6y-10=0$ et ' +
               '$2x+3y-5=0$ sont la même droite.',
           ],
         },
@@ -115,9 +124,9 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'methode',
           label: 'Vecteur directeur, vecteur normal, rotation de 90°',
           items: [
-            'Une droite de vecteur directeur $(d_x;d_y)$ a pour vecteur normal $(-d_y;d_x)$ — la ' +
-              'rotation de 90° du directeur, jamais le vecteur recopié tel quel.',
-            'Une droite passant par $P(x_0;y_0)$ de normale $(a;b)$ a pour équation ' +
+            'Une droite de vecteur directeur $(d_x;d_y)$ a pour vecteur normal $(-d_y;d_x)$ : la ' +
+              'rotation de 90° du directeur — jamais le vecteur recopié tel quel !',
+            'Une droite qui passe par $P(x_0;y_0)$ avec pour normale $(a;b)$ a pour équation ' +
               '$a(x-x_0)+b(y-y_0)=0$.',
           ],
         },
@@ -144,7 +153,7 @@ export const lieuxGeometriques: ChapterContent = {
           text:
             'Pour deux droites de normales $(a_1;b_1)$ et $(a_2;b_2)$ : $a_1b_2-a_2b_1=0$ ⟺ ' +
             'droites **parallèles** ; $a_1a_2+b_1b_2=0$ ⟺ droites **perpendiculaires**. Confondre ' +
-            "les deux critères est l'erreur la plus fréquente de ce chapitre.",
+            "les deux critères, c'est l'erreur la plus fréquente de ce chapitre !",
         },
         {
           kind: 'illustrationGroup',
@@ -175,8 +184,8 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'methode',
           label: 'Pente, parallélisme, perpendicularité, angle',
           items: [
-            'Si $b \\neq 0$, la droite $ax+by+c=0$ a pour pente $m=-a/b$ (coefficient directeur).',
-            'Parallèles ⟺ $m_1=m_2$ ; perpendiculaires ⟺ $m_1 \\cdot m_2=-1$.',
+            'Si $b \\neq 0$, la droite $ax+by+c=0$ a pour pente $m=-a/b$.',
+            'Parallèles ⟺ $m_1=m_2$. Perpendiculaires ⟺ $m_1 \\cdot m_2=-1$.',
             'Angle $\\theta$ entre deux droites sécantes de pentes $m_1$, $m_2$ : ' +
               '$\\tan\\theta = \\dfrac{|m_2-m_1|}{1+m_1 m_2}$.',
           ],
@@ -202,9 +211,9 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'attention',
           label: "Piège classique — une droite verticale n'a pas de pente",
           text:
-            'Une droite $x=k$ (verticale, $b=0$) n\'a pas de pente définie — toujours traiter ce ' +
-            'cas à part (ou raisonner uniquement avec les normales $(a;b)$, qui n\'ont, elles, ' +
-            'jamais de cas particulier).',
+            'Une droite $x=k$ (verticale, $b=0$) n\'a pas de pente définie ! Traite toujours ce ' +
+            "cas à part — ou raisonne uniquement avec les normales $(a;b)$, qui n'ont jamais de " +
+            'cas particulier.',
         },
         {
           kind: 'illustration',
@@ -265,23 +274,24 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'methode',
           label: 'Comment…',
           items: [
-            "**Vérifier qu'un point** $M(x;y)$ **appartient à** $d:ax+by+c=0$ **?** → contrôler que $ax+by+c=0$.",
-            "**Trouver l'équation de la droite passant par deux points A, B ?** → vecteur " +
-              'directeur $\\vec{AB}$, normale = rotation de 90°, puis $a(x-x_A)+b(y-y_A)=0$.',
-            '**Trouver l\'intersection de deux droites ?** → résoudre le système 2×2 ; système ' +
-              'impossible ⟺ parallèles distinctes, indéterminé ⟺ confondues.',
-            '**Vérifier que trois droites sont concourantes ?** → résoudre le système formé par ' +
-              'deux d\'entre elles, puis contrôler que le point obtenu vérifie aussi la 3e équation.',
-            '**Vérifier que trois points sont alignés ?** → écrire l\'équation de la droite ' +
-              "passant par deux d'entre eux, puis contrôler que le 3e la vérifie.",
+            "**Un point** $M(x;y)$ **appartient-il à** $d:ax+by+c=0$ **?** → vérifie que $ax+by+c=0$.",
+            "**Quelle est l'équation de la droite passant par deux points A, B ?** → prends le " +
+              'vecteur directeur $\\vec{AB}$, tourne-le de 90° pour la normale, puis écris ' +
+              '$a(x-x_A)+b(y-y_A)=0$.',
+            '**Comment trouver l\'intersection de deux droites ?** → résous le système 2×2. ' +
+              'Système impossible ⟺ droites parallèles distinctes ; indéterminé ⟺ droites confondues.',
+            '**Trois droites sont-elles concourantes ?** → résous le système formé par deux ' +
+              "d'entre elles, puis vérifie que le point trouvé satisfait aussi la 3e équation.",
+            '**Trois points sont-ils alignés ?** → écris l\'équation de la droite passant par ' +
+              "deux d'entre eux, puis vérifie que le 3e la vérifie aussi.",
           ],
         },
         { kind: 'subheading', text: 'Retrouver un triangle à partir des milieux de ses côtés' },
         {
           kind: 'methode',
           items: [
-            "Si $A'$, $B'$, $C'$ sont les milieux respectifs de $[BC]$, $[CA]$, $[AB]$, chaque " +
-              "sommet se retrouve par $A = B'+C'-A'$ (et permutations circulaires pour B, C).",
+            "Si $A'$, $B'$, $C'$ sont les milieux respectifs de $[BC]$, $[CA]$, $[AB]$, tu " +
+              "retrouves chaque sommet par $A = B'+C'-A'$ (et permutations circulaires pour B, C).",
           ],
         },
         {
@@ -327,10 +337,19 @@ export const lieuxGeometriques: ChapterContent = {
         },
         { kind: 'subheading', text: "Point d'une bissectrice — théorème de la bissectrice" },
         {
+          kind: 'intuition',
+          label: "Ce que fait vraiment une bissectrice",
+          text:
+            "Un point sur la bissectrice d'un angle est à **égale distance** des deux côtés de " +
+            'cet angle — imagine-toi pile au milieu entre deux murs qui se referment sur toi, à ' +
+            "la même distance des deux. C'est cette égalité de distance, appliquée aux deux " +
+            "côtés issus de B, qui fixe la position exacte du point I sur $[AC]$.",
+        },
+        {
           kind: 'definition',
           items: [
             'La bissectrice issue de B coupe le côté opposé $[AC]$ en un point $I$ tel que ' +
-              '$AI/IC = AB/BC$ — jamais au milieu de $[AC]$, sauf triangle isocèle en B.',
+              '$AI/IC = AB/BC$ — jamais au milieu de $[AC]$, sauf si le triangle est isocèle en B !',
             '$I = \\dfrac{BC \\times A + AB \\times C}{AB+BC}$',
           ],
         },
@@ -372,17 +391,18 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'attention',
           label: 'Piège classique — bissectrice ≠ médiane',
           text:
-            'Prendre le milieu de $[AC]$ — soit $(3/2;4)$ — à la place de $I=(4/3;4)$ confond la ' +
-            'bissectrice avec la médiane : ces deux droites ne coïncident que si le triangle est ' +
-            'isocèle en B (ici $AB=5 \\neq 4=BC$, donc jamais).',
+            'Prendre le milieu de $[AC]$ — soit $(3/2;4)$ — à la place de $I=(4/3;4)$, c\'est ' +
+            'confondre la bissectrice avec la médiane ! Ces deux droites ne coïncident que si le ' +
+            'triangle est isocèle en B (ici $AB=5 \\neq 4=BC$, donc jamais).',
         },
         { kind: 'subheading', text: 'Aire variable — un point qui parcourt une droite' },
         {
           kind: 'methode',
           items: [
             'Si $C(t)=P_0+t\\cdot\\vec{dir}$ parcourt une droite $d$ (non parallèle à $(AB)$), ' +
-              "l'aire du triangle $ABC(t)$ vaut $\\tfrac12|K+M\\cdot t|$ — une valeur absolue, donc " +
-              '$|K+Mt|=2k$ équivaut à $K+Mt=2k$ OU $K+Mt=-2k$ : toujours exactement deux solutions distinctes.',
+              "l'aire du triangle $ABC(t)$ vaut $\\tfrac12|K+M\\cdot t|$. C'est une valeur absolue : " +
+              '$|K+Mt|=2k$ équivaut à $K+Mt=2k$ OU $K+Mt=-2k$ — il y a donc toujours exactement ' +
+              'deux solutions distinctes.',
           ],
         },
         {
@@ -426,9 +446,9 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'attention',
           label: "Piège classique — ne garder qu'une seule solution",
           text:
-            'Répondre uniquement $C=(3;4)$ ignore que $C=(3;-2)$ convient tout autant — la valeur ' +
+            'Répondre uniquement $C=(3;4)$ oublie que $C=(3;-2)$ convient tout autant ! La valeur ' +
             'absolue dans la formule de l\'aire garantit toujours deux solutions symétriques par ' +
-            'rapport à $(AB)$, jamais une seule, tant que $d$ n\'est ni parallèle à $(AB)$ ni ' +
+            'rapport à $(AB)$ — jamais une seule, tant que $d$ n\'est ni parallèle à $(AB)$ ni ' +
             'sécante en A ou B.',
         },
         { kind: 'subheading', text: "Symétrique d'un point par rapport à une droite" },
@@ -436,7 +456,7 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'definition',
           items: [
             "Le symétrique $Q$ d'un point $P$ par rapport à une droite $d$ vérifie $Q=2H-P$, où " +
-              '$H$ est le pied de la perpendiculaire abaissée de $P$ sur $d$ — $H$ est alors le ' +
+              '$H$ est le pied de la perpendiculaire abaissée de $P$ sur $d$ : $H$ est alors le ' +
               'milieu de $[PQ]$.',
           ],
         },
@@ -479,17 +499,17 @@ export const lieuxGeometriques: ChapterContent = {
           text:
             "Même si A, B, P ont des coordonnées entières, H a pour dénominateur $a^2+b^2$ (avec " +
             "$(a;b)$ la normale de $(AB)$) — égal à 1 seulement dans des cas très particuliers. " +
-            "Ne jamais s'étonner d'un résultat fractionnaire ici, et ne jamais arrondir avant la " +
-            'fin du calcul.',
+            "Ne t'étonne jamais d'un résultat fractionnaire ici, et n'arrondis jamais avant la " +
+            'fin du calcul !',
         },
         {
           kind: 'entrainement',
           title: 'Points et droites remarquables du triangle',
           generatorId: '6gen54',
           description: [
-            "Retrouve un sommet depuis les milieux des côtés, place un point de bissectrice, fais " +
-              "varier l'aire d'un triangle ou construis le symétrique d'un point par rapport à une " +
-              'droite — toute droite en forme implicite ax+by+c=0.',
+            "Retrouve un sommet à partir des milieux des côtés, place un point de bissectrice, " +
+              "fais varier l'aire d'un triangle ou construis le symétrique d'un point par rapport " +
+              'à une droite — toujours avec une droite en forme implicite ax+by+c=0.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 54. Points et droites remarquables du triangle »',
@@ -506,17 +526,28 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un cercle se manipule sous deux formes — générale (utile quand le centre est inconnu) ' +
-            'et centre-rayon — et les grands classiques (par 3 points, par 2 points et un rayon, ' +
-            'inscrit à un triangle, tangentes depuis un point extérieur) sy ramènent tous.',
+            'Un cercle se manipule sous deux formes : la forme générale (utile quand le centre ' +
+            "est encore inconnu) et la forme centre-rayon. Les grands classiques de cette section " +
+            '— cercle par 3 points, par 2 points et un rayon, cercle inscrit à un triangle, ' +
+            "tangentes depuis un point extérieur — s'y ramènent tous.",
+        },
+        {
+          kind: 'intuition',
+          label: 'Le cercle, le lieu le plus simple qui soit',
+          text:
+            "Reprends l'image du parc : tout le monde qui se tient exactement à 5 mètres d'un " +
+            "arbre dessine un cercle autour de lui. C'est le lieu géométrique le plus simple qui " +
+            "existe — l'ensemble de tous les points à une distance fixe (le rayon) d'un point " +
+            "fixe (le centre), comme une corde tendue autour d'un piquet planté au centre. Toute " +
+            "cette section n'est que la version algébrique de cette même idée.",
         },
         {
           kind: 'definition',
           label: "Deux formes d'équation",
           items: [
-            "Un cercle s'écrit soit sous forme **générale** $x^2+y^2+Dx+Ey+F=0$ (utile quand le " +
-              'centre est inconnu), soit sous forme **centre-rayon** une fois D, E, F connus : ' +
-              'centre $=\\left(-\\dfrac{D}{2};-\\dfrac{E}{2}\\right)$, rayon ' +
+            "Un cercle s'écrit soit sous forme **générale** $x^2+y^2+Dx+Ey+F=0$ (utile tant que " +
+              'le centre est encore inconnu), soit sous forme **centre-rayon** une fois D, E, F ' +
+              'connus : centre $=\\left(-\\dfrac{D}{2};-\\dfrac{E}{2}\\right)$, rayon ' +
               '$=\\sqrt{\\dfrac{D^2}{4}+\\dfrac{E^2}{4}-F}$.',
           ],
         },
@@ -524,9 +555,10 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'methode',
           items: [
-            'Substituer chaque point dans $x^2+y^2+Dx+Ey+F=0$ donne un système **linéaire** de 3 ' +
-              'équations en $(D;E;F)$ — le terme $x^2+y^2$ de chaque point est un nombre connu, ' +
-              'passé au second membre. Trois points non alignés déterminent toujours un unique cercle.',
+            'Substitue chaque point dans $x^2+y^2+Dx+Ey+F=0$ : tu obtiens un système **linéaire** ' +
+              'de 3 équations en $(D;E;F)$ — le terme $x^2+y^2$ de chaque point est un nombre ' +
+              'connu, à passer au second membre. Trois points non alignés déterminent toujours un ' +
+              'unique cercle.',
           ],
         },
         {
@@ -560,11 +592,20 @@ export const lieuxGeometriques: ChapterContent = {
         },
         { kind: 'subheading', text: 'Cercle passant par 2 points, rayon donné' },
         {
+          kind: 'intuition',
+          label: 'Pourquoi le centre est-il sur la médiatrice ?',
+          text:
+            "La médiatrice de $[AB]$, c'est l'ensemble de tous les points à **égale distance** de " +
+            "A et de B — un vrai point d'équilibre entre les deux. Le centre d'un cercle passant " +
+            'par A et B doit être à cette même distance (le rayon) des deux points : il est donc ' +
+            'forcément sur cette médiatrice.',
+        },
+        {
           kind: 'methode',
           items: [
-            'Le centre est nécessairement sur la **médiatrice** de $[AB]$ ; imposer la distance $r$ ' +
-              'depuis un point de cette médiatrice donne une équation du second degré : **deux ' +
-              'centres possibles**, symétriques par rapport à $(AB)$, dès que $2r>AB$.',
+            'Le centre est forcément sur la **médiatrice** de $[AB]$. Impose la distance $r$ ' +
+              'depuis un point de cette médiatrice : tu obtiens une équation du second degré, ' +
+              'avec **deux centres possibles**, symétriques par rapport à $(AB)$, dès que $2r>AB$.',
           ],
         },
         {
@@ -603,17 +644,17 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'attention',
           label: "Piège classique — n'en retenir qu'un seul",
           text:
-            'Ne donner que le centre $(3;4)$ ignore que $(3;-4)$ répond tout aussi bien à la ' +
-            'question — sauf précision supplémentaire dans l\'énoncé (ex. « au-dessus de (AB) »), ' +
-            'les deux solutions doivent toujours être données.',
+            'Ne donner que le centre $(3;4)$ oublie que $(3;-4)$ répond tout aussi bien à la ' +
+            'question ! Sauf précision supplémentaire dans l\'énoncé (ex. « au-dessus de (AB) »), ' +
+            'donne toujours les deux solutions.',
         },
         { kind: 'subheading', text: 'Cercle inscrit à un triangle' },
         {
           kind: 'definition',
           items: [
-            'Avec $a=BC$, $b=CA$, $c=AB$ (côtés **opposés** aux sommets), le centre du cercle ' +
-              'inscrit (incentre) est le barycentre pondéré par les côtés opposés : incentre ' +
-              '$=\\dfrac{aA+bB+cC}{a+b+c}$, rayon $=\\dfrac{\\text{aire}}{\\text{demi-périmètre}}$.',
+            'Avec $a=BC$, $b=CA$, $c=AB$ (les côtés **opposés** à chaque sommet), le centre du ' +
+              "cercle inscrit (l'incentre) est le barycentre pondéré par les côtés opposés : " +
+              'incentre $=\\dfrac{aA+bB+cC}{a+b+c}$, rayon $=\\dfrac{\\text{aire}}{\\text{demi-périmètre}}$.',
           ],
         },
         {
@@ -653,8 +694,8 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'attention',
           label: 'Piège classique — incentre ≠ centre de gravité',
           text:
-            '$(A+B+C)/3=(1;4/3)$ est le **centre de gravité**, pas l\'incentre — l\'incentre ' +
-            'pondère chaque sommet par le côté opposé (a, b, c), une moyenne pondérée, jamais une ' +
+            '$(A+B+C)/3=(1;4/3)$, c\'est le **centre de gravité** — pas l\'incentre ! L\'incentre ' +
+            'pondère chaque sommet par le côté opposé (a, b, c) : une moyenne pondérée, jamais une ' +
             'moyenne simple. Les deux points ne coïncident que pour un triangle équilatéral.',
         },
         {
@@ -684,18 +725,18 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'methode',
           items: [
             'Pour un cercle de centre O et rayon r, et un point P **extérieur** ($OP>r$), il ' +
-              'existe toujours **exactement deux** droites tangentes passant par P.',
-            'Méthode : écrire une droite générique par P sous forme $a(x-x_P)+b(y-y_P)=0$, imposer ' +
-              '$dist(O;d)=r$ — cette condition donne une équation du second degré (en $a/b$ ou en ' +
-              'la pente m), dont les deux solutions sont les deux tangentes.',
+              'existe toujours **exactement deux** droites tangentes qui passent par P.',
+            'Méthode : écris une droite générique par P sous la forme $a(x-x_P)+b(y-y_P)=0$, ' +
+              'impose $dist(O;d)=r$ — cette condition donne une équation du second degré (en ' +
+              '$a/b$ ou en la pente m), dont les deux solutions sont les deux tangentes.',
           ],
         },
         {
           kind: 'astuce',
           text:
             'Par Pythagore dans le triangle rectangle OTP (T = point de contact, $OT \\perp TP$) : ' +
-            '$PT=\\sqrt{OP^2-r^2}$ — utile pour vérifier un résultat, ou répondre directement si ' +
-            'seule la longueur est demandée.',
+            '$PT=\\sqrt{OP^2-r^2}$. Utile pour vérifier un résultat, ou pour répondre directement ' +
+            'si seule la longueur est demandée.',
         },
         {
           kind: 'exemple',
@@ -764,14 +805,14 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'methode',
           label: 'Méthode en 4 étapes',
           items: [
-            "Choisir un repère **adapté** à la figure — souvent un sommet à l'origine et un côté " +
+            "Choisis un repère **adapté** à la figure — souvent un sommet à l'origine et un côté " +
               'sur un axe, pour simplifier les calculs sans perdre en généralité.',
-            'Traduire les données en coordonnées avec des **paramètres génériques** (des lettres, ' +
-              "jamais des nombres fixés) — une propriété prouvée pour des lettres vaut pour tous " +
-              "les cas particuliers, alors qu'un exemple numérique n'en prouve qu'un seul.",
-            'Traduire la propriété à démontrer en une égalité entre expressions calculées à ' +
+            'Traduis les données en coordonnées avec des **paramètres génériques** (des lettres, ' +
+              "jamais des nombres fixés). Une propriété prouvée pour des lettres vaut pour tous " +
+              "les cas particuliers — un exemple numérique, lui, n'en prouve qu'un seul !",
+            'Traduis la propriété à démontrer en une égalité entre deux expressions calculées à ' +
               'partir de ces paramètres.',
-            'Développer les deux membres et constater qu\'ils coïncident, quels que soient les ' +
+            'Développe les deux membres et vérifie qu\'ils coïncident, quels que soient les ' +
               'paramètres.',
           ],
         },
@@ -782,7 +823,7 @@ export const lieuxGeometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Repère choisi : $A(0;0)$, $B(2a;0)$, $D(2b;2c)$ avec a, b, c **quelconques** (le ' +
+                'Repère choisi : $A(0;0)$, $B(2a;0)$, $D(2b;2c)$, avec a, b, c **quelconques** (le ' +
                 'facteur 2 évite toute fraction dans les milieux). Comme ABCD est un ' +
                 'parallélogramme, $C=B+D-A=(2a+2b;2c)$.',
             },
@@ -793,8 +834,8 @@ export const lieuxGeometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Les deux milieux sont **identiques** pour tout a, b, c — les diagonales $[AC]$ et ' +
-                '$[BD]$ se coupent bien toujours en leur milieu commun, quel que soit le ' +
+                'Les deux milieux sont **identiques**, pour tout a, b, c ! Les diagonales $[AC]$ ' +
+                'et $[BD]$ se coupent donc toujours en leur milieu commun, quel que soit le ' +
                 'parallélogramme choisi.',
             },
           ],
@@ -830,8 +871,8 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'astuce',
           text:
             'Traiter cet exemple avec des coordonnées numériques fixées (ex. B(4;0), D(2;3)) ne ' +
-            'prouverait la propriété que pour ce parallélogramme précis. Garder a, b, c génériques ' +
-            'est ce qui transforme un exemple en démonstration.',
+            'prouverait la propriété que pour ce parallélogramme précis. Garder a, b, c ' +
+            'génériques, c\'est exactement ce qui transforme un exemple en démonstration.',
         },
       ],
     },
@@ -846,18 +887,28 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'para',
           text:
             'Un lieu géométrique se décrit toujours en traduisant une condition en une équation. ' +
-            "Cette section couvre les lieux qui se traduisent directement en (x;y), sans paramètre " +
-            "à éliminer — la méthode des génératrices (deux droites mobiles), plus délicate, fait " +
-            "l'objet de la section suivante.",
+            "Cette section couvre les lieux qui se traduisent directement en (x;y), sans aucun " +
+            "paramètre à éliminer. La méthode des génératrices (deux droites mobiles), plus " +
+            "délicate, fait l'objet de la section suivante.",
+        },
+        {
+          kind: 'intuition',
+          label: 'Un lieu géométrique, en une image',
+          text:
+            "Reprends encore l'image du parc : un lieu géométrique, c'est l'ensemble de **tous** " +
+            'les points qui obéissent à une même règle — comme tout le monde qui se tient à ' +
+            'exactement 5 mètres d\'un arbre — et **seulement** ceux-là. Traduire un lieu en ' +
+            'équation, c\'est écrire cette règle avec x et y au lieu de mots.',
         },
         {
           kind: 'definition',
           label: "7 natures possibles d'un lieu",
           items: [
-            "L'ensemble des points vérifiant une condition géométrique donnée (un **lieu**) est " +
-              'toujours l\'une de ces natures : vide, un point, une droite, une paire de droites, ' +
-              'un cercle, une bande pleine (région, bords compris), ou une forme étendue ' +
-              '(polygone). Identifier laquelle exige souvent de distinguer des cas très proches en apparence.',
+            "L'ensemble des points qui vérifient une condition géométrique donnée (un **lieu**) " +
+              'est toujours l\'une de ces natures : vide, un point, une droite, une paire de ' +
+              'droites, un cercle, une bande pleine (région, bords compris), ou une forme étendue ' +
+              '(polygone). Identifier laquelle demande souvent de distinguer des cas qui se ' +
+              'ressemblent beaucoup en apparence.',
           ],
         },
         {
@@ -866,22 +917,22 @@ export const lieuxGeometriques: ChapterContent = {
           items: [
             "Tous les lieux de cette section s'obtiennent par **traduction directe** : la " +
               "condition de l'énoncé (une distance, une somme, un rapport) s'écrit immédiatement " +
-              "en (x;y), sans paramètre à éliminer. C'est différent des lieux de la section " +
+              "en (x;y), sans aucun paramètre à éliminer. C'est différent des lieux de la section " +
               'suivante (méthode des **génératrices**, où deux droites mobiles dépendent d\'un ' +
               'paramètre commun α à éliminer) et de ceux donnés par une **représentation ' +
-              'paramétrique** ci-dessous (où x et y dépendent séparément d\'un même paramètre, ' +
-              'éliminé via une identité).',
+              'paramétrique**, plus loin (où x et y dépendent séparément d\'un même paramètre, ' +
+              'éliminé grâce à une identité).',
           ],
         },
         { kind: 'subheading', text: 'Valeur absolue — somme ou différence, deux natures opposées' },
         {
           kind: 'methode',
           items: [
-            'Pour $p=2$, $q=-1$, $k=3$ : $|x-p|+|y-q|=k$ (**somme**) donne un **losange** borné, ' +
-              'de sommets obtenus en annulant tour à tour une seule valeur absolue — $(p\\pm k;q)$ ' +
-              'et $(p;q\\pm k)$, jamais les 4 combinaisons de signes $(p\\pm k;q\\pm k)$ (qui ' +
-              "donneraient les sommets d'un carré ne vérifiant même pas l'équation).",
-            '$|x-p|-|y-q|=k$ (**différence**) donne au contraire un lieu **non borné**, 4 demi-droites.',
+            'Pour $p=2$, $q=-1$, $k=3$ : $|x-p|+|y-q|=k$ (**somme**) donne un **losange** borné. ' +
+              'Ses sommets s\'obtiennent en annulant tour à tour une seule valeur absolue — ' +
+              '$(p\\pm k;q)$ et $(p;q\\pm k)$ — jamais les 4 combinaisons de signes $(p\\pm k;q\\pm k)$, ' +
+              "qui donneraient les sommets d'un carré ne vérifiant même pas l'équation !",
+            '$|x-p|-|y-q|=k$ (**différence**) donne au contraire un lieu **non borné** : 4 demi-droites.',
           ],
         },
         {
@@ -933,8 +984,8 @@ export const lieuxGeometriques: ChapterContent = {
           label: 'Piège classique — sommets du losange',
           text:
             "Répondre $(5;2)$, $(5;-4)$, $(-1;2)$, $(-1;-4)$ (les 4 combinaisons $p\\pm k$, " +
-            "$q\\pm k$) est faux : ces 4 points sont les sommets d'un **carré** qui ne vérifie pas " +
-            "l'équation. Un seul terme s'annule à la fois — les vrais sommets sont $(p+k;q)$, " +
+            "$q\\pm k$) est faux ! Ces 4 points sont les sommets d'un **carré**, qui ne vérifie " +
+            "pas l'équation. Un seul terme s'annule à la fois : les vrais sommets sont $(p+k;q)$, " +
             '$(p-k;q)$, $(p;q+k)$, $(p;q-k)$.',
         },
         { kind: 'subheading', text: 'Somme de carrés de distances — le théorème de la médiane' },
@@ -942,8 +993,8 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'definition',
           items: [
             'Pour M milieu de $[AB]$ : $PA^2+PB^2 = 2\\times PM^2 + AB^2/2$. Le lieu $PA^2+PB^2=k$ ' +
-              'a donc toujours un seuil $AB^2/2$, avec trois régimes stricts : $k>$seuil → cercle ' +
-              'centré M ; $k=$seuil → le point M seul ; $k<$seuil → vide.',
+              'a donc toujours un seuil, $AB^2/2$, avec trois régimes stricts : $k>$seuil → ' +
+              'cercle centré en M ; $k=$seuil → le point M seul ; $k<$seuil → lieu vide.',
           ],
         },
         {
@@ -975,8 +1026,8 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'astuce',
           text:
             'Au seuil exact, le lieu n\'est pas un « tout petit cercle » mais **exactement** le ' +
-            'point M, rayon nul — et strictement en dessous du seuil, le lieu est réellement ' +
-            '**vide** (aucune tolérance). Ces trois régimes ne se mélangent jamais.',
+            'point M, rayon nul. Et strictement en dessous du seuil, le lieu est réellement ' +
+            '**vide** — aucune tolérance ! Ces trois régimes ne se mélangent jamais.',
         },
         {
           kind: 'illustrationGroup',
@@ -1019,8 +1070,8 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'definition',
           items: [
             'Pour $A(-a;0)$, $B(a;0)$, le lieu $PA^2=k\\times PB^2$ est : si $k=1$, la ' +
-              '**médiatrice** de $[AB]$ (traitement à part, jamais une limite numérique de la ' +
-              'formule générale) ; si $k \\neq 1$, un **cercle** centré sur l\'axe (AB).',
+              '**médiatrice** de $[AB]$ — un traitement à part, jamais une simple limite ' +
+              'numérique de la formule générale ; si $k \\neq 1$, un **cercle** centré sur l\'axe (AB).',
           ],
         },
         {
@@ -1055,9 +1106,9 @@ export const lieuxGeometriques: ChapterContent = {
           label: 'Piège classique — 4c au lieu de 4c²',
           text:
             'Pour un carré $[-c;c]^2$ : le seuil de la somme des **carrés** des distances aux 4 ' +
-            'côtés vaut $4c^2$ (comme le théorème de la médiane ci-dessus) ; le seuil de la somme ' +
-            'des distances **simples** (non élevées au carré) vaut $4c$ — ne jamais confondre ces ' +
-            'deux formules qui se ressemblent.',
+            'côtés vaut $4c^2$ (comme le théorème de la médiane ci-dessus). Le seuil de la somme ' +
+            'des distances **simples** (non élevées au carré) vaut $4c$ — ne confonds jamais ces ' +
+            'deux formules qui se ressemblent !',
         },
         {
           kind: 'illustration',
@@ -1155,27 +1206,38 @@ export const lieuxGeometriques: ChapterContent = {
             "éliminer ce paramètre pour faire apparaître l'équation du lieu.",
         },
         {
+          kind: 'intuition',
+          label: 'Deux règles qui pivotent ensemble',
+          text:
+            "Imagine deux règles articulées, chacune pivotant autour d'un point fixe, réglées " +
+            'pour tourner **en même temps**, au même rythme. Leur point de croisement se déplace ' +
+            "tout seul et trace un chemin — c'est exactement ce chemin, ce lieu, que la méthode " +
+            'des génératrices permet de retrouver, sans avoir à suivre les deux règles image par ' +
+            'image.',
+        },
+        {
           kind: 'definition',
           label: 'Méthode des génératrices',
           items: [
             'Un point mobile est parfois défini comme l\'intersection de deux droites qui ' +
               "dépendent toutes deux d'un même paramètre α — les **génératrices**.",
-            "La méthode : (1) écrire les deux équations en fonction de α ; (2) **éliminer** α " +
-              'entre les deux pour obtenir une équation brute en (x;y) ; (3) factoriser ; (4) ' +
-              'trier chaque morceau : **singulier** (les deux génératrices coïncident pour un α ' +
-              "précis), **parasite** (solution algébrique qu'aucune valeur de α n'atteint), ou " +
-              '**propre** (fait réellement partie du lieu) ; (5) préciser la **restriction** — la ' +
-              'portion réellement balayée quand α parcourt son domaine.',
+            "La méthode, en 5 étapes : (1) écris les deux équations en fonction de α ; (2) " +
+              '**élimine** α entre les deux pour obtenir une équation brute en (x;y) ; (3) ' +
+              'factorise ; (4) trie chaque morceau — **singulier** (les deux génératrices ' +
+              'coïncident pour un α précis), **parasite** (une solution algébrique qu\'aucune ' +
+              'valeur de α n\'atteint jamais), ou **propre** (il fait réellement partie du lieu) ; ' +
+              '(5) précise la **restriction** — la portion vraiment balayée quand α parcourt son ' +
+              'domaine.',
           ],
         },
         {
           kind: 'attention',
           label: 'Piège classique — chercher un parasite « par réflexe »',
           text:
-            "Tous les problèmes de génératrices n'ont pas les 3 morceaux : certains n'ont aucun " +
-            "parasite, d'autres aucun singulier. Le statut de chaque morceau se lit sur la " +
-            'configuration géométrique réelle, jamais par habitude — vérifier à chaque fois ' +
-            'plutôt que supposer.',
+            "Tous les problèmes de génératrices n'ont pas forcément les 3 morceaux : certains " +
+            "n'ont aucun parasite, d'autres aucun singulier. Le statut de chaque morceau se lit " +
+            'sur la configuration géométrique réelle — jamais par habitude. Vérifie à chaque ' +
+            'fois, ne suppose jamais.',
         },
         { kind: 'subheading', text: 'Exemple résolu en détail — un parallélogramme' },
         {
@@ -1186,14 +1248,14 @@ export const lieuxGeometriques: ChapterContent = {
               kind: 'para',
               text:
                 'Génératrices : droite (AY) → $\\alpha x - 4y=0$ ; droite (BZ) → ' +
-                '$\\alpha(x-4)+4y=0$. En éliminant α (produit croisé) puis en factorisant : ' +
-                '$y(2x-4)=0$.',
+                '$\\alpha(x-4)+4y=0$. En éliminant α (par produit croisé) puis en factorisant, on ' +
+                'obtient $y(2x-4)=0$.',
             },
             {
               kind: 'para',
               text:
                 'Morceau $y=0$ (pour $\\alpha=0$, les deux génératrices coïncident) : ' +
-                '**singulier**. Morceau $x=2$ : **propre** — remarquer qu\'il ne dépend pas de la ' +
+                '**singulier**. Morceau $x=2$ : **propre** — remarque qu\'il ne dépend pas de la ' +
                 'hauteur 6, seulement de la largeur ($x=b/2$).',
             },
             {
@@ -1245,9 +1307,9 @@ export const lieuxGeometriques: ChapterContent = {
           kind: 'astuce',
           text:
             "Ici, $x=2$ ne dépend pas de la hauteur du parallélogramme — seule la **restriction** " +
-            '(le segment réellement balayé, qui va jusqu\'à y=3) en dépend. Toujours distinguer ' +
-            "l'équation du lieu de sa restriction : décrire un lieu sans restriction est une " +
-            'réponse incomplète.',
+            '(le segment réellement balayé, qui va jusqu\'à y=3) en dépend. Distingue toujours ' +
+            "l'équation du lieu de sa restriction : décrire un lieu sans sa restriction, c'est " +
+            'une réponse incomplète.',
         },
         { kind: 'subheading', text: "Une médiane qui émerge d'une famille de céviennes" },
         {
@@ -1257,7 +1319,7 @@ export const lieuxGeometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Pour chaque hauteur α, la parallèle à (BC) coupe $[AB]$ en D et $[AC]$ en E ; le ' +
+                'Pour chaque hauteur α, la parallèle à (BC) coupe $[AB]$ en D et $[AC]$ en E. Le ' +
                 'lieu de $(BE)\\cap(CD)$, une fois α éliminé et factorisé, donne un morceau ' +
                 'singulier $y=0$ et un morceau propre $4x+3y-12=0$.',
             },
@@ -1265,8 +1327,8 @@ export const lieuxGeometriques: ChapterContent = {
               kind: 'para',
               text:
                 'Vérification : cette droite passe par A(0;4) et par le milieu de $[BC]$, (3;0) — ' +
-                "c'est très exactement la **médiane** issue de A, qui émerge comme lieu " +
-                'd\'intersection sans jamais être postulée au départ.',
+                "c'est très exactement la **médiane** issue de A, qui apparaît ici comme un lieu " +
+                'd\'intersection, sans jamais avoir été postulée au départ.',
             },
           ],
         },
@@ -1308,16 +1370,16 @@ export const lieuxGeometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Les deux génératrices (perpendiculaires à (AC) par A, à (BC) par B) s\'éliminent ' +
-                'directement en $x=1$.',
+                'Les deux génératrices (perpendiculaire à (AC) par A, perpendiculaire à (BC) par ' +
+                'B) s\'éliminent directement en $x=1$.',
             },
             {
               kind: 'para',
               text:
                 "Un seul morceau, entièrement **propre** — mais le point (1;0) lui-même n'est " +
-                'jamais atteint : il faudrait α infini pour l\'obtenir. Un point **parasite** peut ' +
-                "donc exister même quand l'équation factorisée n'a qu'un seul morceau, entièrement " +
-                'propre par ailleurs.',
+                'jamais atteint : il faudrait un α infini pour l\'obtenir. Un point **parasite** ' +
+                "peut donc exister même quand l'équation factorisée n'a qu'un seul morceau, par " +
+                'ailleurs entièrement propre.',
             },
           ],
         },
@@ -1356,8 +1418,8 @@ export const lieuxGeometriques: ChapterContent = {
             'Le produit croisé (utile quand les deux génératrices ont des coefficients de α ' +
             'différents), la soustraction directe (quand elles partagent le même coefficient) et ' +
             'la substitution (quand un angle double $\\tan(2\\alpha)$ intervient) ne sont pas ' +
-            "interchangeables — appliquer aveuglément la même technique d'une configuration à " +
-            "l'autre peut introduire un facteur parasite en trop.",
+            "interchangeables ! Appliquer aveuglément la même technique d'une configuration à " +
+            "l'autre peut faire apparaître un facteur parasite en trop.",
         },
         {
           kind: 'entrainement',
@@ -1382,10 +1444,10 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'definition',
           items: [
-            'Un lieu peut être donné directement par deux équations $x=f(t)$, $y=g(t)$ (une ' +
-              '**représentation paramétrique**), plutôt que par une seule condition géométrique. ' +
+            'Un lieu peut être donné directement par deux équations $x=f(t)$, $y=g(t)$ — une ' +
+              '**représentation paramétrique** — plutôt que par une seule condition géométrique. ' +
               'Pour retrouver l\'équation cartésienne du lieu, on élimine t entre les deux ' +
-              'équations — le plus souvent via une **identité** qui relie f et g (par exemple ' +
+              'équations, le plus souvent grâce à une **identité** qui relie f et g (par exemple ' +
               '$\\cos^2 t+\\sin^2 t=1$).',
           ],
         },
@@ -1428,8 +1490,8 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Pour contrôler un résultat, choisir une valeur simple de λ (ex. $\\lambda=\\pi/2$ ' +
-            'donne $\\cos\\lambda=0$, $\\sin\\lambda=1$, donc le point (0;1)) et vérifier qu\'il ' +
+            'Pour contrôler un résultat, choisis une valeur simple de λ (ex. $\\lambda=\\pi/2$ ' +
+            'donne $\\cos\\lambda=0$, $\\sin\\lambda=1$, donc le point (0;1)) et vérifie qu\'il ' +
             "satisfait bien l'équation cartésienne obtenue — un contrôle rapide qui ne demande " +
             'aucun nouveau calcul.',
         },
@@ -1466,15 +1528,15 @@ export const lieuxGeometriques: ChapterContent = {
     },
     forward:
       "Le lien entre une figure et son équation, construit ici pour des droites et des cercles, " +
-      "se retrouvera à l'identique en géométrie de l'espace — avec une troisième coordonnée en " +
-      'plus.',
+      "tu le retrouveras à l'identique en géométrie de l'espace — avec une troisième coordonnée " +
+      'en plus.',
     entrainement: {
       kind: 'entrainement',
       title: 'Lieux géométriques — quiz vrai/faux',
       generatorId: '6gen72',
       description: [
-        'Affirmations vrai/faux réparties par thème qui reprennent tout ce chapitre. Un seul essai ' +
-          'par question, la justification est toujours révélée.',
+        'Des affirmations vrai/faux réparties par thème, qui reprennent tout ce chapitre. Un ' +
+          'seul essai par question — la justification est toujours révélée.',
       ],
       chantier: '6e-6h',
       whereLabel: '6e (6h) → « 72. Lieux géométriques — quiz vrai/faux »',

@@ -7,10 +7,10 @@ export const fonctionsExponentielles: ChapterContent = {
   title: 'Fonctions exponentielles',
   slug: 'fonctions-exponentielles',
   lede:
-    "Une fonction exponentielle est la seule dont la vitesse de croissance à chaque instant est " +
-    "proportionnelle à sa propre valeur — c'est ce qui explique pourquoi elle décrit population, " +
-    "radioactivité, épidémies ou intérêts composés, et pourquoi $e^x$ occupe une place à part : " +
-    "elle est sa propre dérivée.",
+    "Une population qui double, une épidémie qui explose, un capital qui grossit tout seul : tu " +
+    "vas retrouver la même fonction partout, $a^x$. Elle a une propriété unique — sa vitesse de " +
+    "croissance est toujours proportionnelle à sa propre valeur — et c'est exactement ce qui " +
+    "rend $e^x$ à part : c'est la seule fonction qui est sa propre dérivée.",
 
   sections: [
     {
@@ -20,11 +20,23 @@ export const fonctionsExponentielles: ChapterContent = {
       kicker: "la position de la base par rapport à 1, puis la dominance sur tout polynôme",
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Une bactérie qui se divise',
+          text:
+            'Imagine une seule bactérie dans une boîte, qui se divise en deux toutes les ' +
+            'heures : 1, puis 2, puis 4, puis 8… Après une journée, elles se comptent déjà par ' +
+            'millions ! Un capital placé à intérêts composés, une rumeur qui se propage, une ' +
+            'épidémie qui démarre : ces phénomènes suivent tous le même principe — à chaque pas ' +
+            "de temps, ce n'est pas une quantité fixe qui s'ajoute, mais un facteur constant qui " +
+            "multiplie ce qu'il y avait déjà. C'est exactement l'idée derrière toute fonction " +
+            'exponentielle.',
+        },
+        {
           kind: 'para',
           text:
-            "Il existe deux grandes façons pour une quantité d'évoluer à intervalles de temps " +
-            "égaux : de façon **linéaire** (elle augmente d'une valeur constante) ou de façon " +
-            "**exponentielle** (elle est multipliée par un facteur constant).",
+            "Une quantité peut évoluer de deux façons, à intervalles de temps égaux. Façon " +
+            "**linéaire** : elle augmente toujours de la même valeur. Façon **exponentielle** : " +
+            'elle est multipliée à chaque fois par le même facteur.',
         },
         {
           kind: 'exempleLibre',
@@ -33,44 +45,45 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "Un robinet remplit une citerne à débit constant $d$ : la quantité suit " +
-                "$f(t) = d \\cdot t + q_0$, une fonction du premier degré — croissance **linéaire**.",
+                'Un robinet remplit une citerne à débit constant $d$. La quantité suit ' +
+                "$f(t) = d \\cdot t + q_0$ — une fonction du premier degré, donc une croissance " +
+                '**linéaire**.',
             },
             {
               kind: 'para',
               text:
-                "Une surface d'algues double chaque semaine : en notant $S_0$ la surface " +
-                "initiale, la surface après $t$ semaines entières vaut $S_0 \\cdot 2^t$ — chaque " +
-                "semaine, ce n'est pas une quantité fixe qui s'ajoute, mais un **facteur** " +
-                "constant (ici ×2) qui s'applique. C'est une croissance **exponentielle**.",
+                "Une surface d'algues double chaque semaine. En notant $S_0$ la surface " +
+                'initiale, elle vaut $S_0 \\cdot 2^t$ après $t$ semaines entières. Ici, ce ' +
+                "n'est pas une quantité fixe qui s'ajoute à chaque semaine, mais un " +
+                "**facteur** constant (×2) qui s'applique. C'est ça, une croissance " +
+                '**exponentielle**.',
             },
             {
               kind: 'para',
               text:
-                "Rien n'oblige à s'arrêter aux semaines entières. Le facteur multiplicatif " +
-                "quotidien $k$ doit lui aussi être constant, et sept jours doivent redonner le " +
-                "facteur hebdomadaire : $k^7 = 2$, donc $k = \\sqrt[7]{2} = 2^{1/7}$. Après " +
-                "3 jours, la surface est donc multipliée par $\\left(2^{1/7}\\right)^3 = 2^{3/7}$, " +
-                "et après 7 jours par $\\left(2^{1/7}\\right)^7 = 2$ — bien le facteur d'une " +
-                "semaine, comme il se doit.",
+                "Mais rien n'oblige à s'arrêter aux semaines entières ! Le facteur " +
+                'multiplicatif quotidien $k$ doit lui aussi être constant, et sept jours de ' +
+                'suite doivent redonner le facteur hebdomadaire : $k^7 = 2$, donc ' +
+                '$k = \\sqrt[7]{2} = 2^{1/7}$. Après 3 jours, la surface est multipliée par ' +
+                '$\\left(2^{1/7}\\right)^3 = 2^{3/7}$ ; après 7 jours, par ' +
+                "$\\left(2^{1/7}\\right)^7 = 2$ — on retombe bien sur le facteur d'une semaine.",
             },
             {
               kind: 'para',
               text:
-                "En généralisant, pour une durée de $\\dfrac{n}{p}$ semaines la surface est " +
-                "multipliée par $2^{n/p}$, et pour une durée de $\\dfrac{n}{p}$ semaines " +
-                "**avant** l'instant initial il faut au contraire **diviser** par $2^{n/p}$, " +
-                "c'est-à-dire multiplier par $2^{-n/p}$. Pour tout $t$ **rationnel**, positif ou " +
-                "négatif, on obtient donc la même écriture : $f(t) = S_0 \\cdot 2^t$.",
+                'En généralisant : pour une durée de $\\dfrac{n}{p}$ semaines, la surface est ' +
+                "multipliée par $2^{n/p}$. Et **avant** l'instant initial, il faut au contraire " +
+                '**diviser** par $2^{n/p}$, donc multiplier par $2^{-n/p}$. Pour tout $t$ ' +
+                '**rationnel** — positif ou négatif — tu obtiens donc toujours la même ' +
+                'écriture : $f(t) = S_0 \\cdot 2^t$.',
             },
             {
               kind: 'para',
               text:
-                "Toutes les définitions de puissance vues les années précédentes (exposant " +
-                "entier, fractionnaire, positif, négatif), si disparates qu'elles paraissent, " +
-                "expriment ici une seule et même réalité. Reste à franchir un dernier pas : " +
-                "donner un sens à $2^t$ pour $t$ **irrationnel** — c'est exactement l'objet de " +
-                "la définition qui suit.",
+                'Toutes ces définitions de puissance que tu as vues les années précédentes ' +
+                '(exposant entier, fractionnaire, positif, négatif) racontent en fait la même ' +
+                'histoire. Il reste un dernier pas à franchir : donner un sens à $2^t$ quand ' +
+                '$t$ est **irrationnel** — exactement ce que fait la définition qui suit.',
             },
           ],
         },
@@ -114,35 +127,60 @@ export const fonctionsExponentielles: ChapterContent = {
             "Pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$, il existe une unique fonction " +
               "$f : \\mathbb{R} \\to \\mathbb{R}$, continue, telle que $f(x) = a^x$ pour tout $x$ " +
               "rationnel (théorème admis). Cette fonction, notée $\\exp_a$, **prolonge " +
-              "naturellement** la puissance $a^x$ à tout exposant réel — y compris irrationnel : " +
-              "on pose alors, par définition, $a^x = \\exp_a(x)$.",
-            "Pour $a = 1$, cette fonction est constante (toujours égale à 1) : ce n'est pas une " +
-              "exponentielle — d'où la condition $a \\neq 1$.",
+              "naturellement** la puissance $a^x$ à tout exposant réel, irrationnel compris : " +
+              "on pose $a^x = \\exp_a(x)$, par définition.",
+            "Pour $a = 1$, la fonction est constante — toujours égale à 1. Ce n'est donc pas " +
+              "vraiment une exponentielle, d'où la condition $a \\neq 1$.",
           ],
         },
         {
           kind: 'methode',
           label: 'Propriétés des puissances à exposants réels',
           items: [
-            "Pour $a, b \\in \\mathbb{R}_0^+$ et $r, s \\in \\mathbb{R}$, exactement les mêmes " +
-              'règles qu\'avec des exposants entiers ou rationnels restent valables :',
+            "Pour $a, b \\in \\mathbb{R}_0^+$ et $r, s \\in \\mathbb{R}$ : ce sont exactement " +
+              "les mêmes règles qu'avec des exposants entiers ou rationnels, rien de nouveau à " +
+              'apprendre :',
             "**(1)** $a^r \\cdot a^s = a^{r+s} \\qquad$ **(2)** $\\dfrac{a^r}{a^s} = a^{r-s}$",
             "**(3)** $(a \\cdot b)^r = a^r \\cdot b^r \\qquad$ **(4)** $(a^r)^s = a^{r \\cdot s}$",
-            "Ces quatre règles sont l'**extension** aux exposants réels de règles déjà connues " +
-              "pour les exposants rationnels ; elles sont admises sans démonstration à ce stade " +
-              "(une preuve complète relève de l'analyse réelle). Elles seront citées par leur " +
-              'numéro, (1) à (4), dans toutes les démonstrations du chapitre.',
-            "Attention à la condition sur les bases : si $a$ ou $b$ n'est pas strictement " +
-              "positif, ces égalités peuvent encore être vraies pour certaines valeurs de $r$ " +
-              "et $s$, mais plus pour toutes — et la règle (2) n'est **jamais** valable si " +
-              '$a = 0$, faute de pouvoir diviser par $0^s = 0$.',
+            "Ces quatre règles ne sont que l'**extension**, aux exposants réels, de règles que " +
+              "tu connais déjà pour les exposants rationnels. Admises sans démonstration ici " +
+              "(une preuve complète relève de l'analyse réelle). Tu les retrouveras citées par " +
+              'leur numéro, (1) à (4), dans toutes les démonstrations du chapitre.',
+            "Attention à la condition sur les bases ! Si $a$ ou $b$ n'est pas strictement " +
+              'positif, ces égalités restent parfois vraies pour certaines valeurs de $r$ et ' +
+              "$s$, mais plus pour toutes. Et la règle (2) ne marche **jamais** si $a = 0$ : " +
+              'diviser par $0^s = 0$ n\'a aucun sens.',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi a⁰ vaut-il 1 ?',
+          text:
+            "Tu connais déjà cette règle, mais d'où vient-elle vraiment ? Prends n'importe " +
+            'quel nombre $a \\neq 0$ et regarde $\\dfrac{a^n}{a^n}$ : ce rapport vaut ' +
+            "évidemment 1, quel que soit $n$. Or la règle (2) donne aussi " +
+            '$\\dfrac{a^n}{a^n} = a^{n-n} = a^0$. Les deux écritures désignent le même ' +
+            "nombre : $a^0$ vaut donc 1, exactement pour la raison qu'une quantité divisée " +
+            "par elle-même vaut toujours 1 — ce n'est pas une convention tombée du ciel, " +
+            'juste une conséquence directe des règles de puissances.',
         },
         {
           kind: 'para',
           text:
-            "Le comportement d'une fonction exponentielle $a^x$ ($a>0$, $a \\neq 1$) à l'infini " +
-            "ne dépend que d'une seule chose : la position de $a$ par rapport à 1.",
+            "En l'infini, le comportement d'une fonction exponentielle $a^x$ ($a>0$, " +
+            "$a \\neq 1$) ne dépend que d'une seule chose : où se trouve $a$ par rapport à 1.",
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi la courbe ne touche jamais l’axe des x',
+          text:
+            "Pense à une substance radioactive dont la moitié disparaît à chaque durée fixe : " +
+            'après une demi-vie il en reste la moitié, après deux il en reste un quart, après ' +
+            'trois un huitième… La quantité restante est toujours divisée par deux, donc elle ' +
+            'ne peut jamais tomber à zéro — elle s\'en approche indéfiniment, sans jamais ' +
+            "l'atteindre. C'est exactement ce que fait une exponentielle $a^x$ avec $0<a<1$ " +
+            'quand $x$ grandit : elle se rapproche de 0 sans jamais le toucher. La droite ' +
+            '$y=0$ est une **asymptote horizontale**.',
         },
         {
           kind: 'featureTable',
@@ -196,16 +234,30 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'astuce',
           label: '💡 Le cas de e',
           text:
-            "$e \\approx 2{,}718 > 1$ : la fonction $e^x$ suit donc toujours le premier cas de " +
-            "la table ci-dessus (croissante, 0 en −∞, +∞ en +∞).",
+            "$e \\approx 2{,}718 > 1$. La fonction $e^x$ suit donc toujours le premier cas de " +
+            'la table ci-dessus : croissante, tend vers 0 en −∞, vers +∞ en +∞.',
         },
         { kind: 'subheading', text: 'La règle de dominance' },
+        {
+          kind: 'intuition',
+          label: 'Ce que tu sais déjà, et ce qui change',
+          text:
+            'Une fonction du premier degré grandit toujours **du même pas** : chaque unité de ' +
+            'x ajoute la même valeur constante. Une fonction exponentielle, elle, grandit ' +
+            "d'un pas qui **grossit lui-même** à chaque fois, puisqu'il est multiplié par un " +
+            'facteur constant plutôt qu\'additionné. Au début, un polynôme comme $x^{1000}$ ' +
+            "peut sembler beaucoup plus grand — mais l'écart entre deux valeurs d'une " +
+            "exponentielle continue de s'amplifier indéfiniment, alors que celui d'un " +
+            "polynôme ralentit relativement. Tôt ou tard, l'exponentielle rattrape et dépasse " +
+            'n\'importe quel polynôme, aussi impressionnant soit-il au départ.',
+        },
         {
           kind: 'methode',
           label: 'À retenir',
           items: [
-            "Pour toute base $a > 1$, l'exponentielle $a^x$ l'emporte toujours sur n'importe " +
-              "quelle puissance de $x$, aussi grand soit son degré ou son coefficient :",
+            "Pour toute base $a > 1$, l'exponentielle $a^x$ finit **toujours** par l'emporter " +
+              "sur n'importe quelle puissance de $x$ — même avec un degré ou un coefficient " +
+              'énorme :',
             "$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^n}{a^x} = 0 \\quad$ pour tout entier $n$",
           ],
         },
@@ -233,9 +285,9 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "$\\displaystyle\\lim_{x \\to +\\infty} (2^x - x^{1000}) = +\\infty$, **pas** $-\\infty$. Même avec " +
-            "un exposant polynomial énorme, l'exponentielle finit par l'emporter — le signe du " +
-            "terme polynomial ne change jamais la conclusion.",
+            "$\\displaystyle\\lim_{x \\to +\\infty} (2^x - x^{1000}) = +\\infty$, **pas** $-\\infty$ ! Même " +
+            "avec un exposant polynomial énorme, l'exponentielle finit toujours par gagner — " +
+            'le signe du terme polynomial ne change jamais la conclusion.',
         },
         {
           kind: 'exemple',
@@ -259,8 +311,8 @@ export const fonctionsExponentielles: ChapterContent = {
           label: 'À retenir',
           items: [
             '$\\displaystyle\\lim_{x \\to 0} \\dfrac{e^x - 1}{x} = 1$',
-            "Cette limite n'est autre que le nombre dérivé de $e^x$ en 0 — elle annonce " +
-              'directement la section suivante.',
+            "Cette limite, c'est en fait le nombre dérivé de $e^x$ en 0 — elle annonce " +
+              'directement ce qui vient dans la section suivante.',
           ],
         },
         {
@@ -268,8 +320,8 @@ export const fonctionsExponentielles: ChapterContent = {
           title: 'Calcul de limites',
           generatorId: '6gen6',
           description: [
-            "Calcule des limites de fonctions exponentielles en utilisant la position de la " +
-              'base par rapport à 1 et la règle de dominance sur tout polynôme.',
+            'Calcule des limites de fonctions exponentielles : joue avec la position de la ' +
+              'base par rapport à 1, puis avec la règle de dominance sur tout polynôme.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 6. Calcul de limites »',
@@ -286,8 +338,8 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'para',
           text:
             "$a^x$ est définie sur $\\mathbb{R}$ tout entier, quelle que soit la base $a>0$ " +
-            "($a \\neq 1$) — seule une composition avec une autre fonction (racine, fraction…) " +
-            "peut restreindre ce domaine.",
+            "($a \\neq 1$). Seule une composition avec une autre fonction (racine, fraction…) " +
+            'peut restreindre ce domaine.',
         },
         {
           kind: 'definition',
@@ -295,16 +347,17 @@ export const fonctionsExponentielles: ChapterContent = {
           items: [
             "$(a^x)' = \\ln(a) \\cdot a^x$",
             "Cas particulier essentiel : $\\ln(e) = 1$, donc $(e^x)' = e^x$ — $e^x$ est sa " +
-              'propre dérivée.',
-            "Ces deux formules ne sont pas à admettre : elles sont **démontrées** en fin de " +
-              "section, à partir de la seule définition du nombre dérivé.",
+              'propre dérivée, la seule fonction dans ce cas !',
+            'Ces deux formules ne sont pas à apprendre par cœur sans comprendre : elles sont ' +
+              '**démontrées** en fin de section, à partir de la seule définition du nombre ' +
+              'dérivé.',
           ],
         },
         {
           kind: 'piege',
           text:
-            "$(2^x)'$ **n'est pas** $2^x$ — il manque le facteur $\\ln(2)$ : $(2^x)' = \\ln(2) " +
-            "\\cdot 2^x$. Seule la base $e$ se dérive « sans rien changer ».",
+            "$(2^x)'$ **n'est pas** $2^x$ ! Il manque le facteur $\\ln(2)$ : " +
+            "$(2^x)' = \\ln(2) \\cdot 2^x$. Seule la base $e$ se dérive « sans rien changer ».",
         },
         { kind: 'subheading', text: 'Exemples résolus' },
         {
@@ -320,8 +373,8 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "$k(x) = 3^{x^4-x}$ : base $\\ne e$ **et** exposant composé, les deux facteurs " +
-                'apparaissent donc. Avec $u(x) = x^4-x$ :',
+                "$k(x) = 3^{x^4-x}$ : base $\\ne e$ **et** exposant composé, donc les deux " +
+                'facteurs apparaissent. Avec $u(x) = x^4-x$ :',
             },
             {
               kind: 'para',
@@ -332,9 +385,9 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "$m(x) = e^{\\sin(x)}$ : base $e$, donc pas de facteur $\\ln$, mais la chaîne " +
-                "reste : $m'(x) = \\left(\\sin x\\right)' \\cdot e^{\\sin x} = \\cos(x) \\cdot " +
-                'e^{\\sin x}$.',
+                "$m(x) = e^{\\sin(x)}$ : base $e$, donc pas de facteur $\\ln$ — mais la chaîne " +
+                "reste quand même ! $m'(x) = \\left(\\sin x\\right)' \\cdot e^{\\sin x} = " +
+                '\\cos(x) \\cdot e^{\\sin x}$.',
             },
           ],
         },
@@ -357,8 +410,8 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "$e^{\\ldots}$ est définie partout, mais la racine carrée exige $x-2 \\ge 0$. " +
-                'Domaine de $h$ : $[2\\,;\\,+\\infty[$.',
+                "$e^{\\ldots}$ est définie partout, mais la racine carrée, elle, exige " +
+                '$x-2 \\ge 0$. Domaine de $h$ : $[2\\,;\\,+\\infty[$.',
             },
           ],
         },
@@ -366,8 +419,8 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'methode',
           label: 'Astuce méthodologique',
           items: [
-            "Pour dériver $base^{g(x)}$ : toujours le même motif, quelle que soit la base — " +
-              "multiplier par $g'(x)$ et par $\\ln(base)$.",
+            "Pour dériver $base^{g(x)}$, c'est toujours le même motif, quelle que soit la " +
+              "base : tu multiplies par $g'(x)$ et par $\\ln(base)$.",
           ],
         },
         { kind: 'subheading', text: "Pour aller plus loin — d'où vient le facteur ln(a) ?" },
@@ -379,14 +432,15 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "Soit $a \\in \\mathbb{R}_0^+$ et soit $f : \\mathbb{R} \\to \\mathbb{R} : " +
-                "x \\mapsto a^x$. Rien n'est supposé connu sur la dérivée de $f$ : on repart de " +
-                "la **définition** du nombre dérivé, comme limite du taux d'accroissement.",
+                "x \\mapsto a^x$. On ne suppose rien de connu sur la dérivée de $f$ : on repart " +
+                "de zéro, de la **définition** du nombre dérivé comme limite du taux " +
+                "d'accroissement.",
             },
             {
               kind: 'para',
               text:
-                "**Étape 1.** On écrit le taux d'accroissement de $f$ entre $x$ et $x+h$, " +
-                'directement à partir de la définition :',
+                "**Étape 1.** On écrit le taux d'accroissement de $f$ entre $x$ et $x+h$, tout " +
+                'droit à partir de la définition :',
             },
             {
               kind: 'para',
@@ -396,8 +450,7 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "**Étape 2.** Le numérateur se factorise. Par la règle **(1)**, " +
-                "$a^{x+h} = a^x \\cdot a^h$ : les deux termes du numérateur ont donc $a^x$ en " +
-                'facteur commun.',
+                "$a^{x+h} = a^x \\cdot a^h$ : les deux termes ont donc $a^x$ en facteur commun.",
             },
             {
               kind: 'para',
@@ -407,9 +460,9 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "**Étape 3.** On réécrit le $1$ sous la forme $a^0$ — c'est la même valeur, mais " +
-                "cette écriture fait apparaître un taux d'accroissement de $f$ **entre 0 et** " +
-                '$0+h$ :',
+                "**Étape 3.** On réécrit le $1$ comme $a^0$ — même valeur (voir l'encadré " +
+                "ci-dessus), mais cette écriture fait apparaître un taux d'accroissement de " +
+                '$f$ **entre 0 et** $0+h$ :',
             },
             {
               kind: 'para',
@@ -420,8 +473,7 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "**Étape 4.** On passe à la limite quand $h \\to 0$. Le facteur $a^x$ ne dépend " +
-                "**pas** de $h$ : c'est une constante vis-à-vis de cette limite, elle sort donc " +
-                'devant.',
+                "**pas** de $h$ : c'est une constante pour cette limite, il sort donc devant.",
             },
             {
               kind: 'para',
@@ -432,9 +484,9 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "**Étape 5.** La limite qui reste est, mot pour mot, la définition du nombre " +
+                "**Étape 5.** La limite qui reste, c'est mot pour mot la définition du nombre " +
                 "dérivé de $f$ **en 0**. Elle vaut donc $f'(0)$ — à condition qu'elle existe, " +
-                "c'est-à-dire que $f$ soit dérivable en 0. C'est précisément ce qu'affirme le " +
+                "c'est-à-dire que $f$ soit dérivable en 0. C'est exactement ce qu'affirme le " +
                 'théorème admis ci-dessous.',
             },
             { kind: 'para', text: "$f'(x) = f'(0) \\cdot a^x \\qquad \\blacksquare$" },
@@ -442,8 +494,8 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "Conclusion remarquable : **la dérivée d'une exponentielle est un multiple " +
-                "d'elle-même**, et le coefficient de proportionnalité — le même pour tout $x$ — " +
-                "est simplement la pente de la courbe au point $(0\\,;1)$. Il ne dépend que de " +
+                "d'elle-même** ! Le coefficient de proportionnalité — le même pour tout $x$ — " +
+                "n'est autre que la pente de la courbe au point $(0\\,;1)$. Il ne dépend que de " +
                 'la base $a$. Reste à lui donner un nom : ce sera $\\ln(a)$.',
             },
           ],
@@ -453,7 +505,7 @@ export const fonctionsExponentielles: ChapterContent = {
           label: 'Théorème admis — dérivabilité en 0',
           items: [
             "Pour tout $a \\in \\mathbb{R}_0^+$, la fonction $f : \\mathbb{R} \\to \\mathbb{R} : " +
-              "x \\mapsto a^x$ est dérivable en 0. Ce théorème est admis sans démonstration ; " +
+              "x \\mapsto a^x$ est dérivable en 0. Ce théorème est admis sans démonstration — " +
               "c'est lui qui rend légitime l'étape 5 ci-dessus.",
           ],
         },
@@ -463,13 +515,13 @@ export const fonctionsExponentielles: ChapterContent = {
           items: [
             "On appelle **logarithme népérien** de $a$, noté $\\ln(a)$, le nombre dérivé en 0 " +
               "de la fonction $x \\mapsto a^x$. Autrement dit, $\\ln(a)$ n'est **rien d'autre " +
-              "qu'un nom donné au nombre** $f'(0)$ apparu ci-dessus.",
+              "qu'un nom** donné au nombre $f'(0)$ trouvé ci-dessus.",
             "En reportant cette définition dans le résultat de la démonstration, " +
-              "$f'(x) = f'(0) \\cdot a^x$, on obtient immédiatement la formule annoncée en tête " +
-              'de section :',
+              "$f'(x) = f'(0) \\cdot a^x$, tu retrouves immédiatement la formule annoncée en " +
+              'tête de section :',
             "$\\forall x \\in \\mathbb{R} : (a^x)' = \\ln(a) \\cdot a^x$",
-            "Le facteur $\\ln(a)$ n'est donc pas une coïncidence ni une constante tombée du " +
-              'ciel : il **est** la pente de la courbe en $(0\\,;1)$, par définition même.',
+            "Le facteur $\\ln(a)$ n'a donc rien d'une coïncidence, ni d'une constante tombée " +
+              'du ciel : il **est**, par définition, la pente de la courbe en $(0\\,;1)$.',
           ],
         },
         {
@@ -513,19 +565,19 @@ export const fonctionsExponentielles: ChapterContent = {
                 "Le **nombre d'Euler** $e$ est défini par $e = \\displaystyle\\lim_{x \\to " +
                 "+\\infty} \\left(1+\\dfrac{1}{x}\\right)^x \\approx 2{,}71828\\ldots$ " +
                 "(l'existence de cette limite est admise). La fonction exponentielle de base " +
-                "$e$ est appelée **fonction exponentielle népérienne** et se note $\\exp$ " +
-                'plutôt que $\\exp_e$.',
+                "$e$ porte un nom à part, **fonction exponentielle népérienne**, et se note " +
+                '$\\exp$ plutôt que $\\exp_e$.',
             },
             {
               kind: 'para',
               text:
-                "On admet également le résultat $\\ln(e) = 1$ : par construction, $e$ est " +
-                "exactement la base dont la courbe a une pente de 1 en $(0\\,;1)$.",
+                "On admet aussi le résultat $\\ln(e) = 1$ : par construction, $e$ est " +
+                'exactement la base dont la courbe a une pente de 1 en $(0\\,;1)$.',
             },
             {
               kind: 'para',
               text:
-                "Il n'y a alors plus rien à démontrer, seulement une substitution à faire. La " +
+                "Il n'y a alors plus rien à démontrer — juste une substitution à faire. La " +
                 "formule $(a^x)' = \\ln(a) \\cdot a^x$, appliquée au cas particulier $a = e$, " +
                 'donne pour tout $x$ réel :',
             },
@@ -536,9 +588,9 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "Soit, en notation usuelle, $(e^x)' = e^x$. $\\qquad \\blacksquare$ La seule " +
-                "chose qui rend $e$ spéciale est donc que **son** facteur $\\ln$ vaut 1 : toutes " +
-                "les autres bases traînent un facteur multiplicatif à chaque dérivation.",
+                "Soit, en notation usuelle, $(e^x)' = e^x$. $\\qquad \\blacksquare$ Ce qui rend " +
+                "$e$ spéciale, c'est uniquement que **son** facteur $\\ln$ vaut 1 : toutes les " +
+                'autres bases traînent un facteur multiplicatif à chaque dérivation.',
             },
           ],
         },
@@ -547,17 +599,16 @@ export const fonctionsExponentielles: ChapterContent = {
           label: "💡 Retenir les décimales de e",
           text:
             "Moyen mnémotechnique : « Je renonce à calculer la suivante » — le nombre de " +
-            'lettres de chaque mot donne 2, 7, 1, 8, 2, 8. La phrase rappelle au passage que ' +
-            "2,71828 n'est qu'une valeur approchée par défaut de $e$ (à moins de " +
-            '$2 \\cdot 10^{-6}$ près).',
+            'lettres de chaque mot donne 2, 7, 1, 8, 2, 8. Et ce n\'est qu\'une valeur ' +
+            "approchée de $e$ (à moins de $2 \\cdot 10^{-6}$ près), pas la valeur exacte !",
         },
         {
           kind: 'para',
           text:
-            "Une conséquence directe de la formule : puisque $a^x > 0$ pour tout $x$, le signe " +
-            "de $(a^x)' = \\ln(a) \\cdot a^x$ est exactement celui de $\\ln(a)$. Or " +
-            "$\\ln(a) < 0$ si $0 < a < 1$, $\\ln(1) = 0$, et $\\ln(a) > 0$ si $a > 1$. Le calcul " +
-            'de dérivée **redémontre** donc, sans aucun graphique, la monotonie observée à la ' +
+            "Conséquence directe de la formule : puisque $a^x > 0$ pour tout $x$, le signe de " +
+            "$(a^x)' = \\ln(a) \\cdot a^x$ est exactement celui de $\\ln(a)$. Or $\\ln(a) < 0$ " +
+            'si $0 < a < 1$, $\\ln(1) = 0$, et $\\ln(a) > 0$ si $a > 1$. Le calcul de dérivée ' +
+            '**redémontre** donc, sans le moindre graphique, la monotonie déjà observée à la ' +
             'section 1 : décroissante en dessous de 1, croissante au-dessus.',
         },
         {
@@ -614,7 +665,7 @@ export const fonctionsExponentielles: ChapterContent = {
           generatorId: '6gen7',
           description: [
             "Détermine le domaine d'une fonction exponentielle composée, puis calcule sa " +
-              'dérivée en appliquant la règle de la chaîne et le facteur ln(base).',
+              'dérivée avec la règle de la chaîne et le facteur ln(base).',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 7. Domaine et dérivée »',
@@ -630,8 +681,8 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Le lien entre une fonction et sa dérivée se lit directement sur un graphique : le " +
-            "signe de $f'$ donne le sens de variation de $f$, et un changement de signe de $f'$ " +
+            "Le lien entre une fonction et sa dérivée se lit directement sur un graphique. Le " +
+            "signe de $f'$ donne le sens de variation de $f$ ; un changement de signe de $f'$ " +
             'repère un extremum de $f$.',
         },
         {
@@ -672,17 +723,17 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "Oublier le signe négatif lors de la dérivation de $e^{-kx}$ transforme par erreur " +
-            'une fonction impaire en fonction paire — toujours appliquer la règle de la chaîne, ' +
-            'y compris sur le signe.',
+            "Oublier le signe négatif en dérivant $e^{-kx}$ transforme par erreur une fonction " +
+            'impaire en fonction paire ! Applique toujours la règle de la chaîne jusqu\'au ' +
+            'bout — signe compris.',
         },
         {
           kind: 'entrainement',
           title: 'Graphique de la dérivée',
           generatorId: '6gen8',
           description: [
-            "Associe une fonction exponentielle et sa dérivée à partir de leur graphique, en " +
-              'utilisant la parité, le signe et les extremums.',
+            "Associe une fonction exponentielle à sa dérivée à partir de leur graphique, en " +
+              'te servant de la parité, du signe et des extremums.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 8. Graphique de la dérivée »',
@@ -700,7 +751,7 @@ export const fonctionsExponentielles: ChapterContent = {
           label: 'Méthode 1 — même base',
           items: [
             "Une exponentielle de base fixée est injective : $base^u = base^v$ équivaut à " +
-              '$u = v$. Aucun logarithme n\'est nécessaire.',
+              "$u = v$. Pas besoin de logarithme !",
           ],
         },
         {
@@ -719,28 +770,29 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "Soient $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $x,y \\in \\mathbb{R}$. " +
-                "Il s'agit d'une **équivalence** : les deux implications se démontrent " +
+                "C'est une **équivalence** : il faut démontrer les deux implications " +
                 'séparément.',
             },
             {
               kind: 'para',
               text:
                 "**1) Sens** $\\implies$ — de $a^x = a^y$ vers $x = y$. C'est le sens utile en " +
-                'pratique, celui qui autorise à « supprimer les deux bases » dans une équation.',
+                'pratique : celui qui te permet de « supprimer les deux bases » dans une ' +
+                'équation.',
             },
             {
               kind: 'para',
               text:
                 "La section 1 a établi que $\\exp_a$ est **strictement monotone** : strictement " +
-                "croissante si $a > 1$, strictement décroissante si $0 < a < 1$ — et l'exclusion " +
-                'de $a = 1$ garantit que ce sont bien les deux seuls cas possibles.',
+                "croissante si $a > 1$, strictement décroissante si $0 < a < 1$. L'exclusion de " +
+                '$a = 1$ garantit que ce sont bien les deux seuls cas possibles.',
             },
             {
               kind: 'para',
               text:
                 "Or une fonction strictement monotone ne prend **jamais deux fois la même " +
-                "valeur**. En effet, prenons deux réels **distincts** $x$ et $y$ ; quitte à " +
-                'échanger leurs noms, on peut supposer $x < y$. Alors :',
+                "valeur**. Prenons deux réels **distincts** $x$ et $y$ ; quitte à échanger " +
+                'leurs noms, on peut supposer $x < y$. Alors :',
             },
             {
               kind: 'list',
@@ -752,31 +804,32 @@ export const fonctionsExponentielles: ChapterContent = {
             {
               kind: 'para',
               text:
-                "Dans les deux cas $a^x \\neq a^y$. Deux réels distincts ne peuvent donc pas " +
-                "avoir la même image par $\\exp_a$ : c'est exactement dire que $\\exp_a$ est " +
+                "Dans les deux cas, $a^x \\neq a^y$. Deux réels distincts ne peuvent donc " +
+                "jamais avoir la même image par $\\exp_a$ : c'est exactement ça, être " +
                 '**injective**.',
             },
             {
               kind: 'para',
               text:
                 "On vient de démontrer la **contraposée** de ce qui est demandé : " +
-                "$x \\neq y \\implies a^x \\neq a^y$. Une implication et sa contraposée étant " +
-                'équivalentes, on a bien $a^x = a^y \\implies x = y$.',
+                "$x \\neq y \\implies a^x \\neq a^y$. Une implication et sa contraposée sont " +
+                'équivalentes, donc on a bien $a^x = a^y \\implies x = y$.',
             },
             {
               kind: 'para',
               text:
                 "**2) Sens** $\\impliedby$ — de $x = y$ vers $a^x = a^y$. Évident : $\\exp_a$ " +
-                "est une **fonction**, elle associe une seule image à chaque antécédent ; deux " +
-                'écritures du même nombre ont donc la même image. $\\qquad \\blacksquare$',
+                "est une **fonction**, elle associe une seule image à chaque antécédent. Deux " +
+                'écritures du même nombre ont donc forcément la même image. ' +
+                '$\\qquad \\blacksquare$',
             },
             {
               kind: 'para',
               text:
                 "La condition $a \\neq 1$ est **indispensable**, et uniquement pour le sens " +
-                "$\\implies$. Avec $a = 1$ en effet, $1^x = 1^y = 1$ pour tous $x$ et $y$ : " +
-                "l'égalité des images est toujours vraie et n'apprend absolument rien sur les " +
-                'exposants.',
+                "$\\implies$. Avec $a = 1$, en effet, $1^x = 1^y = 1$ pour tous $x$ et $y$ : " +
+                "l'égalité des images est toujours vraie, et n'apprend donc absolument rien " +
+                'sur les exposants.',
             },
           ],
         },
@@ -825,8 +878,8 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'methode',
           label: 'Méthode 2 — substitution',
           items: [
-            "Quand l'équation fait apparaître $base^x$ et son carré, poser $t = base^x$ ramène " +
-              "l'équation à un second degré en $t$.",
+            "Quand l'équation fait apparaître $base^x$ et son carré, pose $t = base^x$ : elle " +
+              'se ramène à une équation du second degré en $t$.',
           ],
         },
         {
@@ -840,21 +893,21 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Une racine $t$ négative ou nulle doit toujours être **rejetée** : $base^x$ est ' +
+            'Une racine $t$ négative ou nulle doit toujours être **rejetée** ! $base^x$ est ' +
             'strictement positif, donc $t \\le 0$ ne correspond à aucun $x$ réel.',
         },
         {
           kind: 'astuce',
           label: "💡 Reconnaître l'impossible",
-          text: "$5 \\cdot 2^x + 3 = 0$ n'a aucune solution : une somme de quantités strictement positives ne peut jamais valoir 0.",
+          text: "$5 \\cdot 2^x + 3 = 0$ n'a aucune solution : une somme de quantités strictement positives ne peut jamais valoir 0 !",
         },
         {
           kind: 'entrainement',
           title: 'Équations exponentielles',
           generatorId: '6gen9',
           description: [
-            'Résous une équation exponentielle par identification de bases ou par substitution, ' +
-              'en rejetant les racines invalides le cas échéant.',
+            'Résous une équation exponentielle par identification de bases ou par ' +
+              'substitution — et rejette les racines invalides quand il y en a.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 9. Équations exponentielles »',
@@ -871,9 +924,9 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'piege',
           label: 'Piège central du chapitre',
           text:
-            "Si $base > 1$, l'inégalité sur les exposants garde le même sens. Si $0 < base < 1$, " +
-            'il faut **inverser** le comparateur — exactement comme pour toute fonction ' +
-            'strictement décroissante.',
+            "Si $base > 1$, l'inégalité sur les exposants garde le même sens. Si " +
+            '$0 < base < 1$, il faut **inverser** le comparateur ! Exactement comme pour ' +
+            'toute fonction strictement décroissante.',
         },
         {
           kind: 'featureTable',
@@ -901,8 +954,8 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'definition',
           label: "Principes d'équivalence — inégalité de deux images par une exponentielle",
           items: [
-            "Les huit cas se rangent en deux colonnes selon la position de $a$ par rapport à 1. " +
-              'Pour tous $x, y \\in \\mathbb{R}$ :',
+            "Les huit cas se rangent en deux colonnes, selon la position de $a$ par rapport à " +
+              '1. Pour tous $x, y \\in \\mathbb{R}$ :',
             "**Si** $0 < a < 1$ **(le sens s'inverse) :** **(a)** $a^x < a^y \\iff x > y$ ; " +
               '**(b)** $a^x \\le a^y \\iff x \\ge y$ ; **(c)** $a^x > a^y \\iff x < y$ ; ' +
               '**(d)** $a^x \\ge a^y \\iff x \\le y$.',
@@ -930,8 +983,8 @@ export const fonctionsExponentielles: ChapterContent = {
               text:
                 "Soient $0 < a < 1$ et $x, y \\in \\mathbb{R}$. Il suffit de démontrer " +
                 "**entièrement** le cas **(a)**, $a^x < a^y \\iff x > y$ : les trois autres " +
-                "s'en déduisent ensuite sans nouveau raisonnement. Les deux sens de " +
-                "l'équivalence se traitent séparément, et par des méthodes différentes.",
+                "cas s'en déduisent ensuite sans nouveau raisonnement. Les deux sens de " +
+                "l'équivalence se traitent séparément, et avec des méthodes différentes.",
             },
             {
               kind: 'para',
@@ -1005,7 +1058,7 @@ export const fonctionsExponentielles: ChapterContent = {
                 "Soient $a > 1$ et $x, y \\in \\mathbb{R}$. La structure est **rigoureusement " +
                 "la même** que dans la colonne précédente : seul le sens de variation de " +
                 "$\\exp_a$ change, et avec lui le sens de toutes les inégalités obtenues. On " +
-                'démontre le cas **(e)**, $a^x < a^y \\iff x < y$.',
+                'démontre ici le cas **(e)**, $a^x < a^y \\iff x < y$.',
             },
             {
               kind: 'para',
@@ -1047,7 +1100,7 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "Le cas $a = e$ relève toujours de cette colonne, puisque " +
-                "$e \\approx 2{,}718 > 1$ : une inéquation en $e^{\\ldots}$ conserve donc " +
+                "$e \\approx 2{,}718 > 1$ : une inéquation en $e^{\\ldots}$ garde donc " +
                 'toujours son comparateur.',
             },
           ],
@@ -1124,7 +1177,8 @@ export const fonctionsExponentielles: ChapterContent = {
           label: 'Cas particuliers à reconnaître',
           items: [
             'Une quantité strictement positive ne peut jamais être ≤ un nombre strictement ' +
-              'négatif : certaines inéquations n\'ont donc **aucune solution** (∅), sans aucun calcul.',
+              'négatif : certaines inéquations n\'ont donc **aucune solution** (∅) — sans le ' +
+              'moindre calcul !',
             "À l'inverse, une inégalité toujours vraie par construction (discriminant négatif, " +
               'quantité toujours positive…) peut avoir **ℝ tout entier** comme ensemble-solution.',
           ],
@@ -1134,8 +1188,8 @@ export const fonctionsExponentielles: ChapterContent = {
           title: 'Inéquations exponentielles',
           generatorId: '6gen10',
           description: [
-            "Résous une inéquation exponentielle en tenant compte du sens de la base pour " +
-              'inverser (ou non) le comparateur.',
+            'Résous une inéquation exponentielle en tenant compte du sens de la base — pour ' +
+              "savoir s'il faut inverser le comparateur, ou pas.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 10. Inéquations exponentielles »',
@@ -1151,7 +1205,7 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Étudier complètement une fonction, c'est déterminer dans l'ordre : domaine, " +
+            "Étudier complètement une fonction, c'est déterminer, dans l'ordre : domaine, " +
             'limites, asymptotes, sens de variation, et concavité.',
         },
         {
@@ -1160,8 +1214,8 @@ export const fonctionsExponentielles: ChapterContent = {
           items: [
             "Le signe de $f''$ donne la concavité : $f'' > 0 \\implies$ convexe ; $f'' < 0 " +
               "\\implies$ concave. Un changement de signe de $f''$ repère un **point " +
-              "d'inflexion** — à ne pas confondre avec un extremum, qui correspond à un " +
-              "changement de signe de $f'$.",
+              "d'inflexion** — à ne pas confondre avec un extremum, qui vient lui d'un " +
+              "changement de signe de $f'$ !",
           ],
         },
         { kind: 'subheading', text: 'Exemple résolu — étude complète' },
@@ -1213,7 +1267,7 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'piege',
           text:
             "Une fonction peut très bien avoir ses deux limites (en $-\\infty$ et en $+\\infty$) " +
-            'égales à $+\\infty$ — ce n\'est pas parce qu\'une limite « ressemble » à celle de ' +
+            'égales à $+\\infty$ ! Ce n\'est pas parce qu\'une limite « ressemble » à celle de ' +
             "l'autre côté qu'il n'y a rien à conclure : chaque côté se traite indépendamment.",
         },
         { kind: 'subheading', text: "Exemple résolu — une fonction paire, deux points d'inflexion" },
@@ -1382,8 +1436,8 @@ export const fonctionsExponentielles: ChapterContent = {
           title: 'Étudier une fonction exponentielle',
           generatorId: '6gen11',
           description: [
-            'Mène une étude complète (domaine, limites, asymptotes, variation, concavité) sur ' +
-              'une fonction exponentielle composée.',
+            'Mène une étude complète — domaine, limites, asymptotes, variation, concavité — ' +
+              'sur une fonction exponentielle composée.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 11. Étudier une fonction exponentielle »',
@@ -1400,8 +1454,8 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'para',
           text:
             "Croissance d'une population, désintégration radioactive, propagation d'une " +
-            'épidémie, intérêts composés : tous ces phénomènes partagent le même modèle ' +
-            'mathématique, seul le contexte change.',
+            'épidémie, intérêts composés : tous ces phénomènes partagent le **même** modèle ' +
+            'mathématique. Seul le contexte change.',
         },
         {
           kind: 'definition',
@@ -1421,8 +1475,8 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "Soient $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $r, s \\in \\mathbb{R}$ " +
-                "deux instants. On calcule le rapport des images de $r$ et $s$ par $\\exp_a$, " +
-                'en une seule ligne :',
+                'deux instants. Calcule le rapport des images de $r$ et $s$ par $\\exp_a$, en ' +
+                'une seule ligne :',
             },
             {
               kind: 'para',
@@ -1433,10 +1487,10 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "La première égalité n'est que la définition de $\\exp_a$ ; la seconde est la " +
-                "règle des puissances **(2)**, $\\dfrac{a^{r}}{a^{s}} = a^{r-s}$, de la " +
+                "règle des puissances **(2)**, $\\dfrac{a^{r}}{a^{s}} = a^{r-s}$, vue à la " +
                 "section 1. Le résultat ne fait plus intervenir $r$ et $s$ que par leur " +
                 "**différence** $s-r$ : le rapport est donc constant dès que l'écart entre les " +
-                'deux instants est constant.',
+                "deux instants l'est.",
             },
             {
               kind: 'para',
@@ -1455,20 +1509,20 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 "Le facteur $k$ apparaît au numérateur **et** au dénominateur : il se " +
-                "**simplifie**, et le rapport obtenu est exactement le même que pour " +
-                "$\\exp_a$ toute seule. Autrement dit, la valeur initiale d'une grandeur ne " +
-                "change rien à son taux de croissance — deux populations de tailles très " +
-                'différentes peuvent croître au même rythme. $\\qquad \\blacksquare$',
+                "**simplifie** ! Le rapport obtenu est exactement le même que pour $\\exp_a$ " +
+                "toute seule. Autrement dit, la valeur initiale d'une grandeur ne change rien " +
+                'à son taux de croissance — deux populations de tailles très différentes ' +
+                'peuvent très bien croître au même rythme. $\\qquad \\blacksquare$',
             },
             {
               kind: 'para',
               text:
-                "**La réciproque est vraie**, et elle est admise ici : une fonction définie sur " +
+                "**La réciproque est vraie**, et on l'admet ici : une fonction définie sur " +
                 "$\\mathbb{R}$ dont le rapport $f(s)/f(r)$ ne dépend que de la différence " +
-                "$s-r$ est nécessairement une fonction exponentielle, ou un multiple de " +
-                "fonction exponentielle (ou une fonction constante, si ce rapport vaut " +
-                "toujours 1). C'est elle qui autorise, dans les problèmes, à **conclure** à un " +
-                "modèle exponentiel à partir d'un simple tableau de mesures.",
+                "$s-r$ est forcément une fonction exponentielle, ou un multiple de fonction " +
+                'exponentielle (ou une fonction constante, si ce rapport vaut toujours 1). ' +
+                "C'est elle qui te permet, dans un problème, de **conclure** à un modèle " +
+                "exponentiel à partir d'un simple tableau de mesures.",
             },
           ],
         },
@@ -1476,13 +1530,13 @@ export const fonctionsExponentielles: ChapterContent = {
           kind: 'astuce',
           label: '💡 En pratique, dans un tableau de données',
           text:
-            "Face à un tableau de valeurs expérimentales, on choisit des observations faites à " +
-            "**intervalles de temps égaux** (la variable augmente à pas constant), puis on " +
-            "calcule le rapport de deux valeurs **consécutives**. Si ce rapport est à peu près " +
-            "constant, la situation se modélise par $f(t) = b \\cdot a^{t}$, où $a$ est une " +
-            "valeur approchée de ce rapport et $b$ la valeur initiale (celle lue en $t=0$). " +
-            "Attention : c'est bien le **rapport** qu'il faut calculer, jamais la différence — " +
-            'une différence constante signalerait au contraire un modèle linéaire.',
+            "Face à un tableau de valeurs expérimentales, choisis des observations prises à " +
+            "**intervalles de temps égaux** (la variable augmente à pas constant), puis " +
+            "calcule le rapport de deux valeurs **consécutives**. Si ce rapport reste à peu " +
+            'près constant, la situation se modélise par $f(t) = b \\cdot a^{t}$, où $a$ est ' +
+            'une valeur approchée de ce rapport et $b$ la valeur initiale (celle lue en ' +
+            "$t=0$). Attention : c'est bien le **rapport** qu'il faut calculer, jamais la " +
+            'différence ! Une différence constante, elle, signale plutôt un modèle linéaire.',
         },
         {
           kind: 'illustration',
@@ -1531,6 +1585,18 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         { kind: 'subheading', text: 'Modèle de saturation' },
         {
+          kind: 'intuition',
+          label: 'Une rumeur qui plafonne',
+          text:
+            'Une rumeur se propage vite au début, puis ralentit à mesure que presque tout le ' +
+            "monde est déjà au courant — elle s'approche de 100 % de la population sans " +
+            "jamais l'atteindre parfaitement. Une épidémie qui sature, un objet qui refroidit " +
+            "vers la température ambiante : même logique. C'est ce que capture " +
+            '$p(t) = 1 - e^{-0{,}1t}$ : le terme $e^{-0{,}1t}$ décroît vers 0 comme dans ' +
+            "l'exemple de la radioactivité vu plus haut, donc $p(t)$ grimpe vers 1 sans " +
+            'jamais y arriver tout à fait.',
+        },
+        {
           kind: 'exempleLibre',
           blocks: [
             { kind: 'para', text: '$p(t) = 1 - e^{-0{,}1t}$' },
@@ -1538,8 +1604,8 @@ export const fonctionsExponentielles: ChapterContent = {
               kind: 'para',
               text:
                 'Quand $t$ augmente, $e^{-0,1t}$ tend vers 0, donc $p(t)$ tend vers 1 (100 %) ' +
-                "sans jamais l'atteindre. Après 10 unités de temps : $p(10) = 1-e^{-1} \\approx " +
-                '0{,}632$, soit environ 63 %.',
+                "sans jamais l'atteindre ! Après 10 unités de temps : $p(10) = 1-e^{-1} " +
+                '\\approx 0{,}632$, soit environ 63 %.',
             },
           ],
         },
@@ -1569,8 +1635,9 @@ export const fonctionsExponentielles: ChapterContent = {
           label: '💡 Trouver un instant précis',
           text:
             "Pour répondre à « à partir de quel instant $t$ la quantité dépasse-t-elle un " +
-            'seuil donné ? », on isole le terme exponentiel puis on utilise le logarithme ' +
-            'népérien à la calculatrice — la seule situation du chapitre où ln intervient en pratique.',
+            'seuil donné ? », isole le terme exponentiel, puis utilise le logarithme népérien ' +
+            'à la calculatrice — la seule situation du chapitre où ln intervient vraiment en ' +
+            'pratique.',
         },
         {
           kind: 'entrainement',
@@ -1578,7 +1645,7 @@ export const fonctionsExponentielles: ChapterContent = {
           generatorId: '6gen12',
           description: [
             "Modélise une situation de croissance, décroissance ou saturation exponentielle à " +
-              "partir d'un contexte narratif, et réponds à une question sur un instant précis.",
+              "partir d'une histoire, puis réponds à une question sur un instant précis.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 12. Problèmes d\'exponentielles »',
@@ -1597,15 +1664,15 @@ export const fonctionsExponentielles: ChapterContent = {
       ],
     },
     forward:
-      "À retenir : l'exponentielle domine toujours tout polynôme en +∞ ; côté " +
-      "équations/inéquations, on raisonne par identification de bases ou par substitution — " +
-      'jamais par logarithme à ce stade.',
+      "À retenir : l'exponentielle domine toujours tout polynôme en +∞. Côté " +
+      'équations/inéquations, tu raisonnes par identification de bases ou par substitution — ' +
+      "jamais par logarithme, pas encore à ce stade.",
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',
       generatorId: '6gen65',
       description: [
-        'Choisis un thème et teste-toi sur tout le chapitre — affirmations pré-écrites, une ' +
+        'Choisis un thème et teste-toi sur tout le chapitre : affirmations pré-écrites, une ' +
           'seule tentative par question, justification toujours révélée.',
       ],
       chantier: '6e-6h',

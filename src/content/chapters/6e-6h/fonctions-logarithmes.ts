@@ -10,7 +10,7 @@ export const fonctionsLogarithmes: ChapterContent = {
   slug: 'fonctions-logarithmes',
   lede:
     "Le logarithme népérien est la fonction **réciproque** de l'exponentielle : là où $e^x$ " +
-    "transforme une somme en produit, $\\ln$ transforme un produit en somme. Il permet de " +
+    "transforme une somme en produit, $\\ln$ transforme un produit en somme. Il te permet de " +
     "« défaire » une exponentielle — et rend enfin accessibles les équations, comparaisons et " +
     "modèles où l'inconnue se cache dans un exposant.",
 
@@ -22,39 +22,51 @@ export const fonctionsLogarithmes: ChapterContent = {
       kicker: 'réciproque de exp_a, propriétés algébriques, changement de base',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'La question que pose un logarithme',
+          text:
+            "Une exponentielle $a^x$ répond à la question « $a$ multiplié par lui-même $x$ " +
+            "fois, ça donne quoi ? ». Le logarithme pose la question **inverse** : « par " +
+            "combien de fois faut-il multiplier $a$ par lui-même pour tomber sur ce nombre " +
+            "précis ? ». $\\log_a(x)$, c'est exactement cette réponse — l'exposant à donner à " +
+            "$a$ pour obtenir $x$.",
+        },
+        {
           kind: 'para',
           text:
-            'Au chapitre 2, $\\exp_a$ ($a>0$, $a \\neq 1$) était strictement croissante si ' +
-            '$a>1$ et strictement décroissante si $0<a<1$ — dans les deux cas, strictement ' +
-            'monotone, donc **injective** : elle admet une fonction réciproque, appelée ' +
-            '**logarithme de base a** et notée $\\log_a$, définie pour **toute** base $a>0$, $a \\neq 1$.',
+            'Au chapitre 2, tu as vu que $\\exp_a$ ($a>0$, $a \\neq 1$) est strictement ' +
+            'croissante si $a>1$, et strictement décroissante si $0<a<1$. Dans les deux cas, ' +
+            'elle est strictement monotone, donc **injective** : elle admet une fonction ' +
+            'réciproque. On l\'appelle **logarithme de base a**, notée $\\log_a$ — et elle ' +
+            'existe pour **toute** base $a>0$, $a \\neq 1$.',
         },
         {
           kind: 'definition',
           label: 'Définition — logarithme de base a',
           items: [
             'Pour $a>0$, $a \\neq 1$, $\\log_a$ est l\'unique fonction définie sur ' +
-              '$\\mathbb{R}_0^+ = ]0;+\\infty[$ telle que, pour tout $x>0$ et tout $y \\in ' +
-              '\\mathbb{R}$ : $\\log_a(x) = y \\iff a^y = x$. Cette équivalence est le ' +
-              '**principe d\'équivalence fondamental** : le logarithme de base $a$ d\'un réel ' +
-              'strictement positif est l\'exposant de la puissance de $a$ égale à ce réel.',
+              '$\\mathbb{R}_0^+ = ]0;+\\infty[$ qui vérifie, pour tout $x>0$ et tout $y \\in ' +
+              '\\mathbb{R}$ : $\\log_a(x) = y \\iff a^y = x$. Retiens bien cette équivalence : ' +
+              'c\'est le **principe d\'équivalence fondamental**, tout le chapitre s\'appuie ' +
+              'dessus. Il dit juste ceci : le logarithme de base $a$ d\'un réel strictement ' +
+              'positif, c\'est l\'exposant à donner à $a$ pour retomber sur ce réel.',
           ],
         },
         {
           kind: 'definition',
           label: 'Propriétés immédiates',
           items: [
-            'Quatre égalités se lisent directement sur le principe d\'équivalence ' +
-              'ci-dessus. Pour toute base $a>0$, $a \\neq 1$, tout $x>0$ et tout ' +
+            'Quatre égalités se lisent directement sur le principe d\'équivalence ci-dessus. ' +
+              'Valables pour toute base $a>0$, $a \\neq 1$, tout $x>0$ et tout ' +
               '$r \\in \\mathbb{R}$ :',
             '**(P1)** $\\log_a(1) = 0$ — car $a^0 = 1$.',
             '**(P2)** $\\log_a(a) = 1$ — car $a^1 = a$.',
-            '**(P3)** $\\log_a(a^r) = r$ — l\'exposant à donner à $a$ pour obtenir $a^r$ est ' +
-              'évidemment $r$ : $\\log_a$ **défait** $\\exp_a$.',
-            '**(P4)** $a^{\\log_a(x)} = x$ — en posant $y = \\log_a(x)$, le principe ' +
-              'd\'équivalence donne exactement $a^y = x$ : $\\exp_a$ **défait** $\\log_a$.',
-            'Ces quatre propriétés sont l\'outil de base de **toutes** les démonstrations de ce ' +
-              'chapitre : elles y seront citées par leur numéro, (P1) à (P4).',
+            '**(P3)** $\\log_a(a^r) = r$ — logique : l\'exposant à donner à $a$ pour obtenir ' +
+              '$a^r$, c\'est $r$ ! $\\log_a$ **défait** $\\exp_a$.',
+            '**(P4)** $a^{\\log_a(x)} = x$ — pose $y = \\log_a(x)$ : le principe ' +
+              'd\'équivalence donne directement $a^y = x$. $\\exp_a$ **défait** $\\log_a$.',
+            'Retiens bien ces quatre propriétés : tu t\'appuieras dessus dans **toutes** les ' +
+              'démonstrations de ce chapitre, citées par leur numéro, (P1) à (P4).',
           ],
         },
         {
@@ -98,13 +110,25 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'intuition',
+          label: 'Pourquoi le domaine s\'arrête pile en 0',
+          text:
+            "Ce n'est pas une règle arbitraire à mémoriser : $\\log_a(x)$ demande à quelle " +
+            "puissance élever $a$ pour obtenir $x$. Or une puissance d'un nombre $a>0$ ne " +
+            "peut **jamais** valoir 0, ni encore moins un nombre négatif — quel que soit " +
+            "l'exposant que tu essaies, positif, négatif ou nul, le résultat reste " +
+            "strictement positif. Il n'existe donc aucune réponse à donner si $x \\le 0$ : le " +
+            "domaine $]0;+\\infty[$ n'est pas un choix, c'est une conséquence directe de la " +
+            "question posée.",
+        },
+        {
           kind: 'definition',
           label: 'Caractéristiques graphiques',
           items: [
             'Pour **toute** base $a>0$, $a \\neq 1$ : $\\text{dom}\\ \\log_a = \\mathbb{R}_0^+$, ' +
-              '$\\text{im}\\ \\log_a = \\mathbb{R}$. Point particulier commun à **toutes** les ' +
-              'fonctions logarithmes, quelle que soit leur base : $(1;0)$, puisque $\\log_a(1)=0$. ' +
-              'L\'axe $Oy$ est une asymptote verticale ($x=0$) — il n\'y a **aucune autre asymptote**.',
+              '$\\text{im}\\ \\log_a = \\mathbb{R}$. Un point commun à **toutes** les fonctions ' +
+              'logarithmes, quelle que soit leur base : $(1;0)$, puisque $\\log_a(1)=0$. L\'axe ' +
+              '$Oy$ est une asymptote verticale ($x=0$) — et il n\'y en a **aucune autre**.',
           ],
         },
         {
@@ -116,6 +140,18 @@ export const fonctionsLogarithmes: ChapterContent = {
             ['lim en x→0⁺', '+∞', '−∞'],
             ['lim en x→+∞', '−∞', '+∞'],
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Le pont avec le chapitre sur les exponentielles',
+          text:
+            "log et exp ne sont pas juste deux fonctions qui se ressemblent : ce sont des " +
+            "**réciproques** l'une de l'autre, exactement comme tu l'as déjà vu pour d'autres " +
+            "couples de fonctions. Concrètement, ça veut dire que leurs deux graphiques sont " +
+            "**symétriques par rapport à la droite** $y=x$ — ce que montrent les deux figures " +
+            "ci-dessous. Défaire une exponentielle, c'est prendre son logarithme ; défaire un " +
+            "logarithme, c'est en prendre l'exponentielle. Tu vas t'appuyer sur cet " +
+            "aller-retour dans tout le reste du chapitre.",
         },
         {
           kind: 'illustration',
@@ -178,6 +214,18 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'intuition',
+          label: 'L\'astuce qui a rendu le log indispensable, avant les calculatrices',
+          text:
+            'Multiplier deux grands nombres à la main, c\'est long et source d\'erreurs. ' +
+            'Additionner, beaucoup moins. Or le logarithme **transforme une multiplication en ' +
+            'addition** ($\\log_a(xy)=\\log_a(x)+\\log_a(y)$, démontré juste en dessous) : ' +
+            'pendant des siècles, avant l\'invention des calculatrices, ingénieurs et savants ' +
+            'ont utilisé des tables de logarithmes — et la fameuse **règle à calcul** — pour ' +
+            'remplacer des multiplications pénibles par de simples additions, bien plus ' +
+            'rapides et bien plus fiables.',
+        },
+        {
           kind: 'methode',
           label: 'Propriétés algébriques',
           items: [
@@ -195,15 +243,15 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a>0$, $a \\neq 1$, et $x,y>0$. Toute la démonstration tient en une ' +
-                'idée : réécrire $x$ et $y$ comme des **puissances de la base** $a$, pour ' +
-                'utiliser les règles de calcul sur les exposants du chapitre 2.',
+                'Prends $a>0$, $a \\neq 1$, et $x,y>0$. Toute la démonstration tient en une ' +
+                'seule idée : réécris $x$ et $y$ comme des **puissances de la base** $a$, puis ' +
+                'réutilise les règles de calcul sur les exposants du chapitre 2.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$ et $y = a^{\\log_a(y)}$. En ' +
-                'remplaçant $x$ et $y$ par ces écritures dans $\\log_a(xy)$ :',
+                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$ et $y = a^{\\log_a(y)}$. ' +
+                'Remplace $x$ et $y$ par ces écritures dans $\\log_a(xy)$ :',
             },
             {
               kind: 'para',
@@ -213,8 +261,8 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 2.** L\'argument est maintenant un produit de deux puissances de même ' +
-                'base $a$ : la propriété des puissances $a^p \\cdot a^q = a^{p+q}$ (chapitre 2) ' +
-                'permet de n\'en faire qu\'une seule, en **additionnant** les exposants :',
+                'base $a$. La propriété des puissances $a^p \\cdot a^q = a^{p+q}$ (chapitre 2) ' +
+                'permet de n\'en garder qu\'une seule, en **additionnant** les exposants :',
             },
             {
               kind: 'para',
@@ -231,9 +279,9 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 'C\'est bien la propriété annoncée : le logarithme **transforme un produit en ' +
-                'somme**. Toute la démonstration s\'est jouée sur le passage de $\\cdot$ à $+$ à ' +
-                'l\'étape 2 — les étapes 1 et 3 ne font qu\'entrer puis sortir de l\'écriture ' +
-                '« puissance de $a$ ».',
+                'somme**. Tout s\'est joué au passage de $\\cdot$ à $+$, à l\'étape 2 — les ' +
+                'étapes 1 et 3 ne servent qu\'à entrer puis sortir de l\'écriture « puissance ' +
+                'de $a$ ».',
             },
           ],
         },
@@ -244,14 +292,14 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$. Même schéma en trois ' +
+                'Prends $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$. Même schéma en trois ' +
                 'étapes que pour le produit, avec cette fois la propriété des puissances ' +
                 'relative à une puissance de puissance.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$. On remplace $x$ par cette ' +
+                '**Étape 1.** Par **(P4)**, $x = a^{\\log_a(x)}$. Remplace $x$ par cette ' +
                 'écriture dans $\\log_a(x^r)$ :',
             },
             {
@@ -278,9 +326,9 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Le logarithme **transforme une puissance en produit** : l\'exposant $r$ « ' +
-                'descend » devant le logarithme. C\'est cette propriété qui permettra, en ' +
-                'section 2, de faire sortir l\'inconnue d\'un exposant.',
+                'Le logarithme **transforme une puissance en produit** : l\'exposant $r$ ' +
+                '« descend » devant le logarithme. Tu vas t\'appuyer sur cette propriété en ' +
+                'section 2, pour faire sortir l\'inconnue d\'un exposant.',
             },
           ],
         },
@@ -291,7 +339,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a>0$, $a \\neq 1$, et $x,y>0$. Le schéma est rigoureusement le même que ' +
+                'Prends $a>0$, $a \\neq 1$, et $x,y>0$. Le schéma est rigoureusement le même que ' +
                 'pour le produit ; seule change la propriété des puissances utilisée à ' +
                 'l\'étape 2.',
             },
@@ -325,7 +373,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'On aurait aussi pu déduire ce résultat des deux précédents, sans repartir de ' +
+                'Tu aurais aussi pu déduire ce résultat des deux précédents, sans repartir de ' +
                 '**(P4)** : $\\log_a(x/y) = \\log_a(x \\cdot y^{-1}) = \\log_a(x) + ' +
                 '\\log_a(y^{-1})$ (logarithme d\'un produit) $= \\log_a(x) + (-1) \\cdot ' +
                 '\\log_a(y)$ (logarithme d\'une puissance, avec $r=-1$) $= \\log_a(x) - \\log_a(y)$.',
@@ -365,14 +413,14 @@ export const fonctionsLogarithmes: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: 'Soient $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et soit $x$ un réel.',
+              text: 'Prends $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et $x$ un réel quelconque.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1.** On réécrit d\'abord la **base** $a$ comme une puissance de $b$. ' +
+                '**Étape 1.** Réécris d\'abord la **base** $a$ comme une puissance de $b$. ' +
                 'Comme $a>0$, la propriété **(P4)** appliquée en base $b$ donne ' +
-                '$a = b^{\\log_b(a)}$. On élève les deux membres à la puissance $x$ :',
+                '$a = b^{\\log_b(a)}$. Élève les deux membres à la puissance $x$ :',
             },
             {
               kind: 'para',
@@ -440,10 +488,10 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et soit $x>0$. On **pose** ' +
+                'Prends $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et $x>0$. **Pose** ' +
                 '$y = \\log_a(x)$ : démontrer la formule revient alors à calculer $y$ en ' +
-                'fonction de logarithmes de base $b$ uniquement. On écrit successivement les ' +
-                'égalités équivalentes suivantes.',
+                'fonction de logarithmes de base $b$ uniquement. Voici la chaîne d\'égalités ' +
+                'équivalentes, une idée par ligne.',
             },
             {
               kind: 'para',
@@ -455,7 +503,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Étape 2.** On applique au membre de gauche le changement de base pour les ' +
+                '**Étape 2.** Applique au membre de gauche le changement de base pour les ' +
                 'exponentielles démontré ci-dessus, $a^{y} = b^{\\,y \\cdot \\log_b(a)}$ :',
             },
             { kind: 'para', text: '$b^{\\,y \\cdot \\log_b(a)} = x$' },
@@ -471,14 +519,14 @@ export const fonctionsLogarithmes: ChapterContent = {
               kind: 'para',
               text:
                 '**Étape 4.** Enfin, $\\log_b(a) \\neq 0$ : par **(P1)**, $\\log_b$ ne s\'annule ' +
-                'qu\'en 1, et $a \\neq 1$ par hypothèse. On peut donc diviser les deux membres ' +
+                'qu\'en 1, et $a \\neq 1$ par hypothèse. Tu peux donc diviser les deux membres ' +
                 'par $\\log_b(a)$ :',
             },
             { kind: 'para', text: '$y = \\dfrac{\\log_b(x)}{\\log_b(a)}$' },
             {
               kind: 'para',
               text:
-                'Comme $y = \\log_a(x)$ par construction, on conclut $\\log_a(x) = ' +
+                'Comme $y = \\log_a(x)$ par construction, tu conclus $\\log_a(x) = ' +
                 '\\dfrac{\\log_b(x)}{\\log_b(a)}$. $\\qquad \\blacksquare$',
             },
             {
@@ -541,12 +589,12 @@ export const fonctionsLogarithmes: ChapterContent = {
             'introduit au chapitre 2 par une tout autre voie — comme le coefficient qui apparaît ' +
             'dans la dérivée $(a^x)\' = a^x \\cdot \\ln(a)$. Ces deux fonctions, définies ' +
             'indépendamment l\'une de l\'autre, sont en fait **la même** : c\'est l\'objet du ' +
-            'théorème démontré juste après. On note donc $\\ln$ plutôt que $\\log_e$. Le ' +
+            'théorème démontré juste après. Tu notes donc $\\ln$ plutôt que $\\log_e$. Le ' +
             'changement de base ci-dessus, avec $b=e$, donne alors une écriture de **tout** ' +
             'logarithme uniquement à l\'aide de $\\ln$ : $\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$. ' +
-            'C\'est cette écriture qui rend $\\ln$ si pratique en pratique : une calculatrice ' +
-            'n\'a souvent qu\'une touche $\\ln$. Pour obtenir $\\log_2(10)$ par exemple, on ' +
-            'calcule $\\ln(10)/\\ln(2) \\approx 3{,}32$.',
+            'C\'est cette écriture qui rend $\\ln$ si pratique : une calculatrice n\'a souvent ' +
+            'qu\'une touche $\\ln$. Pour obtenir $\\log_2(10)$ par exemple, tu calcules ' +
+            '$\\ln(10)/\\ln(2) \\approx 3{,}32$.',
         },
         {
           kind: 'definition',
@@ -560,14 +608,14 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soit $a>0$, $a \\neq 1$. L\'idée est de **calculer la dérivée de** $\\exp_a$ ' +
-                '**de deux façons différentes**, puis d\'identifier les deux résultats.',
+                'Prends $a>0$, $a \\neq 1$. L\'idée : **calculer la dérivée de** $\\exp_a$ ' +
+                '**de deux façons différentes**, puis identifier les deux résultats.',
             },
             {
               kind: 'para',
               text:
                 '**Premier calcul** — via le changement de base. Le théorème démontré plus haut, ' +
-                'appliqué avec $b=e$, donne $a^x = e^{\\,x \\cdot \\log_e(a)}$. On dérive cette ' +
+                'appliqué avec $b=e$, donne $a^x = e^{\\,x \\cdot \\log_e(a)}$. Dérive cette ' +
                 'écriture :',
             },
             {
@@ -604,7 +652,7 @@ export const fonctionsLogarithmes: ChapterContent = {
               text:
                 '**Identification.** Les deux calculs portent sur la même fonction dérivée, donc ' +
                 'pour tout $x$ réel : $a^x \\cdot \\log_e(a) = a^x \\cdot \\ln(a)$. Comme ' +
-                '$a^x > 0$ (jamais nul), on peut diviser les deux membres par $a^x$ :',
+                '$a^x > 0$ (jamais nul), tu peux diviser les deux membres par $a^x$ :',
             },
             { kind: 'para', text: '$\\log_e(a) = \\ln(a) \\qquad \\blacksquare$' },
             {
@@ -746,19 +794,19 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'para',
           text:
             'Deux nouvelles techniques s\'ajoutent à l\'identification de bases vue au ' +
-            'chapitre 2 : appliquer $\\log_a$ aux deux membres d\'une équation exponentielle de ' +
-            'base $a$, ou appliquer $\\exp_a$ aux deux membres d\'une équation logarithmique de ' +
-            'base $a$ — puisque les deux fonctions sont réciproques l\'une de l\'autre, pour ' +
-            '**toute** base $a>0$, $a \\neq 1$.',
+            'chapitre 2 : applique $\\log_a$ aux deux membres d\'une équation exponentielle de ' +
+            'base $a$, ou $\\exp_a$ aux deux membres d\'une équation logarithmique de base $a$ ' +
+            '— puisque les deux fonctions sont réciproques l\'une de l\'autre, pour **toute** ' +
+            'base $a>0$, $a \\neq 1$.',
         },
         {
           kind: 'methode',
           label: 'Méthode 1 — équation exponentielle',
           items: [
-            'Pour $a^x = b$ ($a>0$, $a \\neq 1$, $b>0$), on applique $\\log_a$ aux deux membres ' +
+            'Pour $a^x = b$ ($a>0$, $a \\neq 1$, $b>0$), applique $\\log_a$ aux deux membres ' +
               '— ce qui donne directement x, par définition même de $\\log_a$ comme réciproque ' +
               'de $\\exp_a$ : $\\log_a(a^x) = \\log_a(b) \\implies x = \\log_a(b)$.',
-            'Si l\'on préfère une valeur décimale approchée, le changement de base ramène ce ' +
+            'Tu préfères une valeur décimale approchée ? Le changement de base ramène ce ' +
               'résultat à $x = \\ln(b)/\\ln(a)$, directement calculable.',
           ],
         },
@@ -770,7 +818,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode 2 — équation logarithmique',
           items: [
-            'Pour $\\log_a(u) = b$ ($a>0$, $a \\neq 1$), on applique $\\exp_a$ des deux côtés : ' +
+            'Pour $\\log_a(u) = b$ ($a>0$, $a \\neq 1$), applique $\\exp_a$ des deux côtés : ' +
               '$u = a^b$. Comme $a^b$ est toujours strictement positif, la condition de domaine ' +
               '$u>0$ est **automatiquement satisfaite** par cette solution.',
           ],
@@ -790,10 +838,10 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Après avoir résolu par $\\log_a$ ou $\\exp_a$ (quelle que soit la base $a$), il ' +
-            'faut **toujours** vérifier que la solution garde chaque argument de logarithme de ' +
-            'l\'équation **initiale** strictement positif — une solution trouvée algébriquement ' +
-            'peut violer cette condition et doit alors être rejetée.',
+            'Après avoir résolu par $\\log_a$ ou $\\exp_a$ (quelle que soit la base $a$), ' +
+            'vérifie **toujours** que la solution garde chaque argument de logarithme de ' +
+            'l\'équation **initiale** strictement positif ! Une solution trouvée ' +
+            'algébriquement peut violer cette condition — il faut alors la rejeter.',
         },
         {
           kind: 'exempleLibre',
@@ -803,8 +851,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'CE : $2w^2-1>0$, c\'est-à-dire $w < -\\sqrt{2}/2$ ou $w > \\sqrt{2}/2$. On ' +
-                'procède en écrivant successivement les égalités équivalentes :',
+                'CE : $2w^2-1>0$, c\'est-à-dire $w < -\\sqrt{2}/2$ ou $w > \\sqrt{2}/2$. Écris ' +
+                'ensuite les égalités équivalentes, une par une :',
             },
             { kind: 'para', text: '$2w^2-1 = 3^4 = 81 \\implies w^2 = 41 \\implies w = \\pm\\sqrt{41}$' },
             {
@@ -828,8 +876,8 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a>0$, $a \\neq 1$, et $x,y>0$. Il s\'agit d\'une **équivalence** : il ' +
-                'faut donc démontrer les deux implications séparément.',
+                'Prends $a>0$, $a \\neq 1$, et $x,y>0$. C\'est une **équivalence** : il faut ' +
+                'donc démontrer les deux implications séparément.',
             },
             {
               kind: 'para',
@@ -840,9 +888,9 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'On part de l\'hypothèse et on applique $\\exp_a$ aux deux membres. C\'est ' +
-                'légitime parce que $\\exp_a$ est une **fonction** : deux nombres égaux ont ' +
-                'nécessairement la même image.',
+                'Pars de l\'hypothèse et applique $\\exp_a$ aux deux membres. C\'est légitime ' +
+                'parce que $\\exp_a$ est une **fonction** : deux nombres égaux ont nécessairement ' +
+                'la même image.',
             },
             {
               kind: 'para',
@@ -968,6 +1016,16 @@ export const fonctionsLogarithmes: ChapterContent = {
       kicker: 'le sens dépend de la base — domaine d\'abord, toujours',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Le même réflexe qu\'avec les exponentielles',
+          text:
+            "Tu as déjà rencontré cette bascule au chapitre 2, pour comparer deux " +
+            "exponentielles de même base : une fonction croissante conserve le sens d'une " +
+            "inégalité, une fonction décroissante l'inverse. $\\log_a$ obéit à la même " +
+            "logique — rien de nouveau à apprendre, juste à réappliquer ce réflexe une fois " +
+            "de plus, cette fois côté logarithmes.",
+        },
+        {
           kind: 'methode',
           label: 'À retenir — le sens dépend de la base a',
           items: [
@@ -988,7 +1046,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $0<a<1$ et $u,v>0$. On démontre l\'équivalence ' +
+                'Prends $0<a<1$ et $u,v>0$. Démontrons l\'équivalence ' +
                 '$\\log_a(u) < \\log_a(v) \\iff u > v$ ; les trois autres comparateurs s\'en ' +
                 'déduisent ensuite. Les deux sens se démontrent séparément, et **chacun ' +
                 's\'appuie sur une fonction différente** — c\'est le point délicat.',
@@ -1038,7 +1096,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a>1$ et $u,v>0$. On démontre cette fois ' +
+                'Prends $a>1$ et $u,v>0$. Démontrons cette fois ' +
                 '$\\log_a(u) < \\log_a(v) \\iff u < v$. La structure est **identique** à celle ' +
                 'du cas précédent : seul le sens de variation de $\\exp_a$ et de $\\log_a$ ' +
                 'change, et avec lui le sens de l\'inégalité obtenue.',
@@ -1096,14 +1154,14 @@ export const fonctionsLogarithmes: ChapterContent = {
               text:
                 'La troisième ligne de la méthode ci-dessus — $\\log_a(u) < y \\iff u > a^y$ si ' +
                 '$0<a<1$ — n\'est pas un résultat nouveau : elle se **déduit** de ce qui ' +
-                'précède, sans nouvelle démonstration à partir de zéro. Soient $0<a<1$, $u>0$ et ' +
+                'précède, sans nouvelle démonstration à partir de zéro. Prends $0<a<1$, $u>0$ et ' +
                 '$y$ un réel quelconque.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1.** Le membre de droite $y$ n\'est pas encore un logarithme : on le ' +
-                'réécrit comme tel. Par **(P3)**, $\\log_a(a^{y}) = y$. On peut donc remplacer ' +
+                '**Étape 1.** Le membre de droite $y$ n\'est pas encore un logarithme : ' +
+                'réécris-le comme tel. Par **(P3)**, $\\log_a(a^{y}) = y$. Tu peux donc remplacer ' +
                 '$y$ par $\\log_a(a^{y})$ :',
             },
             { kind: 'para', text: '$\\log_a(u) < y \\iff \\log_a(u) < \\log_a(a^{y})$' },
@@ -1188,19 +1246,17 @@ export const fonctionsLogarithmes: ChapterContent = {
           kind: 'piege',
           label: 'Piège central du chapitre',
           text:
-            'Le **domaine de validité** (là où chaque logarithme est défini) et ' +
-            'l\'**ensemble-solution** (là où l\'inégalité est vraie) sont deux choses ' +
-            'différentes — toujours déterminer le domaine **en premier**, puis résoudre ' +
-            'l\'inégalité à l\'intérieur de ce domaine.',
+            'Ne confonds jamais **domaine de validité** (là où chaque logarithme est défini) ' +
+            'et **ensemble-solution** (là où l\'inégalité est vraie) ! Détermine toujours le ' +
+            'domaine **en premier**, puis résous l\'inégalité à l\'intérieur de ce domaine.',
         },
         {
           kind: 'astuce',
           label: 'Vérification finale',
           text:
-            'Comme toujours avec un domaine restreint, il est utile de vérifier que ' +
-            'l\'ensemble-solution obtenu par le calcul est bien inclus dans le domaine de ' +
-            'départ — ici $S=]2;+\\infty[$ est bien inclus dans $]1;+\\infty[$, ce qui confirme ' +
-            'la cohérence du résultat.',
+            'Avec un domaine restreint, vérifie toujours que l\'ensemble-solution obtenu par ' +
+            'le calcul est bien inclus dans le domaine de départ — ici $S=]2;+\\infty[$ est ' +
+            'bien inclus dans $]1;+\\infty[$, ce qui confirme la cohérence du résultat.',
         },
         {
           kind: 'exempleLibre',
@@ -1270,7 +1326,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soit $x>0$. La démonstration n\'utilise **aucun calcul de limite** : elle ' +
+                'Prends $x>0$. Cette démonstration n\'utilise **aucun calcul de limite** : elle ' +
                 'combine trois résultats déjà acquis, un par ligne.',
             },
             {
@@ -1285,16 +1341,15 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Étape 1.** On applique ce théorème à $f = \\exp$, dont la réciproque est ' +
-                '$f^{-1} = \\ln$ (section 1). En remplaçant $f$ par $\\exp$ et $f^{-1}$ par ' +
-                '$\\ln$ :',
+                '**Étape 1.** Applique ce théorème à $f = \\exp$, dont la réciproque est ' +
+                '$f^{-1} = \\ln$ (section 1). Remplace $f$ par $\\exp$ et $f^{-1}$ par $\\ln$ :',
             },
             { kind: 'para', text: '$\\ln\'(x) = \\dfrac{1}{\\exp\'(\\ln(x))}$' },
             {
               kind: 'para',
               text:
                 '**Étape 2.** Le chapitre 2 a établi que $\\exp$ est **sa propre dérivée** : ' +
-                '$\\exp\' = \\exp$. On peut donc remplacer $\\exp\'$ par $\\exp$ au ' +
+                '$\\exp\' = \\exp$. Tu peux donc remplacer $\\exp\'$ par $\\exp$ au ' +
                 'dénominateur, sans rien changer d\'autre :',
             },
             { kind: 'para', text: '$= \\dfrac{1}{\\exp(\\ln(x))}$' },
@@ -1309,7 +1364,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Remarquer que la formule n\'a de sens que pour $x>0$ — ce qui est bien le ' +
+                'Remarque que la formule n\'a de sens que pour $x>0$ — ce qui est bien le ' +
                 'domaine de $\\ln$ — et que $1/x > 0$ y est **toujours strictement positif** : ' +
                 'c\'est la preuve formelle que $\\ln$ est strictement croissante, propriété ' +
                 'jusqu\'ici seulement lue sur le graphique.',
@@ -1368,7 +1423,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         },
         {
           kind: 'piege',
-          text: '$(\\ln(x))\'$ **n\'est pas** x — c\'est $\\dfrac{1}{x}$. Confondre la fonction avec sa dérivée est une erreur fréquente sous la pression du temps.',
+          text: '$(\\ln(x))\'$ **n\'est pas** x — c\'est $\\dfrac{1}{x}$ ! Confondre la fonction avec sa dérivée est une erreur fréquente sous la pression du temps.',
         },
         {
           kind: 'methode',
@@ -1416,16 +1471,16 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $g$ une fonction dérivable et **strictement positive**, et $h$ une ' +
+                'Prends $g$ une fonction dérivable et **strictement positive**, et $h$ une ' +
                 'fonction dérivable. La stricte positivité de $g$ est indispensable : c\'est ce ' +
                 'qui autorise à écrire $\\ln(g(x))$.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1.** On réécrit la puissance en base $e$. Par **(P4)** en base $e$, ' +
-                '$g(x) = e^{\\ln(g(x))}$ ; en élevant à la puissance $h(x)$ et en multipliant ' +
-                'les exposants :',
+                '**Étape 1.** Réécris la puissance en base $e$. Par **(P4)** en base $e$, ' +
+                '$g(x) = e^{\\ln(g(x))}$ ; élève à la puissance $h(x)$ et multiplie les ' +
+                'exposants :',
             },
             {
               kind: 'para',
@@ -1501,12 +1556,12 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$f(x) = (1+\\sqrt{x})^{2x}$, pour $x>0$. On écrit $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$.',
+                '$f(x) = (1+\\sqrt{x})^{2x}$, pour $x>0$. Écris $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$.',
             },
             {
               kind: 'para',
               text:
-                'On dérive d\'abord l\'exposant, par la règle du produit puis de la chaîne : ' +
+                'Dérive d\'abord l\'exposant, par la règle du produit puis de la chaîne : ' +
                 '$(2x \\cdot \\ln(1+\\sqrt{x}))\' = 2\\ln(1+\\sqrt{x}) + 2x \\cdot ' +
                 '\\dfrac{1}{2\\sqrt{x}} \\cdot \\dfrac{1}{1+\\sqrt{x}} = 2\\ln(1+\\sqrt{x}) + ' +
                 '\\dfrac{\\sqrt{x}}{1+\\sqrt{x}}$.',
@@ -1534,7 +1589,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Soient $a>0$, $a \\neq 1$, et $x>0$. Aucun calcul nouveau n\'est nécessaire : ' +
+                'Prends $a>0$, $a \\neq 1$, et $x>0$. Aucun calcul nouveau n\'est nécessaire : ' +
                 'il suffit de ramener $\\log_a$ à $\\ln$, dont la dérivée vient d\'être établie.',
             },
             {
@@ -1557,7 +1612,7 @@ export const fonctionsLogarithmes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Étape 3.** On remplace $\\ln\'(x)$ par sa valeur $\\dfrac{1}{x}$, démontrée ' +
+                '**Étape 3.** Remplace $\\ln\'(x)$ par sa valeur $\\dfrac{1}{x}$, démontrée ' +
                 'plus haut :',
             },
             {
@@ -1575,7 +1630,7 @@ export const fonctionsLogarithmes: ChapterContent = {
                 'croissante), **négatif** si $0<a<1$ (donc décroissante). En dérivant une ' +
                 'seconde fois, $\\log_a\'\'(x) = \\dfrac{-1}{x^2 \\cdot \\ln(a)}$, de signe ' +
                 '**opposé** : la concavité est tournée vers le bas si $a>1$, vers le haut si ' +
-                '$0<a<1$. On retrouve ligne pour ligne le tableau de la section 1.',
+                '$0<a<1$. Tu retrouves ligne pour ligne le tableau de la section 1.',
             },
             {
               kind: 'para',
@@ -1759,9 +1814,9 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$\\displaystyle\\lim_{x \\to +\\infty} x \\cdot \\ln(x)$ **n\'est pas** une forme indéterminée : ' +
-            'les deux facteurs tendent vers +∞, leur produit diverge donc directement vers +∞ ' +
-            '— inutile (et faux) d\'invoquer la croissance comparée ici.',
+            '$\\displaystyle\\lim_{x \\to +\\infty} x \\cdot \\ln(x)$ **n\'est pas** une forme ' +
+            'indéterminée ! Les deux facteurs tendent vers +∞, leur produit diverge donc ' +
+            'directement vers +∞ — inutile (et faux) d\'invoquer la croissance comparée ici.',
         },
         { kind: 'subheading', text: 'La limite fondamentale en 1' },
         {
@@ -1812,7 +1867,7 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Comme au chapitre 2, on peut retrouver des paramètres inconnus d\'une fonction à ' +
+            'Comme au chapitre 2, tu peux retrouver des paramètres inconnus d\'une fonction à ' +
             'partir d\'informations lues sur son graphique — un point, une tangente, une ' +
             'asymptote. Pour une fonction du type $f(x) = a + b \\cdot \\ln(x)$, le fait que ' +
             '$\\ln(1)=0$ rend la lecture particulièrement directe.',
@@ -1879,16 +1934,16 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Ne pas confondre le point en x=1 (où $\\ln(1)=0$ annule b, donnant directement a) ' +
+            'Ne confonds pas le point en x=1 (où $\\ln(1)=0$ annule b, donnant directement a) ' +
             'avec un point en x=e (où $\\ln(e)=1$, donc b intervient bel et bien) — c\'est a+b, ' +
-            'pas simplement a.',
+            'pas simplement a !',
         },
         {
           kind: 'astuce',
           label: 'Toujours vérifier',
           text:
-            'Une fois les paramètres calculés, réinjecter leurs valeurs dans les conditions de ' +
-            'départ permet de détecter une éventuelle erreur de calcul avant de conclure.',
+            'Une fois les paramètres calculés, réinjecte leurs valeurs dans les conditions de ' +
+            'départ : ça permet de détecter une éventuelle erreur de calcul avant de conclure.',
         },
         {
           kind: 'entrainement',
@@ -1971,8 +2026,8 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'ch(x) ≥ 1 **toujours** (minimum en x=0) — ne jamais la confondre avec cos, qui ' +
-            'oscille entre −1 et 1. ch ne devient jamais négative.',
+            'ch(x) ≥ 1 **toujours** (minimum en x=0) — ne la confonds jamais avec cos, qui ' +
+            'oscille entre −1 et 1 ! ch ne devient jamais négative.',
         },
         {
           kind: 'entrainement',
@@ -2107,10 +2162,10 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Quand une fonction combine un logarithme **et** une expression rationnelle, il ' +
-            'faut vérifier **à la fois** les restrictions imposées par le logarithme **et** ' +
-            'celles imposées par un éventuel dénominateur — ici les deux coïncident par ' +
-            'chance, mais ce n\'est pas systématique.',
+            'Quand une fonction combine un logarithme **et** une expression rationnelle, ' +
+            'vérifie **à la fois** les restrictions imposées par le logarithme **et** celles ' +
+            'imposées par un éventuel dénominateur — ici les deux coïncident par chance, mais ' +
+            'ce n\'est pas systématique !',
         },
         {
           kind: 'entrainement',
@@ -2137,6 +2192,19 @@ export const fonctionsLogarithmes: ChapterContent = {
             'Échelles logarithmiques (pH, magnitude de Richter, décibels), demi-vie ' +
             'radioactive, croissance logistique : autant de situations où retrouver une ' +
             'inconnue « cachée dans un exposant » passe obligatoirement par ln.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi tant de grandeurs physiques passent par le log',
+          text:
+            "Un séisme peut libérer une énergie 1 000, 100 000 ou 10 000 000 fois plus grande " +
+            "qu'un autre : impossible de mettre des écarts pareils sur une seule échelle " +
+            "lisible ! Le logarithme résout exactement ce problème : il **compresse** des " +
+            "écarts énormes en petits nombres bien lisibles, en transformant un facteur ×10 " +
+            "en un simple +1. C'est pour ça que la magnitude de Richter, les décibels ou le pH " +
+            "sont tous construits avec un log₁₀ — une magnitude 6 ne représente pas « un peu " +
+            "plus » qu'une magnitude 5, mais un séisme 10 fois plus énergétique, caché derrière " +
+            "un chiffre qui n'augmente, lui, que d'une unité.",
         },
         {
           kind: 'definition',
@@ -2221,8 +2289,8 @@ export const fonctionsLogarithmes: ChapterContent = {
           label: 'Trouver un instant précis',
           text:
             'Pour répondre à « à partir de quel instant une quantité dépasse-t-elle un seuil ' +
-            'donné ? », on isole le terme exponentiel puis on applique ln — exactement la ' +
-            'même démarche qu\'au chapitre 2, désormais menée jusqu\'au bout.',
+            'donné ? », isole le terme exponentiel puis applique ln — exactement la même ' +
+            'démarche qu\'au chapitre 2, désormais menée jusqu\'au bout.',
         },
         {
           kind: 'entrainement',
