@@ -77,6 +77,43 @@
   }
 }
 
+/* Impression (Ctrl+P, "Enregistrer en PDF", et le fichier HTML du bouton "Exporter" qui copie
+   l'intégralité de ce fichier CSS tel quel) : --ink-soft/--ink-faint/--line/--line-soft, pensés
+   pour un écran rétroéclairé, tombent sous le seuil de lisibilité une fois sur papier — kickers de
+   section, légendes de figure, sous-titres de callout, texte des diagrammes SVG (axes, étiquettes
+   discrètes), bordures fines de tableau et quadrillage de fond de diagramme s'impriment gris pâle
+   voire disparaissent. Ce bloc ne redéfinit QUE ces jetons, uniquement sous @media print : aucun
+   changement visuel à l'écran (clair ou sombre), tout le reste du design (couleurs d'accent,
+   callouts, mise en page) est inchangé — tous les usages passent déjà par var(--ink-faint) etc.,
+   donc une seule redéfinition ici suffit à corriger le site entier, aucun fichier de contenu ni
+   composant à toucher. --paper/--surface forcés en blanc au cas où le mode sombre du système
+   resterait actif à l'impression sur certains navigateurs (sinon fond sombre gâchant l'encre) ;
+   color-scheme: light pour la même raison.
+   `body { background }` neutralisé séparément : --line-soft sert aussi de quadrillage décoratif de
+   fond (`body`, deux `repeating-linear-gradient`) — le durcir pour les tableaux/`svg-grid` l'aurait
+   rendu bien trop présent sur toute la page imprimée (même piège déjà rencontré et corrigé dans le
+   fichier HTML du bouton "Exporter", `src/lib/export/buildHtml.ts` — `STYLE_IMPRESSION` neutralise
+   ce même quadrillage pour la même raison). */
+@media print {
+  :root {
+    color-scheme: light;
+    --paper: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --ink-soft: #37444d;
+    --ink-faint: #4c5960;
+    --line: #7c8a93;
+    --line-soft: #a9b6bd;
+  }
+  /* !important nécessaire : la règle `body { background: <quadrillage>, var(--paper) }` plus bas
+     dans ce fichier est hors media query (s'applique toujours) et arrive APRÈS ce bloc dans
+     l'ordre des sources — à spécificité égale (un seul sélecteur `body` de chaque côté), c'est elle
+     qui l'emporterait sans !important, y compris à l'impression. Repéré en vérifiant le rendu
+     imprimé réel (Playwright, @media print), pas supposé : le quadrillage restait visible tant que
+     ce !important n'y était pas. */
+  body { background: #ffffff !important; }
+}
+
 * { box-sizing: border-box; }
 
 html, body { margin: 0; padding: 0; }
