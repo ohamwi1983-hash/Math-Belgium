@@ -11,28 +11,32 @@
    * ================================================================ */
 
   var N_MIN = 3, N_MAX = 30, N_DEFAUT = 6;
-  // Rayon pixel FIXE du cercle (et donc du polygone inscrit, dont les sommets sont dessus) — le
-  // cercle ne doit JAMAIS changer de taille quand n varie. Choisi GRAND (127) pour remplir le
-  // cadre visuel, pas timidement réservé en fonction du pire cas n=3 (piège de la version
-  // précédente : réserver la moitié du cadre pour n=3 faisait paraître le cercle minuscule à tout
-  // le reste de la plage, avec une grande marge grise inutilisée autour — repéré sur capture
-  // d'écran réelle, pas en relisant le code).
-  var R_CERCLE_PX = 127;
-  // Cadre visuel gris (rectangle dessiné, PAS le fond CSS du <svg>) : juste un peu plus grand que
-  // le cercle, pour qu'il le remplisse presque entièrement — dimensionné sur le cas n=6 (référence
-  // par défaut, coïncide presque exactement avec le facteur 1/cos(30°)≈1,155 du polygone
-  // circonscrit à 6 côtés).
+  var CSS_MAX_WIDTH_PX = 460; // doit rester synchronisé avec la règle `svg{max-width}` plus bas.
+  // Rayon du cercle en unités de viewBox (et donc du polygone inscrit, dont les sommets sont
+  // dessus) — le cercle ne doit JAMAIS changer de taille quand n varie.
+  //
+  // PIÈGE VÉRIFIÉ EN PRATIQUE (deux essais précédents dans ce sens, tous les deux insuffisants) :
+  // augmenter ce nombre seul NE change RIEN à la taille réellement affichée à l'écran si la taille
+  // totale du viewBox (LARGEUR) grandit dans la même proportion — seul le RATIO r/LARGEUR détermine
+  // la taille affichée (× CSS_MAX_WIDTH_PX), pas r tout seul. Confirmé par calcul direct (pas
+  // supposé) : passer r de 86 à 127 tout en gardant "jamais aucun rognage même à n=3" n'avait fait
+  // grandir le cercle affiché que de 208px à 216px (+4%, imperceptible) — parce que garantir 0
+  // rognage à n=3 (facteur 1/cos60°=2, le circonscrit vaut le double du cercle) sur ce MÊME viewBox
+  // oblige mathématiquement le cercle à rester sous ~50% de la largeur totale, quel que soit r.
+  // Correctif définitif : ne protéger du rognage que jusqu'à n=5 (PROTECTION_FACTEUR = 1,3, entre
+  // 1/cos(36°)=1,236 pour n=5 et 1/cos(45°)=1,414 pour n=4) plutôt que le pire cas n=3 — à n=3 et
+  // dans une moindre mesure n=4, le polygone circonscrit (jamais le cercle) dépasse alors le bord
+  // réel du SVG et est rogné net par le viewport SVG (comportement par défaut, pas un bug) : un prix
+  // pédagogiquement raisonnable pour un cercle enfin visiblement grand sur TOUTE la plage.
+  var R_CERCLE_PX = 150;
+  var PROTECTION_FACTEUR = 1.3;
+  var MARGE_SECURITE_PX = 12;
+  var DEMI_VIEWBOX_PX = R_CERCLE_PX * PROTECTION_FACTEUR + MARGE_SECURITE_PX;
+  var LARGEUR = DEMI_VIEWBOX_PX * 2, HAUTEUR = DEMI_VIEWBOX_PX * 2;
+  // Cadre visuel gris (rectangle dessiné, PAS le fond CSS du <svg>), un peu plus grand que le
+  // cercle pour qu'il le remplisse presque entièrement, sans coller pile à son bord.
   var PAD_CADRE_PX = 20;
   var DEMI_CADRE_PX = R_CERCLE_PX + PAD_CADRE_PX;
-  // Zone de dessin RÉELLE (viewBox), plus grande que le cadre gris : pour n petit (3, 4), le
-  // polygone circonscrit dépasse largement le cadre gris — volontairement laissé déborder SUR LE
-  // FOND DE LA CARTE (jamais rogné/coupé net) plutôt que rétréci pour rentrer dans le cadre, ce qui
-  // aurait fait reculer le cercle à chaque changement de n (le bug initialement signalé). Le pire
-  // cas n=3 (facteur 1/cos 60°=2, le circonscrit vaut deux fois le rayon du cercle) fixe la marge
-  // de sécurité nécessaire pour qu'il ne soit JAMAIS rogné par le bord réel du SVG.
-  var MARGE_SECURITE_PX = 16;
-  var DEMI_VIEWBOX_PX = R_CERCLE_PX * 2 + MARGE_SECURITE_PX;
-  var LARGEUR = DEMI_VIEWBOX_PX * 2, HAUTEUR = DEMI_VIEWBOX_PX * 2;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -46,7 +50,7 @@
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:18px;}' +
-    'svg{width:100%;max-width:460px;height:auto;}' +
+    'svg{width:100%;max-width:' + CSS_MAX_WIDTH_PX + 'px;height:auto;}' +
     '.cadre-fond{fill:var(--surface-2,#faf6f0);stroke:var(--line,#e2d8c8);stroke-width:1;}' +
     '.cercle{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
     '.poly-inscrit{stroke:var(--good,#2f7a4f);stroke-width:2.4;fill:var(--good,#2f7a4f);fill-opacity:0.08;}' +
