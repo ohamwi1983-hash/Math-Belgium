@@ -24,6 +24,10 @@
      chapitre — un plan ET une droite sécante apparaissent souvent sur la même figure). */
   --plan: #5b4ea3;
   --plan-ink: #443a80;
+  /* Fond doux assorti à --plan, même usage que les autres tons de callout (accent-soft,
+     good-soft...) — nécessaire dès que --plan sert aussi de fond de callout (bloc "intuition"),
+     pas seulement de couleur de trait SVG. */
+  --plan-soft: #ece9f8;
   /* Bleu dédié aux diagrammes à groupes de couleurs multiples (ex. cercle trigonométrique codé par
      angle de référence) — aucun autre token existant n'est bleu (accent/attn/tip sont tous des
      tons chauds proches, good/bad/plan sont déjà pris par d'autres significations). */
@@ -65,6 +69,7 @@
     --tip-soft: #302c10;
     --plan: #a494e8;
     --plan-ink: #c3b8f2;
+    --plan-soft: #221f33;
     --sky: #6ea8e8;
     --rose: #e07fb8;
     --on-accent: #201404;
@@ -275,6 +280,8 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .callout-definition .callout-label { color: var(--good); }
 .callout-exemple { border-left-color: var(--accent); background: var(--surface-2); }
 .callout-exemple .callout-label { color: var(--accent-ink); }
+.callout-intuition { border-left-color: var(--plan); background: var(--plan-soft); }
+.callout-intuition .callout-label { color: var(--plan-ink); }
 
 /* ---------- exemple résolu ---------- */
 .exemple {

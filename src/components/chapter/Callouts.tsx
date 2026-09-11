@@ -91,6 +91,18 @@ export function PiegeClassique({ block }: { block: Extract<Block, { kind: 'piege
   )
 }
 
+/** Callout "intuition" — image concrète, analogie ou "pourquoi" avant/à côté de la règle formelle. */
+export function Intuition({ block }: { block: Extract<Block, { kind: 'intuition' }> }) {
+  return (
+    <div className="callout callout-intuition">
+      <p className="callout-label">{block.label ?? 'Intuition'}</p>
+      <p>
+        <RichText text={block.text} />
+      </p>
+    </div>
+  )
+}
+
 /** Callout "Définitions" — paragraphes de définition formelle (pas une liste à puces, contrairement
  * à `Rappel`). */
 export function Definition({ block }: { block: Extract<Block, { kind: 'definition' }> }) {

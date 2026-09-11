@@ -23,6 +23,7 @@ de `Block` — le même bloc peut apparaître dans n'importe quel ordre selon le
 | `attention`      | Callout "⚠ Attention"                                                  |
 | `astuce`         | Callout "💡 Astuce" (+ liste optionnelle)                              |
 | `piege`          | Callout "Piège classique"                                              |
+| `intuition`      | Callout violet "image concrète / analogie / pourquoi", distinct des autres callouts — voir plus bas |
 | `definition`     | Callout "Définitions" — paragraphes de définition formelle, pas une liste à puces |
 | `exemple`        | "Exemple résolu" : badge, formule, étapes tagguées, résultat encadré  |
 | `exempleLibre`   | "Exemple résolu" en forme libre : blocs imbriqués quelconques (prose, chaîne...), quand le raisonnement ne se découpe pas en étapes/résultat rigides |
@@ -78,6 +79,35 @@ Les `label` de callout, `badge` et `tag` d'exemple, `kicker` de section, `descri
 `entrainement` et en-têtes de `featureTable` sont rendus en texte BRUT — y écrire `$...$` affiche
 les dollars littéralement (détecté uniquement au rendu navigateur, jamais par `tsc`). Y mettre des
 caractères Unicode (2ⁿ, x², ×, −), jamais du LaTeX.
+
+## Callout `intuition` — apports pédagogiques (image concrète, analogie, "pourquoi")
+
+`{ kind: 'intuition', label?, text }` — callout teinté violet (réutilise `--plan`/`--plan-soft`,
+déjà utilisé pour la géométrie dans l'espace ; les deux usages ne se rencontrent jamais dans le
+même callout, seulement parfois sur la même page). Sert à ajouter, à côté du contenu existant, un
+des quatre types d'aide pédagogique validés avec l'utilisateur :
+
+1. une image concrète ou une analogie **avant** la définition formelle (ex. le distributeur de
+   boissons avant "une fonction associe...") ;
+2. le **pourquoi** d'une règle, avant de la donner (ex. pourquoi un dénominateur à 0 ou une racine
+   d'un négatif posent problème, pas seulement la règle "il faut que...") ;
+3. une analogie mémorable pour un point qui se retient mal (ex. chaussettes-avant-chaussures pour
+   l'ordre de composition de fonctions) ;
+4. un pont explicite vers une notion déjà connue (ex. rappeler que f(x) est déjà connu depuis un
+   chapitre antérieur, avant d'aller plus loin).
+
+**Ne jamais** utiliser "Ajout pédagogique" (ou toute variante methodologique/meta) comme `label` —
+ce texte n'a de sens qu'en interne, jamais pour l'élève qui lit la page. Toujours donner un `label`
+naturel et spécifique au contenu du bloc (ex. "Pourquoi ça marche ?", "Pour visualiser",
+"Ce que tu sais déjà", ou tout autre titre à hauteur d'élève) — jamais le label par défaut
+générique "Intuition" laissé tel quel si un titre plus parlant est possible.
+
+Ce callout est un **ajout**, jamais une réécriture de contenu existant : il ne remplace ni un
+`rappel`, ni un `methode`, ni aucun autre bloc déjà présent — il vient en plus, à l'endroit où il
+aide le plus (typiquement juste avant une définition dense, ou juste après une règle dont le
+"pourquoi" n'est pas déjà expliqué ailleurs). Un chapitre n'en a pas besoin à chaque section : 3 à
+6 par chapitre, aux endroits qui en profitent vraiment, valent mieux qu'un bloc systématique par
+section qui finit par se banaliser et alourdir la lecture.
 
 ## Convention de lien vers un générateur
 

@@ -9,8 +9,11 @@ paths:
   matières, intro, sections numérotées, récapitulatif final.
 - `BlockRenderer` / `BlockList` (`components/chapter/BlockRenderer.tsx`) — bascule sur
   `Block.kind` pour rendre chaque bloc de contenu.
-- `Rappel`, `Methode`, `Attention`, `Astuce`, `PiegeClassique` (`components/chapter/Callouts.tsx`)
-  — callouts stylés distinctement (couleur + icône propres à chacun, cohérentes sur tout le site).
+- `Rappel`, `Methode`, `Attention`, `Astuce`, `PiegeClassique`, `Intuition`
+  (`components/chapter/Callouts.tsx`) — callouts stylés distinctement (couleur + icône propres à
+  chacun, cohérentes sur tout le site). `Intuition` (violet, réutilise `--plan`) est le plus
+  récent : voir `.claude/rules/content-authoring.md` pour son rôle exact (image concrète, analogie,
+  "pourquoi" — jamais un `label` méta comme "Ajout pédagogique").
 - `ExempleResolu`, `WrongRight`, `CarteEntrainement`, `RecapFinal`, `ChecklistRelecture` (dossier
   `components/chapter/`) — `ChecklistRelecture` est un composant à part entière (fichier propre),
   distinct de `RecapFinal` : l'un résume la théorie ("Ce qu'il faut retenir"), l'autre est la

@@ -849,6 +849,16 @@ export type Block =
   | { kind: 'astuce'; label?: string; text: string; items?: string[] }
   | { kind: 'piege'; label?: string; text: string }
   | {
+      /** Callout "intuition" — image concrète, analogie ou explication du "pourquoi" avant/à
+       * côté de la règle formelle, distincte des autres callouts (teinte violette dédiée,
+       * réutilisant --plan). Le `label` par défaut est volontairement neutre ("Intuition") ;
+       * toujours le personnaliser pour refléter le rôle exact du bloc (ex. "Pourquoi ça marche ?",
+       * "Pour visualiser", "Ce que tu sais déjà") plutôt que de le laisser générique partout. */
+      kind: 'intuition'
+      label?: string
+      text: string
+    }
+  | {
       /** Callout "Définitions" — plusieurs paragraphes de définition formelle, pas une liste à
        * puces (contrairement à `rappel`). Découvert nécessaire pour du contenu de 6e riche en
        * définitions formelles (injectif/surjectif/bijectif) — absent des chapitres 4e/5e. */

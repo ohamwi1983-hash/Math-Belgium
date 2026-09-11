@@ -7,41 +7,59 @@ export const fonctionsComposees: ChapterContent = {
   title: 'Fonctions : rappels et compléments',
   slug: 'fonctions-composees',
   lede:
-    "Avant d'attaquer les limites, les asymptotes puis les dérivées, on refait le point sur les " +
-    'fonctions : où sont-elles définies, comment en composer deux, comment décomposer une écriture ' +
-    'compliquée en étapes simples, et comment lire tout ça sur un graphique ou dans un contexte concret.',
+    "Avant les limites, les asymptotes et les dérivées, on refait le point sur les fonctions : " +
+    "où elles existent, comment en enchaîner deux, comment décomposer une écriture compliquée " +
+    'en étapes simples, et comment lire tout ça sur un graphique ou dans une situation concrète.',
 
   intro: {
     title: "Avant de commencer : une fonction, c'est une machine",
     blocks: [
       {
+        kind: 'intuition',
+        label: 'Pour visualiser',
+        text:
+          "Imagine un distributeur de boissons. Tu appuies sur un bouton précis, une boisson " +
+          'précise sort. Toujours la même boisson pour le même bouton. Jamais deux boissons ' +
+          "différentes pour le même bouton, au même moment. Une **fonction**, c'est exactement " +
+          'ce principe, mais avec des nombres.',
+      },
+      {
         kind: 'para',
         text:
-          'Une fonction **f** associe, à chaque nombre **x** d’un certain ensemble de départ, ' +
-          '**un seul** nombre noté **f(x)**. On peut se la représenter comme une machine : on entre ' +
-          '**x**, il se passe des calculs à l’intérieur, il en ressort **f(x)**.',
+          'Une fonction f prend un nombre x, et renvoie **un seul** nombre, noté f(x). On peut ' +
+          'se la représenter comme une machine : tu entres x, il se passe des calculs à ' +
+          "l'intérieur, il en ressort f(x).",
       },
       { kind: 'illustration', illustration: { kind: 'machine' } },
       {
-        kind: 'para',
+        kind: 'intuition',
+        label: 'Tu connais déjà ça',
         text:
-          'Deux notions à garder sous la main pour tout ce chapitre : le **domaine de définition** ' +
-          '(noté $\\operatorname{dom} f$), c’est-à-dire l’ensemble des **x** que la machine accepte ' +
-          'sans planter ; et le **graphe** $C_f$, l’ensemble des points $(x\\,;\\,f(x))$.',
+          "Tu utilises la notation f(x) depuis la 4e. Ici, on ne réapprend pas ce que c'est : on " +
+          "va juste un peu plus loin — où f(x) existe vraiment, comment enchaîner deux " +
+          'fonctions, et comment lire tout ça sur un graphique.',
       },
       {
         kind: 'para',
         text:
-          'Concrètement, « faire tourner la machine » veut dire remplacer chaque **x** de la formule ' +
-          'par la valeur choisie. Avec $f(x) = x^2 - 2x$ : $f(3) = 9-6=3$, $f(0)=0$, $f(-2)=4+4=8$.',
+          'Deux mots à garder sous la main pour tout le chapitre. Le **domaine de définition** ' +
+          '(noté $\\operatorname{dom} f$) : l\'ensemble des x que la machine accepte sans ' +
+          'planter. Le **graphe** $C_f$ : l\'ensemble des points $(x\\,;\\,f(x))$.',
+      },
+      {
+        kind: 'para',
+        text:
+          '« Faire tourner la machine », concrètement, ça veut dire remplacer chaque x de la ' +
+          'formule par la valeur choisie. Avec $f(x) = x^2 - 2x$ : $f(3) = 9-6=3$, $f(0)=0$, ' +
+          '$f(-2)=4+4=8$.',
       },
       {
         kind: 'astuce',
         text:
-          'Pour évaluer f en un point, mets systématiquement la valeur entre **parenthèses** avant de ' +
-          'remplacer — surtout si elle est négative ou déjà une expression. $f(-2) = (-2)^2 - 2(-2)$ ne ' +
-          'laisse aucune place au doute ; $f(-2) = -2^2 - 2-2$ (sans parenthèses) est une porte ouverte à ' +
-          "l'erreur de signe.",
+          'Pour évaluer f en un point, mets systématiquement la valeur entre **parenthèses** ' +
+          'avant de remplacer — surtout si elle est négative ou déjà une expression. ' +
+          '$f(-2) = (-2)^2 - 2(-2)$ ne laisse aucune place au doute ; $f(-2) = -2^2 - 2-2$ (sans ' +
+          "parenthèses) est une porte ouverte à l'erreur de signe.",
       },
     ],
   },
@@ -54,12 +72,21 @@ export const fonctionsComposees: ChapterContent = {
       kicker: 'dom f — ce que la machine accepte',
       blocks: [
         {
+          kind: 'intuition',
+          label: "Pourquoi s'en soucier ?",
+          text:
+            'Si tu oublies une condition, tu peux calculer une réponse pour une valeur de x qui ' +
+            "n'a en réalité aucun sens ! Un peu comme trouver « combien de temps pour vider une " +
+            'baignoire » et obtenir un temps négatif. dom f, c\'est simplement la liste des ' +
+            'valeurs de x pour lesquelles f(x) veut vraiment dire quelque chose.',
+        },
+        {
           kind: 'para',
           text:
-            '**dom f** est l’ensemble de toutes les valeurs de **x** pour lesquelles **f(x)** peut ' +
-            'réellement être calculé. La plupart du temps, une expression est calculable pour **tout** réel ' +
-            '— le travail consiste à repérer les quelques opérations qui, elles, imposent une **condition ' +
-            "d'existence** (CE).",
+            '**dom f** est l\'ensemble de toutes les valeurs de **x** pour lesquelles **f(x)** ' +
+            'peut réellement être calculé. La plupart du temps, une expression est calculable ' +
+            'pour **tout** réel — le travail consiste à repérer les quelques opérations qui, ' +
+            "elles, imposent une **condition d'existence** (CE).",
         },
         {
           kind: 'rappel',
@@ -72,13 +99,23 @@ export const fonctionsComposees: ChapterContent = {
           ],
         },
         {
+          kind: 'intuition',
+          label: 'Pourquoi ces deux-là ?',
+          text:
+            "Un dénominateur à 0 : diviser par 0 n'a pas de sens. Essaie sur ta calculatrice, " +
+            'elle refuse ! Une racine carrée d\'un nombre négatif : aucun nombre réel, mis au ' +
+            'carré, ne donne un résultat négatif. $(-2)^2 = 4$, jamais $-4$. Donc $\\sqrt{-4}$ ' +
+            "n'existe pour aucun réel.",
+        },
+        {
           kind: 'attention',
           label: "Attention — large ou strict, ce n'est pas pareil",
           text:
-            'Une racine paire impose $\\text{radicande} \\ge 0$ : c’est une inégalité **large**, le 0 ' +
-            'lui-même est accepté. Un dénominateur impose $\\text{dénominateur} \\ne 0$ : ce n’est ' +
-            '**pas** une inégalité, mais une seule valeur ponctuelle qu’on retire — pas tout un côté ' +
-            'de la droite. Ne recopie jamais « ≠ 0 » là où il fallait « ≥ 0 », ou l’inverse.',
+            'Une racine paire impose $\\text{radicande} \\ge 0$ : c’est une inégalité **large**, ' +
+            'le 0 lui-même est accepté. Un dénominateur impose $\\text{dénominateur} \\ne 0$ : ce ' +
+            'n’est **pas** une inégalité, mais une seule valeur ponctuelle qu’on retire — pas ' +
+            'tout un côté de la droite. Ne recopie jamais « ≠ 0 » là où il fallait « ≥ 0 », ou ' +
+            "l'inverse.",
         },
         {
           kind: 'methode',
@@ -196,6 +233,14 @@ export const fonctionsComposees: ChapterContent = {
             "Composer deux fonctions, c'est enchaîner deux machines : la sortie de la première devient " +
             "l'entrée de la seconde. On note $(f\\circ g)(x) = f(g(x))$ : on lit « f rond g », et on " +
             'calcule **de droite à gauche** — d’abord g, ensuite f.',
+        },
+        {
+          kind: 'intuition',
+          label: "Pour retenir l'ordre",
+          text:
+            'Le matin, tu mets tes chaussettes, **PUIS** tes chaussures. Jamais l\'inverse ! ' +
+            '$(f\\circ g)(x)$, c\'est pareil : on fait g d\'abord (les chaussettes), puis f (les ' +
+            'chaussures). L\'ordre compte, toujours.',
         },
         { kind: 'illustration', illustration: { kind: 'compositionIntro' } },
         {
@@ -553,8 +598,8 @@ export const fonctionsComposees: ChapterContent = {
           label: 'Attention — le domaine « physique » est presque toujours plus restrictif',
           text:
             'Purement algébriquement, $h(r) = 1000/(\\pi r^2)$ n’exclut que r = 0 (le dénominateur). ' +
-            'Mais dans le contexte, un **rayon** ne peut être ni nul ni négatif — le vrai domaine du modèle ' +
-            'est donc $r > 0$, une restriction plus forte que la simple condition « ≠ 0 ». Relis toujours ' +
+            'Mais dans le contexte, un **rayon** ne peut être ni nul ni négatif — le vrai domaine du ' +
+            'modèle est donc $r > 0$, une restriction plus forte que la simple condition « ≠ 0 ». Relis toujours ' +
             'l’énoncé pour d’éventuelles bornes supplémentaires (hauteur maximale du bidon, ' +
             'quantité de matière première disponible, etc.) : le domaine mathématique n’est qu’un ' +
             'point de départ.',
@@ -586,7 +631,7 @@ export const fonctionsComposees: ChapterContent = {
   recap: {
     items: [
       '**Domaine de définition** — repérer dénominateurs et racines paires, poser une condition par risque, combiner par intersection.',
-      '**Composer** — (f∘g)(x) = f(g(x)) : g agit en premier, f en second ; l’ordre compte.',
+      '**Composer** — (f∘g)(x) = f(g(x)) : g agit en premier, f en second (comme les chaussettes avant les chaussures) ; l’ordre compte.',
       '**Décomposer** — repérer la toute dernière opération effectuée, l’éplucher, recommencer.',
       '**Domaine d’une composée** — x ∈ dom g, ET g(x) ∈ dom f ; l’intersection peut être bornée, voire vide.',
       '**Lecture graphique** — deux lectures successives, la sortie de la première devient l’entrée de la seconde ; vérifier que l’image existe.',
