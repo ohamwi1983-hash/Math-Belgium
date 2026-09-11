@@ -7,10 +7,11 @@ export const primitivesIntegrales: ChapterContent = {
   title: 'Intégrales et primitives',
   slug: 'primitives-integrales',
   lede:
-    "Dériver, c'est passer d'une fonction à sa pente. **Intégrer** fait exactement l'inverse : " +
-    "reconstruire une fonction à partir de sa dérivée. Ce chapitre construit cette idée pas à " +
-    "pas, d'un seul théorème central — le théorème fondamental de l'analyse — jusqu'à ses " +
-    "applications concrètes : aires, volumes de révolution, longueurs d'arc et problèmes de cinématique.",
+    "Dériver, c'est passer d'une fonction à sa pente. **Intégrer**, c'est littéralement " +
+    "l'inverse : tu repars de la pente pour retrouver la fonction de départ. Ce chapitre " +
+    "construit cette idée pas à pas, à partir d'un seul théorème central — le théorème " +
+    "fondamental de l'analyse — puis tu l'utilises partout : aires, volumes de révolution, " +
+    "longueurs d'arc, problèmes de cinématique.",
 
   sections: [
     {
@@ -20,13 +21,31 @@ export const primitivesIntegrales: ChapterContent = {
       kicker: 'F\'=f ; primitive générale F(x)+C ; substitution ; intégration par parties',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Rembobiner la vidéo',
+          text:
+            "Imagine une vidéo qui filme la pente d'une courbe à chaque instant — sa dérivée, " +
+            "en direct. **Trouver une primitive, c'est rembobiner cette vidéo** : tu connais " +
+            'la pente à chaque instant, et tu veux retrouver la courbe de départ, celle qui ' +
+            "produit exactement cette pente. C'est tout le programme de ce chapitre.",
+        },
+        {
           kind: 'definition',
           label: 'Définition',
           items: [
-            'Soit f une fonction définie sur un intervalle I. On dit que F est une ' +
-              '**primitive** de f sur I si F est dérivable sur I et si F\'(x) = f(x) pour tout ' +
-              'x de I. Intégrer, c\'est donc l\'opération **inverse** de dériver.',
+            'Soit f une fonction définie sur un intervalle I. F est une **primitive** de f sur ' +
+              'I si F est dérivable sur I et si F\'(x) = f(x) pour tout x de I. Intégrer, c\'est ' +
+              'donc l\'opération **inverse** de dériver.',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi toute une famille, et pas une seule primitive ?',
+          text:
+            'Prends une courbe, puis fais-la glisser verticalement, vers le haut ou vers le ' +
+            'bas : sa pente, en chaque point, ne change **jamais** ! Toutes ces courbes ' +
+            'parallèles ont donc exactement la même dérivée. Le +C, c\'est juste ce glissement ' +
+            'vertical : il ne change jamais la forme de la courbe, seulement sa hauteur.',
         },
         {
           kind: 'methode',
@@ -35,7 +54,7 @@ export const primitivesIntegrales: ChapterContent = {
             'Si F est UNE primitive de f sur I, alors TOUTES les primitives de f sur I sont ' +
               'exactement les fonctions $x \\mapsto F(x)+C$, où C décrit ℝ. Une fonction admet ' +
               'donc soit aucune primitive sur I (si elle n\'y est pas continue), soit une ' +
-              '**infinité** — jamais une seule.',
+              '**infinité** — jamais une seule !',
           ],
         },
         {
@@ -68,11 +87,12 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'definition',
           label: 'Notation — intégrale indéfinie',
           items: [
-            'L\'ensemble de TOUTES les primitives de f sur I s\'appelle l\'**intégrale ' +
-              'indéfinie** de f sur I et se note $\\int f(x)dx$ : on écrit $\\int f(x)dx = ' +
+            'L\'ensemble de toutes les primitives de f sur I s\'appelle l\'**intégrale ' +
+              'indéfinie** de f sur I, notée $\\int f(x)dx$ : $\\int f(x)dx = ' +
               'F(x)+C$ (C ∈ ℝ), où F est une primitive quelconque de f.',
-            'Ce symbole, écrit **sans bornes**, désigne donc une **famille de fonctions** — à ne ' +
-              'pas confondre avec $\\int_a^b f(x)dx$, qui désigne un **nombre** et sera défini à la section 3.',
+            'Ce symbole, écrit **sans bornes**, désigne donc toute une **famille de fonctions** ' +
+              '— à ne pas confondre avec $\\int_a^b f(x)dx$, qui désigne un **nombre** (tu le ' +
+              'découvres à la section 3).',
           ],
         },
         {
@@ -95,8 +115,8 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             'La formule $x^n \\to \\dfrac{x^{n+1}}{n+1}$ est **explicitement exclue** pour n = ' +
-            '−1 (division par 0). La primitive de 1/x n\'est jamais une puissance de x : c\'est ' +
-            'ln|x|. Oublier la valeur absolue est une erreur fréquente — ln(x) seul n\'est ' +
+            '−1 : tu diviserais par 0 ! La primitive de 1/x n\'est jamais une puissance de x, ' +
+            'c\'est ln|x|. Piège classique : oublier la valeur absolue — ln(x) seul n\'est ' +
             'défini que pour x > 0, alors que 1/x l\'est aussi pour x < 0.',
         },
         { kind: 'subheading', text: 'Technique de substitution — reconnaître une forme u\'·f(u)' },
@@ -104,10 +124,10 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Si l\'**intégrande** (la fonction écrite sous le signe ∫) se présente comme ' +
-              'u\'(x)·f(u(x)) — la dérivée d\'une expression ' +
-              'composée apparaît EXACTEMENT comme facteur —, alors une primitive est F(u(x)) + ' +
-              'C, où F est une primitive de f. Cas particuliers très utiles :',
+            'Regarde si l\'**intégrande** (la fonction écrite sous le signe ∫) a la forme ' +
+              'u\'(x)·f(u(x)) — la dérivée d\'une expression composée apparaît EXACTEMENT comme ' +
+              'facteur. Si oui, une primitive est F(u(x)) + C, où F est une primitive de f. ' +
+              'Trois cas particuliers très utiles :',
             '$\\dfrac{u\'}{u} \\to \\ln|u| + C \\qquad u\'e^u \\to e^u + C \\qquad u\'u^n \\to \\dfrac{u^{n+1}}{n+1} + C$',
           ],
         },
@@ -117,8 +137,8 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$\\int 2x \\cdot e^{x^2} dx$ : ici $u(x)=x^2$, donc $u\'(x)=2x$ — qui apparaît ' +
-                'EXACTEMENT dans l\'intégrande. C\'est la forme $u\'e^u$, de primitive $e^u$.',
+                '$\\int 2x \\cdot e^{x^2} dx$ : ici $u(x)=x^2$, donc $u\'(x)=2x$ — et ce facteur ' +
+                'apparaît EXACTEMENT dans l\'intégrande ! C\'est la forme $u\'e^u$, de primitive $e^u$.',
             },
             { kind: 'para', text: '$\\int 2x \\cdot e^{x^2} dx = e^{x^2} + C$' },
           ],
@@ -127,14 +147,14 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             '$\\int x \\cdot e^{x^2} dx \\neq e^{x^2}+C$ : l\'intégrande ne porte que x, pas ' +
-            '$2x=u\'(x)$ — il manque le facteur 1/2. La bonne primitive est $\\dfrac{1}{2}e^{x^2}+C$.',
+            '$2x=u\'(x)$ — il manque le facteur 1/2 ! La bonne primitive est $\\dfrac{1}{2}e^{x^2}+C$.',
         },
         {
           kind: 'astuce',
           label: 'Toujours vérifier',
           text:
-            'Une primitive se vérifie en la **dérivant** : si le résultat obtenu ne redonne pas ' +
-            'exactement f, la primitive est fausse. C\'est un réflexe systématique, pas ' +
+            'Une primitive se vérifie en la **dérivant** : si tu ne retombes pas exactement ' +
+            'sur f, ta primitive est fausse ! Prends-en le réflexe systématique — pas ' +
             'seulement un contrôle de fin d\'exercice.',
         },
         { kind: 'subheading', text: 'Pour aller plus loin — intégration par parties' },
@@ -142,12 +162,11 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Quand l\'intégrande est un **produit** de deux fonctions dont aucune substitution ' +
-              'simple ne marche, on peut « transférer » la dérivation d\'un facteur vers l\'autre :',
+            'Quand l\'intégrande est un **produit** de deux fonctions et qu\'aucune substitution ' +
+              'simple ne marche, tu peux « transférer » la dérivation d\'un facteur vers l\'autre :',
             '$\\int f(x) \\cdot g\'(x) \\, dx = f(x) \\cdot g(x) - \\int f\'(x) \\cdot g(x) \\, dx$',
-            'Choisir judicieusement quelle partie du produit dériver (f) et quelle partie ' +
-              'primitiver (g\') est l\'étape déterminante : le bon choix simplifie l\'intégrale ' +
-              'restante, le mauvais la complique.',
+            'Choisir quelle partie dériver (f) et quelle partie primitiver (g\') est l\'étape ' +
+              'déterminante : le bon choix simplifie l\'intégrale restante, le mauvais la complique !',
           ],
         },
         {
@@ -164,9 +183,9 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Or $\\int (f \\cdot g)\'(x)dx = f(x) \\cdot g(x) + C$ directement (une fonction ' +
-                'est une primitive de sa propre dérivée) : isoler $\\int f(x) \\cdot g\'(x)dx$ ' +
-                'donne la formule.',
+                'Or $\\int (f \\cdot g)\'(x)dx = f(x) \\cdot g(x) + C$ directement — une fonction ' +
+                'est toujours une primitive de sa propre dérivée. Isole $\\int f(x) \\cdot ' +
+                'g\'(x)dx$ dans l\'égalité ci-dessus : tu retrouves exactement la formule.',
             },
           ],
         },
@@ -176,7 +195,7 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$\\int x \\cdot e^x dx$ : on pose $f(x)=x$ (donc $f\'(x)=1$, plus simple) et ' +
+                '$\\int x \\cdot e^x dx$ : pose $f(x)=x$ (donc $f\'(x)=1$, plus simple) et ' +
                 '$g\'(x)=e^x$ (donc $g(x)=e^x$) :',
             },
             {
@@ -189,8 +208,8 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             'Le choix inverse — $f(x)=e^x$, $g\'(x)=x$ — n\'est pas faux mathématiquement, mais ' +
-            'mène à une intégrale **plus compliquée** ($\\int e^x \\cdot x^2/2 \\, dx$), pas plus ' +
-            'simple : dériver la partie qui se « simplifie » en dérivant (ici x → 1) est ' +
+            'mène à une intégrale **plus compliquée** ($\\int e^x \\cdot x^2/2 \\, dx$), jamais ' +
+            'plus simple ! Dériver la partie qui se « simplifie » en dérivant (ici x → 1) est ' +
             'presque toujours le bon réflexe.',
         },
         {
@@ -201,7 +220,8 @@ export const primitivesIntegrales: ChapterContent = {
               kind: 'para',
               text:
                 '$\\int x^2 \\cdot \\sin(x) dx$ : une première IPP (f=x², g\'=sin(x)) laisse ' +
-                'encore un produit $x \\cdot \\cos(x)$ à intégrer — il faut recommencer :',
+                'encore un produit $x \\cdot \\cos(x)$ à intégrer — il faut recommencer une ' +
+                'deuxième fois :',
             },
             {
               kind: 'para',
@@ -217,7 +237,7 @@ export const primitivesIntegrales: ChapterContent = {
           generatorId: '6gen23',
           description: [
             'Calcule des primitives par lecture directe du tableau, par substitution (forme ' +
-              'u\'·f(u)) ou par intégration par parties, avec vérification par dérivation.',
+              'u\'·f(u)) ou par intégration par parties, puis vérifie en dérivant.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 23. Calcul de primitives »',
@@ -234,17 +254,26 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'para',
           text:
             'La primitive générale F(x) + C regroupe une **infinité** de fonctions. Pour en ' +
-            'isoler UNE seule — la « primitive particulière » —, il faut une information ' +
-            'supplémentaire : une **condition initiale** F(x₀) = y₀.',
+            'isoler UNE seule — la « primitive particulière » —, tu as besoin d\'une ' +
+            'information en plus : une **condition initiale** F(x₀) = y₀.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Quelle piste choisir, parmi toutes les primitives ?',
+          text:
+            'Tu te souviens : toutes les primitives de f sont des courbes parallèles, décalées ' +
+            'verticalement les unes des autres. Une condition initiale, c\'est juste un point ' +
+            'par lequel la courbe doit passer — exactement de quoi repérer, parmi toute cette ' +
+            'famille, sur QUELLE piste tu te trouves.',
         },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Calculer la primitive générale F(x) + C (techniques de la section 1), sans jamais oublier C.',
-            'Remplacer x par x₀ et poser l\'équation F(x₀) + C = y₀.',
-            'Résoudre cette équation du **premier degré** en C — elle admet toujours exactement une solution.',
-            'Écrire la primitive particulière obtenue.',
+            'Calcule la primitive générale F(x) + C (techniques de la section 1) — sans jamais oublier C !',
+            'Remplace x par x₀ et pose l\'équation F(x₀) + C = y₀.',
+            'Résous cette équation du **premier degré** en C — elle admet toujours exactement une solution.',
+            'Écris la primitive particulière obtenue.',
           ],
         },
         {
@@ -298,16 +327,16 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           label: 'Piège central de cet exercice',
           text:
-            'Oublier C dès le premier calcul (le traiter comme s\'il valait toujours 0) rend ' +
-            'l\'équation F(x₀) = y₀ impossible à poser correctement. C doit rester ' +
-            '**symbolique** jusqu\'à ce que la condition initiale l\'évalue — jamais fixé « provisoirement » à 0.',
+            'Oublier C dès le premier calcul — le traiter comme s\'il valait déjà 0 — rend ' +
+            'l\'équation F(x₀) = y₀ impossible à poser correctement ! C doit rester ' +
+            '**symbolique** jusqu\'à ce que la condition initiale l\'évalue, jamais fixé « provisoirement » à 0.',
         },
         {
           kind: 'astuce',
           label: 'Deux mots, deux sens',
           text:
             'Une **racine** est un zéro d\'un polynôme intermédiaire ; une **solution** résout ' +
-            'l\'énoncé complet. Ici, la « solution » de l\'équation en C donne directement ' +
+            'l\'énoncé complet. Ici, la « solution » de l\'équation en C te donne directement ' +
             'l\'expression finale de F — ces deux mots ne sont jamais interchangeables.',
         },
         {
@@ -316,7 +345,7 @@ export const primitivesIntegrales: ChapterContent = {
           generatorId: '6gen24',
           description: [
             'Calcule la primitive générale, pose et résous l\'équation en C à partir d\'une ' +
-              'condition initiale, puis écris la primitive particulière obtenue.',
+              'condition initiale, puis écris la primitive particulière.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 24. Quelle primitive ? (condition initiale) »',
@@ -330,12 +359,21 @@ export const primitivesIntegrales: ChapterContent = {
       kicker: 'théorème fondamental, propriétés, méthode des trapèzes, valeur moyenne',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Instantané ou accumulé ?',
+          text:
+            "Une dérivée mesure un débit à un instant précis — la vitesse à laquelle une " +
+            "piscine se remplit, à la seconde où tu regardes. Une **intégrale**, c'est tout " +
+            "l'inverse : elle accumule ce débit sur toute une durée, pour te donner le volume " +
+            "TOTAL accumulé — pas une valeur instantanée, une vraie somme continue.",
+        },
+        {
           kind: 'definition',
           label: 'Comment définit-on l\'intégrale, avant même de connaître une primitive ?',
           items: [
-            'Soit f continue et positive sur [a;b]. On partage cet intervalle en n ' +
-              'sous-intervalles de longueur constante Δx=(b−a)/n. Sur chacun, on note mᵢ la ' +
-              'plus petite valeur prise par f, et Mᵢ la plus grande.',
+            'Prends f continue et positive sur [a;b]. Partage cet intervalle en n ' +
+              'sous-intervalles de longueur constante Δx=(b−a)/n. Sur chacun, note mᵢ la plus ' +
+              'petite valeur prise par f, et Mᵢ la plus grande.',
           ],
         },
         {
@@ -398,8 +436,8 @@ export const primitivesIntegrales: ChapterContent = {
           items: [
             'L\'aire A sous la courbe est encadrée par ces deux sommes de rectangles : ' +
               '$\\Delta x \\sum_{i=1}^{n} m_i \\le A \\le \\Delta x \\sum_{i=1}^{n} M_i$.',
-            'Lorsque n augmente indéfiniment, ces deux sommes convergent vers une **même ' +
-              'limite** (admis) — c\'est cette limite commune que l\'on appelle ' +
+            'Quand n augmente indéfiniment, ces deux sommes convergent vers une **même ' +
+              'limite** (admis) — c\'est cette limite commune qu\'on appelle ' +
               '$\\int_a^b f(x)dx$, l\'**intégrale définie** de f entre a et b. La démarche se ' +
               'généralise à toute fonction f continue, même non positive.',
           ],
@@ -421,7 +459,7 @@ export const primitivesIntegrales: ChapterContent = {
             { kind: 'para', text: '$= F(b)-F(a)$ — C s\'annule toujours' },
             {
               kind: 'para',
-              text: 'Peu importe la primitive choisie pour calculer $\\int_a^b f(x)dx$ : le résultat est toujours le même nombre.',
+              text: 'Peu importe la primitive que tu choisis pour calculer $\\int_a^b f(x)dx$ : le résultat est toujours le même nombre !',
             },
           ],
         },
@@ -435,7 +473,7 @@ export const primitivesIntegrales: ChapterContent = {
             'L\'intégrale définie est une somme **signée** : son signe suit celui de f sur ' +
               '[a;b], même si a < b. La variable d\'intégration est **muette** — $\\int_a^b ' +
               'f(x)dx$ et $\\int_a^b f(t)dt$ désignent exactement le même nombre. C\'est cette ' +
-              'propriété d\'additivité qui justifie le découpage aux racines utilisé pour les ' +
+              'additivité qui justifie le découpage aux racines que tu utiliseras pour les ' +
               'aires (section 4).',
           ],
         },
@@ -444,12 +482,12 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Quand on ne trouve pas de primitive explicite (ou que l\'on ne dispose que de ' +
-              'mesures ponctuelles), on peut approcher $\\int_a^b f(x)dx$ en remplaçant chaque ' +
+            'Quand tu ne trouves pas de primitive explicite (ou que tu ne disposes que de ' +
+              'mesures ponctuelles), tu peux approcher $\\int_a^b f(x)dx$ en remplaçant chaque ' +
               'rectangle de l\'encadrement par un **trapèze** reliant ($x_{i-1}$;$f(x_{i-1})$) ' +
               'à ($x_i$;$f(x_i)$) :',
             '$\\int_a^b f(x)dx \\approx \\dfrac{\\Delta x}{2}[f(x_0) + f(x_n) + 2(f(x_1)+\\ldots+f(x_{n-1}))]$',
-            'Cette approximation est d\'autant plus précise que n (le nombre de sous-intervalles) est grand.',
+            'Plus n (le nombre de sous-intervalles) est grand, plus cette approximation est précise.',
           ],
         },
         {
@@ -479,7 +517,7 @@ export const primitivesIntegrales: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: 'Approcher $\\int_0^4 x^2 dx$ par la méthode des trapèzes, avec 4 sous-intervalles (Δx=1) :',
+              text: 'Approche $\\int_0^4 x^2 dx$ par la méthode des trapèzes, avec 4 sous-intervalles (Δx=1) :',
             },
             { kind: 'para', text: '$\\int_0^4 x^2 dx \\approx \\dfrac{1}{2}[0+16+2(1+4+9)] = \\dfrac{1}{2}(16+28) = 22$' },
             {
@@ -508,7 +546,7 @@ export const primitivesIntegrales: ChapterContent = {
               text:
                 'La valeur moyenne est donc **comprise** entre le minimum et le maximum de f ' +
                 'sur [a;b] : par le théorème des valeurs intermédiaires, il existe r ∈ [a;b] ' +
-                'tel que f(r) vaut exactement cette valeur moyenne — elle est donc toujours atteinte, pas seulement approchée.',
+                'tel que f(r) vaut exactement cette valeur moyenne — elle est donc toujours atteinte, jamais seulement approchée.',
             },
           ],
         },
@@ -550,7 +588,7 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             'Confondre la valeur de l\'**intégrale** (8, ci-dessus) avec la **valeur moyenne** ' +
-            '(2) — il manque la division par b−a. Ce sont deux nombres différents, jamais interchangeables.',
+            '(2) — il manque la division par b−a ! Ce sont deux nombres différents, jamais interchangeables.',
         },
         { kind: 'subheading', text: 'Retrouver un paramètre depuis une intégrale connue' },
         {
@@ -558,7 +596,7 @@ export const primitivesIntegrales: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: 'On cherche m > 0 tel que $\\int_0^m 2x \\, dx = 9$. L\'intégrale vaut [x²]₀ᵐ = m², d\'où l\'équation m² = 9, puis, avec m > 0 :',
+              text: 'Tu cherches m > 0 tel que $\\int_0^m 2x \\, dx = 9$. L\'intégrale vaut [x²]₀ᵐ = m², d\'où l\'équation m² = 9, puis, avec m > 0 :',
             },
             { kind: 'para', text: 'm = 3' },
           ],
@@ -569,7 +607,8 @@ export const primitivesIntegrales: ChapterContent = {
           generatorId: '6gen25',
           description: [
             'Applique le théorème fondamental, ses propriétés (additivité, linéarité), la ' +
-              'méthode des trapèzes et la valeur moyenne — ou retrouve un paramètre depuis une intégrale connue.',
+              'méthode des trapèzes et la valeur moyenne, ou retrouve un paramètre à partir ' +
+              'd\'une intégrale connue.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 25. Intégrales définies, paramètre et valeur moyenne »',
@@ -585,8 +624,9 @@ export const primitivesIntegrales: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une aire est **toujours** une quantité positive ou nulle. L\'intégrale signée ' +
-            'coïncide avec l\'aire seulement quand f garde un signe constant sur l\'intervalle considéré.',
+            'Une aire est **toujours** positive ou nulle — jamais négative ! L\'intégrale ' +
+            'signée coïncide avec l\'aire seulement quand f garde un signe constant sur ' +
+            'l\'intervalle considéré.',
         },
         {
           kind: 'methode',
@@ -594,9 +634,9 @@ export const primitivesIntegrales: ChapterContent = {
           items: [
             'Si f ≥ 0 sur [a;b] : aire = $\\int_a^b f(x)dx$.',
             'Si f ≤ 0 sur [a;b] : aire = $-\\int_a^b f(x)dx$.',
-            'Si f change de signe : on découpe l\'intervalle aux **racines** de f, puis on ' +
-              'somme la valeur absolue de chaque intégrale partielle — jamais une intégrale ' +
-              'globale sur tout l\'intervalle, où les parties positives et négatives se compenseraient.',
+            'Si f change de signe : découpe l\'intervalle aux **racines** de f, puis somme la ' +
+              'valeur absolue de chaque intégrale partielle — jamais une seule intégrale ' +
+              'globale sur tout l\'intervalle, où les parties positives et négatives se compenseraient !',
           ],
         },
         {
@@ -644,7 +684,7 @@ export const primitivesIntegrales: ChapterContent = {
           items: [
             'Si f(x) ≥ g(x) sur [a;b] : aire = $\\int_a^b (f(x)-g(x))dx$.',
             'Si les courbes se croisent, les **racines de f−g** (leurs points d\'intersection) ' +
-              'deviennent les bornes des sous-intervalles à traiter séparément, exactement ' +
+              'deviennent les bornes des sous-intervalles à traiter séparément — exactement ' +
               'comme pour une aire sous une seule courbe.',
           ],
         },
@@ -687,14 +727,14 @@ export const primitivesIntegrales: ChapterContent = {
           text:
             'Calculer directement $\\int_a^b f(x)dx$ (ou $\\int(f-g)$) sur l\'intervalle ENTIER ' +
             'quand le signe change (ou que les courbes se croisent) donne une valeur trop ' +
-            'petite : les parties positives et négatives se compensent au lieu de s\'additionner en valeur absolue.',
+            'petite ! Les parties positives et négatives se compensent au lieu de s\'additionner en valeur absolue.',
         },
         {
           kind: 'astuce',
           label: 'Avant de calculer',
           text:
-            'Esquisser rapidement le signe de f (ou de f−g) sur chaque sous-intervalle ' +
-            '**avant** de poser l\'intégrale — décider où placer les valeurs absolues avant de calculer, jamais après coup.',
+            'Esquisse rapidement le signe de f (ou de f−g) sur chaque sous-intervalle ' +
+            '**avant** de poser l\'intégrale — décide où placer les valeurs absolues avant de calculer, jamais après coup.',
         },
         { kind: 'subheading', text: 'Aire délimitée par plus de deux courbes' },
         {
@@ -703,9 +743,9 @@ export const primitivesIntegrales: ChapterContent = {
           items: [
             'Une région peut être bordée par **plus de deux** courbes — ou, ce qui revient au ' +
               'même, la courbe qui joue le rôle de « majorant » peut **changer** au milieu de ' +
-              'l\'intervalle. On repère alors les **points de bascule** (où deux des courbes ' +
-              'bordantes se croisent), on découpe l\'intervalle à cet endroit, et on choisit sur ' +
-              'chaque morceau la bonne paire majorant/minorant — exactement comme on découpait ' +
+              'l\'intervalle. Repère alors les **points de bascule** (où deux des courbes ' +
+              'bordantes se croisent), découpe l\'intervalle à cet endroit, puis choisis sur ' +
+              'chaque morceau la bonne paire majorant/minorant — exactement comme tu découpais ' +
               'aux racines pour une aire signée.',
           ],
         },
@@ -758,9 +798,9 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           label: 'Piège spécifique à ce cas',
           text:
-            'Ne découper qu\'aux zéros de f (comme pour une aire signée) ne suffit pas ici : il ' +
-            'faut **aussi** découper là où la courbe majorante change, même si aucune des deux ' +
-            'courbes ne s\'annule à cet endroit.',
+            'Ne découper qu\'aux zéros de f (comme pour une aire signée) ne suffit pas ici ! ' +
+            'Il faut **aussi** découper là où la courbe majorante change, même si aucune des ' +
+            'deux courbes ne s\'annule à cet endroit.',
         },
         { kind: 'subheading', text: 'Pour aller plus loin — retrouver l\'aire d\'un disque' },
         {
@@ -800,8 +840,8 @@ export const primitivesIntegrales: ChapterContent = {
           title: 'Calcul d\'aires par intégrale',
           generatorId: '6gen26',
           description: [
-            'Calcule l\'aire sous une courbe (en découpant aux racines si le signe change) ou ' +
-              'entre deux courbes (en découpant à leurs intersections).',
+            'Calcule l\'aire sous une courbe (découpe aux racines si le signe change) ou ' +
+              'entre deux courbes (découpe à leurs intersections).',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 26. Calcul d\'aires par intégrale »',
@@ -817,9 +857,9 @@ export const primitivesIntegrales: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Faire tourner une région du plan autour de l\'axe des abscisses engendre un ' +
-            'solide en trois dimensions. Deux méthodes, selon que la région est bordée par une ' +
-            'seule courbe ou par deux.',
+            'Fais tourner une région du plan autour de l\'axe des abscisses : tu engendres un ' +
+            'solide en trois dimensions ! Deux méthodes, selon que la région est bordée par ' +
+            'une seule courbe ou par deux.',
         },
         {
           kind: 'astuce',
@@ -827,9 +867,10 @@ export const primitivesIntegrales: ChapterContent = {
           text:
             'Plus généralement, pour un solide compris entre les plans z=a et z=b, si S(t) ' +
             'désigne l\'aire de la section du solide par le plan z=t, son volume vaut ' +
-            '$V=\\int_a^b S(t)dt$ — le volume est la « somme » (l\'intégrale) des aires des ' +
-            'tranches infiniment fines qui le composent. Pour un solide de révolution, chaque ' +
-            'tranche est un disque d\'aire $S(x)=\\pi[f(x)]^2$ : c\'est exactement la formule ci-dessous.',
+            '$V=\\int_a^b S(t)dt$ — le volume est la « somme » (l\'intégrale) des aires de ' +
+            'toutes les tranches infiniment fines qui le composent. Pour un solide de ' +
+            'révolution, chaque tranche est un disque d\'aire $S(x)=\\pi[f(x)]^2$ : c\'est ' +
+            'exactement la formule ci-dessous.',
         },
         {
           kind: 'definition',
@@ -950,15 +991,16 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           label: 'Piège central du chapitre',
           text:
-            '$V = \\pi\\int[f(x)-g(x)]^2 dx$ est **faux** : il faut soustraire les CARRÉS ' +
+            '$V = \\pi\\int[f(x)-g(x)]^2 dx$ est **faux** ! Il faut soustraire les CARRÉS ' +
             '($[f]^2-[g]^2$), pas élever la DIFFÉRENCE au carré — ces deux expressions ne sont pas égales en général.',
         },
         {
           kind: 'astuce',
           label: 'Avant de poser la formule',
           text:
-            'Identifier d\'abord : « disque plein » (une seule courbe, jusqu\'à l\'axe) ou « ' +
-            'rondelle » (deux courbes, un trou) ? Le carré (ou la différence de carrés) qui en résulte se lit ensuite directement.',
+            'Identifie d\'abord : « disque plein » (une seule courbe, jusqu\'à l\'axe) ou ' +
+            '« rondelle » (deux courbes, un trou) ? Le carré (ou la différence de carrés) à ' +
+            'utiliser se lit ensuite directement.',
         },
         { kind: 'subheading', text: 'Pour aller plus loin — retrouver le volume d\'un tronc de cône' },
         {
@@ -976,9 +1018,9 @@ export const primitivesIntegrales: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Après développement et intégration terme à terme (calcul mécanique, mêmes ' +
-                'techniques que la section 1), on retrouve exactement la formule connue depuis ' +
-                'la géométrie de l\'espace : $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$.',
+                'Après développement et intégration terme à terme (mêmes techniques que la ' +
+                'section 1), tu retrouves exactement la formule connue depuis la géométrie de ' +
+                'l\'espace : $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$.',
             },
           ],
         },
@@ -988,7 +1030,7 @@ export const primitivesIntegrales: ChapterContent = {
           generatorId: '6gen27',
           description: [
             'Calcule un volume de révolution par la méthode des disques (une courbe) ou des ' +
-              'rondelles (deux courbes), en identifiant d\'abord le bon modèle.',
+              'rondelles (deux courbes) — identifie d\'abord le bon modèle.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 27. Volumes de révolution »',
@@ -1116,16 +1158,16 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'piege',
           text:
             'Oublier le « 1+ » ou la racine carrée elle-même sous l\'intégrale — les deux sont ' +
-            'TOUJOURS présents, quelle que soit la fonction f. Le signe de f\'(x) n\'a lui ' +
-            'aucune incidence : il est élevé au carré.',
+            'TOUJOURS là, quelle que soit la fonction f ! Le signe de f\'(x) n\'a lui aucune ' +
+            'incidence : il est élevé au carré.',
         },
         {
           kind: 'astuce',
           label: 'Repérer un carré parfait avant d\'intégrer',
           text:
             'Certaines fonctions sont construites (ou apparaissent naturellement, comme ch) ' +
-            'pour que $1+[f\'(x)]^2$ soit un carré parfait. Le repérer AVANT d\'intégrer évite ' +
-            'une intégrale bien plus compliquée sous une racine irréductible.',
+            'pour que $1+[f\'(x)]^2$ soit un carré parfait. Repère-le AVANT d\'intégrer : ça ' +
+            't\'évite une intégrale bien plus compliquée sous une racine irréductible.',
         },
         { kind: 'subheading', text: 'Pour aller plus loin — vérifier la formule sur un cas connu' },
         {
@@ -1159,8 +1201,8 @@ export const primitivesIntegrales: ChapterContent = {
           title: 'Longueur d\'un arc de courbe',
           generatorId: '6gen28',
           description: [
-            'Calcule la longueur d\'un arc de courbe par la formule ∫√(1+[f\'(x)]²)dx, en ' +
-              'repérant si besoin un carré parfait sous la racine.',
+            'Calcule la longueur d\'un arc de courbe par la formule ∫√(1+[f\'(x)]²)dx — repère ' +
+              'si besoin un carré parfait sous la racine.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 28. Longueur d\'un arc de courbe »',
@@ -1178,15 +1220,24 @@ export const primitivesIntegrales: ChapterContent = {
           text:
             'Un problème contextualisé (cinématique, économie, géométrie...) réutilise ' +
             '**exactement** les mêmes techniques de primitivation que les exercices « ' +
-            'abstraits » — seule l\'interprétation du résultat change.',
+            'abstraits » — seule l\'interprétation du résultat change !',
+        },
+        {
+          kind: 'intuition',
+          label: 'Le pont avec les dérivées',
+          text:
+            'Au chapitre des dérivées (5e), tu as vu que dériver une position donne une ' +
+            "vitesse instantanée : ça « défait » un mouvement pour n'en garder que le rythme, " +
+            'à chaque instant. **Intégrer fait exactement le chemin inverse** : à partir de la ' +
+            "vitesse, tu « refais » le trajet complet — la position, étape par étape.",
         },
         {
           kind: 'definition',
           label: 'Cinématique — accélération, vitesse, position',
           items: [
-            'Si a(t) est l\'accélération d\'un mobile, alors v(t) (la vitesse) est une ' +
-              'primitive de a, fixée par une condition v(t₀). De même, x(t) (la position) est ' +
-              'une primitive de v, fixée par une condition x(t₀) — **indépendante** de la précédente.',
+            'Si a(t) est l\'accélération d\'un mobile, v(t) (la vitesse) est une primitive ' +
+              'de a, fixée par une condition v(t₀). De même, x(t) (la position) est une ' +
+              'primitive de v, fixée par une condition x(t₀) — **indépendante** de la précédente.',
           ],
         },
         {
@@ -1230,7 +1281,7 @@ export const primitivesIntegrales: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Réutiliser la **même** constante pour v(t) et x(t) : chaque intégration introduit ' +
+            'Réutiliser la **même** constante pour v(t) et x(t) ! Chaque intégration introduit ' +
             'sa PROPRE constante, déterminée par SA PROPRE condition initiale — jamais partagée entre les deux étapes.',
         },
         {
@@ -1249,7 +1300,7 @@ export const primitivesIntegrales: ChapterContent = {
           kind: 'astuce',
           label: 'Même boîte à outils, contextes différents',
           text:
-            'Face à un problème contextualisé, identifier d\'abord QUELLE technique du chapitre ' +
+            'Face à un problème contextualisé, identifie d\'abord QUELLE technique du chapitre ' +
             's\'applique (primitive + condition initiale, aire, volume, valeur moyenne...) — le ' +
             'contexte ne change jamais la technique, seulement le sens du résultat final.',
         },
@@ -1259,7 +1310,7 @@ export const primitivesIntegrales: ChapterContent = {
           generatorId: '6gen29',
           description: [
             'Résous un problème contextualisé (cinématique, économie, volume par ' +
-              'soustraction) en identifiant la technique du chapitre qui s\'applique.',
+              'soustraction) en identifiant d\'abord la technique du chapitre qui s\'applique.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 29. Intégrales et primitives : problèmes »',
@@ -1286,8 +1337,8 @@ export const primitivesIntegrales: ChapterContent = {
     },
     forward:
       'Un seul théorème — $\\int_a^b f(x)dx = F(b)-F(a)$ — porte toutes les applications de ce ' +
-      'chapitre : aires, volumes, longueurs, valeur moyenne, cinématique. Maîtriser le calcul ' +
-      'de primitives (section 1) est donc le socle sur lequel repose tout le reste.',
+      'chapitre : aires, volumes, longueurs, valeur moyenne, cinématique. Maîtrise le calcul ' +
+      'de primitives (section 1) : c\'est le socle sur lequel repose tout le reste.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai/faux : réviser tout le chapitre',

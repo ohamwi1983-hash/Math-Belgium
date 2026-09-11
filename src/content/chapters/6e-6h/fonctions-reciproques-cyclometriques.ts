@@ -9,9 +9,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
   title: 'Fonctions réciproques & cyclométriques',
   slug: 'fonctions-reciproques-cyclometriques',
   lede:
-    'Toute fonction bijective peut être « défaite » par une réciproque — et quand on applique ' +
-    'cette idée à sin, cos et tan, on obtient trois nouvelles fonctions, les arcfonctions, ' +
-    "indispensables pour résoudre des équations trigonométriques et lire des angles à partir " +
+    'Toute fonction bijective a une réciproque, qui « défait » ce qu\'elle fait. Applique cette ' +
+    'idée à sin, cos et tan : tu obtiens trois nouvelles fonctions, les **arcfonctions** — ' +
+    "indispensables pour résoudre des équations trigonométriques et retrouver un angle à partir " +
     "d'un rapport.",
 
   sections: [
@@ -24,18 +24,18 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une fonction $f$ définie sur un ensemble $A$ et à valeurs dans un ensemble $B$ peut ' +
-            'avoir trois propriétés indépendantes :',
+            'Prends une fonction $f$ définie sur un ensemble $A$, à valeurs dans un ensemble ' +
+            '$B$. Elle peut avoir trois propriétés indépendantes :',
         },
         {
           kind: 'definition',
           items: [
-            '$f$ est **injective** si $f(x_1) = f(x_2)$ entraîne toujours $x_1 = x_2$ — deux ' +
+            '$f$ est **injective** si $f(x_1) = f(x_2)$ entraîne toujours $x_1 = x_2$ : deux ' +
               'entrées différentes ne donnent jamais la même image.',
-            '$f$ est **surjective** sur $B$ si Image($f$) = $B$ exactement — pas seulement ' +
-              'inclus dans $B$.',
-            '$f$ est **bijective** sur $B$ si elle est injective ET surjective sur $B$, les ' +
-              'deux à la fois.',
+            '$f$ est **surjective** sur $B$ si Image($f$) = $B$ : tout élément de $B$ est ' +
+              'atteint, pas seulement une partie de $B$.',
+            '$f$ est **bijective** sur $B$ si elle est les deux à la fois : injective ET ' +
+              'surjective sur $B$.',
           ],
         },
         {
@@ -91,8 +91,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'astuce',
           label: "💡 Lire l'injectivité sur un graphique",
           text:
-            'Une fonction est injective si et seulement si **toute droite horizontale coupe ' +
-            'son graphe en au plus un point** — c\'est le test le plus rapide pour trancher sans calcul.',
+            'Un test rapide, sans aucun calcul : une fonction est injective si et seulement ' +
+            'si **toute droite horizontale coupe son graphe en au plus un point**.',
         },
         {
           kind: 'illustrationGroup',
@@ -127,30 +127,38 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'para',
           text:
             "Seule une fonction bijective (entre un domaine et un ensemble d'arrivée bien " +
-            'choisis) possède une **réciproque**, notée $f^{-1}$, qui « défait » $f$ :',
+            'choisis) a une **réciproque**, notée $f^{-1}$, qui « défait » $f$ :',
         },
         { kind: 'para', text: '$f^{-1}(f(x)) = x \\quad$ et $\\quad f(f^{-1}(y)) = y$' },
+        {
+          kind: 'intuition',
+          label: 'La machine qui défait',
+          text:
+            "Une fonction $f$, c'est une machine : tu entres $x$, elle ressort $f(x)$. Sa " +
+            'réciproque $f^{-1}$ est une seconde machine qui fait le trajet **inverse** : tu ' +
+            'lui donnes $f(x)$, elle te rend $x$. Comme une clé qui verrouille un cadenas et ' +
+            "une clé qui le déverrouille — l'une défait exactement ce que l'autre a fait.",
+        },
         {
           kind: 'definition',
           label: 'Relation réciproque — la définition précise',
           items: [
-            'Soit $f$ une fonction de $\\mathbb{R}$ dans $\\mathbb{R}$. On appelle **relation ' +
-              'réciproque** de $f$ la relation de $\\mathbb{R}$ dans $\\mathbb{R}$ qui, à tout ' +
-              'élément $x$ de Image($f$), fait correspondre **le ou les** éléments $y$ de ' +
-              'dom($f$) tels que $f(y) = x$.',
-            'Cette relation existe toujours — aucune hypothèse sur $f$ n\'est nécessaire pour ' +
-              'l\'écrire. Ce qui n\'est pas automatique, c\'est qu\'elle soit une **fonction** : ' +
-              'il faudrait pour cela qu\'à chaque $x$ corresponde **un seul** $y$, et rien dans ' +
-              'la définition ne le garantit.',
+            'Soit $f$ une fonction de $\\mathbb{R}$ dans $\\mathbb{R}$. La **relation ' +
+              'réciproque** de $f$ associe, à tout élément $x$ de Image($f$), **le ou les** ' +
+              'éléments $y$ de dom($f$) tels que $f(y) = x$.',
+            'Cette relation existe toujours, quelle que soit $f$ — rien de particulier n\'est ' +
+              'requis pour l\'écrire. Ce qui n\'est pas garanti, c\'est qu\'elle soit une ' +
+              '**fonction** : il faudrait pour ça qu\'à chaque $x$ corresponde **un seul** $y$, ' +
+              'et rien ici ne l\'assure.',
           ],
         },
         {
           kind: 'para',
           text:
-            'Autrement dit, dès que $f$ est **injective**, sa réciproque existe déjà comme ' +
+            'Autrement dit : dès que $f$ est **injective**, sa réciproque est déjà une ' +
             "fonction — il suffit de restreindre l'ensemble d'arrivée à Image($f$) pour obtenir " +
-            'la bijectivité automatiquement. Ce point mérite une démonstration, car c\'est lui ' +
-            'qui autorise la notation $f^{-1}$ :',
+            'la bijectivité automatiquement. Ce point mérite une démonstration : c\'est lui ' +
+            'qui autorise la notation $f^{-1}$.',
         },
         {
           kind: 'exempleLibre',
@@ -161,40 +169,39 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               text:
                 'Soit $f$ une fonction injective, et soit $x \\in$ Image($f$). Dire que la ' +
                 'relation réciproque est une fonction, c\'est dire qu\'elle associe à ce $x$ ' +
-                '**une valeur, et une seule**. Il y a donc exactement deux choses à vérifier : ' +
-                'qu\'il existe au moins un $y$ convenable, et qu\'il n\'y en a pas deux.',
+                '**une valeur, et une seule**. Deux choses à vérifier : qu\'il existe au moins ' +
+                'un $y$ convenable, et qu\'il n\'y en a pas deux.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1 — existence.** Dire que $x$ appartient à Image($f$), c\'est ' +
-                'exactement dire, par définition de l\'image, qu\'il existe au moins un ' +
-                '$y \\in$ dom($f$) tel que $f(y) = x$. La relation réciproque associe donc ' +
-                'bien au moins une valeur à $x$ : le domaine de départ Image($f$) a été choisi ' +
-                'précisément pour cela.',
+                '**Étape 1 — existence.** $x \\in$ Image($f$) veut justement dire, par ' +
+                'définition de l\'image, qu\'il existe au moins un $y \\in$ dom($f$) tel que ' +
+                '$f(y) = x$. La relation réciproque associe donc bien au moins une valeur à ' +
+                '$x$ — le domaine de départ Image($f$) a été choisi exactement pour ça.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 2 — unicité.** Supposons que deux éléments $y_1$ et $y_2$ de dom($f$) ' +
-                'conviennent tous les deux, c\'est-à-dire $f(y_1) = x$ et $f(y_2) = x$. Alors ' +
-                '$f(y_1) = f(y_2)$, et c\'est exactement la situation dans laquelle l\'hypothèse ' +
-                'd\'injectivité conclut : $f(y_1) = f(y_2) \\implies y_1 = y_2$. Les deux ' +
-                'antécédents supposés distincts n\'en faisaient donc qu\'un.',
+                '**Étape 2 — unicité.** Suppose que deux éléments $y_1$ et $y_2$ de dom($f$) ' +
+                'conviennent tous les deux : $f(y_1) = x$ et $f(y_2) = x$. Alors ' +
+                '$f(y_1) = f(y_2)$ — exactement la situation où l\'injectivité conclut : ' +
+                '$f(y_1) = f(y_2) \\implies y_1 = y_2$. Les deux antécédents supposés distincts ' +
+                'n\'en faisaient donc qu\'un.',
             },
             {
               kind: 'para',
               text:
                 '**Étape 3 — conclusion.** À chaque $x$ de Image($f$), la relation réciproque ' +
-                'associe un $y$ (étape 1) et un seul (étape 2) : c\'est précisément la ' +
+                'associe un $y$ (étape 1) et un seul (étape 2) : c\'est exactement la ' +
                 'définition d\'une fonction. $\\qquad \\blacksquare$',
             },
             {
               kind: 'para',
               text:
-                'On peut alors la noter $f^{-1}$ et parler de **fonction réciproque**. On voit ' +
-                'aussi où l\'injectivité est réellement utilisée : nulle part pour l\'existence ' +
-                '(elle vient de Image($f$)), uniquement pour l\'unicité.',
+                'Tu peux alors la noter $f^{-1}$ et parler de **fonction réciproque**. Remarque ' +
+                'où l\'injectivité sert vraiment : jamais pour l\'existence (elle vient de ' +
+                'Image($f$)), seulement pour l\'unicité.',
             },
           ],
         },
@@ -202,14 +209,14 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'piege',
           text:
             'La notation $f^{-1}$ est trompeuse : $f^{-1}(x)$ et $\\dfrac{1}{f(x)}$ sont deux ' +
-            'objets sans aucun rapport. Pour $f(x) = \\dfrac{5}{x-1}$, on verra que ' +
+            'objets sans aucun rapport ! Pour $f(x) = \\dfrac{5}{x-1}$, tu verras que ' +
             '$f^{-1}(x) = 1 + \\dfrac{5}{x}$, alors que $\\dfrac{1}{f(x)} = \\dfrac{x-1}{5}$.',
         },
         {
           kind: 'para',
           text:
-            "À l'inverse, si $f$ n'est pas injective, sa relation réciproque n'est pas une " +
-            'fonction — un même $x$ y aurait plusieurs images :',
+            "À l'inverse : si $f$ n'est pas injective, sa relation réciproque n'est pas une " +
+            'fonction — un même $x$ y aurait plusieurs images.',
         },
         {
           kind: 'illustration',
@@ -247,20 +254,30 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Il n\'y a rien à calculer pour l\'établir : c\'est la construction même de la ' +
-            'relation réciproque qui l\'impose. Celle-ci part des éléments $x$ de Image($f$) — ' +
-            'ce sont donc eux, et eux seuls, qui ont une image par $f^{-1}$, d\'où ' +
-            'dom($f^{-1}$) = Image($f$) — et elle les renvoie vers des éléments $y$ de dom($f$), ' +
-            'qui sont donc exactement les valeurs prises par $f^{-1}$, d\'où ' +
-            'Image($f^{-1}$) = dom($f$). Les deux ensembles ont simplement **échangé leur rôle**.',
+            'Rien à calculer ici : c\'est la construction même de la relation réciproque qui ' +
+            'l\'impose. Elle part des éléments $x$ de Image($f$) — ce sont donc eux, et eux ' +
+            'seuls, qui ont une image par $f^{-1}$, d\'où dom($f^{-1}$) = Image($f$). Elle les ' +
+            'renvoie vers des éléments $y$ de dom($f$), qui sont donc exactement les valeurs ' +
+            'prises par $f^{-1}$, d\'où Image($f^{-1}$) = dom($f$). Les deux ensembles ont ' +
+            'simplement **échangé leur rôle**.',
         },
         {
           kind: 'para',
           text:
-            'Cet échange se lit d\'un coup d\'œil sur les graphiques : passer de $f$ à $f^{-1}$, ' +
-            'c\'est permuter l\'abscisse et l\'ordonnée de chaque point, donc remplacer chaque ' +
-            'point $(a ; b)$ par le point $(b ; a)$. Dans un repère orthonormé, les deux graphes ' +
-            'sont donc **symétriques** par rapport à la droite $y = x$.',
+            'Cet échange se lit d\'un coup d\'œil sur les graphiques. Passer de $f$ à $f^{-1}$, ' +
+            'c\'est permuter l\'abscisse et l\'ordonnée de chaque point : chaque point ' +
+            '$(a ; b)$ devient $(b ; a)$. Dans un repère orthonormé, les deux graphes sont donc ' +
+            '**symétriques** par rapport à la droite $y = x$.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Un miroir posé sur y = x',
+          text:
+            'Pose un miroir le long de la droite $y = x$ : le reflet du graphe de $f$ dans ce ' +
+            "miroir, c'est exactement le graphe de $f^{-1}$. Chaque point $(a\\,;\\,b)$ de $f$ " +
+            'a son reflet $(b\\,;\\,a)$ sur $f^{-1}$ — retiens cette image, elle marche pour ' +
+            "toute fonction réciproque, y compris pour arcsin, arccos et arctan plus loin dans " +
+            'ce chapitre.',
         },
         {
           kind: 'illustration',
@@ -311,19 +328,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                '**Point 1 — la réciproque est elle aussi injective.** Supposons ' +
+                '**Point 1 — la réciproque est elle aussi injective.** Suppose ' +
                 '$f^{-1}(x_1) = f^{-1}(x_2)$, et ' +
-                'notons $y$ cette valeur commune. Par $(\\star)$ lu de gauche à droite, ' +
+                'note $y$ cette valeur commune. Par $(\\star)$ lu de gauche à droite, ' +
                 '$f(y) = x_1$ et $f(y) = x_2$ ; comme $f$ est une fonction, elle n\'attribue ' +
-                'qu\'une seule image à $y$, donc $x_1 = x_2$. C\'est bien la définition de ' +
-                'l\'injectivité de $f^{-1}$ — et c\'est ce qui permet de parler de la fonction ' +
-                '$(f^{-1})^{-1}$ au point suivant.',
+                'qu\'une seule image à $y$, donc $x_1 = x_2$. C\'est exactement la définition ' +
+                'de l\'injectivité de $f^{-1}$ — et c\'est ce qui permet de parler de la ' +
+                'fonction $(f^{-1})^{-1}$ au point suivant.',
             },
             {
               kind: 'para',
               text:
                 '**Point 2 — la réciproque de la réciproque redonne la fonction de départ.** ' +
-                'Appliquons $(\\star)$ à la fonction ' +
+                'Applique $(\\star)$ à la fonction ' +
                 'injective $f^{-1}$ elle-même : pour tout $y$, $z = (f^{-1})^{-1}(y) \\iff ' +
                 'f^{-1}(z) = y$. Or, à nouveau par $(\\star)$ (cette fois pour $f$), ' +
                 '$f^{-1}(z) = y \\iff f(y) = z$. En enchaînant les deux équivalences : ' +
@@ -332,10 +349,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Les deux fonctions prennent donc la même valeur en tout point, et elles ont ' +
-                'aussi le même domaine, puisque dom$\\big((f^{-1})^{-1}\\big) = $ ' +
+                'Les deux fonctions prennent donc la même valeur en tout point, et le même ' +
+                'domaine aussi, puisque dom$\\big((f^{-1})^{-1}\\big) = $ ' +
                 'Image($f^{-1}$) $= $ dom($f$), d\'après la propriété « domaine et ' +
-                'ensemble-image » établie plus haut. Même domaine et mêmes valeurs : ' +
+                'ensemble-image » vue plus haut. Même domaine, mêmes valeurs : ' +
                 '$(f^{-1})^{-1} = f$. $\\qquad \\blacksquare$',
             },
             {
@@ -344,17 +361,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 '**Point 3 — le lien est symétrique.** Dire $g = f^{-1}$, ' +
                 'c\'est dire, par $(\\star)$ : pour tous $x$ et $y$, $y = g(x) \\iff f(y) = x$. ' +
                 'Cette phrase est **déjà symétrique** en $f$ et $g$ : lue de droite à gauche, ' +
-                'elle dit que pour tous $x$ et $y$, $x = f(y) \\iff g(x) = y$, ce qui est mot ' +
-                'pour mot la définition de $f = g^{-1}$. Une équivalence se lisant ' +
-                'indifféremment dans les deux sens, les deux énoncés n\'en font qu\'un. ' +
-                '$\\qquad \\blacksquare$',
+                'elle dit que pour tous $x$ et $y$, $x = f(y) \\iff g(x) = y$ — mot pour mot ' +
+                'la définition de $f = g^{-1}$. Une équivalence se lit dans les deux sens : les ' +
+                'deux énoncés n\'en font qu\'un. $\\qquad \\blacksquare$',
             },
             {
               kind: 'para',
               text:
                 'C\'est cette symétrie qui autorise à parler d\'un **couple** de fonctions ' +
-                'réciproques l\'une de l\'autre, sans avoir à préciser laquelle est « la » ' +
-                'réciproque de l\'autre — et c\'est aussi ce qui rend leurs deux graphes ' +
+                'réciproques l\'une de l\'autre, sans devoir préciser laquelle est « la » ' +
+                'réciproque de l\'autre. C\'est aussi elle qui rend leurs deux graphes ' +
                 'symétriques par rapport à $y = x$ : la symétrie axiale, appliquée deux fois, ' +
                 'ramène chaque graphe sur lui-même.',
             },
@@ -365,8 +381,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'methode',
           label: 'Méthode 1 — décomposition en fonctions élémentaires',
           items: [
-            'On décompose $f$ en une chaîne d\'opérations élémentaires (chacune facile à ' +
-              '« défaire »), puis on remonte la chaîne en partant de l\'image.',
+            'Décompose $f$ en une chaîne d\'opérations élémentaires (chacune facile à ' +
+              '« défaire »), puis remonte la chaîne en partant de l\'image.',
           ],
         },
         {
@@ -382,7 +398,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             },
             {
               kind: 'para',
-              text: "On construit la réciproque en défaisant chaque opération, dans l'ordre inverse, en partant de l'image :",
+              text: "Construis la réciproque en défaisant chaque opération, dans l'ordre inverse, en partant de l'image :",
             },
             {
               kind: 'operationChain',
@@ -401,7 +417,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'methode',
           label: 'Méthode 2 — permutation',
-          items: ['Dans $y = f(x)$, permuter $x$ et $y$, puis isoler $y$.'],
+          items: ['Dans $y = f(x)$, permute $x$ et $y$, puis isole $y$.'],
         },
         {
           kind: 'exempleLibre',
@@ -431,17 +447,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'On a vu plus haut que $f : \\mathbb{R} \\to \\mathbb{R} : x \\mapsto x^2$ n\'est ' +
-                "pas injective, donc sa relation réciproque n'est pas une fonction. En " +
-                'revanche, sa **restriction** à $\\mathbb{R}^+$ l\'est :',
+                'Tu as vu plus haut que $f : \\mathbb{R} \\to \\mathbb{R} : x \\mapsto x^2$ ' +
+                "n'est pas injective, donc sa relation réciproque n'est pas une fonction. Sa " +
+                '**restriction** à $\\mathbb{R}^+$, elle, l\'est :',
             },
             { kind: 'para', text: '$f|_{\\mathbb{R}^+} : \\mathbb{R}^+ \\to \\mathbb{R}^+ : x \\mapsto x^2$' },
             {
               kind: 'para',
               text:
                 'Sur $\\mathbb{R}^+$, deux réels distincts ont des carrés distincts : ' +
-                '$f|_{\\mathbb{R}^+}$ est injective et possède une réciproque, ' +
-                '$f|_{\\mathbb{R}^+}^{-1}(x) = \\sqrt{x}$ — **attention**, $f|_{\\mathbb{R}^+}$ ' +
+                '$f|_{\\mathbb{R}^+}$ est injective et a une réciproque, ' +
+                '$f|_{\\mathbb{R}^+}^{-1}(x) = \\sqrt{x}$ — **attention !** $f|_{\\mathbb{R}^+}$ ' +
                 'et $f$ restent deux fonctions différentes (même formule, mais domaines ' +
                 'différents : $\\mathbb{R}^+$ contre $\\mathbb{R}$).',
             },
@@ -504,14 +520,24 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Quand on dispose d\'une expression commode de $f^{-1}$, il n\'y a aucun problème : ' +
-            'on la dérive avec les règles habituelles. Ainsi ' +
+            'Quand tu as une expression exploitable de $f^{-1}$, aucun problème : tu la dérives ' +
+            'avec les règles habituelles. Ainsi ' +
             '$\\left(\\sqrt{x}\\right)\' = \\dfrac{1}{2\\sqrt{x}}$ pour la réciproque de ' +
             '$x^2$ sur $\\mathbb{R}^+$, ou $\\left(1 + \\dfrac{5}{x}\\right)\' = ' +
             '-\\dfrac{5}{x^2}$ pour celle de $\\dfrac{5}{x-1}$. Mais il arrive qu\'on ne ' +
             'connaisse **aucune** expression exploitable de $f^{-1}$ — ce sera exactement le ' +
-            'cas d\'arcsin, arccos et arctan. Le théorème suivant permet alors de la dériver ' +
-            'quand même, à partir de la seule dérivée de $f$.',
+            'cas d\'arcsin, arccos et arctan. Le théorème suivant permet quand même de la ' +
+            'dériver, à partir de la seule dérivée de $f$.',
+        },
+        {
+          kind: 'intuition',
+          label: "Pourquoi la pente s'inverse",
+          text:
+            'Tu viens de voir que les graphes de $f$ et $f^{-1}$ sont symétriques par rapport ' +
+            'à $y = x$. Or réfléchir une droite par rapport à $y = x$ échange ses deux axes : ' +
+            "une tangente de pente $m$ devient, après le miroir, une tangente de pente $1/m$. " +
+            "C'est exactement pour ça que la dérivée de $f^{-1}$ est **l'inverse** de celle de " +
+            "$f$ — le théorème qui suit ne fait que traduire cette image en formule.",
         },
         {
           kind: 'methode',
@@ -519,15 +545,15 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             "Si $f$ est injective, dérivable en $f^{-1}(x)$, et si $f'(f^{-1}(x)) \\neq 0$, alors :",
             '$(f^{-1})\'(x) = \\dfrac{1}{f\'(f^{-1}(x))}$',
             'Les nombres dérivés de $f$ en $a$ et de $f^{-1}$ en $f(a)$ sont donc inverses ' +
-              "l'un de l'autre — ce théorème général explique les formules d'arcsin, arccos et " +
-              'arctan de la section 4.',
+              "l'un de l'autre — ce théorème explique les formules d'arcsin, arccos et arctan " +
+              'de la section 4.',
           ],
         },
         {
           kind: 'para',
           text:
             'Ce théorème est **admis sans démonstration** : c\'est le seul résultat du chapitre ' +
-            'qui ne soit pas établi ici. On peut en revanche le vérifier sur des cas où les ' +
+            'qui ne soit pas établi ici. Tu peux quand même le vérifier sur des cas où les ' +
             'deux membres se calculent séparément — c\'est tout l\'objet de la vérification ' +
             'croisée ci-dessous.',
         },
@@ -550,7 +576,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Reprenons $f(x) = \\dfrac{5}{x-1}$, $f^{-1}(x) = 1 + \\dfrac{5}{x}$, et calculons ' +
+                'Reprends $f(x) = \\dfrac{5}{x-1}$, $f^{-1}(x) = 1 + \\dfrac{5}{x}$, et calcule ' +
                 '$(f^{-1})\'(-5)$ de deux façons.',
             },
             {
@@ -570,7 +596,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               kind: 'para',
               text:
                 'Rien n\'obligeait à s\'arrêter à $x = -5$ : le théorème redonne en fait la ' +
-                'dérivée complète. Pour tout réel $x$ non nul, on remplace $f^{-1}(x)$ par ' +
+                'dérivée complète. Pour tout réel $x$ non nul, remplace $f^{-1}(x)$ par ' +
                 '$1 + \\dfrac{5}{x}$ dans $f\'$ :',
             },
             {
@@ -598,7 +624,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               text:
                 'C\'est exactement la dérivée obtenue en dérivant $1 + \\dfrac{5}{x}$ ' +
                 'directement : le théorème n\'invente rien, il donne un **second chemin** vers ' +
-                'le même résultat — le seul disponible quand on ne connaît pas d\'expression ' +
+                'le même résultat — le seul disponible quand tu ne connais pas d\'expression ' +
                 'commode de $f^{-1}$, ce qui sera précisément le cas d\'arcsin, arccos et arctan.',
             },
             {
@@ -635,8 +661,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           label: 'Remarque — le théorème donne une condition suffisante, pas nécessaire',
           text:
             "Si les hypothèses du théorème ne sont pas vérifiées en un point, cela ne prouve " +
-            '**pas** que $f^{-1}$ n\'y est pas dérivable — juste que ce théorème ne permet pas ' +
-            'de conclure. Exemple : pour $f(x) = \\sqrt[5]{x}$, $f\'(0)$ n\'existe pas (tangente ' +
+            '**pas** que $f^{-1}$ n\'y est pas dérivable ! Ça veut juste dire que ce théorème ' +
+            'ne permet pas de conclure. Exemple : pour $f(x) = \\sqrt[5]{x}$, $f\'(0)$ n\'existe pas (tangente ' +
             "verticale), donc le théorème ne s'applique pas en $x = 0$. Pourtant $f^{-1}(x) = " +
             'x^5$ est parfaitement dérivable en 0, avec $(f^{-1})\'(0) = 5 \\cdot 0^4 = 0$.',
         },
@@ -663,8 +689,19 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           text:
             'sin, cos et tan sont périodiques : elles ne sont donc **jamais injectives** sur ' +
             "$\\mathbb{R}$ tout entier, et n'ont pas de réciproque sur $\\mathbb{R}$. Pour en " +
-            'construire une, on **restreint le domaine** à un intervalle où la fonction ' +
+            'construire une, il faut **restreindre le domaine** à un intervalle où la fonction ' +
             'redevient bijective — le plus court possible, et contenant 0.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi il faut restreindre le domaine',
+          text:
+            'sin(0) = 0, mais sin(π) = 0 aussi, et sin(2π) = 0… une infinité de $x$ donnent la ' +
+            "même image : sin n'est donc pas injective sur ℝ, et — tu l'as vu en section 1 — " +
+            'sans injectivité, pas de réciproque possible. La solution : garder un seul ' +
+            '« tour » de la fonction, le plus court possible, sur lequel elle redevient ' +
+            'injective (et même bijective, vers son image). Exactement l\'idée de la section 1, ' +
+            'appliquée à sin, cos et tan.',
         },
         {
           kind: 'illustration',
@@ -728,8 +765,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La réciproque de chaque restriction porte un nom (« arc » + le nom de la fonction ' +
-            '— littéralement « l\'arc dont le sinus/cosinus/la tangente vaut… ») :',
+            'La réciproque de chaque restriction porte un nom : « arc » + le nom de la ' +
+            'fonction — littéralement « l\'arc dont le sinus/cosinus/la tangente vaut… ».',
         },
         {
           kind: 'featureTable',
@@ -744,9 +781,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'para',
           text:
             'Le tableau se lit aussi géométriquement : chaque arcfonction s\'obtient en ' +
-            'réfléchissant le graphe de sa restriction par rapport à la droite $y = x$ — la ' +
-            'symétrie établie en section 1. Colonnes « Domaine » et « Image » comprises, ' +
-            'qui ne font qu\'échanger celles de la restriction :',
+            'réfléchissant le graphe de sa restriction par rapport à la droite $y = x$ — le ' +
+            'miroir de la section 1. Colonnes « Domaine » et « Image » comprises, qui ne font ' +
+            'qu\'échanger celles de la restriction :',
         },
         {
           kind: 'illustration',
@@ -786,7 +823,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           text:
             'Sur le cercle trigonométrique (rayon 1), un angle $y$ se mesure justement par la ' +
             "longueur de l'**arc** de cercle qu'il intercepte à partir de 0. Chaque arcfonction " +
-            'répond ainsi littéralement à la question « quel est l\'arc $y$ dont le ' +
+            'répond donc littéralement à la question « quel est l\'arc $y$ dont le ' +
             'sinus/cosinus/la tangente vaut $x$ ? » :',
         },
         {
@@ -813,6 +850,15 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'intuition',
+          label: 'Tu connais déjà ce cercle',
+          text:
+            'Ce cercle trigonométrique, tu le manipules depuis la 4e/5e : sin(π/6) = 1/2, ' +
+            "cos(π/3) = 1/2, etc. Une arcfonction ne fait rien de neuf — elle pose juste la " +
+            'même question à l\'envers. Tu savais lire sin(π/6) = 1/2 ; tu sais donc déjà, sans ' +
+            'aucun calcul supplémentaire, qu\'arcsin(1/2) = π/6.',
+        },
+        {
           kind: 'definition',
           label: 'Caractérisation',
           items: [
@@ -824,8 +870,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "La borne de l'image d'arctan se lit aussi comme deux limites, correspondant aux " +
-            'deux asymptotes horizontales du graphe :',
+            "Les bornes de l'image d'arctan se lisent aussi comme deux limites, correspondant " +
+            'aux deux asymptotes horizontales du graphe :',
         },
         {
           kind: 'para',
@@ -891,15 +937,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'arcsin($x$) n\'est pas « un » angle dont le sinus vaut $x$ parmi tous les possibles ' +
-            '(il y en a une infinité par périodicité), mais **l\'unique** angle de [−π/2 ; π/2] ' +
-            "dont le sinus vaut $x$. Même logique pour arccos et arctan, chacune avec sa propre image.",
+            'arcsin($x$) n\'est **pas** « un » angle dont le sinus vaut $x$ parmi tous les ' +
+            'possibles (il y en a une infinité par périodicité) ! C\'est **l\'unique** angle de ' +
+            '[−π/2 ; π/2] dont le sinus vaut $x$. Même logique pour arccos et arctan, chacune ' +
+            'avec sa propre image.',
         },
         {
           kind: 'exempleLibre',
           label: 'Démonstration — arcsin est impaire',
           blocks: [
-            { kind: 'para', text: 'Soit $f(x) = \\arcsin(x)$. Montrons que $f(-x) = -f(x)$.' },
+            { kind: 'para', text: 'Soit $f(x) = \\arcsin(x)$. Montre que $f(-x) = -f(x)$.' },
             {
               kind: 'para',
               text:
@@ -1029,10 +1076,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'para',
           text:
             'La justification tient en une ligne, et elle explique pourquoi la CE n\'est pas ' +
-            'négociable : si $\\arcsin(A) = \\arcsin(B)$, appliquons sin aux deux membres. ' +
+            'négociable : si $\\arcsin(A) = \\arcsin(B)$, applique sin aux deux membres. ' +
             'Comme $\\sin(\\arcsin(u)) = u$ pour tout $u$ de $[-1;1]$ — et **seulement** pour ' +
-            'ceux-là — on obtient $A = B$. La réciproque est immédiate : deux quantités égales ' +
-            'ont la même image. Hors CE, $\\arcsin(A)$ n\'existe même pas, et l\'équivalence ' +
+            'ceux-là — tu obtiens $A = B$. La réciproque est immédiate : deux quantités égales ' +
+            'ont la même image. Hors CE, $\\arcsin(A)$ n\'existe même pas : l\'équivalence ' +
             'perd tout son sens.',
         },
         {
@@ -1070,9 +1117,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           kind: 'methode',
           label: 'Méthode en 3 temps',
           items: [
-            "1) Poser la CE de chaque arcfonction. 2) Résoudre l'équation « simplifiée » " +
-              "obtenue en enlevant les arcfonctions. 3) Vérifier que la solution trouvée " +
-              'appartient bien à la CE — sinon, elle est rejetée.',
+            "1) Pose la CE de chaque arcfonction. 2) Résous l'équation « simplifiée » " +
+              "obtenue en enlevant les arcfonctions. 3) Vérifie que la solution trouvée " +
+              'appartient bien à la CE — sinon, rejette-la.',
           ],
         },
         {
@@ -1091,9 +1138,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'L\'étape 3 de la méthode n\'est pas une formalité : il arrive qu\'une solution ' +
-                'parfaitement correcte de l\'équation simplifiée doive être **rejetée**. En voici ' +
-                'un cas.',
+                'L\'étape 3 de la méthode n\'est pas une formalité ! Il arrive qu\'une solution ' +
+                'parfaitement correcte de l\'équation simplifiée doive être **rejetée**. En ' +
+                'voici un exemple.',
             },
             { kind: 'para', text: '$\\arccos(x^2 - 1) = \\arccos(1 - x)$' },
             {
@@ -1176,9 +1223,9 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Attention au signe **moins** devant la dérivée de arccos — c\'est la seule des ' +
-            "trois qui est négative. Comme pour toute composée, on multiplie par $u'(x)$ " +
-            '(règle de la chaîne).',
+            'Attention au signe **moins** devant la dérivée de arccos : c\'est la seule des ' +
+            "trois qui est négative ! Comme pour toute composée, n'oublie pas de multiplier " +
+            "par $u'(x)$ (règle de la chaîne).",
         },
         { kind: 'subheading', text: 'Pour aller plus loin — d\'où viennent ces trois formules ?' },
         {
@@ -1207,10 +1254,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'On peut aussi le lire sans le théorème, par dérivation implicite : ' +
+                'Tu peux aussi le lire sans le théorème, par dérivation implicite : ' +
                 '$\\sin(\\arcsin(x)) = x$ pour tout $x$ de $[-1;1]$ ; en dérivant les deux ' +
                 'membres (règle de la chaîne à gauche), ' +
-                '$\\cos(\\arcsin(x)) \\cdot \\arcsin\'(x) = 1$, ce qui est la même égalité.',
+                '$\\cos(\\arcsin(x)) \\cdot \\arcsin\'(x) = 1$ — la même égalité.',
             },
             {
               kind: 'para',
@@ -1262,10 +1309,10 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'La constante $\\pi/2$ se dérive en 0, et il ne reste que le signe moins : ' +
-                'c\'est bien de là qu\'il vient. Cette démonstration est expéditive, mais elle ' +
-                '**dépend** de l\'identité complémentaire et ne dit rien de propre à arccos. ' +
-                'D\'où l\'intérêt de la refaire par la méthode directe, exactement comme pour ' +
+                'La constante $\\pi/2$ se dérive en 0 : il ne reste que le signe moins, et ' +
+                'c\'est bien de là qu\'il vient. Cette démonstration est rapide, mais elle ' +
+                '**dépend** de l\'identité complémentaire et ne dit rien de propre à arccos — ' +
+                'd\'où l\'intérêt de la refaire par la méthode directe, exactement comme pour ' +
                 'arcsin.',
             },
           ],
@@ -1402,8 +1449,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Raisonnons par l\'absurde : **supposons** arcsin dérivable en 1, et cherchons ' +
-                'la contradiction.',
+                'Raisonne par l\'absurde : **suppose** arcsin dérivable en 1, et cherche la ' +
+                'contradiction.',
             },
             {
               kind: 'para',
@@ -1461,12 +1508,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           label: 'Attention à l\'ordre du raisonnement',
           text:
             'Le fait que la formule $\\dfrac{1}{\\sqrt{1-x^2}}$ ne soit pas définie en ' +
-            '$x = \\pm 1$ ne prouve **rien** à lui seul : cette formule a été obtenue via le ' +
-            'théorème de la section 1, dont les hypothèses ne sont pas vérifiées en $\\pm 1$ — ' +
-            'et on a vu que des hypothèses non vérifiées n\'établissent jamais la ' +
-            'non-dérivabilité (contre-exemple de $\\sqrt[5]{x}$). C\'est le raisonnement par ' +
-            'l\'absurde ci-dessus, et lui seul, qui établit réellement que arcsin n\'est pas ' +
-            'dérivable en $\\pm 1$.',
+            '$x = \\pm 1$ ne prouve **rien** à lui seul ! Cette formule vient du théorème de ' +
+            'la section 1, dont les hypothèses ne sont pas vérifiées en $\\pm 1$ — et tu as vu ' +
+            'que des hypothèses non vérifiées n\'établissent jamais la non-dérivabilité ' +
+            '(contre-exemple de $\\sqrt[5]{x}$). Seul le raisonnement par l\'absurde ci-dessus ' +
+            'établit réellement que arcsin n\'est pas dérivable en $\\pm 1$.',
         },
         { kind: 'subheading', text: 'Exemple résolu — dérivée composée' },
         {
@@ -1501,7 +1547,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       blocks: [
         {
           kind: 'para',
-          text: 'Face à un graphe inconnu, trois questions suffisent presque toujours à identifier la bonne arcfonction :',
+          text: 'Face à un graphe inconnu, trois questions suffisent presque toujours à trouver la bonne arcfonction :',
         },
         {
           kind: 'methode',

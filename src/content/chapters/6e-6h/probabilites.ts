@@ -7,10 +7,10 @@ export const probabilites: ChapterContent = {
   title: 'Les probabilités',
   slug: 'probabilites',
   lede:
-    "Mesurer la chance qu'un événement se produise, combiner plusieurs événements (union, " +
-    'intersection, complémentaire), tenir compte d\'une information déjà connue ' +
-    '(conditionnement) et remonter d\'un effet à sa cause la plus probable (théorème de Bayes) ' +
-    '— quatre idées qui, ensemble, forment l\'outillage complet de ce chapitre.',
+    "Mesurer la chance qu'un événement se produise. Combiner plusieurs événements (union, " +
+    'intersection, complémentaire). Tenir compte d\'une info déjà connue (conditionnement). ' +
+    'Remonter d\'un effet à sa cause la plus probable (théorème de Bayes). Quatre outils, un ' +
+    'seul chapitre.',
 
   sections: [
     {
@@ -21,22 +21,31 @@ export const probabilites: ChapterContent = {
       blocks: [
         { kind: 'video', title: 'Les probabilités' },
         {
+          kind: 'intuition',
+          label: 'Pour visualiser une expérience aléatoire',
+          text:
+            'Imagine un sac opaque rempli de billes de couleurs différentes. Tu ne sais jamais ' +
+            'à l\'avance quelle bille tu vas tirer — mais tu sais très bien quelles couleurs ' +
+            'sont dans le sac. C\'est exactement ça, une expérience aléatoire : tu connais ' +
+            'toutes les issues possibles, sans savoir laquelle va sortir.',
+        },
+        {
           kind: 'definition',
           label: 'Définition — expérience aléatoire',
           items: [
-            'Une expérience aléatoire est une expérience que l\'on peut répéter à volonté dans ' +
-              "des conditions identiques, dont on connaît à l'avance l'ensemble des résultats " +
-              'possibles, mais dont on ne peut prédire avec certitude le résultat dû au hasard. ' +
-              'L\'ensemble de tous les résultats possibles est l\'univers, noté $\\Omega$ ; le ' +
-              'résultat réellement observé est une issue.',
+            'Une expérience aléatoire, tu peux la répéter autant de fois que tu veux, dans les ' +
+              'mêmes conditions. Tu connais à l\'avance TOUS les résultats possibles — mais ' +
+              'jamais lequel va sortir, à cause du hasard. L\'ensemble de tous les résultats ' +
+              'possibles s\'appelle l\'univers, noté $\\Omega$. Le résultat que tu observes ' +
+              'réellement est une issue.',
           ],
         },
         {
           kind: 'definition',
           label: 'Événement, et cas particuliers',
           items: [
-            'Un événement est tout sous-ensemble de $\\Omega$ — souvent décrit par une ' +
-              'proposition, réalisée dès qu\'on obtient un résultat qui lui est favorable. Un ' +
+            'Un événement, c\'est n\'importe quel sous-ensemble de $\\Omega$ — souvent décrit ' +
+              'par une phrase, réalisée dès que le résultat obtenu lui est favorable. Un ' +
               'événement réduit à UN SEUL résultat est un événement élémentaire. L\'événement ' +
               'impossible ($\\emptyset$) ne se réalise jamais ; l\'événement certain ($\\Omega$) ' +
               'se réalise toujours. Deux événements qui se partagent TOUS les résultats ' +
@@ -49,11 +58,11 @@ export const probabilites: ChapterContent = {
           kind: 'definition',
           label: 'Définition — probabilité',
           items: [
-            'La probabilité $P(A)$ d\'un événement $A$ mesure sa chance de se réaliser : ' +
-              '$0 \\leq P(A) \\leq 1$, $P(\\Omega)=1$ (certitude), $P(\\emptyset)=0$ ' +
-              '(impossibilité), $P(\\bar{A})=1-P(A)$ (contraire). En situation ' +
-              'd\'ÉQUIPROBABILITÉ (tous les résultats également probables) : $P(A)$ = (nombre ' +
-              'de cas favorables) / (nombre de cas possibles).',
+            '$P(A)$ mesure la chance que $A$ se réalise : $0 \\leq P(A) \\leq 1$, ' +
+              '$P(\\Omega)=1$ (certitude), $P(\\emptyset)=0$ (impossibilité), ' +
+              '$P(\\bar{A})=1-P(A)$ (contraire). En situation d\'ÉQUIPROBABILITÉ (tous les ' +
+              'résultats également probables), c\'est simple : $P(A)$ = (nombre de cas ' +
+              'favorables) / (nombre de cas possibles).',
           ],
         },
         {
@@ -61,22 +70,23 @@ export const probabilites: ChapterContent = {
           label: "Piège classique — vérifier l'équiprobabilité avant de compter",
           text:
             'Au lancer de 2 dés, $\\Omega=\\{2,3,\\ldots,12\\}$ (les 11 sommes possibles) — mais ' +
-            'ces 11 résultats NE SONT PAS équiprobables : un total de 2 n\'est obtenu que par ' +
-            '(1;1), soit 1 seule façon, alors qu\'un total de 9 est obtenu par (3;6),(4;5),' +
-            '(5;4),(6;3), soit 4 façons. $P$(total=9) est donc PLUS GRANDE que $P$(total=2), ' +
-            'jamais 1/11 dans les deux cas — la formule « favorables/possibles » exige TOUJOURS ' +
-            'des résultats équiprobables, à vérifier avant tout calcul.',
+            'ces 11 résultats NE SONT PAS équiprobables ! Un total de 2 ne s\'obtient que par ' +
+            '(1;1), une seule façon. Un total de 9 s\'obtient par (3;6), (4;5), (5;4), (6;3) — ' +
+            '4 façons. $P$(total=9) est donc PLUS GRANDE que $P$(total=2), jamais 1/11 dans les ' +
+            'deux cas. La formule « favorables/possibles » n\'est valable QUE si les résultats ' +
+            'sont équiprobables — toujours à vérifier avant de compter.',
         },
         { kind: 'subheading', text: 'Probabilité expérimentale (fréquentielle) et probabilité a priori' },
         {
           kind: 'definition',
           label: 'Deux façons d\'obtenir une probabilité',
           items: [
-            'La probabilité a priori (ou intuitive) se calcule SANS expérimentation, par un ' +
-              'raisonnement d\'équiprobabilité (comme ci-dessus). La probabilité expérimentale ' +
-              '(ou fréquentielle) s\'obtient, à l\'inverse, en répétant l\'expérience un très ' +
-              'grand nombre de fois : la FRÉQUENCE relative de l\'événement se stabilise alors ' +
-              'autour d\'une valeur limite — c\'est cette valeur qui est retenue comme probabilité.',
+            'La probabilité a priori (ou intuitive) se calcule SANS rien expérimenter, juste ' +
+              'par un raisonnement d\'équiprobabilité (comme ci-dessus). La probabilité ' +
+              'expérimentale (ou fréquentielle) fonctionne à l\'inverse : tu répètes ' +
+              'l\'expérience un très grand nombre de fois, et la FRÉQUENCE relative de ' +
+              'l\'événement se stabilise autour d\'une valeur limite — c\'est cette valeur que ' +
+              'tu retiens comme probabilité.',
           ],
         },
         {
@@ -105,8 +115,8 @@ export const probabilites: ChapterContent = {
           text:
             'Pour une pièce ou un dé bien équilibrés, la probabilité a priori (1/2, 1/6, …) et ' +
             'la probabilité expérimentale (mesurée en répétant l\'expérience) convergent vers ' +
-            'la même valeur — c\'est d\'ailleurs ainsi qu\'on détecte un dé ou une pièce ' +
-            'truqués : la fréquence observée ne se stabilise PAS autour de la valeur a priori attendue.',
+            'la même valeur. C\'est même comme ça qu\'on détecte un dé ou une pièce truqués : ' +
+            'la fréquence observée ne se stabilise PAS autour de la valeur a priori attendue.',
         },
         { kind: 'subheading', text: 'Représenter A∪B et A∩B' },
         {
@@ -136,10 +146,10 @@ export const probabilites: ChapterContent = {
         {
           kind: 'para',
           text:
-            'On additionne les deux probabilités puis on RETIRE l\'intersection, comptée deux ' +
-            'fois sinon (une fois dans $P(A)$, une fois dans $P(B)$). Cas particulier : si $A$ ' +
-            'et $B$ sont INCOMPATIBLES ($P(A \\cap B)=0$), cette formule se réduit à la loi de ' +
-            'la somme : $P(A \\cup B)=P(A)+P(B)$.',
+            'Tu additionnes les deux probabilités, puis tu RETIRES l\'intersection — sinon elle ' +
+            'est comptée deux fois (une fois dans $P(A)$, une fois dans $P(B)$). Cas ' +
+            'particulier : si $A$ et $B$ sont INCOMPATIBLES ($P(A \\cap B)=0$), la formule se ' +
+            'simplifie en loi de la somme : $P(A \\cup B)=P(A)+P(B)$.',
         },
         {
           kind: 'exempleLibre',
@@ -148,24 +158,24 @@ export const probabilites: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Tout élément de $A$ est soit dans $B$, soit pas, donc $A = (A \\cap \\bar{B}) ' +
-                '\\cup (A \\cap B)$, une union disjointe — d\'où, les probabilités s\'additionnant ' +
-                'pour une union disjointe, $P(A) = P(A \\cap \\bar{B}) + P(A \\cap B)$.',
+                'Tout élément de $A$ est soit dans $B$, soit pas : $A = (A \\cap \\bar{B}) \\cup ' +
+                '(A \\cap B)$, une union disjointe. Les probabilités s\'additionnent pour une ' +
+                'union disjointe, donc $P(A) = P(A \\cap \\bar{B}) + P(A \\cap B)$.',
             },
             {
               kind: 'para',
               text:
-                'De même, par symétrie, $P(B) = P(\\bar{A} \\cap B) + P(A \\cap B)$. Or ' +
-                '$A \\cup B = (A \\cap \\bar{B}) \\cup (\\bar{A} \\cap B) \\cup (A \\cap B)$, trois ' +
-                'morceaux disjoints, donc $P(A \\cup B) = P(A \\cap \\bar{B})+P(\\bar{A} \\cap B)+P(A \\cap B)$.',
+                'Par symétrie, $P(B) = P(\\bar{A} \\cap B) + P(A \\cap B)$. Et ' +
+                '$A \\cup B = (A \\cap \\bar{B}) \\cup (\\bar{A} \\cap B) \\cup (A \\cap B)$ — ' +
+                'trois morceaux disjoints — donc $P(A \\cup B) = P(A \\cap \\bar{B})+P(\\bar{A} \\cap B)+P(A \\cap B)$.',
             },
             {
               kind: 'para',
               text:
-                'En ajoutant les deux égalités ci-dessus, $P(A)+P(B) = [P(A \\cap \\bar{B})+P(A ' +
-                '\\cap B)] + [P(\\bar{A} \\cap B)+P(A \\cap B)]$, le terme $P(A \\cap B)$ ' +
-                'apparaît deux fois : il faut donc le retrancher une fois pour retrouver ' +
-                'exactement $P(A \\cup B)$.',
+                'En ajoutant les deux égalités précédentes : $P(A)+P(B) = [P(A \\cap \\bar{B})+P(A ' +
+                '\\cap B)] + [P(\\bar{A} \\cap B)+P(A \\cap B)]$. Le terme $P(A \\cap B)$ ' +
+                'apparaît deux fois — il faut donc le retrancher une fois pour retomber ' +
+                'exactement sur $P(A \\cup B)$.',
             },
           ],
         },
@@ -179,8 +189,8 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Additionner $P(A)+P(B)$ SANS retirer $P(A \\cap B)$ donne ici 33/40 — FAUX, car les ' +
-            '6 personnes de l\'intersection sont comptées deux fois. La bonne valeur est 27/40.',
+            'Additionner $P(A)+P(B)$ SANS retirer $P(A \\cap B)$ donne 33/40 ici — FAUX ! Les 6 ' +
+            'personnes de l\'intersection sont comptées deux fois. La bonne valeur reste 27/40.',
         },
         { kind: 'subheading', text: 'Tableau à double entrée et complémentaire' },
         {
@@ -193,9 +203,8 @@ export const probabilites: ChapterContent = {
             'Avec l\'exemple ci-dessus : $n(A \\cap \\bar{B})$=12, $n(\\bar{A} \\cap B)$=9, ' +
               '$n(A \\cap B)$=6, $n(\\bar{A} \\cap \\bar{B})$=40−27=13 — la somme des 4 cases, ' +
               '12+9+6+13=40, retombe bien sur le total. Le tableau à double entrée range ces 9 ' +
-              'valeurs d\'un coup : 4 d\'entre elles viennent directement de l\'énoncé (6, 15, ' +
-              '18, 40) et restent en noir, les 5 autres se déduisent par soustraction et sont ' +
-              'mises en évidence.',
+              'valeurs d\'un coup : 4 viennent directement de l\'énoncé (6, 15, 18, 40) et ' +
+              'restent en noir, les 5 autres se déduisent par soustraction et sont mises en évidence.',
           ],
         },
         {
@@ -210,26 +219,46 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'La case « ni $A$ ni $B$ » vaut $1-P(A \\cup B)$, JAMAIS $1-P(A)-P(B)$ (qui oublie ' +
-            'que $A$ et $B$ se chevauchent) : ici 1−27/40=13/40, pas 1−18/40−15/40=7/40.',
+            'La case « ni $A$ ni $B$ » vaut $1-P(A \\cup B)$, JAMAIS $1-P(A)-P(B)$ — cette ' +
+            'dernière formule oublie que $A$ et $B$ se chevauchent ! Ici : 1−27/40=13/40, pas ' +
+            '1−18/40−15/40=7/40.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Conditionner, c\'est zoomer',
+          text:
+            '$P(A|B)$, c\'est zoomer sur le seul monde où $B$ est déjà vrai : tu oublies ' +
+            'temporairement tout le reste de $\\Omega$, et tu recalcules une proportion À ' +
+            'L\'INTÉRIEUR de $B$ uniquement. C\'est exactement ce qui change entre $P(A)$ et ' +
+            '$P(A|B)$ — le dénominateur passe du total $N$ au seul total de $B$.',
         },
         {
           kind: 'methode',
           label: 'Probabilité conditionnelle',
           items: [
-            'La probabilité de $A$ SACHANT $B$ (l\'information « $B$ est réalisé » est déjà ' +
-              'connue) se note $P(A|B)$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$.',
-            'Avec l\'exemple : $P(A|B)$ = 6/15 = 0,4, alors que $P(B|A)$ = 6/18 = 1/3 — le ' +
-              'numérateur est le même, mais pas le dénominateur.',
+            'La probabilité de $A$ SACHANT $B$ (tu sais déjà que $B$ est réalisé) se note ' +
+              '$P(A|B)$ : $P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$.',
+            'Avec l\'exemple : $P(A|B)$ = 6/15 = 0,4, alors que $P(B|A)$ = 6/18 = 1/3. Le ' +
+              'numérateur est le même — mais pas le dénominateur !',
           ],
         },
         {
           kind: 'piege',
           text:
-            '$P(A|B) \\neq P(B|A)$ en général — confondre les deux sens de conditionnement est ' +
-            'L\'erreur la plus fréquente de ce chapitre (elle revient dans chaque section).',
+            '$P(A|B) \\neq P(B|A)$ en général ! Confondre les deux sens de conditionnement, ' +
+            'c\'est L\'erreur la plus fréquente de tout ce chapitre — elle revient dans chaque section.',
         },
         { kind: 'subheading', text: 'Indépendance' },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi on multiplie',
+          text:
+            'Choisir une tenue, c\'est 4 hauts × 3 bas = 12 tenues possibles, parce que chaque ' +
+            'haut se combine avec chaque bas, sans restriction. Le même principe vaut pour deux ' +
+            'événements indépendants : chaque issue de $A$ rencontre chaque issue de $B$, sans ' +
+            'qu\'aucune ne soit favorisée ou exclue — d\'où la multiplication des probabilités, ' +
+            '$P(A \\cap B) = P(A) \\times P(B)$.',
+        },
         {
           kind: 'definition',
           label: 'Définition — événements indépendants',
@@ -247,27 +276,27 @@ export const probabilites: ChapterContent = {
             '$A$ = « tirer un cœur » ($P(A)$=13/52), $B$ = « tirer une figure » ($P(B)$=12/52). ' +
             'Il y a exactement 3 figures de cœur, donc $P(A \\cap B)$=3/52.',
           steps: [{ tag: 'test d\'indépendance', text: '$P(A) \\times P(B) = \\frac{13}{52} \\times \\frac{12}{52} = \\frac{3}{52} = P(A \\cap B)$' }],
-          result: { tag: 'résultat', text: '$A$ et $B$ SONT indépendants — un résultat que seul le calcul, jamais l\'intuition, permet de confirmer.' },
+          result: { tag: 'résultat', text: '$A$ et $B$ SONT indépendants — un résultat que seul le calcul confirme, jamais l\'intuition.' },
         },
         {
           kind: 'piege',
           label: 'Piège classique — incompatibilité ≠ indépendance',
           text:
             'Deux événements INCOMPATIBLES ($A \\cap B=\\emptyset$, ils ne peuvent jamais se ' +
-            'produire ensemble) de probabilités non nulles ne sont JAMAIS indépendants : ' +
-            '$P(A \\cap B)$=0 alors que $P(A) \\times P(B)>0$, l\'égalité échoue toujours. Les ' +
+            'produire ensemble) et de probabilités non nulles ne sont JAMAIS indépendants ! ' +
+            '$P(A \\cap B)$=0 alors que $P(A) \\times P(B)>0$ : l\'égalité échoue toujours. Les ' +
             'événements $A \\cap \\bar{B}$ et $\\bar{A} \\cap B$, par exemple, sont TOUJOURS ' +
             'incompatibles (un élément ne peut pas à la fois appartenir à $A$ et ne pas y ' +
             'appartenir) — donc jamais indépendants non plus. Incompatibilité et indépendance ' +
-            'sont deux notions distinctes, jamais équivalentes.',
+            'sont deux notions bien distinctes, jamais équivalentes.',
         },
         {
           kind: 'astuce',
           label: 'L\'indépendance se vérifie, elle ne se devine jamais',
           text:
-            'Pour savoir si deux événements sont indépendants, il faut toujours comparer ' +
-            'NUMÉRIQUEMENT $P(A \\cap B)$ à $P(A) \\times P(B)$ — jamais se fier à une ' +
-            'impression intuitive (l\'exemple des cartes ci-dessus est justement un cas où l\'intuition ne suffit pas).',
+            'Pour savoir si deux événements sont indépendants, compare toujours NUMÉRIQUEMENT ' +
+            '$P(A \\cap B)$ et $P(A) \\times P(B)$ — jamais à une simple impression. L\'exemple ' +
+            'des cartes ci-dessus est justement un cas où l\'intuition ne suffit pas.',
         },
         {
           kind: 'entrainement',
@@ -291,10 +320,10 @@ export const probabilites: ChapterContent = {
           label: 'Définition — arbre pondéré',
           items: [
             'Un arbre pondéré représente une suite d\'épreuves : chaque branche porte la ' +
-              'probabilité de passer d\'un nœud à l\'autre. Deux règles gouvernent sa lecture : ' +
-              'probabilité d\'un CHEMIN = produit des probabilités des branches traversées ; ' +
-              'probabilité d\'un ÉVÉNEMENT = somme des probabilités des chemins qui y mènent ' +
-              '(loi des probabilités totales).',
+              'probabilité de passer d\'un nœud à l\'autre. Deux règles suffisent pour le lire : ' +
+              'la probabilité d\'un CHEMIN, c\'est le produit des probabilités des branches ' +
+              'traversées ; la probabilité d\'un ÉVÉNEMENT, c\'est la somme des probabilités ' +
+              'des chemins qui y mènent (loi des probabilités totales).',
           ],
         },
         {
@@ -319,16 +348,16 @@ export const probabilites: ChapterContent = {
           kind: 'piege',
           text:
             'La probabilité d\'un CHEMIN s\'obtient en MULTIPLIANT les probabilités des ' +
-            'branches, jamais en les additionnant — c\'est l\'inverse pour la probabilité d\'un ' +
-            'ÉVÉNEMENT (plusieurs chemins), qui s\'obtient en ADDITIONNANT.',
+            'branches, jamais en les additionnant ! C\'est l\'inverse pour la probabilité d\'un ' +
+            'ÉVÉNEMENT (plusieurs chemins) : elle s\'obtient en ADDITIONNANT.',
         },
         { kind: 'subheading', text: 'Avec ou sans remise : tout change' },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Avec remise : l\'urne retrouve toujours sa composition initiale, les tirages sont INDÉPENDANTS.',
-            'Sans remise : la composition change après chaque tirage, les tirages ne sont JAMAIS indépendants.',
+            'Avec remise : l\'urne retrouve toujours sa composition initiale — les tirages sont INDÉPENDANTS.',
+            'Sans remise : la composition change après chaque tirage — les tirages ne sont JAMAIS indépendants.',
           ],
         },
         {
@@ -344,9 +373,9 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Utiliser la même probabilité 5/8 au second tirage SANS remise (comme si de rien ' +
-            'n\'était) est l\'erreur la plus fréquente de cette section — la bonne valeur, 4/7, ' +
-            'se lit directement sur la 2e branche de l\'arbre.',
+            'Utiliser la même probabilité 5/8 au second tirage SANS remise, comme si de rien ' +
+            'n\'était, c\'est l\'erreur la plus fréquente de cette section ! La bonne valeur, ' +
+            '4/7, se lit directement sur la 2e branche de l\'arbre.',
         },
         {
           kind: 'methode',
@@ -355,16 +384,16 @@ export const probabilites: ChapterContent = {
             'Deux chemins de l\'arbre mènent à « exactement une rouge » : $RB$ et $BR$. Sans ' +
               'remise : $P$(exactement 1 rouge) = $P(RB)+P(BR) = \\frac{5}{8} \\times \\frac{3}{7} + ' +
               '\\frac{3}{8} \\times \\frac{5}{7} = \\frac{15}{56}+\\frac{15}{56} = \\frac{15}{28}$.',
-            'Et par le complément, $P$(au moins 1 rouge) = $1-P(BB) = 1-6/56 = 25/28$.',
+            'Et par le complément : $P$(au moins 1 rouge) = $1-P(BB) = 1-6/56 = 25/28$.',
           ],
         },
         {
           kind: 'astuce',
           label: 'Vérifier que les chemins couvrent tout',
           text:
-            'La somme des probabilités de TOUS les chemins d\'un arbre vaut toujours 1 (sans ' +
-            'remise : 20/56+15/56+15/56+6/56=1) — un excellent moyen de repérer une erreur de ' +
-            'calcul avant de répondre.',
+            'La somme des probabilités de TOUS les chemins d\'un arbre vaut toujours 1 (ici, ' +
+            'sans remise : 20/56+15/56+15/56+6/56=1). Un excellent moyen de repérer une erreur ' +
+            'de calcul avant de répondre !',
         },
         { kind: 'subheading', text: 'Une autre façon de dénombrer : le diagramme cartésien' },
         {
@@ -372,7 +401,7 @@ export const probabilites: ChapterContent = {
           label: 'Méthode',
           items: [
             'Quand une expérience combine 2 tirages INDÉPENDANTS à résultats numériques (2 dés, ' +
-              'par exemple), on peut représenter les $n \\times m$ issues comme des points ' +
+              'par exemple), tu peux représenter les $n \\times m$ issues comme des points ' +
               'd\'une grille : le résultat du 1er tirage en abscisse, celui du 2e en ordonnée. ' +
               'Chaque point de la grille est une issue équiprobable — il suffit alors de ' +
               'COMPTER les points qui satisfont la condition cherchée.',
@@ -409,13 +438,22 @@ export const probabilites: ChapterContent = {
         },
         { kind: 'subheading', text: 'Dénombrement — permutations et dérangements' },
         {
+          kind: 'intuition',
+          label: "D'où vient le n! ?",
+          text:
+            'Range 4 objets dans 4 cases : 4 choix possibles pour la 1re case, puis seulement 3 ' +
+            'pour la 2e (un objet est déjà casé), puis 2, puis 1 seul. Au total : ' +
+            '$4 \\times 3 \\times 2 \\times 1=24$ façons — c\'est exactement $4!$. Le nombre de ' +
+            'choix se réduit d\'une unité à chaque case remplie, jamais l\'inverse.',
+        },
+        {
           kind: 'definition',
           label: 'Définition',
           items: [
-            'Le nombre de façons de ranger $n$ objets distincts (une PERMUTATION) est ' +
-              '$n! = n \\times (n-1) \\times \\ldots \\times 1$. Un dérangement est une ' +
+            'Le nombre de façons de ranger $n$ objets distincts (une PERMUTATION) vaut ' +
+              '$n! = n \\times (n-1) \\times \\ldots \\times 1$. Un dérangement, c\'est une ' +
               'permutation où AUCUN objet ne reste à sa place initiale ; leur nombre se note ' +
-              '$D(n)$ — $D(n) \\neq n!$ (par exemple $D(4)$=9, très différent de 4!=24).',
+              '$D(n)$ — et $D(n) \\neq n!$ (par exemple $D(4)$=9, très différent de 4!=24).',
           ],
         },
         {
@@ -430,9 +468,8 @@ export const probabilites: ChapterContent = {
               tag: 'exactement 2 correctes',
               text:
                 'on énumère les paires de lettres correctement placées — {1;2}, {1;3}, {1;4}, ' +
-                '{2;3}, {2;4}, {3;4}, soit 6 paires — puis les 2 lettres restantes doivent ' +
-                'former un dérangement complet entre elles ($D(2)$=1 façon) : ' +
-                '$P=(6 \\times 1)/24=1/4$',
+                '{2;3}, {2;4}, {3;4} : 6 paires. Les 2 lettres restantes doivent alors former ' +
+                'un dérangement complet entre elles ($D(2)$=1 façon) : $P=(6 \\times 1)/24=1/4$',
             },
           ],
           result: { tag: '', text: '' },
@@ -440,9 +477,9 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '« Exactement 3 lettres sur 4 à la bonne place » est structurellement IMPOSSIBLE ' +
-            '(probabilité nulle) : si 3 lettres sont bien placées, la 4e l\'est forcément ' +
-            'aussi, il ne reste qu\'une seule enveloppe pour une seule lettre.',
+            '« Exactement 3 lettres sur 4 à la bonne place », c\'est structurellement ' +
+            'IMPOSSIBLE (probabilité nulle) ! Si 3 lettres sont bien placées, la 4e l\'est ' +
+            'forcément aussi — il ne reste qu\'une seule enveloppe pour une seule lettre.',
         },
         {
           kind: 'entrainement',
@@ -465,10 +502,10 @@ export const probabilites: ChapterContent = {
           kind: 'definition',
           label: 'Définition — partition et loi des probabilités totales',
           items: [
-            'Une partition de l\'univers est une famille d\'événements deux à deux ' +
-              'INCOMPATIBLES dont l\'union recouvre l\'univers ENTIER (les deux conditions sont ' +
-              'indispensables). Si $B_1,\\ldots,B_n$ forment une partition, la loi des ' +
-              'probabilités totales donne, pour tout événement $A$ : ' +
+            'Une partition de l\'univers, c\'est une famille d\'événements deux à deux ' +
+              'INCOMPATIBLES dont l\'union recouvre l\'univers ENTIER — les deux conditions ' +
+              'comptent, aucune n\'est optionnelle. Si $B_1,\\ldots,B_n$ forment une partition, ' +
+              'la loi des probabilités totales donne, pour tout événement $A$ : ' +
               '$P(A) = \\displaystyle\\sum_{i=1}^{n} P(A|B_i) \\times P(B_i)$.',
           ],
         },
@@ -517,7 +554,7 @@ export const probabilites: ChapterContent = {
           label: 'Théorème de Bayes',
           items: [
             '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$. Bayes permet de RETOURNER un ' +
-              'conditionnement : connaissant $P(B|A)$, on en déduit $P(A|B)$ — utile quand ' +
+              'conditionnement : tu connais $P(B|A)$, tu en déduis $P(A|B)$ — utile dès que ' +
               'seule la probabilité « dans le mauvais sens » est directement connue.',
           ],
         },
@@ -537,7 +574,7 @@ export const probabilites: ChapterContent = {
               text:
                 'Les deux membres de droite valent tous deux $P(A \\cap B)$ : ils sont donc ' +
                 'égaux entre eux. En isolant $P(A|B)$ dans $P(A|B) \\times P(B) = P(B|A) \\times ' +
-                'P(A)$, on obtient exactement la formule de Bayes.',
+                'P(A)$, tu retombes exactement sur la formule de Bayes.',
             },
           ],
         },
@@ -551,11 +588,11 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$P(malade|T^+) \\approx 0,33$ est TRÈS différent de $P(T^+|malade) = 0,9$ — ' +
-            'confondre ces deux probabilités conditionnelles est LE piège central du théorème ' +
-            'de Bayes. Un test « fiable à 90 % » ($P(T^+|malade)$=0,9) ne signifie PAS qu\'un ' +
-            'résultat positif garantit 90 % de chances d\'être malade : tout dépend aussi de la ' +
-            'rareté de la maladie ($P(malade)$=0,1, ici assez rare) et du taux de faux positifs.',
+            '$P(malade|T^+) \\approx 0,33$ est TRÈS différent de $P(T^+|malade) = 0,9$ ! ' +
+            'Confondre ces deux probabilités conditionnelles, c\'est LE piège central du ' +
+            'théorème de Bayes. Un test « fiable à 90 % » ($P(T^+|malade)$=0,9) ne signifie PAS ' +
+            'qu\'un résultat positif donne 90 % de chances d\'être malade : tout dépend aussi ' +
+            'de la rareté de la maladie ($P(malade)$=0,1, ici assez rare) et du taux de faux positifs.',
         },
         {
           kind: 'illustration',
@@ -604,19 +641,19 @@ export const probabilites: ChapterContent = {
           kind: 'piege',
           text:
             'Une partition exige que les événements recouvrent TOUT l\'univers, pas seulement ' +
-            'qu\'ils aient une probabilité non nulle — oublier un morceau de la partition dans ' +
-            'la loi des probabilités totales fait obtenir un résultat trop petit, sans aucun ' +
-            'signal d\'erreur visible.',
+            'qu\'ils aient une probabilité non nulle. Oublier un morceau de la partition dans ' +
+            'la loi des probabilités totales donne un résultat trop petit — sans aucun signal ' +
+            'd\'erreur visible !',
         },
         {
           kind: 'methode',
           label: 'Lire P(A|B) directement dans un tableau à double entrée',
           items: [
             'Dans un tableau à double entrée (section 1), $P(A|B)$ se lit directement en ' +
-              'restreignant l\'attention à la SEULE ligne (ou colonne) de $B$ : c\'est ' +
+              'restreignant ton attention à la SEULE ligne (ou colonne) de $B$ : c\'est ' +
               'l\'effectif de la case $A \\cap B$ divisé par le TOTAL de cette ligne — sans ' +
               'même repasser par la formule $P(A \\cap B)/P(B)$, puisque diviser numérateur et ' +
-              'dénominateur par le même effectif total ne change pas le résultat.',
+              'dénominateur par le même effectif total ne change rien au résultat.',
           ],
         },
         {
@@ -644,7 +681,7 @@ export const probabilites: ChapterContent = {
           kind: 'para',
           text:
             'Soit $A$ « l\'élève étudie la guitare » et $B$ « l\'élève est un garçon ». Sachant ' +
-            'qu\'un élève étudie la guitare (on reste dans la SEULE colonne « Guitare », de ' +
+            'qu\'un élève étudie la guitare (tu restes dans la SEULE colonne « Guitare », de ' +
             'total 28), la probabilité qu\'il soit un garçon vaut $P(B|A) = \\dfrac{15}{28}$.',
         },
         {
@@ -664,20 +701,21 @@ export const probabilites: ChapterContent = {
             {
               kind: 'para',
               text:
-                'On part de $P(A|B) = P(A)$ (définition du cours), soit, par définition de la ' +
-                'probabilité conditionnelle, $\\dfrac{P(A \\cap B)}{P(B)} = P(A)$. En ' +
+                'Tu pars de $P(A|B) = P(A)$ (la définition du cours), soit, par définition de ' +
+                'la probabilité conditionnelle, $\\dfrac{P(A \\cap B)}{P(B)} = P(A)$. En ' +
                 'multipliant les deux membres par $P(B)$ : $P(A \\cap B) = P(A) \\times P(B)$.',
             },
             {
               kind: 'para',
               text:
-                'Le même calcul, mené en isolant cette fois $P(B|A)$ au lieu de $P(A|B)$, ' +
+                'Le même calcul, mené cette fois en isolant $P(B|A)$ au lieu de $P(A|B)$, ' +
                 'montre que $P(A \\cap B)=P(A) \\times P(B)$ entraîne aussi $P(B|A)=P(B)$. Les ' +
                 'trois égalités — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$, ' +
                 '$P(B|A)=P(B)$ — sont donc rigoureusement équivalentes : n\'importe laquelle ' +
                 'peut servir à définir ou à vérifier l\'indépendance. En pratique, c\'est la 2e ' +
                 'forme qui sert de DÉFINITION officielle, car elle reste valable même quand ' +
-                '$P(A)$ ou $P(B)$ vaut 0 (les deux autres formes exigent alors une division par 0, impossible).',
+                '$P(A)$ ou $P(B)$ vaut 0 (les deux autres formes exigeraient alors une ' +
+                'division par 0, impossible).',
             },
           ],
         },
@@ -685,8 +723,8 @@ export const probabilites: ChapterContent = {
           kind: 'astuce',
           label: 'Deux probabilités conditionnées par le MÊME événement se complètent',
           text:
-            '$P(malade|T^+) + P(\\text{non malade}|T^+) = 1$ TOUJOURS (même événement ' +
-            'conditionnant $T^+$ des deux côtés). En revanche $P(malade|T^+) + ' +
+            '$P(malade|T^+) + P(\\text{non malade}|T^+) = 1$ TOUJOURS (le même événement ' +
+            'conditionne $T^+$ des deux côtés). En revanche, $P(malade|T^+) + ' +
             'P(malade|\\text{non } T^+)$ n\'a AUCUNE raison de valoir 1 — les deux ' +
             'probabilités sont conditionnées par des événements différents.',
         },
@@ -713,15 +751,16 @@ export const probabilites: ChapterContent = {
           items: [
             'Répéter $n$ fois la MÊME épreuve à deux issues (succès de probabilité $p$, échec ' +
               '$1-p$), en remettant à chaque fois les conditions à l\'identique, c\'est ' +
-              'exactement l\'arbre de la section 2 — mais où les DEUX probabilités $p$ et $1-p$ ' +
-              'sont les MÊMES à chaque étage (indépendance : le résultat d\'un tir n\'affecte ' +
-              'jamais le suivant).',
-            'Sur un chemin donné, on multiplie les probabilités étage par étage comme toujours. ' +
-              'Mais puisque $p$ et $1-p$ sont identiques à chaque étage, DEUX chemins comptant ' +
-              'le MÊME NOMBRE de succès — peu importe à quels étages ils se produisent — ont ' +
-              'exactement la même probabilité. Pour trouver $P$(exactement $k$ succès), il ' +
-              'suffit donc de COMPTER combien de chemins de l\'arbre contiennent $k$ succès, ' +
-              'puis de multiplier ce nombre par la probabilité commune à chacun de ces chemins.',
+              'exactement l\'arbre de la section 2 — sauf que les DEUX probabilités $p$ et ' +
+              '$1-p$ sont les MÊMES à chaque étage (indépendance : le résultat d\'un tir ' +
+              'n\'affecte jamais le suivant).',
+            'Sur un chemin donné, tu multiplies les probabilités étage par étage, comme ' +
+              'toujours. Mais puisque $p$ et $1-p$ sont identiques à chaque étage, DEUX chemins ' +
+              'comptant le MÊME NOMBRE de succès — peu importe à quels étages ils se ' +
+              'produisent — ont exactement la même probabilité. Pour trouver $P$(exactement ' +
+              '$k$ succès), il suffit donc de COMPTER combien de chemins de l\'arbre ' +
+              'contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune ' +
+              'à chacun d\'eux.',
           ],
         },
         {
@@ -731,8 +770,8 @@ export const probabilites: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Avec seulement 3 tirs, l\'arbre complet tient sur 8 chemins — on peut tous les ' +
-                'lister et les regrouper par nombre de succès (S) :',
+                'Avec seulement 3 tirs, l\'arbre complet tient sur 8 chemins — tu peux tous les ' +
+                'lister, et les regrouper par nombre de succès (S) :',
             },
             {
               kind: 'featureTable',
@@ -754,7 +793,7 @@ export const probabilites: ChapterContent = {
               kind: 'para',
               text:
                 'Vérification : 0,027+0,189+0,441+0,343 = 1 EXACTEMENT — les 8 chemins couvrent ' +
-                'tous les cas possibles, disjoints deux à deux.',
+                'tous les cas possibles, sans jamais se chevaucher.',
             },
           ],
         },
@@ -786,10 +825,10 @@ export const probabilites: ChapterContent = {
             {
               tag: 'seule la POSITION des 2 succès compte',
               text:
-                'Avec 5 tirs, lister les 32 chemins complets serait trop lourd — mais pour ' +
-                '$P(X=2)$, seule la POSITION des 2 succès parmi les 5 tirs compte (chaque ' +
+                'Avec 5 tirs, lister les 32 chemins complets serait trop lourd. Mais pour ' +
+                '$P(X=2)$, seule la POSITION des 2 succès parmi les 5 tirs compte : chaque ' +
                 'position donne un chemin de probabilité $0,3^2 \\times 0,7^3$, quelle que soit ' +
-                'la position exacte). On énumère ces positions :',
+                'la position exacte. Il suffit d\'énumérer ces positions :',
             },
             {
               tag: 'énumération des positions',
@@ -804,16 +843,16 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Oublier de COMPTER le nombre de positions (ici 10) et ne garder qu\'UNE seule ' +
-            'd\'entre elles donne $0,3^2 \\times 0,7^3=0,03087$ — un résultat 10 fois trop ' +
-            'petit. Le nombre de chemins n\'est JAMAIS optionnel dès que $0<k<n$.',
+            'Oublier de COMPTER le nombre de positions (ici 10), et ne garder qu\'UNE seule ' +
+            'd\'entre elles, donne $0,3^2 \\times 0,7^3=0,03087$ — un résultat 10 fois trop ' +
+            'petit ! Le nombre de chemins n\'est JAMAIS optionnel dès que $0<k<n$.',
         },
         {
           kind: 'methode',
           label: '« Au moins un » : toujours par le complément',
           items: [
             '$P$(au moins un succès) se calcule par le complément de « aucun succès », JAMAIS ' +
-              'en additionnant des probabilités individuelles (qui dépasserait facilement 1) : ' +
+              'en additionnant des probabilités individuelles — ça dépasserait facilement 1 ! ' +
               '$P(\\text{au moins 1}) = 1 - P(X=0) = 1-(1-p)^n$.',
             'Avec l\'exemple : $1-0,7^5 = 1-0,16807 = 0,83193$.',
           ],
@@ -821,10 +860,10 @@ export const probabilites: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$P(\\text{au moins 1}) = 5 \\times p = 1,5$ est IMPOSSIBLE (une probabilité ne ' +
-            'dépasse jamais 1) — cette méthode « additionner les p » est toujours fausse ; la ' +
-            'seule méthode fiable est le complément, quelle que soit la valeur de $p$ (le ' +
-            'complément fonctionne pour tout $p$ entre 0 et 1, pas seulement $p$=0,5).',
+            '$P(\\text{au moins 1}) = 5 \\times p = 1,5$ est IMPOSSIBLE — une probabilité ne ' +
+            'dépasse jamais 1 ! Cette méthode « additionner les $p$ » est toujours fausse. La ' +
+            'seule méthode fiable, c\'est le complément, quelle que soit la valeur de $p$ (il ' +
+            'fonctionne pour tout $p$ entre 0 et 1, pas seulement $p$=0,5).',
         },
         {
           kind: 'illustration',
@@ -858,8 +897,8 @@ export const probabilites: ChapterContent = {
           result: {
             tag: 'somme',
             text:
-              'Leur somme, 0,064+0,288+0,432+0,216, vaut exactement 1 (ces 4 valeurs couvrent ' +
-              'tous les cas possibles, disjoints deux à deux).',
+              'Leur somme, 0,064+0,288+0,432+0,216, vaut exactement 1 — ces 4 valeurs couvrent ' +
+              'tous les cas possibles, sans jamais se chevaucher.',
           },
         },
         {
