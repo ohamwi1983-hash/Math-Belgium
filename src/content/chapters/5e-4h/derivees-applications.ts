@@ -7,14 +7,12 @@ export const deriveesApplications: ChapterContent = {
   title: 'Dérivées et applications',
   slug: 'derivees-applications',
   lede:
-    "La dérivée d'une fonction en un point mesure sa pente instantanée — la vitesse exacte à " +
-    "laquelle elle varie à cet endroit précis, prolongement direct des limites du chapitre " +
-    "précédent (la dérivée EST une limite). Ce chapitre construit cette notion depuis sa " +
-    "définition (taux d'accroissement dont on prend la limite), l'utilise pour tracer une " +
-    "tangente, établit ensuite les règles de calcul d'une fonction dérivée, puis étudie " +
-    "localement les variations et les extremums d'une fonction, mène une étude complète " +
-    "(domaine, dérivée, limites, asymptotes), lit directement un graphique sans calcul, avant " +
-    "de l'appliquer à l'optimisation géométrique, à l'économie et à la cinématique.",
+    "La **dérivée** d'une fonction en un point, c'est sa pente exacte à cet instant précis — la " +
+    "suite directe des limites du chapitre précédent (la dérivée EST une limite !). Dans ce " +
+    "chapitre, tu pars de sa définition, tu t'en sers pour tracer une tangente, puis tu " +
+    "apprends à calculer n'importe quelle dérivée avec des règles simples. Ensuite, tu étudies " +
+    "les variations et les extremums d'une fonction, tu mènes une étude complète, et tu lis " +
+    "tout ça directement sur un graphique. Pour finir : l'optimisation, l'économie, et le mouvement.",
 
   sections: [
     {
@@ -24,21 +22,33 @@ export const deriveesApplications: ChapterContent = {
       kicker: "taux d'accroissement, limite quand h→0, interprétation géométrique (pente de la tangente)",
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pour visualiser',
+          text:
+            "Imagine que tu es en voiture. Ton compteur de vitesse affiche un nombre à **chaque " +
+            "instant** — pas une moyenne sur tout le trajet, une valeur précise, là, maintenant. " +
+            "C'est exactement ce que mesure une dérivée : pas une vitesse moyenne entre deux " +
+            "points, mais la pente **exacte** de la courbe en un seul point. Le taux " +
+            "d'accroissement ci-dessous, c'est la vitesse moyenne du trajet. La dérivée f'(a), " +
+            "c'est ce que ton compteur affiche à l'instant a.",
+        },
+        {
           kind: 'rappel',
           label: 'Rappel — définition du nombre dérivé',
           items: [
-            'Le **taux d\'accroissement** de f entre a et a+h est $\\dfrac{f(a+h)-f(a)}{h}$ — ' +
-              'la pente de la **sécante** qui relie les points (a;f(a)) et (a+h;f(a+h)). Le ' +
-              '**nombre dérivé** f\'(a) est la **limite** de ce taux quand h se rapproche de 0 ' +
-              '(chapitre précédent) : $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
+            'Le **taux d\'accroissement** de f entre a et a+h, c\'est $\\dfrac{f(a+h)-f(a)}{h}$. ' +
+              'C\'est la pente de la **sécante** — la droite qui relie les points (a;f(a)) et ' +
+              '(a+h;f(a+h)). Fais tendre h vers 0, comme au chapitre précédent : la limite de ce ' +
+              'taux, c\'est le **nombre dérivé** f\'(a). $f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$.',
           ],
         },
         {
           kind: 'para',
           text:
-            'Géométriquement, quand h se rapproche de 0, le point (a+h;f(a+h)) glisse le long de ' +
-            'la courbe vers (a;f(a)) : la **sécante** pivote progressivement jusqu\'à devenir la ' +
-            '**tangente** en a — sa pente limite est exactement f\'(a).',
+            'Géométriquement, que se passe-t-il quand h se rapproche de 0 ? Le point ' +
+            '(a+h;f(a+h)) glisse le long de la courbe, de plus en plus près de (a;f(a)). La ' +
+            '**sécante** pivote petit à petit — jusqu\'à devenir la **tangente** en a. Sa pente ' +
+            'limite, c\'est exactement f\'(a).',
         },
         {
           kind: 'exemple',
@@ -68,36 +78,38 @@ export const deriveesApplications: ChapterContent = {
             points: [{ x: 1, y: 1, label: 'A(1;1)', tone: 'accent', labelPos: 'below' }],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=x² — les sécantes en h=2 puis h=0,5 ont pour pente 4 puis 2,5 : elles se rapprochent de la tangente en A, de pente f\'(1)=2',
+            caption:
+              'f(x)=x² — la sécante en h=2 a une pente de 4, celle en h=0,5 une pente de 2,5. ' +
+              'Elles se rapprochent de la tangente en A, de pente f\'(1)=2.',
           },
         },
         {
           kind: 'methode',
           label: 'Le squelette, valable pour toute fonction',
           items: [
-            'Calculer f(a) et développer f(a+h) (en fonction de h).',
-            'Former le taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$ et le simplifier au ' +
-              'maximum — le facteur h du dénominateur doit toujours pouvoir se simplifier ' +
-              '(sinon la limite n\'est pas directement calculable).',
-            'Passer à la limite quand h→0 sur l\'expression SIMPLIFIÉE : f\'(a).',
+            'Calcule f(a). Développe f(a+h) (en fonction de h).',
+            'Forme le taux d\'accroissement $\\dfrac{f(a+h)-f(a)}{h}$, puis simplifie-le au ' +
+              'maximum. Le h du dénominateur doit toujours pouvoir se simplifier — sinon, tu ' +
+              'ne peux pas calculer la limite directement.',
+            'Fais tendre h vers 0 sur l\'expression SIMPLIFIÉE. Tu obtiens f\'(a).',
           ],
         },
         {
           kind: 'attention',
           label: 'Ne jamais remplacer h par 0 AVANT d\'avoir simplifié',
           text:
-            'Le taux d\'accroissement brut $\\dfrac{f(a+h)-f(a)}{h}$ vaut toujours 0/0 en h=0 ' +
-            '(forme indéterminée, comme au chapitre précédent) — c\'est exactement pourquoi il ' +
+            'Le taux d\'accroissement brut $\\dfrac{f(a+h)-f(a)}{h}$ vaut toujours 0/0 en h=0 — ' +
+            'une forme indéterminée, comme au chapitre précédent. C\'est exactement pourquoi il ' +
             'faut d\'abord SIMPLIFIER par h (factorisation, ou technique du conjugué pour une ' +
-            'racine) avant de faire tendre h vers 0, jamais l\'inverse.',
+            'racine) avant de faire tendre h vers 0. Jamais l\'inverse !',
         },
         {
           kind: 'astuce',
           label: 'La définition marche pour toute fonction, même sans racine',
           text:
-            'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement se simplifie par l\'expression ' +
-            'conjuguée (comme au chapitre précédent, forme ∞−∞ ou 0/0 selon l\'écriture) — la ' +
-            'méthode générale ne change jamais, seule la technique de simplification s\'adapte ' +
+            'Pour $f(x)=\\sqrt{x}$, le taux d\'accroissement se simplifie avec l\'expression ' +
+            'conjuguée — comme au chapitre précédent (forme ∞−∞ ou 0/0 selon l\'écriture). La ' +
+            'méthode générale ne change jamais. Seule la technique de simplification s\'adapte ' +
             'à la forme de f.',
         },
         {
@@ -105,8 +117,8 @@ export const deriveesApplications: ChapterContent = {
           title: 'Calculer f\'(a) par la définition',
           generatorId: '5gen26',
           description: [
-            'Développe f(a+h), simplifie le taux d\'accroissement, puis calcule f\'(a) en ' +
-              'passant à la limite — sur des fonctions affines, quadratiques et rationnelles.',
+            'Développe f(a+h). Simplifie le taux d\'accroissement. Calcule f\'(a) en passant à ' +
+              'la limite — sur des fonctions affines, quadratiques et rationnelles.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 26. Calculer f\'(a) par la définition »',
@@ -120,12 +132,22 @@ export const deriveesApplications: ChapterContent = {
       kicker: 'y=f(a)+f\'(a)(x−a) ; tangente horizontale ⟺ f\'(a)=0 ; tangente vs sécante',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Zoome sur la courbe',
+          text:
+            "Zoome de plus en plus près sur une courbe, à un endroit précis. Plus tu zoomes, " +
+            "plus elle ressemble à... une droite ! C'est cette droite-limite qui est la " +
+            "**tangente**. Elle épouse la courbe de si près, à cet endroit, qu'aucune autre " +
+            "droite ne colle mieux : c'est la meilleure approximation de la courbe par une " +
+            "droite, juste autour de ce point.",
+        },
+        {
           kind: 'rappel',
           label: 'Rappel — équation de la tangente en un point',
           items: [
-            'La tangente à la courbe de f au point d\'abscisse a est la droite qui passe par ' +
-              '(a;f(a)) avec pour pente f\'(a) — sa pente EST le nombre dérivé, par définition ' +
-              'même de f\'(a) (section 1) : $y = f(a) + f\'(a)(x-a)$.',
+            'La tangente à la courbe de f, au point d\'abscisse a, c\'est la droite qui passe ' +
+              'par (a;f(a)) avec pour pente f\'(a). Sa pente EST le nombre dérivé — c\'est même ' +
+              'sa définition (section 1) : $y = f(a) + f\'(a)(x-a)$.',
           ],
         },
         {
@@ -155,44 +177,46 @@ export const deriveesApplications: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=(x−1)² — tangente oblique au point (3;4) de pente f\'(3)=4, et tangente horizontale au point (1;0) de pente f\'(1)=0',
+            caption:
+              'f(x)=(x−1)² — la tangente au point (3;4) est oblique, de pente f\'(3)=4. Au ' +
+              'point (1;0), elle est horizontale, de pente f\'(1)=0.',
           },
         },
         {
           kind: 'methode',
           label: 'Tangente horizontale',
           items: [
-            'Une tangente est **horizontale** exactement quand sa pente est nulle, c\'est-à-dire ' +
-              'f\'(a) = 0. Avec le même f(x)=x²−2x+1 : f\'(x)=2x−2=0 ⟺ x=1, et f(1)=1−2+1=0 — la ' +
-              'tangente en x=1 est donc la droite y=0 (l\'axe des abscisses lui-même).',
+            'Une tangente est **horizontale** exactement quand sa pente est nulle — quand ' +
+              'f\'(a) = 0. Reprends f(x)=x²−2x+1 : f\'(x)=2x−2=0 ⟺ x=1, et f(1)=1−2+1=0. La ' +
+              'tangente en x=1 est donc la droite y=0 : l\'axe des abscisses lui-même !',
           ],
         },
         {
           kind: 'attention',
           label: 'Tangente ≠ sécante',
           text:
-            'Une **sécante** relie DEUX points distincts de la courbe (a;f(a)) et (b;f(b)), de ' +
-            'pente $\\dfrac{f(b)-f(a)}{b-a}$ — c\'est le taux d\'accroissement de la section 1. ' +
-            'Une **tangente** ne touche la courbe qu\'EN UN SEUL point (localement), de pente ' +
-            'f\'(a) — c\'est la LIMITE de la sécante quand b se rapproche de a, jamais une ' +
-            'sécante elle-même.',
+            'Une **sécante** relie DEUX points distincts de la courbe, (a;f(a)) et (b;f(b)). Sa ' +
+            'pente, c\'est $\\dfrac{f(b)-f(a)}{b-a}$ — le taux d\'accroissement de la section 1. ' +
+            'Une **tangente**, elle, ne touche la courbe qu\'EN UN SEUL point (localement). Sa ' +
+            'pente est f\'(a) : la LIMITE de la sécante quand b se rapproche de a. Une tangente ' +
+            'n\'est jamais une sécante !',
         },
         {
           kind: 'astuce',
           label: 'Deux points de contrôle avant de conclure',
           text:
-            'Une équation de tangente correcte doit toujours vérifier DEUX choses : passer par ' +
-            'le point (a;f(a)) (teste x=a dans ton équation, tu dois retrouver f(a)) et avoir ' +
-            'la bonne pente (le coefficient de x doit être exactement f\'(a)) — une erreur sur ' +
-            'l\'un des deux se détecte immédiatement par cette double vérification.',
+            'Une équation de tangente correcte doit toujours vérifier DEUX choses. Elle passe ' +
+            'par le point (a;f(a)) — teste x=a dans ton équation, tu dois retrouver f(a). Et ' +
+            'elle a la bonne pente — le coefficient de x doit être exactement f\'(a). Cette ' +
+            'double vérification repère immédiatement une erreur.',
         },
         {
           kind: 'entrainement',
           title: 'Tangentes',
           generatorId: '5gen28',
           description: [
-            'Détermine l\'équation de la tangente en un point donné, résous une tangente ' +
-              'horizontale, ou confirme qu\'une droite est deux fois tangente à une même courbe.',
+            'Détermine l\'équation de la tangente en un point donné. Résous une tangente ' +
+              'horizontale. Ou confirme qu\'une droite est deux fois tangente à une même courbe.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 28. Tangentes »',
@@ -207,16 +231,27 @@ export const deriveesApplications: ChapterContent = {
         'fonction dérivée, domaine de dérivabilité, interprétation du nombre dérivé, dérivées de référence, règles de la somme/produit/quotient/chaîne',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Tu connais déjà ça',
+          text:
+            "Tu connais déjà le taux d'accroissement d'une fonction du premier degré depuis la " +
+            "4e (le paramètre m, la pente de la droite). f'(a), c'est la même idée, appliquée à " +
+            "N'IMPORTE QUELLE courbe, en un point précis plutôt que sur toute une droite. Rien " +
+            "de neuf dans le principe — seulement dans le fait que la pente change maintenant " +
+            "d'un point à l'autre.",
+        },
+        {
           kind: 'rappel',
           label: 'Rappel — domaine de dérivabilité et fonction dérivée',
           items: [
-            'f est **dérivable en a** si f\'(a) existe (la limite du taux d\'accroissement en a ' +
-              'est un nombre réel — pas ±∞, pas indéfinie). L\'ensemble des réels où f est ' +
-              'dérivable s\'appelle le **domaine de dérivabilité** de f, noté $\\text{dom}_d f$ — ' +
-              'il peut être plus petit que dom f (ex. √x est définie en 0 mais pas dérivable en 0).',
-            'Calculer f\'(a) par la définition (section 1) pour un a QUELCONQUE de ' +
-              '$\\text{dom}_d f$, plutôt que pour une seule valeur fixée, donne une nouvelle ' +
-              'fonction : la **fonction dérivée** f\', qui associe à chaque x son nombre dérivé f\'(x).',
+            'f est **dérivable en a** si f\'(a) existe — si la limite du taux d\'accroissement ' +
+              'en a est un nombre réel (pas ±∞, pas indéfinie). L\'ensemble des réels où f est ' +
+              'dérivable s\'appelle le **domaine de dérivabilité** de f, noté $\\text{dom}_d f$. ' +
+              'Il peut être plus petit que dom f : √x est définie en 0, mais pas dérivable en 0 !',
+            'Calcule f\'(a) par la définition (section 1), mais pour un a QUELCONQUE de ' +
+              '$\\text{dom}_d f$ — plutôt que pour une seule valeur fixée. Tu obtiens une ' +
+              'nouvelle fonction : la **fonction dérivée** f\', qui associe à chaque x son ' +
+              'nombre dérivé f\'(x).',
           ],
         },
         {
@@ -243,8 +278,8 @@ export const deriveesApplications: ChapterContent = {
           label: 'Rappel — interpréter le nombre dérivé (et le comparer au taux de variation)',
           items: [
             'Le taux de variation (moyen, entre deux points) et le nombre dérivé (instantané, ' +
-              'en un seul point) se lisent chacun de deux façons — graphique et physique — ' +
-              'pour un même type de calcul :',
+              'en un seul point) se lisent chacun de deux façons : graphique, et physique. ' +
+              'Voici comment, pour un même type de calcul :',
           ],
         },
         {
@@ -282,9 +317,9 @@ export const deriveesApplications: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Les deux entrées les moins évidentes du tableau ci-dessus ne s\'apprennent pas ' +
-                'par cœur sans savoir d\'où elles viennent — elles se retrouvent directement ' +
-                'avec la méthode de la section 1.',
+                'Les deux entrées les moins évidentes du tableau ci-dessus, mieux vaut ne pas ' +
+                'les apprendre par cœur sans savoir d\'où elles viennent. Tu peux les retrouver ' +
+                'directement, avec la méthode de la section 1.',
             },
             { kind: 'para', text: '**a.** $f(x) = 1/x$ ($x \\in \\mathbb{R}_0$)' },
             {
@@ -293,21 +328,21 @@ export const deriveesApplications: ChapterContent = {
                 'Taux d\'accroissement — même dénominateur, puis simplifié par h : ' +
                 '$\\dfrac{1/(x+h) - 1/x}{h} = \\dfrac{x-(x+h)}{h \\cdot x(x+h)} = \\dfrac{-h}{h \\cdot x(x+h)} = \\dfrac{-1}{x(x+h)}$',
             },
-            { kind: 'para', text: 'Passer à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{-1}{x(x+h)} = -\\dfrac{1}{x^2}$' },
+            { kind: 'para', text: 'Passe à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{-1}{x(x+h)} = -\\dfrac{1}{x^2}$' },
             { kind: 'para', text: '**b.** $f(x) = \\sqrt{x}$ ($x \\in \\mathbb{R}^+$)' },
             {
               kind: 'para',
               text:
-                'Forme indéterminée « 0/0 » — on multiplie par l\'expression conjuguée : ' +
+                'Forme indéterminée « 0/0 » : multiplie par l\'expression conjuguée : ' +
                 '$\\dfrac{\\sqrt{x+h}-\\sqrt{x}}{h} = \\dfrac{(x+h)-x}{h(\\sqrt{x+h}+\\sqrt{x})} = \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}}$',
             },
-            { kind: 'para', text: 'Passer à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}} = \\dfrac{1}{2\\sqrt{x}}$' },
+            { kind: 'para', text: 'Passe à la limite : $f\'(x) = \\displaystyle\\lim_{h \\to 0} \\dfrac{1}{\\sqrt{x+h}+\\sqrt{x}} = \\dfrac{1}{2\\sqrt{x}}$' },
             {
               kind: 'para',
               text:
-                'Les dérivées de sin x et cos x se démontrent aussi par la définition, mais avec ' +
-                'des limites trigonométriques admises à ce niveau — le résultat reste dans le ' +
-                'tableau de référence.',
+                'Les dérivées de sin x et cos x se démontrent aussi par la définition. Mais ' +
+                'elles utilisent des limites trigonométriques admises à ce niveau — retiens ' +
+                'simplement le résultat, déjà dans le tableau de référence.',
             },
           ],
         },
@@ -317,9 +352,9 @@ export const deriveesApplications: ChapterContent = {
           items: [
             '**Somme** — (u+v)\' = u\'+v\' (chaque terme se dérive indépendamment).',
             '**Produit** — (u·v)\' = u\'v + uv\'.',
-            '**Quotient** — $(u/v)\' = \\dfrac{u\'v - uv\'}{v^2}$ (ordre du numérateur significatif : u\' EN PREMIER).',
-            '**Composée (chaîne)** — si f(x)=g(u(x)), alors f\'(x) = u\'(x)·g\'(u(x)) : on dérive ' +
-              '« de l\'extérieur vers l\'intérieur », puis on multiplie par la dérivée de l\'intérieur.',
+            '**Quotient** — $(u/v)\' = \\dfrac{u\'v - uv\'}{v^2}$ (l\'ordre compte dans le numérateur : u\' EN PREMIER).',
+            '**Composée (chaîne)** — si f(x)=g(u(x)), alors f\'(x) = u\'(x)·g\'(u(x)). Dérive « de ' +
+              'l\'extérieur vers l\'intérieur », puis multiplie par la dérivée de l\'intérieur.',
           ],
         },
         {
@@ -335,9 +370,10 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Retrouvé à partir de la formule générale : par exemple pour f(x)=uⁿ, on a ' +
-            'g(u)=uⁿ donc g\'(u)=n·uⁿ⁻¹, et f\'(x)=u\'(x)·g\'(u(x))=n·uⁿ⁻¹·u\' — chaque colonne ' +
-            'du tableau n\'est qu\'une application de cette même règle à une « extérieure » g différente.',
+            'Ce tableau vient directement de la formule générale. Par exemple, pour f(x)=uⁿ : ' +
+            'g(u)=uⁿ, donc g\'(u)=n·uⁿ⁻¹, et f\'(x)=u\'(x)·g\'(u(x))=n·uⁿ⁻¹·u\'. Chaque colonne ' +
+            'du tableau n\'est qu\'une application de cette même règle, avec une « extérieure » ' +
+            'g différente à chaque fois.',
         },
         {
           kind: 'exemple',
@@ -352,8 +388,8 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Vérification par développement direct : f(x)=(2x+1)(x²−3)=2x³+x²−6x−3, dont la ' +
-            'dérivée terme à terme redonne bien 6x²+2x−6.',
+            'Vérification par développement direct : f(x)=(2x+1)(x²−3)=2x³+x²−6x−3. Sa dérivée ' +
+            'terme à terme redonne bien 6x²+2x−6.',
         },
         {
           kind: 'wrongRight',
@@ -367,9 +403,9 @@ export const deriveesApplications: ChapterContent = {
           label: '(uv)\' ≠ u\'·v\', et (u/v)\' ≠ u\'/v\'',
           text:
             'L\'erreur la plus fréquente de ce chapitre : dériver un produit ou un quotient en ' +
-            'dérivant chaque facteur SÉPARÉMENT puis en les recombinant naïvement. Seules la ' +
-            'somme et la composition ont une règle « simple » — le produit et le quotient ' +
-            'exigent TOUJOURS la formule complète (u\'v+uv\' ou (u\'v−uv\')/v²), jamais un raccourci.',
+            'dérivant chaque facteur SÉPARÉMENT, puis en les recombinant naïvement. Seules la ' +
+            'somme et la composition ont une règle « simple ». Le produit et le quotient ' +
+            'exigent TOUJOURS la formule complète — u\'v+uv\' ou (u\'v−uv\')/v² — jamais un raccourci !',
         },
         {
           kind: 'exemple',
@@ -399,34 +435,35 @@ export const deriveesApplications: ChapterContent = {
             highlightIndex: 0,
             outputLabel: '(2x−1)³',
             caption:
-              'décomposition de f(x)=(2x−1)³ — intérieure u(x)=2x−1 (encadré), sortie g(u)=u³ ; ' +
-              'on dérive l\'extérieure g d\'abord (3u²), puis on multiplie par u\'(x)=2, dans ' +
-              'l\'ordre inverse de la construction',
+              'décomposition de f(x)=(2x−1)³ — intérieure u(x)=2x−1 (encadré), sortie g(u)=u³. ' +
+              'On dérive l\'extérieure g d\'abord (3u²), puis on multiplie par u\'(x)=2 : ' +
+              'l\'ordre inverse de la construction.',
           },
         },
         {
           kind: 'para',
           text:
             'Vérification par développement direct : (2x−1)³=8x³−12x²+6x−1, dérivée = ' +
-            '24x²−24x+6 ; 6(2x−1)²=6(4x²−4x+1)=24x²−24x+6 — les deux méthodes coïncident exactement.',
+            '24x²−24x+6. Et 6(2x−1)²=6(4x²−4x+1)=24x²−24x+6. Les deux méthodes tombent ' +
+            'exactement d\'accord.',
         },
         {
           kind: 'astuce',
           label: 'Repérer d\'abord la STRUCTURE, avant de dériver',
           text:
             'Avant tout calcul, demande-toi : est-ce une SOMME de termes indépendants (règle de ' +
-            'base), un PRODUIT de deux facteurs, un QUOTIENT, ou une fonction « dans » une ' +
-            'autre (composée) ? Cette reconnaissance préalable évite d\'appliquer la mauvaise ' +
-            'règle — un piège fréquent est de traiter une composée (ex. sin(2x)) comme si ' +
-            'l\'intérieure était triviale, en oubliant le facteur de la chaîne.',
+            'base) ? Un PRODUIT de deux facteurs ? Un QUOTIENT ? Ou une fonction « dans » une ' +
+            'autre (composée) ? Repérer ça d\'abord t\'évite d\'appliquer la mauvaise règle. ' +
+            'Piège fréquent : traiter une composée (ex. sin(2x)) comme si l\'intérieure était ' +
+            'triviale, en oubliant le facteur de la chaîne !',
         },
         {
           kind: 'entrainement',
           title: 'Fonction dérivée',
           generatorId: '5gen27',
           description: [
-            'Reconnais la structure de f(x) (règle de base, produit, quotient, composée), ' +
-              'décompose-la si besoin, puis calcule f\'(x) — avec ou sans habillage trigonométrique.',
+            'Reconnais la structure de f(x) : règle de base, produit, quotient, ou composée. ' +
+              'Décompose-la si besoin, puis calcule f\'(x) — avec ou sans habillage trigonométrique.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 27. Fonction dérivée »',
@@ -442,10 +479,20 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Tu sais maintenant définir f\'(a) (section 1), l\'interpréter comme pente d\'une ' +
-            'tangente (section 2), et calculer f\'(x) avec les règles de calcul (section 3) — ' +
-            'reste à savoir ce que le SIGNE de f\' (et de f\'\') révèle sur f : son sens de ' +
-            'variation, sa concavité, et la position de ses extremums.',
+            'Tu sais maintenant définir f\'(a) (section 1), l\'interpréter comme la pente ' +
+            'd\'une tangente (section 2), et calculer f\'(x) avec les règles de calcul ' +
+            '(section 3). Reste à savoir ce que le SIGNE de f\' (et de f\'\') révèle sur f : son ' +
+            'sens de variation, sa concavité, et la position de ses extremums.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pense à une colline',
+          text:
+            "Au sommet d'une colline, la pente est nulle — un instant parfaitement plat, avant " +
+            "de redescendre. Même chose au fond d'une vallée. C'est pour ça qu'un extremum " +
+            "(maximum ou minimum) a toujours une tangente HORIZONTALE : f'(a)=0. Mais attention, " +
+            "une pente nulle ne suffit pas à elle seule — il faut aussi que la pente change " +
+            "vraiment de signe autour de ce point, sinon ce n'est qu'un replat, pas un vrai sommet.",
         },
         {
           kind: 'rappel',
@@ -453,19 +500,19 @@ export const deriveesApplications: ChapterContent = {
           items: [
             '$f\'(x) > 0$ sur un intervalle ⟹ f est **croissante** sur cet intervalle (la courbe monte).',
             '$f\'(x) < 0$ sur un intervalle ⟹ f est **décroissante** sur cet intervalle (la courbe descend).',
-            '$f\'(a) = 0$ ET f\' **change de signe** en a ⟹ f admet un **extremum local** en a ' +
-              '(maximum si f\' passe de + à −, minimum si f\' passe de − à +).',
+            '$f\'(a) = 0$ ET f\' **change de signe** en a ⟹ f admet un **extremum local** en a. ' +
+              'Maximum si f\' passe de + à − ; minimum si f\' passe de − à +.',
           ],
         },
         {
           kind: 'rappel',
           label: 'Rappel — signe de f\'\' ⟺ concavité de f',
           items: [
-            '$f\'\'(x) > 0$ sur un intervalle ⟹ f est **convexe** (concave vers le haut, la ' +
-              'courbe est au-dessus de chacune de ses tangentes, forme de « bol »).',
-            '$f\'\'(x) < 0$ sur un intervalle ⟹ f est **concave** (concave vers le bas, forme de « dôme »).',
-            'Un **point d\'inflexion** est un point où f\'\' **change de signe** — la courbe ' +
-              'traverse sa tangente en ce point, passant d\'un type de concavité à l\'autre.',
+            '$f\'\'(x) > 0$ sur un intervalle ⟹ f est **convexe** — concave vers le haut. La ' +
+              'courbe reste au-dessus de chacune de ses tangentes : une forme de « bol ».',
+            '$f\'\'(x) < 0$ sur un intervalle ⟹ f est **concave** — concave vers le bas. Une forme de « dôme ».',
+            'Un **point d\'inflexion** est un point où f\'\' **change de signe**. La courbe ' +
+              'traverse sa tangente à cet endroit, en passant d\'un type de concavité à l\'autre.',
           ],
         },
         {
@@ -510,27 +557,27 @@ export const deriveesApplications: ChapterContent = {
           kind: 'attention',
           label: 'f\'(a)=0 ne garantit PAS un extremum',
           text:
-            'La condition f\'(a)=0 est NÉCESSAIRE pour un extremum local, jamais suffisante à ' +
-            'elle seule : il faut en plus que f\' **change réellement de signe** autour de a. Un ' +
-            'cas classique où ça échoue est développé en détail à la section 5 (point critique ' +
-            'sans extremum, f(x)=x³ en x=0).',
+            'La condition f\'(a)=0 est NÉCESSAIRE pour un extremum local. Mais jamais suffisante ' +
+            'à elle seule : il faut en plus que f\' **change réellement de signe** autour de a. ' +
+            'Un cas classique où ça échoue est détaillé à la section 5 (point critique sans ' +
+            'extremum, f(x)=x³ en x=0).',
         },
         {
           kind: 'astuce',
           label: 'Lire d\'abord f\', puis seulement f\'\'',
           text:
-            'Ne mélange jamais les deux lectures : le signe de f\' renseigne sur la ' +
-            '**direction** de la courbe (monte/descend), le signe de f\'\' renseigne sur sa ' +
-            '**forme** (bol/dôme) — un extremum se lit sur f\', un point d\'inflexion se lit sur ' +
-            'f\'\', jamais l\'inverse.',
+            'Ne mélange jamais les deux lectures. Le signe de f\' renseigne sur la **direction** ' +
+            'de la courbe (monte/descend). Le signe de f\'\' renseigne sur sa **forme** ' +
+            '(bol/dôme). Un extremum se lit sur f\', un point d\'inflexion se lit sur f\'\' — ' +
+            'jamais l\'inverse !',
         },
         {
           kind: 'entrainement',
           title: 'Association graphique/mots ↔ signe de f\'/f\'\'',
           generatorId: '5gen25',
           description: [
-            'Associe un graphique de f à son graphique de f\' (ou à une description verbale de ' +
-              'f\'/f\'\'), par sélection — reconnaissance directe du lien signe de la dérivée ↔ ' +
+            'Associe un graphique de f à son graphique de f\' — ou à une description verbale de ' +
+              'f\'/f\'\'. Reconnaissance directe du lien entre le signe de la dérivée et le ' +
               'comportement de la courbe.',
           ],
           chantier: '5e-4h',
@@ -548,9 +595,9 @@ export const deriveesApplications: ChapterContent = {
           kind: 'methode',
           label: 'Tableau de signes de f\' complet',
           items: [
-            'Résoudre f\'(x)=0 pour trouver les **zéros** de f\' (candidats extremums).',
-            'Étudier le SIGNE de f\' entre et autour de ces zéros (tableau de signes).',
-            'En déduire les **variations** de f (flèches ↗/↘) puis **classer** chaque zéro : ' +
+            'Résous f\'(x)=0 pour trouver les **zéros** de f\' : ce sont tes candidats extremums.',
+            'Étudie le SIGNE de f\' entre et autour de ces zéros (tableau de signes).',
+            'Déduis-en les **variations** de f (flèches ↗/↘), puis **classe** chaque zéro : ' +
               'max local si f\' passe de + à −, min local si f\' passe de − à +.',
           ],
         },
@@ -604,8 +651,8 @@ export const deriveesApplications: ChapterContent = {
             {
               kind: 'para',
               text:
-                'f\' change de signe aux DEUX zéros : max local en x=−1 (f=2), min local en ' +
-                'x=1 (f=−2) — ce sont bien de VRAIS extremums.',
+                'f\' change de signe aux DEUX zéros. Max local en x=−1 (f=2), min local en x=1 ' +
+                '(f=−2) : ce sont bien de VRAIS extremums.',
             },
           ],
         },
@@ -613,10 +660,10 @@ export const deriveesApplications: ChapterContent = {
           kind: 'piege',
           label: 'Un point critique n\'est pas toujours un extremum',
           text:
-            'f\'(a)=0 définit un **point critique**, candidat à être un extremum — mais ' +
+            'f\'(a)=0 définit un **point critique** — un candidat à être un extremum. Mais ' +
             'SEULEMENT si f\' change réellement de signe autour de a. Si f\' garde le MÊME ' +
-            'signe des deux côtés (par exemple toujours positif), a n\'est PAS un extremum : ' +
-            'c\'est un point d\'inflexion à tangente horizontale.',
+            'signe des deux côtés (par exemple toujours positif), a n\'est PAS un extremum. ' +
+            'C\'est un point d\'inflexion à tangente horizontale.',
         },
         {
           kind: 'exemple',
@@ -629,9 +676,9 @@ export const deriveesApplications: ChapterContent = {
           result: {
             tag: 'conclusion',
             text:
-              'f\'(0)=0 MAIS f\' ne change pas de signe (+ des deux côtés) ⟹ **pas d\'extremum** ' +
-              'en x=0 — x=0 est un point d\'inflexion à tangente horizontale, f restant ' +
-              'croissante de part et d\'autre.',
+              'f\'(0)=0, MAIS f\' ne change pas de signe (+ des deux côtés) ⟹ **pas d\'extremum** ' +
+              'en x=0. C\'est un point d\'inflexion à tangente horizontale : f reste croissante ' +
+              'de part et d\'autre.',
           },
           illustration: {
             kind: 'curvePlot',
@@ -653,18 +700,18 @@ export const deriveesApplications: ChapterContent = {
           kind: 'astuce',
           label: 'Vérifie TOUJOURS les deux côtés d\'un zéro de f\'',
           text:
-            'Trouver f\'(a)=0 n\'est que la moitié du travail : évalue le signe de f\' juste ' +
-            'avant ET juste après a (une valeur test suffit de chaque côté). Si le signe est ' +
-            'identique des deux côtés, conclus explicitement « pas d\'extremum », ne t\'arrête ' +
-            'jamais après le seul calcul de f\'(a)=0.',
+            'Trouver f\'(a)=0 n\'est que la moitié du travail. Évalue le signe de f\' juste ' +
+            'avant ET juste après a — une valeur test suffit de chaque côté. Si le signe est ' +
+            'identique des deux côtés, conclus explicitement « pas d\'extremum ». Ne t\'arrête ' +
+            'jamais après le seul calcul de f\'(a)=0 !',
         },
         {
           kind: 'entrainement',
           title: 'Étude locale (extremums et points critiques)',
           generatorId: '5gen29',
           description: [
-            'Résous f\'(x)=0, dresse le tableau de signes étendu, classe chaque extremum — ' +
-              'puis, pour les instances avancées, mène la même étude sur f\'\' (points d\'inflexion).',
+            'Résous f\'(x)=0, dresse le tableau de signes étendu, classe chaque extremum. Puis, ' +
+              'dans les instances avancées, mène la même étude sur f\'\' (points d\'inflexion).',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 29. Étude locale (extremums et points critiques) »',
@@ -681,14 +728,15 @@ export const deriveesApplications: ChapterContent = {
           kind: 'para',
           text:
             'Toutes les notions des sections 4 et 5 se lisent directement sur un graphique de ' +
-            'f, SANS calculer la moindre dérivée : il suffit de savoir reconnaître les formes.',
+            'f, SANS calculer la moindre dérivée. Il suffit de savoir reconnaître les formes.',
         },
         {
           kind: 'methode',
           label: 'Ce qu\'il faut repérer sur un graphique de f',
           items: [
             'La courbe MONTE ⟹ f\'>0 sur cet intervalle. La courbe DESCEND ⟹ f\'<0.',
-            'Un sommet (pic ou creux) où la courbe change de direction ⟹ extremum local, f\' y vaut 0 et change de signe.',
+            'Un sommet (pic ou creux), là où la courbe change de direction ⟹ extremum local. ' +
+              'f\' y vaut 0 et change de signe.',
             'La courbe a la forme d\'un « bol » (au-dessus de ses tangentes) ⟹ convexe, f\'\'>0. ' +
               'La forme d\'un « dôme » (en-dessous de ses tangentes) ⟹ concave, f\'\'<0.',
             'Le point où la courbe passe de « bol » à « dôme » (ou l\'inverse) ⟹ point d\'inflexion.',
@@ -733,10 +781,10 @@ export const deriveesApplications: ChapterContent = {
           kind: 'attention',
           label: 'Un simple changement de pente n\'est pas un extremum',
           text:
-            'Une courbe peut ralentir sa montée (pente qui diminue mais reste positive) sans ' +
-            'jamais s\'arrêter ni redescendre — ce n\'est PAS un extremum, juste une variation ' +
-            'de concavité. Un extremum exige un véritable changement de DIRECTION (la courbe ' +
-            'monte puis redescend, ou l\'inverse), jamais seulement un changement de vitesse.',
+            'Une courbe peut ralentir sa montée — une pente qui diminue mais reste positive — ' +
+            'sans jamais s\'arrêter ni redescendre. Ce n\'est PAS un extremum, juste une ' +
+            'variation de concavité ! Un extremum exige un véritable changement de DIRECTION ' +
+            '(la courbe monte puis redescend, ou l\'inverse) — jamais seulement un changement de vitesse.',
         },
         {
           kind: 'exemple',
@@ -751,9 +799,9 @@ export const deriveesApplications: ChapterContent = {
           result: {
             tag: 'conclusion',
             text:
-              'la tangente en C est bien horizontale (f\'(C)=0), mais ce n\'est PAS un extremum : ' +
-              'la courbe ralentit un instant puis continue exactement dans le même sens — ' +
-              'exactement le piège décrit dans l\'encadré ci-dessus, ici identifié par simple ' +
+              'la tangente en C est bien horizontale (f\'(C)=0). Mais ce n\'est PAS un extremum : ' +
+              'la courbe ralentit un instant, puis continue exactement dans le même sens. C\'est ' +
+              'exactement le piège décrit dans l\'encadré ci-dessus — ici repéré par simple ' +
               'lecture, sans aucun calcul.',
           },
           illustration: {
@@ -778,9 +826,10 @@ export const deriveesApplications: ChapterContent = {
           kind: 'astuce',
           label: 'Suis le doigt le long de la courbe, de gauche à droite',
           text:
-            'Balaie la courbe de gauche à droite en observant si elle monte ou descend : chaque ' +
-            'changement de direction est un extremum à noter, chaque changement de courbure ' +
-            '(bol ↔ dôme) est un point d\'inflexion à noter — une lecture systématique évite d\'en oublier un.',
+            'Balaie la courbe de gauche à droite en observant si elle monte ou descend. Chaque ' +
+            'changement de direction est un extremum à noter. Chaque changement de courbure ' +
+            '(bol ↔ dôme) est un point d\'inflexion à noter. Une lecture systématique évite ' +
+            'd\'en oublier un.',
         },
         {
           kind: 'entrainement',
@@ -788,7 +837,7 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen30',
           description: [
             'Un graphique de f est affiché : lis directement asymptotes, extremums, signe de ' +
-              'f\'/f\'\', concavité et points d\'inflexion — aucun calcul, calculatrice absente.',
+              'f\'/f\'\', concavité et points d\'inflexion. Aucun calcul, calculatrice absente.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 30. Lecture graphique — dérivées et applications »',
@@ -804,15 +853,15 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'para',
           text:
-            'L\'étude complète d\'une fonction réunit TOUT ce qui précède, dans un ordre fixe — ' +
-            'et reconvoque directement les techniques du chapitre précédent pour les limites ' +
+            'L\'étude complète d\'une fonction réunit TOUT ce qui précède, dans un ordre fixe. ' +
+            'Elle reconvoque directement les techniques du chapitre précédent pour les limites ' +
             'et les asymptotes.',
         },
         {
           kind: 'methode',
           label: 'La démarche complète, dans l\'ordre',
           items: [
-            '**Domaine** — exclure les valeurs interdites (dénominateur nul, etc.).',
+            '**Domaine** — exclus les valeurs interdites (dénominateur nul, etc.).',
             '**Dérivée** f\'(x) — calculée avec les règles de la section 3.',
             '**Signe de f\'** — tableau de signes complet, y compris la colonne d\'exclusion.',
             '**Variations et extremums** — lus directement sur le tableau de signes.',
@@ -863,34 +912,36 @@ export const deriveesApplications: ChapterContent = {
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'f(x)',
-            caption: 'f(x)=(x−1)+4/(x−1) — la courbe se resserre progressivement contre l\'asymptote verticale x=1 (des deux côtés) et contre l\'asymptote oblique y=x−1',
+            caption:
+              'f(x)=(x−1)+4/(x−1) — la courbe se resserre progressivement contre l\'asymptote ' +
+              'verticale x=1, des deux côtés, et contre l\'asymptote oblique y=x−1.',
           },
         },
         {
           kind: 'piege',
           label: 'La colonne d\'exclusion (CE) n\'a jamais de cellule « variation »',
           text:
-            'En x=1, f n\'est pas définie : la colonne correspondante porte le symbole ∄ ' +
+            'En x=1, f n\'est pas définie. La colonne correspondante porte le symbole ∄ ' +
             '(n\'existe pas) sur CHAQUE ligne du tableau — jamais une flèche de variation qui ' +
-            '« enjamberait » la valeur exclue, même si les deux morceaux semblent se prolonger ' +
-            'visuellement sur le graphique.',
+            '« enjamberait » la valeur exclue. Même si les deux morceaux semblent se prolonger ' +
+            'visuellement sur le graphique !',
         },
         {
           kind: 'astuce',
           label: 'Réutilise le chapitre précédent sans le refaire',
           text:
             'Le domaine, la nature de l\'asymptote verticale (vraie asymptote ou point vide, ' +
-            'test du numérateur) et l\'asymptote oblique (division euclidienne ou méthode des ' +
-            'limites) suivent EXACTEMENT les techniques du chapitre 4 — l\'étude complète ' +
-            'n\'ajoute que le calcul de f\' et son tableau de signes par-dessus ce qui est déjà su.',
+            'test du numérateur), et l\'asymptote oblique (division euclidienne ou méthode des ' +
+            'limites) : tout ça suit EXACTEMENT les techniques du chapitre 4. L\'étude complète ' +
+            'n\'ajoute que le calcul de f\' et son tableau de signes, par-dessus ce que tu sais déjà.',
         },
         {
           kind: 'entrainement',
           title: 'Étudier une fonction',
           generatorId: '5gen31',
           description: [
-            'Étude complète capstone : domaine, dérivée, signe, variations, extremums, ' +
-              'limites et asymptotes, synthèse finale et placement de points clés sur le graphique.',
+            'Étude complète capstone : domaine, dérivée, signe, variations, extremums, limites ' +
+              'et asymptotes, synthèse finale, et placement de points clés sur le graphique.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 31. Étudier une fonction »',
@@ -907,11 +958,11 @@ export const deriveesApplications: ChapterContent = {
           kind: 'methode',
           label: 'Optimiser une grandeur géométrique',
           items: [
-            'Exprimer la grandeur à optimiser (aire, volume, périmètre) en fonction d\'UNE ' +
-              'SEULE variable, en utilisant la contrainte donnée pour éliminer les autres.',
-            'Dériver cette fonction, résoudre sa dérivée = 0.',
-            'Confirmer qu\'il s\'agit bien d\'un maximum (ou minimum) — par tableau de signes ' +
-              'ou par le signe de la dérivée SECONDE — jamais supposé automatiquement.',
+            'Exprime la grandeur à optimiser (aire, volume, périmètre) en fonction d\'UNE SEULE ' +
+              'variable. Utilise la contrainte donnée pour éliminer les autres.',
+            'Dérive cette fonction, résous sa dérivée = 0.',
+            'Confirme qu\'il s\'agit bien d\'un maximum (ou d\'un minimum) — par tableau de ' +
+              'signes, ou par le signe de la dérivée SECONDE. Jamais supposé automatiquement !',
           ],
         },
         {
@@ -943,15 +994,15 @@ export const deriveesApplications: ChapterContent = {
           label: 'Ne jamais optimiser deux variables à la fois',
           text:
             'Tant que la fonction dépend de DEUX variables (ici x et y), sa dérivée n\'a pas de ' +
-            'sens au programme de ce chapitre — utilise TOUJOURS la contrainte pour éliminer ' +
-            'une variable AVANT de dériver, jamais après.',
+            'sens au programme de ce chapitre. Utilise TOUJOURS la contrainte pour éliminer une ' +
+            'variable AVANT de dériver — jamais après !',
         },
         {
           kind: 'astuce',
           label: 'Vérifier le domaine réaliste de x',
           text:
             'Une largeur x doit rester strictement positive ET strictement inférieure au ' +
-            'périmètre disponible (ici x∈]0;20[, sinon y=20−x devient négatif ou nul) — un ' +
+            'périmètre disponible — ici x∈]0;20[, sinon y=20−x devient négatif ou nul. Un ' +
             'extremum mathématique situé hors de ce domaine n\'aurait aucun sens géométrique.',
         },
         {
@@ -960,8 +1011,8 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen32',
           description: [
             'Maximise ou minimise une aire, un volume ou un périmètre sous contrainte — ' +
-              'trapèze, cylindre, rectangle avec marges, fenêtre demi-cercle — en dérivant ' +
-              'toi-même la fonction à optimiser.',
+              'trapèze, cylindre, rectangle avec marges, fenêtre demi-cercle. À toi de dériver ' +
+              'la fonction à optimiser.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 32. Optimisation géométrique »',
@@ -978,10 +1029,10 @@ export const deriveesApplications: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — coût marginal',
           items: [
-            'Le **coût marginal** est le coût de production d\'une unité SUPPLÉMENTAIRE — en ' +
-              'pratique, deux estimations : la version DISCRÈTE C(q+1)−C(q) (coût réel de la ' +
-              '(q+1)-ième unité), et la version CONTINUE C\'(q) (la dérivée, pente instantanée) ' +
-              '— les deux sont PROCHES mais pas identiques.',
+            'Le **coût marginal**, c\'est le coût de production d\'une unité SUPPLÉMENTAIRE. En ' +
+              'pratique, deux façons de l\'estimer : la version DISCRÈTE C(q+1)−C(q) — le coût ' +
+              'réel de la (q+1)-ième unité — et la version CONTINUE C\'(q) — la dérivée, la ' +
+              'pente instantanée. Les deux sont PROCHES, mais pas identiques.',
           ],
         },
         {
@@ -1001,9 +1052,10 @@ export const deriveesApplications: ChapterContent = {
           kind: 'rappel',
           label: 'Rappel — bénéfice maximal : égalité des marginales',
           items: [
-            'Le bénéfice B(x)=R(x)−C(x) (recette moins coût) est maximal quand B\'(x)=0, ' +
-              'c\'est-à-dire quand R\'(x) = C\'(x) — la **recette marginale égale le coût ' +
-              'marginal**. Produire une unité de plus ne devient plus rentable exactement à cet instant.',
+            'Le bénéfice B(x)=R(x)−C(x) — recette moins coût — est maximal quand B\'(x)=0. ' +
+              'C\'est-à-dire quand R\'(x) = C\'(x) : la **recette marginale égale le coût ' +
+              'marginal**. C\'est exactement l\'instant où produire une unité de plus cesse ' +
+              'd\'être rentable.',
           ],
         },
         {
@@ -1036,36 +1088,36 @@ export const deriveesApplications: ChapterContent = {
             xAxisLabel: 'x (quantité)',
             yAxisLabel: '€',
             caption:
-              'R(x)=50x−x² (recette, vert) et C(x)=x²+10x+20 (coût, rouge) — l\'écart vertical ' +
-              'entre les deux est le bénéfice B(x), maximal en x=10 (B=180 €)',
+              'R(x)=50x−x² (recette, vert) et C(x)=x²+10x+20 (coût, rouge). L\'écart vertical ' +
+              'entre les deux, c\'est le bénéfice B(x) — maximal en x=10 (B=180 €).',
           },
         },
         {
           kind: 'piege',
           label: 'Maximiser la RECETTE n\'est pas maximiser le BÉNÉFICE',
           text:
-            'R\'(x)=0 donne la quantité qui maximise la recette seule (ici x=25, R\'(25)=50−50=0) ' +
-            '— un piège classique est de confondre ce point avec l\'optimum de bénéfice, qui ' +
-            'doit TOUJOURS tenir compte du coût (ici x=10, très différent) : produire davantage ' +
-            'augmente parfois la recette tout en réduisant le bénéfice net si le coût marginal ' +
-            'dépasse la recette marginale.',
+            'R\'(x)=0 donne la quantité qui maximise la recette SEULE (ici x=25, R\'(25)=50−50=0). ' +
+            'Piège classique : confondre ce point avec l\'optimum de bénéfice, qui doit ' +
+            'TOUJOURS tenir compte du coût (ici x=10, très différent !). Produire davantage ' +
+            'augmente parfois la recette, tout en réduisant le bénéfice net — si le coût ' +
+            'marginal dépasse la recette marginale.',
         },
         {
           kind: 'astuce',
           label: 'L\'existence d\'un extremum n\'est pas garantie',
           text:
             'Pour un coût cubique, il arrive que l\'équation du coût marginal (dérivée) n\'ait ' +
-            'pas de racine réelle (discriminant négatif) — dans ce cas, conclus explicitement ' +
-            '« pas d\'extremum » plutôt que de laisser un champ vide : c\'est une réponse ' +
-            'mathématiquement valide, pas un échec.',
+            'pas de racine réelle (discriminant négatif). Dans ce cas, conclus explicitement ' +
+            '« pas d\'extremum » plutôt que de laisser un champ vide. C\'est une réponse ' +
+            'mathématiquement valide, pas un échec !',
         },
         {
           kind: 'entrainement',
           title: 'Contexte économique',
           generatorId: '5gen33',
           description: [
-            'Calcule un coût marginal (discret et par dérivée), détermine un bénéfice maximal ' +
-              'par égalité des marginales, et confirme la cohérence entre les deux approches.',
+            'Calcule un coût marginal, discret et par dérivée. Détermine un bénéfice maximal ' +
+              'par égalité des marginales. Confirme la cohérence entre les deux approches.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 33. Contexte économique »',
@@ -1082,21 +1134,20 @@ export const deriveesApplications: ChapterContent = {
           kind: 'attention',
           label: 'Sur un intervalle fermé, l\'extremum ABSOLU n\'est pas toujours un extremum LOCAL',
           text:
-            'Contrairement à une étude sur ℝ tout entier (section 5, où le domaine « part à ' +
-            'l\'infini »), sur un intervalle FERMÉ ET BORNÉ [a;b] la fonction a aussi une ' +
-            'valeur EN a et EN b — et l\'extremum absolu peut très bien s\'y trouver, même si ' +
-            'aucun extremum local n\'y est présent. Comparer les valeurs aux bornes n\'est ' +
-            'JAMAIS optionnel.',
+            'Sur ℝ tout entier (section 5), le domaine « part à l\'infini ». Mais sur un ' +
+            'intervalle FERMÉ ET BORNÉ [a;b], la fonction a aussi une valeur EN a et EN b. ' +
+            'L\'extremum absolu peut très bien s\'y trouver — même si aucun extremum local n\'y ' +
+            'est présent ! Comparer les valeurs aux bornes n\'est JAMAIS optionnel.',
         },
         {
           kind: 'methode',
           label: 'Trouver l\'extremum absolu sur [a;b]',
           items: [
-            'Trouver tous les extremums locaux À L\'INTÉRIEUR de ]a;b[ (comme en section 5).',
-            'Calculer f(a) et f(b) — les valeurs AUX bornes.',
-            'Comparer TOUTES ces valeurs ensemble (extremums locaux + f(a) + f(b)) : le ' +
-              'maximum absolu est la plus grande, le minimum absolu la plus petite — QUEL QUE ' +
-              'SOIT l\'endroit où elle se trouve.',
+            'Trouve tous les extremums locaux À L\'INTÉRIEUR de ]a;b[ (comme en section 5).',
+            'Calcule f(a) et f(b) — les valeurs AUX bornes.',
+            'Compare TOUTES ces valeurs ensemble — extremums locaux, f(a), f(b). Le maximum ' +
+              'absolu est la plus grande, le minimum absolu la plus petite, QUEL QUE SOIT ' +
+              'l\'endroit où elle se trouve.',
           ],
         },
         {
@@ -1132,8 +1183,8 @@ export const deriveesApplications: ChapterContent = {
             yAxisLabel: 'f(t)',
             caption:
               'f(t)=t³−6t²+9t+2 sur [0;5] — le maximum local (t=1, f=6) n\'est PAS le maximum ' +
-              'absolu : celui-ci se trouve à la borne t=5 (f=22) ; le minimum absolu est ' +
-              'atteint à la fois en t=0 et t=3 (valeur commune 2)',
+              'absolu ! Celui-ci se trouve à la borne t=5 (f=22). Le minimum absolu, lui, est ' +
+              'atteint à la fois en t=0 et en t=3 (valeur commune 2).',
           },
         },
         {
@@ -1148,19 +1199,18 @@ export const deriveesApplications: ChapterContent = {
           kind: 'piege',
           label: 'S\'arrêter au tableau de signes de f\' sans regarder les bornes',
           text:
-            'Le tableau de signes de f\' répond correctement « f(1)=6 est un maximum LOCAL » — ' +
-            'mais répondre « donc le maximum de f sur [0;5] est 6 » est FAUX ici : f(5)=22 ' +
-            'dépasse largement cette valeur. Sur un intervalle borné, la comparaison finale aux ' +
-            'bornes n\'est jamais une formalité, c\'est une étape qui peut renverser la conclusion.',
+            'Le tableau de signes de f\' répond correctement « f(1)=6 est un maximum LOCAL ». ' +
+            'Mais répondre « donc le maximum de f sur [0;5] est 6 » est FAUX ici : f(5)=22 ' +
+            'dépasse largement cette valeur ! Sur un intervalle borné, la comparaison finale aux ' +
+            'bornes n\'est jamais une formalité — c\'est une étape qui peut renverser la conclusion.',
         },
         {
           kind: 'astuce',
           label: 'Dresse une liste unique de candidats avant de comparer',
           text:
-            'Regroupe TOUJOURS dans une seule liste — valeurs aux extremums locaux ET valeurs ' +
-            'aux deux bornes — puis compare cette liste d\'un coup d\'œil : le plus grand ' +
-            'nombre est le maximum absolu, le plus petit le minimum absolu, sans exception ni ' +
-            'cas particulier à retenir.',
+            'Regroupe TOUJOURS dans une seule liste : valeurs aux extremums locaux ET valeurs ' +
+            'aux deux bornes. Compare cette liste d\'un coup d\'œil. Le plus grand nombre est le ' +
+            'maximum absolu, le plus petit le minimum absolu — sans exception ni cas particulier à retenir.',
         },
         {
           kind: 'entrainement',
@@ -1168,8 +1218,8 @@ export const deriveesApplications: ChapterContent = {
           generatorId: '5gen34',
           description: [
             'Sur un intervalle fermé [0;T], résous f\'(t)=0, classe les extremums locaux, ' +
-              'calcule f aux bornes, puis identifie explicitement le maximum et le minimum ' +
-              'absolus parmi TOUTES ces valeurs.',
+              'calcule f aux bornes. Puis identifie explicitement le maximum et le minimum ' +
+              'absolus, parmi TOUTES ces valeurs.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 34. Extrema en contexte borné »',
@@ -1188,9 +1238,9 @@ export const deriveesApplications: ChapterContent = {
           items: [
             'Pour un mouvement en ligne droite décrit par une position s(t) (en mètres, t en ' +
               'secondes) : la **vitesse** est v(t) = s\'(t), et l\'**accélération** est a(t) = ' +
-              'v\'(t) = s\'\'(t) — exactement la même logique que le sens de variation (section ' +
-              '4), appliquée à la physique : v est la dérivée de la POSITION, a est la dérivée ' +
-              'de la VITESSE.',
+              'v\'(t) = s\'\'(t). C\'est exactement la même logique que le sens de variation ' +
+              '(section 4), appliquée à la physique — v est la dérivée de la POSITION, a est la ' +
+              'dérivée de la VITESSE.',
           ],
         },
         {
@@ -1206,10 +1256,10 @@ export const deriveesApplications: ChapterContent = {
           result: {
             tag: 'interprétation physique',
             text:
-              'Le mobile avance (v>0) jusqu\'à t=4 s, atteint sa position maximale (16 m) au ' +
-              'moment EXACT où v s\'annule, puis recule (v<0) — l\'accélération négative ' +
-              'constante (−2 m/s²) freine le mobile puis le fait repartir en arrière, comme un ' +
-              'objet lancé puis freiné.',
+              'Le mobile avance (v>0) jusqu\'à t=4 s. Il atteint sa position maximale (16 m) au ' +
+              'moment EXACT où v s\'annule, puis recule (v<0). L\'accélération négative ' +
+              'constante (−2 m/s²) le freine, puis le fait repartir en arrière — comme un objet ' +
+              'lancé, puis freiné.',
           },
         },
         {
@@ -1239,7 +1289,9 @@ export const deriveesApplications: ChapterContent = {
             points: [{ x: 4, y: 0, label: 'v(4)=0', tone: 'good', labelPos: 'above' }],
             xAxisLabel: 't (s)',
             yAxisLabel: 'v(t) (m/s)',
-            caption: 'v(t)=s\'(t)=−2t+8 — la position est maximale EXACTEMENT quand la vitesse s\'annule (t=4 s), positive avant (avance), négative après (recule)',
+            caption:
+              'v(t)=s\'(t)=−2t+8 — la position est maximale EXACTEMENT quand la vitesse ' +
+              's\'annule (t=4 s) : positive avant (le mobile avance), négative après (il recule).',
           },
         },
         { kind: 'video', title: 'Un mobile filmé, position/vitesse superposées en direct' },
@@ -1248,8 +1300,8 @@ export const deriveesApplications: ChapterContent = {
           label: 'La vitesse n\'est qu\'UN exemple parmi d\'autres grandeurs reliées par une dérivée',
           items: [
             'La dérivée s\'applique chaque fois qu\'une grandeur est le **taux de variation ' +
-              'instantané** d\'une autre — $f\'(x) = \\displaystyle\\lim_{h \\to 0} ' +
-              '\\dfrac{f(x+h)-f(x)}{h}$ ne change jamais, seule l\'interprétation physique ' +
+              'instantané** d\'une autre. La formule $f\'(x) = \\displaystyle\\lim_{h \\to 0} ' +
+              '\\dfrac{f(x+h)-f(x)}{h}$ ne change jamais — seule l\'interprétation physique ' +
               'change de nom.',
           ],
         },
@@ -1267,33 +1319,33 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La dérivée sert aussi à **optimiser** n\'importe laquelle de ces grandeurs (coût ' +
-            'minimal, volume maximal, aire maximale — sections 8 et 9) : la méthode reste ' +
-            'toujours la même, dérivée nulle au point optimal, confirmée par un tableau de signes.',
+            'La dérivée sert aussi à **optimiser** n\'importe laquelle de ces grandeurs — coût ' +
+            'minimal, volume maximal, aire maximale (sections 8 et 9). La méthode reste ' +
+            'toujours la même : dérivée nulle au point optimal, confirmée par un tableau de signes.',
         },
         {
           kind: 'attention',
           label: 'Vitesse négative ne veut pas dire « ralentir »',
           text:
-            'v(t)<0 signifie que le mobile se déplace dans le sens NÉGATIF (il recule), pas ' +
-            'qu\'il ralentit. Le mobile ralentit quand |v(t)| DIMINUE — ce qui dépend du signe ' +
-            'de a(t) par rapport à celui de v(t), jamais du seul signe de v.',
+            'v(t)<0 signifie que le mobile se déplace dans le sens NÉGATIF — il recule. Ça ne ' +
+            'veut pas dire qu\'il ralentit ! Le mobile ralentit quand |v(t)| DIMINUE — ce qui ' +
+            'dépend du signe de a(t) par rapport à celui de v(t), jamais du seul signe de v.',
         },
         {
           kind: 'astuce',
           label: 'La position est extrémale exactement quand v=0',
           text:
             'Comme pour tout extremum (section 4) : la position s(t) est maximale ou minimale ' +
-            'au moment précis où sa dérivée v(t) s\'annule ET change de signe — repère toujours ' +
-            'ce moment en premier, il structure toute l\'interprétation du mouvement.',
+            'au moment précis où sa dérivée v(t) s\'annule ET change de signe. Repère toujours ' +
+            'ce moment en premier — il structure toute l\'interprétation du mouvement.',
         },
         {
           kind: 'entrainement',
           title: 'Vitesse et position',
           generatorId: '5gen35',
           description: [
-            'Dérive une position pour obtenir une vitesse, résous une équation de position, ' +
-              'convertis une vitesse en km/h — sur un scénario narratif (sprint, natation, cyclisme...).',
+            'Dérive une position pour obtenir une vitesse. Résous une équation de position. ' +
+              'Convertis une vitesse en km/h — sur un scénario narratif (sprint, natation, cyclisme...).',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 35. Vitesse et position »',
@@ -1304,22 +1356,22 @@ export const deriveesApplications: ChapterContent = {
 
   recap: {
     items: [
-      '**Définition de f\'(a)** — limite du taux d\'accroissement [f(a+h)−f(a)]/h quand h→0 ' +
-        '(chapitre précédent), interprétée comme la pente de la tangente en a.',
-      '**Tangente** — y=f(a)+f\'(a)(x−a) ; horizontale ⟺ f\'(a)=0 ; distincte d\'une sécante ' +
-        '(qui relie deux points réels, pas un seul).',
+      '**Définition de f\'(a)** — la limite du taux d\'accroissement [f(a+h)−f(a)]/h quand h→0 ' +
+        '(chapitre précédent). C\'est la pente de la tangente en a.',
+      '**Tangente** — y=f(a)+f\'(a)(x−a). Horizontale ⟺ f\'(a)=0. Distincte d\'une sécante, ' +
+        'qui relie deux points réels, pas un seul.',
       '**Fonction dérivée** — règles de la somme, du produit (u\'v+uv\'), du quotient ' +
-        '((u\'v−uv\')/v²) et de la chaîne (u\'(x)·g\'(u(x))) ; jamais (uv)\'=u\'v\' ni (u/v)\'=u\'/v\'.',
+        '((u\'v−uv\')/v²) et de la chaîne (u\'(x)·g\'(u(x))). Jamais (uv)\'=u\'v\' ni (u/v)\'=u\'/v\' !',
       '**Signe de f\'/f\'\'** — f\'>0 ⟹ croissante, f\'<0 ⟹ décroissante, f\'=0 ET change de ' +
-        'signe ⟹ extremum local ; f\'\'>0 ⟹ convexe, f\'\'<0 ⟹ concave, f\'\' change de signe ⟹ point d\'inflexion.',
-      '**Étude locale** — tableau de signes de f\' ⟹ variations et extremums ; un point ' +
-        'critique (f\'(a)=0) n\'est un extremum QUE si f\' change réellement de signe.',
+        'signe ⟹ extremum local. f\'\'>0 ⟹ convexe, f\'\'<0 ⟹ concave, f\'\' change de signe ⟹ point d\'inflexion.',
+      '**Étude locale** — le tableau de signes de f\' donne les variations et les extremums. ' +
+        'Un point critique (f\'(a)=0) n\'est un extremum QUE si f\' change réellement de signe.',
       '**Étude complète** — domaine → f\' → signe → variations/extremums → limites et ' +
         'asymptotes (techniques du chapitre précédent) → synthèse.',
       '**Applications en contexte** — optimisation géométrique (dérivée nulle au point ' +
-        'optimal), coût marginal = C\'(q), bénéfice maximal ⟺ Rm=Cm, extrema BORNÉS (comparer ' +
-        'aussi aux bornes de l\'intervalle, pas seulement aux extremums locaux), vitesse v=s\' ' +
-        'et accélération a=v\'=s\'\'.',
+        'optimal), coût marginal = C\'(q), bénéfice maximal ⟺ Rm=Cm. Extrema BORNÉS : compare ' +
+        'aussi aux bornes de l\'intervalle, pas seulement aux extremums locaux. Vitesse v=s\', ' +
+        'accélération a=v\'=s\'\'.',
     ],
     checklist: {
       items: [
@@ -1330,18 +1382,17 @@ export const deriveesApplications: ChapterContent = {
       ],
     },
     forward:
-      'La dérivée seconde et l\'étude de concavité posées ici (section 4) annoncent une ' +
-      'lecture plus fine des courbes ; les techniques de limites et d\'asymptotes du chapitre ' +
-      'précédent restent, elles, mobilisées à chaque étude complète — les deux chapitres se répondent directement.',
+      'La dérivée seconde et l\'étude de concavité, posées ici (section 4), annoncent une ' +
+      'lecture plus fine des courbes. Les techniques de limites et d\'asymptotes du chapitre ' +
+      'précédent, elles, reviennent à chaque étude complète — les deux chapitres se répondent directement.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai ou faux — tout le chapitre',
       generatorId: '5gen43',
       description: [
-        '7 thèmes de 20 affirmations chacun (reconnaissance graphique, calcul par définition, ' +
-          'fonction dérivée, tangentes, étude locale et graphique, étude complète, ' +
-          'applications en contexte) — choisis un thème, réponds vrai ou faux, la ' +
-          'justification est toujours révélée.',
+        '7 thèmes de 20 affirmations chacun : reconnaissance graphique, calcul par définition, ' +
+          'fonction dérivée, tangentes, étude locale et graphique, étude complète, applications ' +
+          'en contexte. Choisis un thème, réponds vrai ou faux — la justification est toujours révélée.',
       ],
       chantier: '5e-4h',
       whereLabel: '5e (4h) → « 43. Dérivées et applications — quiz vrai/faux »',
