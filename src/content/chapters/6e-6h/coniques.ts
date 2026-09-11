@@ -14,7 +14,7 @@ export const coniques: ChapterContent = {
   title: 'Les coniques',
   slug: 'coniques',
   lede:
-    "Une parabole, une ellipse et une hyperbole ne sont pas trois courbes sans rapport : ce sont les trois sections planes d'un même cône, et les trois lieux d'un même énoncé — le rapport entre la distance à un point (le **foyer**) et la distance à une droite (la **directrice**) y vaut une constante $e$, l'**excentricité**. Ce chapitre construit leurs équations, apprend à les reconnaître derrière une équation générale $mx^2+ny^2+qxy+rx+sy+t=0$, à les couper par une droite, à leur mener une tangente — et à comprendre pourquoi un miroir parabolique concentre la lumière en un point.",
+    "Parabole, ellipse, hyperbole : trois courbes, mais un seul cône ! Coupe-le sous des angles différents, et tu obtiens l'une ou l'autre. Les trois partagent aussi la même définition : le rapport entre la distance à un point (le **foyer**) et la distance à une droite (la **directrice**) y reste constant — cette constante $e$, c'est l'**excentricité**. Dans ce chapitre, tu vas construire leurs équations, apprendre à les reconnaître derrière une équation générale $mx^2+ny^2+qxy+rx+sy+t=0$, les couper par une droite, leur mener une tangente — et comprendre pourquoi un miroir parabolique concentre toute la lumière en un seul point.",
   sections: [
     {
       id: 'identifier',
@@ -25,7 +25,13 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Les trois coniques se définissent chacune par une condition de distance, se construisent point par point à la règle et au compas, et admettent une équation cartésienne **simple** à la seule condition de choisir le bon repère. Cette section parcourt les trois, dans le même ordre à chaque fois : définition → construction → équation → caractéristiques → importance du repère.",
+            "Chacune des trois coniques se définit par une condition de distance, se construit point par point à la règle et au compas, et a une équation **simple** — à condition de bien choisir le repère ! Cette section les parcourt toutes les trois, toujours dans le même ordre : définition → construction → équation → caractéristiques → importance du repère.",
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi « coniques » ? La lampe de poche',
+          text:
+            "Pointe une lampe de poche bien droit vers un mur : tu obtiens un **cercle** de lumière. Incline-la un peu : le cercle s'étire en **ellipse**. Incline-la encore, jusqu'à ce que le bord du faisceau devienne parallèle au mur : tu obtiens une **parabole**. Incline-la plus loin : c'est une **hyperbole**. Le faisceau de la lampe, c'est un cône de lumière — et chaque forme est juste une **coupe** de ce cône, selon l'angle du mur. D'où le nom : sections **coniques**.",
         },
         { kind: 'subheading', text: 'A. La parabole' },
         {
@@ -37,18 +43,24 @@ export const coniques: ChapterContent = {
           ],
         },
         {
+          kind: 'intuition',
+          label: 'Tu connais déjà ce genre de définition',
+          text:
+            "« Le lieu des points qui vérifient telle condition de distance » : c'est exactement la même démarche que dans le chapitre sur les lieux géométriques ! Une conique n'est rien d'autre qu'un lieu géométrique particulier, défini par une condition sur des distances — ici, à un point et à une droite (la parabole), ou à deux points (l'ellipse et l'hyperbole, plus loin).",
+        },
+        {
           kind: 'methode',
           label: 'Méthode — construire la parabole point par point',
           items: [
-            "Les points $A$ et $B$ de la parabole situés à distance $r$ de $F$ et de $d$ se trouvent à la fois sur le cercle de centre $F$ et de rayon $r$, et sur une parallèle à $d$ située à distance $r$ de $d$, du même côté que $F$.",
-            "(1) choisir un réel $r \\geq p/2$ ; (2) tracer le cercle de centre $F$ et de rayon $r$, ainsi que la parallèle à $d$ à distance $r$ ; (3) marquer le(s) point(s) d'intersection de ces deux objets ; (4) recommencer (2) et (3) pour d'autres valeurs $r \\geq p/2$.",
+            "Tu cherches les points $A$ et $B$ de la parabole à distance $r$ de $F$ **et** de $d$ ? Ils se trouvent forcément sur le cercle de centre $F$ et de rayon $r$, **et** sur la parallèle à $d$ située à distance $r$ de $d$, du même côté que $F$.",
+            "(1) choisis un réel $r \\geq p/2$ ; (2) trace le cercle de centre $F$ et de rayon $r$, ainsi que la parallèle à $d$ à distance $r$ ; (3) marque le(s) point(s) d'intersection ; (4) recommence (2) et (3) avec d'autres valeurs de $r \\geq p/2$.",
           ],
         },
         {
           kind: 'piege',
           label: 'La borne r ≥ p/2 n\'est pas décorative',
           text:
-            'Pour $r < p/2$ le cercle et la parallèle ne se coupent **pas** : aucun point de la parabole n\'est plus proche de $F$ que $p/2$. Pour $r = p/2$ exactement, il n\'y a qu\'**un** point (le sommet) ; pour $r > p/2$, il y en a exactement **deux**, symétriques par rapport à l\'axe focal.',
+            'Pour $r < p/2$, le cercle et la parallèle ne se coupent **pas du tout** ! Aucun point de la parabole n\'est jamais plus proche de $F$ que $p/2$. Pour $r = p/2$ pile, il n\'y a qu\'**un seul** point (le sommet). Pour $r > p/2$, il y en a exactement **deux**, symétriques par rapport à l\'axe focal.',
         },
         {
           kind: 'illustration',
@@ -75,7 +87,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Le repère se choisit **orthonormé**, avec l'axe des abscisses perpendiculaire à $d$ et passant par $F$, et l'axe des ordonnées parallèle à $d$ et à égale distance de $F$ et de $d$. Alors $F(p/2 ; 0)$ et $d \\equiv x = -p/2$.",
+            "Choisis un repère **orthonormé** : axe des abscisses perpendiculaire à $d$ et passant par $F$, axe des ordonnées parallèle à $d$, à égale distance de $F$ et de $d$. Dans ce repère, $F(p/2 ; 0)$ et $d \\equiv x = -p/2$.",
         },
         {
           kind: 'exemple',
@@ -92,7 +104,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Il est également possible d'obtenir cette équation par la **méthode des génératrices** : les points de la parabole sont alors obtenus comme intersections de droites et de cercles variables, et le paramètre de construction $r$ est éliminé entre les deux équations.",
+            "Tu peux aussi retrouver cette équation par la **méthode des génératrices** : les points de la parabole sont obtenus comme intersections de droites et de cercles variables, et le paramètre de construction $r$ s'élimine entre les deux équations.",
         },
         {
           kind: 'definition',
@@ -105,7 +117,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'En transformant l\'équation : $y^2 = 2px \\iff y = \\pm\\sqrt{2px}$. La parabole est donc l\'union du graphique de la fonction $f(x) = \\sqrt{2px}$ et de son symétrique par rapport à l\'axe des abscisses. L\'étude de $f$ donne :',
+            'Transforme l\'équation : $y^2 = 2px \\iff y = \\pm\\sqrt{2px}$. La parabole est donc l\'union du graphique de $f(x) = \\sqrt{2px}$ et de son symétrique par rapport à l\'axe des abscisses. Étudie $f$, et tu obtiens :',
         },
         {
           kind: 'methode',
@@ -121,14 +133,14 @@ export const coniques: ChapterContent = {
           kind: 'definition',
           label: 'Vocabulaire — axe focal et sommet',
           items: [
-            'La parabole possède **un** axe de symétrie, passant par le foyer et perpendiculaire à la directrice : c\'est l\'**axe focal**. Le point d\'intersection entre la parabole et son axe de symétrie est le **sommet** de la parabole : c\'est le point de la parabole le plus proche du foyer et de la directrice (à distance $p/2$ de chacun).',
+            'La parabole a **un seul** axe de symétrie : il passe par le foyer et est perpendiculaire à la directrice — c\'est l\'**axe focal**. Le point où la parabole coupe cet axe est son **sommet** : le point de la parabole le plus proche du foyer et de la directrice, à distance $p/2$ des deux.',
           ],
         },
         { kind: 'subheading', text: 'Importance du choix du repère' },
         {
           kind: 'para',
           text:
-            "L'équation de la parabole est la plus simple dans un repère dont l'origine est le **sommet** et dont un des axes est l'**axe focal**. Selon l'orientation choisie, quatre équations apparaissent :",
+            "L'équation de la parabole est la plus simple dans un repère dont l'origine est le **sommet** et dont un axe est l'**axe focal**. Selon l'orientation choisie, tu obtiens l'une de ces quatre équations :",
         },
         {
           kind: 'illustrationGroup',
@@ -176,36 +188,42 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: "Lire l'orientation directement sur l'équation",
           text:
-            'La variable qui est au **carré** donne l\'axe focal, la variable au premier degré donne le sens d\'ouverture : $y^2=2px$ → axe focal = axe des $x$, ouverture vers les $x$ positifs. $x^2=-2py$ → axe focal = axe des $y$, ouverture vers les $y$ négatifs. Et dans tous les cas, le foyer est à distance $p/2$ du sommet, du côté de l\'ouverture ; la directrice est de l\'autre côté, à la même distance.',
+            'La variable au **carré** te donne l\'axe focal, la variable au premier degré te donne le sens d\'ouverture. $y^2=2px$ → axe focal = axe des $x$, ouverture vers les $x$ positifs. $x^2=-2py$ → axe focal = axe des $y$, ouverture vers les $y$ négatifs. Et dans tous les cas : le foyer est à distance $p/2$ du sommet, du côté de l\'ouverture ; la directrice est de l\'autre côté, à la même distance.',
         },
         { kind: 'subheading', text: "B. L'ellipse" },
         {
           kind: 'definition',
           label: "Définition — l'ellipse",
           items: [
-            "On appelle **ellipse** le lieu des points du plan situés à des distances de deux points fixes $F$ et $F'$ (les **foyers** de l'ellipse) dont la **somme est constante**.",
-            "On note $|FF'| = 2c > 0$ et $2a > 0$ cette somme constante.",
+            "Une **ellipse**, c'est le lieu des points du plan dont la **somme** des distances à deux points fixes $F$ et $F'$ (les **foyers** de l'ellipse) reste **constante**.",
+            "On note $|FF'| = 2c > 0$ la distance entre les foyers, et $2a > 0$ cette somme constante.",
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Le jardinier et ses deux piquets',
+          text:
+            "Un jardinier plante deux piquets, y noue une ficelle **lâche**, puis la tend avec la pointe d'un bâton et trace en faisant le tour : la courbe obtenue est une **ellipse** ! Ça marche parce que la longueur de la ficelle (fixe) est exactement la somme des distances aux deux piquets — les deux foyers. C'est pour ça qu'une ellipse a **deux** foyers, là où la parabole n'en a qu'un : sa définition repose sur une somme de deux distances, pas sur une seule.",
         },
         {
           kind: 'methode',
           label: "Méthode — construire l'ellipse point par point",
           items: [
-            "Les points $A$ et $B$ de l'ellipse se trouvent à la fois sur le cercle de centre $F$ et de rayon $r$, et sur le cercle de centre $F'$ et de rayon $2a-r$ (leur somme vaut bien $2a$).",
-            "(1) choisir $r$ avec $a-c \\leq r \\leq a+c$ ; (2) tracer les deux cercles ; (3) marquer leurs points d'intersection ; (4) recommencer pour d'autres $r$.",
+            "Tu cherches un point de l'ellipse à distance $r$ de $F$ ? Il est forcément sur le cercle de centre $F$ et de rayon $r$, **et** sur le cercle de centre $F'$ et de rayon $2a-r$ — leur somme vaut bien $2a$.",
+            "(1) choisis $r$ avec $a-c \\leq r \\leq a+c$ ; (2) trace les deux cercles ; (3) marque leurs points d'intersection ; (4) recommence avec d'autres valeurs de $r$.",
           ],
         },
         {
           kind: 'piege',
           label: "L'ellipse n'existe que si a > c",
           text:
-            "Ce qui précède ne prend tout son sens que si $a > c$. Si $a < c$, le lieu est **vide** (la somme des distances aux deux foyers est toujours au moins $|FF'| = 2c$). Si $a = c$, il s'agit du **segment** $[FF']$, pas d'une ellipse. Vérifier $a > c$ avant tout calcul.",
+            "Tout ça n'a de sens que si $a > c$ ! Si $a < c$, le lieu est **vide** : la somme des distances aux deux foyers vaut toujours au moins $|FF'| = 2c$. Si $a = c$, tu obtiens le **segment** $[FF']$, pas une ellipse. Vérifie toujours $a > c$ avant de te lancer dans un calcul.",
         },
         { kind: 'subheading', text: "Équation cartésienne de l'ellipse" },
         {
           kind: 'para',
           text:
-            "Repère orthonormé : axe des abscisses passant par $F$ et $F'$, axe des ordonnées = médiatrice de $[FF']$. Alors $F(c;0)$ et $F'(-c;0)$.",
+            "Prends un repère orthonormé : axe des abscisses passant par $F$ et $F'$, axe des ordonnées = médiatrice de $[FF']$. Dans ce repère, $F(c;0)$ et $F'(-c;0)$.",
         },
         {
           kind: 'exemple',
@@ -224,7 +242,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            'La condition $x^2+y^2 \\leq a^2+b^2$, nécessaire aux mises au carré, est en fait **superflue** : tout point solution de l\'équation finale vérifie $x^2/a^2 \\leq 1$ et $y^2/b^2 \\leq 1$, donc $x^2 \\leq a^2$ et $y^2 \\leq b^2$, d\'où $x^2+y^2 \\leq a^2+b^2$.',
+            'La condition $x^2+y^2 \\leq a^2+b^2$, nécessaire pour les mises au carré, est en fait **superflue** : elle est déjà automatique ! Tout point solution de l\'équation finale vérifie $x^2/a^2 \\leq 1$ et $y^2/b^2 \\leq 1$, donc $x^2 \\leq a^2$ et $y^2 \\leq b^2$ — d\'où $x^2+y^2 \\leq a^2+b^2$.',
         },
         {
           kind: 'definition',
@@ -237,7 +255,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "De même : $x^2/a^2+y^2/b^2=1 \\iff y = \\pm\\dfrac{b}{a}\\sqrt{a^2-x^2}$. L'ellipse est l'union du graphique de $f(x) = \\dfrac{b}{a}\\sqrt{a^2-x^2}$ et de son symétrique par rapport à l'axe des abscisses.",
+            "Même démarche : $x^2/a^2+y^2/b^2=1 \\iff y = \\pm\\dfrac{b}{a}\\sqrt{a^2-x^2}$. L'ellipse est donc l'union du graphique de $f(x) = \\dfrac{b}{a}\\sqrt{a^2-x^2}$ et de son symétrique par rapport à l'axe des abscisses.",
         },
         {
           kind: 'methode',
@@ -252,8 +270,8 @@ export const coniques: ChapterContent = {
           kind: 'definition',
           label: 'Vocabulaire — axes, centre, sommets, grand et petit axe',
           items: [
-            "L'ellipse possède **deux** axes de symétrie : l'**axe focal** passe par les foyers, l'**axe non focal** est la médiatrice de $[FF']$. Leur point d'intersection est le **centre** de l'ellipse. Les points d'intersection entre l'ellipse et ses axes de symétrie sont ses **sommets** : l'ellipse en possède donc **quatre**.",
-            "Ainsi, l'ellipse d'équation $x^2/a^2+y^2/b^2=1$ a pour sommets $(a;0)$, $(-a;0)$, $(0;b)$ et $(0;-b)$. Les nombres strictement positifs $2a$, $2b$ et $2c$ sont appelés respectivement **grand axe**, **petit axe** et **distance focale** de l'ellipse.",
+            "L'ellipse a **deux** axes de symétrie : l'**axe focal** passe par les foyers, l'**axe non focal** est la médiatrice de $[FF']$. Leur point d'intersection est le **centre** de l'ellipse. Les points où l'ellipse coupe ses axes de symétrie sont ses **sommets** — elle en a donc **quatre**.",
+            "L'ellipse d'équation $x^2/a^2+y^2/b^2=1$ a pour sommets $(a;0)$, $(-a;0)$, $(0;b)$ et $(0;-b)$. Les nombres $2a$, $2b$ et $2c$ (tous strictement positifs) portent chacun un nom : **grand axe**, **petit axe** et **distance focale**.",
           ],
         },
         {
@@ -299,42 +317,42 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'Le cercle est le cas c = 0 de l\'ellipse',
           text:
-            "Si les deux foyers sont confondus ($c=0$), alors $b^2 = a^2-0 = a^2$, donc $b=a$, et l'équation $x^2/a^2+y^2/b^2=1$ devient $x^2+y^2=a^2$ : l'équation du cercle de centre $(0;0)$ et de rayon $a$. Un cercle est exactement une ellipse dont les deux foyers coïncident avec le centre.",
+            "Si les deux foyers sont confondus ($c=0$), alors $b^2 = a^2-0 = a^2$, donc $b=a$. L'équation $x^2/a^2+y^2/b^2=1$ devient $x^2+y^2=a^2$ : l'équation d'un cercle de centre $(0;0)$ et de rayon $a$ ! Un cercle, c'est donc juste une ellipse dont les deux foyers sont tombés au même endroit — le centre.",
         },
         {
           kind: 'piege',
           label: 'b n\'est pas toujours le « petit » demi-axe de l\'équation lue à gauche',
           text:
-            "L'équation de l'ellipse n'est simple que dans un repère dont les axes de coordonnées sont ses axes de symétrie. Si l'axe focal est l'axe des **abscisses** ($F(c;0)$, $F'(-c;0)$), l'équation est $x^2/a^2 + y^2/b^2 = 1$ ; si l'axe focal est l'axe des **ordonnées** ($F(0;c)$, $F'(0;-c)$), l'équation devient $y^2/a^2 + x^2/b^2 = 1$ — dans les deux cas avec $b^2=a^2-c^2$. C'est le plus grand dénominateur qui porte $a^2$ et désigne l'axe focal, jamais la position de $x$ ou de $y$ dans l'écriture.",
+            "L'équation de l'ellipse n'est simple que dans un repère dont les axes sont ses axes de symétrie. Si l'axe focal est l'axe des **abscisses** ($F(c;0)$, $F'(-c;0)$), l'équation est $x^2/a^2 + y^2/b^2 = 1$. Si l'axe focal est l'axe des **ordonnées** ($F(0;c)$, $F'(0;-c)$), elle devient $y^2/a^2 + x^2/b^2 = 1$ — dans les deux cas avec $b^2=a^2-c^2$. C'est toujours le **plus grand dénominateur** qui porte $a^2$ et désigne l'axe focal — jamais la position de $x$ ou de $y$ dans l'écriture !",
         },
         { kind: 'subheading', text: "C. L'hyperbole" },
         {
           kind: 'definition',
           label: "Définition — l'hyperbole",
           items: [
-            "On appelle **hyperbole** le lieu des points du plan situés à des distances de deux points fixes $F$ et $F'$ (les **foyers** de l'hyperbole) dont la **valeur absolue de la différence est constante**.",
-            "On note $|FF'| = 2c > 0$ et $2a > 0$ cette constante. Une hyperbole est constituée de **deux parties**, appelées **branches** de l'hyperbole.",
+            "Une **hyperbole**, c'est le lieu des points du plan dont la **valeur absolue de la différence** des distances à deux points fixes $F$ et $F'$ (les **foyers**) reste constante.",
+            "On note $|FF'| = 2c > 0$ la distance entre les foyers, et $2a > 0$ cette constante. Une hyperbole a **deux parties**, appelées ses **branches**.",
           ],
         },
         {
           kind: 'methode',
           label: "Méthode — construire l'hyperbole point par point",
           items: [
-            "Les points $A$ et $B$ se trouvent à la fois sur le cercle de centre $F$ et de rayon $r$ et sur le cercle de centre $F'$ et de rayon $2a+r$ (la différence vaut bien $2a$).",
-            "(1) choisir $r \\geq c-a$ ; (2) tracer les deux cercles ; (3) marquer leurs intersections ; (4) recommencer. On obtient ainsi une seule branche ; l'autre s'obtient en échangeant les rôles de $F$ et $F'$.",
+            "Un point à distance $r$ de $F$ est forcément sur le cercle de centre $F$ et de rayon $r$, **et** sur le cercle de centre $F'$ et de rayon $2a+r$ — leur différence vaut bien $2a$.",
+            "(1) choisis $r \\geq c-a$ ; (2) trace les deux cercles ; (3) marque leurs intersections ; (4) recommence. Tu obtiens ainsi une seule branche ; l'autre s'obtient en échangeant les rôles de $F$ et $F'$.",
           ],
         },
         {
           kind: 'piege',
           label: "L'hyperbole exige c > a, l'ellipse a > c",
           text:
-            "Pour l'hyperbole, le lieu n'a de sens que si $c > a$ ; si $c < a$ il est **vide**, et si $a = c$ c'est la droite $FF'$ privée du segment $]FF'[$. L'inégalité est **exactement inversée** par rapport à l'ellipse — comme la relation entre $a$, $b$ et $c$ : $b^2=a^2-c^2$ pour l'ellipse, $b^2=c^2-a^2$ pour l'hyperbole. Ne jamais recopier l'une pour l'autre.",
+            "Pour l'hyperbole, il faut $c > a$ ! Si $c < a$, le lieu est **vide** ; si $a = c$, c'est la droite $FF'$ privée du segment $]FF'[$. L'inégalité est **exactement inversée** par rapport à l'ellipse — comme la relation entre $a$, $b$ et $c$ : $b^2=a^2-c^2$ pour l'ellipse, $b^2=c^2-a^2$ pour l'hyperbole. Ne recopie jamais l'une pour l'autre.",
         },
         { kind: 'subheading', text: "Équation cartésienne de l'hyperbole — méthode des génératrices" },
         {
           kind: 'para',
           text:
-            "Repère orthonormé : abscisses passant par $F$ et $F'$, ordonnées = médiatrice de $[FF']$, donc $F(c;0)$ et $F'(-c;0)$. On utilise cette fois le **procédé de construction** : tout point de l'hyperbole est sur le cercle $\\mathcal{C}_1$ de centre $F$ et de rayon $r$ ET sur le cercle $\\mathcal{C}_2$ de centre $F'$ et de rayon $2a+r$. Ces deux cercles sont les **génératrices** ; il reste à éliminer le paramètre $r$.",
+            "Repère orthonormé : abscisses passant par $F$ et $F'$, ordonnées = médiatrice de $[FF']$, donc $F(c;0)$ et $F'(-c;0)$. Cette fois, on part du **procédé de construction** : tout point de l'hyperbole est sur le cercle $\\mathcal{C}_1$ de centre $F$ et de rayon $r$ ET sur le cercle $\\mathcal{C}_2$ de centre $F'$ et de rayon $2a+r$. Ces deux cercles sont les **génératrices** ; il ne reste plus qu'à éliminer le paramètre $r$.",
         },
         {
           kind: 'exemple',
@@ -352,7 +370,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "**Analyse du lieu.** La condition $r = (c/a)\\cdot x - a$ avec $r \\geq c-a$ implique $x \\geq a$ : on n'obtient ainsi qu'une « demi-hyperbole ». L'autre branche s'obtient en considérant les cercles $\\mathcal{C}_1$ de centre $F'$ et de rayon $r$, et $\\mathcal{C}_2$ de centre $F$ et de rayon $2a+r$.",
+            "**Analyse du lieu.** La condition $r = (c/a)\\cdot x - a$ avec $r \\geq c-a$ impose $x \\geq a$ : tu n'obtiens donc qu'une « demi-hyperbole ». Pour l'autre branche, il suffit d'échanger les rôles : cercle $\\mathcal{C}_1$ de centre $F'$ et de rayon $r$, cercle $\\mathcal{C}_2$ de centre $F$ et de rayon $2a+r$.",
         },
         {
           kind: 'definition',
@@ -365,7 +383,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "$x^2/a^2-y^2/b^2=1 \\iff y = \\pm\\dfrac{b}{a}\\sqrt{x^2-a^2}$. L'hyperbole est l'union du graphique de $f(x) = \\dfrac{b}{a}\\sqrt{x^2-a^2}$ et de son symétrique par rapport à l'axe des abscisses.",
+            "$x^2/a^2-y^2/b^2=1 \\iff y = \\pm\\dfrac{b}{a}\\sqrt{x^2-a^2}$ : l'hyperbole est donc l'union du graphique de $f(x) = \\dfrac{b}{a}\\sqrt{x^2-a^2}$ et de son symétrique par rapport à l'axe des abscisses.",
         },
         {
           kind: 'methode',
@@ -381,8 +399,8 @@ export const coniques: ChapterContent = {
           kind: 'definition',
           label: 'Vocabulaire — axes, centre, sommets, asymptotes',
           items: [
-            "L'hyperbole possède **deux** axes de symétrie : l'**axe focal** passe par les foyers, l'**axe non focal** est la médiatrice de $[FF']$. Leur intersection est le **centre**. Les points d'intersection entre l'hyperbole et ses axes de symétrie sont ses **sommets** : elle en possède **deux**, tous deux sur l'axe focal. Elle possède également **deux asymptotes**, qui passent par son centre.",
-            "Ainsi, l'hyperbole d'équation $x^2/a^2-y^2/b^2=1$ a pour sommets $(a;0)$ et $(-a;0)$, et pour asymptotes les droites $y = \\dfrac{b}{a}x$ et $y = -\\dfrac{b}{a}x$.",
+            "L'hyperbole a **deux** axes de symétrie : l'**axe focal** passe par les foyers, l'**axe non focal** est la médiatrice de $[FF']$. Leur intersection est le **centre**. Les points où l'hyperbole coupe ses axes de symétrie sont ses **sommets** — elle en a **deux**, tous deux sur l'axe focal. Elle a aussi **deux asymptotes**, qui passent par le centre.",
+            "L'hyperbole d'équation $x^2/a^2-y^2/b^2=1$ a pour sommets $(a;0)$ et $(-a;0)$, et pour asymptotes les droites $y = \\dfrac{b}{a}x$ et $y = -\\dfrac{b}{a}x$.",
           ],
         },
         {
@@ -418,18 +436,18 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'Tracer les asymptotes avant la courbe',
           text:
-            "Le rectangle de sommets $(\\pm a;\\pm b)$ — largeur $2a$, hauteur $2b$ — a pour diagonales exactement les deux asymptotes $y=\\pm(b/a)x$. Tracer ce rectangle puis ses diagonales, et enfin la courbe qui part des sommets $(\\pm a;0)$ en se collant aux diagonales, donne un tracé correct sans aucun calcul de point.",
+            "Le rectangle de sommets $(\\pm a;\\pm b)$ — largeur $2a$, hauteur $2b$ — a pour diagonales exactement les deux asymptotes $y=\\pm(b/a)x$ ! Trace ce rectangle, puis ses diagonales, puis la courbe qui part des sommets $(\\pm a;0)$ en se collant aux diagonales : un tracé correct, sans calculer un seul point.",
         },
         { kind: 'subheading', text: "Un cas particulier — l'hyperbole équilatère" },
         {
           kind: 'para',
           text:
-            "Lorsque $c = a\\sqrt{2}$, on a $b^2 = c^2-a^2 = a^2$, donc $b = a$ : l'équation s'écrit $x^2 - y^2 = a^2$. Ses asymptotes sont les droites $y = \\pm x$ — les bissectrices des axes de coordonnées, donc **perpendiculaires** entre elles. C'est l'**hyperbole équilatère**.",
+            "Quand $c = a\\sqrt{2}$, alors $b^2 = c^2-a^2 = a^2$, donc $b = a$ : l'équation s'écrit $x^2 - y^2 = a^2$. Ses asymptotes sont les droites $y = \\pm x$ — les bissectrices des axes de coordonnées, donc **perpendiculaires** entre elles ! C'est l'**hyperbole équilatère**.",
         },
         {
           kind: 'para',
           text:
-            "Si l'on travaille dans un repère dont les axes de coordonnées sont **les asymptotes elles-mêmes**, son équation devient $xy = k$ ($k$ constante). Ses axes de symétrie sont alors les droites $y = x$ et $y = -x$.",
+            "Change de repère : prends **les asymptotes elles-mêmes** comme axes de coordonnées, et son équation devient $xy = k$ ($k$ constante). Ses axes de symétrie sont alors les droites $y = x$ et $y = -x$.",
         },
         {
           kind: 'illustrationGroup',
@@ -464,20 +482,20 @@ export const coniques: ChapterContent = {
           kind: 'piege',
           label: 'Reconnaître une hyperbole sous la forme xy = k',
           text:
-            "Une équation $xy = k$ ne « ressemble » pas à $x^2/a^2-y^2/b^2=1$, et pourtant les deux décrivent une hyperbole — la première dans le repère des asymptotes, la seconde dans celui des axes de symétrie. Le terme en $xy$ signale toujours que les axes de symétrie de la conique ne sont **pas** parallèles aux axes de coordonnées (voir section 2).",
+            "Une équation $xy = k$ ne « ressemble » pas du tout à $x^2/a^2-y^2/b^2=1$, et pourtant les deux décrivent une hyperbole ! La première est écrite dans le repère des asymptotes, la seconde dans celui des axes de symétrie. Retiens ceci : un terme en $xy$ signale toujours que les axes de symétrie de la conique ne sont **pas** parallèles aux axes de coordonnées (voir section 2).",
         },
         {
           kind: 'astuce',
           label: "Distinguer les trois coniques en un coup d'œil sur l'équation réduite",
           text:
-            "Une fois l'équation ramenée à sa forme réduite : deux carrés **additionnés** égaux à 1 → **ellipse** (cercle si les deux dénominateurs sont égaux) ; deux carrés **soustraits** égaux à 1 → **hyperbole** (l'axe focal est celui de la variable dont le carré est positif) ; un seul carré, l'autre variable au premier degré → **parabole**.",
+            "Une fois l'équation ramenée à sa forme réduite, un coup d'œil suffit : deux carrés **additionnés** égaux à 1 → **ellipse** (cercle si les deux dénominateurs sont égaux) ; deux carrés **soustraits** égaux à 1 → **hyperbole** (l'axe focal est celui de la variable dont le carré est positif) ; un seul carré, l'autre variable au premier degré → **parabole**.",
         },
         {
           kind: 'entrainement',
           title: 'Identifier et caractériser une conique',
           generatorId: '6gen58',
           description: [
-            "Reconnaître, à partir d'une équation réduite ou d'une description géométrique, la nature d'une conique et en extraire foyers, sommets et asymptotes.",
+            "Reconnais la nature d'une conique à partir de son équation réduite ou d'une description géométrique, puis retrouve ses foyers, sommets et asymptotes.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 58. Identifier et caractériser une conique »',
@@ -493,7 +511,13 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Les trois coniques de la section 1 ont été définies par trois conditions différentes. Il existe pourtant **un seul** énoncé qui les décrit toutes les trois — et c'est le nombre qui y apparaît, l'excentricité, qui décide laquelle on obtient.",
+            "Les trois coniques de la section 1 ont chacune leur propre définition. Et pourtant, il existe **un seul** énoncé qui les décrit toutes les trois à la fois ! C'est un seul nombre, l'excentricité, qui décide laquelle des trois tu obtiens.",
+        },
+        {
+          kind: 'intuition',
+          label: 'Un seul curseur, trois courbes',
+          text:
+            "Imagine un curseur qui commande une seule valeur, l'excentricité $e$. À $e=0$, tu obtiens un cercle. Fais-le glisser un peu : le cercle s'étire en ellipse, de plus en plus allongée à mesure que $e$ se rapproche de 1. À $e=1$ pile, l'ellipse « s'ouvre » et devient une parabole. Continue à faire glisser le curseur au-delà de 1 : c'est une hyperbole, de plus en plus ouverte. Un seul nombre, un seul réglage — et les trois coniques défilent l'une après l'autre.",
         },
         {
           kind: 'definition',
@@ -517,7 +541,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Il est facile de montrer que l'on peut remplacer $F(c;0)$ par $F'(-c;0)$ et la droite $d \\equiv x=a^2/c$ par $d' \\equiv x=-a^2/c$. Les droites $d$ et $d'$ sont appelées **directrices** de l'ellipse ; $F$ et $F'$ en sont les foyers. La démonstration dans le cas de l'hyperbole est analogue.",
+            "Tu peux facilement montrer qu'on peut remplacer $F(c;0)$ par $F'(-c;0)$, et la droite $d \\equiv x=a^2/c$ par $d' \\equiv x=-a^2/c$. Les droites $d$ et $d'$ sont les **directrices** de l'ellipse ; $F$ et $F'$ en sont les foyers. La démonstration est la même pour l'hyperbole.",
         },
         {
           kind: 'definition',
@@ -552,7 +576,7 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'Conique centrée ou non centrée',
           text:
-            "L'expression **conique centrée** désigne une ellipse ou une hyperbole, car elles possèdent un centre de symétrie ; les paraboles sont des coniques **non centrées**. Une conique centrée a toujours deux foyers et deux directrices, une parabole n'en a qu'un et qu'une. Quant au **cercle**, il est d'excentricité nulle et n'a **pas** de directrice — c'est pourquoi il est exclu de la caractérisation focale ci-dessus.",
+            "**Conique centrée** désigne l'ellipse ou l'hyperbole, qui ont un centre de symétrie ; la parabole, elle, est une conique **non centrée**. Une conique centrée a toujours deux foyers et deux directrices ; une parabole n'en a qu'un et qu'une. Et le **cercle** ? Son excentricité est nulle, et il n'a **pas** de directrice — c'est pour ça qu'il est exclu de la caractérisation focale ci-dessus.",
         },
         {
           kind: 'definition',
@@ -566,13 +590,13 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Le mot « conique » n'est pas choisi au hasard : il s'agit des courbes obtenues en coupant un **cône de révolution** (engendré par la rotation, autour d'un axe, d'une droite de l'espace coupant cet axe) par un plan ne passant pas par le sommet du cône. Selon la position du plan, la section est un **cercle** (plan perpendiculaire à l'axe), une **ellipse**, une **parabole** ou une **hyperbole**.",
+            "Le mot « conique » n'est pas choisi au hasard ! Ces courbes s'obtiennent en coupant un **cône de révolution** (engendré par la rotation, autour d'un axe, d'une droite de l'espace qui coupe cet axe) par un plan ne passant pas par le sommet du cône. Selon la position de ce plan, la section est un **cercle** (plan perpendiculaire à l'axe), une **ellipse**, une **parabole** ou une **hyperbole** — exactement les quatre formes de la lampe de poche vues plus haut.",
         },
         {
           kind: 'definition',
           label: 'Théorème de Dandelin-Quételet',
           items: [
-            "*La section d'un cône de révolution par un plan est une conique dont les **foyers** sont les points de contact avec ce plan des deux sphères inscrites dans ce cône et tangentes au plan, et les **directrices**, les intersections avec ce plan des deux plans contenant les cercles de contact de ces sphères avec le cône.*",
+            "La section d'un cône de révolution par un plan est une conique dont les **foyers** sont les points de contact avec ce plan des deux sphères inscrites dans ce cône et tangentes au plan, et les **directrices**, les intersections avec ce plan des deux plans contenant les cercles de contact de ces sphères avec le cône.",
             'Germinal Pierre Dandelin (1794-1847), mathématicien belge, et Lambert Adolphe Jacques Quételet (1796-1874), fondateur de l\'Observatoire royal de Belgique — ce théorème est aussi connu sous le nom de **théorème belge**.',
           ],
         },
@@ -625,14 +649,14 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Toute l'étude de la section 1 suppose un repère **adapté** à la conique : les axes de coordonnées coïncident avec les axes de symétrie (coniques centrées, l'origine étant le centre), ou bien un axe coïncide avec l'axe de symétrie et l'origine avec le sommet (parabole). Dans un repère quelconque, l'équation est de la forme générale $mx^2+ny^2+qxy+rx+sy+t=0$, et il est difficile d'y lire la nature et les caractéristiques de la conique.",
+            "Toute la section 1 suppose un repère **adapté** à la conique : les axes de coordonnées coïncident avec les axes de symétrie (coniques centrées, origine au centre), ou un axe coïncide avec l'axe de symétrie et l'origine avec le sommet (parabole). Dans un repère quelconque, l'équation prend la forme générale $mx^2+ny^2+qxy+rx+sy+t=0$ — et là, difficile d'y lire directement la nature et les caractéristiques de la conique !",
         },
         {
           kind: 'methode',
           label: "Méthode — réduction de l'équation d'une conique",
           items: [
-            "Passer du repère initial à un repère adapté s'appelle la **réduction** de l'équation de la conique. On se limite ici au cas d'une simple **translation** (axes parallèles, mêmes sens) — ce qui suffit dès que l'équation ne contient pas de terme en $xy$.",
-            "(1) regrouper les termes en $x$ d'un côté, les termes en $y$ de l'autre ; (2) compléter chaque groupe en un **carré parfait**, en ajoutant la même quantité aux deux membres ; (3) factoriser ; (4) diviser pour ramener le second membre à 1 ; (5) lire la translation $(x';y')$ et identifier la conique.",
+            "Passer du repère initial à un repère adapté, ça s'appelle **réduire** l'équation de la conique. Ici, on se limite à une simple **translation** (axes parallèles, même sens) — ça suffit dès que l'équation ne contient pas de terme en $xy$.",
+            "(1) regroupe les termes en $x$ d'un côté, ceux en $y$ de l'autre ; (2) complète chaque groupe en un **carré parfait**, en ajoutant la même quantité aux deux membres ; (3) factorise ; (4) divise pour ramener le second membre à 1 ; (5) lis la translation $(x';y')$ et identifie la conique.",
           ],
         },
         {
@@ -699,26 +723,26 @@ export const coniques: ChapterContent = {
           kind: 'piege',
           label: 'Un terme en xy interdit la simple translation',
           text:
-            "La présence d'un terme en $xy$ exprime le fait que les axes de symétrie de la conique **ne sont pas parallèles** aux axes de coordonnées. Dans ce cas, une translation ne suffit plus : il faudrait en plus une rotation. Vérifier l'absence du terme en $xy$ est donc la toute première chose à faire avant de se lancer dans la complétion des carrés.",
+            "Un terme en $xy$ dans l'équation signifie que les axes de symétrie de la conique **ne sont pas parallèles** aux axes de coordonnées ! Une simple translation ne suffit alors plus : il faudrait en plus une rotation. Vérifie donc l'absence de terme en $xy$ **avant** de te lancer dans la complétion des carrés — c'est le tout premier réflexe.",
         },
         {
           kind: 'piege',
           label: "Le signe du second membre décide de l'axe focal",
           text:
-            "Après complétion des carrés, l'exemple donne $16(x+5/2)^2 - 36(y-7/2)^2 = -144$. En divisant par $-144$ (un nombre **négatif**), les deux signes s'inversent : c'est le carré en $y$ qui devient positif, donc l'axe focal est **vertical**. Diviser sans faire attention au signe conduit à écrire $x'^2/9 - y'^2/4 = 1$, une hyperbole d'axe focal horizontal — toutes les caractéristiques suivantes sont alors fausses.",
+            "Après complétion des carrés, l'exemple donne $16(x+5/2)^2 - 36(y-7/2)^2 = -144$. En divisant par $-144$ (un nombre **négatif**), les deux signes s'inversent ! C'est le carré en $y$ qui devient positif : l'axe focal est donc **vertical**. Diviser sans faire attention au signe te fait écrire $x'^2/9 - y'^2/4 = 1$, une hyperbole d'axe focal horizontal — et toutes les caractéristiques qui suivent deviennent fausses.",
         },
         {
           kind: 'astuce',
           label: 'Vérifier la réduction en testant un sommet',
           text:
-            "Une fois les sommets calculés dans $R_1$ (ici $S(-5/2;11/2)$), il suffit de les substituer dans l'équation générale de départ : $16(-5/2)^2-36(11/2)^2+80(-5/2)+252(11/2)-197 = 100-1089-200+1386-197 = 0$ ✓. Un contrôle de 10 secondes qui attrape toute erreur de complétion de carré ou de signe.",
+            "Une fois les sommets calculés dans $R_1$ (ici $S(-5/2;11/2)$), substitue-les dans l'équation générale de départ : $16(-5/2)^2-36(11/2)^2+80(-5/2)+252(11/2)-197 = 100-1089-200+1386-197 = 0$ ✓. Un contrôle de 10 secondes qui attrape toute erreur de complétion de carré ou de signe !",
         },
         {
           kind: 'entrainement',
           title: "Excentricité, foyers, directrices et réduction d'équation",
           generatorId: '6gen59',
           description: [
-            "Passer de foyer/directrice/excentricité à une équation, réduire une équation générale par translation, et identifier la conique obtenue.",
+            "Passe de foyer/directrice/excentricité à une équation, réduis une équation générale par translation, puis identifie la conique obtenue.",
           ],
           chantier: '6e-6h',
           whereLabel: "6e (6h) → « 59. Excentricité, foyers, directrices et réduction d'équation »",
@@ -734,7 +758,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Les sections 1 et 2 ont produit des équations. Cette section-ci exploite au contraire les propriétés purement **métriques** de l'ellipse — les distances aux foyers, appelées **rayons focaux**, et l'excentricité — sans jamais avoir besoin de repasser par une équation cartésienne.",
+            "Les sections 1 et 2 t'ont fait produire des équations. Cette section fait l'inverse : elle exploite les propriétés purement **métriques** de l'ellipse — les distances aux foyers, appelées **rayons focaux**, et l'excentricité — sans jamais repasser par une équation cartésienne.",
         },
         { kind: 'subheading', text: 'A. Aire du triangle foyer-point-foyer' },
         {
@@ -748,7 +772,7 @@ export const coniques: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — aire du triangle FPF′ en 3 étapes',
           items: [
-            "(1) **Rayons focaux.** Si l'énoncé donne le rapport $k = |PF|/|PF'|$, résoudre le système $\\{|PF|+|PF'|=2a \\; ; \\; |PF|=k\\cdot|PF'|\\} \\implies |PF'| = \\dfrac{2a}{k+1}$, $|PF| = \\dfrac{2ak}{k+1}$.",
+            "(1) **Rayons focaux.** Si l'énoncé donne le rapport $k = |PF|/|PF'|$, résous le système $\\{|PF|+|PF'|=2a \\; ; \\; |PF|=k\\cdot|PF'|\\} \\implies |PF'| = \\dfrac{2a}{k+1}$, $|PF| = \\dfrac{2ak}{k+1}$.",
             "(2) **Angle au sommet P**, par la loi des cosinus dans le triangle $FPF'$, dont le troisième côté est $|FF'|=2c$ : $\\cos(\\widehat{FPF'}) = \\dfrac{|PF|^2+|PF'|^2-4c^2}{2\\cdot|PF|\\cdot|PF'|}$ avec $c^2=a^2-b^2$.",
             "(3) **Aire**, par la formule du sinus : $\\text{aire} = \\dfrac{1}{2}\\cdot|PF|\\cdot|PF'|\\cdot\\sin(\\widehat{FPF'})$ avec $\\sin = \\sqrt{1-\\cos^2}$.",
           ],
@@ -812,25 +836,25 @@ export const coniques: ChapterContent = {
           kind: 'piege',
           label: 'Croire que |PF| = |PF′| = a',
           text:
-            "L'égalité $|PF|=|PF'|=a$ n'est vraie qu'en **un** seul cas : lorsque $P$ est un sommet de l'axe **non focal** ($P(0;\\pm b)$). Pour tout autre point, les deux rayons focaux sont différents, et rien d'autre que le système $\\{$somme$=2a$ ; rapport$=k\\}$ ne permet de les déterminer séparément. C'est la propriété caractéristique $|PF|+|PF'|=2a$ qui est la **clé d'entrée obligatoire** du problème.",
+            "L'égalité $|PF|=|PF'|=a$ n'est vraie que dans **un seul** cas : quand $P$ est un sommet de l'axe **non focal** ($P(0;\\pm b)$). Pour tout autre point, les deux rayons focaux sont différents — et seul le système $\\{$somme$=2a$ ; rapport$=k\\}$ permet de les retrouver séparément. La propriété $|PF|+|PF'|=2a$ est donc ta **porte d'entrée obligatoire** dans ce genre de problème.",
         },
         {
           kind: 'astuce',
           label: "N'extraire jamais c, seul c² est nécessaire",
           text:
-            "La loi des cosinus n'utilise que $|FF'|^2=4c^2=4(a^2-b^2)$ — jamais $c$ lui-même, qui est souvent irrationnel (ex. $a=5$, $b=3 \\to c=4$, mais $a=5$, $b=2 \\to c=\\sqrt{21}$). En gardant $c^2$ entier tout du long, le cosinus reste une fraction exacte ; seule l'aire finale, qui passe par un sinus, peut être irrationnelle.",
+            "La loi des cosinus n'utilise que $|FF'|^2=4c^2=4(a^2-b^2)$ — jamais $c$ lui-même, qui est souvent irrationnel (ex. $a=5$, $b=3 \\to c=4$, mais $a=5$, $b=2 \\to c=\\sqrt{21}$). En gardant $c^2$ entier tout du long, ton cosinus reste une fraction exacte ; seule l'aire finale, qui passe par un sinus, peut devenir irrationnelle.",
         },
         {
           kind: 'piege',
           label: 'Un point P doit exister réellement',
           text:
-            "Quand $P$ parcourt l'ellipse, $|PF|$ ne prend que les valeurs de l'intervalle $[a-c;a+c]$ (minimum au sommet le plus proche de $F$, maximum au sommet le plus éloigné). Un rapport $k$ trop grand pour une ellipse trop peu excentrée place $|PF|=2ak/(k+1)$ hors de cet intervalle : le triangle $FPF'$ ne se referme plus, $|\\cos| \\geq 1$, et le calcul produirait un sinus impossible. Toujours vérifier $a-c \\leq |PF| \\leq a+c$ avant de conclure.",
+            "Quand $P$ parcourt l'ellipse, $|PF|$ ne prend que des valeurs dans $[a-c;a+c]$ (minimum au sommet le plus proche de $F$, maximum au sommet le plus éloigné). Un rapport $k$ trop grand pour une ellipse trop peu excentrée place $|PF|=2ak/(k+1)$ **hors** de cet intervalle : le triangle $FPF'$ ne se referme plus, $|\\cos| \\geq 1$, et le calcul te donnerait un sinus impossible ! Vérifie toujours $a-c \\leq |PF| \\leq a+c$ avant de conclure.",
         },
         { kind: 'subheading', text: "B. Excentricité à partir d'une condition géométrique" },
         {
           kind: 'para',
           text:
-            "Une condition géométrique portant sur une ellipse se traduit en une équation reliant $a$, $b$ et $c$, qui se résout ensuite en $e=c/a$. Trois conditions classiques :",
+            "Une condition géométrique sur une ellipse se traduit toujours en une équation reliant $a$, $b$ et $c$ — que tu résous ensuite en $e=c/a$. Voici trois conditions classiques :",
         },
         {
           kind: 'exempleLibre',
@@ -906,14 +930,14 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'Contrôler une excentricité trouvée par sa fourchette',
           text:
-            "Une ellipse a toujours $0<e<1$. Toute condition géométrique qui aboutit à $e \\geq 1$ signale soit une erreur de traduction, soit une condition impossible pour une ellipse (elle décrirait alors une parabole ou une hyperbole). Réciproquement, un $e$ très proche de 0 correspond à une ellipse presque circulaire, un $e$ proche de 1 à une ellipse très allongée : un simple croquis suffit à valider l'ordre de grandeur.",
+            "Une ellipse a toujours $0<e<1$. Si tu trouves $e \\geq 1$, c'est le signal d'alarme : soit une erreur de traduction, soit une condition tout simplement impossible pour une ellipse (elle décrirait alors une parabole ou une hyperbole). Et pour vérifier l'ordre de grandeur : un $e$ proche de 0 correspond à une ellipse presque circulaire, un $e$ proche de 1 à une ellipse très allongée — un simple croquis suffit à sentir si ton résultat est plausible.",
         },
         {
           kind: 'entrainement',
           title: 'Aire, rayons focaux et excentricité',
           generatorId: '6gen60',
           description: [
-            "Calculer des rayons focaux à partir d'un rapport donné, en déduire une aire de triangle, ou remonter d'une condition géométrique à l'excentricité.",
+            "Calcule des rayons focaux à partir d'un rapport donné, déduis-en une aire de triangle, ou remonte d'une condition géométrique jusqu'à l'excentricité.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 60. Aire, rayons focaux et excentricité »',
@@ -930,8 +954,8 @@ export const coniques: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            "Déterminer l'éventuelle intersection entre une droite et une conique revient à résoudre le système formé par les équations de cette droite (1er degré) et de cette conique (2e degré). En substituant l'équation de la droite dans celle de la conique, on obtient une équation du second degré en une seule inconnue : la résolution de ce système fournit donc **au maximum deux** points d'intersection.",
-            "Le nombre de solutions se lit sur le discriminant $\\Delta$ de cette équation : $\\Delta>0$ → 2 points (droite **sécante**) ; $\\Delta=0$ → 1 point (droite **tangente**, voir section 5) ; $\\Delta<0$ → aucun point (droite **extérieure**).",
+            "Chercher l'intersection entre une droite et une conique revient à résoudre le système formé par leurs deux équations — 1er degré pour la droite, 2e degré pour la conique. Substitue l'équation de la droite dans celle de la conique : tu obtiens une équation du second degré à une seule inconnue. Sa résolution donne donc **au maximum deux** points d'intersection.",
+            "Le nombre de solutions se lit directement sur le discriminant $\\Delta$ de cette équation : $\\Delta>0$ → 2 points (droite **sécante**) ; $\\Delta=0$ → 1 point (droite **tangente**, voir section 5) ; $\\Delta<0$ → aucun point (droite **extérieure**).",
           ],
         },
         {
@@ -999,32 +1023,32 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: "Réduire l'équation de la conique pour se contrôler",
           text:
-            "La conique de l'exemple se réduit (méthode de la section 2) en $16(x+2)^2-9(y+2)^2=144$, c'est-à-dire $(x+2)^2/9-(y+2)^2/16=1$ : hyperbole de centre $(-2;-2)$, $a=3$, $b=4$, $c=5$, sommets $(1;-2)$ et $(-5;-2)$. Excentricité $e=c/a=5/3$ ✓ — exactement la valeur donnée dans l'énoncé. Ce contrôle vérifie d'un coup toute l'étape 2, avant d'entamer la substitution.",
+            "La conique de l'exemple se réduit (méthode de la section 2) en $16(x+2)^2-9(y+2)^2=144$, soit $(x+2)^2/9-(y+2)^2/16=1$ : hyperbole de centre $(-2;-2)$, $a=3$, $b=4$, $c=5$, sommets $(1;-2)$ et $(-5;-2)$. Excentricité $e=c/a=5/3$ ✓ — exactement la valeur de l'énoncé ! Ce contrôle vérifie d'un coup toute l'étape 2, avant même d'entamer la substitution.",
         },
         {
           kind: 'piege',
           label: 'Élever au carré une valeur absolue sans précaution',
           text:
-            "La caractérisation focale contient $|x+1/5|$. L'élévation au carré est ici légitime car les deux membres sont positifs (une racine carrée d'un côté, une valeur absolue de l'autre) — mais elle fait disparaître le signe, ce qui est précisément la raison pour laquelle une hyperbole a **deux branches** : celle du côté $x>-1/5$ et celle du côté $x<-1/5$. Ne jamais éliminer d'office l'une des deux.",
+            "La caractérisation focale contient $|x+1/5|$. Élever au carré est ici légitime, puisque les deux membres sont positifs (une racine carrée d'un côté, une valeur absolue de l'autre) — mais ça fait disparaître le signe ! Et c'est précisément pour ça qu'une hyperbole a **deux branches** : celle du côté $x>-1/5$ et celle du côté $x<-1/5$. N'élimine jamais l'une des deux d'office.",
         },
         {
           kind: 'piege',
           label: "Un discriminant nul n'est pas « pas de solution »",
           text:
-            "$\\Delta=0$ signifie exactement **un** point d'intersection (double), pas zéro : la droite est alors tangente à la conique. C'est $\\Delta<0$ qui donne l'ensemble vide. Confondre les deux revient à déclarer extérieure une droite qui touche pourtant la courbe.",
+            "$\\Delta=0$ signifie exactement **un** point d'intersection (double), jamais zéro : la droite est alors tangente à la conique. C'est $\\Delta<0$ qui donne l'ensemble vide — pas $\\Delta=0$ ! Confondre les deux te fait déclarer extérieure une droite qui pourtant touche la courbe.",
         },
         {
           kind: 'piege',
           label: 'La droite verticale n\'entre pas dans y = mx + p',
           text:
-            "Si la droite de l'énoncé est verticale ($x=k$), elle n'a pas de pente et ne peut pas être substituée sous la forme $y=mx+p$ : il faut alors remplacer $x$ par $k$ dans l'équation de la conique et résoudre en $y$. La méthode est la même, l'inconnue restante change.",
+            "Si la droite de l'énoncé est verticale ($x=k$), elle n'a pas de pente : impossible de la substituer sous la forme $y=mx+p$ ! Remplace plutôt $x$ par $k$ dans l'équation de la conique, et résous en $y$. La méthode reste la même, seule l'inconnue restante change.",
         },
         {
           kind: 'entrainement',
           title: "Intersection d'une conique et d'une droite",
           generatorId: '6gen61',
           description: [
-            "Substituer l'équation d'une droite dans celle d'une conique, résoudre le système et interpréter le discriminant obtenu.",
+            "Substitue l'équation d'une droite dans celle d'une conique, résous le système, puis interprète le discriminant obtenu.",
           ],
           chantier: '6e-6h',
           whereLabel: "6e (6h) → « 61. Intersection d'une conique et d'une droite »",
@@ -1040,13 +1064,13 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Une conique n'est pas le graphique d'une fonction : la verticale d'abscisse $x$ la rencontre en général en deux points. Mais elle est l'**union de deux graphiques de fonctions** (section 1) — et la tangente en un point $P$ de la conique est simplement la tangente au graphique de celle de ces deux fonctions qui contient $P$.",
+            "Une conique n'est pas le graphique d'une fonction : la verticale d'abscisse $x$ la traverse en général en deux points. Mais elle est l'**union de deux graphiques de fonctions** (section 1) — et la tangente en un point $P$ de la conique, c'est simplement la tangente au graphique de celle des deux fonctions qui contient $P$.",
         },
         {
           kind: 'methode',
           label: 'Méthode — tangente en un point d\'une conique',
           items: [
-            "(1) Écrire la conique comme union de deux graphiques $y=\\pm f(x)$ ; (2) choisir la branche qui contient $P(x_P;y_P)$ — celle du haut si $y_P>0$, celle du bas si $y_P<0$ ; (3) dériver cette fonction et évaluer en $x_P$ : c'est la **pente** de la tangente ; (4) écrire $y-y_P = f'(x_P)(x-x_P)$.",
+            "(1) écris la conique comme union de deux graphiques $y=\\pm f(x)$ ; (2) choisis la branche qui contient $P(x_P;y_P)$ — celle du haut si $y_P>0$, celle du bas si $y_P<0$ ; (3) dérive cette fonction et évalue-la en $x_P$ : c'est la **pente** de la tangente ; (4) écris $y-y_P = f'(x_P)(x-x_P)$.",
           ],
         },
         { kind: 'subheading', text: 'Cas de l\'ellipse — la dérivation complète' },
@@ -1068,7 +1092,7 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "La seconde écriture, $-b^2x_P/(a^2y_P)$, est la forme utile : elle ne contient plus de racine et vaut aussi pour la branche inférieure ($y_P<0$), la démonstration étant identique au signe près.",
+            "La seconde écriture, $-b^2x_P/(a^2y_P)$, est la forme la plus utile : elle ne contient plus de racine, et elle vaut aussi pour la branche inférieure ($y_P<0$) — la démonstration est identique, au signe près.",
         },
         {
           kind: 'definition',
@@ -1128,26 +1152,26 @@ export const coniques: ChapterContent = {
           kind: 'piege',
           label: "Les sommets de l'axe focal n'ont pas de pente",
           text:
-            "Aux sommets $(\\pm a;0)$ d'une ellipse (ou d'une hyperbole), $y_P=0$ : la formule $-b^2x_P/(a^2y_P)$ **n'a pas de sens** (division par zéro), et $f$ n'y est d'ailleurs pas dérivable. C'est normal : la tangente y est **verticale**, d'équation $x=\\pm a$. La forme dédoublée, elle, reste valable et donne directement $x(\\pm a)/a^2=1 \\iff x=\\pm a$.",
+            "Aux sommets $(\\pm a;0)$ d'une ellipse (ou d'une hyperbole), $y_P=0$ : la formule $-b^2x_P/(a^2y_P)$ **n'a plus de sens** (division par zéro), et $f$ n'y est d'ailleurs pas dérivable ! C'est normal : la tangente y est **verticale**, d'équation $x=\\pm a$. La forme dédoublée, elle, reste valable et donne directement $x(\\pm a)/a^2=1 \\iff x=\\pm a$.",
         },
         {
           kind: 'piege',
           label: 'Dériver la mauvaise branche',
           text:
-            "Pour $y_P<0$, c'est la branche $y=-f(x)$ qu'il faut dériver ; utiliser $f$ donne une pente de **signe opposé** et une tangente symétrique de la bonne par rapport à l'axe des abscisses — une erreur invisible sur le calcul, très visible sur un croquis. Faire systématiquement un croquis rapide pour vérifier de quel côté la tangente doit pencher.",
+            "Pour $y_P<0$, c'est la branche $y=-f(x)$ qu'il faut dériver ! Utiliser $f$ te donne une pente de **signe opposé**, et une tangente symétrique de la bonne par rapport à l'axe des abscisses — une erreur invisible sur le calcul, mais très visible sur un croquis. Fais toujours un croquis rapide pour vérifier de quel côté la tangente doit pencher.",
         },
         {
           kind: 'astuce',
           label: 'La forme dédoublée évite entièrement la dérivation',
           text:
-            "Une fois établie, la forme dédoublée s'écrit sans aucun calcul de dérivée, ne présente aucun cas particulier (sommets compris) et se retient très facilement : on remplace, dans l'équation de la conique, $x^2$ par $xx_P$, $y^2$ par $yy_P$, $x$ par $(x+x_P)/2$ et $y$ par $(y+y_P)/2$. Elle reste cependant à **justifier** par la dérivation lorsque l'énoncé demande la démarche.",
+            "Une fois établie, la forme dédoublée s'écrit sans aucun calcul de dérivée, ne présente aucun cas particulier (sommets compris), et se retient très facilement : tu remplaces, dans l'équation de la conique, $x^2$ par $xx_P$, $y^2$ par $yy_P$, $x$ par $(x+x_P)/2$ et $y$ par $(y+y_P)/2$. Il faut quand même la **justifier** par la dérivation quand l'énoncé demande la démarche.",
         },
         {
           kind: 'entrainement',
           title: 'Tangentes à une conique',
           generatorId: '6gen62',
           description: [
-            "Déterminer la tangente à une conique en un point donné, par dérivation ou par la forme dédoublée, avec contrôle par le discriminant.",
+            "Détermine la tangente à une conique en un point donné, par dérivation ou par la forme dédoublée — avec un contrôle par le discriminant.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 62. Tangentes à une conique »',
@@ -1163,9 +1187,15 @@ export const coniques: ChapterContent = {
         {
           kind: 'para',
           text:
-            "Un rayon lumineux qui frappe un miroir courbe se réfléchit selon la loi de Descartes : l'angle d'incidence et l'angle de réflexion, mesurés par rapport à la **tangente** au point d'impact, sont égaux. Les coniques ont, vis-à-vis de leurs foyers, exactement la propriété d'angles qui rend ces réflexions remarquables.",
+            "Un rayon lumineux qui frappe un miroir courbe se réfléchit selon la loi de Descartes : l'angle d'incidence et l'angle de réflexion, mesurés par rapport à la **tangente** au point d'impact, sont égaux. Et les coniques ont, vis-à-vis de leurs foyers, exactement la propriété d'angles qui rend ces réflexions si remarquables !",
         },
         { kind: 'subheading', text: 'A. La parabole' },
+        {
+          kind: 'intuition',
+          label: 'Le secret des miroirs paraboliques',
+          text:
+            "Imagine des rayons de lumière qui arrivent tous parallèles, comme les rayons du soleil, et qui frappent un miroir courbe. Sur un miroir parabolique, ils rebondissent tous vers le **même point** : le foyer — peu importe à quelle distance de l'axe chaque rayon a frappé le miroir ! Sur n'importe quelle autre courbe, ils partiraient dans des directions différentes, sans jamais converger. C'est cette propriété, unique à la parabole, que la propriété optique ci-dessous va démontrer.",
+        },
         {
           kind: 'definition',
           label: 'Propriété optique de la parabole',
@@ -1207,7 +1237,7 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'Pourquoi les antennes et les phares sont paraboliques',
           text:
-            "Une antenne parabolique reçoit des ondes venues d'un satellite très éloigné, donc pratiquement **parallèles** : elles se concentrent toutes au foyer, où l'on place le capteur. Un phare de voiture fonctionne dans l'autre sens : la source est placée au foyer, et le miroir renvoie un faisceau parallèle. Un four solaire exploite la première propriété, un télescope à réflexion aussi.",
+            "Une antenne parabolique reçoit des ondes venues d'un satellite très éloigné, donc pratiquement **parallèles** : elles se concentrent toutes au foyer, où l'on place le capteur. Un phare de voiture, lui, fonctionne à l'envers : la source est placée au foyer, et le miroir renvoie un faisceau parallèle. Un four solaire exploite la première propriété, un télescope à réflexion aussi.",
         },
         { kind: 'subheading', text: "B. L'ellipse et l'hyperbole" },
         {
@@ -1276,13 +1306,13 @@ export const coniques: ChapterContent = {
           kind: 'astuce',
           label: 'De l\'ellipse à la parabole : le second foyer part à l\'infini',
           text:
-            "La propriété de la parabole est le **cas limite** de celle de l'ellipse. Si l'on éloigne indéfiniment le second foyer $F'$, les droites $PF'$ deviennent toutes parallèles entre elles — parallèles à l'axe. L'énoncé « $PF$ et $PF'$ font des angles égaux avec la tangente » devient alors « $PF$ et la parallèle à l'axe font des angles égaux avec la tangente » : exactement la propriété de la parabole. Une seule idée, trois formulations.",
+            "La propriété de la parabole est en fait le **cas limite** de celle de l'ellipse ! Éloigne indéfiniment le second foyer $F'$ : les droites $PF'$ deviennent toutes parallèles entre elles — parallèles à l'axe. L'énoncé « $PF$ et $PF'$ font des angles égaux avec la tangente » devient alors « $PF$ et la parallèle à l'axe font des angles égaux avec la tangente » : exactement la propriété de la parabole. Une seule idée, trois formulations.",
         },
         {
           kind: 'piege',
           label: "L'ellipse ne concentre PAS les rayons parallèles",
           text:
-            "La propriété de l'ellipse concerne **les deux foyers** : elle relie un foyer à l'autre, jamais une direction parallèle à un foyer. Un faisceau de rayons parallèles envoyé sur un miroir elliptique ne se concentre en **aucun** point — seul le miroir *parabolique* possède cette propriété. Symétriquement, un rayon issu du foyer d'une parabole ne repasse par aucun « second foyer » : la parabole n'en a qu'un.",
+            "La propriété de l'ellipse concerne **les deux foyers** : elle relie un foyer à l'autre, jamais une direction parallèle à un foyer ! Un faisceau de rayons parallèles envoyé sur un miroir elliptique ne se concentre en **aucun** point — seul le miroir **parabolique** a cette propriété. Et symétriquement, un rayon issu du foyer d'une parabole ne repasse par aucun « second foyer » : la parabole n'en a qu'un.",
         },
         {
           kind: 'astuce',
@@ -1295,7 +1325,7 @@ export const coniques: ChapterContent = {
           title: 'Propriétés optiques des coniques',
           generatorId: '6gen63',
           description: [
-            "Retrouver, pour chaque conique, le trajet d'un rayon réfléchi à partir de la propriété de tangente aux foyers.",
+            "Retrouve, pour chaque conique, le trajet d'un rayon réfléchi à partir de la propriété de tangente aux foyers.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 63. Propriétés optiques des coniques »',
@@ -1336,13 +1366,13 @@ export const coniques: ChapterContent = {
       ],
     },
     forward:
-      "La caractérisation focale — un même rapport de distances qui engendre trois courbes distinctes selon sa valeur — est un bel exemple de la façon dont un seul énoncé algébrique peut recouvrir des objets géométriques a priori très différents ; c'est aussi, avec les propriétés optiques, l'aboutissement du programme de géométrie analytique de la 6e.",
+      "Retiens surtout ceci : un même rapport de distances — l'excentricité — engendre trois courbes distinctes selon sa valeur. C'est un bel exemple de la façon dont un seul énoncé algébrique peut recouvrir des objets géométriques très différents. Avec les propriétés optiques, c'est aussi l'aboutissement de tout le programme de géométrie analytique de la 6e.",
     entrainement: {
       kind: 'entrainement',
       title: 'Les coniques — quiz vrai/faux',
       generatorId: '6gen73',
       description: [
-        'Affirmations vrai/faux réparties par thème qui reprennent tout ce chapitre. Un seul essai par question, la justification est toujours révélée.',
+        'Des affirmations vrai/faux réparties par thème, qui reprennent tout le chapitre. Un seul essai par question, la justification est toujours révélée.',
       ],
       chantier: '6e-6h',
       whereLabel: '6e (6h) → « 73. Les coniques — quiz vrai/faux »',

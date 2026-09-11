@@ -10,11 +10,12 @@ export const nombresComplexes: ChapterContent = {
   title: 'Nombres complexes',
   slug: 'nombres-complexes',
   lede:
-    "ℝ ne contient aucune solution à $x^2=-1$. Les nombres complexes règlent ce manque en " +
-    "introduisant un nouveau nombre, $i$, tel que $i^2=-1$ — puis en bâtissant sur lui toute " +
-    "une algèbre nouvelle, avec sa propre géométrie (le plan d'Argand) et ses propres outils " +
-    "(module, argument, formule de Moivre) pour résoudre des équations, décrire des " +
-    "transformations du plan et retrouver des propriétés de figures.",
+    "$x^2=-1$ n'a aucune solution dans ℝ. Les nombres complexes comblent ce trou : tu " +
+    "introduis un nouveau nombre, $i$, tel que $i^2=-1$, puis tu bâtis dessus toute une " +
+    "nouvelle algèbre — avec sa propre géométrie (le plan d'Argand) et ses propres outils " +
+    "(module, argument, formule de Moivre). De quoi résoudre des équations qui semblaient " +
+    "impossibles, décrire des transformations du plan, et retrouver des propriétés de " +
+    "figures géométriques.",
 
   sections: [
     {
@@ -24,14 +25,26 @@ export const nombresComplexes: ChapterContent = {
       kicker: 'i²=−1, forme a+bi, conjugué, division',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Une histoire déjà vécue',
+          text:
+            'Les nombres négatifs ont longtemps semblé absurdes : comment un nombre ' +
+            'pourrait-il être « plus petit que rien » ? Ils sont pourtant devenus ' +
+            'indispensables dès qu\'il a fallu représenter une dette, ou une température sous ' +
+            'zéro. $i$ suit exactement le même chemin : $x^2=-1$ paraît impossible tant que tu ' +
+            'restes dans ℝ, mais $i$ devient nécessaire dès que tu veux résoudre ce type ' +
+            'd\'équation, ou décrire certaines rotations du plan. Ce n\'est pas un nombre ' +
+            '« magique » — c\'est un nombre de plus, comme les négatifs en leur temps.',
+        },
+        {
           kind: 'definition',
           items: [
-            'ℝ ne contient aucune solution de $x^2=-1$. On introduit un nombre $i$ tel que ' +
-              '$i^2=-1$, et on appelle **nombre complexe** tout nombre de la forme $z = a+bi$, ' +
-              'avec $a,b \\in \\mathbb{R}$. $a$ est la **partie réelle** ($Re(z)$), $b$ la ' +
-              '**partie imaginaire** ($Im(z)$). L\'ensemble des nombres complexes est noté ℂ ; ' +
-              'ℝ en est un sous-ensemble (les complexes de partie imaginaire nulle), lui-même ' +
-              'construit sur ℕ⊂ℤ⊂ℚ⊂ℝ.',
+            'ℝ n\'a aucune solution à $x^2=-1$. Tu introduis donc un nouveau nombre, $i$, tel ' +
+              'que $i^2=-1$. Tout nombre de la forme $z = a+bi$ (avec $a,b \\in \\mathbb{R}$) ' +
+              's\'appelle un **nombre complexe** : $a$ est sa **partie réelle** ($Re(z)$), $b$ ' +
+              'sa **partie imaginaire** ($Im(z)$). L\'ensemble des nombres complexes se note ' +
+              'ℂ. ℝ en est un sous-ensemble — les complexes de partie imaginaire nulle — ' +
+              'lui-même bâti sur ℕ⊂ℤ⊂ℚ⊂ℝ.',
           ],
         },
         {
@@ -53,9 +66,9 @@ export const nombresComplexes: ChapterContent = {
               { dx: 128, dy: 68, label: 'i', anchor: 'start' },
             ],
             caption:
-              "ℂ prolonge l'emboîtement ℕ⊂ℤ⊂ℚ⊂ℝ : chaque ensemble précédent est inclus dans le " +
-              "suivant, et ℂ contient enfin des nombres comme $i$ qu'aucun des précédents ne " +
-              'pouvait exprimer.',
+              "ℂ prolonge l'emboîtement ℕ⊂ℤ⊂ℚ⊂ℝ : chaque ensemble est inclus dans le suivant, " +
+              "et ℂ contient enfin des nombres comme $i$, qu'aucun des précédents ne savait " +
+              'exprimer.',
           },
         },
         {
@@ -63,19 +76,19 @@ export const nombresComplexes: ChapterContent = {
           label: 'Nombres complexes égaux',
           items: [
             '$(a_1+b_1i) = (a_2+b_2i) \\iff a_1=a_2$ et $b_1=b_2$',
-            'Deux complexes sont égaux si et seulement s\'ils ont mêmes parties réelle ET ' +
-              'imaginaire — jamais une égalité « globale » approchée : c\'est ce qui permet ' +
-              'd\'identifier séparément les deux parties dans toute équation entre complexes ' +
-              '(on s\'en servira plus loin pour la racine carrée, section 2).',
+            'Deux complexes sont égaux SEULEMENT s\'ils ont la même partie réelle ET la même ' +
+              'partie imaginaire — jamais une égalité « globale » approchée. C\'est ce qui te ' +
+              'permet d\'identifier séparément les deux parties dans une équation entre ' +
+              'complexes : tu t\'en serviras pour la racine carrée, à la section 2.',
           ],
         },
         {
           kind: 'methode',
           label: 'Opérations de base',
           items: [
-            '**Addition/soustraction** : on traite séparément les parties réelles et ' +
+            '**Addition/soustraction** : traite séparément les parties réelles et ' +
               'imaginaires. $(a+bi) \\pm (c+di) = (a\\pm c) + (b\\pm d)i$',
-            '**Multiplication** : on développe comme un produit de binômes, puis on remplace ' +
+            '**Multiplication** : développe comme un produit de binômes, puis remplace ' +
               '$i^2$ par $-1$. $(a+bi)(c+di) = ac+adi+bci+bdi^2 = (ac-bd) + (ad+bc)i$',
           ],
         },
@@ -88,28 +101,28 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$i^2 = 1$ est FAUX. Par définition, $i$ est tel que $i^2=-1$ — c\'est tout ' +
-            'l\'intérêt d\'introduire $i$ : obtenir une racine carrée à un nombre négatif.',
+            '$i^2 = 1$ est FAUX ! Par définition, $i^2=-1$ — c\'est tout l\'intérêt d\'avoir ' +
+            'introduit $i$ : donner enfin une racine carrée à un nombre négatif.',
         },
         {
           kind: 'definition',
           label: 'Structure algébrique de ℂ',
           items: [
-            'L\'addition et la multiplication dans ℂ ont les mêmes propriétés que dans ℝ : ' +
-              'toutes deux sont **associatives** et **commutatives**, admettent un **élément ' +
-              'neutre** (0 pour +, 1 pour ×), et la multiplication est **distributive** par ' +
-              'rapport à l\'addition. Tout complexe $z$ a un **opposé** $-z$ ; tout complexe ' +
-              'NON NUL a un **inverse** $1/z$. ℂ est donc, comme ℝ, un corps commutatif.',
+            'L\'addition et la multiplication se comportent dans ℂ exactement comme dans ℝ : ' +
+              'toutes deux sont **associatives** et **commutatives**, ont un **élément ' +
+              'neutre** (0 pour +, 1 pour ×), et la multiplication est **distributive** sur ' +
+              'l\'addition. Tout complexe $z$ a un **opposé** $-z$, et tout complexe NON NUL a ' +
+              'un **inverse** $1/z$. ℂ est donc, comme ℝ, un corps commutatif.',
           ],
         },
         {
           kind: 'piege',
           text:
-            'Il n\'existe PAS de relation d\'ordre dans ℂ compatible avec les opérations ' +
-            '(contrairement à ℝ) : des écritures comme $z_1 < z_2$ ou $z > 0$ n\'ont AUCUN sens ' +
-            'pour des complexes non réels. Seuls des nombres RÉELS (parties réelles, ' +
-            'parties imaginaires, longueurs, …) peuvent être comparés avec <, ≤, >, ≥ — ' +
-            'jamais deux complexes quelconques entre eux.',
+            'Contrairement à ℝ, il n\'existe AUCUNE relation d\'ordre dans ℂ compatible avec ' +
+            'les opérations : des écritures comme $z_1 < z_2$ ou $z > 0$ n\'ont tout simplement ' +
+            'AUCUN sens pour des complexes non réels ! Seuls des nombres RÉELS (parties ' +
+            'réelles, parties imaginaires, longueurs…) se comparent avec <, ≤, >, ≥ — jamais ' +
+            'deux complexes quelconques entre eux.',
         },
         {
           kind: 'definition',
@@ -123,7 +136,7 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Le conjugué de $z$ n\'est PAS l\'opposé $-z$. Le conjugué change seulement le ' +
+            'Le conjugué de $z$ n\'est PAS son opposé $-z$ ! Le conjugué change seulement le ' +
             'signe de la partie IMAGINAIRE ($a-bi$) ; l\'opposé change les DEUX signes ' +
             '($-a-bi$).',
         },
@@ -134,8 +147,8 @@ export const nombresComplexes: ChapterContent = {
           items: [
             'Pour tout $z=a+bi$ NON NUL, l\'inverse de $z$ s\'obtient en multipliant par le ' +
               'conjugué : $\\dfrac{1}{z} = \\dfrac{\\bar{z}}{z\\bar{z}} = \\dfrac{a-bi}{a^2+b^2}$',
-            'C\'est exactement le principe utilisé ci-dessous : $z\\cdot\\bar{z}$ est toujours ' +
-              'réel (rappel ci-dessus), donc multiplier par $\\bar{z}$ élimine $i$ du ' +
+            'C\'est le même principe qui sert juste en dessous : $z\\cdot\\bar{z}$ est toujours ' +
+              'réel (rappel ci-dessus), donc multiplier par $\\bar{z}$ fait disparaître $i$ du ' +
               'dénominateur.',
           ],
         },
@@ -143,7 +156,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Pour diviser par $c+di$, on multiplie numérateur et dénominateur par le conjugué ' +
+            'Pour diviser par $c+di$, multiplie numérateur et dénominateur par le conjugué ' +
               'du **dénominateur**, $c-di$ : le dénominateur devient réel ($c^2+d^2$).',
           ],
         },
@@ -154,6 +167,17 @@ export const nombresComplexes: ChapterContent = {
           result: { tag: 'résultat', text: '$i$' },
         },
         { kind: 'subheading', text: 'Puissances de i' },
+        {
+          kind: 'intuition',
+          label: '×i, c\'est tourner d\'un quart de tour',
+          text:
+            'Multiplier par $i$, ce n\'est pas qu\'une manipulation algébrique : ' +
+            'géométriquement, ça fait tourner le point d\'un quart de tour (90°) autour de ' +
+            'l\'origine, toujours dans le même sens. Pars de 1, multiplie par $i$ : tu arrives ' +
+            'en $i$. Encore une fois : tu arrives en $-1$. Encore : $-i$. Encore : retour à 1. ' +
+            'Quatre quarts de tour, un tour complet — exactement le cycle de période 4 que tu ' +
+            'vas retrouver juste en dessous.',
+        },
         {
           kind: 'illustration',
           illustration: {
@@ -172,8 +196,7 @@ export const nombresComplexes: ChapterContent = {
             angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 90, radiusPx: 26, label: '×i', tone: 'good' }],
             caption:
               'Les puissances de $i$ tournent de 90° à chaque multiplication : 4 positions sur ' +
-              'le cercle unité, puis le cycle recommence — multiplier par $i$ fait toujours ' +
-              'pivoter d\'un quart de tour direct.',
+              'le cercle unité, puis le cycle recommence.',
           },
         },
         {
@@ -181,7 +204,7 @@ export const nombresComplexes: ChapterContent = {
           label: 'Cycle de période 4',
           items: [
             '$i^0=1 \\quad i^1=i \\quad i^2=-1 \\quad i^3=-i \\quad i^4=1$ puis le cycle recommence',
-            'Pour $i^n$, on ne garde que le reste de la division de $n$ par 4.',
+            'Pour calculer $i^n$, garde seulement le reste de la division de $n$ par 4.',
           ],
         },
         {
@@ -194,15 +217,15 @@ export const nombresComplexes: ChapterContent = {
           kind: 'astuce',
           label: 'Toujours vérifier',
           text:
-            'Une opération sur des complexes se vérifie en revenant à la forme $a+bi$ et en ' +
-            'identifiant séparément parties réelle et imaginaire — jamais en mélangeant les ' +
-            'deux dans un même terme.',
+            'Pour vérifier un calcul sur des complexes, reviens à la forme $a+bi$ et identifie ' +
+            'séparément partie réelle et partie imaginaire — ne les mélange jamais dans un ' +
+            'même terme.',
         },
         {
           kind: 'entrainement',
           title: 'Opérations de base et puissances de i',
           generatorId: '6gen34',
-          description: ['Manipule additions, produits, quotients et puissances de i, jusqu\'au cycle de période 4.'],
+          description: ['Entraîne-toi sur les additions, produits, quotients et puissances de i — jusqu\'au cycle de période 4.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 34. Opérations de base et puissances de i »',
         },
@@ -215,14 +238,24 @@ export const nombresComplexes: ChapterContent = {
       kicker: 'affixe, plan d\'Argand, milieu, racine carrée',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Le plan complexe, comme une carte',
+          text:
+            'Pense à une carte, ou à un GPS : une position se donne par deux coordonnées, ' +
+            'est-ouest et nord-sud. Dans le plan d\'Argand, c\'est pareil — la partie réelle ' +
+            'joue le rôle de l\'est-ouest, la partie imaginaire celui du nord-sud. Chaque ' +
+            'nombre complexe devient un point précis (ou une flèche depuis l\'origine), pas ' +
+            'juste une formule abstraite avec un $i$ dedans.',
+        },
+        {
           kind: 'definition',
           label: 'Définition — affixe, plan d\'Argand',
           items: [
-            'À tout nombre complexe $z=a+bi$ on associe le point $M(a;b)$ du plan : $z$ est ' +
+            'À tout nombre complexe $z=a+bi$, tu associes le point $M(a;b)$ du plan : $z$ est ' +
               'l\'**affixe** de $M$. Ce plan, muni des axes « Re » (partie réelle) et « Im » ' +
-              '(partie imaginaire), est le **plan d\'Argand**. Un vecteur $\\vec{OM}$ a la même ' +
-              'affixe que le point $M$ ; plus généralement, le vecteur $\\vec{AB}$ a pour ' +
-              'affixe $z_B - z_A$.',
+              '(partie imaginaire), s\'appelle le **plan d\'Argand**. Le vecteur $\\vec{OM}$ a ' +
+              'la même affixe que le point $M$ ; plus généralement, le vecteur $\\vec{AB}$ a ' +
+              'pour affixe $z_B - z_A$.',
           ],
         },
         {
@@ -248,8 +281,8 @@ export const nombresComplexes: ChapterContent = {
           items: [
             '$z_M = \\dfrac{z_A+z_B}{2} \\qquad AB = |z_B - z_A|$',
             'La notation $|a+bi| = \\sqrt{a^2+b^2}$ désigne la LONGUEUR du vecteur d\'affixe ' +
-              '$a+bi$ — c\'est le théorème de Pythagore appliqué dans le plan d\'Argand. Cette ' +
-              'longueur sera étudiée pour elle-même à la section 4.',
+              '$a+bi$ — c\'est simplement le théorème de Pythagore, appliqué dans le plan ' +
+              'd\'Argand. Tu étudieras cette longueur pour elle-même à la section 4.',
           ],
         },
         {
@@ -262,18 +295,18 @@ export const nombresComplexes: ChapterContent = {
           kind: 'piege',
           text:
             'La distance $AB$ utilise la DIFFÉRENCE des affixes ($|z_B-z_A|$), jamais leur ' +
-            'somme : $|z_A+z_B|$ n\'est la distance entre aucune paire de points reliés ' +
-            'simplement à $A$ et $B$.',
+            'somme ! $|z_A+z_B|$ n\'est la distance entre aucune paire de points simplement ' +
+            'reliés à $A$ et $B$.',
         },
         { kind: 'subheading', text: 'Racine carrée d\'un nombre complexe' },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Pour trouver $x+iy$ tel que $(x+iy)^2 = a+bi$ : on développe $(x^2-y^2) + 2xyi = ' +
-              'a+bi$, puis on identifie parties réelle/imaginaire. On obtient une 3e équation ' +
-              'en ÉLEVANT AU CARRÉ ces deux équations puis en les ADDITIONNANT membre à membre ' +
-              '(démonstration ci-dessous) :',
+            'Pour trouver $x+iy$ tel que $(x+iy)^2 = a+bi$ : développe $(x^2-y^2) + 2xyi = ' +
+              'a+bi$, puis identifie les parties réelle et imaginaire. Une 3e équation ' +
+              'apparaît en ÉLEVANT AU CARRÉ ces deux équations puis en les ADDITIONNANT membre ' +
+              'à membre (démonstration ci-dessous) :',
             '$x^2-y^2 = a \\qquad 2xy = b \\qquad x^2+y^2 = \\sqrt{a^2+b^2}$',
           ],
         },
@@ -286,7 +319,7 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'On développe la 1re ligne : $x^4-2x^2y^2+y^4 = a^2$. En ADDITIONNANT cette ' +
+                'Développe la 1re ligne : $x^4-2x^2y^2+y^4 = a^2$. En ADDITIONNANT cette ' +
                 'égalité à $4x^2y^2=b^2$, les termes en $x^2y^2$ se recombinent en carré parfait :',
             },
             { kind: 'para', text: '$x^4+2x^2y^2+y^4 = a^2+b^2$ — somme des deux lignes précédentes' },
@@ -294,20 +327,20 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Comme $x^2+y^2 \\ge 0$ (somme de deux carrés réels), on peut prendre la ' +
+                'Comme $x^2+y^2 \\ge 0$ (somme de deux carrés réels), tu peux prendre la ' +
                 'racine carrée RÉELLE des deux membres sans ambiguïté de signe : $x^2+y^2 = ' +
-                '\\sqrt{a^2+b^2}$. On dispose alors de 3 équations linéaires en $x^2$ et $y^2$ ' +
-                '(la 1re et cette nouvelle 3e), qui se résolvent par somme et différence — la ' +
-                '2e équation ne sert qu\'à la toute fin, pour fixer le signe RELATIF de $x$ et $y$.',
+                '\\sqrt{a^2+b^2}$. Tu as alors 3 équations linéaires en $x^2$ et $y^2$ (la 1re ' +
+                'et cette nouvelle 3e), qui se résolvent par somme et différence — la 2e ' +
+                'équation ne sert qu\'à la toute fin, pour fixer le signe RELATIF de $x$ et $y$.',
             },
           ],
         },
         {
           kind: 'piege',
           text:
-            'La 3e équation est $x^2+y^2 = \\sqrt{a^2+b^2}$, avec la RACINE CARRÉE : c\'est ' +
-            '$(x^2+y^2)^2$ qui vaut $a^2+b^2$, pas $x^2+y^2$ lui-même. Oublier cette racine ' +
-            'est la confusion classique.',
+            'La 3e équation est $x^2+y^2 = \\sqrt{a^2+b^2}$ — avec la RACINE CARRÉE ! C\'est ' +
+            '$(x^2+y^2)^2$ qui vaut $a^2+b^2$, pas $x^2+y^2$ tout seul. Oublier cette racine ' +
+            'est l\'erreur classique.',
         },
         {
           kind: 'exemple',
@@ -337,15 +370,15 @@ export const nombresComplexes: ChapterContent = {
           kind: 'astuce',
           label: 'Toujours deux racines, opposées',
           text:
-            'Un nombre complexe non nul possède toujours EXACTEMENT deux racines carrées, ' +
-            'opposées l\'une de l\'autre : si $z_0$ convient, $-z_0$ aussi (car $(-z_0)^2 = ' +
-            'z_0^2$), jamais une seule.',
+            'Un nombre complexe non nul a toujours EXACTEMENT deux racines carrées, opposées ' +
+            'l\'une de l\'autre : si $z_0$ convient, $-z_0$ convient aussi (car $(-z_0)^2 = ' +
+            'z_0^2$) — jamais une seule.',
         },
         {
           kind: 'entrainement',
           title: 'Affixes et racines carrées',
           generatorId: '6gen35',
-          description: ['Calcule un milieu, une distance, ou les deux racines carrées d\'un nombre complexe par le système x²−y², 2xy, somme des carrés.'],
+          description: ['Calcule un milieu, une distance, ou les deux racines carrées d\'un nombre complexe grâce au système x²−y², 2xy, somme des carrés.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 35. Affixes et racines carrées »',
         },
@@ -361,12 +394,11 @@ export const nombresComplexes: ChapterContent = {
           kind: 'definition',
           label: 'Second degré à discriminant négatif',
           items: [
-            'Pour $az^2+bz+c=0$ ($a,b,c$ réels), si $\\Delta<0$, l\'équation n\'a AUCUNE ' +
-              'solution réelle, mais elle a exactement DEUX solutions complexes, conjuguées ' +
-              'l\'une de l\'autre :',
+            'Pour $az^2+bz+c=0$ ($a,b,c$ réels), si $\\Delta<0$ : AUCUNE solution réelle, mais ' +
+              'exactement DEUX solutions complexes, conjuguées l\'une de l\'autre :',
             '$z = \\dfrac{-b \\pm i\\sqrt{|\\Delta|}}{2a}$',
             'On écrit $\\Delta = -|\\Delta| = i^2|\\Delta|$, d\'où $\\sqrt{\\Delta} = ' +
-              'i\\sqrt{|\\Delta|}$ — jamais une racine carrée réelle laissée sur un nombre ' +
+              'i\\sqrt{|\\Delta|}$ — jamais de racine carrée réelle laissée sur un nombre ' +
               'négatif.',
           ],
         },
@@ -382,11 +414,12 @@ export const nombresComplexes: ChapterContent = {
               text:
                 'L\'équation $az^2+bz+c=0$ équivaut donc à $(z+\\dfrac{b}{2a})^2 = ' +
                 '\\dfrac{\\Delta}{4a^2}$. Jusqu\'ici, RIEN ne dépend du signe de $\\Delta$ — ' +
-                'c\'est la même identité que dans ℝ. La différence apparaît seulement à ' +
-                'l\'étape suivante : dans ℝ, on s\'arrête si $\\Delta<0$ (pas de racine carrée ' +
-                'réelle) ; dans ℂ, on continue en écrivant $\\Delta/4a^2 = i^2|\\Delta|/4a^2$, ' +
-                'ce qui EST un carré parfait complexe : $(i\\sqrt{|\\Delta|}/2a)^2$. On en ' +
-                'tire $z+b/2a = \\pm i\\sqrt{|\\Delta|}/2a$, d\'où la formule annoncée.',
+                'c\'est exactement la même identité que dans ℝ. La différence n\'apparaît ' +
+                'qu\'à l\'étape suivante : dans ℝ, tu t\'arrêtes si $\\Delta<0$ (pas de racine ' +
+                'carrée réelle) ; dans ℂ, tu continues, en écrivant $\\Delta/4a^2 = ' +
+                'i^2|\\Delta|/4a^2$ — ce qui EST un carré parfait complexe : ' +
+                '$(i\\sqrt{|\\Delta|}/2a)^2$. Tu en tires $z+b/2a = \\pm i\\sqrt{|\\Delta|}/2a$, ' +
+                'd\'où la formule annoncée.',
             },
           ],
         },
@@ -422,16 +455,16 @@ export const nombresComplexes: ChapterContent = {
           label: 'Méthode',
           items: [
             'Une équation bicarrée $az^4+bz^2+c=0$ se ramène à une équation du second degré ' +
-              'via le changement de variable $u=z^2$. Chaque solution $u\\ne0$ fournit ensuite ' +
-              'EXACTEMENT 2 valeurs de $z$ (ses 2 racines carrées).',
+              'grâce au changement de variable $u=z^2$. Chaque solution $u\\ne0$ te donne ' +
+              'ensuite EXACTEMENT 2 valeurs de $z$ — ses 2 racines carrées.',
           ],
         },
         {
           kind: 'piege',
           text:
-            'Le changement de variable est $u=z^2$, jamais $u=z$ (qui laisserait l\'équation ' +
-            'de degré 4). Et si une valeur de $u$ est NÉGATIVE, ses racines carrées sont ' +
-            'imaginaires pures — pas de raison de rejeter cette valeur de $u$ dans ℂ.',
+            'Le changement de variable est $u=z^2$, jamais $u=z$ (l\'équation resterait de ' +
+            'degré 4) ! Et si une valeur de $u$ est NÉGATIVE, ses racines carrées sont ' +
+            'simplement imaginaires pures — aucune raison de la rejeter, tu es dans ℂ.',
         },
         {
           kind: 'exempleLibre',
@@ -439,15 +472,15 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                '$z^4-5z^2+4=0$ : en posant $u=z^2$, $u^2-5u+4=0$ donne $u=1$ ou $u=4$, d\'où ' +
-                '$z = \\pm1$ ou $\\pm2$ (4 solutions réelles).',
+                'Pose $u=z^2$ dans $z^4-5z^2+4=0$ : $u^2-5u+4=0$ donne $u=1$ ou $u=4$, d\'où ' +
+                '$z = \\pm1$ ou $\\pm2$ — 4 solutions réelles.',
             },
             {
               kind: 'para',
               text:
-                '$z^4+5z^2+4=0$ : ici $u^2+5u+4=0$ donne $u=-1$ ou $u=-4$, toutes deux ' +
-                'négatives — les 4 solutions sont $z = \\pm i$ ou $\\pm2i$ (purement ' +
-                'imaginaires, aucune n\'est réelle).',
+                'Pour $z^4+5z^2+4=0$ : ici $u^2+5u+4=0$ donne $u=-1$ ou $u=-4$, toutes deux ' +
+                'négatives — les 4 solutions sont $z = \\pm i$ ou $\\pm2i$, purement ' +
+                'imaginaires : aucune n\'est réelle.',
             },
           ],
         },
@@ -455,18 +488,18 @@ export const nombresComplexes: ChapterContent = {
           kind: 'definition',
           label: 'Théorème fondamental de l\'algèbre',
           items: [
-            'Dans ℂ, tout polynôme de degré $n$ ($n\\ge1$) admet exactement $n$ racines, ' +
-              'comptées avec multiplicité — contrairement à ℝ, où un polynôme peut n\'avoir ' +
-              'aucune racine réelle.',
+            'Dans ℂ, tout polynôme de degré $n$ ($n\\ge1$) a exactement $n$ racines, comptées ' +
+              'avec multiplicité — contrairement à ℝ, où un polynôme peut n\'avoir aucune ' +
+              'racine réelle du tout.',
           ],
         },
         {
           kind: 'methode',
           label: 'Racines conjuguées d\'un polynôme réel',
           items: [
-            'Si $z_0$ est une racine NON RÉELLE d\'un polynôme à coefficients RÉELS, alors ' +
-              'son conjugué $\\bar{z}_0$ est aussi une racine. On peut alors factoriser : ' +
-              '$a(z-z_0)(z-\\bar{z}_0)$.',
+            'Si $z_0$ est une racine NON RÉELLE d\'un polynôme à coefficients RÉELS, son ' +
+              'conjugué $\\bar{z}_0$ en est forcément une racine aussi. Tu peux alors ' +
+              'factoriser : $a(z-z_0)(z-\\bar{z}_0)$.',
             'Ce produit redonne bien un polynôme à coefficients RÉELS en $z$, puisque ' +
               '$z_0+\\bar{z}_0$ et $z_0\\cdot\\bar{z}_0$ sont tous deux réels.',
           ],
@@ -474,15 +507,15 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Cette propriété exige des coefficients RÉELS. Pour un polynôme à coefficients ' +
-            'véritablement complexes, rien ne garantit que le conjugué d\'une racine en soit ' +
-            'une aussi.',
+            'Cette propriété exige des coefficients RÉELS ! Pour un polynôme à coefficients ' +
+            'vraiment complexes, rien ne garantit que le conjugué d\'une racine en soit une ' +
+            'aussi.',
         },
         {
           kind: 'entrainement',
           title: 'Équations dans ℂ',
           generatorId: '6gen36',
-          description: ['Résous une équation du second degré à discriminant négatif ou une équation bicarrée dans ℂ.'],
+          description: ['Résous une équation du second degré à discriminant négatif, ou une équation bicarrée, dans ℂ.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 36. Équations dans ℂ »',
         },
@@ -495,12 +528,21 @@ export const nombresComplexes: ChapterContent = {
       kicker: 'module, argument, forme trigonométrique et exponentielle',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Le module, c\'est juste une distance',
+          text:
+            'Ne te laisse pas intimider par le mot « module » : $|z|$ répond simplement à la ' +
+            'question « à quelle distance de l\'origine ? ». Tu la calcules exactement comme ' +
+            'n\'importe quelle distance dans le plan, avec Pythagore — rien de neuf ici, ' +
+            'seulement un nouveau nom pour une idée que tu maîtrises déjà.',
+        },
+        {
           kind: 'definition',
           label: 'Module et argument',
           items: [
             'Le **module** de $z=a+bi$ est sa distance à l\'origine : $|z| = \\sqrt{a^2+b^2}$, ' +
-              'toujours positif ou nul — c\'est la longueur déjà utilisée à la section 2 pour ' +
-              'la distance $AB=|z_B-z_A|$, qui reçoit ici son nom. L\'**argument** $arg(z)$ ' +
+              'toujours positif ou nul — c\'est la même longueur qu\'à la section 2, pour la ' +
+              'distance $AB=|z_B-z_A|$, qui reçoit ici enfin son nom. L\'**argument** $arg(z)$ ' +
               'est l\'angle (à $2\\pi$ près) entre l\'axe des réels positifs et le vecteur ' +
               '$\\vec{OM}$.',
           ],
@@ -528,24 +570,24 @@ export const nombresComplexes: ChapterContent = {
           label: 'Forme trigonométrique et forme exponentielle',
           items: [
             '$z = r(\\cos\\theta+i\\sin\\theta) = re^{i\\theta}$',
-            'La seconde écriture (forme exponentielle) découle de la formule d\'Euler ' +
-              '$e^{i\\theta}=\\cos\\theta+i\\sin\\theta$.',
+            'La seconde écriture, la forme exponentielle, vient directement de la formule ' +
+              'd\'Euler : $e^{i\\theta}=\\cos\\theta+i\\sin\\theta$.',
           ],
         },
         {
           kind: 'piege',
           text:
             'Dans $z=r(\\cos\\theta+i\\sin\\theta)$, $r$ est TOUJOURS positif ou nul, jamais ' +
-            'négatif — c\'est l\'angle $\\theta$ qui code la position (quadrant), pas le signe ' +
-            'de $r$.',
+            'négatif ! C\'est l\'angle $\\theta$ qui code la position (le quadrant), pas le ' +
+            'signe de $r$.',
         },
         { kind: 'subheading', text: 'Retrouver l\'argument depuis a et b' },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Si $a>0$, $arg(z) = \\arctan(b/a)$ directement. Si $a<0$, il faut AJOUTER (ou ' +
-              'soustraire) $\\pi$ à cette valeur — sinon on obtient l\'argument du complexe ' +
+            'Si $a>0$, $arg(z) = \\arctan(b/a)$ directement. Si $a<0$, tu dois AJOUTER (ou ' +
+              'soustraire) $\\pi$ à cette valeur — sinon tu obtiens l\'argument du complexe ' +
               'opposé, pas celui de $z$.',
           ],
         },
@@ -553,8 +595,8 @@ export const nombresComplexes: ChapterContent = {
           kind: 'methode',
           label: 'Produit et quotient',
           items: [
-            'Multiplier deux complexes MULTIPLIE leurs modules et ADDITIONNE leurs arguments ; ' +
-              'diviser DIVISE les modules et SOUSTRAIT les arguments.',
+            'Multiplier deux complexes MULTIPLIE leurs modules et ADDITIONNE leurs arguments. ' +
+              'Diviser DIVISE les modules et SOUSTRAIT les arguments.',
             '$r_1e^{i\\theta_1} \\cdot r_2e^{i\\theta_2} = r_1r_2 e^{i(\\theta_1+\\theta_2)} ' +
               '\\qquad \\dfrac{r_1e^{i\\theta_1}}{r_2e^{i\\theta_2}} = \\dfrac{r_1}{r_2} e^{i(\\theta_1-\\theta_2)}$',
           ],
@@ -570,8 +612,8 @@ export const nombresComplexes: ChapterContent = {
               kind: 'para',
               text:
                 'Les deux parenthèses sont exactement les formules d\'addition trigonométrique ' +
-                '— celles-là mêmes que redémontre la formule de Moivre par récurrence ' +
-                '(section 5) : $\\cos(\\theta_1+\\theta_2) = \\cos\\theta_1\\cos\\theta_2-' +
+                '— celles que la formule de Moivre redémontre par récurrence à la section 5 : ' +
+                '$\\cos(\\theta_1+\\theta_2) = \\cos\\theta_1\\cos\\theta_2-' +
                 '\\sin\\theta_1\\sin\\theta_2$ et $\\sin(\\theta_1+\\theta_2) = ' +
                 '\\sin\\theta_1\\cos\\theta_2+\\sin\\theta_2\\cos\\theta_1$. D\'où $z_1z_2 = ' +
                 'r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$ : c\'est de ' +
@@ -581,16 +623,16 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Pour le quotient, on multiplie numérateur et dénominateur par le conjugué de ' +
+                'Pour le quotient, multiplie numérateur et dénominateur par le conjugué de ' +
                 '$z_2$ : $z_1/z_2 = z_1\\bar{z}_2/(z_2\\bar{z}_2) = z_1\\bar{z}_2/r_2^2$. Or ' +
                 '$\\bar{z}_2 = r_2(\\cos\\theta_2-i\\sin\\theta_2) = ' +
                 'r_2(\\cos(-\\theta_2)+i\\sin(-\\theta_2))$, puisque $\\cos(-\\theta)=' +
                 '\\cos\\theta$ et $\\sin(-\\theta)=-\\sin\\theta$ : le conjugué a donc le MÊME ' +
                 'module $r_2$ et l\'argument OPPOSÉ $-\\theta_2$. Le produit $z_1\\bar{z}_2$ ' +
-                'a alors pour module $r_1r_2$ et pour ' +
-                'argument $\\theta_1-\\theta_2$ (démonstration ci-dessus) ; diviser par le ' +
-                'réel positif $r_2^2$ divise le module par $r_2^2$ sans toucher l\'argument, ' +
-                'd\'où le module final $r_1r_2/r_2^2 = r_1/r_2$.',
+                'a alors pour module $r_1r_2$ et pour argument $\\theta_1-\\theta_2$ ' +
+                '(démonstration ci-dessus) ; diviser par le réel positif $r_2^2$ divise le ' +
+                'module par $r_2^2$ sans toucher l\'argument — d\'où le module final ' +
+                '$r_1r_2/r_2^2 = r_1/r_2$.',
             },
           ],
         },
@@ -629,7 +671,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'piege',
           text:
             'Les modules se MULTIPLIENT dans un produit ($2\\times3=6$), ils ne s\'additionnent ' +
-            'jamais ($2+3=5$ serait faux). C\'est l\'inverse pour les arguments : ils ' +
+            'JAMAIS ($2+3=5$ serait faux !). C\'est l\'inverse pour les arguments : ils ' +
             's\'ADDITIONNENT, ils ne se multiplient jamais.',
         },
         {
@@ -637,8 +679,9 @@ export const nombresComplexes: ChapterContent = {
           label: 'Angles remarquables',
           text:
             'Les multiples de $\\pi/6$ ou $\\pi/4$ sont dits « remarquables » : leur cosinus et ' +
-            'leur sinus s\'expriment exactement (racines, fractions), sans approximation ' +
-            'décimale — la banque d\'angles la plus utile de ce chapitre.',
+            'leur sinus s\'expriment exactement (racines, fractions), sans aucune ' +
+            'approximation décimale — retiens-les, ce sont les angles les plus utiles de tout ' +
+            'le chapitre.',
         },
         {
           kind: 'featureTable',
@@ -657,7 +700,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Forme trigonométrique, module et argument',
           generatorId: '6gen37',
-          description: ['Calcule module et argument, convertis entre formes algébrique/trigonométrique/exponentielle, multiplie et divise des complexes sous forme exponentielle.'],
+          description: ['Calcule module et argument, convertis entre les formes algébrique/trigonométrique/exponentielle, et multiplie/divise des complexes sous forme exponentielle.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 37. Forme trigonométrique, module et argument »',
         },
@@ -706,11 +749,11 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Il reste à réécrire $e^{in\\theta}$ sous forme trigonométrique : par la ' +
-                'formule d\'Euler appliquée cette fois à l\'angle $n\\theta$, $e^{in\\theta} = ' +
-                '\\cos(n\\theta)+i\\sin(n\\theta)$. En combinant les deux extrémités de la ' +
-                'chaîne d\'égalités : $(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta)+i\\sin(n\\theta)$, ' +
-                'ce qui est exactement la formule de Moivre.',
+                'Reste à réécrire $e^{in\\theta}$ sous forme trigonométrique : par la formule ' +
+                'd\'Euler, appliquée cette fois à l\'angle $n\\theta$, $e^{in\\theta} = ' +
+                '\\cos(n\\theta)+i\\sin(n\\theta)$. En combinant les deux bouts de la chaîne ' +
+                'd\'égalités : $(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta)+i\\sin(n\\theta)$ ' +
+                '— exactement la formule de Moivre.',
             },
           ],
         },
@@ -719,18 +762,18 @@ export const nombresComplexes: ChapterContent = {
           label: 'Démonstration alternative — par récurrence sur n, sans passer par e^(iθ)',
           blocks: [
             { kind: 'para', text: '$(\\cos\\theta+i\\sin\\theta)^1 = \\cos(1\\cdot\\theta)+i\\sin(1\\cdot\\theta)$ — initialisation : vrai trivialement pour $n=1$' },
-            { kind: 'para', text: 'Hérédité — on suppose la propriété vraie au rang $n-1$ : $(\\cos\\theta+i\\sin\\theta)^{n-1} = \\cos((n-1)\\theta)+i\\sin((n-1)\\theta)$' },
-            { kind: 'para', text: '$(\\cos\\theta+i\\sin\\theta)^n = (\\cos\\theta+i\\sin\\theta)^{n-1}\\cdot(\\cos\\theta+i\\sin\\theta)^1$ — on sépare un facteur, pour appliquer l\'hypothèse de récurrence' },
-            { kind: 'para', text: '$= [\\cos((n-1)\\theta)+i\\sin((n-1)\\theta)]\\cdot[\\cos\\theta+i\\sin\\theta]$ — on remplace le premier facteur par l\'hypothèse de récurrence' },
+            { kind: 'para', text: 'Hérédité — tu supposes la propriété vraie au rang $n-1$ : $(\\cos\\theta+i\\sin\\theta)^{n-1} = \\cos((n-1)\\theta)+i\\sin((n-1)\\theta)$' },
+            { kind: 'para', text: '$(\\cos\\theta+i\\sin\\theta)^n = (\\cos\\theta+i\\sin\\theta)^{n-1}\\cdot(\\cos\\theta+i\\sin\\theta)^1$ — tu sépares un facteur, pour appliquer l\'hypothèse de récurrence' },
+            { kind: 'para', text: '$= [\\cos((n-1)\\theta)+i\\sin((n-1)\\theta)]\\cdot[\\cos\\theta+i\\sin\\theta]$ — tu remplaces le premier facteur par l\'hypothèse de récurrence' },
             {
               kind: 'para',
               text:
-                'C\'est exactement la forme du produit de deux complexes trigonométriques ' +
-                'traité section 4 (module 1 ici, aux angles $(n-1)\\theta$ et $\\theta$) : le ' +
-                'produit vaut $\\cos[(n-1)\\theta+\\theta]+i\\sin[(n-1)\\theta+\\theta] = ' +
+                'C\'est exactement le produit de deux complexes trigonométriques traité à la ' +
+                'section 4 (module 1 ici, aux angles $(n-1)\\theta$ et $\\theta$) : il vaut ' +
+                '$\\cos[(n-1)\\theta+\\theta]+i\\sin[(n-1)\\theta+\\theta] = ' +
                 '\\cos(n\\theta)+i\\sin(n\\theta)$. La propriété est donc vraie au rang $n$ dès ' +
                 'qu\'elle l\'est au rang $n-1$ ; comme elle est vraie au rang 1, elle est ' +
-                'vraie pour tout entier $n\\ge1$ (principe de récurrence).',
+                'vraie pour tout entier $n\\ge1$ — c\'est le principe de récurrence.',
             },
           ],
         },
@@ -739,12 +782,12 @@ export const nombresComplexes: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'On développe $(\\cos x+i\\sin x)^n$ par le binôme de Newton : $(\\cos x+i\\sin ' +
+            'Développe $(\\cos x+i\\sin x)^n$ par le binôme de Newton : $(\\cos x+i\\sin ' +
               'x)^n = \\sum_{k=0}^{n} C(n,k)\\cdot\\cos^{n-k}x\\cdot(i\\sin x)^k$',
-            'Chaque terme contient $i^k$, qu\'il faut simplifier selon le cycle de période 4 ' +
-              '(section 1) : les termes à $k$ PAIR redonnent un réel (partie $\\cos(nx)$) ; ' +
-              'les termes à $k$ IMPAIR redonnent un imaginaire pur (partie $i\\cdot\\sin(nx)$). ' +
-              'On identifie ensuite les deux parties séparément.',
+            'Chaque terme contient $i^k$ : simplifie-le grâce au cycle de période 4 ' +
+              '(section 1). Les termes à $k$ PAIR redonnent un réel (la partie $\\cos(nx)$) ; ' +
+              'les termes à $k$ IMPAIR redonnent un imaginaire pur (la partie $i\\cdot\\sin(nx)$). ' +
+              'Il ne reste plus qu\'à identifier les deux parties séparément.',
           ],
         },
         {
@@ -752,8 +795,8 @@ export const nombresComplexes: ChapterContent = {
           label: 'Piège central de cette technique',
           text:
             'Oublier UN SEUL signe issu d\'un $i^2$ ou $i^4$ (le traiter comme $+1$ au lieu de ' +
-            '$-1$, par exemple) rend le résultat final incorrect, même si tous les autres ' +
-            'termes sont exacts — chaque puissance de $i$ doit être résolue individuellement.',
+            '$-1$, par exemple) rend le résultat final faux — même si tous les autres termes ' +
+            'sont exacts ! Chaque puissance de $i$ doit être résolue une par une.',
         },
         {
           kind: 'exempleLibre',
@@ -775,8 +818,8 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'En développant $(\\cos x+i\\sin x)^3$ et en séparant les termes à $k$ pair ' +
-                '(0 et 2) des termes à $k$ impair (1 et 3) :',
+                'Développe $(\\cos x+i\\sin x)^3$ et sépare les termes à $k$ pair (0 et 2) de ' +
+                'ceux à $k$ impair (1 et 3) :',
             },
             { kind: 'para', text: '$\\cos(3x) = \\cos^3x-3\\cos x\\sin^2x \\qquad \\sin(3x) = 3\\cos^2x\\sin x-\\sin^3x$' },
           ],
@@ -793,7 +836,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Formule de Moivre',
           generatorId: '6gen38',
-          description: ['Applique la formule de Moivre, et développe cos(nx)/sin(nx) par le binôme de Newton.'],
+          description: ['Applique la formule de Moivre, et développe cos(nx)/sin(nx) grâce au binôme de Newton.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 38. Formule de Moivre »',
         },
@@ -811,9 +854,9 @@ export const nombresComplexes: ChapterContent = {
           items: [
             'Les $n$ racines n-ièmes d\'un nombre complexe non nul $z=re^{i\\theta}$ sont : ' +
               '$z_k = r^{1/n}\\cdot e^{i(\\theta+2k\\pi)/n}$, pour $k=0,1,\\ldots,n-1$',
-            'Trouver ces racines nécessite d\'abord d\'écrire $z$ sous forme trigonométrique ' +
-              'ou exponentielle (module et argument) — il n\'existe pas de formule directe ' +
-              'depuis $a+bi$ seul.',
+            'Pour trouver ces racines, tu dois d\'abord écrire $z$ sous forme trigonométrique ' +
+              'ou exponentielle (module et argument) — il n\'existe aucune formule directe ' +
+              'depuis $a+bi$ tout seul.',
           ],
         },
         {
@@ -836,18 +879,18 @@ export const nombresComplexes: ChapterContent = {
           kind: 'methode',
           label: 'Une répartition géométrique régulière',
           items: [
-            'Toutes les racines ont le MÊME module $r^{1/n}$ (seul l\'argument change), et ' +
-              'sont réparties régulièrement sur un cercle de centre $O$ : l\'angle entre deux ' +
-              'racines consécutives vaut toujours $2\\pi/n$. Reliées entre elles, elles ' +
-              'forment un polygone régulier à $n$ côtés inscrit dans ce cercle.',
+            'Toutes les racines partagent le MÊME module $r^{1/n}$ — seul l\'argument change ' +
+              '— et se répartissent régulièrement sur un cercle de centre $O$ : l\'angle ' +
+              'entre deux racines consécutives vaut toujours $2\\pi/n$. Relie-les entre elles ' +
+              ': tu obtiens un polygone régulier à $n$ côtés, inscrit dans ce cercle.',
           ],
         },
         {
           kind: 'piege',
           text:
             'L\'espacement angulaire correct est en $2k\\pi$, pas $k\\pi$ — une erreur d\'un ' +
-            'facteur 2 donnerait un espacement 2 fois trop petit. Au-delà de $k=n-1$, les ' +
-            'angles obtenus se répètent modulo $2\\pi$ : il n\'y a jamais plus de $n$ racines ' +
+            'facteur 2 donnerait un espacement deux fois trop petit ! Au-delà de $k=n-1$, les ' +
+            'angles se répètent modulo $2\\pi$ : il n\'y a jamais plus de $n$ racines ' +
             'distinctes.',
         },
         { kind: 'subheading', text: 'Racines n-ièmes de l\'unité' },
@@ -862,10 +905,10 @@ export const nombresComplexes: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Pour $n=4$ : les 4 racines quatrièmes de l\'unité sont $1, i, -1, -i$ (les 4 ' +
-                'sommets d\'un carré). Pour $n=3$ : les 3 racines cubiques de l\'unité sont ' +
-                '$1, e^{2i\\pi/3}, e^{4i\\pi/3}$ (un triangle équilatéral) — $i$ et $-i$ sont ' +
-                'des racines QUATRIÈMES, jamais cubiques.',
+                'Pour $n=4$ : les 4 racines quatrièmes de l\'unité sont $1, i, -1, -i$ — les 4 ' +
+                'sommets d\'un carré. Pour $n=3$ : les 3 racines cubiques de l\'unité sont ' +
+                '$1, e^{2i\\pi/3}, e^{4i\\pi/3}$ — un triangle équilatéral. Attention : $i$ ' +
+                'et $-i$ sont des racines QUATRIÈMES, jamais cubiques !',
             },
           ],
         },
@@ -873,23 +916,23 @@ export const nombresComplexes: ChapterContent = {
           kind: 'astuce',
           label: 'La somme des racines n-ièmes de l\'unité vaut 0',
           text:
-            'C\'est une identité classique ($n\\ge2$) : géométriquement, leur isobarycentre ' +
-            'est le centre du cercle, l\'origine $O$.',
+            'C\'est une identité classique, valable dès que $n\\ge2$ : géométriquement, leur ' +
+            'isobarycentre est le centre du cercle, l\'origine $O$.',
         },
         {
           kind: 'exempleLibre',
           label: 'Démonstration — pourquoi cette somme est nulle',
           blocks: [
-            { kind: 'para', text: '$S = \\sum_{k=0}^{n-1} e^{2ik\\pi/n} = \\sum_{k=0}^{n-1} (e^{2i\\pi/n})^k$ — on pose $\\omega=e^{2i\\pi/n}$ — chaque racine est une puissance de $\\omega$' },
+            { kind: 'para', text: '$S = \\sum_{k=0}^{n-1} e^{2ik\\pi/n} = \\sum_{k=0}^{n-1} (e^{2i\\pi/n})^k$ — pose $\\omega=e^{2i\\pi/n}$ : chaque racine est une puissance de $\\omega$' },
             { kind: 'para', text: '$S = 1+\\omega+\\omega^2+\\ldots+\\omega^{n-1}$ — somme géométrique de raison $\\omega$, $n$ termes' },
             { kind: 'para', text: '$(\\omega-1)\\cdot S = \\omega^n - 1$ — identité de la somme géométrique : $(\\omega-1)(1+\\omega+\\ldots+\\omega^{n-1}) = \\omega^n-1$ (les termes intermédiaires se télescopent)' },
             {
               kind: 'para',
               text:
-                'Or $\\omega^n = (e^{2i\\pi/n})^n = e^{2i\\pi} = 1$ (formule de Moivre, section ' +
-                '5, ou simplement un tour complet du cercle), donc $\\omega^n-1 = 0$. Comme ' +
-                '$n\\ge2$, $\\omega=e^{2i\\pi/n}\\ne1$ (l\'angle $2\\pi/n$ n\'est pas un ' +
-                'multiple de $2\\pi$), donc $\\omega-1\\ne0$ : on peut diviser, et $S = ' +
+                'Or $\\omega^n = (e^{2i\\pi/n})^n = e^{2i\\pi} = 1$ — formule de Moivre, ' +
+                'section 5, ou simplement un tour complet du cercle — donc $\\omega^n-1 = 0$. ' +
+                'Comme $n\\ge2$, $\\omega=e^{2i\\pi/n}\\ne1$ (l\'angle $2\\pi/n$ n\'est pas un ' +
+                'multiple de $2\\pi$), donc $\\omega-1\\ne0$ : tu peux diviser, et $S = ' +
                 '0/(\\omega-1) = 0$.',
             },
           ],
@@ -898,7 +941,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'entrainement',
           title: 'Racines n-ièmes d\'un nombre complexe',
           generatorId: '6gen39',
-          description: ['Calcule les n racines n-ièmes d\'un nombre complexe, ou les racines n-ièmes de l\'unité.'],
+          description: ['Calcule les n racines n-ièmes d\'un nombre complexe, ou celles de l\'unité.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 39. Racines n-ièmes d\'un nombre complexe »',
         },
@@ -910,6 +953,18 @@ export const nombresComplexes: ChapterContent = {
       title: 'Transformations du plan',
       kicker: 'translation, rotation, homothétie, similitude',
       blocks: [
+        {
+          kind: 'intuition',
+          label: 'Une idée déjà familière : tourner, agrandir, glisser',
+          text:
+            'Translation, rotation, homothétie : tu connais déjà ces trois transformations ' +
+            'depuis la géométrie. Ce qui change ici, c\'est l\'outil — au lieu de manipuler ' +
+            'des coordonnées, UNE SEULE multiplication (ou addition) complexe suffit à décrire ' +
+            'chacune d\'elles. Multiplier par un nombre de module 1, c\'est tourner ; ' +
+            'multiplier par un réel, c\'est agrandir ou réduire ; additionner un complexe, ' +
+            'c\'est glisser. Les nombres complexes ne sont pas là pour compliquer la ' +
+            'géométrie — ils la rendent plus rapide à calculer.',
+        },
         {
           kind: 'definition',
           label: 'Trois transformations de base',
@@ -948,20 +1003,19 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Démonstration — l\'addition correspond à une translation',
           blocks: [
-            { kind: 'para', text: '$M(z),\\ z=x+yi \\qquad A(c),\\ c=a+bi \\qquad P(z+c)$ — on nomme les 3 points par leurs affixes' },
-            { kind: 'para', text: '$z+c = (x+a)+(y+b)i$ — on développe l\'affixe de $P$, partie réelle + partie imaginaire' },
+            { kind: 'para', text: '$M(z),\\ z=x+yi \\qquad A(c),\\ c=a+bi \\qquad P(z+c)$ — nomme les 3 points par leurs affixes' },
+            { kind: 'para', text: '$z+c = (x+a)+(y+b)i$ — développe l\'affixe de $P$, partie réelle + partie imaginaire' },
             { kind: 'para', text: 'affixe de $\\vec{MP}$ = affixe($P$) − affixe($M$) = $(z+c) - z = c$ — rappel : l\'affixe d\'un vecteur $\\vec{UV}$ est affixe($V$)−affixe($U$) (section 2)' },
             { kind: 'para', text: 'affixe de $\\vec{OA}$ = affixe($A$) − affixe($O$) = $c - 0 = c$ — même calcul pour le vecteur de référence $\\vec{OA}$' },
             {
               kind: 'para',
               text:
                 '$\\vec{MP}$ et $\\vec{OA}$ ont donc TOUJOURS la même affixe $c$, quel que soit ' +
-                'le point $M$ choisi au départ — ils sont donc toujours égaux comme vecteurs ' +
-                '(même direction, même sens, même longueur). Deux vecteurs égaux signifient ' +
-                'exactement que $P$ est l\'image de $M$ par la translation de vecteur ' +
-                '$\\vec{OA}$ : c\'est la définition même d\'une translation. Comme cela vaut ' +
-                'pour tout $M$, la transformation $z\\mapsto z+c$ tout entière est cette ' +
-                'translation.',
+                'le point $M$ de départ — ils sont donc toujours égaux comme vecteurs (même ' +
+                'direction, même sens, même longueur). Deux vecteurs égaux, c\'est exactement ' +
+                'dire que $P$ est l\'image de $M$ par la translation de vecteur $\\vec{OA}$ : ' +
+                'c\'est la définition même d\'une translation. Comme ça vaut pour tout $M$, la ' +
+                'transformation $z\\mapsto z+c$ tout entière EST cette translation.',
             },
           ],
         },
@@ -990,7 +1044,7 @@ export const nombresComplexes: ChapterContent = {
           kind: 'piege',
           text:
             'Dans la formule de rotation, c\'est $(z-z_0)$ qu\'il faut utiliser, jamais ' +
-            '$(z_0-z)$ — inverser l\'ordre revient à ajouter $\\pi$ à l\'angle appliqué. Le ' +
+            '$(z_0-z)$ ! Inverser l\'ordre revient à ajouter $\\pi$ à l\'angle appliqué. Le ' +
             'multiplicateur $e^{i\\theta}$ a toujours pour module 1 : une rotation conserve ' +
             'les distances.',
         },
@@ -998,30 +1052,30 @@ export const nombresComplexes: ChapterContent = {
           kind: 'exempleLibre',
           label: 'Démonstration — pourquoi multiplier par un complexe combine rotation et homothétie',
           blocks: [
-            { kind: 'para', text: 'Cas $z_0=0$ (centre $O$) : $z = \\rho(\\cos\\theta+i\\sin\\theta), \\ c = r(\\cos\\alpha+i\\sin\\alpha)$ — on écrit $z$ et le multiplicateur $c$ sous forme trigonométrique' },
+            { kind: 'para', text: 'Cas $z_0=0$ (centre $O$) : $z = \\rho(\\cos\\theta+i\\sin\\theta), \\ c = r(\\cos\\alpha+i\\sin\\alpha)$ — écris $z$ et le multiplicateur $c$ sous forme trigonométrique' },
             { kind: 'para', text: '$zc = r\\rho[\\cos(\\theta+\\alpha)+i\\sin(\\theta+\\alpha)]$ — formule du produit (section 4)' },
             {
               kind: 'para',
               text:
-                'Le point d\'affixe $zc$ a donc pour module $r\\rho$ (celui de $z$ multiplié ' +
-                'par $r=|c|$) et pour argument $\\theta+\\alpha$ (celui de $z$ augmenté de ' +
+                'Le point d\'affixe $zc$ a donc pour module $r\\rho$ (celui de $z$, multiplié ' +
+                'par $r=|c|$) et pour argument $\\theta+\\alpha$ (celui de $z$, augmenté de ' +
                 '$\\alpha=arg(c)$). Ajouter $\\alpha$ à l\'argument SANS toucher au module, ' +
                 'c\'est une rotation de centre $O$ et d\'angle $\\alpha$ ; multiplier ensuite ' +
                 'le module par $r$ SANS toucher à l\'argument, c\'est une homothétie de ' +
-                'centre $O$ et de rapport $r$. Les deux effets se produisent simultanément ' +
+                'centre $O$ et de rapport $r$. Les deux effets se produisent en même temps ' +
                 'dans $zc$ : c\'est bien la composée des deux.',
             },
-            { kind: 'para', text: 'Cas général (centre $\\Omega$ d\'affixe $z_0$) : $z\'-z_0 = c(z-z_0)$ — on applique le cas $z_0=0$ ci-dessus au vecteur $\\vec{\\Omega M}$, d\'affixe $z-z_0$' },
+            { kind: 'para', text: 'Cas général (centre $\\Omega$ d\'affixe $z_0$) : $z\'-z_0 = c(z-z_0)$ — applique le cas $z_0=0$ ci-dessus au vecteur $\\vec{\\Omega M}$, d\'affixe $z-z_0$' },
             {
               kind: 'para',
               text:
                 'Le vecteur $\\vec{\\Omega M}$ subit la rotation+homothétie de centre $O$ ' +
-                'tout juste démontrée (puisque tout vecteur peut se traiter comme si son ' +
-                'origine était $O$) : il devient $\\vec{\\Omega M\'}$ d\'affixe $c(z-z_0)$. ' +
-                'On retranslate ensuite l\'origine en $\\Omega$ (translation, ci-dessus) pour ' +
-                'obtenir $z\' = z_0 + c(z-z_0)$ : exactement la formule annoncée en tête de ' +
-                'section, avec $c=e^{i\\theta}$ pour une rotation pure ou $c=k$ réel pour une ' +
-                'homothétie pure.',
+                'tout juste démontrée (tout vecteur peut se traiter comme si son origine ' +
+                'était $O$) : il devient $\\vec{\\Omega M\'}$, d\'affixe $c(z-z_0)$. Il ne ' +
+                'reste qu\'à retranslater l\'origine en $\\Omega$ (translation, ci-dessus) ' +
+                'pour obtenir $z\' = z_0 + c(z-z_0)$ : exactement la formule annoncée en tête ' +
+                'de section, avec $c=e^{i\\theta}$ pour une rotation pure, ou $c=k$ réel pour ' +
+                'une homothétie pure.',
             },
           ],
         },
@@ -1032,15 +1086,15 @@ export const nombresComplexes: ChapterContent = {
             '$z\'=iz$ : comme $i=e^{i\\pi/2}$, c\'est la rotation de centre $O$ et d\'angle ' +
             '$\\pi/2$ (module 1 : pas d\'homothétie). $z\'=i^2z=-z$ : deux rotations de ' +
             '$\\pi/2$ composées, donc une rotation de $\\pi$ — c\'est la symétrie centrale de ' +
-            'centre $O$ ($M$ et $M\'$ alignés avec $O$, à égale distance de part et d\'autre).',
+            'centre $O$ : $M$ et $M\'$ alignés avec $O$, à égale distance de part et d\'autre.',
         },
         {
           kind: 'definition',
           label: 'Similitude directe',
           items: [
             'Une similitude directe s\'écrit $z\' = az+b$, avec $a$ un complexe NON NUL. En ' +
-              'écrivant $a = |a|e^{i\\theta}$, elle combine une rotation d\'angle $\\theta = ' +
-              'arg(a)$ et une homothétie de rapport $|a|$, de même centre.',
+              'écrivant $a = |a|e^{i\\theta}$, tu vois qu\'elle combine une rotation d\'angle ' +
+              '$\\theta = arg(a)$ et une homothétie de rapport $|a|$, de même centre.',
             '$|a|$ = rapport d\'agrandissement $\\qquad arg(a)$ = angle de rotation',
           ],
         },
@@ -1057,22 +1111,22 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'methode',
           label: 'Retrouver le centre d\'une transformation',
-          items: ['Pour $a\\ne1$, le centre $\\Omega$ est l\'unique point FIXE de la transformation : on résout $z_0=az_0+b$, soit $z_0 = \\dfrac{b}{1-a}$.'],
+          items: ['Pour $a\\ne1$, le centre $\\Omega$ est l\'unique point FIXE de la transformation : résous $z_0=az_0+b$, ce qui donne $z_0 = \\dfrac{b}{1-a}$.'],
         },
         {
           kind: 'astuce',
           label: 'Composer, c\'est multiplier les multiplicateurs',
           text:
             'Deux transformations de MÊME centre $\\Omega$ (multiplicateurs $a$ et $k$) ' +
-            'commutent toujours : leur composée a pour multiplicateur $ak=ka$ (la ' +
-            'multiplication complexe est commutative). En revanche, une rotation et une ' +
+            'commutent toujours : leur composée a pour multiplicateur $ak=ka$, puisque la ' +
+            'multiplication complexe est commutative. En revanche, une rotation et une ' +
             'translation ne commutent PAS en général — l\'ordre de composition compte.',
         },
         {
           kind: 'entrainement',
           title: 'Transformations du plan via les nombres complexes',
           generatorId: '6gen40',
-          description: ['Détermine l\'écriture complexe d\'une translation, rotation, homothétie ou similitude, ou retrouve le centre et le type d\'une transformation donnée.'],
+          description: ['Détermine l\'écriture complexe d\'une translation, rotation, homothétie ou similitude — ou retrouve le centre et le type d\'une transformation donnée.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 40. Transformations du plan via les nombres complexes »',
         },
@@ -1102,15 +1156,15 @@ export const nombresComplexes: ChapterContent = {
           kind: 'piege',
           text:
             'Un rapport RÉEL signale un alignement (ou une colinéarité), un rapport ' +
-            'IMAGINAIRE PUR signale une orthogonalité — ces deux critères sont fréquemment ' +
-            'échangés par erreur.',
+            'IMAGINAIRE PUR signale une orthogonalité — les deux se confondent facilement, ' +
+            'fais bien attention !',
         },
         {
           kind: 'methode',
           label: 'Triangle isocèle, rectangle',
           items: [
-            '$ABC$ est isocèle en $A$ ⟺ $|z_B-z_A| = |z_C-z_A|$ (égalité des MODULES, jamais ' +
-              'des complexes eux-mêmes — cela forcerait $B=C$).',
+            '$ABC$ est isocèle en $A$ ⟺ $|z_B-z_A| = |z_C-z_A|$ — égalité des MODULES, jamais ' +
+              'des complexes eux-mêmes ! (ça forcerait $B=C$).',
             '$ABC$ est rectangle en $A$ ⟺ $\\dfrac{z_B-z_A}{z_C-z_A}$ imaginaire pur ' +
               '(orthogonalité de $AB$ et $AC$).',
           ],
@@ -1145,21 +1199,21 @@ export const nombresComplexes: ChapterContent = {
           blocks: [
             { kind: 'para', text: '$F = B\\cdot e^{i\\pi/3}$ — définition de $F$ : l\'image de $B$ par la rotation de centre $O$ et d\'angle $\\pi/3$' },
             { kind: 'para', text: '$OF = |F-0| = |B\\cdot e^{i\\pi/3}| = |B|\\cdot|e^{i\\pi/3}| = |B| = OB$ — module d\'un produit = produit des modules (section 4), et $|e^{i\\pi/3}|=1$' },
-            { kind: 'para', text: 'Premier côté acquis : une rotation conserve les distances au centre, donc $OF=OB$ — c\'était prévisible sans calcul, mais le calcul confirme la valeur commune.' },
-            { kind: 'para', text: '$BF = |F-B| = |B\\cdot e^{i\\pi/3} - B| = |B|\\cdot|e^{i\\pi/3}-1|$ — on met $B$ en évidence, puis module d\'un produit = produit des modules' },
-            { kind: 'para', text: 'Reste à évaluer $|e^{i\\pi/3}-1|$. Méthode générale, pour tout angle $\\theta$ : on factorise par $e^{i\\theta/2}$.' },
+            { kind: 'para', text: 'Premier côté déjà acquis : une rotation conserve les distances au centre, donc $OF=OB$ — c\'était prévisible sans calcul, mais le calcul confirme la valeur commune.' },
+            { kind: 'para', text: '$BF = |F-B| = |B\\cdot e^{i\\pi/3} - B| = |B|\\cdot|e^{i\\pi/3}-1|$ — mets $B$ en évidence, puis module d\'un produit = produit des modules' },
+            { kind: 'para', text: 'Reste à évaluer $|e^{i\\pi/3}-1|$. Méthode générale, pour tout angle $\\theta$ : factorise par $e^{i\\theta/2}$.' },
             { kind: 'para', text: '$e^{i\\theta}-1 = e^{i\\theta/2}(e^{i\\theta/2}-e^{-i\\theta/2})$ — mise en évidence de $e^{i\\theta/2}$ (vérifiable en redéveloppant)' },
             { kind: 'para', text: '$e^{i\\theta/2}-e^{-i\\theta/2} = [\\cos(\\theta/2)+i\\sin(\\theta/2)] - [\\cos(\\theta/2)-i\\sin(\\theta/2)] = 2i\\sin(\\theta/2)$ — formule d\'Euler sur chaque terme, puis $\\cos(-x)=\\cos x$ et $\\sin(-x)=-\\sin x$' },
             {
               kind: 'para',
               text:
                 'Donc $e^{i\\theta}-1 = 2i\\cdot e^{i\\theta/2}\\cdot\\sin(\\theta/2)$, un ' +
-                'produit de trois facteurs dont on connaît chaque module : $|2i|=2$, ' +
+                'produit de trois facteurs dont tu connais chaque module : $|2i|=2$, ' +
                 '$|e^{i\\theta/2}|=1$, et $\\sin(\\theta/2)$ est ici un réel. D\'où ' +
                 '$|e^{i\\theta}-1| = 2|\\sin(\\theta/2)|$. Pour $\\theta=\\pi/3\\in]0;2\\pi[$, ' +
                 '$\\sin(\\theta/2)=\\sin(\\pi/6)=1/2>0$, donc $|e^{i\\pi/3}-1| = 2\\times(1/2) = 1$.',
             },
-            { kind: 'para', text: 'Conclusion : $BF = |B|\\times1 = |B| = OB = OF$ — les 3 côtés du triangle $OBF$ sont égaux, il est bien équilatéral, et ce pour n\'importe quel $B\\ne O$ choisi au départ.' },
+            { kind: 'para', text: 'Conclusion : $BF = |B|\\times1 = |B| = OB = OF$ — les 3 côtés du triangle $OBF$ sont égaux, il est bien équilatéral, et ça marche pour n\'importe quel $B\\ne O$ de départ.' },
           ],
         },
         {
@@ -1167,16 +1221,16 @@ export const nombresComplexes: ChapterContent = {
           label: 'Loi des cosinus depuis les affixes',
           text:
             'Une fois les 3 longueurs d\'un triangle obtenues comme modules de différences ' +
-            'd\'affixes, la loi des cosinus permet de retrouver un angle — sans garantie que ' +
-            'cet angle soit remarquable, même pour des côtés entiers (c\'est le seul type ' +
-            'd\'écran de ce chapitre vérifié par tolérance décimale plutôt que par égalité ' +
+            'd\'affixes, la loi des cosinus te permet de retrouver un angle — sans garantie ' +
+            'que cet angle soit remarquable, même avec des côtés entiers (le seul type ' +
+            'd\'exercice de ce chapitre vérifié par tolérance décimale plutôt que par égalité ' +
             'exacte).',
         },
         {
           kind: 'entrainement',
           title: 'Propriétés géométriques de triangles',
           generatorId: '6gen41',
-          description: ['Détermine si des points sont alignés, si des vecteurs sont orthogonaux, ou reconnais un triangle isocèle, rectangle ou équilatéral à partir de leurs affixes.'],
+          description: ['Détermine si des points sont alignés, si des vecteurs sont orthogonaux, ou reconnais un triangle isocèle, rectangle ou équilatéral — à partir de leurs affixes.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 41. Propriétés géométriques de triangles »',
         },
@@ -1200,11 +1254,11 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '« Réel » (mod $\\pi$) et « réel POSITIF » (mod $2\\pi$) ne demandent pas la même ' +
-            'condition : un angle qui rend $z^n$ réel NÉGATIF vérifie $n\\theta \\equiv \\pi ' +
-            '\\pmod{2\\pi}$, pas 0 — il satisfait la condition « réel » mais pas la condition ' +
-            '« réel positif ». Confondre les deux modules ($\\pi$ contre $2\\pi$) est ' +
-            'l\'erreur la plus fréquente de ce type d\'exercice.',
+            '« Réel » (mod $\\pi$) et « réel POSITIF » (mod $2\\pi$) ne demandent PAS la même ' +
+            'condition ! Un angle qui rend $z^n$ réel NÉGATIF vérifie $n\\theta \\equiv \\pi ' +
+            '\\pmod{2\\pi}$, pas 0 — il satisfait la condition « réel » mais pas « réel ' +
+            'positif ». Confondre les deux modules ($\\pi$ contre $2\\pi$) est l\'erreur la ' +
+            'plus fréquente sur ce type d\'exercice.',
         },
         {
           kind: 'exemple',
@@ -1215,7 +1269,7 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'definition',
           label: 'Lieux géométriques',
-          items: ['Un point $M$ d\'affixe $z$ vérifiant une condition sur $z-a$ (avec $a$ l\'affixe d\'un point fixe $A$) décrit une courbe simple selon la nature de cette condition :'],
+          items: ['Un point $M$ d\'affixe $z$ qui vérifie une condition sur $z-a$ (où $a$ est l\'affixe d\'un point fixe $A$) décrit une courbe simple, selon la nature de cette condition :'],
         },
         {
           kind: 'featureTable',
@@ -1245,27 +1299,27 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '« mod $2\\pi$ » ne retient qu\'UN SEUL des deux rayons opposés issus de $A$ (une ' +
-            'DEMI-droite) ; « mod $\\pi$ » retient les DEUX à la fois, formant une droite ' +
+            '« mod $2\\pi$ » ne retient qu\'UN SEUL des deux rayons opposés issus de $A$ — une ' +
+            'DEMI-droite ; « mod $\\pi$ » retient les DEUX à la fois, ce qui forme une droite ' +
             'complète. Prendre « mod $\\pi$ » là où l\'énoncé impose « mod $2\\pi$ » ajoute au ' +
-            'lieu la moitié qui ne convient pas.',
+            'lieu la moitié qui ne convient pas !',
         },
         { kind: 'subheading', text: 'Une transformation qui conserve le cercle unité' },
         {
           kind: 'exempleLibre',
           label: 'Démonstration — pour |a|≠1, si |z|=1 alors |z′|=1 avec z′ = (z−a)/(1−āz)',
           blocks: [
-            { kind: 'para', text: 'Hypothèse : $|z|=1$, c\'est-à-dire $z\\cdot\\bar{z}=1$ — définition du module au carré (section 1) appliquée à $|z|=1$' },
-            { kind: 'para', text: '$z\\cdot\\bar{z}=1 \\implies \\bar{z} = 1/z$ — on divise les deux membres par $z$ (non nul, car $|z|=1$)' },
-            { kind: 'para', text: 'On veut calculer $|z\'| = |z-a| / |1-\\bar{a}z|$. Le numérateur est déjà simple ; on transforme le DÉNOMINATEUR pour faire apparaître le même $|z-a|$.' },
-            { kind: 'para', text: '$|1-\\bar{a}z| = |z|\\cdot|1/z-\\bar{a}|$ — on met $z$ en évidence dans $1-\\bar{a}z = z(1/z-\\bar{a})$, puis module d\'un produit' },
+            { kind: 'para', text: 'Hypothèse : $|z|=1$, c\'est-à-dire $z\\cdot\\bar{z}=1$ — définition du module au carré (section 1), appliquée à $|z|=1$' },
+            { kind: 'para', text: '$z\\cdot\\bar{z}=1 \\implies \\bar{z} = 1/z$ — divise les deux membres par $z$ (non nul, car $|z|=1$)' },
+            { kind: 'para', text: 'Tu veux calculer $|z\'| = |z-a| / |1-\\bar{a}z|$. Le numérateur est déjà simple ; transforme le DÉNOMINATEUR pour faire apparaître ce même $|z-a|$.' },
+            { kind: 'para', text: '$|1-\\bar{a}z| = |z|\\cdot|1/z-\\bar{a}|$ — mets $z$ en évidence dans $1-\\bar{a}z = z(1/z-\\bar{a})$, puis module d\'un produit' },
             { kind: 'para', text: '$= 1\\cdot|\\bar{z}-\\bar{a}| = |\\bar{z}-\\bar{a}|$ — $|z|=1$ (hypothèse), et $1/z=\\bar{z}$ (étape précédente)' },
             { kind: 'para', text: '$|\\bar{z}-\\bar{a}| = |\\overline{z-a}| = |z-a|$ — conjugué d\'une différence, puis même module (section 4)' },
             {
               kind: 'para',
               text:
                 'En combinant toute la chaîne : $|1-\\bar{a}z| = |z-a|$ — le dénominateur vaut ' +
-                'exactement le numérateur. Donc $|z\'| = |z-a| / |z-a| = 1$ (le quotient est ' +
+                'exactement le numérateur ! Donc $|z\'| = |z-a| / |z-a| = 1$ (le quotient est ' +
                 'bien défini car $z\\ne a$ : sinon $|a|=|z|=1$, exclu par hypothèse). Tout ' +
                 'point du cercle unité est donc envoyé par cette transformation sur un AUTRE ' +
                 'point du cercle unité.',
@@ -1276,8 +1330,8 @@ export const nombresComplexes: ChapterContent = {
           kind: 'astuce',
           label: 'Toujours repartir de la définition du module',
           text:
-            'Sur un problème avancé, la seule stratégie sûre reste d\'écrire $|u|^2 = ' +
-            'u\\cdot\\bar{u}$ (ou, pour $|u|=1$, $\\bar{u}=1/u$) et de manipuler des égalités ' +
+            'Sur un problème avancé, la seule stratégie vraiment sûre reste d\'écrire $|u|^2 = ' +
+            'u\\cdot\\bar{u}$ (ou, pour $|u|=1$, $\\bar{u}=1/u$) et de manipuler des égalités, ' +
             'plutôt que de deviner un résultat — les raccourcis mémorisés sur des cas ' +
             'particuliers ne se généralisent pas toujours.',
         },
@@ -1316,9 +1370,10 @@ export const nombresComplexes: ChapterContent = {
       ],
     },
     forward:
-      'Le plan d\'Argand, le module et l\'argument reviendront dans les problèmes de synthèse ' +
-      'combinant géométrie et algèbre — les nombres complexes offrent souvent la voie la plus ' +
-      'courte vers une propriété qu\'une preuve purement géométrique rendrait longue.',
+      'Le plan d\'Argand, le module et l\'argument reviennent dans les problèmes de synthèse ' +
+      'qui combinent géométrie et algèbre — les nombres complexes offrent souvent le chemin ' +
+      'le plus court vers une propriété qu\'une preuve purement géométrique rendrait longue ' +
+      'et pénible.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz de révision — vrai ou faux sur tout le chapitre',

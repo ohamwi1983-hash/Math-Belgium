@@ -13,7 +13,7 @@ export const variablesAleatoires: ChapterContent = {
   title: 'Variables aléatoires et lois de probabilités',
   slug: 'variables-aleatoires',
   lede:
-    "Combien un jeu rapporte-t-il en moyenne ? À partir de combien d'épreuves un événement rare devient-il presque certain ? Quelle proportion d'une population se situe dans un intervalle donné ? Ce chapitre construit les outils pour répondre : variable aléatoire discrète et espérance, loi binomiale, passage au continu par la densité de probabilité, loi uniforme continue, loi normale — lue via une table de la fonction de répartition Φ — un générateur de clôture qui combine binomiale, normale et théorème de Bayes, puis la loi de Poisson pour les événements rares.",
+    "Combien un jeu rapporte-t-il en moyenne ? À partir de combien d'essais un événement rare devient-il presque certain ? Dans ce chapitre, tu vas apprendre à **construire** une variable aléatoire et son espérance, à utiliser la **loi binomiale**, puis à passer au continu avec la **densité de probabilité**, la **loi uniforme continue** et la **loi normale** — lue sur une table Φ. Tu termines avec un exercice qui mélange tout ça (binomiale, normale, théorème de Bayes), puis la **loi de Poisson** pour les événements rares.",
   sections: [
     {
       id: 'variablesdiscretes',
@@ -21,10 +21,16 @@ export const variablesAleatoires: ChapterContent = {
       title: 'Variables aléatoires discrètes et espérance',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pour visualiser',
+          text:
+            "Imagine un traducteur automatique : tu lui donnes le résultat d'une expérience — une face de dé, une couleur tirée, une carte piochée — il te répond toujours par un seul nombre : un gain, une distance, un temps. Une **variable aléatoire**, c'est exactement ce traducteur. Elle ne donne jamais deux réponses différentes pour le même résultat.",
+        },
+        {
           kind: 'definition',
           label: 'Variable aléatoire discrète et loi de probabilité',
           items: [
-            "Une **variable aléatoire discrète** $X$ associe à chaque issue d'une expérience une valeur numérique parmi un ensemble fini $\\{x_1,\\ldots,x_n\\}$. Sa **loi de probabilité** donne $P(X=x_i)$ pour chaque valeur, avec la contrainte $\\sum P(X=x_i) = 1$ — jamais plus, jamais moins.",
+            "Une **variable aléatoire discrète** $X$ associe un nombre à chaque issue d'une expérience, parmi un ensemble fini $\\{x_1,\\ldots,x_n\\}$. Sa **loi de probabilité**, c'est simplement $P(X=x_i)$ pour chaque valeur possible. Une seule règle à respecter : $\\sum P(X=x_i) = 1$ — jamais plus, jamais moins !",
           ],
         },
         { kind: 'subheading', text: 'Fonction de répartition F(x)=P(X≤x)' },
@@ -32,7 +38,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'definition',
           label: 'Fonction de répartition',
           items: [
-            "La **fonction de répartition** $F$ d'une variable aléatoire discrète associe à tout réel $x$ la probabilité cumulée $F(x)=P(X\\leq x)$ — la somme des probabilités de toutes les valeurs inférieures ou égales à $x$. Son graphique est toujours un graphique en escaliers, jamais une courbe continue.",
+            "La **fonction de répartition** $F$ associe à tout réel $x$ la probabilité cumulée $F(x)=P(X\\leq x)$ : la somme des probabilités de toutes les valeurs inférieures ou égales à $x$. Pour une variable discrète, son graphique est **toujours** un escalier — jamais une courbe continue !",
           ],
         },
         {
@@ -61,24 +67,36 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Chaque marche mesure exactement P(X=x)',
-          text: 'La hauteur du saut de $F$ en $x=x_i$ est toujours $P(X=x_i)$ — par exemple le saut en $x=4$ vaut $0,70-0,40=0,30$, exactement $P(X=4)$. Lire un graphique en escaliers revient donc à lire directement toute la loi de probabilité.',
+          text: 'La hauteur de chaque saut de $F$ en $x=x_i$ vaut exactement $P(X=x_i)$. Exemple : le saut en $x=4$ fait $0,70-0,40=0,30$ — c\'est $P(X=4)$. Lire un escalier, c\'est donc lire toute la loi de probabilité d\'un coup !',
         },
         {
           kind: 'definition',
           label: 'Espérance E(X)',
           items: [
-            "L'**espérance** $E(X)$ est la valeur moyenne de $X$, pondérée par les probabilités — jamais une simple moyenne arithmétique des valeurs possibles :",
+            "L'**espérance** $E(X)$, c'est la valeur moyenne de $X$ — mais une moyenne **pondérée** par les probabilités, jamais une simple moyenne arithmétique des valeurs possibles !",
             '$E(X) = \\displaystyle\\sum_{i=1}^{n} x_i\\times P(X=x_i)$',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Ce que représente vraiment E(X)',
+          text:
+            "Imagine que tu joues au même jeu des centaines de fois de suite. Certaines parties, tu perds ; d'autres, tu gagnes gros. $E(X)$, c'est le gain moyen que tu observerais sur un **très grand nombre de parties** — pas le résultat d'une seule partie, qu'aucune loi ne peut prédire. Un jeu où $E(X)>0$ te fait gagner en moyenne sur le long terme ; un jeu **équitable** a $E(X)=0$.",
         },
         {
           kind: 'definition',
           label: 'Variance V(X) et écart-type σ(X)',
           items: [
-            'La **variance** $V(X)$ mesure la dispersion de $X$ autour de son espérance — la moyenne, pondérée par les probabilités, des écarts à $E(X)$ mis au carré :',
+            'La **variance** $V(X)$ mesure à quel point $X$ s\'écarte de son espérance — la moyenne, pondérée par les probabilités, des écarts à $E(X)$ mis au carré :',
             '$V(X) = \\displaystyle\\sum_{i=1}^{n} P(X=x_i)\\times[x_i-E(X)]^2 = E(X^2)-[E(X)]^2$',
-            "L'**écart-type** $\\sigma(X) = \\sqrt{V(X)}$ se mesure dans la même unité que $X$ — contrairement à $V(X)$, qui porte cette unité au carré.",
+            "L'**écart-type** $\\sigma(X) = \\sqrt{V(X)}$ se mesure dans la **même unité** que $X$ — contrairement à $V(X)$, qui porte cette unité au carré, donc pas directement comparable à $X$.",
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Deux jeux, même espérance, pas le même risque',
+          text:
+            "Deux jeux peuvent avoir exactement la même espérance — disons 0€, un jeu équitable — sans être aussi imprévisibles l'un que l'autre. Le premier fait gagner ou perdre 1€ à chaque fois : peu de surprise. Le second fait gagner ou perdre 100€, à pile ou face : bien plus risqué, même si le gain moyen est identique. C'est exactement ce que mesure $\\sigma(X)$ : plus il est grand, plus les résultats individuels s'éloignent de la moyenne — plus le jeu est imprévisible.",
         },
         {
           kind: 'exempleLibre',
@@ -86,7 +104,7 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: "$X\\in\\{2,3,4,5,6\\}$, avec $P=(0,15\\,;\\,0,25\\,;\\,0,30\\,;\\,0,20\\,;\\,0,10)$. Vérification préalable : $0,15+0,25+0,30+0,20+0,10=1,00$ — c'est bien une loi de probabilité valide.",
+              text: "$X\\in\\{2,3,4,5,6\\}$, avec $P=(0,15\\,;\\,0,25\\,;\\,0,30\\,;\\,0,20\\,;\\,0,10)$. D'abord, un réflexe : $0,15+0,25+0,30+0,20+0,10=1,00$ — la loi est bien valide.",
             },
             {
               kind: 'featureTable',
@@ -121,11 +139,11 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: "Pour cette même loi, additionner simplement les 5 valeurs puis diviser par 5 donnerait $(2+3+4+5+6)/5=4$ — une moyenne qui ignore les probabilités, donc fausse dès que la loi n'est pas uniforme. L'espérance correcte, $3,85$, penche vers les valeurs 3 et 4 qui portent le plus de poids ($0,25$ et $0,30$).",
+              text: "Fais bien la différence : additionner simplement les 5 valeurs et diviser par 5 donnerait $(2+3+4+5+6)/5=4$ — une moyenne qui ignore les probabilités, donc fausse dès que la loi n'est pas uniforme ! La vraie espérance, $3,85$, penche vers 3 et 4, qui portent le plus de poids ($0,25$ et $0,30$).",
             },
             {
               kind: 'para',
-              text: 'Écart de chaque valeur à $E(X)=3,85$, mis au carré et pondéré par sa probabilité :',
+              text: "L'écart de chaque valeur à $E(X)=3,85$, mis au carré et pondéré par sa probabilité :",
             },
             {
               kind: 'para',
@@ -137,12 +155,12 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: 'Oublier de pondérer par la probabilité',
-          text: "Calculer une moyenne simple des 5 écarts au carré, $(3,4225+0,7225+0,0225+1,3225+4,6225)/5\\approx2,0225$, ignore que les probabilités ne sont pas égales — exactement le même piège que pour l'espérance. La variance pondère chaque écart au carré par $P(X=x_i)$, donnant $1,4275$, jamais une moyenne arithmétique simple.",
+          text: "Calculer une moyenne simple des 5 écarts au carré, $(3,4225+0,7225+0,0225+1,3225+4,6225)/5\\approx2,0225$, oublie que les probabilités ne sont pas égales — exactement le même piège que pour l'espérance ! La variance pondère chaque écart au carré par $P(X=x_i)$ : ça donne $1,4275$, jamais une moyenne arithmétique simple.",
         },
         { kind: 'subheading', text: 'Le piège des événements « au moins » / « au plus »' },
         {
           kind: 'para',
-          text: "Deux événements sont **contraires** si et seulement si (1) leur intersection est vide et (2) leur union couvre toutes les valeurs possibles. Pour la loi ci-dessus : « $X\\leq3$ » (valeurs 2, 3 ; $P=0,40$) et « $X\\geq4$ » (valeurs 4, 5, 6 ; $P=0,60$) sont bien contraires — aucune valeur commune, et ensemble elles couvrent $\\{2,\\ldots,6\\}$.",
+          text: "Deux événements sont **contraires** si (1) leur intersection est vide et (2) leur union couvre toutes les valeurs possibles — les deux conditions à la fois. Pour la loi ci-dessus : « $X\\leq3$ » (valeurs 2, 3 ; $P=0,40$) et « $X\\geq4$ » (valeurs 4, 5, 6 ; $P=0,60$) sont bien contraires — aucune valeur commune, et ensemble elles couvrent $\\{2,\\ldots,6\\}$.",
         },
         {
           kind: 'illustration',
@@ -173,12 +191,12 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: 'La valeur frontière est comptée deux fois',
-          text: "« $X\\geq4$ » ($P=0,60$) et « $X\\leq4$ » ($P=0,70$) ne sont pas contraires : ils partagent la valeur $X=4$, jamais retirée d'aucun des deux événements. Leur somme ($1,30$) n'est d'ailleurs même pas égale à 1 — mais le vrai test n'est jamais « la somme fait-elle 1 ? », c'est toujours « l'intersection est-elle vide et l'union complète ? ».",
+          text: "« $X\\geq4$ » ($P=0,60$) et « $X\\leq4$ » ($P=0,70$) ne sont **pas** contraires : ils partagent la valeur $X=4$, jamais retirée d'aucun des deux ! Leur somme ($1,30$) n'est même pas égale à 1 — la bonne question n'est jamais « la somme fait-elle 1 ? », mais toujours « l'intersection est-elle vide, et l'union complète ? ».",
         },
         {
           kind: 'astuce',
           label: 'Une somme à 1 ne suffit jamais à elle seule',
-          text: "Deux événements contraires vérifient toujours $P(A)+P(B)=1$, mais la réciproque est fausse : il faut en plus l'absence de chevauchement. Repérer le mot-frontière commun (« au moins $k$ » et « au plus $k$ » partagent toujours $X=k$) est le réflexe le plus rapide — le vrai couple de contraires de « au moins $k$ » est « au plus $k-1$ », jamais « au plus $k$ ».",
+          text: "Deux événements contraires vérifient toujours $P(A)+P(B)=1$, mais l'inverse est faux : il faut aussi qu'ils ne se chevauchent pas. Le réflexe le plus rapide : repérer le mot-frontière commun (« au moins $k$ » et « au plus $k$ » partagent toujours $X=k$). Le vrai contraire de « au moins $k$ », c'est « au plus $k-1$ » — jamais « au plus $k$ » !",
         },
         { kind: 'subheading', text: 'Jeux et gains — jeu favorable, défavorable ou équitable' },
         {
@@ -188,7 +206,7 @@ export const variablesAleatoires: ChapterContent = {
             { kind: 'para', text: '$E = -2\\times0,4 + 3\\times0,35 + 5\\times0,25 = -0,8+1,05+1,25 = 1,5€$' },
             {
               kind: 'para',
-              text: "Espérance strictement positive : le jeu est **favorable** au joueur (sur un grand nombre de parties, il gagne en moyenne 1,5€ par partie).",
+              text: "Espérance strictement positive : le jeu est **favorable** au joueur — sur un grand nombre de parties, il gagne en moyenne 1,5€ à chaque fois.",
             },
           ],
         },
@@ -198,7 +216,7 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: 'Gain brut 10€ (0,2) / 4€ (0,3) / −6€ (0,5) : $E(\\text{gain brut})=10\\times0,2+4\\times0,3+(-6)\\times0,5=2+1,2-3=0,2€$. Le gain net vaut désormais $\\text{gain brut}-m$ ; comme $\\sum p_i=1$, l\'espérance du gain net est $E(\\text{gain brut})-m$, linéaire en $m$ — pour un jeu équitable ($E=0$) :',
+              text: "Gain brut 10€ (0,2) / 4€ (0,3) / −6€ (0,5) : $E(\\text{gain brut})=10\\times0,2+4\\times0,3+(-6)\\times0,5=2+1,2-3=0,2€$. Le gain net vaut désormais $\\text{gain brut}-m$. Comme $\\sum p_i=1$, l'espérance du gain net est simplement $E(\\text{gain brut})-m$ — linéaire en $m$. Pour un jeu équitable ($E=0$) :",
             },
             { kind: 'para', text: '$m = E(\\text{gain brut}) = 0,2€$' },
           ],
@@ -206,12 +224,12 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Retrancher une constante ne demande jamais de refaire toute la somme',
-          text: "Puisque $E(\\text{gain brut}-m)=E(\\text{gain brut})-m$ (linéarité), il suffit de calculer $E(\\text{gain brut})$ une seule fois puis de résoudre l'équation du premier degré $E(\\text{gain brut})-m=0$ — jamais recalculer une somme de 3 termes pour chaque valeur de $m$ essayée.",
+          text: "Puisque $E(\\text{gain brut}-m)=E(\\text{gain brut})-m$ (linéarité), calcule $E(\\text{gain brut})$ **une seule fois**, puis résous l'équation du premier degré $E(\\text{gain brut})-m=0$ — inutile de refaire la somme de 3 termes à chaque valeur de $m$ essayée !",
         },
         { kind: 'subheading', text: 'Cas particulier — tirage sans remise (loi hypergéométrique)' },
         {
           kind: 'para',
-          text: "Quand $X$ compte le nombre de succès parmi $n$ tirages sans remise dans une population de $N$ éléments dont $K$ sont des succès, la loi de $X$ et son espérance se calculent exactement comme pour toute variable discrète — $P(k)$ vient simplement de la formule hypergéométrique plutôt que d'être donnée directement.",
+          text: "Quand $X$ compte le nombre de succès parmi $n$ tirages **sans remise** dans une population de $N$ éléments dont $K$ sont des succès, rien de neuf côté méthode : la loi et l'espérance se calculent comme pour toute variable discrète. Seul $P(k)$ change — il vient de la formule hypergéométrique plutôt que d'être donné directement.",
         },
         {
           kind: 'exempleLibre',
@@ -220,26 +238,26 @@ export const variablesAleatoires: ChapterContent = {
             { kind: 'para', text: '$P(k) = \\dfrac{C(4,k)\\times C(6,3-k)}{C(10,3)}$' },
             {
               kind: 'para',
-              text: 'Support complet $k\\in\\{0,1,2,3\\}$ : $P(0)=1/6$, $P(1)=1/2$, $P(2)=3/10$, $P(3)=1/30$ (somme exacte = 1). Espérance :',
+              text: 'Support complet $k\\in\\{0,1,2,3\\}$ : $P(0)=1/6$, $P(1)=1/2$, $P(2)=3/10$, $P(3)=1/30$ (la somme fait bien 1). Espérance :',
             },
             { kind: 'para', text: '$E(X) = 0\\times\\frac{1}{6}+1\\times\\frac{1}{2}+2\\times\\frac{3}{10}+3\\times\\frac{1}{30} = 0+0,5+0,6+0,1 = 1,2$' },
             {
               kind: 'para',
-              text: "Ce résultat coïncide avec le raccourci $E(X)=nK/N=3\\times4/10=1,2$ — propre à la loi hypergéométrique, jamais un résultat général pour n'importe quelle loi discrète.",
+              text: "Ce résultat coïncide avec le raccourci $E(X)=nK/N=3\\times4/10=1,2$ — un raccourci propre à la loi hypergéométrique, jamais valable pour n'importe quelle loi discrète !",
             },
           ],
         },
         {
           kind: 'attention',
           label: 'Piège classique',
-          text: "Prendre la valeur centrale du support $\\{0,1,2,3\\}$, soit $1,5$, à la place de l'espérance est une erreur fréquente — l'espérance n'est jamais la simple valeur médiane d'un support, elle doit toujours être pondérée par les vraies probabilités de chaque valeur (ici asymétriques : $P(1)=0,5$ pèse bien plus que $P(3)=1/30$).",
+          text: "Prendre la valeur centrale du support $\\{0,1,2,3\\}$, soit $1,5$, à la place de l'espérance est une erreur fréquente. L'espérance n'est **jamais** la simple valeur médiane d'un support — elle doit toujours être pondérée par les vraies probabilités de chaque valeur (ici asymétriques : $P(1)=0,5$ pèse bien plus que $P(3)=1/30$).",
         },
         { kind: 'subheading', text: 'Cas particulier — loi uniforme discrète' },
         {
           kind: 'definition',
           label: 'Définition',
           items: [
-            'Une variable aléatoire discrète suit une **loi uniforme** lorsque ses $n$ valeurs possibles ont toutes la même probabilité $1/n$. Dans ce cas particulier :',
+            'Une variable aléatoire discrète suit une **loi uniforme** quand ses $n$ valeurs possibles ont toutes la même probabilité $1/n$. Dans ce cas particulier seulement :',
             '$E(X) = \\dfrac{n+1}{2} \\qquad V(X) = \\dfrac{n^2-1}{12}$',
           ],
         },
@@ -249,20 +267,20 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: "Chaque face a la même probabilité $1/6$ : $E(X)=(6+1)/2=3,5$ — une valeur qu'aucune face ne porte, comme dans l'exemple précédent où $E(X)=3,85$ ne coïncidait avec aucune valeur de $X$. $V(X)=(6^2-1)/12=35/12\\approx2,917$.",
+              text: "Chaque face a la même probabilité $1/6$ : $E(X)=(6+1)/2=3,5$ — une valeur qu'aucune face ne porte, exactement comme dans l'exemple précédent où $E(X)=3,85$ ne tombait sur aucune valeur de $X$. $V(X)=(6^2-1)/12=35/12\\approx2,917$.",
             },
           ],
         },
         {
           kind: 'attention',
           label: 'Ces 2 formules ne valent que pour une loi uniforme',
-          text: "Les raccourcis $E(X)=(n+1)/2$ et $V(X)=(n^2-1)/12$ supposent des probabilités toutes égales à $1/n$ — pour une loi non uniforme (comme l'exemple hypergéométrique ci-dessus, où $P(1)=1/2$ diffère nettement des 3 autres probabilités), il faut toujours repasser par la formule générale pondérée, jamais ce raccourci.",
+          text: "Les raccourcis $E(X)=(n+1)/2$ et $V(X)=(n^2-1)/12$ supposent des probabilités toutes égales à $1/n$. Pour une loi non uniforme (comme l'exemple hypergéométrique ci-dessus, où $P(1)=1/2$ diffère nettement des 3 autres probabilités), reviens toujours à la formule générale pondérée — jamais ce raccourci !",
         },
         {
           kind: 'entrainement',
           title: 'Variables aléatoires discrètes et espérance',
           generatorId: '6gen49',
-          description: ["S'entraîner à construire une loi de probabilité, calculer l'espérance, la variance et l'écart-type."],
+          description: ["Construis une loi de probabilité, puis calcule l'espérance, la variance et l'écart-type."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 49. Variables aléatoires discrètes et espérance »',
         },
@@ -286,7 +304,7 @@ export const variablesAleatoires: ChapterContent = {
           items: [
             '$P(X=k) = C(n,k)\\times p^k\\times(1-p)^{n-k} \\qquad E(X) = n\\times p$',
             '$V(X) = n\\times p\\times(1-p) \\qquad \\sigma(X) = \\sqrt{n\\times p\\times(1-p)}$',
-            "$p$ (succès) porte l'exposant $k$ ; $(1-p)$ (échec) porte l'exposant $n-k$ — jamais l'inverse. Le coefficient $C(n,k)$ compte les différentes positions possibles des $k$ succès parmi les $n$ épreuves — jamais optionnel dès que $0<k<n$.",
+            "$p$ (succès) porte l'exposant $k$ ; $(1-p)$ (échec) porte l'exposant $n-k$ — jamais l'inverse ! Le coefficient $C(n,k)$ compte les différentes positions possibles des $k$ succès parmi les $n$ épreuves — jamais optionnel dès que $0<k<n$.",
           ],
         },
         {
@@ -327,7 +345,7 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: 'Détail du calcul pour $k=2$ : $P(X=2)=C(5,2)\\times0,4^2\\times0,6^3=10\\times0,16\\times0,216=0,3456$. Oublier $C(5,2)=10$ donnerait $0,4^2\\times0,6^3=0,03456$, une valeur 10 fois trop petite.',
+              text: "Détail du calcul pour $k=2$ : $P(X=2)=C(5,2)\\times0,4^2\\times0,6^3=10\\times0,16\\times0,216=0,3456$. Oublie $C(5,2)=10$ et tu obtiens $0,4^2\\times0,6^3=0,03456$ — dix fois trop petit !",
             },
             { kind: 'para', text: '$V(X) = 5\\times0,4\\times0,6 = 1,2 \\qquad \\sigma(X) = \\sqrt{1,2} \\approx 1,095$' },
           ],
@@ -338,15 +356,21 @@ export const variablesAleatoires: ChapterContent = {
           items: [
             '« Exactement $k$ », « aucun » ou « tous » → un seul terme.',
             '« Au moins $k$ » ou « au plus $k$ » avec peu de termes → somme directe.',
-            '« Au moins $k$ » ou « au plus $k$ » avec beaucoup de termes → complément : $P(X\\geq1)=1-P(X=0)=1-0,07776=0,92224$, bien plus rapide qu\'une somme de 5 termes.',
+            "« Au moins $k$ » ou « au plus $k$ » avec beaucoup de termes → passe par le complément : $P(X\\geq1)=1-P(X=0)=1-0,07776=0,92224$ — bien plus rapide qu'une somme de 5 termes !",
           ],
         },
         {
           kind: 'attention',
           label: 'Le mauvais partenaire de complément',
-          text: "Le complément de « au moins 1 succès » est « aucun succès » ($X=0$), jamais « tous des succès » ($X=5$) — $1-P(X=5)=1-0,01024=0,98976$ serait une réponse fausse, même si elle semble plausible. Toujours identifier le seuil exact avant de choisir le complément : le contraire de « au moins $k$ » est « au plus $k-1$ », le contraire de « au plus $k$ » est « au moins $k+1$ ».",
+          text: "Le complément de « au moins 1 succès », c'est « aucun succès » ($X=0$), **jamais** « tous des succès » ($X=5$) ! $1-P(X=5)=1-0,01024=0,98976$ serait une réponse fausse, même si elle a l'air plausible. Identifie toujours le seuil exact avant de choisir le complément : le contraire de « au moins $k$ » est « au plus $k-1$ », le contraire de « au plus $k$ » est « au moins $k+1$ ».",
         },
         { kind: 'subheading', text: 'Trouver n — résolution par logarithme' },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi n finit toujours par suffire',
+          text:
+            "Même un événement très rare finit presque toujours par arriver, si tu répètes l'épreuve assez de fois. Un gain de loterie a une chance infime à chaque tirage — mais joue des milliers de fois, et la probabilité de gagner au moins une fois grimpe vers 1. C'est exactement ce que calcule cette section : à partir de quel nombre d'épreuves $n$ un événement rare devient-il presque certain ?",
+        },
         {
           kind: 'methode',
           label: "Isoler n dans « au moins 1 succès »",
@@ -358,7 +382,7 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: "Le sens de l'inégalité s'inverse",
-          text: "$\\ln(1-p)$ est toujours négatif (car $0<1-p<1$) : diviser les deux membres de l'inégalité par un nombre négatif inverse son sens. C'est pourquoi l'inégalité finale utilise $>$ alors que la ligne précédente utilisait $<$ — oublier cette inversion est le piège central de ce type d'exercice.",
+          text: "$\\ln(1-p)$ est **toujours négatif** (car $0<1-p<1$) : diviser les deux membres d'une inégalité par un nombre négatif inverse son sens. C'est pour ça que l'inégalité finale utilise $>$ alors que la ligne d'avant utilisait $<$ — oublier cette inversion est LE piège de ce type d'exercice !",
         },
         {
           kind: 'exempleLibre',
@@ -367,7 +391,7 @@ export const variablesAleatoires: ChapterContent = {
             { kind: 'para', text: '$n > \\dfrac{\\ln(0,1)}{\\ln(0,9)} \\approx 21,85 \\implies n=22$' },
             {
               kind: 'para',
-              text: "Vérification : $n=21$ est insuffisant — $(0,9)^{21}\\approx0,109>0,1$, donc $P(\\text{au moins 1})\\approx0,891<0,9$. $n=22$ suffit — $(0,9)^{22}\\approx0,0985<0,1$, donc $P(\\text{au moins 1})\\approx0,9015>0,9$.",
+              text: "Vérifions : $n=21$ ne suffit pas — $(0,9)^{21}\\approx0,109>0,1$, donc $P(\\text{au moins 1})\\approx0,891<0,9$. $n=22$ suffit — $(0,9)^{22}\\approx0,0985<0,1$, donc $P(\\text{au moins 1})\\approx0,9015>0,9$.",
             },
             {
               kind: 'illustration',
@@ -399,13 +423,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Toujours vérifier n−1 juste en dessous',
-          text: 'Le calcul par logarithme donne une valeur décimale (ici $21,85$) — le réflexe de vérification consiste à recalculer $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est bien le plus petit entier qui convient.',
+          text: 'Le calcul par logarithme donne une valeur décimale (ici $21,85$). Le bon réflexe : recalcule $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est vraiment le plus petit entier qui convient.',
         },
         {
           kind: 'entrainement',
           title: 'Loi binomiale',
           generatorId: '6gen50',
-          description: ['S\'entraîner à reconnaître un schéma de Bernoulli, calculer une probabilité binomiale et résoudre « trouver n ».'],
+          description: ['Reconnais un schéma de Bernoulli, calcule une probabilité binomiale, et résous un « trouver n ».'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 50. Loi binomiale »',
         },
@@ -418,27 +442,27 @@ export const variablesAleatoires: ChapterContent = {
       blocks: [
         {
           kind: 'para',
-          text: "Les variables aléatoires rencontrées jusqu'ici ne prenaient qu'un nombre fini de valeurs. Quand la valeur observée peut être **n'importe quel réel d'un intervalle** — la graduation exacte où s'arrête une aiguille, la masse exacte d'un sachet de sucre — la probabilité qu'elle prenne une valeur bien précise est nulle : si ce n'était pas le cas, la somme des probabilités serait infinie et non égale à 1. On ne peut donc plus définir une loi de probabilité valeur par valeur comme pour une variable discrète ; on n'attribue une probabilité qu'aux événements définis par un intervalle.",
+          text: "Jusqu'ici, une variable aléatoire ne prenait qu'un nombre fini de valeurs. Mais si la valeur observée peut être **n'importe quel réel d'un intervalle** — la graduation exacte où s'arrête une aiguille, la masse exacte d'un sachet de sucre — la probabilité qu'elle tombe pile sur une valeur précise est nulle ! Sinon, la somme des probabilités serait infinie, jamais égale à 1. On ne peut donc plus définir une loi valeur par valeur comme pour une variable discrète : on n'attribue une probabilité qu'à des événements définis par un **intervalle**.",
         },
         {
           kind: 'definition',
           label: 'Variable aléatoire continue',
           items: [
-            "Une **variable aléatoire continue** est une variable aléatoire qui peut prendre toutes les valeurs réelles d'un intervalle $I$, ou d'une union d'intervalles.",
+            "Une **variable aléatoire continue** peut prendre toutes les valeurs réelles d'un intervalle $I$, ou d'une union d'intervalles.",
           ],
         },
         {
           kind: 'definition',
           label: 'Densité de probabilité',
           items: [
-            "On appelle **densité de probabilité** d'une variable aléatoire $X$, dont l'ensemble des valeurs possibles est un intervalle $[u;v]$ de $\\mathbb{R}$, une fonction $f$ définie, continue et positive sur $[u;v]$ telle que :",
+            "La **densité de probabilité** d'une variable aléatoire $X$ (dont les valeurs possibles forment un intervalle $[u;v]$ de $\\mathbb{R}$) est une fonction $f$ définie, continue et positive sur $[u;v]$, telle que :",
             "$\\displaystyle\\int_u^v f(t)\\,dt = 1$ ;",
-            "quel que soit l'intervalle $[a;b]$ contenu dans $[u;v]$ (c'est-à-dire $[a;b]\\subset[u;v]$), on a $\\displaystyle P(a\\leq X\\leq b) = \\int_a^b f(t)\\,dt$.",
+            "et, pour tout intervalle $[a;b]$ contenu dans $[u;v]$ : $\\displaystyle P(a\\leq X\\leq b) = \\int_a^b f(t)\\,dt$.",
           ],
         },
         {
           kind: 'para',
-          text: "La probabilité que la valeur de la variable aléatoire appartienne à un intervalle $[a;b]$ est donc l'**aire de la surface sous la courbe** de $f$, entre les droites $x=a$ et $x=b$ — jamais la valeur $f(t)$ lue en un point.",
+          text: "La probabilité que $X$ tombe dans un intervalle $[a;b]$, c'est donc l'**aire sous la courbe** de $f$, entre les droites $x=a$ et $x=b$ — jamais la simple valeur $f(t)$ lue en un point !",
         },
         {
           kind: 'illustration',
@@ -465,7 +489,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'definition',
           label: "Fonction de répartition d'une variable aléatoire continue",
           items: [
-            "La **fonction de répartition** d'une variable aléatoire continue $X$ est la fonction $F$ définie sur $\\mathbb{R}$ par $F(x)=P(X\\leq x)$ — exactement la même définition que dans le cas discret, mais son graphique est cette fois une courbe continue et croissante, jamais un graphique en escaliers.",
+            "La **fonction de répartition** d'une variable continue $X$ est encore $F(x)=P(X\\leq x)$ — exactement la même définition que dans le cas discret. Mais son graphique change de nature : une courbe continue et croissante, plus du tout un escalier !",
           ],
         },
         { kind: 'subheading', text: 'Propriétés de la fonction de répartition et de la densité' },
@@ -483,16 +507,22 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Strict ou large : aucune différence en continu',
-          text: "Puisque $P(X=a)=0$ pour toute valeur isolée, ajouter ou retirer une borne ne change jamais la probabilité d'un intervalle : $P(a<X<b)$ et $P(a\\leq X\\leq b)$ valent toujours la même chose, $F(b)-F(a)$. C'est exactement l'inverse du cas discret, où la valeur frontière $X=k$ pèse un vrai $P(X=k)$ et fait se recouvrir « au moins $k$ » et « au plus $k$ » (section 1).",
+          text: "Puisque $P(X=a)=0$ pour toute valeur isolée, ajouter ou retirer une borne ne change **jamais** la probabilité d'un intervalle : $P(a<X<b)$ et $P(a\\leq X\\leq b)$ valent toujours pareil, $F(b)-F(a)$. C'est l'inverse exact du cas discret, où la valeur frontière $X=k$ pèse un vrai $P(X=k)$ et fait se recouvrir « au moins $k$ » et « au plus $k$ » (section 1).",
         },
         {
           kind: 'definition',
           label: "Espérance, variance et écart-type d'une variable aléatoire continue",
           items: [
-            "L'**espérance mathématique** d'une variable aléatoire $X$ dont l'ensemble des valeurs possibles est un intervalle $[u;v]$ de $\\mathbb{R}$ est définie par :",
+            "L'**espérance mathématique** d'une variable aléatoire continue $X$ (valeurs possibles dans $[u;v]$ de $\\mathbb{R}$) se définit par :",
             '$\\displaystyle E(X) = \\int_u^v t\\cdot f(t)\\,dt$',
-            "Sa **variance** est définie par $\\displaystyle V(X) = \\int_u^v [t-E(X)]^2\\cdot f(t)\\,dt$, et son **écart-type** est la racine carrée de sa variance : $\\sigma(X)=\\sqrt{V(X)}$.",
+            "Sa **variance** est $\\displaystyle V(X) = \\int_u^v [t-E(X)]^2\\cdot f(t)\\,dt$, et son **écart-type** en est la racine carrée : $\\sigma(X)=\\sqrt{V(X)}$.",
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Le même écart-type qu’en statistique descriptive',
+          text:
+            "Tu as déjà rencontré la moyenne et l'écart-type d'une série de données, en statistique descriptive. L'idée ne change pas ici : $E(X)$ reste une moyenne, $\\sigma(X)$ reste une mesure de dispersion autour de cette moyenne. Seul l'outil de calcul change — une somme devient une intégrale, parce que $X$ prend maintenant une infinité de valeurs possibles, pas un nombre fini.",
         },
       ],
     },
@@ -503,7 +533,7 @@ export const variablesAleatoires: ChapterContent = {
       blocks: [
         {
           kind: 'para',
-          text: 'Les deux familles partagent exactement les mêmes notions — loi, fonction de répartition, espérance, variance, écart-type — mais chacune les porte avec un outil différent : une somme pondérée dans le cas discret, une intégrale dans le cas continu.',
+          text: 'Les deux familles partagent exactement les mêmes notions — loi, fonction de répartition, espérance, variance, écart-type — mais chacune les porte avec un outil différent : une somme pondérée en discret, une intégrale en continu.',
         },
         {
           kind: 'featureTable',
@@ -528,7 +558,7 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: "Passer d'une colonne à l'autre : deux substitutions",
-          text: "Chaque formule continue se lit comme sa jumelle discrète en remplaçant $\\sum$ par $\\int$ et la probabilité ponctuelle $p_i=P(X=x_i)$ par $f(t)\\,dt$ — l'espérance reste toujours une moyenne des valeurs pondérée par leur poids de probabilité, jamais une moyenne simple des valeurs possibles. Seul l'écart-type s'écrit à l'identique dans les 2 colonnes : $\\sigma(X)=\\sqrt{V(X)}$, quelle que soit la nature de la variable aléatoire.",
+          text: "Chaque formule continue se lit comme sa jumelle discrète, en remplaçant $\\sum$ par $\\int$ et la probabilité ponctuelle $p_i=P(X=x_i)$ par $f(t)\\,dt$. L'espérance reste toujours une moyenne pondérée par le poids de probabilité — jamais une moyenne simple des valeurs possibles ! Seul l'écart-type s'écrit à l'identique dans les 2 colonnes : $\\sigma(X)=\\sqrt{V(X)}$, quelle que soit la nature de la variable.",
         },
       ],
     },
@@ -541,7 +571,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'definition',
           label: 'Définition',
           items: [
-            "Pour $X$ uniformément réparti sur $[a;b]$, la densité est constante, égale à $1/(b-a)$ — et la probabilité d'un intervalle ne dépend que de sa longueur, jamais de sa position :",
+            "Pour $X$ uniformément réparti sur $[a;b]$, la densité est constante, égale à $1/(b-a)$. La probabilité d'un intervalle ne dépend alors que de sa **longueur** — jamais de sa position :",
             '$P(c\\leq X\\leq d) = \\dfrac{d-c}{b-a}$',
             '$E(X) = \\dfrac{a+b}{2} \\qquad V(X) = \\dfrac{(b-a)^2}{12}$',
           ],
@@ -579,7 +609,7 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'Seule la longueur compte, jamais la position',
-          text: '$P(10\\leq X\\leq25)=15/60=0,25$ et $P(35\\leq X\\leq50)=15/60=0,25$ sont identiques — 2 intervalles de même longueur ont toujours la même probabilité, quelle que soit leur position dans $[a;b]$.',
+          text: '$P(10\\leq X\\leq25)=15/60=0,25$ et $P(35\\leq X\\leq50)=15/60=0,25$ sont identiques ! Deux intervalles de même longueur ont toujours la même probabilité, peu importe où ils se trouvent dans $[a;b]$.',
         },
       ],
     },
@@ -589,10 +619,16 @@ export const variablesAleatoires: ChapterContent = {
       title: 'Loi normale',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pourquoi la courbe a cette forme de cloche',
+          text:
+            "Pense aux tailles des élèves d'une grande école : peu sont très petits, peu sont très grands, la majorité se regroupe autour d'une taille moyenne. C'est exactement le profil d'une loi normale — une bosse centrée sur $\\mu$, qui s'aplatit progressivement des deux côtés. Plus $\\sigma$ est petit, plus les valeurs sont serrées autour de la moyenne ; plus $\\sigma$ est grand, plus la cloche s'étale.",
+        },
+        {
           kind: 'definition',
           label: 'Une loi continue, lue via la fonction de répartition Φ',
           items: [
-            "Une variable $X$ suivant une **loi normale** $N(\\mu,\\sigma)$ est une variable aléatoire continue, dont la densité est la courbe « en cloche » de Gauss : $P(X=x)$ vaut donc toujours 0 pour un réel $x$ précis, et seule une probabilité sur un intervalle a un sens — lue ici via la **fonction de répartition** $\\Phi$ de la loi normale centrée réduite $N(0,1)$ : $\\Phi(z)=P(Z\\leq z)$.",
+            "Une variable $X$ suivant une **loi normale** $N(\\mu,\\sigma)$ est une variable aléatoire continue, dont la densité dessine la courbe « en cloche » de Gauss. $P(X=x)$ vaut donc toujours 0 pour un réel $x$ précis — seule une probabilité sur un intervalle a un sens. On la lit ici via la **fonction de répartition** $\\Phi$ de la loi normale centrée réduite $N(0,1)$ : $\\Phi(z)=P(Z\\leq z)$.",
           ],
         },
         { kind: 'subheading', text: 'La règle empirique 68-95-99,7' },
@@ -640,20 +676,20 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: '$50-2\\times10=30$ et $50+2\\times10=70$ : environ $95,4\\%$ des valeurs tombent dans $[30;70]$, donc $1-0,954=0,046$ (4,6%) tombent en dehors, tous côtés confondus.',
+              text: '$50-2\\times10=30$ et $50+2\\times10=70$ : environ $95,4\\%$ des valeurs tombent dans $[30;70]$. Donc $1-0,954=0,046$ (4,6%) tombent en dehors, tous côtés confondus.',
             },
           ],
         },
         {
           kind: 'attention',
           label: 'Diviser par 2 pour un seul côté',
-          text: "La probabilité d'être seulement au-dessus de 70 (un seul côté) n'est jamais le complément total ($4,6\\%$) — la loi normale étant symétrique, ce complément se partage également entre les deux queues : $0,046/2=0,023$ (2,3%) pour un seul côté. Oublier cette division par 2 est l'erreur la plus fréquente de cette règle.",
+          text: "La probabilité d'être seulement au-dessus de 70 (un seul côté) n'est **jamais** le complément total ($4,6\\%$) ! La loi normale étant symétrique, ce complément se partage également entre les deux queues : $0,046/2=0,023$ (2,3%) pour un seul côté. Oublier cette division par 2 est l'erreur la plus fréquente de cette règle.",
         },
         {
           kind: 'definition',
           label: 'Standardisation',
           items: [
-            "Pour utiliser la table de $\\Phi$ (construite pour $N(0,1)$ uniquement), toute variable $X\\sim N(\\mu,\\sigma)$ doit d'abord être ramenée à une variable centrée réduite :",
+            "Pour utiliser la table de $\\Phi$ (construite uniquement pour $N(0,1)$), toute variable $X\\sim N(\\mu,\\sigma)$ doit d'abord être ramenée à une variable centrée réduite :",
             '$Z = \\dfrac{X-\\mu}{\\sigma}$',
           ],
         },
@@ -679,12 +715,12 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: 'Standardisation : $z=(65-50)/10=1,5$. Lecture de table : $\\Phi(1,5)\\approx0,9332$, donc $P(X\\leq65)\\approx0,9332$.',
+              text: 'Standardisation : $z=(65-50)/10=1,5$. Lecture dans la table : $\\Phi(1,5)\\approx0,9332$, donc $P(X\\leq65)\\approx0,9332$.',
             },
             { kind: 'para', text: '« Au moins » est le complément de « au plus » : $P(X\\geq65)=1-\\Phi(1,5)\\approx1-0,9332=0,0668$.' },
             {
               kind: 'para',
-              text: 'Par symétrie $\\Phi(-z)=1-\\Phi(z)$ : $P(X\\leq35)=\\Phi(-1,5)=1-\\Phi(1,5)\\approx0,0668$ — la même valeur que $P(X\\geq65)$, cohérent car 35 et 65 sont symétriques autour de $\\mu=50$.',
+              text: 'Par symétrie $\\Phi(-z)=1-\\Phi(z)$ : $P(X\\leq35)=\\Phi(-1,5)=1-\\Phi(1,5)\\approx0,0668$ — exactement la même valeur que $P(X\\geq65)$, logique puisque 35 et 65 sont symétriques autour de $\\mu=50$.',
             },
           ],
         },
@@ -697,11 +733,11 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: "Φ n'est jamais paire",
-          text: '$\\Phi(-1,5)$ n\'est pas égal à $\\Phi(1,5)$ — $\\Phi$ n\'est pas une fonction paire. La vraie relation est $\\Phi(-z)=1-\\Phi(z)$ (symétrie par rapport à 0,5, pas par rapport à l\'axe des ordonnées) : $\\Phi(-1,5)\\approx0,0668$, très différent de $\\Phi(1,5)\\approx0,9332$.',
+          text: "$\\Phi(-1,5)$ n'est **pas** égal à $\\Phi(1,5)$ — $\\Phi$ n'est pas une fonction paire ! La vraie relation, c'est $\\Phi(-z)=1-\\Phi(z)$ (symétrie par rapport à 0,5, pas par rapport à l'axe des ordonnées) : $\\Phi(-1,5)\\approx0,0668$, très différent de $\\Phi(1,5)\\approx0,9332$.",
         },
         {
           kind: 'para',
-          text: "Pour un intervalle de la loi centrée réduite, on soustrait toujours deux valeurs de $\\Phi$ — jamais on ne les additionne (ce qui pourrait même dépasser 1, signal d'alerte immédiat) :",
+          text: "Pour un intervalle de la loi centrée réduite, on soustrait toujours deux valeurs de $\\Phi$ — jamais on ne les additionne (le résultat pourrait même dépasser 1, signal d'alerte immédiat !) :",
         },
         { kind: 'para', text: '$P(1\\leq Z\\leq2) = \\Phi(2)-\\Phi(1) \\approx 0,9772-0,8413 = 0,1359$' },
         { kind: 'subheading', text: 'Sens inverse — retrouver z (ou x) depuis une probabilité' },
@@ -709,7 +745,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Retrouver $z$ tel que $\\Phi(z)=p$ (table inversée, $\\Phi^{-1}$) puis, pour une loi générale $N(\\mu,\\sigma)$, dé-standardiser :',
+            'Retrouve $z$ tel que $\\Phi(z)=p$ (table inversée, $\\Phi^{-1}$), puis, pour une loi générale $N(\\mu,\\sigma)$, dé-standardise :',
             '$x = \\mu+z\\times\\sigma$',
           ],
         },
@@ -719,7 +755,7 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: "$z\\approx1,645$ (valeur usuelle du quantile à 95%, largement utilisée). Attention : $1-0,95=0,05$ est une probabilité, pas une valeur de $z$ — il faut impérativement passer par $\\Phi^{-1}$ pour convertir une probabilité en valeur de $z$.",
+              text: "$z\\approx1,645$ (le quantile à 95%, une valeur très utilisée). Attention : $1-0,95=0,05$ est une **probabilité**, pas une valeur de $z$ — il faut absolument passer par $\\Phi^{-1}$ pour convertir une probabilité en valeur de $z$ !",
             },
           ],
         },
@@ -735,13 +771,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: 'Un critère pratique, jamais une démonstration',
-          text: "Ces vérifications suffisent, en pratique, pour conclure que la loi est normale — mais elles ne constituent pas, théoriquement, une condition suffisante : les satisfaire ne démontre jamais que la distribution est exactement normale.",
+          text: "En pratique, ces vérifications suffisent pour conclure que la loi est normale. Mais elles ne constituent pas, théoriquement, une condition suffisante : les satisfaire ne prouve jamais que la distribution est exactement normale.",
         },
         {
           kind: 'entrainement',
           title: 'Loi normale',
           generatorId: '6gen51',
-          description: ["S'entraîner à standardiser, lire la table de Φ et appliquer la règle empirique."],
+          description: ['Standardise, lis la table de Φ, et applique la règle empirique.'],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 51. Loi normale »',
         },
@@ -754,7 +790,7 @@ export const variablesAleatoires: ChapterContent = {
       blocks: [
         {
           kind: 'para',
-          text: 'Ce générateur de clôture combine ce que les sections précédentes ont établi — résolution « trouver n » de la loi binomiale, sens inverse de la loi normale — avec le **théorème de Bayes** à 3 catégories, une approximation de la binomiale par la loi normale, une loi uniforme continue, et une loi discrète reconstruite appliquée à une population entière.',
+          text: 'Cet exercice de clôture combine ce que les sections précédentes ont établi — « trouver n » en binomiale, sens inverse de la loi normale — avec le **théorème de Bayes** à 3 catégories, une approximation de la binomiale par la loi normale, une loi uniforme continue, et une loi discrète appliquée à une population entière.',
         },
         { kind: 'subheading', text: 'Épreuves composées — indépendance « ET »' },
         {
@@ -765,7 +801,7 @@ export const variablesAleatoires: ChapterContent = {
             { kind: 'para', text: '$p = p_1\\times p_2 = 0,5\\times0,3 = 0,15$' },
             {
               kind: 'para',
-              text: 'Pour trouver $n$ minimal tel que $P(\\text{au moins 1 succès})>0,8$ avec ce $p$ composé : $n>\\ln(0,2)/\\ln(0,85)\\approx9,90$, donc $n=10$ — exactement la même résolution par logarithme que la section précédente, appliquée à un $p$ obtenu par multiplication plutôt que donné directement.',
+              text: 'Pour trouver le $n$ minimal tel que $P(\\text{au moins 1 succès})>0,8$ avec ce $p$ composé : $n>\\ln(0,2)/\\ln(0,85)\\approx9,90$, donc $n=10$ — exactement la même résolution par logarithme que la section précédente, juste appliquée à un $p$ obtenu par multiplication plutôt que donné directement.',
             },
             {
               kind: 'illustration',
@@ -786,14 +822,14 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: 'Piège classique',
-          text: '$p_1+p_2=0,8$ pour ce même « ET » est faux — un « ET » entre événements indépendants se traduit toujours par une multiplication, jamais une addition. Une somme dépasserait même chacune des 2 probabilités séparées, ce qui n\'a aucun sens pour un « ET » (plus restrictif qu\'un « OU »).',
+          text: "$p_1+p_2=0,8$ pour ce même « ET » est faux ! Un « ET » entre événements indépendants se traduit toujours par une **multiplication**, jamais une addition. Une somme dépasserait même chacune des 2 probabilités séparées — ce qui n'a aucun sens pour un « ET » (plus restrictif qu'un « OU »).",
         },
         { kind: 'subheading', text: 'Théorème de Bayes à 3 catégories' },
         {
           kind: 'definition',
           label: 'Probabilités totales et formule de Bayes',
           items: [
-            'Une population se partitionne en 3 catégories de proportions $q_1$, $q_2$, $q_3$ (somme=1). Un critère survient avec probabilité $r_i$ dans chaque catégorie. Probabilité totale du critère (formule des probabilités totales, 3 termes) :',
+            'Une population se partitionne en 3 catégories, de proportions $q_1$, $q_2$, $q_3$ (somme=1). Un critère survient avec probabilité $r_i$ dans chaque catégorie. Probabilité totale du critère (formule des probabilités totales, 3 termes) :',
             '$P_{totale} = q_1r_1+q_2r_2+q_3r_3$',
             'Probabilité inverse — appartenir à la catégorie $j$ sachant que le critère est survenu (théorème de Bayes) :',
             '$P(\\text{cat.}j \\mid \\text{critère}) = \\dfrac{q_jr_j}{P_{totale}}$',
@@ -837,12 +873,12 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: 'Confondre a priori et a posteriori',
-          text: "Répondre $q_3=0,25$ à la question « probabilité d'appartenir à la catégorie 3 sachant le sinistre » ignore complètement l'information du critère observé — c'est confondre une probabilité a priori ($q_3$, avant observation) avec une probabilité a posteriori ($P(\\text{cat.3}\\mid\\text{sinistre})\\approx0,4545$, après observation).",
+          text: "Répondre $q_3=0,25$ à la question « probabilité d'appartenir à la catégorie 3 sachant le sinistre » ignore complètement l'information du critère observé — tu confonds une probabilité **a priori** ($q_3$, avant observation) avec une probabilité **a posteriori** ($P(\\text{cat.3}\\mid\\text{sinistre})\\approx0,4545$, après observation).",
         },
         {
           kind: 'astuce',
           label: 'Toujours pondérer par le poids de chaque catégorie',
-          text: "Faire la moyenne simple des 3 conditionnelles, $(0,1+0,2+0,4)/3\\approx0,233$, ignore que les catégories n'ont pas le même poids ($q_1,q_2,q_3$ différents) — même piège que pour l'espérance à la section 1 : la vraie formule des probabilités totales pondère chaque $r_i$ par son $q_i$, donnant 0,22, pas 0,233.",
+          text: "Faire la moyenne simple des 3 conditionnelles, $(0,1+0,2+0,4)/3\\approx0,233$, ignore que les catégories n'ont pas le même poids ($q_1,q_2,q_3$ différents) — exactement le même piège que pour l'espérance à la section 1 ! La vraie formule des probabilités totales pondère chaque $r_i$ par son $q_i$ : ça donne 0,22, pas 0,233.",
         },
         { kind: 'subheading', text: "Approximation d'une loi binomiale par une loi normale" },
         {
@@ -863,14 +899,14 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: 'Pour estimer $P(X\\leq55)$ : standardisation $z=(55-50)/5=1$, puis lecture de table $\\Phi(1)\\approx0,8413$ — exactement la même méthode que pour toute loi normale, une fois $\\mu$ et $\\sigma$ déterminés.',
+              text: 'Pour estimer $P(X\\leq55)$ : standardisation $z=(55-50)/5=1$, puis lecture de table $\\Phi(1)\\approx0,8413$ — exactement la même méthode que pour n\'importe quelle loi normale, une fois $\\mu$ et $\\sigma$ déterminés.',
             },
           ],
         },
         {
           kind: 'attention',
           label: 'Confondre les 2 approximations de la binomiale',
-          text: "L'approximation par une loi de Poisson (vue plus loin, $n\\geq30$, $p\\leq0,1$) et l'approximation par une loi normale ($n>30$, $0,3<p<0,7$) ont des domaines de validité qui ne se chevauchent jamais : la première sert pour un $p$ proche de 0 (événement rare), la seconde pour un $p$ proche de 0,5. Un $p$ intermédiaire (par exemple $p=0,2$) ne remplit aucune des deux — la binomiale exacte reste alors la seule option correcte.",
+          text: "L'approximation par une loi de Poisson (vue plus loin, $n\\geq30$, $p\\leq0,1$) et l'approximation par une loi normale ($n>30$, $0,3<p<0,7$) ont des domaines de validité qui **ne se chevauchent jamais** : la première sert pour un $p$ proche de 0 (événement rare), la seconde pour un $p$ proche de 0,5. Un $p$ intermédiaire (par exemple $p=0,2$) ne rentre dans aucune des deux — la binomiale exacte reste alors la seule option correcte.",
         },
         { kind: 'subheading', text: "Reconstruire une loi et appliquer l'espérance à une population" },
         {
@@ -879,7 +915,7 @@ export const variablesAleatoires: ChapterContent = {
           blocks: [
             {
               kind: 'para',
-              text: '$20\\%$ des clients choisissent la formule Basique (15€), $30\\%$ la Standard (35€) ; le 3ᵉ pourcentage se déduit par différence, jamais donné directement : $100-20-30=50\\%$ pour la Premium (60€).',
+              text: '$20\\%$ des clients choisissent la formule Basique (15€), $30\\%$ la Standard (35€). Le 3ᵉ pourcentage se déduit par différence, jamais donné directement : $100-20-30=50\\%$ pour la Premium (60€).',
             },
             {
               kind: 'featureTable',
@@ -910,7 +946,7 @@ export const variablesAleatoires: ChapterContent = {
             },
             {
               kind: 'para',
-              text: "Appliqué à une population de 500 clients, la recette totale attendue se calcule en multipliant l'espérance par l'effectif — jamais en les additionnant :",
+              text: "Appliqué à une population de 500 clients, la recette totale attendue se calcule en **multipliant** l'espérance par l'effectif — jamais en les additionnant !",
             },
             { kind: 'para', text: '$E(X)\\times500 = 43,5\\times500 = 21\\,750€$' },
           ],
@@ -918,13 +954,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: 'Piège classique',
-          text: "$43,5+500=543,5€$ n'a aucun sens dimensionnel (un prix moyen additionné à un nombre de clients) — il faut toujours multiplier l'espérance par l'effectif pour obtenir un total attendu sur une population, jamais les additionner.",
+          text: "$43,5+500=543,5€$ n'a aucun sens dimensionnel — c'est un prix moyen additionné à un nombre de clients ! Multiplie toujours l'espérance par l'effectif pour obtenir un total attendu sur une population, jamais une addition.",
         },
         {
           kind: 'entrainement',
           title: 'Extensions binomiale, normale et Bayes',
           generatorId: '6gen52',
-          description: ["S'entraîner sur les épreuves composées, le théorème de Bayes, l'approximation normale et la loi uniforme continue."],
+          description: ["Entraîne-toi sur les épreuves composées, le théorème de Bayes, l'approximation normale et la loi uniforme continue."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 52. Extensions binomiale, normale et Bayes »',
         },
@@ -939,7 +975,7 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'definition',
           label: 'Loi de Poisson, paramètre λ',
           items: [
-            "La **loi de Poisson** de paramètre $\\lambda$ (le nombre moyen d'événements sur une unité donnée) modélise le comptage d'événements rares et indépendants — pannes, arrivées, défauts — sur un intervalle de temps ou un effectif :",
+            "La **loi de Poisson** de paramètre $\\lambda$ (le nombre moyen d'événements sur une unité donnée) modélise le comptage d'événements **rares et indépendants** — pannes, arrivées, défauts — sur un intervalle de temps ou un effectif :",
             '$P(X=k) = e^{-\\lambda}\\times\\dfrac{\\lambda^k}{k!} \\quad \\text{pour tout entier } k\\geq0$',
           ],
         },
@@ -947,13 +983,13 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'methode',
           label: 'Calcul itératif, jamais λᵏ et k! séparément',
           items: [
-            'Pour un $\\lambda$ élevé, calculer $\\lambda^k$ et $k!$ séparément peut faire déborder chacun vers l\'infini (en machine) bien avant que leur rapport — toujours compris entre 0 et 1 — ne pose problème.',
-            'La méthode stable part de $\\text{terme}_0=e^{-\\lambda}$ et construit chaque terme suivant à partir du précédent : $\\text{terme}_i = \\text{terme}_{i-1} \\times \\dfrac{\\lambda}{i}$.',
+            'Pour un $\\lambda$ élevé, calculer $\\lambda^k$ et $k!$ séparément peut faire déborder chacun vers l\'infini (en machine), bien avant que leur rapport — toujours compris entre 0 et 1 — ne pose le moindre problème.',
+            'La méthode stable part de $\\text{terme}_0=e^{-\\lambda}$, puis construit chaque terme suivant à partir du précédent : $\\text{terme}_i = \\text{terme}_{i-1} \\times \\dfrac{\\lambda}{i}$.',
           ],
         },
         {
           kind: 'para',
-          text: 'Construction itérative de $P(X=k)$ pour $\\lambda=4$, $\\text{terme}_0=e^{-4}$ puis chaque terme obtenu en multipliant le précédent par $\\lambda/i$ :',
+          text: "Construction itérative de $P(X=k)$ pour $\\lambda=4$ : $\\text{terme}_0=e^{-4}$, puis chaque terme suivant s'obtient en multipliant le précédent par $\\lambda/i$ :",
         },
         {
           kind: 'operationChain',
@@ -967,7 +1003,7 @@ export const variablesAleatoires: ChapterContent = {
           items: [
             'Quand $n$ est grand et $p$ petit, la loi binomiale $B(n,p)$ s\'approxime par une loi de Poisson de paramètre $\\lambda=n\\times p$, à condition que :',
             '$n\\geq30$ ; $p\\leq0,1$ ; $n\\times p\\leq15$.',
-            'Les 3 conditions doivent toutes être vérifiées — un $n\\times p$ faible avec un $n$ trop petit ne suffit jamais.',
+            'Les 3 conditions doivent **toutes** être vérifiées — un $n\\times p$ faible avec un $n$ trop petit ne suffit jamais !',
           ],
         },
         {
@@ -1029,13 +1065,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'attention',
           label: '« au plus k » n\'est jamais un complément ici',
-          text: "Contrairement à la loi binomiale (support fini, borné par $n$), la loi de Poisson a un support infini — il n'existe aucune borne « $n$ » à côté de laquelle un complément court serait naturel. « Au plus $k$ » se calcule donc toujours par une somme directe de 0 à $k$, jamais par complément.",
+          text: "Contrairement à la loi binomiale (support fini, borné par $n$), la loi de Poisson a un support **infini** — il n'existe aucune borne « $n$ » à côté de laquelle un complément court serait naturel. « Au plus $k$ » se calcule donc toujours par une somme directe de 0 à $k$, jamais par complément !",
         },
         { kind: 'subheading', text: "Piège d'échelle — ajuster λ avant de calculer" },
         {
           kind: 'attention',
           label: "λ n'est jamais le taux de base recopié tel quel",
-          text: '$\\lambda$ doit toujours être ajusté à l\'échelle exacte de la question posée : multiplicatif pour un contexte temporel (taux par minute × nombre de minutes), proportionnel pour un contexte effectif (taux « pour N » × effectif cible/N). Recopier le taux de base sans ajustement est le piège le plus fréquent de cette famille.',
+          text: '$\\lambda$ doit toujours être ajusté à l\'échelle exacte de la question posée : multiplicatif pour un contexte temporel (taux par minute × nombre de minutes), proportionnel pour un contexte effectif (taux « pour N » × effectif cible/N). Recopier le taux de base sans ajustement, c\'est LE piège le plus fréquent de cette famille !',
         },
         {
           kind: 'exempleLibre',
@@ -1054,13 +1090,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'astuce',
           label: 'E(X)=V(X)=λ — une propriété caractéristique',
-          text: "Pour une loi de Poisson, l'espérance et la variance sont toutes les deux égales à $\\lambda$ — contrairement à la plupart des lois, où espérance et variance diffèrent systématiquement.",
+          text: "Pour une loi de Poisson, l'espérance et la variance sont toutes les deux égales à $\\lambda$ — une propriété assez rare : dans la plupart des lois, espérance et variance sont différentes !",
         },
         {
           kind: 'entrainement',
           title: 'Loi de Poisson',
           generatorId: '6gen53',
-          description: ["S'entraîner sur la loi de Poisson, l'approximation binomiale→Poisson et l'ajustement d'échelle de λ."],
+          description: ["Entraîne-toi sur la loi de Poisson, l'approximation binomiale→Poisson, et l'ajustement d'échelle de λ."],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 53. Loi de Poisson »',
         },
@@ -1096,7 +1132,7 @@ export const variablesAleatoires: ChapterContent = {
       kind: 'entrainement',
       title: 'Variables aléatoires et lois de probabilités — quiz vrai/faux',
       generatorId: '6gen71',
-      description: ['Quiz de révision transversal à tout le chapitre.'],
+      description: ['Un quiz de révision qui couvre tout le chapitre.'],
       chantier: '6e-6h',
       whereLabel: '6e (6h) → « 71. Quiz vrai/faux — Variables aléatoires »',
     },
