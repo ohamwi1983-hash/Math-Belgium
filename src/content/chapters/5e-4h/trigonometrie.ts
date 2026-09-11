@@ -510,7 +510,6 @@ export const trigonometrie: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.sin, tone: 'accent' }],
             xMin: -5 * (PI / 2),
             xMax: 5 * (PI / 2),
@@ -539,7 +538,6 @@ export const trigonometrie: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: [{ fn: Math.cos, tone: 'accent' }],
             xMin: -5 * (PI / 2),
             xMax: 5 * (PI / 2),
@@ -568,7 +566,6 @@ export const trigonometrie: ChapterContent = {
           kind: 'illustration',
           illustration: {
             kind: 'curvePlot',
-            compact: true,
             curves: TAN_CURVES,
             xMin: -4 * PI,
             xMax: 4 * PI,
