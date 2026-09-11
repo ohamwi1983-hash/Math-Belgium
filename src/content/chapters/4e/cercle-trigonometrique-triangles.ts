@@ -136,6 +136,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         },
         { kind: 'subheading', text: 'Pour aller plus loin — représenter tan θ sur le cercle' },
         {
+          kind: 'intuition',
+          label: 'Tu connais déjà ça',
+          text:
+            'Tu as déjà rencontré tan θ dans un triangle rectangle, comme opposé/adjacent — ' +
+            'sans aucun lien avec un cercle. Ici, c\'est exactement la même valeur, mais lue ' +
+            'autrement : plus une coordonnée, mais une **longueur**, ailleurs sur la figure. Le ' +
+            'mot « tangente » vient d\'ailleurs de cette construction : la droite qui touche ' +
+            '(« tangente ») le cercle en un seul point.',
+        },
+        {
           kind: 'para',
           text:
             'sin θ et cos θ se lisent directement comme des **coordonnées** de M(θ). tan θ, ' +
@@ -437,6 +447,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           },
         },
         {
+          kind: 'intuition',
+          label: 'Pour visualiser',
+          text:
+            'Chaque angle associé est un reflet de M(θ) dans un miroir placé à un endroit ' +
+            'précis du cercle. 180°−θ : miroir vertical (l\'axe des sinus). −θ : miroir ' +
+            'horizontal (l\'axe des cosinus). 180°+θ : reflet à travers le centre O, de l\'autre ' +
+            'côté du cercle. 90°−θ : miroir selon la diagonale qui échange les deux axes — ' +
+            'c\'est justement pour ça que sinus et cosinus s\'échangent dans cette seule famille.',
+        },
+        {
           kind: 'featureTable',
           caption: 'Les 4 règles de transformation',
           headers: ['Famille', 'sin', 'cos', 'tan'],
@@ -489,6 +509,16 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Une équation du type sin α = k a, en général, **deux** solutions distinctes sur ' +
             '[0° ; 360°[. La seconde solution est toujours liée à la première par une symétrie ' +
             'de la section précédente.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi (souvent) deux solutions ?',
+          text:
+            'Une droite horizontale coupe presque toujours un cercle en **deux** points ' +
+            'distincts, comme sur la figure ci-dessous. Ces deux points sont les deux solutions ' +
+            'de sin α = k. Un seul cas y échappe : quand la droite touche le cercle tout en haut ' +
+            'ou tout en bas, comme une tangente — un seul point de contact, donc une seule ' +
+            'solution (le cas limite un peu plus bas).',
         },
         {
           kind: 'illustration',
@@ -700,6 +730,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           ],
         },
         {
+          kind: 'intuition',
+          label: 'Pourquoi ça marche sans tracer la hauteur ?',
+          text:
+            'Dans un triangle rectangle, tu sais déjà que sin θ = opposé/hypoténuse, donc ' +
+            'opposé = hypoténuse × sin θ. C\'est exactement ce qui se passe ici : b sin Â, ' +
+            'c\'est la hauteur du triangle ABC issue de C — sinus la calcule directement, sans ' +
+            'avoir besoin de la tracer ni de mesurer quoi que ce soit en plus.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Aire',
           blocks: [
@@ -772,6 +811,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'triangle **pont**, entièrement résoluble avec les données de l\'énoncé. Tu en ' +
             'tires un côté ou un angle. Cette valeur devient une donnée du triangle **cible** ' +
             '— toujours quelconque, résolu à la fin par la loi des sinus.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Tu connais déjà ce principe',
+          text:
+            'C\'est le même principe que ton GPS, ou que les géomètres sur le terrain : ' +
+            'impossible de mesurer directement une distance ou une hauteur inaccessible, mais ' +
+            'en combinant les angles vus depuis deux points connus, la trigonométrie la ' +
+            'retrouve quand même — sans bouger de mesure directe.',
         },
         {
           kind: 'methode',

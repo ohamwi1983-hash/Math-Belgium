@@ -37,6 +37,18 @@ export const geometrieDansEspace: ChapterContent = {
             'Sans cette réduction, un cube semblerait étiré vers l\'arrière !',
         },
         {
+          kind: 'intuition',
+          label: 'Pourquoi une convention, et pas juste dessiner ce qu\'on voit ?',
+          text:
+            'Une photo ou ton œil font déjà de la perspective tout seuls, sans qu\'on y pense : ' +
+            'les objets lointains paraissent plus petits, les lignes parallèles semblent se ' +
+            'resserrer au loin. Mais un dessin technique n\'a pas ce luxe — il doit rester ' +
+            '**lisible et comparable** d\'un exercice à l\'autre, avec des angles et des longueurs ' +
+            'qui suivent toujours la même règle. C\'est tout le rôle de la perspective cavalière : ' +
+            'une convention fixée une fois pour toutes, pas un effet visuel qu\'on improvise à ' +
+            'chaque dessin.',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'solidCavaliere',
@@ -107,6 +119,17 @@ export const geometrieDansEspace: ChapterContent = {
             'Une droite est fixée par un point et une direction. Un plan, lui, est fixé par une ' +
             'donnée minimale : toujours l\'une de ces 4 formes. Jamais une équation à trois ' +
             'inconnues dans ce chapitre !',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi 3 points, et pas 2 ?',
+          text:
+            'Deux points suffisent à fixer une droite. Mais autour de cette seule droite, une ' +
+            'infinité de plans peuvent encore pivoter — comme les pages d\'un livre qui tournent ' +
+            'toutes autour de sa reliure. Un troisième point, à condition qu\'il ne soit **pas** ' +
+            'sur cette droite, immobilise un seul de ces plans. C\'est exactement pourquoi un ' +
+            'tabouret à 3 pieds ne bancale jamais, quel que soit le sol, alors qu\'un tabouret à 4 ' +
+            'pieds peut se mettre à vaciller si un seul pied est un peu plus court que les autres.',
         },
         {
           kind: 'illustrationGroup',
@@ -188,6 +211,16 @@ export const geometrieDansEspace: ChapterContent = {
             'deux droites peuvent n\'avoir **aucun plan commun**. On dit alors qu\'elles sont ' +
             '**gauches**. Elles ne sont ni sécantes ni parallèles : elles ne se croisent jamais, ' +
             'et elles ne sont jamais parallèles non plus.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pour visualiser des droites gauches',
+          text:
+            'Imagine deux avions qui volent à des altitudes différentes, sur des trajectoires qui, ' +
+            'vues d\'en haut sur une carte, semblent se croiser. Dans les airs, ils ne se ' +
+            'percutent jamais : ils n\'ont ni point commun, ni la moindre direction commune. ' +
+            'C\'est exactement ça, deux droites **gauches** — une situation qui n\'existe tout ' +
+            'simplement pas sur une feuille de papier, en géométrie plane.',
         },
         {
           kind: 'illustrationGroup',
@@ -446,6 +479,15 @@ export const geometrieDansEspace: ChapterContent = {
       kicker: '3 droites d\'intersection, jamais indépendantes les unes des autres',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pour visualiser',
+          text:
+            'Pense au coin de ta chambre : le sol et deux murs se rencontrent tous les trois ' +
+            '**en un seul point**, l\'angle de la pièce. C\'est exactement le premier cas ' +
+            'ci-dessous. Le second cas, lui, correspondrait à trois murs tous parallèles entre ' +
+            'eux — comme les pages d\'un même classeur, qui ne se touchent jamais.',
+        },
+        {
           kind: 'para',
           text:
             'Si trois plans sont sécants deux à deux, les trois droites d\'intersection obtenues ' +
@@ -602,6 +644,17 @@ export const geometrieDansEspace: ChapterContent = {
             'séparés. Chaque face réellement traversée y apporte **exactement deux sommets**. Le ' +
             'plan de coupe traverse toujours une face convexe en exactement deux points — jamais ' +
             'un seul, jamais trois.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Comme trancher un pain',
+          text:
+            'Imagine une baguette de pain qu\'on tranche au couteau. Coupée bien ' +
+            'perpendiculairement, la tranche est presque un cercle. Couteau incliné, la tranche ' +
+            's\'étire et devient ovale. La forme de la coupe dépend entièrement de l\'**angle du ' +
+            'couteau** — jamais de la baguette elle-même. C\'est exactement le même principe pour ' +
+            'un solide : la forme du polygone de section dépend entièrement de la façon dont le ' +
+            'plan le traverse, jamais du solide seul.',
         },
         {
           kind: 'illustration',
@@ -783,6 +836,16 @@ export const geometrieDansEspace: ChapterContent = {
       title: 'Point de fuite et construction en perspective centrale',
       kicker: 'toutes les parallèles d\'un plan horizontal convergent vers un point, sur la ligne d\'horizon',
       blocks: [
+        {
+          kind: 'intuition',
+          label: 'Tu as déjà vu ça',
+          text:
+            'Tu as déjà vu cet effet cent fois, sans y penser : les rails d\'une voie ferrée, ou ' +
+            'les lignes blanches d\'une route, qui paraissent se resserrer et se rejoindre tout ' +
+            'là-bas, à l\'horizon — alors qu\'en réalité, les rails restent strictement parallèles, ' +
+            'à la même distance l\'un de l\'autre partout. C\'est précisément ce point de ' +
+            'rencontre apparent que la perspective centrale reproduit sur le papier.',
+        },
         {
           kind: 'para',
           text:

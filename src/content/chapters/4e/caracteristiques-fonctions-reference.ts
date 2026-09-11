@@ -24,6 +24,15 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           'l\'une de ces six-là.',
       },
       {
+        kind: 'intuition',
+        label: 'Tu connais déjà ça',
+        text:
+          'Au chapitre 1, tu as déjà appris à connaître $x^2$ à fond : domaine, sommet, ' +
+          'transformations. Ici, tu vas faire exactement la même chose, mais avec cinq ' +
+          'nouvelles courbes en plus de la parabole. Une fois que tu sais « lire » une famille ' +
+          'de référence, tu sais les lire toutes — c\'est la même grille de lecture à chaque fois.',
+      },
+      {
         kind: 'rappel',
         label: 'Rappel — qu\'est-ce qu\'une fonction ?',
         items: [
@@ -49,6 +58,17 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ['Inverse', '1/x', 'ℝ \\ {0}', 'hyperbole à 2 branches, impaire'],
           ['Valeur absolue', '|x|', 'ℝ', '« V », sommet à l\'origine, paire'],
         ],
+      },
+      {
+        kind: 'intuition',
+        label: 'Pourquoi « paire » et « impaire » ?',
+        text:
+          'Une fonction **paire**, c\'est une courbe qui se reflète parfaitement si tu poses un ' +
+          'miroir sur l\'axe Oy — la moitié gauche est le reflet exact de la moitié droite. Une ' +
+          'fonction **impaire**, c\'est une courbe qui revient identique à elle-même après une ' +
+          'rotation d\'un demi-tour (180°) autour de l\'origine. Regarde les 6 courbes ' +
+          'ci-dessous avec cette image en tête : tu verras tout de suite lesquelles sont ' +
+          '« miroir » et lesquelles sont « demi-tour ».',
       },
       {
         kind: 'illustration',
@@ -135,6 +155,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         },
       },
       {
+        kind: 'intuition',
+        label: 'Pourquoi la courbe ne touche jamais les axes ?',
+        text:
+          'Prends 1 et divise-le par un nombre de plus en plus grand : $1/10=0,1$, puis ' +
+          '$1/100=0,01$, puis $1/1000=0,001$... Le résultat se rapproche de 0 sans **jamais** ' +
+          'l\'atteindre. C\'est exactement ce que fait la courbe de $1/x$ très loin de ' +
+          'l\'origine : elle s\'approche de l\'axe des x sans jamais le toucher — c\'est ça, une ' +
+          '**asymptote**.',
+      },
+      {
         kind: 'illustration',
         illustration: {
           kind: 'curvePlot',
@@ -192,6 +222,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           'de racine cubique tracée à la main.',
       },
       {
+        kind: 'intuition',
+        label: 'Pour visualiser un point d\'inflexion',
+        text:
+          'Imagine une route qui vire d\'abord vers la gauche, puis change et vire vers la ' +
+          'droite. L\'endroit exact où elle change de sens de virage, c\'est le point ' +
+          'd\'inflexion. Sur les courbes de $x^3$ et de $\\sqrt[3]{x}$, ce moment de bascule ' +
+          'tombe pile à l\'origine — avant, la courbe est creusée d\'un côté ; après, elle est ' +
+          'creusée de l\'autre.',
+      },
+      {
         kind: 'rappel',
         label: 'Point d\'inflexion — cube et racine cubique',
         items: [
@@ -241,6 +281,15 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             '**Asymptotes** — les droites (verticale et/ou horizontale) que la courbe approche ' +
               'sans jamais les toucher.',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Pour repérer une croissance ou une décroissance d\'un coup d\'œil',
+          text:
+            'Parcours la courbe de gauche à droite, comme si tu marchais dessus. Si tu montes, ' +
+            'la fonction est **croissante**. Si tu descends, elle est **décroissante**. Si le ' +
+            'terrain reste plat, elle est constante. C\'est tout : pas besoin de retenir des ' +
+            'inégalités par cœur avant de savoir répondre d\'un coup d\'œil sur un graphique.',
         },
         {
           kind: 'rappel',

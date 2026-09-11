@@ -305,6 +305,16 @@ export const statistiqueDescriptive: ChapterContent = {
       kicker: 'les paramètres de position — le rang, pas la valeur',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pourquoi une médiane, en plus de la moyenne ?',
+          text:
+            'Imagine une rue de dix maisons. Neuf valent environ 200 000 € chacune, la dixième ' +
+            'est un immense château à 10 000 000 €. La **moyenne** des dix prix explose à cause ' +
+            'du château — elle donne un prix qu\'aucune maison de la rue n\'atteint vraiment. La ' +
+            '**médiane**, elle, ne regarde que le rang : elle reste sur le prix d\'une maison ' +
+            '« normale », sans se soucier de savoir à quel point le château est cher.',
+        },
+        {
           kind: 'para',
           text:
             'Ces paramètres localisent une série par le **rang** des individus — pas par un ' +
@@ -415,6 +425,16 @@ export const statistiqueDescriptive: ChapterContent = {
       kicker: 'min, Q1, médiane, Q3, max — un résumé visuel en 5 nombres',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pour visualiser les quartiles',
+          text:
+            'Imagine toute la classe alignée du plus petit au plus grand, puis découpée en ' +
+            'quatre groupes de même taille. Q1 est la frontière après le premier quart de la ' +
+            'file, Q3 la frontière après les trois quarts. La **boîte** de la boîte à ' +
+            'moustaches, c\'est exactement ce groupe du milieu : la moitié des individus qui ne ' +
+            'sont ni parmi les plus petits, ni parmi les plus grands.',
+        },
+        {
           kind: 'para',
           text:
             'La **boîte à moustaches** (ou **box-plot**) résume une série en cinq nombres ' +
@@ -487,6 +507,16 @@ export const statistiqueDescriptive: ChapterContent = {
       kicker: 'à quel point les valeurs s\'écartent-elles de la moyenne ?',
       blocks: [
         {
+          kind: 'intuition',
+          label: 'Pourquoi un nombre pour la dispersion ?',
+          text:
+            'Deux classes peuvent avoir exactement la même moyenne, 12/20, sans se ressembler ' +
+            'en rien : dans l\'une, presque tout le monde est entre 10 et 14 ; dans l\'autre, la ' +
+            'moitié a 20/20 et l\'autre moitié a 4/20. La moyenne seule ne fait **aucune** ' +
+            'différence entre ces deux classes. Il faut un autre nombre, qui mesure à quel point ' +
+            'les valeurs s\'écartent du centre — c\'est tout l\'objet de cette section.',
+        },
+        {
           kind: 'para',
           text:
             'La **moyenne** résume le centre d\'une série. Mais deux séries de même moyenne ' +
@@ -512,6 +542,16 @@ export const statistiqueDescriptive: ChapterContent = {
               'contrairement à la variance, qui est en unité au carré : ' +
               '$\\text{écart-type} = \\sqrt{V}$.',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Ce que représente concrètement l\'écart-type',
+          text:
+            'Tu as déjà mesuré une distance entre deux nombres sur une droite graduée, $|a-b|$. ' +
+            'L\'écart-type, c\'est un peu la même idée, résumée pour toute la série en un seul ' +
+            'nombre : à peu près la distance **typique** entre une valeur de la série et la ' +
+            'moyenne. Un écart-type petit veut dire que les valeurs sont proches de x̄ ; un ' +
+            'écart-type grand veut dire qu\'elles s\'en éloignent beaucoup, en moyenne.',
         },
         {
           kind: 'rappel',

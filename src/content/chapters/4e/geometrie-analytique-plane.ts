@@ -33,6 +33,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'seule vérité géométrique de la droite.',
         },
         {
+          kind: 'intuition',
+          label: 'Tu connais déjà ça',
+          text:
+            'Ce vecteur directeur $\\vec{u}$, c\'est exactement celui du chapitre sur le calcul ' +
+            "vectoriel — une flèche qui porte une direction, rien de plus. Tu ne réapprends rien " +
+            "de nouveau ici : tu l'utilises juste pour une seule chose, dire dans quel sens une " +
+            'droite s\'étire. Un point de départ et une direction : c\'est tout ce qu\'il faut ' +
+            'pour reconstruire une droite entière, comme deux repères suffisent à reconstruire ' +
+            'un trajet parfaitement rectiligne.',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'vectorPlane',
@@ -341,6 +352,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'position.',
         },
         {
+          kind: 'intuition',
+          label: 'Comme un escalier',
+          text:
+            'La pente m, c\'est juste « de combien tu montes, pour un pas que tu avances ». Un ' +
+            'escalier aux marches hautes et courtes a une pente élevée ; une route de montagne ' +
+            'annoncée à 8% monte 8 m tous les 100 m parcourus à l\'horizontale. ' +
+            '$m = \\dfrac{\\Delta y}{\\Delta x}$ ne dit rien d\'autre que ça, juste écrit avec des lettres.',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'vectorPlane',
@@ -410,6 +430,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'Il y a deux critères sur les vecteurs directeurs, à ne jamais confondre. Ce sont ' +
             'les mêmes que pour la colinéarité et l\'orthogonalité de vecteurs, appliqués ici à ' +
             'des droites.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pour visualiser la perpendicularité',
+          text:
+            'Tourne un vecteur $\\begin{pmatrix} a \\\\ b \\end{pmatrix}$ d\'un quart de tour ' +
+            '(90°) : ses deux composantes s\'échangent, et l\'une d\'elles change de signe — tu ' +
+            'obtiens $\\begin{pmatrix} -b \\\\ a \\end{pmatrix}$. C\'est tout ce qu\'il y a à voir ' +
+            'derrière le critère du produit scalaire nul : une droite perpendiculaire à une ' +
+            'autre, c\'est simplement sa direction tournée d\'un quart de tour.',
         },
         {
           kind: 'illustrationGroup',
@@ -742,6 +772,16 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'extraire les paramètres.',
         },
         {
+          kind: 'intuition',
+          label: 'Pour se représenter un lieu',
+          text:
+            'Imagine tout le monde dans un parc se plaçant exactement à 5 mètres d\'un arbre : ' +
+            'ensemble, ces personnes dessinent un cercle autour de l\'arbre — pas UNE position, ' +
+            'mais TOUTES celles qui vérifient la même condition, et elles seules. Un lieu ' +
+            'géométrique, c\'est exactement ça : l\'ensemble de tous les points qui obéissent à ' +
+            'une règle donnée, rien de plus.',
+        },
+        {
           kind: 'definition',
           label: 'Définition formelle',
           items: [
@@ -795,6 +835,15 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'Un cercle de centre $(x_0 ; y_0)$ et de rayon r, c\'est l\'ensemble des points ' +
             'situés exactement à distance r du centre. Ça donne directement son équation, par ' +
             'Pythagore.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Comme un compas de jardinier',
+          text:
+            'Plante un piquet au centre, attache une corde de longueur r, tends-la et tourne : tu ' +
+            'traces exactement un cercle — parce que chaque point du tracé reste à la même ' +
+            'distance r du piquet, ni plus ni moins. L\'équation du cercle ne dit rien d\'autre ' +
+            'que ça, juste en langage algébrique.',
         },
         {
           kind: 'rappel',
@@ -950,6 +999,17 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             ],
             caption: 'PF = distance(P, d) — vrai pour **tout** point P de la courbe : c\'est la définition même de la parabole',
           },
+        },
+        {
+          kind: 'intuition',
+          label: 'Une image physique',
+          text:
+            'C\'est le même principe qu\'une antenne parabolique ou le réflecteur d\'un phare de ' +
+            'voiture : tous les rayons parallèles à l\'axe, en rebondissant sur la courbe, se ' +
+            'concentrent en un seul point — le foyer. Réciproquement, une source de lumière ' +
+            'placée exactement au foyer ressort en rayons parfaitement parallèles. Cette ' +
+            'propriété n\'est vraie QUE pour cette forme précise, celle définie par ' +
+            'l\'équidistance foyer/directrice.',
         },
         { kind: 'subheading', text: "L'équation" },
         {

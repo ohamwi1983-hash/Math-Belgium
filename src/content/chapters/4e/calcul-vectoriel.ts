@@ -17,6 +17,16 @@ export const calculVectoriel: ChapterContent = {
     title: "Avant de commencer : qu'est-ce qu'un vecteur ?",
     blocks: [
       {
+        kind: 'intuition',
+        label: 'Un nombre ne suffit pas toujours',
+        text:
+          "Imagine qu'on te dise : « le trésor est caché à 10 mètres d'ici. » Tu ne sais " +
+          "toujours pas où creuser ! Il manque une **direction** — « 10 mètres vers le " +
+          "nord-est », par exemple. Un simple nombre décrit une longueur. Un **vecteur** " +
+          'décrit un déplacement complet : une longueur ET une direction. Voilà exactement ' +
+          'ce que ce chapitre va formaliser.',
+      },
+      {
         kind: 'para',
         text:
           'Un vecteur $\\vec{AB}$ porte trois informations. Rien de plus : une **direction** ' +
@@ -77,6 +87,16 @@ export const calculVectoriel: ChapterContent = {
               'simplement AB pour $\\vec{AB}$. Elle est toujours positive ou nulle. Tu peux la ' +
               "mesurer à la règle sur une figure, même avant d'avoir un repère.",
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Un vecteur ne vit nulle part en particulier',
+          text:
+            'Pense à une consigne du type « avance de 300 mètres vers le nord-est ». Peu ' +
+            'importe l\'endroit où tu te trouves quand tu la reçois : elle décrit toujours le ' +
+            'même déplacement. Un vecteur fonctionne pareil — il ne « vit » nulle part en ' +
+            'particulier sur la feuille. Deux flèches dessinées à des endroits complètement ' +
+            'différents peuvent donc représenter exactement le même vecteur.',
         },
         {
           kind: 'piege',
@@ -189,6 +209,16 @@ export const calculVectoriel: ChapterContent = {
             'portés par des droites parallèles, ou par la même droite. Trois points sont ' +
             '**alignés** exactement quand deux vecteurs formés à partir de ces points sont ' +
             'colinéaires.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pour se représenter la colinéarité',
+          text:
+            'Deux vecteurs colinéaires, c\'est comme deux voitures qui roulent sur la même ' +
+            'route (ou sur deux routes parallèles) : peu importe leur vitesse, ou même si ' +
+            'l\'une roule en marche arrière — elles vont dans la même direction, ou dans la ' +
+            'direction exactement opposée. « Colinéaire » ne veut pas dire « identique », ' +
+            'juste « sur la même droite ».',
         },
         {
           kind: 'illustration',
@@ -328,6 +358,16 @@ export const calculVectoriel: ChapterContent = {
             "Une chaîne de vecteurs se relaie point par point : le point d'arrivée de l'un est " +
             "le point de départ du suivant. Elle se réduit alors à un seul vecteur — celui qui " +
             'va directement du tout premier point au tout dernier.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Une marche en deux étapes',
+          text:
+            "Marche de A à B, puis de B à C : où que t'aient fait bifurquer les deux étapes, " +
+            'tu es arrivé exactement là où tu serais arrivé en marchant directement de A à C, ' +
+            'en ligne droite. C\'est tout ce que dit la relation de Chasles : ' +
+            '$\\vec{AB} + \\vec{BC} = \\vec{AC}$. Le point B, simple étape intermédiaire, ' +
+            "n'apparaît plus dans le résultat final.",
         },
         {
           kind: 'illustration',
@@ -795,6 +835,15 @@ export const calculVectoriel: ChapterContent = {
             'rectangle en l\'un de ses sommets.',
         },
         {
+          kind: 'intuition',
+          label: 'Tu connais déjà cette idée',
+          text:
+            'Tu connais déjà Pythagore : dans un triangle rectangle, $BC^2 = AB^2 + AC^2$. Le ' +
+            'produit scalaire $\\vec{AB} \\cdot \\vec{AC} = 0$ est juste une autre façon ' +
+            "d'écrire exactement la même idée — sous une forme qui se calcule directement à " +
+            'partir des composantes, sans même connaître les trois longueurs à l\'avance.',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'vectorPlane',
@@ -1021,6 +1070,16 @@ export const calculVectoriel: ChapterContent = {
       title: 'Applications physiques : la résultante',
       kicker: 'R² = F₁² + F₂² + 2·F₁·F₂·cos θ (loi des cosinus, chapitre 5)',
       blocks: [
+        {
+          kind: 'intuition',
+          label: 'Deux personnes qui tirent un traîneau',
+          text:
+            'Imagine deux personnes qui tirent un traîneau, chacune dans une direction ' +
+            "différente. Le traîneau ne part ni vers l'une, ni vers l'autre : il part dans " +
+            'une direction intermédiaire, déterminée par la force ET la direction de ' +
+            'CHACUNE des deux personnes. Cette force et cette direction combinées, c\'est ' +
+            'exactement ce que donne $\\vec{v_R} = \\vec{v_1} + \\vec{v_2}$.',
+        },
         {
           kind: 'para',
           text:
