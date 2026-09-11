@@ -127,6 +127,17 @@ export const fonctionSecondDegre: ChapterContent = {
       blocks: [
         { kind: 'subheading', text: "Le rôle du coefficient a — l'allure de la parabole" },
         {
+          kind: 'intuition',
+          label: 'Une image pour ne jamais confondre',
+          text:
+            "Lance une balle en l'air : elle monte, ralentit, puis redescend — sa trajectoire a " +
+            'un point le plus **haut**, jamais de point le plus bas. À l\'inverse, une bille ' +
+            "lâchée dans un bol roule vers le fond, puis remonte de l'autre côté : elle a un " +
+            'point le plus **bas**, jamais de point le plus haut. Une parabole se comporte ' +
+            'exactement pareil : ouverte vers le bas, elle a toujours un maximum ; ouverte vers ' +
+            'le haut, toujours un minimum.',
+        },
+        {
           kind: 'para',
           text:
             'Le signe et la valeur de a donnent la forme générale de la parabole. Tu le sais ' +
@@ -200,6 +211,15 @@ export const fonctionSecondDegre: ChapterContent = {
           ],
         },
         { kind: 'subheading', text: 'Sommet et axe de symétrie' },
+        {
+          kind: 'intuition',
+          label: 'Tu as déjà vu ça',
+          text:
+            "Un ballon lancé en l'air, un jet d'eau, une balle de basket qui file vers le " +
+            'panier : leur trajectoire dessine cette même forme, avec un point culminant, le ' +
+            "plus haut atteint. Ce point, c'est exactement le **sommet** de la parabole — un " +
+            'vrai ballon lancé revient d\'ailleurs plus loin dans ce chapitre.',
+        },
         {
           kind: 'para',
           text:
@@ -326,6 +346,16 @@ export const fonctionSecondDegre: ChapterContent = {
             'à l’origine directement sur le graphe, en direct.',
         },
         { kind: 'subheading', text: 'Domaine et image' },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi le domaine est-il toujours ℝ ?',
+          text:
+            'Une fonction du second degré ne contient ni dénominateur, ni racine carrée : rien ' +
+            "qui puisse jamais empêcher un calcul, quelle que soit la valeur de x. La machine " +
+            "$ax^2+bx+c$ accepte n'importe quel nombre réel en entrée, sans jamais planter. Tu " +
+            "rencontreras plus tard des fonctions où ce n'est plus vrai — un dénominateur qui " +
+            'peut valoir 0, par exemple — où le domaine demandera un vrai calcul.',
+        },
         {
           kind: 'para',
           text:
@@ -603,6 +633,14 @@ export const fonctionSecondDegre: ChapterContent = {
         },
         { kind: 'subheading', text: 'Étirement, compression et symétrie' },
         {
+          kind: 'intuition',
+          label: "Une image pour retenir l'effet de a",
+          text:
+            'Imagine une bande élastique tenue par le sommet : plus tu tires fort dessus (|a| ' +
+            'grand), plus elle se resserre et devient étroite autour de son axe. Plus tu la ' +
+            'relâches (|a| proche de 0), plus elle s\'étale et devient large et aplatie.',
+        },
+        {
           kind: 'para',
           text: 'Le coefficient devant le carré change la **forme** de la courbe — pas seulement sa position !',
         },
@@ -774,6 +812,17 @@ export const fonctionSecondDegre: ChapterContent = {
           },
         },
         { kind: 'subheading', text: "Trouver l'optimum" },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi il faut vérifier le domaine',
+          text:
+            "Imagine un sentier de randonnée qui grimpe vers un sommet, mais qui s'arrête avant " +
+            "de l'atteindre. Le point culminant du sentier n'est pas le sommet de la montagne : " +
+            "c'est l'endroit où le sentier s'arrête, le plus haut point que tu puisses " +
+            "réellement atteindre. C'est exactement pareil pour une fonction restreinte à un " +
+            'domaine de validité : si le sommet théorique tombe hors de ce domaine, l\'optimum ' +
+            "réel est à l'endroit où le domaine s'arrête — à une borne.",
+        },
         {
           kind: 'para',
           text:

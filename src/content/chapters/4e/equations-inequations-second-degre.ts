@@ -60,6 +60,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'cas plus rapides ci-dessous.',
         },
         {
+          kind: 'intuition',
+          label: 'Le bon réflexe',
+          text:
+            'Face à une porte fermée, tu n\'attaques pas le mur au marteau tout de suite : tu ' +
+            'essaies d\'abord la poignée. Le **discriminant**, c\'est le mur — il marche à ' +
+            'chaque fois, mais il demande le plus de calculs. Les 4 cas du tableau ci-dessous, ' +
+            'ce sont les poignées : plus rapides, à essayer en premier.',
+        },
+        {
           kind: 'featureTable',
           caption: 'Reconnaître la technique avant de calculer quoi que ce soit',
           headers: ['Ce que tu vois dans l\'équation', 'Ce que tu fais'],
@@ -101,6 +110,17 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           result: { tag: 'solution (racine double)', text: '$x = 3$' },
         },
         { kind: 'subheading', text: 'Le cas général — la formule du discriminant' },
+        {
+          kind: 'intuition',
+          label: 'Tu as déjà vu ça, au chapitre 1',
+          text:
+            'Au chapitre 1, tu lisais le nombre de zéros d\'une parabole sur son graphique : ' +
+            'deux fois où elle coupe l\'axe des x, une seule (elle le touche du bout, au ' +
+            'sommet), ou jamais. Le signe de $\\Delta$ te donne exactement cette information, ' +
+            'mais par le calcul, sans dessiner : $\\Delta>0$ donne deux solutions, $\\Delta=0$ ' +
+            'une seule (racine double), $\\Delta<0$ aucune solution réelle — la parabole ne ' +
+            'touche jamais l\'axe.',
+        },
         {
           kind: 'para',
           text:
@@ -445,6 +465,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
         },
         {
+          kind: 'intuition',
+          label: 'Pour retenir la règle des signes',
+          text:
+            'Imagine chaque facteur négatif comme un interrupteur qui inverse le signe du ' +
+            'produit, de + à − ou de − à +. Zéro ou deux facteurs négatifs (nombre **pair**), tu ' +
+            'reviens au signe de départ. Un ou trois (nombre **impair**), tu termines sur le ' +
+            'signe inversé. C\'est exactement la règle « compter les négatifs » ci-dessous.',
+        },
+        {
           kind: 'methode',
           label: 'Méthode — compter les signes négatifs',
           items: [
@@ -578,6 +607,16 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           },
         },
         {
+          kind: 'intuition',
+          label: 'Une image pour comprendre',
+          text:
+            'Multiplier en croix, c\'est un peu comme résoudre un problème plus large que celui ' +
+            'posé au départ — une équation moins stricte, qui accepte plus de valeurs. ' +
+            'Certaines de ces valeurs collent à la version élargie, mais pas à l\'équation ' +
+            'd\'origine : ce sont des **racines étrangères**, des solutions qui se glissent ' +
+            'dans la réponse sans avoir le droit d\'y être.',
+        },
+        {
           kind: 'piege',
           label: 'Pourquoi une racine étrangère apparaît',
           text:
@@ -699,6 +738,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             axisLabel: '',
             caption: 'rond vide en −1 (toujours exclu, même pour un symbole large) — rond plein en 2 (inclus, car ≥)',
           },
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi c\'est toujours exclu',
+          text:
+            'Diviser par 0 n\'a tout simplement pas de sens : demande à ta calculatrice, elle ' +
+            'refuse aussi. Que le symbole soit strict (<, >) ou large (≤, ≥) ne change rien à ce ' +
+            'problème — une valeur qui annule le dénominateur ne rend jamais le quotient ni ' +
+            'positif, ni négatif, ni nul. Elle n\'entre même pas en compte.',
         },
         {
           kind: 'attention',
