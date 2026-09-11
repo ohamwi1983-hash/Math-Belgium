@@ -22,12 +22,12 @@ export const trigonometrie: ChapterContent = {
   title: 'Trigonométrie',
   slug: 'trigonometrie',
   lede:
-    "On change d'unité pour mesurer les angles : le radian remplace le degré, et le cercle " +
-    "trigonométrique devient l'outil de référence pour résoudre équations et problèmes de " +
-    'géométrie. Les fonctions sinus et cosinus prennent ensuite une forme paramétrée — ' +
-    'amplitude, période, déphasage, décalage vertical — qui permet de modéliser de vrais ' +
-    "phénomènes périodiques : la hauteur d'une nacelle de grande roue, une marée, une tension " +
-    'électrique.',
+    "On change d'unité pour mesurer les angles : le radian remplace le degré. Le cercle " +
+    "trigonométrique devient ton outil de référence pour résoudre des équations et des " +
+    'problèmes de géométrie. Les fonctions sinus et cosinus prennent ensuite une forme ' +
+    'paramétrée — amplitude, période, déphasage, décalage vertical. Tu peux alors modéliser ' +
+    "de vrais phénomènes périodiques : la hauteur d'une nacelle de grande roue, une marée, " +
+    'une tension électrique.',
 
   sections: [
     {
@@ -40,12 +40,13 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Le nombre π est défini comme le rapport constant entre la circonférence d\'un cercle ' +
-            "et son diamètre. Mais comment en obtenir une valeur approchée sans instrument de " +
-            'mesure ? Dès l\'Antiquité, **Archimède** (3e siècle av. J.-C.) a eu l\'idée d\'encadrer ' +
-            'le cercle entre deux polygones réguliers à $n$ côtés : un **inscrit** (à l\'intérieur ' +
-            'du cercle, sommets sur le cercle) et un **circonscrit** (à l\'extérieur, côtés ' +
-            'tangents au cercle). Le périmètre du cercle est nécessairement compris entre les deux.',
+            "Le nombre π, c'est le rapport constant entre la circonférence d'un cercle et son " +
+            'diamètre. Mais comment trouver sa valeur sans instrument de mesure ? Dans ' +
+            "l'Antiquité, **Archimède** (3e siècle av. J.-C.) a eu une idée : encadrer le " +
+            'cercle entre deux polygones réguliers à $n$ côtés. Un polygone **inscrit** (à ' +
+            "l'intérieur du cercle, ses sommets touchent le cercle) et un polygone " +
+            "**circonscrit** (à l'extérieur, ses côtés touchent le cercle). Le périmètre du " +
+            'cercle est forcément entre les deux.',
         },
         {
           kind: 'illustration',
@@ -119,7 +120,7 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Plus $n$ est grand, plus les deux polygones se rapprochent du cercle et plus ' +
+            "Plus $n$ est grand, plus les deux polygones se rapprochent du cercle. Et plus " +
             "l'encadrement se resserre :",
         },
         {
@@ -134,18 +135,29 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            "En partant d'un hexagone ($n=6$) et en doublant six fois le nombre de côtés jusqu'à " +
-            'un polygone à 96 côtés, Archimède est parvenu à l\'encadrement historique ' +
+            "Archimède est parti d'un hexagone ($n=6$). Il a doublé le nombre de côtés six " +
+            "fois, jusqu'à un polygone à 96 côtés. Il a obtenu l'encadrement historique " +
             '$3 + \\frac{10}{71} < \\pi < 3 + \\frac{1}{7}$, soit environ $3{,}1408 < \\pi < ' +
-            '3{,}1429$ — un résultat obtenu sans aucune calculatrice, uniquement par géométrie.',
+            "3{,}1429$. Un résultat trouvé sans aucune calculatrice, juste avec de la " +
+            'géométrie !',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi ne pas garder les degrés ?',
+          text:
+            "Le degré est un choix arbitraire : 360, c'est à peu près le nombre de jours " +
+            "dans une année, rien de plus. Le radian, lui, vient directement du cercle. " +
+            "Imagine une ficelle de la longueur du rayon, posée sur le bord du cercle : " +
+            "l'angle qu'elle balaie, c'est exactement 1 radian. Pas de nombre choisi au " +
+            'hasard — juste le cercle lui-même qui sert de règle.',
         },
         {
           kind: 'para',
           text:
-            "Jusqu'ici, un angle se mesurait en **degrés**. Le **radian** est une autre unité, " +
-            "mieux adaptée au calcul : un angle de $1$ radian est l'angle au centre qui " +
-            'intercepte, sur un cercle, un arc de longueur égale au rayon. Le cercle complet ' +
-            '(360°) correspond ainsi à $2\\pi$ radians.',
+            "Jusqu'ici, tu mesurais un angle en degrés. Le radian, c'est une autre unité, " +
+            "mieux adaptée au calcul. Un angle de $1$ radian, c'est l'angle au centre qui " +
+            "intercepte, sur un cercle, un arc de longueur égale au rayon. Le cercle complet " +
+            '(360°) correspond à $2\\pi$ radians.',
         },
         {
           kind: 'rappel',
@@ -160,10 +172,10 @@ export const trigonometrie: ChapterContent = {
           label: 'Attention — jamais de degrés dans les formules d\'arc et de secteur',
           text:
             'Les formules $s = r\\theta$ (longueur d\'arc) et $A = \\frac{1}{2}r^2\\theta$ (aire de ' +
-            'secteur) n\'utilisent **que** des angles en **radians**. Si l\'énoncé donne un angle ' +
-            'en degrés, la toute première étape — avant même de penser au rayon — est de le ' +
-            'convertir en radians. Un θ laissé en degrés dans ces formules donne un résultat sans ' +
-            'aucun sens.',
+            'secteur) utilisent **seulement** des angles en **radians** ! Un angle donné en ' +
+            'degrés ? Ta toute première étape, avant même de penser au rayon, c\'est de le ' +
+            'convertir en radians. Un θ laissé en degrés dans ces formules donne un résultat qui ' +
+            'ne veut rien dire.',
         },
         {
           kind: 'exemple',
@@ -195,23 +207,33 @@ export const trigonometrie: ChapterContent = {
             '30° = π/6 · 45° = π/4 · 60° = π/3',
             '90° = π/2 · 180° = π · 360° = 2π',
           ],
-          text: 'Retiens ces six correspondances degré/radian : elles reviennent dans presque tous les exercices.',
+          text: 'Apprends ces six correspondances degré/radian par cœur : elles reviennent dans presque tous les exercices.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Tu connais déjà ça',
+          text:
+            'Depuis la 4e, tu sais que cos et sin donnent les coordonnées d\'un point sur le ' +
+            'cercle trigonométrique. Ici, on ne change rien à cette idée — on va juste plus ' +
+            "loin : au lieu d'un angle entre 0° et 360°, on enroule n'importe quel nombre " +
+            'réel autour du cercle, même très grand, même négatif. Le principe reste ' +
+            'exactement le même.',
         },
         {
           kind: 'rappel',
           label: 'Rappel — cercle trigonométrique',
           items: [
-            'Le **cercle trigonométrique** est le cercle de rayon 1, centré à l\'origine d\'un ' +
-              'repère orthonormé. On l\'oriente dans le **sens positif** (le sens anti-horloger). ' +
-              'Mesurer un angle en radians revient à **enrouler** la droite réelle autour de ce ' +
-              'cercle : à chaque réel $x$ correspond un unique point $M$ du cercle, son **point ' +
-              'image**, obtenu en parcourant une longueur d\'arc $x$ depuis le point $(1;0)$ (dans ' +
-              'le sens positif si $x > 0$, dans le sens négatif sinon). Comme le cercle a pour ' +
-              'périmètre $2\\pi$, deux réels qui diffèrent d\'un multiple de $2\\pi$ ont le même ' +
-              'point image.',
-            'Sur ce cercle, l\'abscisse du point image de x est $\\cos x$ et son ordonnée est ' +
-              '$\\sin x$ — c\'est la définition même des lignes trigonométriques pour un réel ' +
-              'quelconque, plus seulement pour un angle aigu d\'un triangle rectangle.',
+            'Le **cercle trigonométrique**, c\'est le cercle de rayon 1, centré à l\'origine ' +
+              'd\'un repère orthonormé. Il est orienté dans le **sens positif** (le sens ' +
+              'anti-horloger). Mesurer un angle en radians, ça revient à **enrouler** la ' +
+              'droite réelle autour de ce cercle. À chaque réel $x$ correspond un unique ' +
+              'point $M$ du cercle : son **point image**. Tu l\'obtiens en parcourant, depuis ' +
+              'le point $(1;0)$, une longueur d\'arc $x$ — dans le sens positif si $x > 0$, ' +
+              'dans le sens négatif sinon. Le cercle a pour périmètre $2\\pi$. Donc deux ' +
+              'réels qui diffèrent d\'un multiple de $2\\pi$ ont le même point image.',
+            'Sur ce cercle, l\'abscisse du point image de x est $\\cos x$, et son ordonnée ' +
+              'est $\\sin x$. C\'est la vraie définition de cos et sin, pour n\'importe quel ' +
+              'réel — pas seulement pour un angle aigu d\'un triangle rectangle.',
           ],
         },
         {
@@ -265,8 +287,9 @@ export const trigonometrie: ChapterContent = {
           title: 'Arcs et secteurs',
           generatorId: '5gen6',
           description: [
-            'Convertis des angles entre degrés et radians, puis calcule des longueurs d\'arc et ' +
-              'des aires de secteurs circulaires à partir d\'un rayon et d\'un angle donnés.',
+            'Convertis des angles entre degrés et radians. Puis calcule des longueurs ' +
+              'd\'arc et des aires de secteurs circulaires, à partir d\'un rayon et d\'un ' +
+              'angle donnés.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 6. Arcs et secteurs »',
@@ -282,17 +305,19 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Une figure composée (polygone régulier inscrit dans un cercle, secteur accolé à un ' +
-            'triangle…) se traite toujours de la même façon : on la découpe en morceaux simples ' +
-            '— triangles, secteurs — dont on connaît déjà l\'aire, puis on **additionne** ou on ' +
-            '**soustrait** ces aires élémentaires selon que les morceaux s\'ajoutent ou se chevauchent.',
+            'Une figure composée (polygone régulier inscrit dans un cercle, secteur accolé à ' +
+            'un triangle…) se traite toujours de la même façon. Tu la découpes en morceaux ' +
+            'simples — triangles, secteurs — dont tu connais déjà l\'aire. Puis tu ' +
+            '**additionnes** ou tu **soustrais** ces aires élémentaires, selon que les ' +
+            'morceaux s\'ajoutent ou se chevauchent.',
         },
         {
           kind: 'rappel',
           label: "Rappel — l'angle au centre d'un polygone régulier",
           items: [
-            'Un polygone régulier à $n$ côtés inscrit dans un cercle partage celui-ci en $n$ ' +
-              'triangles isocèles identiques, chacun d\'angle au centre $\\theta = \\dfrac{2\\pi}{n}$.',
+            'Un polygone régulier à $n$ côtés, inscrit dans un cercle, partage celui-ci en ' +
+              '$n$ triangles isocèles identiques. Chacun a un angle au centre ' +
+              '$\\theta = \\dfrac{2\\pi}{n}$.',
           ],
         },
         {
@@ -335,30 +360,31 @@ export const trigonometrie: ChapterContent = {
           kind: 'attention',
           label: "Attention — bien identifier l'angle du secteur demandé",
           text:
-            'L\'angle au centre d\'**un côté** du polygone vaut toujours $2\\pi/n$, mais le ' +
-            'secteur dont on te demande l\'aire ne correspond pas forcément à un seul côté : ' +
-            's\'il s\'étend sur deux côtés consécutifs, son angle vaut $2 \\times 2\\pi/n$, pas ' +
-            '$2\\pi/n$. Compte toujours, sur la figure, le nombre exact de côtés couverts par le ' +
-            'secteur en question avant de calculer son angle — ne suppose jamais qu\'il s\'agit ' +
-            'automatiquement de l\'angle élémentaire du polygone.',
+            'L\'angle au centre d\'**un côté** du polygone vaut toujours $2\\pi/n$. Mais le ' +
+            'secteur dont on te demande l\'aire ne correspond pas forcément à un seul côté ! ' +
+            'S\'il s\'étend sur deux côtés consécutifs, son angle vaut $2 \\times 2\\pi/n$ — ' +
+            'pas $2\\pi/n$. Compte toujours, sur la figure, le nombre exact de côtés couverts ' +
+            'par le secteur, avant de calculer son angle. Ne suppose jamais que c\'est ' +
+            'automatiquement l\'angle élémentaire du polygone.',
         },
         {
           kind: 'astuce',
           label: 'Astuce — vérifier par l\'aire totale',
           text:
-            'Une bonne façon de contrôler ce type de résultat : l\'aire du cercle moins l\'aire du ' +
-            'polygone régulier doit valoir exactement $n$ fois l\'aire d\'un seul segment. Ici, ' +
-            '$6 \\times 1{,}45 \\approx 8{,}70$ cm², à comparer à $\\pi r^2 - \\text{aire hexagone} ' +
-            '= 16\\pi - 24\\sqrt{3} \\approx 50{,}27 - 41{,}57 \\approx 8{,}70$ cm² — ça correspond.',
+            'Une bonne façon de vérifier ce genre de résultat : l\'aire du cercle moins ' +
+            'l\'aire du polygone régulier doit valoir exactement $n$ fois l\'aire d\'un seul ' +
+            'segment. Ici, $6 \\times 1{,}45 \\approx 8{,}70$ cm². Compare avec ' +
+            '$\\pi r^2 - \\text{aire hexagone} = 16\\pi - 24\\sqrt{3} \\approx 50{,}27 - ' +
+            '41{,}57 \\approx 8{,}70$ cm² — ça correspond !',
         },
         {
           kind: 'entrainement',
           title: 'Polygones, arcs et secteurs',
           generatorId: '5gen7',
           description: [
-            'Lis un diagramme combinant un polygone régulier inscrit dans un cercle et un ou ' +
-              'plusieurs secteurs/arcs, puis calcule l\'aire d\'une figure composée en décomposant ' +
-              'en triangles et secteurs élémentaires.',
+            'Lis un diagramme qui combine un polygone régulier inscrit dans un cercle et un ' +
+              'ou plusieurs secteurs/arcs. Puis calcule l\'aire d\'une figure composée, en ' +
+              'décomposant en triangles et secteurs élémentaires.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 7. Polygones, arcs et secteurs »',
@@ -374,27 +400,28 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Certains problèmes de géométrie combinent secteurs, **segments circulaires** (la ' +
-            'région comprise entre une corde et l\'arc qu\'elle délimite) et, parfois, la **loi ' +
-            'des cosinus** pour retrouver la longueur d\'une corde ou d\'un rayon à partir d\'un ' +
-            'angle au centre.',
+            'Certains problèmes de géométrie combinent secteurs et **segments circulaires** ' +
+            '— la région entre une corde et l\'arc qu\'elle délimite. Parfois, tu as aussi ' +
+            'besoin de la **loi des cosinus**, pour retrouver la longueur d\'une corde ou ' +
+            'd\'un rayon à partir d\'un angle au centre.',
         },
         {
           kind: 'rappel',
           label: "Rappel — aire d'un segment circulaire",
           items: [
-            'Un segment circulaire d\'angle au centre θ (radians) et de rayon r s\'obtient en ' +
-              'retirant, du secteur, le triangle formé par les deux rayons et la corde : ' +
-              '$A_{segment} = \\frac{1}{2}r^2\\theta - \\frac{1}{2}r^2\\sin(\\theta) = \\frac{1}{2}r^2(\\theta - \\sin\\theta)$.',
+            'Un segment circulaire d\'angle au centre θ (radians) et de rayon r, tu ' +
+              'l\'obtiens en retirant, du secteur, le triangle formé par les deux rayons et ' +
+              'la corde : $A_{segment} = \\frac{1}{2}r^2\\theta - \\frac{1}{2}r^2\\sin(\\theta) ' +
+              '= \\frac{1}{2}r^2(\\theta - \\sin\\theta)$.',
           ],
         },
         {
           kind: 'exemple',
           badge: 'segment circulaire + corde',
           formula:
-            'Un cercle de centre O et de rayon $r = 10$ cm ; deux rayons OA et OB forment un ' +
-            'angle $\\theta = \\dfrac{2\\pi}{3}$ (120°). Calcule l\'aire du segment circulaire ' +
-            'délimité par la corde [AB], puis la longueur de cette corde.',
+            'Un cercle de centre O et de rayon $r = 10$ cm. Deux rayons OA et OB forment un ' +
+            'angle $\\theta = \\dfrac{2\\pi}{3}$ (120°). Calcule l\'aire du segment ' +
+            'circulaire délimité par la corde [AB], puis la longueur de cette corde.',
           steps: [
             { tag: 'aire du secteur OAB — A = ½r²θ', text: '$A_{secteur} = \\frac{1}{2} \\times 100 \\times \\dfrac{2\\pi}{3} \\approx 104{,}72$ cm²' },
             { tag: 'aire du triangle OAB — deux côtés r, angle inclus θ : A = ½r²sin(θ)', text: '$A_{triangle} = 50\\sin(120°) = 25\\sqrt{3} \\approx 43{,}30$ cm²' },
@@ -420,17 +447,17 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Le triangle OAB d\'un secteur est toujours isocèle (deux côtés valent r) — sa ' +
-            'surface se calcule directement par $\\frac{1}{2}r^2\\sin(\\theta)$ (aire d\'un ' +
-            'triangle via deux côtés et l\'angle inclus), sans jamais avoir besoin de connaître la ' +
-            'hauteur ni la base.',
+            'Le triangle OAB d\'un secteur est toujours isocèle (deux côtés valent r). Sa ' +
+            'surface se calcule directement par $\\frac{1}{2}r^2\\sin(\\theta)$ — l\'aire ' +
+            'd\'un triangle à partir de deux côtés et de l\'angle inclus — sans jamais avoir ' +
+            'besoin de connaître la hauteur ni la base.',
         },
         {
           kind: 'entrainement',
           title: 'Problèmes de géométrie du cercle',
           generatorId: '5gen12',
           description: [
-            'Combine secteurs, segments circulaires et loi des cosinus pour retrouver une corde, ' +
+            'Combine secteurs, segments circulaires et loi des cosinus. Retrouve une corde, ' +
               'un rayon ou une aire dans des figures géométriques variées.',
           ],
           chantier: '5e-4h',
@@ -448,9 +475,9 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Avant de généraliser à la forme paramétrée, rappelons les propriétés des trois ' +
-            'fonctions trigonométriques de base — celles dont le point image sur le cercle ' +
-            'trigonométrique donne directement les valeurs.',
+            'Avant de passer à la forme paramétrée, revoyons les propriétés des trois ' +
+            'fonctions trigonométriques de base. Ce sont elles dont le point image sur le ' +
+            'cercle trigonométrique donne directement les valeurs.',
         },
         {
           kind: 'featureTable',
@@ -545,11 +572,23 @@ export const trigonometrie: ChapterContent = {
           },
         },
         {
+          kind: 'intuition',
+          label: 'Pour visualiser',
+          text:
+            "Pense à une balançoire. **L'amplitude**, c'est à quelle hauteur elle monte de " +
+            "chaque côté par rapport au repos. **La période**, c'est le temps qu'il faut " +
+            "pour faire un aller-retour complet. **Le déphasage**, c'est juste : à quel " +
+            "instant tu as commencé à regarder — si tu arrives en cours de mouvement, la " +
+            "balançoire n'est pas forcément au point bas à $t=0$. Une fonction sinusoïdale " +
+            "décrit exactement ce genre de va-et-vient régulier — la grande roue, plus loin " +
+            'dans ce chapitre, en est un autre exemple.',
+        },
+        {
           kind: 'para',
           text:
-            'Une fonction sinusoïdale s\'écrit sous la forme générale $f(x) = A \\sin(\\omega x + ' +
-            '\\varphi) + b$ (ou avec un cosinus — même famille de paramètres). Chaque lettre a un ' +
-            'rôle géométrique précis sur le graphique de f.',
+            'Une fonction sinusoïdale s\'écrit sous la forme générale $f(x) = A \\sin(\\omega x ' +
+            '+ \\varphi) + b$ — ou avec un cosinus, c\'est la même famille de paramètres. ' +
+            'Chaque lettre a un rôle géométrique précis sur le graphique de f.',
         },
         {
           kind: 'rappel',
@@ -566,29 +605,30 @@ export const trigonometrie: ChapterContent = {
           kind: 'rappel',
           label: 'Φ — le décalage horizontal (à ne pas confondre avec φ)',
           items: [
-            'En écrivant $f(x) = A\\sin(\\omega(x - \\Phi)) + b$, la constante $\\Phi = ' +
-              '-\\dfrac{\\varphi}{\\omega}$ indique directement de combien d\'unités **de x** la ' +
-              'courbe de référence $\\sin$ a été translatée horizontalement.',
+            'Écris $f(x) = A\\sin(\\omega(x - \\Phi)) + b$. La constante $\\Phi = ' +
+              '-\\dfrac{\\varphi}{\\omega}$ te dit directement de combien d\'unités **de x** ' +
+              'la courbe de référence $\\sin$ a été translatée horizontalement.',
           ],
         },
         {
           kind: 'piege',
           text:
-            '**φ et Φ ne sont jamais interchangeables.** φ (déphasage) est la constante ajoutée ' +
-            '**dans l\'argument** ($\\omega x + \\varphi$) ; Φ (décalage horizontal) est la valeur ' +
-            'soustraite **à x** ($\\omega(x-\\Phi)$), liée à φ par $\\Phi = -\\varphi/\\omega$. Un ' +
-            'exercice qui demande "le déphasage" veut φ ; un exercice qui demande "le décalage ' +
-            'horizontal" ou "de combien la courbe est translatée" veut Φ.',
+            '**φ et Φ, ce n\'est jamais la même chose !** φ (le déphasage) est la constante ' +
+            'ajoutée **dans l\'argument** ($\\omega x + \\varphi$). Φ (le décalage ' +
+            'horizontal) est la valeur soustraite **à x** ($\\omega(x-\\Phi)$), reliée à φ ' +
+            'par $\\Phi = -\\varphi/\\omega$. Un exercice qui demande « le déphasage » veut ' +
+            'φ. Un exercice qui demande « le décalage horizontal » ou « de combien la ' +
+            'courbe est translatée » veut Φ.',
         },
         {
           kind: 'attention',
           label: 'Attention — ω n\'est pas T',
           text:
-            'La pulsation $\\omega$ est le nombre qui apparaît directement dans la formule, ' +
-            'multiplié par x. La période $T$ ne s\'obtient **qu\'en passant par la formule** ' +
-            '$T = 2\\pi/\\omega$ — ce n\'est ni l\'inverse direct de ω, ni égal à ω. Une confusion ' +
-            'fréquente : croire que « ω = 3 » signifie « la courbe se répète tous les 3 » — en ' +
-            'réalité, elle se répète tous les $2\\pi/3$.',
+            'La pulsation $\\omega$, c\'est simplement le nombre qui apparaît dans la ' +
+            'formule, multiplié par x. La période $T$, elle, ne s\'obtient **qu\'en passant ' +
+            'par la formule** $T = 2\\pi/\\omega$ — ce n\'est ni l\'inverse direct de ω, ni ' +
+            'égal à ω ! Une confusion fréquente : croire que « ω = 3 » veut dire « la courbe ' +
+            'se répète tous les 3 ». En réalité, elle se répète tous les $2\\pi/3$.',
         },
         {
           kind: 'exemple',
@@ -605,20 +645,22 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Pour ne jamais confondre A et b : A se lit par une **soustraction** (max − min, ' +
-            'divisé par 2), b se lit par une **addition** (max + min, divisé par 2). Si tu obtiens ' +
-            'la même formule pour les deux, relis l\'énoncé — c\'est le signe d\'une erreur.',
+            'Pour ne jamais confondre A et b : A se lit avec une **soustraction** (max − ' +
+            'min, divisé par 2). b se lit avec une **addition** (max + min, divisé par 2). ' +
+            'Si tu obtiens la même formule pour les deux, relis l\'énoncé — c\'est le signe ' +
+            'd\'une erreur !',
         },
         { kind: 'subheading', text: 'Construction pas à pas du graphique' },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Tracer la droite $y = b$ (ligne moyenne) et indiquer l\'amplitude A de part et ' +
+            'Trace la droite $y = b$ (la ligne moyenne) et indique l\'amplitude A de part et ' +
               'd\'autre, en pointillés.',
-            'Partager une période complète, à partir de $\\Phi$, en 4 intervalles égaux : la ' +
-              'courbe passe alors par $b$, un extremum, $b$, l\'autre extremum, $b$ — dans cet ordre.',
-            'Reporter cette portion de courbe, de façon répétitive, pour couvrir tout l\'intervalle demandé.',
+            'Partage une période complète, à partir de $\\Phi$, en 4 intervalles égaux. La ' +
+              'courbe passe alors par $b$, un extremum, $b$, l\'autre extremum, $b$ — dans ' +
+              'cet ordre.',
+            'Reporte cette portion de courbe, de façon répétitive, pour couvrir tout l\'intervalle demandé.',
           ],
         },
         {
@@ -661,8 +703,9 @@ export const trigonometrie: ChapterContent = {
           title: "Paramètres d'une fonction sinusoïdale",
           generatorId: '5gen8',
           description: [
-            'À partir d\'une expression donnée, identifie l\'amplitude, la pulsation, la période, ' +
-              'la fréquence, le déphasage φ, le décalage horizontal Φ et le décalage vertical.',
+            'Pars d\'une expression donnée. Identifie l\'amplitude, la pulsation, la ' +
+              'période, la fréquence, le déphasage φ, le décalage horizontal Φ et le ' +
+              'décalage vertical.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 8. Paramètres d\'une fonction sinusoïdale »',
@@ -678,11 +721,11 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Les mêmes paramètres se retrouvent aussi **à partir du graphique seul**, sans ' +
-            'jamais connaître la formule au départ : l\'amplitude et le décalage vertical se ' +
-            'lisent directement sur les valeurs maximale et minimale, la période se mesure entre ' +
-            'deux répétitions identiques du motif, et le déphasage se lit en repérant le ' +
-            'décalage horizontal du « point de départ » du motif par rapport à l\'origine.',
+            'Tu peux retrouver les mêmes paramètres **à partir du graphique seul**, sans ' +
+            'jamais connaître la formule au départ. L\'amplitude et le décalage vertical se ' +
+            'lisent directement sur les valeurs maximale et minimale. La période se mesure ' +
+            'entre deux répétitions identiques du motif. Le déphasage se lit en repérant le ' +
+            'décalage horizontal du « point de départ » du motif, par rapport à l\'origine.',
         },
         {
           kind: 'methode',
@@ -725,19 +768,19 @@ export const trigonometrie: ChapterContent = {
           kind: 'attention',
           label: 'Attention — le sens de variation dépend du signe de A',
           text:
-            'La convention « φ se lit à la traversée **montante** de la ligne moyenne » suppose ' +
-            '$A > 0$. Si la courbe part au contraire d\'un minimum juste après avoir traversé la ' +
-            'ligne moyenne en **descendant**, c\'est le signe de repérer plutôt un $A$ négatif (ou ' +
-            'de choisir la traversée descendante comme point de référence). Vérifie toujours le ' +
-            'sens de variation juste après le point que tu choisis, avant de lire φ — sinon la ' +
-            'phase trouvée est fausse d\'un demi-tour.',
+            'La convention « φ se lit à la traversée **montante** de la ligne moyenne » ' +
+            'suppose $A > 0$. Si la courbe part plutôt d\'un minimum juste après une ' +
+            'traversée **descendante**, c\'est le signe qu\'il faut repérer un $A$ négatif ' +
+            '— ou choisir la traversée descendante comme point de référence. Vérifie ' +
+            'toujours le sens de variation juste après le point que tu choisis, avant de ' +
+            'lire φ ! Sinon, la phase trouvée est fausse d\'un demi-tour.',
         },
         {
           kind: 'astuce',
           text:
-            'Mesurer la période entre deux **maximums** consécutifs est en général plus fiable que ' +
-            'de la mesurer entre deux traversées de la ligne moyenne : un maximum est un point ' +
-            'isolé et net sur le graphique, alors qu\'une traversée de ligne moyenne est plus ' +
+            'Mesurer la période entre deux **maximums** consécutifs est en général plus ' +
+            'fiable qu\'entre deux traversées de la ligne moyenne. Un maximum est un point ' +
+            'isolé et net sur le graphique. Une traversée de ligne moyenne, elle, est plus ' +
             'facile à mal pointer au pixel près.',
         },
         {
@@ -745,8 +788,9 @@ export const trigonometrie: ChapterContent = {
           title: 'Paramètres — lecture graphique',
           generatorId: '5gen9',
           description: [
-            'Retrouve l\'amplitude, la période, la pulsation, la phase et le décalage vertical ' +
-              'd\'une fonction sinusoïdale directement à partir de son graphique, sans formule de départ.',
+            'Retrouve l\'amplitude, la période, la pulsation, la phase et le décalage ' +
+              'vertical d\'une fonction sinusoïdale directement à partir de son graphique, ' +
+              'sans formule de départ.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 9. Paramètres — lecture graphique »',
@@ -762,20 +806,31 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Un maximum de $A\\sin(u) + b$ (avec $A > 0$) correspond à $\\sin(u) = 1$, un minimum ' +
-            'à $\\sin(u) = -1$. Ces deux conditions ont chacune une période de $2\\pi$ en u — mais ' +
-            'si l\'on cherche **tous les extremums** (maximums ET minimums confondus), on réunit ' +
-            'les deux familles, ce qui donne une période effective de seulement $\\pi$.',
+            'Un maximum de $A\\sin(u) + b$ (avec $A > 0$) correspond à $\\sin(u) = 1$. Un ' +
+            'minimum correspond à $\\sin(u) = -1$. Ces deux conditions ont chacune une ' +
+            'période de $2\\pi$ en u. Mais si tu cherches **tous les extremums** (maximums ' +
+            'ET minimums confondus), tu réunis les deux familles — ce qui donne une ' +
+            'période effective de seulement $\\pi$.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi la période est divisée par deux ?',
+          text:
+            'Regarde une vague : elle monte à son maximum, puis redescend à son minimum, ' +
+            'puis remonte — un maximum ET un minimum se produisent à chaque tour complet. ' +
+            'Si tu ne comptes que les maximums, tu attends un tour entier ($2\\pi$) entre ' +
+            'deux. Mais si tu acceptes maximum OU minimum, tu en croises un deux fois plus ' +
+            'souvent : tous les $\\pi$, la moitié du chemin.',
         },
         {
           kind: 'attention',
           label: 'Attention — le piège central de cette section',
           text:
-            'Ne confonds jamais **« sin(u) = 1 seul »** (une seule famille, période $2\\pi$ — les ' +
-            'maximums uniquement) avec **« sin(u) = ±1 réunis »** (maximums ET minimums ' +
-            'ensemble, période effective $\\pi$). Les deux formules sont différentes, et répondre ' +
-            'à « donne tous les extremums » avec la formule d\'un seul type d\'extremum est une ' +
-            'erreur très fréquente.',
+            'Ne confonds jamais **« sin(u) = 1 seul »** (une seule famille, période $2\\pi$ ' +
+            '— les maximums uniquement) avec **« sin(u) = ±1 réunis »** (maximums ET ' +
+            'minimums ensemble, période effective $\\pi$) ! Les deux formules sont ' +
+            'différentes. Répondre à « donne tous les extremums » avec la formule d\'un ' +
+            'seul type d\'extremum est une erreur très fréquente.',
         },
         {
           kind: 'exemple',
@@ -806,19 +861,20 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'astuce',
           text:
-            'Relis toujours la question : « donne les maximums » (une seule famille, période 2π/a) ' +
-            'n\'appelle pas la même formule que « donne tous les extremums » (les deux familles ' +
-            'réunies, période π/a). En cas de doute, calcule les deux familles séparément — c\'est ' +
-            'plus long, mais toujours juste — et ne les réunis qu\'à la toute fin, si la question ' +
-            'le demande explicitement.',
+            'Relis toujours la question ! « Donne les maximums » (une seule famille, ' +
+            'période 2π/a) n\'appelle pas la même formule que « donne tous les extremums » ' +
+            '(les deux familles réunies, période π/a). En cas de doute, calcule les deux ' +
+            'familles séparément — c\'est plus long, mais toujours juste. Ne les réunis ' +
+            'qu\'à la toute fin, si la question le demande explicitement.',
         },
         {
           kind: 'entrainement',
           title: "Extremums d'une fonction sinusoïdale",
           generatorId: '5gen11',
           description: [
-            'Détermine les maximums, les minimums, ou tous les extremums réunis d\'une fonction ' +
-              'sinusoïdale — l\'exercice précise à chaque fois lequel des trois est demandé.',
+            'Détermine les maximums, les minimums, ou tous les extremums réunis d\'une ' +
+              'fonction sinusoïdale. L\'exercice précise à chaque fois lequel des trois est ' +
+              'demandé.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 11. Extremums d\'une fonction sinusoïdale »',
@@ -835,10 +891,10 @@ export const trigonometrie: ChapterContent = {
           kind: 'para',
           text:
             'Face à une situation concrète et périodique (grande roue, marée, température ' +
-            'saisonnière…), construire le modèle sinusoïdal se fait toujours dans le **même ' +
-            'ordre** : amplitude et décalage vertical d\'abord (à partir des valeurs extrêmes), ' +
-            'période ensuite (donc pulsation), et enfin la phase — la seule qui nécessite une ' +
-            '**condition initiale** précise donnée par l\'énoncé.',
+            'saisonnière…), tu construis le modèle sinusoïdal toujours dans le **même ' +
+            'ordre**. D\'abord l\'amplitude et le décalage vertical, à partir des valeurs ' +
+            'extrêmes. Ensuite la période (donc la pulsation). Et enfin la phase — la ' +
+            'seule qui a besoin d\'une **condition initiale** précise, donnée par l\'énoncé.',
         },
         {
           kind: 'methode',
@@ -847,8 +903,8 @@ export const trigonometrie: ChapterContent = {
             'A = (valeur max − valeur min) / 2.',
             'b = (valeur max + valeur min) / 2.',
             'T = durée d\'un cycle complet (donnée par l\'énoncé) ⟹ ω = 2π/T.',
-            'φ : injecter la condition initiale (une valeur connue à un instant connu) dans ' +
-              '$A\\sin(\\omega t+\\varphi)+b$, puis résoudre en φ — en choisissant la solution la ' +
+            'φ : injecte la condition initiale (une valeur connue à un instant connu) dans ' +
+              '$A\\sin(\\omega t+\\varphi)+b$. Résous en φ, en choisissant la solution la ' +
               'plus simple parmi l\'infinité de solutions possibles.',
           ],
         },
@@ -859,9 +915,9 @@ export const trigonometrie: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Une grande roue a un rayon de 15 m ; le centre de la roue est situé à 17 m du ' +
-                'sol. Elle effectue un tour complet en 8 minutes. À l\'instant $t=0$ ' +
-                '(embarquement), une nacelle se trouve à son point le plus bas.',
+                'Une grande roue a un rayon de 15 m. Le centre de la roue est situé à 17 m ' +
+                'du sol. Elle fait un tour complet en 8 minutes. À l\'instant $t=0$ ' +
+                '(l\'embarquement), une nacelle se trouve à son point le plus bas.',
             },
             {
               kind: 'illustrationGroup',
@@ -915,9 +971,9 @@ export const trigonometrie: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Vérification : $hauteur(4) = 15\\sin(\\pi - \\pi/2) + 17 = 15\\sin(\\pi/2)+17 = ' +
-                '32$ m — exactement le point le plus haut, atteint après un demi-tour (4 minutes), ' +
-                'ce qui est cohérent.',
+                'Vérification : $hauteur(4) = 15\\sin(\\pi - \\pi/2) + 17 = 15\\sin(\\pi/2)+17 ' +
+                '= 32$ m. C\'est exactement le point le plus haut, atteint après un ' +
+                'demi-tour (4 minutes) — cohérent !',
             },
           ],
         },
@@ -925,18 +981,19 @@ export const trigonometrie: ChapterContent = {
           kind: 'attention',
           label: 'Attention — φ n\'est pas unique',
           text:
-            'L\'équation $\\sin(\\varphi) = -1$ a une infinité de solutions ($\\varphi = -\\pi/2 + ' +
-            '2k\\pi$). On choisit conventionnellement la plus simple — en général celle qui ' +
-            'appartient à $]-\\pi\\,;\\,\\pi]$ — mais toute autre valeur de cette famille donnerait ' +
-            'exactement la même fonction, puisque le sinus est périodique de période 2π.',
+            'L\'équation $\\sin(\\varphi) = -1$ a une infinité de solutions ($\\varphi = ' +
+            '-\\pi/2 + 2k\\pi$). On choisit, par convention, la plus simple — en général ' +
+            'celle qui appartient à $]-\\pi\\,;\\,\\pi]$. Mais n\'importe quelle autre ' +
+            'valeur de cette famille donnerait exactement la même fonction, puisque le ' +
+            'sinus est périodique de période 2π.',
         },
         {
           kind: 'astuce',
           text:
-            'Une fois le modèle construit, vérifie-le toujours sur **une deuxième donnée** de ' +
-            'l\'énoncé (ici, le point haut à t=4, un demi-tour plus tard) — comme dans l\'exemple ' +
-            'ci-dessus. Une erreur de signe sur φ se détecte immédiatement si la vérification ' +
-            'donne un minimum au lieu d\'un maximum, ou inversement.',
+            'Une fois ton modèle construit, vérifie-le toujours sur **une deuxième donnée** ' +
+            'de l\'énoncé — ici, le point haut à t=4, un demi-tour plus tard, comme dans ' +
+            'l\'exemple ci-dessus. Une erreur de signe sur φ se détecte tout de suite si la ' +
+            'vérification donne un minimum au lieu d\'un maximum, ou l\'inverse.',
         },
         {
           kind: 'entrainement',
@@ -961,10 +1018,22 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Pour que $\\sin x = t$ ou $\\cos x = t$ ait une solution, il faut $-1 \\le t \\le 1$ ' +
-            '— aucune condition pour $\\tan x = t$. Dans les trois cas, on détermine d\'abord un ' +
-            'angle $\\alpha$ (à la calculatrice ou par une valeur remarquable), puis on utilise la ' +
-            '**symétrie du cercle trigonométrique** pour écrire toutes les solutions.',
+            'Pour que $\\sin x = t$ ou $\\cos x = t$ ait une solution, il faut ' +
+            '$-1 \\le t \\le 1$. Aucune condition pour $\\tan x = t$. Dans les trois cas, ' +
+            'tu détermines d\'abord un angle $\\alpha$ — à la calculatrice ou grâce à une ' +
+            'valeur remarquable. Ensuite, tu utilises la **symétrie du cercle ' +
+            'trigonométrique** pour écrire toutes les solutions.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pourquoi deux solutions, en général ?',
+          text:
+            'Le cercle trigonométrique est symétrique. Pour une même hauteur (un même ' +
+            'sinus), il y a presque toujours deux points sur le cercle : un à gauche, un à ' +
+            'droite — comme un reflet dans un miroir vertical. Pour une même abscisse (un ' +
+            'même cosinus), c\'est pareil, mais le miroir est horizontal cette fois. C\'est ' +
+            'cette symétrie, pas une règle à apprendre par cœur, qui donne les deux ' +
+            'familles de solutions.',
         },
         {
           kind: 'rappel',
@@ -1029,20 +1098,22 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Résoudre $\\sin(ax+b) = k$ (ou avec un cosinus) suit toujours la même démarche en ' +
-            'trois temps : on isole l\'argument $u = ax+b$, on résout $trig(u) = k$ à l\'aide du ' +
-            'cercle trigonométrique (ci-dessus), puis on revient à x en divisant **toute ' +
-            'l\'équation en u** — y compris le terme de période — par a.',
+            'Résoudre $\\sin(ax+b) = k$ (ou avec un cosinus) suit toujours la même ' +
+            'démarche, en trois temps. Tu isoles l\'argument $u = ax+b$. Tu résous ' +
+            '$trig(u) = k$ à l\'aide du cercle trigonométrique (ci-dessus). Puis tu ' +
+            'reviens à x, en divisant **toute l\'équation en u** — y compris le terme de ' +
+            'période — par a.',
         },
         {
           kind: 'methode',
           label: 'Méthode',
           items: [
-            'Poser $u = ax + b$, et réécrire l\'équation en u : $trig(u) = k$.',
-            'Résoudre $trig(u) = k$ au cercle trigonométrique — pour cos et sin, deux familles de ' +
-              'solutions en général (une seule pour tan) ; aucune solution si $|k| > 1$ pour sin/cos.',
-            'Remplacer u par ax+b, isoler x en divisant **tout** — constante ET terme périodique — ' +
-              'par a.',
+            'Pose $u = ax + b$, et réécris l\'équation en u : $trig(u) = k$.',
+            'Résous $trig(u) = k$ au cercle trigonométrique — pour cos et sin, deux ' +
+              'familles de solutions en général (une seule pour tan). Aucune solution si ' +
+              '$|k| > 1$ pour sin/cos.',
+            'Remplace u par ax+b, isole x en divisant **tout** — constante ET terme ' +
+              'périodique — par a.',
           ],
         },
         {
@@ -1069,26 +1140,26 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Diviser **seulement** le terme constant par a, en oubliant de diviser aussi le ' +
-            '« +2kπ » : ça donne une famille de solutions avec la mauvaise période (2π au lieu de ' +
-            '2π/a). Toute l\'équation en u — terme constant ET terme périodique — passe par la ' +
+            'Diviser **seulement** le terme constant par a, en oubliant le « +2kπ » : ça ' +
+            'donne une famille de solutions avec la mauvaise période (2π au lieu de 2π/a) ' +
+            '! Toute l\'équation en u — terme constant ET terme périodique — passe par la ' +
             'même division.',
         },
         {
           kind: 'attention',
           label: 'Attention — |k| > 1 : aucune solution',
           text:
-            '$\\cos(u) = 1{,}5$ n\'a **aucune** solution, car cosinus (comme sinus) ne prend ' +
-            'jamais de valeur en dehors de [−1 ; 1]. Ce n\'est pas une erreur de calcul à corriger ' +
-            '— c\'est une réponse valable : l\'ensemble des solutions est vide.',
+            '$\\cos(u) = 1{,}5$ n\'a **aucune** solution, car cosinus (comme sinus) ne ' +
+            'prend jamais de valeur en dehors de [−1 ; 1]. Ce n\'est pas une erreur à ' +
+            'corriger — c\'est une réponse valable : l\'ensemble des solutions est vide.',
         },
         {
           kind: 'entrainement',
           title: 'Équations trigonométriques trig(ax+b)=k',
           generatorId: '5gen10',
           description: [
-            'Résous des équations de la forme sin(ax+b)=k, cos(ax+b)=k ou tan(ax+b)=k, en isolant ' +
-              'l\'argument puis en revenant à x — y compris les cas sans solution.',
+            'Résous des équations de la forme sin(ax+b)=k, cos(ax+b)=k ou tan(ax+b)=k, en ' +
+              'isolant l\'argument puis en revenant à x — y compris les cas sans solution.',
           ],
           chantier: '5e-4h',
           whereLabel: '5e (4h) → « 10. Équations trigonométriques trig(ax+b)=k »',
@@ -1099,23 +1170,23 @@ export const trigonometrie: ChapterContent = {
 
   recap: {
     items: [
-      '**Radian** — $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\pi/180$ ; les formules ' +
-        '$s=r\\theta$ et $A=\\frac{1}{2}r^2\\theta$ n\'utilisent que des radians.',
-      '**Figures composées** — décomposer en triangles et secteurs élémentaires, additionner ou ' +
-        'soustraire selon la figure ; l\'angle d\'un polygone régulier vaut 2π/n par côté, mais un ' +
-        'secteur peut en couvrir plusieurs.',
+      '**Radian** — $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\pi/180$. Les ' +
+        'formules $s=r\\theta$ et $A=\\frac{1}{2}r^2\\theta$ n\'utilisent que des radians.',
+      '**Figures composées** — décompose en triangles et secteurs élémentaires. Additionne ' +
+        'ou soustrais selon la figure. L\'angle d\'un polygone régulier vaut 2π/n par côté, ' +
+        'mais un secteur peut en couvrir plusieurs.',
       '**Géométrie du cercle** — aire d\'un segment = aire du secteur − aire du triangle ' +
-        '($\\frac{1}{2}r^2\\sin\\theta$) ; loi des cosinus pour une corde : $c^2 = 2r^2(1-\\cos\\theta)$.',
+        '($\\frac{1}{2}r^2\\sin\\theta$). Loi des cosinus pour une corde : $c^2 = 2r^2(1-\\cos\\theta)$.',
       '**Paramètres d\'une sinusoïde** — $A=(max-min)/2$, $b=(max+min)/2$, $T=2\\pi/\\omega$ ' +
-        '(jamais l\'inverse), φ décale horizontalement.',
-      '**Lecture graphique** — max/min pour A et b, distance entre deux maximums pour T, ' +
-        'traversée montante de la ligne moyenne pour φ (en vérifiant le sens de variation).',
-      '**Extremums** — sin(u)=1 seul (période 2π, maximums) ≠ sin(u)=±1 réunis (période π, tous ' +
-        'les extremums) : ne jamais confondre les deux formules.',
-      '**Modéliser en contexte** — A et b à partir des extrêmes, T (donc ω) à partir de la durée ' +
-        'd\'un cycle, φ en dernier à partir d\'une condition initiale précise.',
-      '**Équations trig(ax+b)=k** — isoler l\'argument, résoudre au cercle trigonométrique, ' +
-        'diviser TOUT (constante et période) par a ; $|k|>1$ pour sin/cos ⟹ aucune solution.',
+        '(jamais l\'inverse). φ décale la courbe horizontalement.',
+      '**Lecture graphique** — max/min pour trouver A et b. Distance entre deux maximums ' +
+        'pour T. Traversée montante de la ligne moyenne pour φ (en vérifiant le sens de variation).',
+      '**Extremums** — sin(u)=1 seul (période 2π, maximums) ≠ sin(u)=±1 réunis (période π, ' +
+        'tous les extremums). Ne confonds jamais les deux formules.',
+      '**Modéliser en contexte** — A et b à partir des extrêmes. T (donc ω) à partir de la ' +
+        'durée d\'un cycle. φ en dernier, à partir d\'une condition initiale précise.',
+      '**Équations trig(ax+b)=k** — isole l\'argument, résous au cercle trigonométrique, ' +
+        'divise TOUT (constante et période) par a. $|k|>1$ pour sin/cos ⟹ aucune solution.',
     ],
     checklist: {
       label: 'Astuce — avant de rendre ta copie',
@@ -1127,8 +1198,8 @@ export const trigonometrie: ChapterContent = {
       ],
     },
     forward:
-      'Certaines de ces notions reviendront plus loin, notamment quand les suites permettront de ' +
-      'décrire des phénomènes discrets liés à des cycles périodiques.',
+      'Tu retrouveras certaines de ces notions plus loin, quand les suites te permettront ' +
+      'de décrire des phénomènes discrets liés à des cycles périodiques.',
     entrainement: {
       kind: 'entrainement',
       title: 'Quiz vrai ou faux — tout le chapitre',
