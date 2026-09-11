@@ -7,10 +7,11 @@ export const analyseCombinatoire: ChapterContent = {
   title: 'Analyse combinatoire',
   slug: 'analyse-combinatoire',
   lede:
-    "Compter, sans tout énumérer : combien de mains, de mots, de podiums, de répartitions ? Ce " +
-    "chapitre outille le dénombrement — arrangements et combinaisons, répartitions contraintes, " +
-    "développement du binôme de Newton, problèmes combinés — puis l'applique aux tirages sans " +
-    'remise (loi hypergéométrique) et aux épreuves répétées indépendantes (loi binomiale).',
+    "Combien de mains, de mots, de podiums, de répartitions différentes — sans tout compter à " +
+    "la main ? Ce chapitre te donne les outils : arrangements et combinaisons, répartitions " +
+    "contraintes, le binôme de Newton, des problèmes combinés. Tu les appliques ensuite à deux " +
+    "situations concrètes : le tirage sans remise (loi hypergéométrique) et les épreuves " +
+    'répétées indépendantes (loi binomiale).',
 
   sections: [
     {
@@ -24,31 +25,42 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'definition',
           label: 'Définition — principe multiplicatif et factorielle',
           items: [
-            "Quand une expérience se décompose en étapes indépendantes SUCCESSIVES, le nombre " +
-              'total de résultats est le PRODUIT du nombre de choix à chaque étape (jamais une ' +
-              'somme). La **factorielle** de $n$, notée $n!$, compte les façons de ranger $n$ ' +
-              'objets distincts : $n! = n \\times (n-1) \\times \\ldots \\times 1$, avec $0!=1$ ' +
-              'par convention.',
+            "Ton expérience se déroule en plusieurs étapes indépendantes, l'une après l'autre ? " +
+              "Le nombre total de résultats, c'est le **produit** du nombre de choix à chaque " +
+              "étape — jamais une somme. La **factorielle** de $n$, notée $n!$, compte les " +
+              'façons de ranger $n$ objets distincts : ' +
+              '$n! = n \\times (n-1) \\times \\ldots \\times 1$, avec $0!=1$ par convention.',
           ],
         },
         {
           kind: 'definition',
           label: 'Arrangement A(n,k) — choisir ET ordonner',
           items: [
-            "Le nombre de façons de choisir $k$ éléments parmi $n$ EN TENANT COMPTE DE L'ORDRE " +
-              "(un podium, un mot de passe, une désignation de rôles successifs) est " +
+            "Tu choisis $k$ éléments parmi $n$, et l'**ordre compte** (un podium, un mot de " +
+              "passe, une suite de rôles) ? C'est un arrangement : " +
               '$A_n^k = \\dfrac{n!}{(n-k)!} = n \\times (n-1) \\times \\ldots \\times (n-k+1)$.',
           ],
+        },
+        {
+          kind: 'intuition',
+          label: 'Les poignées de main',
+          text:
+            'Imagine une pièce où tout le monde se serre la main, une fois chacun. A serre la ' +
+            "main de B : c'est **exactement** la même poignée de main que B serre la main de A " +
+            "— un seul événement, pas deux ! Compter les poignées de main, c'est donc choisir 2 " +
+            "personnes sans se soucier de qui « commence » : l'ordre n'a aucun sens ici. C'est " +
+            'précisément ce que mesure une combinaison.',
         },
         {
           kind: 'definition',
           label: 'Combinaison C(n,k) — choisir SEULEMENT',
           items: [
-            "Le nombre de façons de choisir $k$ éléments parmi $n$ SANS TENIR COMPTE DE L'ORDRE " +
-              '(un comité, une main de cartes) est $C_n^k = \\dfrac{n!}{k!(n-k)!} = ' +
-              '\\dfrac{A_n^k}{k!}$.',
-            'Diviser $A_n^k$ par $k!$ retire les réordonnancements internes des $k$ éléments ' +
-              "choisis, qui ne comptent plus une fois l'ordre ignoré.",
+            "Tu choisis $k$ éléments parmi $n$, mais cette fois l'**ordre ne compte pas** (un " +
+              "comité, une main de cartes) ? C'est une combinaison : " +
+              '$C_n^k = \\dfrac{n!}{k!(n-k)!} = \\dfrac{A_n^k}{k!}$.',
+            'Pourquoi diviser par $k!$ ? $A_n^k$ compte chaque groupe de $k$ éléments plusieurs ' +
+              "fois, une fois par ordre possible. Diviser par $k!$ retire justement ces " +
+              "réordonnancements internes, qui ne comptent plus une fois l'ordre ignoré.",
           ],
         },
         { kind: 'subheading', text: "Reconnaître le type de groupement — vue d'ensemble" },
@@ -56,12 +68,13 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'methode',
           label: 'Méthode — 3 questions, toujours dans cet ordre',
           items: [
-            "Avant tout calcul, 3 questions déterminent le type EXACT de groupement à dénombrer, " +
-              "et donc la formule à utiliser.",
-            "**L'ordre compte-t-il ?** (permuter les éléments choisis change-t-il le résultat obtenu ?)",
-            '**La répétition est-elle autorisée ?** (un même élément peut-il être choisi plusieurs fois ?)',
-            '**Tous les** $n$ **éléments sont-ils utilisés ?** ($p=n$ — cette 3e question ne se pose ' +
-              "QUE si l'ordre compte : sans ordre, seule la répétition distingue les 2 seuls cas possibles.)",
+            'Avant tout calcul, pose-toi 3 questions, toujours dans le même ordre. Elles te ' +
+              'donnent le type exact de groupement, et donc la bonne formule.',
+            "**L'ordre compte-t-il ?** Permuter les éléments choisis change-t-il le résultat ?",
+            '**La répétition est-elle autorisée ?** Un même élément peut-il être choisi plusieurs fois ?',
+            '**Tous les** $n$ **éléments sont-ils utilisés ?** (c\'est-à-dire $p=n$) — cette 3e ' +
+              "question ne se pose que si l'ordre compte : sans ordre, seule la répétition " +
+              'distingue les 2 cas possibles.',
           ],
         },
         {
@@ -80,33 +93,46 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'astuce',
           label: 'La question 1 coupe le tableau en 2 grandes familles',
           text:
-            "« Ordre compte » (permutation, arrangement) et « ordre ne compte pas » (combinaison) " +
-            'forment 2 familles disjointes — jamais un mélange des deux vocabulaires pour un même ' +
-            'groupement. Les questions 2 et 3 affinent ensuite CHAQUE famille séparément ; ' +
-            '$A_n^k$ et $C_n^k$, déjà vus ci-dessus, sont les 2 cas SANS répétition — les 4 ' +
-            'autres lignes du tableau, détaillées au fil de ce chapitre, couvrent les cas AVEC ' +
-            'répétition et les 2 cas de permutation.',
+            '« Ordre compte » (permutation, arrangement) et « ordre ne compte pas » ' +
+            '(combinaison) forment 2 familles bien séparées — ne mélange jamais leur vocabulaire ' +
+            'pour un même groupement. Les questions 2 et 3 affinent ensuite chaque famille ' +
+            'séparément ; $A_n^k$ et $C_n^k$, déjà vus ci-dessus, sont les 2 cas sans répétition ' +
+            '— les 4 autres lignes du tableau, détaillées au fil de ce chapitre, couvrent les ' +
+            'cas avec répétition et les 2 cas de permutation.',
         },
         {
           kind: 'piege',
           label: 'Piège classique — distinguer choisir-et-ordonner de choisir-seulement',
           text:
-            "La première question à se poser face à un énoncé de dénombrement : « si je permute " +
-            "les éléments choisis, est-ce que ça change le résultat ? » Un podium (1er, 2e, 3e) " +
-            '→ $A_n^k$, arranger changerait qui est 1er. Un comité de 3 personnes sans rôle ' +
-            'distinct → $C_n^k$, permuter les 3 personnes choisies ne change rien au comité obtenu.',
+            'Face à un énoncé de dénombrement, pose-toi toujours cette question en premier : ' +
+            '« si je permute les éléments choisis, est-ce que ça change le résultat ? » Un ' +
+            "podium (1er, 2e, 3e) → $A_n^k$ : changer l'ordre change qui est 1er ! Un comité de " +
+            '3 personnes sans rôle distinct → $C_n^k$ : permuter les 3 personnes choisies ne ' +
+            'change rien au comité obtenu.',
+        },
+        {
+          kind: 'intuition',
+          label: 'Pizza ou tiercé ?',
+          text:
+            'Tu composes ta pizza en choisissant 3 garnitures parmi 8 : peu importe si tu dis ' +
+            '« olives, champignons, jambon » ou « jambon, olives, champignons », c\'est **la ' +
+            "même** pizza. L'ordre ne compte pas → une combinaison, $C_8^3$. Un tiercé, au " +
+            'contraire, distingue le 1er, le 2e et le 3e cheval : les mêmes 3 chevaux dans un ' +
+            "ordre différent donnent un tiercé **différent**. L'ordre compte → un arrangement, " +
+            '$A_8^3$. « Choisir 3 parmi 8 » dans les deux cas, mais deux résultats très ' +
+            'différents !',
         },
         { kind: 'subheading', text: 'Exemple résolu — choisir 3 livres parmi 8' },
         {
           kind: 'exemple',
-          badge: "étagère (ordre compte) vs sac de voyage (ordre ne compte pas)",
-          formula: 'Aligner 3 livres précis, dans un ORDRE donné, sur une étagère, parmi 8 disponibles :',
+          badge: 'étagère (ordre compte) vs sac de voyage (ordre ne compte pas)',
+          formula: "Aligner 3 livres précis, dans un **ordre** donné, sur une étagère, parmi 8 disponibles :",
           steps: [
             { tag: 'ordre compte', text: '$A_8^3 = 8 \\times 7 \\times 6 = 336$' },
             {
-              tag: "ordre ignoré",
+              tag: 'ordre ignoré',
               text:
-                'Emporter les 3 MÊMES livres en vacances, sans se soucier de l\'ordre dans le sac : ' +
+                "Emporter les 3 **mêmes** livres en vacances, sans se soucier de l'ordre dans le sac : " +
                 '$C_8^3 = \\dfrac{336}{3!} = \\dfrac{336}{6} = 56$',
             },
           ],
@@ -119,37 +145,36 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Choisir $k$ éléments SANS ordre : $C_n^k$ façons — **définition de la combinaison**.',
+                'Choisir $k$ éléments sans ordre : $C_n^k$ façons — **définition de la combinaison**.',
             },
             {
               kind: 'para',
               text:
-                'Ordonner ces $k$ éléments choisis : $k!$ façons pour chaque groupe — ' +
+                'Ordonner ensuite ces $k$ éléments choisis : $k!$ façons pour chaque groupe — ' +
                 "**permutation d'un groupe déjà fixé**.",
             },
             {
               kind: 'para',
               text:
-                "Choisir-puis-ordonner est une autre façon de produire exactement les mêmes " +
-                "résultats qu'« arranger directement » : chaque groupe non ordonné se décline en " +
-                '$k!$ ordres possibles, d\'où $A_n^k=C_n^k \\times k!$ — jamais une somme, une ' +
-                'MULTIPLICATION.',
+                "Choisir-puis-ordonner revient exactement à « arranger directement » : chaque " +
+                'groupe non ordonné se décline en $k!$ ordres possibles, d\'où ' +
+                '$A_n^k=C_n^k \\times k!$ — **une multiplication, jamais une somme**.',
             },
           ],
         },
         {
           kind: 'piege',
           text:
-            '$A_n^k=C_n^k+k!$ est FAUX (confond addition et multiplication) : avec l\'exemple, ' +
-            'cela donnerait 56+6=62, très loin des 336 réels.',
+            "$A_n^k=C_n^k+k!$ est **faux** — ça confond addition et multiplication ! Avec " +
+            "l'exemple ci-dessus, ça donnerait 56+6=62, très loin des 336 réels.",
         },
         { kind: 'subheading', text: 'Nombres à chiffres tous distincts — principe multiplicatif position par position' },
         {
           kind: 'methode',
           items: [
-            'Pour compter les nombres à $n$ chiffres TOUS DIFFÉRENTS (choisis parmi 0-9), premier ' +
-              'chiffre non nul : on remplit les positions UNE À UNE, chaque position disposant ' +
-              "d'un chiffre de moins que la précédente puisqu'un chiffre déjà utilisé n'est plus " +
+            "Pour compter les nombres à $n$ chiffres **tous différents** (choisis parmi 0-9), " +
+              'premier chiffre non nul : remplis les positions **une à une**. Chaque position a ' +
+              "un chiffre de moins que la précédente, puisqu'un chiffre déjà utilisé n'est plus " +
               'disponible.',
           ],
         },
@@ -167,18 +192,29 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Exclure 0 de TOUTES les positions (pas seulement la première) donnerait à tort ' +
-            "$9 \\times 8 \\times 7 = 504$ pour l'exemple à 3 chiffres — seul le PREMIER chiffre " +
-            "doit être non nul ; 0 reste parfaitement autorisé ensuite, du moment qu'il n'est pas répété.",
+            "Exclure 0 de **toutes** les positions (pas seulement la première) donnerait à tort " +
+            "$9 \\times 8 \\times 7 = 504$ pour l'exemple à 3 chiffres. Seul le **premier** " +
+            "chiffre doit être non nul ! 0 reste parfaitement autorisé ensuite, tant qu'il n'est " +
+            'pas répété.',
         },
         { kind: 'subheading', text: "Arrangement avec répétitions — contraste direct avec l'exemple précédent" },
+        {
+          kind: 'intuition',
+          label: 'Le code du cadenas',
+          text:
+            "Pense au code à 4 chiffres d'un cadenas ou d'une carte bancaire. Rien n'empêche " +
+            'deux chiffres identiques : 1-1-1-1 est un code parfaitement valable, tout comme ' +
+            '3-7-3-9. Chaque position se règle indépendamment des autres, sur les 10 chiffres ' +
+            "disponibles à chaque fois — c'est exactement le principe de l'arrangement avec " +
+            'répétition.',
+        },
         {
           kind: 'definition',
           label: 'Définition — arrangement avec répétitions B(n,p)=nᵖ',
           items: [
-            "Dès que la répétition est AUTORISÉE (un même élément peut réapparaître à plusieurs " +
-              'positions), chaque position redevient indépendante des précédentes — TOUJOURS $n$ ' +
-              'choix, quelle que soit la position : $B_n^p = n^p$.',
+            "Dès que la répétition est **autorisée** (un même élément peut réapparaître à " +
+              'plusieurs positions), chaque position redevient indépendante des précédentes : ' +
+              '**toujours** $n$ choix, quelle que soit la position. $B_n^p = n^p$.',
           ],
         },
         {
@@ -201,19 +237,20 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "1296>360 n'est jamais un hasard : autoriser la répétition ne peut QU'AUGMENTER (ou " +
-            'laisser égal) le nombre de possibilités, puisque chaque position AVEC répétition ' +
-            'dispose d\'au moins autant de choix que la même position SANS répétition — ' +
+            "1296 > 360 n'est jamais un hasard : autoriser la répétition ne peut **qu'augmenter** " +
+            '(ou laisser égal) le nombre de possibilités. Chaque position avec répétition ' +
+            'dispose d\'au moins autant de choix que la même position sans répétition — ' +
             'strictement plus, dès la 2e position.',
         },
-        { kind: 'subheading', text: 'Permutation simple — un arrangement qui utilise TOUS les éléments' },
+        { kind: 'subheading', text: "Permutation simple — un arrangement qui utilise **tous** les éléments" },
         {
           kind: 'definition',
           label: 'Définition — permutation simple P(p)=p!',
           items: [
-            "Une **permutation simple** de $p$ éléments distincts est le cas particulier de " +
-              "l'arrangement où TOUS les éléments sont utilisés ($p=n$) : il ne reste alors plus " +
-              "aucun élément à laisser de côté, seul l'ORDRE varie d'une permutation à l'autre.",
+            "Une **permutation simple** de $p$ éléments distincts, c'est le cas particulier de " +
+              "l'arrangement où **tous** les éléments sont utilisés ($p=n$). Il ne reste alors " +
+              "plus aucun élément à laisser de côté, seul l'**ordre** change d'une permutation à " +
+              "l'autre.",
             '$P_p = A_p^p = p!$',
           ],
         },
@@ -231,17 +268,17 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'astuce',
           label: 'P(p)=A(n,k) avec n=k=p',
           text:
-            "Poser $n=p$ dans la formule de l'arrangement retrouve directement $P_p$ : " +
-            '$A_p^p = \\dfrac{p!}{(p-p)!} = \\dfrac{p!}{0!} = p!$ (grâce à $0!=1$) — inutile de ' +
-            'mémoriser une formule séparée.',
+            "Pose $n=p$ dans la formule de l'arrangement, tu retrouves directement $P_p$ : " +
+            '$A_p^p = \\dfrac{p!}{(p-p)!} = \\dfrac{p!}{0!} = p!$ (grâce à $0!=1$). Inutile de ' +
+            'mémoriser une formule séparée !',
         },
         { kind: 'subheading', text: "Diagonales d'un polygone" },
         {
           kind: 'definition',
           items: [
             'Un polygone convexe à $n$ côtés a $C_n^2=\\dfrac{n(n-1)}{2}$ segments reliant 2 ' +
-              'sommets quelconques (côtés ET diagonales) ; en retirant les $n$ côtés eux-mêmes, ' +
-              'il reste $D(n) = \\dfrac{n(n-3)}{2}$.',
+              'sommets quelconques (côtés **et** diagonales). Retire les $n$ côtés eux-mêmes, il ' +
+              'reste $D(n) = \\dfrac{n(n-3)}{2}$.',
           ],
         },
         {
@@ -262,9 +299,9 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'astuce',
           label: 'Ne garder que la racine positive',
           text:
-            "L'équation $n^2-3n-54=0$ admet aussi $n=-6$ comme racine algébrique — mais un nombre " +
-            'de côtés ne peut jamais être négatif : seule la racine POSITIVE a un sens ' +
-            "géométrique, l'autre se rejette systématiquement sans même la calculer en détail.",
+            "L'équation $n^2-3n-54=0$ admet aussi $n=-6$ comme racine algébrique — mais un " +
+            'nombre de côtés ne peut jamais être négatif ! Seule la racine **positive** a un ' +
+            "sens géométrique ; l'autre se rejette d'office, sans même la calculer en détail.",
         },
         {
           kind: 'illustration',
@@ -281,11 +318,12 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'definition',
           items: [
-            'Pour $n$ objets distincts disposés en CERCLE : si seules les ROTATIONS sont ' +
-              "considérées équivalentes (une table), il y a $(n-1)!$ dispositions distinctes " +
-              "(fixer un objet de référence élimine les rotations). Si en plus les RÉFLEXIONS " +
-              "sont équivalentes (un collier, un bracelet — le sens de lecture n'importe pas), il " +
-              'faut diviser par 2 : table $(n-1)!$ ; collier $\\dfrac{(n-1)!}{2}$.',
+            'Pour $n$ objets distincts disposés en **cercle** : si seules les **rotations** ' +
+              "sont considérées équivalentes (une table), il y a $(n-1)!$ dispositions " +
+              'distinctes — fixer un objet de référence élimine les rotations. Si en plus les ' +
+              "**réflexions** sont équivalentes (un collier, un bracelet — le sens de lecture " +
+              "n'importe pas), il faut diviser par 2 : table $(n-1)!$ ; collier " +
+              '$\\dfrac{(n-1)!}{2}$.',
           ],
         },
         {
@@ -325,27 +363,27 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'piege',
           text:
             'Oublier la division par 2 pour un collier (répondre 720 au lieu de 360) est ' +
-            "l'erreur la plus fréquente de ce sous-type — un collier n'est PAS une simple table, " +
-            'la réflexion y est une symétrie supplémentaire à prendre en compte.',
+            "l'erreur la plus fréquente de ce sous-type. Un collier **n'est pas** une simple " +
+            'table : la réflexion y ajoute une symétrie supplémentaire à prendre en compte !',
         },
         {
           kind: 'astuce',
           label: 'La symétrie C(n,k)=C(n,n−k), un réflexe de vérification',
           text:
-            'Choisir $k$ éléments parmi $n$ revient exactement à LAISSER $n-k$ éléments de côté : ' +
-            '$C_n^k=C_n^{n-k}$ toujours. Utile pour calculer le plus petit des deux côtés (ex. ' +
-            '$C_{20}^{14}=C_{20}^6$, bien plus rapide à développer à la main) et pour repérer une ' +
-            'erreur de calcul si les deux côtés ne coïncident pas.',
+            'Choisir $k$ éléments parmi $n$ revient exactement à **laisser** $n-k$ éléments de ' +
+            'côté : $C_n^k=C_n^{n-k}$, toujours. Pratique pour calculer le plus petit des deux ' +
+            'côtés (ex. $C_{20}^{14}=C_{20}^6$, bien plus rapide à développer à la main), et ' +
+            'pour repérer une erreur de calcul si les deux côtés ne coïncident pas.',
         },
         { kind: 'subheading', text: 'Combinaison avec répétitions — dernier cas de la classification' },
         {
           kind: 'definition',
           label: 'Définition — combinaison avec répétitions Γ(n,p)',
           items: [
-            "Choisir $p$ éléments parmi $n$, SANS tenir compte de l'ordre ET avec répétition " +
-              'AUTORISÉE (un même élément peut être choisi plusieurs fois) — le dernier des 6 ' +
-              'types de groupement du tableau de classification. Le résultat se ramène à une ' +
-              'combinaison simple, mais sur un ensemble AGRANDI de $p-1$ éléments fictifs : ' +
+            "Choisir $p$ éléments parmi $n$, sans tenir compte de l'ordre et avec répétition " +
+              '**autorisée** (un même élément peut être choisi plusieurs fois) : le dernier des ' +
+              '6 types de groupement du tableau de classification. Le résultat se ramène à une ' +
+              'combinaison simple, mais sur un ensemble **agrandi** de $p-1$ éléments fictifs : ' +
               '$\\Gamma_n^p = C_{n+p-1}^p = \\dfrac{(n+p-1)!}{p!(n-1)!}$.',
           ],
         },
@@ -392,16 +430,17 @@ export const analyseCombinatoire: ChapterContent = {
           label: 'Piège classique — confondre Γ(n,p) et C(n,p)',
           text:
             '$C_5^3=10$ seul (sans répétition) est bien plus petit que $\\Gamma_5^3=35$ (avec ' +
-            "répétition) — jamais utiliser $C_n^p$ quand l'énoncé autorise explicitement la " +
-            'répétition d\'un même élément dans le groupe choisi.',
+            "répétition) ! N'utilise jamais $C_n^p$ quand l'énoncé autorise explicitement la " +
+            "répétition d'un même élément dans le groupe choisi.",
         },
         {
           kind: 'entrainement',
           title: 'Dénombrement fondamental et arrangements',
           generatorId: '6gen43',
           description: [
-            'Principe multiplicatif, factorielle, arrangements et combinaisons, permutations ' +
-              'circulaires, diagonales, combinaisons avec répétitions.',
+            'Entraîne-toi sur le principe multiplicatif, la factorielle, les arrangements et ' +
+              'combinaisons, les permutations circulaires, les diagonales et les combinaisons ' +
+              'avec répétitions.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 43. Dénombrement fondamental et arrangements »',
@@ -419,12 +458,13 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'definition',
           label: 'Définition — répartition multinomiale',
           items: [
-            '$n$ personnes (ou objets) réparties en $k$ groupes NOMMÉS, de tailles fixées ' +
+            '$n$ personnes (ou objets) réparties en $k$ groupes **nommés**, de tailles fixées ' +
               '$n_1,\\ldots,n_k$ sommant à $n$ : le nombre de répartitions possibles est ' +
               '$\\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_k!}$.',
-            "Ce nombre s'obtient aussi comme un enchaînement de choix successifs dans le pool " +
-              'RESTANT à chaque étape : $C_n^{n_1} \\times C_{n-n_1}^{n_2} \\times \\ldots$ — jamais ' +
-              'en répétant $n$ à chaque étape, qui recompterait les mêmes personnes.',
+            'Tu peux aussi voir ce nombre comme un enchaînement de choix successifs, dans le ' +
+              'pool **restant** à chaque étape : $C_n^{n_1} \\times C_{n-n_1}^{n_2} \\times ' +
+              '\\ldots$ — jamais en répétant $n$ à chaque étape, ce qui recompterait les mêmes ' +
+              'personnes.',
           ],
         },
         {
@@ -449,9 +489,9 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$C_{10}^5 \\times C_{10}^3 \\times C_{10}^2$ (en répétant 10 à chaque étape) compterait ' +
-            'plusieurs fois les mêmes personnes dans des groupes différents — toujours puiser ' +
-            'dans le nombre RESTANT après les choix précédents.',
+            '$C_{10}^5 \\times C_{10}^3 \\times C_{10}^2$ — en répétant 10 à chaque étape — ' +
+            'compterait plusieurs fois les mêmes personnes dans des groupes différents ! Puise ' +
+            'toujours dans le nombre **restant** après les choix précédents.',
         },
         {
           kind: 'illustration',
@@ -474,11 +514,11 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'definition',
           label: 'Définition — permutation avec répétitions',
           items: [
-            'Ranger $n$ éléments DONT CERTAINS sont identiques entre eux ($n_1$ exemplaires ' +
+            'Ranger $n$ éléments **dont certains sont identiques** entre eux ($n_1$ exemplaires ' +
               "d'un premier type, $n_2$ d'un second, etc.) revient exactement à une répartition " +
               "multinomiale : chaque type d'élément identique occupe un « groupe nommé » de " +
-              'positions, de taille fixée par son nombre d\'occurrences — la MÊME formule que ' +
-              'ci-dessus, réinterprétée : $\\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_k!}$.',
+              "positions, de taille fixée par son nombre d'occurrences — la **même** formule " +
+              'que ci-dessus, réinterprétée : $\\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_k!}$.',
           ],
         },
         {
@@ -505,20 +545,20 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'piege',
           label: 'Piège classique — oublier de retirer le mot de départ',
           text:
-            "6300 compte le mot MISSISSIPI original comme l'un des « mots » possibles — répondre " +
-            '6300 à la question « combien d\'anagrammes ? » compte 1 de trop. La question ' +
-            '« combien de PERMUTATIONS des lettres ? » (sans exclusion) admet bien 6300 comme ' +
-            'réponse ; seule la question sur les ANAGRAMMES exige de retrancher 1.',
+            "6300 compte le mot MISSISSIPI d'origine comme l'un des « mots » possibles — " +
+            "répondre 6300 à « combien d'anagrammes ? » compte 1 de trop ! La question « combien " +
+            'de **permutations** des lettres ? » (sans exclusion) admet bien 6300 comme ' +
+            'réponse ; seule la question sur les **anagrammes** exige de retrancher 1.',
         },
         {
           kind: 'astuce',
           label: 'Sans lettre répétée, on retrouve p!',
           text:
-            'Si les 10 lettres étaient TOUTES distinctes (aucune répétition), la formule ' +
-            'redonnerait $\\dfrac{10!}{1! \\times 1! \\times \\ldots \\times 1!}=10!$ — exactement ' +
-            'une permutation simple. Diviser par les factorielles des effectifs répétés (4! pour ' +
-            'les I, 4! pour les S) retire précisément les réordonnancements internes des lettres ' +
-            'identiques, qui ne produisent aucun mot nouveau.',
+            'Si les 10 lettres étaient **toutes** distinctes (aucune répétition), la formule ' +
+            'redonnerait $\\dfrac{10!}{1! \\times 1! \\times \\ldots \\times 1!}=10!$ — ' +
+            'exactement une permutation simple. Diviser par les factorielles des effectifs ' +
+            'répétés (4! pour les I, 4! pour les S) retire précisément les réordonnancements ' +
+            'internes des lettres identiques, qui ne produisent aucun mot nouveau.',
         },
         {
           kind: 'illustration',
@@ -541,9 +581,9 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'methode',
           items: [
-            "Dès qu'un des $k$ éléments choisis a un RÔLE PARTICULIER (un président parmi des " +
-              "membres, une carte « pivot » dans une main), on choisit ce rôle À PART, puis le " +
-              'reste par une combinaison ordinaire — une simple $C_n^k$ ignorerait la ' +
+            "Dès qu'un des $k$ éléments choisis a un **rôle particulier** (un président parmi " +
+              'des membres, une carte « pivot » dans une main), choisis ce rôle **à part**, ' +
+              'puis le reste par une combinaison ordinaire. Une simple $C_n^k$ ignorerait la ' +
               'distinction de rôle.',
           ],
         },
@@ -559,18 +599,32 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Écrire $C_{10}^3=120$ (« on choisit 3 personnes parmi 10 ») ignore que le président a ' +
-            'un rôle DISTINCT des 2 vice-présidents — la bonne valeur, 360, est 3 fois plus ' +
-            'grande, exactement le facteur qui distingue « qui est président » parmi les 3 choisis.',
+            'Écrire $C_{10}^3=120$ (« on choisit 3 personnes parmi 10 ») ignore que le président ' +
+            'a un rôle **distinct** des 2 vice-présidents ! La bonne valeur, 360, est 3 fois ' +
+            'plus grande — exactement le facteur qui distingue « qui est président » parmi les ' +
+            '3 choisis.',
         },
         { kind: 'subheading', text: 'Choix indépendants (ET) vs choix exclusifs (OU)' },
         {
+          kind: 'intuition',
+          label: 'Menu du jour ou carte des desserts ?',
+          text:
+            "Au restaurant, un menu impose une entrée **et** un plat : chaque combinaison " +
+            'entrée-plat est un choix différent, et le nombre de menus possibles se ' +
+            '**multiplie** (3 entrées × 4 plats = 12 menus). À la carte des desserts, tu ' +
+            'choisis un seul dessert, parmi ceux du jour **ou** ceux de la carte permanente, ' +
+            "jamais les deux à la fois : le nombre de choix, là, s'**additionne**. Multiplier " +
+            'pour un « ET » qui combine, additionner pour un « OU » qui exclut — exactement la ' +
+            'logique des deux cas qui suivent.',
+        },
+        {
           kind: 'methode',
           items: [
-            'Un « ET » entre 2 choix INDÉPENDANTS (2 groupes séparés, chacun contribue) se ' +
-              'traduit par une MULTIPLICATION.',
-            'Un « OU » EXCLUSIF entre 2 cas qui ne se recouvrent JAMAIS (tous dans le groupe A, ' +
-              'ou tous dans le groupe B, jamais un mélange) se traduit par une ADDITION.',
+            "Un « ET » entre 2 choix **indépendants** (2 groupes séparés, chacun contribue) se " +
+              'traduit par une **multiplication**.',
+            "Un « OU » **exclusif** entre 2 cas qui ne se recouvrent jamais (tous dans le " +
+              'groupe A, ou tous dans le groupe B, jamais un mélange) se traduit par une ' +
+              '**addition**.',
           ],
         },
         {
@@ -583,9 +637,9 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Additionner $C_8^2+C_6^2=28+15=43$ pour ce même ET est faux — un ET entre choix ' +
-            'indépendants MULTIPLIE, jamais n\'additionne, sans quoi le résultat (43) serait même ' +
-            'plus petit que chacun des 2 facteurs pris séparément dans certains cas, un signal ' +
+            "Additionner $C_8^2+C_6^2=28+15=43$ pour ce même ET est faux ! Un ET entre choix " +
+            'indépendants **multiplie**, jamais n\'additionne — sans quoi le résultat pourrait ' +
+            'même tomber plus petit que chacun des 2 facteurs pris séparément : un bon signal ' +
             "d'alerte à repérer.",
         },
         {
@@ -601,8 +655,8 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'methode',
           items: [
-            'Choisir 2 valeurs parmi $n$, RÉPÉTITION autorisée, SANS tenir compte de l\'ordre ' +
-              '(comme les 2 faces d\'un domino) : on sépare les paires de valeurs DIFFÉRENTES ' +
+            "Choisir 2 valeurs parmi $n$, répétition autorisée, sans tenir compte de l'ordre " +
+              "(comme les 2 faces d'un domino) : sépare les paires de valeurs **différentes** " +
               '($C_n^2$) des paires « doubles » ($n$ possibilités, une par valeur) : ' +
               '$C_n^2+n = C_{n+1}^2$.',
           ],
@@ -617,8 +671,8 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            '$C_6^2=15$ seul oublie les 6 dominos « doubles » (0-0, 1-1, …, 5-5) — il faut ' +
-            'TOUJOURS les ajouter séparément pour retrouver le total 21.',
+            '$C_6^2=15$ seul oublie les 6 dominos « doubles » (0-0, 1-1, …, 5-5) ! Il faut ' +
+            '**toujours** les ajouter séparément pour retrouver le total 21.',
         },
         { kind: 'subheading', text: 'Discernable vs indiscernable' },
         {
@@ -642,19 +696,19 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'astuce',
           label: 'Rendre indiscernable réduit toujours le compte',
           text:
-            'Fusionner des cas symétriques ne peut jamais AUGMENTER un dénombrement — 21<36 ici, ' +
-            "et c'est toujours le cas : le rapport n'est cependant pas uniforme (les 6 doubles ne " +
-            'correspondent qu\'à UN SEUL résultat discernable chacun, les 15 paires différentes à ' +
-            'DEUX chacune).',
+            'Fusionner des cas symétriques ne peut jamais **augmenter** un dénombrement — ' +
+            "21 < 36 ici, et c'est toujours le cas. Le rapport n'est cependant pas uniforme : " +
+            'les 6 doubles ne correspondent chacun qu\'à **un seul** résultat discernable, les ' +
+            '15 paires différentes à **deux** chacune.',
         },
         { kind: 'subheading', text: 'Sélection sous contrainte — exclusion et couple indissociable' },
         {
           kind: 'methode',
           items: [
-            '2 éléments précis $X$ et $Y$ ne peuvent JAMAIS être choisis ensemble (exclusion) : ' +
-              'total − (cas où $X$ ET $Y$ sont TOUS DEUX inclus).',
-            '$X$ et $Y$ DOIVENT être choisis ensemble ou pas du tout (couple indissociable) : ' +
-              "(les deux inclus) + (les deux exclus), 2 cas disjoints qui s'additionnent.",
+            '2 éléments précis $X$ et $Y$ ne peuvent **jamais** être choisis ensemble ' +
+              '(exclusion) : total − (cas où $X$ et $Y$ sont **tous les deux** inclus).',
+            '$X$ et $Y$ **doivent** être choisis ensemble ou pas du tout (couple indissociable) : ' +
+              "(les deux inclus) + (les deux exclus) — 2 cas disjoints qui s'additionnent.",
           ],
         },
         {
@@ -669,18 +723,20 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "ADDITIONNER $C_{18}^4$ à $C_{20}^6$ (au lieu de le SOUSTRAIRE) pour l'exclusion ne " +
-            'retirerait rien des cas interdits — la bonne opération retire toujours les cas non ' +
-            "voulus du total, jamais ne les ajoute. Les 2 résultats, 35 700 et 21 624, restent " +
-            "d'ailleurs bien DIFFÉRENTS — ce sont deux contraintes opposées, jamais interchangeables.",
+            "**Additionner** $C_{18}^4$ à $C_{20}^6$ (au lieu de le soustraire) pour l'exclusion " +
+            'ne retirerait rien des cas interdits ! La bonne opération retire toujours les cas ' +
+            'non voulus du total, elle ne les ajoute jamais. Les 2 résultats, 35 700 et 21 624, ' +
+            'restent d\'ailleurs bien **différents** — ce sont deux contraintes opposées, jamais ' +
+            'interchangeables.',
         },
         {
           kind: 'entrainement',
           title: 'Dénombrement combiné et sélections contraintes',
           generatorId: '6gen44',
           description: [
-            'Répartitions multinomiales, permutations avec répétitions, rôles distingués, ET/OU, ' +
-              'exclusion et couple indissociable.',
+            'Entraîne-toi sur les répartitions multinomiales, les permutations avec ' +
+              'répétitions, les rôles distingués, le ET/OU, et sur exclusion et couple ' +
+              'indissociable.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 44. Dénombrement combiné et sélections contraintes »',
@@ -702,16 +758,16 @@ export const analyseCombinatoire: ChapterContent = {
               'piloté par un coefficient binomial : $(a+b)^n = \\displaystyle\\sum_{k=0}^{n} ' +
               'C_n^k \\times a^{n-k} \\times b^k$.',
             'Le **terme général** (rang $k+1$) est $T_{k+1}=C_n^k \\times a^{n-k} \\times b^k$ : ' +
-              "l'exposant de $a$ DÉCROÎT ($n-k$) tandis que celui de $b$ CROÎT ($k$) au fil du " +
-              'développement.',
+              "l'exposant de $a$ **décroît** ($n-k$) tandis que celui de $b$ **croît** ($k$) au " +
+              'fil du développement.',
           ],
         },
         {
           kind: 'piege',
           text:
-            '$(a-b)^n \\neq a^n-b^n$ — on ne peut JAMAIS séparer une puissance d\'une somme (ou ' +
-            "d'une différence) en la puissance de chaque terme pris isolément ; il faut toujours " +
-            'passer par le développement complet du binôme.',
+            "$(a-b)^n \\neq a^n-b^n$ ! Tu ne peux **jamais** séparer une puissance d'une somme " +
+            "(ou d'une différence) en la puissance de chaque terme pris isolément — il faut " +
+            'toujours passer par le développement complet du binôme.',
         },
         {
           kind: 'exempleLibre',
@@ -724,30 +780,30 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                'Développer SANS réduire : 16 mots de 4 lettres ($a$ ou $b$), un par façon de ' +
-                'choisir un terme dans chaque facteur — **principe multiplicatif, 2 choix × 4 ' +
-                'facteurs =** $2^4=16$.',
+                'Développe sans réduire : tu obtiens 16 mots de 4 lettres ($a$ ou $b$), un par ' +
+                'façon de choisir un terme dans chaque facteur — **principe multiplicatif, 2 ' +
+                'choix × 4 facteurs =** $2^4=16$.',
             },
             {
               kind: 'para',
               text:
-                'Regrouper les 16 mots par nombre de $b$ : 1 mot à 0 $b$, 4 mots à 1 $b$, 6 mots ' +
+                'Regroupe les 16 mots par nombre de $b$ : 1 mot à 0 $b$, 4 mots à 1 $b$, 6 mots ' +
                 'à 2 $b$, 4 mots à 3 $b$, 1 mot à 4 $b$ — **énumération directe des 16 mots**.',
             },
             {
               kind: 'para',
               text:
-                'Le nombre de mots à exactement $i$ lettres $b$ (et $4-i$ lettres $a$) est le ' +
-                'nombre de façons de CHOISIR les $i$ positions occupées par $b$ parmi les 4 ' +
-                "positions du mot — exactement $C_4^i$, sans qu'il soit besoin d'énumérer : 1, " +
-                '4, 6, 4, 1 sont exactement $C_4^0$ à $C_4^4$. D\'où $(a+b)^4 = C_4^0a^4b^0 + ' +
-                'C_4^1a^3b^1 + C_4^2a^2b^2 + C_4^3a^1b^3 + C_4^4a^0b^4$.',
+                'Le nombre de mots à exactement $i$ lettres $b$ (et $4-i$ lettres $a$), c\'est ' +
+                'le nombre de façons de choisir les $i$ positions occupées par $b$ parmi les 4 ' +
+                "positions du mot — exactement $C_4^i$, sans besoin d'énumérer : 1, 4, 6, 4, 1 " +
+                'sont exactement $C_4^0$ à $C_4^4$. D\'où $(a+b)^4 = C_4^0a^4b^0 + C_4^1a^3b^1 + ' +
+                'C_4^2a^2b^2 + C_4^3a^1b^3 + C_4^4a^0b^4$.',
             },
             {
               kind: 'para',
               text:
-                'Généralisation à $n$ quelconque : développer $(a+b)^n$ ($n$ facteurs) produit ' +
-                'des monômes $a^{n-i}b^i$, chacun obtenu en choisissant, parmi les $n$ facteurs, ' +
+                'Généralise à $n$ quelconque : développer $(a+b)^n$ ($n$ facteurs) produit des ' +
+                'monômes $a^{n-i}b^i$, chacun obtenu en choisissant, parmi les $n$ facteurs, ' +
                 'lesquels fournissent le $b$ — $C_n^i$ façons de faire ce choix pour chaque $i$, ' +
                 'exactement le coefficient annoncé par la formule.',
             },
@@ -784,14 +840,28 @@ export const analyseCombinatoire: ChapterContent = {
         },
         { kind: 'subheading', text: 'Le triangle de Pascal' },
         {
+          kind: 'intuition',
+          label: 'Pourquoi une simple addition suffit',
+          text:
+            'Tu as déjà croisé la relation de Pascal plus tôt dans ce chapitre, dans la ' +
+            "démonstration de la formule des combinaisons avec répétitions — elle n'est pas " +
+            "neuve. Voici pourquoi elle marche : $C_n^k$, c'est le nombre de façons de choisir " +
+            '$k$ éléments parmi $n$. Fixe un élément précis, disons le dernier, et sépare 2 ' +
+            "cas : soit tu le prends (il reste $k-1$ à choisir parmi les $n-1$ autres, " +
+            "$C_{n-1}^{k-1}$), soit tu ne le prends pas (il reste $k$ à choisir parmi les $n-1$ " +
+            'autres, $C_{n-1}^k$). Ces 2 cas couvrent toutes les possibilités, sans jamais se ' +
+            "chevaucher : leur somme donne exactement $C_n^k$. Voilà tout le secret de " +
+            "l'addition dans le triangle de Pascal.",
+        },
+        {
           kind: 'definition',
           label: 'Relation de Pascal, symétrie, somme de ligne',
           items: [
             '$C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$ ; $C_n^k=C_n^{n-k}$ ; ' +
               '$\\displaystyle\\sum_{k=0}^{n} C_n^k=2^n$.',
-            'Chaque coefficient est la SOMME des deux coefficients juste au-dessus (relation de ' +
-              'Pascal) ; chaque ligne est SYMÉTRIQUE ; la somme d\'une ligne entière double à ' +
-              'chaque ligne suivante.',
+            'Chaque coefficient est la **somme** des deux coefficients juste au-dessus ' +
+              '(relation de Pascal) ; chaque ligne est **symétrique** ; la somme d\'une ligne ' +
+              'entière double à chaque ligne suivante.',
           ],
         },
         {
@@ -862,7 +932,7 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'piege',
           label: 'Piège classique — mauvais partenaire de symétrie',
           text:
-            '$C_5^2=C_5^4$ est FAUX ($C_5^4=5$, pas 10) — le bon partenaire de symétrie de ' +
+            '$C_5^2=C_5^4$ est **faux** ($C_5^4=5$, pas 10) ! Le bon partenaire de symétrie de ' +
             "$C_5^2$ est $C_5^{5-2}=C_5^3$, jamais $C_5^4$ obtenu en changeant l'indice au hasard.",
         },
         {
@@ -913,9 +983,9 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'methode',
           items: [
-            'Pour trouver le coefficient d\'un terme précis (un rang $k$ donné, ou une puissance ' +
-              'de $x$ cherchée), pas besoin de développer les $n+1$ termes : on calcule ' +
-              'directement $T_{k+1}=C_n^k \\times a^{n-k} \\times b^k$ pour ce seul $k$.',
+            "Tu cherches le coefficient d'un terme précis (un rang $k$ donné, ou une puissance " +
+              'de $x$) ? Pas besoin de développer les $n+1$ termes : calcule directement ' +
+              '$T_{k+1}=C_n^k \\times a^{n-k} \\times b^k$ pour ce seul $k$.',
           ],
         },
         {
@@ -929,17 +999,17 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'piege',
           label: "Piège classique — confondre k avec l'exposant de x",
           text:
-            "Associer directement $k=2$ à « l'exposant $x^2$ cherché » est l'erreur classique : " +
-            "l'exposant de $x$ est $5-k$, PAS $k$. Avec $k=2$ on obtiendrait en réalité le terme " +
-            'en $x^3$ (coefficient 80), pas celui en $x^2$.',
+            "Associer directement $k=2$ à « l'exposant $x^2$ cherché » est l'erreur classique ! " +
+            "L'exposant de $x$ est $5-k$, **pas** $k$. Avec $k=2$ tu obtiendrais en réalité le " +
+            'terme en $x^3$ (coefficient 80), pas celui en $x^2$.',
         },
         { kind: 'subheading', text: 'Approximation via le binôme, pour ε petit' },
         {
           kind: 'methode',
           items: [
-            'Pour $\\varepsilon$ petit, seul le PREMIER terme non trivial du développement ' +
+            'Pour $\\varepsilon$ petit, seul le **premier** terme non trivial du développement ' +
               '($k=1$) pèse vraiment ; les suivants ($\\varepsilon^2$, $\\varepsilon^3$, …) ' +
-              'deviennent rapidement négligeables : $(1+\\varepsilon)^n \\approx 1+n\\varepsilon$.',
+              'deviennent vite négligeables : $(1+\\varepsilon)^n \\approx 1+n\\varepsilon$.',
           ],
         },
         {
@@ -958,17 +1028,18 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'astuce',
           label: '« Négligeable » ne veut jamais dire « nul »',
           text:
-            "Le terme suivant, $C_4^2 \\times 0,01^2 = 0,0006$, n'est PAS rigoureusement nul — " +
-            "juste assez petit pour être ignoré dans une approximation. C'est précisément " +
-            'pourquoi 1,04 est une APPROXIMATION (proche) et non la valeur EXACTE (1,0406…) de $1,01^4$.',
+            "Le terme suivant, $C_4^2 \\times 0,01^2 = 0,0006$, n'est **pas** rigoureusement nul " +
+            "— juste assez petit pour être ignoré dans une approximation. C'est précisément " +
+            'pourquoi 1,04 est une **approximation** (proche) et non la valeur **exacte** ' +
+            '(1,0406…) de $1,01^4$.',
         },
         {
           kind: 'entrainement',
           title: 'Binôme de Newton',
           generatorId: '6gen45',
           description: [
-            'Développement complet, terme général, triangle de Pascal, terme précis sans tout ' +
-              'développer, approximation pour ε petit.',
+            "Entraîne-toi sur le développement complet, le terme général, le triangle de " +
+              "Pascal, un terme précis sans tout développer, et l'approximation pour ε petit.",
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 45. Binôme de Newton »',
@@ -985,18 +1056,18 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Les problèmes classiques de dénombrement combinent souvent PLUSIEURS des outils déjà ' +
-            'vus — principe multiplicatif, multinomiale, répétition — en 2 étapes ou plus. La ' +
-            'méthode reste la même : identifier chaque étape, calculer son nombre de choix, puis ' +
-            'MULTIPLIER les étapes indépendantes entre elles.',
+            'Les problèmes classiques de dénombrement combinent souvent **plusieurs** des ' +
+            'outils déjà vus — principe multiplicatif, multinomiale, répétition — en 2 étapes ' +
+            'ou plus. La méthode reste la même : identifie chaque étape, calcule son nombre de ' +
+            'choix, puis **multiplie** les étapes indépendantes entre elles.',
         },
         { kind: 'subheading', text: 'Mains de poker — jeu à 32 cartes (8 hauteurs × 4 couleurs)' },
         {
           kind: 'methode',
           label: 'Méthode — 2 étapes : la combinaison spéciale, puis le reste de la main',
           items: [
-            'Étape 1 : choisir la ou les hauteurs privilégiées ET leurs couleurs.',
-            "Étape 2 : compléter la main avec des cartes d'hauteurs ENCORE DISPONIBLES (les " +
+            'Étape 1 : choisis la ou les hauteurs privilégiées **et** leurs couleurs.',
+            "Étape 2 : complète la main avec des cartes d'hauteurs **encore disponibles** (les " +
               "hauteurs déjà utilisées à l'étape 1 ne le sont plus).",
           ],
         },
@@ -1035,10 +1106,10 @@ export const analyseCombinatoire: ChapterContent = {
           text:
             '224 (carré) < 10 752 (brelan) < 24 192 (deux paires) < 107 520 (paire) : plus une ' +
             'combinaison impose de contraintes précises (4 cartes fixées pour un carré), moins ' +
-            'elle laisse de liberté au reste de la main — donc moins de mains au total. Le nombre ' +
-            "total de mains possibles, $C_{32}^5=201\\,376$, dépasse largement chacune de ces 4 " +
-            "catégories (qui ne couvrent d'ailleurs pas TOUTES les mains — il manque par exemple " +
-            'les mains sans aucune hauteur répétée).',
+            'elle laisse de liberté au reste de la main — donc moins de mains au total. Le ' +
+            "nombre total de mains possibles, $C_{32}^5=201\\,376$, dépasse largement chacune de " +
+            "ces 4 catégories, qui ne couvrent d'ailleurs pas **toutes** les mains (il manque " +
+            'par exemple les mains sans aucune hauteur répétée).',
         },
         {
           kind: 'illustration',
@@ -1068,12 +1139,12 @@ export const analyseCombinatoire: ChapterContent = {
           label: "L'énigme historique",
           items: [
             'Avec 3 dés à 6 faces, les sommes 9 et 10 admettent chacune exactement 6 ' +
-              'DÉCOMPOSITIONS non ordonnées (partitions en 3 valeurs de 1 à 6) — le Chevalier de ' +
-              "Méré en concluait, à tort, qu'elles étaient également probables. Le paradoxe se " +
-              'résout en comptant les TRIPLETS ORDONNÉS plutôt que les partitions : un triplet ' +
-              'aux 3 valeurs différentes offre $3!=6$ arrangements ordonnés, un triplet avec une ' +
-              "paire de valeurs identiques n'en offre que 3, et un triplet aux 3 valeurs " +
-              "identiques n'en offre qu'1 seul.",
+              '**décompositions** non ordonnées (partitions en 3 valeurs de 1 à 6) — le ' +
+              "Chevalier de Méré en concluait, à tort, qu'elles étaient également probables. Le " +
+              'paradoxe se résout en comptant les **triplets ordonnés** plutôt que les ' +
+              'partitions : un triplet aux 3 valeurs différentes offre $3!=6$ arrangements ' +
+              "ordonnés, un triplet avec une paire de valeurs identiques n'en offre que 3, et " +
+              "un triplet aux 3 valeurs identiques n'en offre qu'1 seul.",
           ],
         },
         {
@@ -1106,9 +1177,9 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "Un triplet aux valeurs toutes identiques comme {3;3;3} n'admet qu'UN SEUL " +
+            "Un triplet aux valeurs toutes identiques comme {3;3;3} n'admet qu'**un seul** " +
             'arrangement ordonné ($3!/3!=1$), jamais 6 comme un triplet aux 3 valeurs distinctes ' +
-            "— permuter des dés qui affichent tous la même valeur ne change rien à l'issue observée.",
+            "! Permuter des dés qui affichent tous la même valeur ne change rien à l'issue observée.",
         },
         {
           kind: 'illustration',
@@ -1156,17 +1227,17 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "$3^4=81$ (inverser base et exposant) n'a rien à voir avec $4^3=64$ : c'est toujours " +
-            "le nombre de POSITIONS qui sert de base, et le nombre d'ÉLÉMENTS qui sert d'exposant " +
-            "— jamais l'inverse.",
+            "$3^4=81$ — inverser base et exposant — n'a rien à voir avec $4^3=64$ ! C'est " +
+            'toujours le nombre de **positions** qui sert de base, et le nombre ' +
+            "d'**éléments** qui sert d'exposant, jamais l'inverse.",
         },
         {
           kind: 'entrainement',
           title: 'Dénombrement combinatoire pur — problèmes',
           generatorId: '6gen46',
           description: [
-            'Mains de poker à 32 cartes, paradoxe du Chevalier de Méré, répartitions en boîtes, ' +
-              'dispositifs à répétition.',
+            'Entraîne-toi sur les mains de poker à 32 cartes, le paradoxe du Chevalier de Méré, ' +
+              'les répartitions en boîtes et les dispositifs à répétition.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 46. Dénombrement combinatoire pur — problèmes »',
@@ -1184,12 +1255,13 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'definition',
           label: 'Définition — loi hypergéométrique',
           items: [
-            "Population de $N$ éléments, dont $K$ sont des « succès ». On en tire $n$ SANS REMISE " +
-              "(la composition change à chaque tirage). La probabilité d'obtenir exactement $k$ " +
-              'succès est $P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$.',
-            'Numérateur : succès CHOISIS parmi les succès ($C_K^k$) × échecs choisis parmi les ' +
-              'échecs ($C_{N-K}^{n-k}$). Dénominateur : TOUS les tirages de $n$ éléments possibles, ' +
-              '$C_N^n$ — jamais $C_N^k$.',
+            "Une population de $N$ éléments, dont $K$ sont des « succès ». Tu en tires $n$ " +
+              '**sans remise** (la composition change à chaque tirage). La probabilité ' +
+              "d'obtenir exactement $k$ succès est " +
+              '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$.',
+            'Au numérateur : les succès **choisis** parmi les succès ($C_K^k$) × les échecs ' +
+              'choisis parmi les échecs ($C_{N-K}^{n-k}$). Au dénominateur : **tous** les ' +
+              'tirages de $n$ éléments possibles, $C_N^n$ — jamais $C_N^k$.',
           ],
         },
         { kind: 'subheading', text: 'Exemple résolu — N=20, K=6, n=5' },
@@ -1220,10 +1292,10 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'para',
           text:
-            'Les 6 valeurs ($k=0$ à 5) couvrent tous les cas possibles ; la somme EXACTE des 6 ' +
-            "fractions vaut $\\dfrac{15\\,504}{15\\,504}=1$ (l'arrondi à 4 décimales de chaque " +
-            "ligne, additionné, peut donner 1,0001 par accumulation d'arrondis — jamais un signe " +
-            "d'erreur en soi).",
+            'Les 6 valeurs ($k=0$ à 5) couvrent tous les cas possibles ; la somme **exacte** ' +
+            'des 6 fractions vaut $\\dfrac{15\\,504}{15\\,504}=1$. Additionner les arrondis à 4 ' +
+            "décimales de chaque ligne peut donner 1,0001 par accumulation d'arrondis — ce " +
+            "n'est jamais, en soi, le signe d'une erreur.",
         },
         {
           kind: 'illustration',
@@ -1248,21 +1320,20 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "Remplacer $C_N^n$ par $C_N^k$ au dénominateur — ou par n'importe quelle autre " +
-            'valeur substituée par erreur — est le piège le plus fréquent de cette formule. Le ' +
-            'dénominateur compte TOUJOURS le nombre total de tirages de $n$ éléments, quel que ' +
-            'soit $k$.',
+            "Remplacer $C_N^n$ par $C_N^k$ au dénominateur est le piège le plus fréquent de " +
+            'cette formule ! Le dénominateur compte **toujours** le nombre total de tirages de ' +
+            '$n$ éléments, quel que soit $k$.',
         },
         { kind: 'subheading', text: 'Séquence exacte vs composition — deux questions différentes' },
         {
           kind: 'methode',
           items: [
-            "La probabilité d'une SÉQUENCE précise (un ordre de tirage donné à l'avance) est un " +
-              'produit de fractions DÉCROISSANTES, position par position — jamais la formule ' +
-              'hypergéométrique directement.',
-            'La probabilité de la COMPOSITION correspondante (mêmes effectifs, ORDRE LIBRE) ' +
-              "regroupe TOUS les arrangements qui y mènent : c'est elle qui utilise la formule " +
-              'hypergéométrique.',
+            "La probabilité d'une **séquence** précise (un ordre de tirage donné à l'avance), " +
+              "c'est un produit de fractions décroissantes, position par position — jamais la " +
+              'formule hypergéométrique directement.',
+            'La probabilité de la **composition** correspondante (mêmes effectifs, ordre ' +
+              "libre) regroupe tous les arrangements qui y mènent : c'est elle qui utilise la " +
+              'formule hypergéométrique.',
           ],
         },
         {
@@ -1330,7 +1401,7 @@ export const analyseCombinatoire: ChapterContent = {
             {
               kind: 'para',
               text:
-                "Chaque ordre précis d'une même composition a la MÊME probabilité — " +
+                "Chaque ordre précis d'une même composition a la **même** probabilité — " +
                 "**produit indépendant de l'ordre**.",
             },
             {
@@ -1350,11 +1421,11 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            "Confondre la probabilité d'une séquence précise ($\\frac{5}{36}$) avec celle de la " +
-            'composition correspondante ($\\frac{5}{12}$) — ce sont deux questions DIFFÉRENTES : ' +
-            'la composition regroupe toujours PLUSIEURS séquences équiprobables, sa probabilité ' +
-            'est donc toujours PLUS GRANDE (ou égale, si une seule séquence y mène) que celle ' +
-            "d'une séquence isolée.",
+            "Confondre la probabilité d'une séquence précise ($\\frac{5}{36}$) avec celle de " +
+            'la composition correspondante ($\\frac{5}{12}$), ce sont deux questions ' +
+            '**différentes** ! La composition regroupe toujours **plusieurs** séquences ' +
+            'équiprobables, sa probabilité est donc toujours **plus grande** (ou égale, si une ' +
+            "seule séquence y mène) que celle d'une séquence isolée.",
         },
         { kind: 'subheading', text: '2 tirages hypergéométriques indépendants — loto + bonus' },
         {
@@ -1376,29 +1447,31 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'ADDITIONNER $\\frac{2}{15}+\\frac{1}{5}=\\frac{1}{3}$ pour un ET entre 2 tirages ' +
-            'INDÉPENDANTS est faux — un ET entre indépendants se MULTIPLIE toujours. Ajouter une ' +
-            'condition supplémentaire (réussir le bonus EN PLUS de la grille) ne peut jamais ' +
-            'augmenter la probabilité : $\\frac{2}{75}$ est bien plus petit que $\\frac{2}{15}$ seul.',
+            '**Additionner** $\\frac{2}{15}+\\frac{1}{5}=\\frac{1}{3}$ pour un ET entre 2 ' +
+            'tirages indépendants est faux ! Un ET entre indépendants se **multiplie** ' +
+            'toujours. Ajouter une condition supplémentaire (réussir le bonus en plus de la ' +
+            'grille) ne peut jamais augmenter la probabilité : $\\frac{2}{75}$ est bien plus ' +
+            'petit que $\\frac{2}{15}$ seul.',
         },
         {
           kind: 'astuce',
           label: 'Hypergéométrique (sans remise) contre binomiale (indépendant)',
           text:
-            'La loi hypergéométrique modélise un tirage SANS remise (chaque tirage modifie la ' +
-            'composition restante, donc influence le suivant). La loi binomiale, vue dans la ' +
-            'section suivante, suppose au contraire des épreuves INDÉPENDANTES à probabilité ' +
-            'constante — typiquement avec remise, ou une population si grande que le prélèvement ' +
-            'ne la modifie presque pas. Les deux lois ne coïncident QU\'APPROXIMATIVEMENT lorsque ' +
-            '$N$ est très grand devant $n$ — jamais exactement en général.',
+            'La loi hypergéométrique modélise un tirage **sans remise** (chaque tirage modifie ' +
+            'la composition restante, donc influence le suivant). La loi binomiale, vue dans ' +
+            'la section suivante, suppose au contraire des épreuves **indépendantes** à ' +
+            'probabilité constante — typiquement avec remise, ou une population si grande que ' +
+            "le prélèvement ne la modifie presque pas. Les deux lois ne coïncident " +
+            "qu'**approximativement** lorsque $N$ est très grand devant $n$ — jamais exactement " +
+            'en général.',
         },
         {
           kind: 'entrainement',
           title: 'Probabilité hypergéométrique',
           generatorId: '6gen47',
           description: [
-            'Tirages sans remise, séquence exacte vs composition, tirages hypergéométriques ' +
-              'indépendants combinés.',
+            'Entraîne-toi sur les tirages sans remise, la séquence exacte vs la composition, ' +
+              'et des tirages hypergéométriques indépendants combinés.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 47. Probabilité hypergéométrique »',
@@ -1416,9 +1489,10 @@ export const analyseCombinatoire: ChapterContent = {
           kind: 'definition',
           label: 'Définition — loi binomiale',
           items: [
-            'Pour $n$ épreuves INDÉPENDANTES identiques (probabilité de succès $p$ CONSTANTE — ' +
-              "typiquement avec remise, ou une population très grande), la probabilité d'obtenir " +
-              'exactement $k$ succès est $P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$.',
+            'Pour $n$ épreuves **indépendantes** identiques (probabilité de succès $p$ ' +
+              "**constante** — typiquement avec remise, ou une population très grande), la " +
+              "probabilité d'obtenir exactement $k$ succès est " +
+              '$P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$.',
             '$p$ (succès) porte l\'exposant $k$ ; $(1-p)$ (échec) porte l\'exposant $n-k$ — ' +
               "jamais l'inverse.",
           ],
@@ -1437,19 +1511,19 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Oublier $C_6^2=15$ donne $0,4^2 \\times 0,6^4 = 0,020736$, un résultat 15 FOIS trop ' +
-            "petit — le coefficient binomial n'est jamais optionnel dès que $0<k<n$ : il compte " +
-            'les différentes POSITIONS possibles des $k$ succès parmi les $n$ épreuves.',
+            'Oublier $C_6^2=15$ donne $0,4^2 \\times 0,6^4 = 0,020736$, un résultat **15 fois** ' +
+            "trop petit ! Le coefficient binomial n'est jamais optionnel dès que $0<k<n$ : il " +
+            'compte les différentes **positions** possibles des $k$ succès parmi les $n$ épreuves.',
         },
         { kind: 'subheading', text: 'Trois stratégies — terme unique, somme, complément' },
         {
           kind: 'methode',
           label: 'Méthode — choisir la stratégie la plus courte',
           items: [
-            '« Exactement $k$ », « aucun » ou « tous » : un SEUL terme, calcul direct.',
-            '« Au moins $k$ » ou « au plus $k$ » : SOMME de plusieurs termes SI PEU nombreux, ' +
-              'sinon passer par le COMPLÉMENT (1 moins la probabilité du cas contraire) — ' +
-              'toujours compter les termes des deux côtés avant de choisir.',
+            '« Exactement $k$ », « aucun » ou « tous » : un **seul** terme, calcul direct.',
+            '« Au moins $k$ » ou « au plus $k$ » : **somme** de plusieurs termes si peu ' +
+              'nombreux, sinon passe par le **complément** (1 moins la probabilité du cas ' +
+              'contraire). Compte toujours les termes des deux côtés avant de choisir.',
           ],
         },
         {
@@ -1494,27 +1568,28 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Le complémentaire de « au plus 5 » (sur 6) est « tous réussissent » ($X=6$), jamais ' +
-            '« aucun » ($X=0$) — et le complémentaire de « au moins 4 » est « au plus 3 » ' +
-            '($X=0,1,2$ OU 3, donc 4 termes à retirer), jamais $1-P(X=3)$ qui ne retire qu\'UN ' +
-            'seul terme. Bien identifier le SEUIL exact avant de choisir le complément.',
+            'Le complémentaire de « au plus 5 » (sur 6) est « tous réussissent » ($X=6$), ' +
+            'jamais « aucun » ($X=0$) — et le complémentaire de « au moins 4 » est « au plus ' +
+            '3 » ($X=0,1,2$ ou 3, donc 4 termes à retirer), jamais $1-P(X=3)$ qui ne retire ' +
+            'qu\'**un seul** terme. Identifie bien le **seuil** exact avant de choisir le ' +
+            'complément.',
         },
         {
           kind: 'astuce',
           label: 'La somme de toute la distribution vaut toujours 1',
           text:
-            '$P(0)+P(1)+\\ldots+P(6)=1$ quelle que soit la valeur de $p$ — un excellent moyen de ' +
-            'vérifier une distribution complète avant de répondre, sans que cela exige $p=0,5$ ' +
-            "(l'équiprobabilité entre les issues n'est jamais requise pour que leur somme fasse 1).",
+            '$P(0)+P(1)+\\ldots+P(6)=1$ quelle que soit la valeur de $p$ — un excellent moyen ' +
+            "de vérifier une distribution complète avant de répondre. Ça n'exige pas $p=0,5$ : " +
+            "l'équiprobabilité entre les issues n'est jamais requise pour que leur somme fasse 1.",
         },
         { kind: 'subheading', text: 'Séquence exacte, sans remise, éléments distincts' },
         {
           kind: 'definition',
           label: 'Définition — contraste avec la loi binomiale',
           items: [
-            '$n$ éléments TOUS DISTINCTS, on en tire $k$ SUCCESSIVEMENT SANS REMISE dans un ' +
-              "ORDRE PRÉCIS donné à l'avance : à chaque étape, un seul élément parmi ceux " +
-              'RESTANTS correspond à la position exacte demandée : ' +
+            '$n$ éléments **tous distincts** : tu en tires $k$ successivement, **sans ' +
+              'remise**, dans un **ordre précis** donné à l\'avance. À chaque étape, un seul ' +
+              'élément parmi ceux restants correspond à la position exacte demandée : ' +
               '$\\dfrac{1}{n} \\times \\dfrac{1}{n-1} \\times \\ldots \\times \\dfrac{1}{n-k+1}$.',
           ],
         },
@@ -1536,28 +1611,29 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'piege',
           text:
-            'Utiliser $\\frac{1}{n^k}$ (probabilité CONSTANTE à chaque tirage, comme AVEC remise) ' +
-            "au lieu du produit décroissant est l'erreur classique — SANS remise, le nombre " +
-            "d'éléments restants DIMINUE à chaque tirage (9, 8, 7, 6, …), la probabilité de " +
-            'deviner juste change donc à chaque étape.',
+            'Utiliser $\\frac{1}{n^k}$ (probabilité constante à chaque tirage, comme avec ' +
+            "remise) au lieu du produit décroissant est l'erreur classique ! Sans remise, le " +
+            "nombre d'éléments restants **diminue** à chaque tirage (9, 8, 7, 6, …) : la " +
+            'probabilité de deviner juste change donc à chaque étape.',
         },
         {
           kind: 'astuce',
           label: 'Deux modèles qui ne coïncident jamais en général',
           text:
-            'La probabilité binomiale suppose des épreuves INDÉPENDANTES à $p$ constant (avec ' +
-            'remise, ou population immense) ; la probabilité de séquence exacte sans remise ' +
-            'suppose au contraire que chaque tirage modifie les probabilités suivantes. ' +
-            'Augmenter $k$ diminue TOUJOURS la probabilité d\'une séquence exacte sans remise (un ' +
-            "choix exact de plus à deviner) — rien à voir avec une éventuelle « compensation » " +
-            "entre tirages, qui n'existe pas ici.",
+            'La probabilité binomiale suppose des épreuves **indépendantes** à $p$ constant ' +
+            '(avec remise, ou population immense) ; la probabilité de séquence exacte sans ' +
+            'remise suppose au contraire que chaque tirage modifie les probabilités suivantes. ' +
+            "Augmenter $k$ diminue **toujours** la probabilité d'une séquence exacte sans " +
+            'remise (un choix exact de plus à deviner) — rien à voir avec une éventuelle « ' +
+            "compensation » entre tirages, qui n'existe pas ici.",
         },
         {
           kind: 'entrainement',
           title: 'Probabilité binomiale et séquence exacte',
           generatorId: '6gen48',
           description: [
-            'Loi binomiale, stratégies terme unique / somme / complément, séquence exacte sans remise.',
+            'Entraîne-toi sur la loi binomiale, les trois stratégies (terme unique / somme / ' +
+              'complément) et la séquence exacte sans remise.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 48. Probabilité binomiale et séquence exacte »',
@@ -1589,7 +1665,7 @@ export const analyseCombinatoire: ChapterContent = {
       kind: 'entrainement',
       title: 'Analyse combinatoire — quiz vrai/faux',
       generatorId: '6gen70',
-      description: ['Quiz de révision transversal à tout le chapitre.'],
+      description: ['Teste-toi sur tout le chapitre : un quiz vrai/faux transversal.'],
       chantier: '6e-6h',
       whereLabel: '6e (6h) → « 70. Quiz vrai/faux — Analyse combinatoire »',
     },
