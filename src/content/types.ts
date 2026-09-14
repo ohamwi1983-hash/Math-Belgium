@@ -12,6 +12,7 @@ export type InteractiveWidgetTag =
   | 'transformations-widget'
   | 'archimede-widget'
   | 'sinusoide-widget'
+  | 'cercle-trigo-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

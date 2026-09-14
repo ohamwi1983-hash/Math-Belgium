@@ -786,3 +786,42 @@ paths:
   pour A. Emplacement du widget vérifié par `compareDocumentPosition` (après le graphe de tan x,
   avant le callout `methode`). `0` erreur console, `0` `$` isolé ; sitewide `regress_all.mjs` sur
   les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : troisième widget interactif
+  (`cercle-trigo-widget`), inséré juste après le graphe de $y=\tan x$ (section "Paramètres d'une
+  fonction sinusoïdale"), à l'emplacement exact qu'occupait `sinusoide-widget` avant d'être déplacé
+  — demandé explicitement par l'utilisateur dans le même message que le curseur T/correctif ω
+  ci-dessus. Cercle trigonométrique (rayon fixe) à gauche, graphe $x\in[0;3\pi]$ à droite, tous deux
+  dans des panneaux SVG séparés (pas de recadrage partagé). Un `<select>` choisit sin(x)/cos(x)/
+  tan(x) ; un curseur $x$ de $0$ à $3\pi$ (pas $0{,}01$) pilote les deux dessins en même temps.
+  L'angle balayé de $0$ à $x$ est tracé en violet (`--plan`) à la fois comme arc sur le cercle ET
+  comme segment en sur-épaisseur sur l'axe des x du graphe — même couleur pour les relier
+  visuellement, comme demandé. Le point courant sur le cercle reste EXACTEMENT sur le cercle de
+  référence (rayon fixe) tant que $x\le 2\pi$ ; au-delà, seul le TRACÉ de l'angle balayé (pas le
+  cercle de référence, qui ne bouge jamais) voit son rayon croître progressivement avec l'excédent
+  au-delà d'un tour complet, produisant l'effet "ressort circulaire" demandé sans jamais faire
+  varier la taille du cercle trigonométrique lui-même (application directe de la leçon déjà tirée
+  deux fois cette session sur `archimede-widget`/`sinusoide-widget` : ne jamais laisser un
+  paramètre déformer l'élément censé rester une référence fixe). Segment rouge (`--bad`, réutilisé
+  ici pour sa teinte, pas sa sémantique "erreur") : projection verticale sur l'axe des x pour
+  sin(x), projection horizontale sur l'axe des y pour cos(x), segment sur la droite tangente au
+  point $(1,0)$ du cercle (longueur bornée à $\pm 2{,}3\times R$ près des asymptotes) pour tan(x) ;
+  masqué proprement quand $\cos x\approx 0$ (tangente non définie). La courbe du graphe se trace
+  progressivement de $0$ à $x$ seulement (jamais pré-tracée sur tout l'intervalle), avec un point
+  rouge à la pointe courante $(x, f(x))$ relié par un pointillé rouge à l'axe des y — pour montrer
+  explicitement que ce point correspond à l'ordonnée du graphe, sans repeindre toute la courbe en
+  rouge. Fenêtres de tracé du graphe **fixes** dès la conception (X: $[0;3\pi]$, Y: $\pm1{,}4$ pour
+  sin/cos, $\pm4$ pour tan avec asymptotes pointillées à $\pi/2$, $3\pi/2$, $5\pi/2$ et tracé coupé
+  net près de chacune, sur le modèle déjà utilisé pour le graphe statique de tan x du même
+  chapitre) — jamais de recadrage automatique sur la valeur courante.
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction Playwright réelle : placement
+  confirmé par `compareDocumentPosition` (après le graphe de tan x, avant le callout `intuition`
+  "Pour visualiser") ; distance du point mobile au centre du cercle mesurée à l'écran (pas un
+  attribut interne) = exactement le rayon de référence pour $x\le 2\pi$, strictement supérieure au-
+  delà (ressort confirmé, ex. $x=3\pi$) ; longueur du tracé SVG confirmée croissante à mesure que le
+  curseur avance (tracé progressif, pas pré-calculé) ; les 3 choix de fonction testés un par un
+  (valeurs numériques recoupées à la main, segment rouge présent sur le cercle pour sin/cos, absent
+  et "non défini" affiché pour tan près d'une asymptote comme attendu) ; bouton de réinitialisation
+  vérifié. `0` erreur console, `0` `$` isolé, `0` `NaN`. `tsc -p tsconfig.app.json --noEmit`/
+  `oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur,
+  `0` `NaN`, `0` `$` isolé.

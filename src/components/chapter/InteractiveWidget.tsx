@@ -11,6 +11,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'transformations-widget': () => import('../../interactive/register-transformations-widget.js'),
   'archimede-widget': () => import('../../interactive/register-archimede-widget.js'),
   'sinusoide-widget': () => import('../../interactive/register-sinusoide-widget.js'),
+  'cercle-trigo-widget': () => import('../../interactive/register-cercle-trigo-widget.js'),
 }
 
 /**

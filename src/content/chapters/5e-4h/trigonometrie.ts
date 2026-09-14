@@ -579,6 +579,17 @@ export const trigonometrie: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'cercle-trigo-widget',
+          label: 'Manipule toi-même — le cercle trigonométrique relié au graphique',
+          caption:
+            'Fais avancer le curseur : l\'angle balayé (en violet) tourne sur le cercle pendant ' +
+            'que la courbe se trace au fur et à mesure à droite. Le segment rouge sur le cercle ' +
+            '(sinus, cosinus ou tangente selon le choix) correspond exactement à l\'ordonnée du ' +
+            'point qui avance sur le graphe. Au-delà de 2π, l\'angle continue de tourner : il se ' +
+            'représente comme un ressort qui s\'enroule vers l\'extérieur.',
+        },
+        {
           kind: 'intuition',
           label: 'Pour visualiser',
           text:
