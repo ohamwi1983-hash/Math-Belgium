@@ -855,3 +855,37 @@ paths:
   tracé (de ~20 à ~37 à $x=3\pi$), la preuve directe que c'est bien lui, et lui seul, qui
   "s'enroule". `0` erreur console, `0` `$` isolé, `0` `NaN` ; `tsc`/`oxlint`/`build` propres ;
   sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+  **Troisième série de corrections/ajouts, sur retour utilisateur direct** :
+  - **Flèche sur l'angle orienté** : l'indicateur d'angle (`.angle-oriente`) se termine maintenant
+    par une tête de flèche triangulaire — un angle "orienté" doit se voir comme orienté, pas comme
+    un simple arc. Piège rencontré et corrigé en cours de route : la direction de la flèche,
+    calculée d'abord à partir des deux DERNIERS points échantillonnés du tracé, disparaissait pour
+    les petits $x$ (les points consécutifs d'un arc de rayon ~20px espacés de quelques centièmes de
+    radian sont à moins de 0,5px l'un de l'autre, sous le seuil de dessin de la flèche) —
+    corrigé en calculant la direction analytiquement, à partir de deux points séparés d'un
+    epsilon angulaire fixe (0,08 rad, borné par $x$ lui-même), indépendant de la densité
+    d'échantillonnage.
+  - **sin(x) et tan(x) : segment rouge retiré, remplacé par le vecteur vert** (le vecteur vert
+    séparé, parti du centre, est lui aussi retiré pour ces deux fonctions) : pour sin(x), le
+    vecteur vert va maintenant de l'axe des x jusqu'au point du cercle qui correspond à sin(x) (la
+    flèche pointe vers ce point) ; pour tan(x), il va du point $(1,0)$ sur la droite tangente
+    jusqu'au point qui correspond à tan(x) — géométrie inchangée par rapport à l'ancien segment
+    rouge, seule la couleur et la flèche changent. **cos(x) n'est pas concerné** : garde son
+    segment rouge ET son vecteur vert par-dessus (les deux coïncident géométriquement), comme
+    avant.
+  - **Prolongement pointillé du segment de l'angle, pour tan(x) uniquement** (nouveau) : une ligne
+    violette pointillée prolonge le rayon au-delà du point sur le cercle, jusqu'à son intersection
+    avec la droite verticale $x=1$ (la tangente) quand cette intersection tombe dans la fenêtre
+    visible ; sinon (angle dans le mauvais sens pour atteindre $x=1$ en avançant — $\cos x\le 0$ —
+    ou intersection hors cadre), la ligne pointillée se prolonge à la place jusqu'à la bordure de
+    la fenêtre SVG (intersection rayon/rectangle calculée directement, pas approximée). Ce
+    prolongement reste visible même quand tan(x) est indéfini (proche d'une asymptote), montrant
+    visuellement le rayon filer vers le bord au lieu de croiser $x=1$.
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction Playwright : comptage direct
+  des éléments SVG par classe pour sin/cos/tan à plusieurs valeurs de $x$ (aucun `.segment-rouge`/
+  `.point-rouge` pour sin/tan, présents pour cos ; `.angle-oriente-tete` toujours présent, y
+  compris à $x$ très petit après le correctif ; `.prolongement-tan` toujours présent en mode tan,
+  y compris près d'une asymptote et en $\cos x<0$) ; capture d'écran pour chaque cas confirmant
+  visuellement le sens du prolongement pointillé (vers $x=1$ quand $\cos x>0$, vers le bord opposé
+  sinon). `0` erreur console, `0` `$` isolé, `0` `NaN` ; `tsc`/`oxlint`/`build` propres ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

@@ -61,10 +61,10 @@
     return R_ANGLE_BASE + ANGLE_RESSORT_CROISSANCE * ((t - DEUX_PI) / DEUX_PI);
   }
 
-  // Dessine un vecteur (ligne + tête de flèche triangulaire) de (x1,y1) vers (x2,y2), dans le
-  // sens de la flèche — fonctionne pour n'importe quelle direction (vertical, horizontal...).
-  function dessinerVecteur(ns, svg, x1, y1, x2, y2, classeLigne, classeTete) {
-    svg.appendChild(svgEl(ns, "line", { x1: x1, y1: y1, x2: x2, y2: y2, class: classeLigne }));
+  // Dessine uniquement la tête de flèche triangulaire à (x2,y2), orientée dans le sens
+  // (x1,y1)->(x2,y2) — réutilisée à la fois par dessinerVecteur et pour marquer la pointe d'un
+  // arc (angle orienté) sans y accoler de ligne droite.
+  function dessinerTeteFleche(ns, svg, x1, y1, x2, y2, classeTete) {
     var dx = x2 - x1, dy = y2 - y1;
     var longueur = Math.hypot(dx, dy);
     if (longueur < 0.5) return;
@@ -76,6 +76,26 @@
     var p2x = baseX - perpX * largeur, p2y = baseY - perpY * largeur;
     var points = x2 + "," + y2 + " " + p1x.toFixed(2) + "," + p1y.toFixed(2) + " " + p2x.toFixed(2) + "," + p2y.toFixed(2);
     svg.appendChild(svgEl(ns, "polygon", { points: points, class: classeTete }));
+  }
+
+  // Dessine un vecteur (ligne + tête de flèche) de (x1,y1) vers (x2,y2).
+  function dessinerVecteur(ns, svg, x1, y1, x2, y2, classeLigne, classeTete) {
+    svg.appendChild(svgEl(ns, "line", { x1: x1, y1: y1, x2: x2, y2: y2, class: classeLigne }));
+    dessinerTeteFleche(ns, svg, x1, y1, x2, y2, classeTete);
+  }
+
+  // Intersection du rayon partant de (cx,cy) dans la direction (dirX,dirY) avec le bord de la
+  // fenêtre carrée [boxMin,boxMax]×[boxMin,boxMax] — utilisée pour prolonger le segment de
+  // l'angle jusqu'à la bordure du contenant quand il ne croise pas la droite x=1 (tangente).
+  function rayonBordFenetre(cx, cy, dirX, dirY, boxMin, boxMax) {
+    var candidats = [];
+    if (dirX > 1e-6) candidats.push((boxMax - cx) / dirX);
+    else if (dirX < -1e-6) candidats.push((boxMin - cx) / dirX);
+    if (dirY > 1e-6) candidats.push((boxMax - cy) / dirY);
+    else if (dirY < -1e-6) candidats.push((boxMin - cy) / dirY);
+    var valides = candidats.filter(function (t) { return t > 0; });
+    var t = valides.length ? Math.min.apply(null, valides) : 0;
+    return { x: cx + dirX * t, y: cy + dirY * t };
   }
 
   var TEMPLATE = document.createElement("template");
@@ -92,6 +112,7 @@
     '.cercle-ref{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
     '.arc-cercle-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;fill:none;stroke-linecap:round;}' +
     '.angle-oriente{stroke:var(--plan,#5b4ea3);stroke-width:2;fill:none;stroke-linecap:round;opacity:0.85;}' +
+    '.angle-oriente-tete{fill:var(--plan,#5b4ea3);opacity:0.85;}' +
     '.rayon-violet{stroke:var(--plan,#5b4ea3);stroke-width:2.6;stroke-linecap:round;}' +
     '.point-mobile{fill:var(--plan,#5b4ea3);}' +
     '.segment-rouge{stroke:var(--bad,#b23a3a);stroke-width:2.8;stroke-linecap:round;}' +
@@ -99,6 +120,7 @@
     '.guide-rouge{stroke:var(--bad,#b23a3a);stroke-width:1.1;stroke-dasharray:3 3;}' +
     '.vecteur-vert-ligne{stroke:var(--good,#2f7a4f);stroke-width:2.4;stroke-linecap:round;}' +
     '.vecteur-vert-tete{fill:var(--good,#2f7a4f);}' +
+    '.prolongement-tan{stroke:var(--plan,#5b4ea3);stroke-width:1.3;stroke-dasharray:4 3;opacity:0.7;}' +
     '.axe-x-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;stroke-linecap:round;}' +
     '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.4;fill:none;}' +
     '.asymptote{stroke:var(--line,#e2d8c8);stroke-width:1;stroke-dasharray:4 3;}' +
@@ -223,9 +245,10 @@
       }
       svg.appendChild(svgEl(ns, "path", { d: dArc.trim(), class: "arc-cercle-violet" }));
 
-      // Angle orienté : petit arc près du sommet. C'EST LUI qui s'enroule en "ressort circulaire"
-      // au-delà de 2π (son rayon grandit avec l'excédent au-delà d'un tour complet), puisqu'un
-      // simple arc à rayon fixe ne peut pas montrer visuellement plus d'un tour.
+      // Angle orienté : petit arc près du sommet, terminé par une flèche (c'est un angle ORIENTÉ,
+      // pas un simple arc). C'EST LUI qui s'enroule en "ressort circulaire" au-delà de 2π (son
+      // rayon grandit avec l'excédent au-delà d'un tour complet), puisqu'un simple arc à rayon
+      // fixe ne peut pas montrer visuellement plus d'un tour.
       var nAng = Math.max(2, Math.round((x / X_MAX) * 400));
       var dAng = "";
       for (var j = 0; j <= nAng; j++) {
@@ -236,39 +259,63 @@
         dAng += (j === 0 ? "M" : "L") + pxj.toFixed(2) + " " + pyj.toFixed(2) + " ";
       }
       svg.appendChild(svgEl(ns, "path", { d: dAng.trim(), class: "angle-oriente" }));
+      // Direction de la flèche calculée analytiquement (deux points écartés d'un epsilon FIXE en
+      // angle), plutôt qu'à partir des deux derniers points échantillonnés — pour un petit x, des
+      // points consécutifs de l'échantillonnage sont trop proches (quelques dixièmes de pixel sur
+      // un arc de rayon ~20px) pour donner une direction fiable, et la flèche disparaissait.
+      var epsilonFleche = Math.min(0.08, x);
+      var rAvant = rayonAngleIndicateur(x - epsilonFleche);
+      var pxAvant = C_CX + rAvant * Math.cos(x - epsilonFleche);
+      var pyAvant = C_CY - rAvant * Math.sin(x - epsilonFleche);
+      var rPointe = rayonAngleIndicateur(x);
+      var pxPointe = C_CX + rPointe * Math.cos(x);
+      var pyPointe = C_CY - rPointe * Math.sin(x);
+      dessinerTeteFleche(ns, svg, pxAvant, pyAvant, pxPointe, pyPointe, "angle-oriente-tete");
     }
 
     // Rayon + point mobile : toujours sur le vrai cercle, jamais de rayon variable.
     svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxVrai.toFixed(2), y2: pyVrai.toFixed(2), class: "rayon-violet" }));
     svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4.5, class: "point-mobile" }));
 
-    // Projections rouges (sin/cos/tan) — inchangées. Dessinées AVANT le vecteur vert : pour
-    // cos(x), les deux représentent exactement le même segment (centre -> abscisse du point) —
-    // le vecteur vert, dessiné en second, reste visible par-dessus au lieu d'être recouvert.
-    if (fn === "sin") {
-      svg.appendChild(svgEl(ns, "line", { x1: pxVrai.toFixed(2), y1: pyVrai.toFixed(2), x2: pxVrai.toFixed(2), y2: C_CY, class: "segment-rouge" }));
-      svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4, class: "point-rouge" }));
-    } else if (fn === "cos") {
+    // cos(x) : inchangé — segment rouge (centre -> abscisse du point) ET vecteur vert par-dessus
+    // (les deux coïncident géométriquement ; le vecteur vert, dessiné en second, reste visible).
+    // sin(x)/tan(x) : sur retour utilisateur, il n'y a plus de segment rouge NI de vecteur vert
+    // séparé du centre — seul le vecteur vert lui-même remplace l'ancien segment rouge, flèche
+    // pointant vers le point qui correspond à la valeur (le point sur le cercle pour sin, le point
+    // sur la droite tangente x=1 pour tan).
+    if (fn === "cos") {
       svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxVrai.toFixed(2), y2: C_CY, class: "segment-rouge" }));
       svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4, class: "point-rouge" }));
+      dessinerVecteur(ns, svg, C_CX, C_CY, pxVrai.toFixed(2), C_CY, "vecteur-vert-ligne", "vecteur-vert-tete");
+    } else if (fn === "sin") {
+      // Vecteur vert de l'axe des x jusqu'au point du cercle qui correspond à sin(x).
+      dessinerVecteur(ns, svg, pxVrai.toFixed(2), C_CY, pxVrai.toFixed(2), pyVrai.toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
     } else {
       var cosX = Math.cos(x);
+      // Prolongement pointillé du segment de l'angle (le rayon, au-delà du point sur le cercle) :
+      // jusqu'à l'intersection avec la droite verticale x=1 quand elle est atteignable dans la
+      // fenêtre visible, sinon jusqu'à la bordure de la fenêtre du contenant.
+      var pointeIntersection = null;
+      if (cosX > 0.02) {
+        var yInterVrai = C_CY - Math.tan(x) * C_R;
+        if (yInterVrai >= 0 && yInterVrai <= C_TAILLE) {
+          pointeIntersection = { x: C_CX + C_R, y: yInterVrai };
+        }
+      }
+      if (!pointeIntersection) {
+        pointeIntersection = rayonBordFenetre(C_CX, C_CY, Math.cos(x), -Math.sin(x), 0, C_TAILLE);
+      }
+      svg.appendChild(svgEl(ns, "line", { x1: pxVrai.toFixed(2), y1: pyVrai.toFixed(2), x2: pointeIntersection.x.toFixed(2), y2: pointeIntersection.y.toFixed(2), class: "prolongement-tan" }));
+
+      // Vecteur vert de l'axe des x (sur la droite x=1) jusqu'au point qui correspond à tan(x) —
+      // seulement quand tan(x) est défini (borné pour rester dans la fenêtre visible).
       if (Math.abs(cosX) > 0.02) {
         var tanX = Math.tan(x);
         var tanClamp = Math.max(-2.3, Math.min(2.3, tanX));
         var pxTang = C_CX + C_R;
         var pyTang = C_CY - tanClamp * C_R;
-        svg.appendChild(svgEl(ns, "line", { x1: pxTang, y1: C_CY, x2: pxTang, y2: pyTang.toFixed(2), class: "segment-rouge" }));
-        svg.appendChild(svgEl(ns, "circle", { cx: pxTang, cy: pyTang.toFixed(2), r: 4, class: "point-rouge" }));
+        dessinerVecteur(ns, svg, pxTang, C_CY, pxTang, pyTang.toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
       }
-    }
-
-    // Vecteur vert : du centre vers l'ordonnée du point intercepté par l'angle x (sin/tan,
-    // vertical) ou vers son abscisse (cos, horizontal).
-    if (fn === "cos") {
-      dessinerVecteur(ns, svg, C_CX, C_CY, pxVrai.toFixed(2), C_CY, "vecteur-vert-ligne", "vecteur-vert-tete");
-    } else {
-      dessinerVecteur(ns, svg, C_CX, C_CY, C_CX, pyVrai.toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
     }
 
     // Indication : valeur de l'angle en π rad, directement sur le cercle.
