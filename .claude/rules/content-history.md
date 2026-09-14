@@ -756,3 +756,33 @@ paths:
   exactement aux valeurs par défaut ; `0` erreur console, `0` `$` isolé. `tsc -b`/`npm run
   build`/`npm run lint` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur,
   `0` `NaN`, `0` `$` isolé.
+  **Repositionné et corrigé sur demande explicite de l'utilisateur**, après avoir vu le widget :
+  déplacé de juste après le graphe de tan x vers la section 5 ("Paramètres d'une fonction
+  sinusoïdale — lecture graphique"), juste après son paragraphe d'introduction, avant le `methode`
+  "lire un graphique de sinusoïde" — pas où je l'avais placé sans consulter l'utilisateur au
+  préalable.
+  **Vrai bug corrigé, confirmé par l'utilisateur** ("le curseur pulsation n'influence pas la
+  courbe ?") : la fenêtre X se recalculait pour TOUJOURS montrer exactement 5 périodes quel que
+  soit ω — le zoom compensait donc exactement tout changement de fréquence, rendant le tracé
+  pixel-par-pixel identique quel que soit ω (le paramètre changeait bien en interne, mais son effet
+  visuel était intégralement annulé par le cadrage automatique). Même piège que celui déjà rencontré
+  et documenté sur `archimede-widget` (un cadrage qui se recale automatiquement sur la grandeur
+  qu'il doit montrer efface son effet), mais appliqué ici à une fenêtre de tracé, pas un rayon fixe.
+  Corrigé en passant à une fenêtre X **fixe** ($x \in [-4\pi ; 4\pi]$) et une fenêtre Y **fixe**
+  ($y \in [-8 ; 8]$, pire cas $b \pm A$ couvert) — A et b, qui souffraient du même défaut sans que
+  l'utilisateur l'ait remarqué (le cadrage Y se recalait aussi automatiquement sur max/min), sont
+  corrigés par la même occasion.
+  **Curseur T (période) ajouté avant ω**, lié bidirectionnellement ($T=2\pi/\omega$) : bouger l'un
+  recalcule et repositionne l'autre. Vérifié que la synchronisation est exacte en LISANT L'ÉTAT
+  INTERNE (`el._omega`, la valeur brute du curseur T), pas les valeurs arrondies affichées à
+  l'écran (qui, multipliées entre elles, donnaient un produit visiblement différent de $2\pi$ à
+  cause du double arrondi d'affichage — pas un bug réel, juste une fausse alerte de la méthode de
+  vérification) : `T × ω = 6,283185307179585` contre `2π = 6,283185307179586` attendu, à l'erreur
+  flottante près. L'encadré "Période T" (devenu redondant avec le nouveau curseur) retiré des
+  statistiques, qui ne montrent plus que Maximum/Minimum.
+  Vérifié par rendu navigateur réel et interaction Playwright : `path.courbe` (l'attribut `d` du
+  tracé SVG) confirmé DIFFÉRENT avant/après un déplacement du seul curseur ω (`true`) — preuve
+  directe que le paramètre affecte enfin le rendu, pas seulement l'état interne ; même confirmation
+  pour A. Emplacement du widget vérifié par `compareDocumentPosition` (après le graphe de tan x,
+  avant le callout `methode`). `0` erreur console, `0` `$` isolé ; sitewide `regress_all.mjs` sur
+  les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

@@ -579,15 +579,6 @@ export const trigonometrie: ChapterContent = {
           },
         },
         {
-          kind: 'atelier',
-          tag: 'sinusoide-widget',
-          label: 'Manipule toi-même — fais varier A, ω, φ et b',
-          caption:
-            'Le graphe et les encadrés Période/Maximum/Minimum se mettent à jour en direct. ' +
-            'Fais bouger un seul curseur à la fois pour bien voir l\'effet propre à chaque ' +
-            'paramètre, avant de lire le rôle de chacun ci-dessous.',
-        },
-        {
           kind: 'intuition',
           label: 'Pour visualiser',
           text:
@@ -742,6 +733,15 @@ export const trigonometrie: ChapterContent = {
             'lisent directement sur les valeurs maximale et minimale. La période se mesure ' +
             'entre deux répétitions identiques du motif. Le déphasage se lit en repérant le ' +
             'décalage horizontal du « point de départ » du motif, par rapport à l\'origine.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'sinusoide-widget',
+          label: 'Manipule toi-même — fais varier A, T (ou ω), φ et b',
+          caption:
+            'Le graphe et les encadrés Maximum/Minimum se mettent à jour en direct. ' +
+            'Fais bouger un seul curseur à la fois pour bien voir l\'effet propre à chaque ' +
+            'paramètre, avant de lire la méthode de lecture ci-dessous.',
         },
         {
           kind: 'methode',

@@ -15,12 +15,37 @@
     phi: { min: -3.14, max: 3.14, step: 0.1 },
     b: { min: -3, max: 3, step: 0.1 },
   };
+  // Bornes de T déduites de celles de ω (T=2π/ω, relation strictement décroissante) — T et ω sont
+  // deux curseurs pour la MÊME grandeur sous-jacente, toujours synchronisés (voir _onInputT/
+  // _onInputOmega) : bouger l'un recalcule et repositionne l'autre.
+  BORNES.t = {
+    min: +(2 * Math.PI / BORNES.omega.max).toFixed(2),
+    max: +(2 * Math.PI / BORNES.omega.min).toFixed(2),
+    step: 0.1,
+  };
   var LARGEUR = 520, HAUTEUR = 360, MARGE = 34;
+  // Fenêtres FIXES (indépendantes des paramètres courants) — piège vérifié en pratique : une
+  // fenêtre qui se recadre automatiquement sur "la courbe actuelle" (ex. toujours N périodes
+  // visibles, ou toujours cadrée exactement sur max/min) ANNULE VISUELLEMENT l'effet du paramètre
+  // qu'elle compense. Repéré ainsi sur ce widget : la première version recalculait la fenêtre X
+  // pour montrer TOUJOURS exactement 5 périodes quel que soit ω — le curseur ω semblait donc "ne
+  // rien faire" (signalé par l'utilisateur), alors qu'il changeait bien `omega` en interne : le
+  // zoom compensait exactement le changement de fréquence, rendu pixel par pixel identique. Fenêtre
+  // X fixe = ±4π (assez large pour montrer une période entière de chaque côté même au T max, ~12,6)
+  // ; fenêtre Y fixe = ±8 (couvre le pire cas b±A = ±3±4 = ±7, plus marge) — A et b restent
+  // maintenant visibles dans leurs effets (courbe plus haute/basse, décalée) au lieu d'être
+  // compensés par un cadrage automatique sur leurs propres valeurs.
+  var X_DEMI = 4 * Math.PI;
+  var Y_MIN = -8, Y_MAX = 8;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
     var arrondi = Math.round(n * facteur) / facteur;
     return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
+  }
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
   }
 
   function formatFormule(a, omega, phi, b) {
@@ -62,12 +87,12 @@
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">Période T</span><span class="stat-value" id="val-t"></span></div>' +
     '<div class="stat"><span class="stat-label">Maximum</span><span class="stat-value" id="val-max"></span></div>' +
     '<div class="stat"><span class="stat-label">Minimum</span><span class="stat-value" id="val-min"></span></div>' +
     '</div>' +
     '<div class="curseurs">' +
     '<div class="curseur"><label for="a">A — amplitude</label><div class="curseur-row"><input type="range" id="a" min="' + BORNES.a.min + '" max="' + BORNES.a.max + '" step="' + BORNES.a.step + '" value="' + DEFAUT.a + '"><span class="curseur-valeur" id="a-valeur"></span></div></div>' +
+    '<div class="curseur"><label for="t">T — période</label><div class="curseur-row"><input type="range" id="t" min="' + BORNES.t.min + '" max="' + BORNES.t.max + '" step="' + BORNES.t.step + '"><span class="curseur-valeur" id="t-valeur"></span></div></div>' +
     '<div class="curseur"><label for="omega">ω — pulsation</label><div class="curseur-row"><input type="range" id="omega" min="' + BORNES.omega.min + '" max="' + BORNES.omega.max + '" step="' + BORNES.omega.step + '" value="' + DEFAUT.omega + '"><span class="curseur-valeur" id="omega-valeur"></span></div></div>' +
     '<div class="curseur"><label for="phi">φ — déphasage</label><div class="curseur-row"><input type="range" id="phi" min="' + BORNES.phi.min + '" max="' + BORNES.phi.max + '" step="' + BORNES.phi.step + '" value="' + DEFAUT.phi + '"><span class="curseur-valeur" id="phi-valeur"></span></div></div>' +
     '<div class="curseur"><label for="b">b — décalage vertical</label><div class="curseur-row"><input type="range" id="b" min="' + BORNES.b.min + '" max="' + BORNES.b.max + '" step="' + BORNES.b.step + '" value="' + DEFAUT.b + '"><span class="curseur-valeur" id="b-valeur"></span></div></div>' +
@@ -88,14 +113,15 @@
     this._svg = shadow.getElementById("svg");
     this._formule = shadow.getElementById("formule");
     this._inputA = shadow.getElementById("a");
+    this._inputT = shadow.getElementById("t");
     this._inputOmega = shadow.getElementById("omega");
     this._inputPhi = shadow.getElementById("phi");
     this._inputB = shadow.getElementById("b");
     this._valeurA = shadow.getElementById("a-valeur");
+    this._valeurT = shadow.getElementById("t-valeur");
     this._valeurOmega = shadow.getElementById("omega-valeur");
     this._valeurPhi = shadow.getElementById("phi-valeur");
     this._valeurB = shadow.getElementById("b-valeur");
-    this._valT = shadow.getElementById("val-t");
     this._valMax = shadow.getElementById("val-max");
     this._valMin = shadow.getElementById("val-min");
     this._resetBtn = shadow.getElementById("reset");
@@ -103,10 +129,29 @@
 
   SinusoideWidgetClass.prototype.connectedCallback = function () {
     var self = this;
-    this._onInput = function () {
+    this._onInputA = function () {
       self._a = parseFloat(self._inputA.value);
+      self._rendre();
+    };
+    // T et ω partagent la même grandeur (T=2π/ω) : bouger l'un recalcule et repositionne l'autre,
+    // plutôt que deux curseurs indépendants qui pourraient se contredire.
+    this._onInputT = function () {
+      var t = parseFloat(self._inputT.value);
+      self._omega = clamp((2 * Math.PI) / t, BORNES.omega.min, BORNES.omega.max);
+      self._inputOmega.value = String(self._omega);
+      self._rendre();
+    };
+    this._onInputOmega = function () {
       self._omega = parseFloat(self._inputOmega.value);
+      var t = clamp((2 * Math.PI) / self._omega, BORNES.t.min, BORNES.t.max);
+      self._inputT.value = String(t);
+      self._rendre();
+    };
+    this._onInputPhi = function () {
       self._phi = parseFloat(self._inputPhi.value);
+      self._rendre();
+    };
+    this._onInputB = function () {
       self._b = parseFloat(self._inputB.value);
       self._rendre();
     };
@@ -114,29 +159,33 @@
       self._a = DEFAUT.a; self._omega = DEFAUT.omega; self._phi = DEFAUT.phi; self._b = DEFAUT.b;
       self._inputA.value = String(DEFAUT.a);
       self._inputOmega.value = String(DEFAUT.omega);
+      self._inputT.value = String((2 * Math.PI) / DEFAUT.omega);
       self._inputPhi.value = String(DEFAUT.phi);
       self._inputB.value = String(DEFAUT.b);
       self._rendre();
     };
-    this._inputA.addEventListener("input", this._onInput);
-    this._inputOmega.addEventListener("input", this._onInput);
-    this._inputPhi.addEventListener("input", this._onInput);
-    this._inputB.addEventListener("input", this._onInput);
+    this._inputA.addEventListener("input", this._onInputA);
+    this._inputT.addEventListener("input", this._onInputT);
+    this._inputOmega.addEventListener("input", this._onInputOmega);
+    this._inputPhi.addEventListener("input", this._onInputPhi);
+    this._inputB.addEventListener("input", this._onInputB);
     this._resetBtn.addEventListener("click", this._onReset);
+    this._inputT.value = String((2 * Math.PI) / this._omega);
     this._rendre();
   };
 
   SinusoideWidgetClass.prototype.disconnectedCallback = function () {
-    this._inputA.removeEventListener("input", this._onInput);
-    this._inputOmega.removeEventListener("input", this._onInput);
-    this._inputPhi.removeEventListener("input", this._onInput);
-    this._inputB.removeEventListener("input", this._onInput);
+    this._inputA.removeEventListener("input", this._onInputA);
+    this._inputT.removeEventListener("input", this._onInputT);
+    this._inputOmega.removeEventListener("input", this._onInputOmega);
+    this._inputPhi.removeEventListener("input", this._onInputPhi);
+    this._inputB.removeEventListener("input", this._onInputB);
     this._resetBtn.removeEventListener("click", this._onReset);
   };
 
   SinusoideWidgetClass.prototype._toPx = function (xMath, yMath) {
-    var px = MARGE + (xMath - this._xMin) / (this._xMax - this._xMin) * (LARGEUR - 2 * MARGE);
-    var py = HAUTEUR - MARGE - (yMath - this._yMin) / (this._yMax - this._yMin) * (HAUTEUR - 2 * MARGE);
+    var px = MARGE + (xMath + X_DEMI) / (2 * X_DEMI) * (LARGEUR - 2 * MARGE);
+    var py = HAUTEUR - MARGE - (yMath - Y_MIN) / (Y_MAX - Y_MIN) * (HAUTEUR - 2 * MARGE);
     return [px, py];
   };
 
@@ -149,29 +198,20 @@
     this._formule.textContent = formatFormule(a, omega, phi, b);
 
     var T = (2 * Math.PI) / omega;
+    this._valeurT.textContent = formatNombreFr(T, 2);
     var maxi = b + a, mini = b - a;
-    this._valT.textContent = formatNombreFr(T, 2);
     this._valMax.textContent = formatNombreFr(maxi, 1);
     this._valMin.textContent = formatNombreFr(mini, 1);
-
-    // Fenêtre X : toujours 5 périodes visibles (2,5 de chaque côté de 0), quel que soit ω —
-    // la périodicité reste lisible aussi bien pour un ω petit (période longue) que grand
-    // (période courte), plutôt qu'une fenêtre fixe qui écraserait ou étirerait la courbe.
-    var xHalf = 2.5 * T;
-    this._xMin = -xHalf; this._xMax = xHalf;
-    // Fenêtre Y : cadrée sur le maximum/minimum réels de la courbe (+ une marge), l'axe des x
-    // (y=0) toujours visible même si b déplace toute la courbe au-dessus ou en dessous.
-    this._yMin = Math.min(0, mini) - 1;
-    this._yMax = Math.max(0, maxi) + 1;
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
     svg.innerHTML = "";
     var self = this;
 
-    // Repères verticaux à chaque période (k·T), pour rendre la période directement lisible sur
-    // le graphe plutôt que seulement dans l'encadré "Période T".
-    var kMin = Math.ceil(this._xMin / T), kMax = Math.floor(this._xMax / T);
+    // Repères verticaux à chaque période (k·T), pour rendre la période directement lisible sur le
+    // graphe — leur NOMBRE varie maintenant avec T (fenêtre X fixe), ce qui montre concrètement
+    // que changer ω compresse/étire la courbe, au lieu d'un nombre de repères toujours constant.
+    var kMin = Math.ceil(-X_DEMI / T), kMax = Math.floor(X_DEMI / T);
     for (var k = kMin; k <= kMax; k++) {
       if (k === 0) continue;
       var xk = k * T;
@@ -212,7 +252,7 @@
     svg.appendChild(etiqY);
 
     // Ligne moyenne y=b
-    if (b >= this._yMin && b <= this._yMax) {
+    if (b >= Y_MIN && b <= Y_MAX) {
       var pB = self._toPx(0, b)[1];
       var ligneB = document.createElementNS(ns, "line");
       ligneB.setAttribute("x1", MARGE); ligneB.setAttribute("x2", LARGEUR - MARGE);
@@ -228,7 +268,7 @@
     // Lignes max/min
     [["max", maxi], ["min", mini]].forEach(function (paire) {
       var y = paire[1];
-      if (y < self._yMin || y > self._yMax) return;
+      if (y < Y_MIN || y > Y_MAX) return;
       var py = self._toPx(0, y)[1];
       var lig = document.createElementNS(ns, "line");
       lig.setAttribute("x1", MARGE); lig.setAttribute("x2", LARGEUR - MARGE);
@@ -244,9 +284,9 @@
     });
 
     // Courbe f(x) = A sin(ωx+φ) + b
-    var n = 400, d = "";
+    var n = 500, d = "";
     for (var i = 0; i <= n; i++) {
-      var xx = self._xMin + (i / n) * (self._xMax - self._xMin);
+      var xx = -X_DEMI + (i / n) * (2 * X_DEMI);
       var yy = a * Math.sin(omega * xx + phi) + b;
       var pt = self._toPx(xx, yy);
       d += (i === 0 ? "M" : "L") + pt[0].toFixed(2) + " " + pt[1].toFixed(2) + " ";
