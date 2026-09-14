@@ -825,3 +825,33 @@ paths:
   vérifié. `0` erreur console, `0` `$` isolé, `0` `NaN`. `tsc -p tsconfig.app.json --noEmit`/
   `oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur,
   `0` `NaN`, `0` `$` isolé.
+  **Corrigé et complété sur retour utilisateur direct** (le widget avait été mal compris sur un
+  point précis) :
+  - **Élément confondu, corrigé** : ce n'est PAS l'arc balayé sur la circonférence qui doit devenir
+    un "ressort circulaire" au-delà de 2π — c'est l'**angle orienté** (un indicateur distinct, que
+    la première version n'avait pas du tout dessiné) qui doit prendre cette forme. Ajouté un
+    second élément violet (`.angle-oriente`), un petit arc près du sommet dont le rayon reste fixe
+    (~20px) tant que $x\le 2\pi$ puis grandit avec l'excédent au-delà d'un tour — l'arc balayé sur
+    la circonférence (`.arc-cercle-violet`), lui, reste maintenant à rayon **strictement constant**
+    ($=C_R=90$, y compris au-delà de 2π, où il se retrace simplement sur lui-même) ; de même pour
+    le rayon et le point mobile, qui ne s'étaient jamais censés bouger de rayon mais dont le code
+    de la première version les faisait par erreur suivre le même rayon variable que l'arc.
+  - **Indications ajoutées** (« toutes les indications » demandées) : la valeur de l'angle en π rad
+    s'affiche maintenant à trois endroits distincts — sous le cercle (`x = 0,75π`), à côté du
+    curseur (`0,79 rad (0,25π)`, les deux valeurs ensemble), et sur le graphe, juste sous
+    l'abscisse du segment violet qui avance avec le curseur.
+  - **Vecteur vert ajouté** (nouvel élément, absent avant) : sur le graphe, un vecteur vertical vert
+    (ligne + tête de flèche) du point d'abscisse $x$ vers le point de la courbe $(x, f(x))$. Le
+    même principe est repris sur le cercle : un vecteur vert du centre vers l'ordonnée du point
+    intercepté par l'angle (vertical, cas sin/tan) ou vers son abscisse (horizontal, cas cos) — ce
+    dernier coïncide géométriquement avec le segment rouge déjà existant pour cos ; le vecteur vert
+    est dessiné APRÈS les segments rouges pour rester visible par-dessus dans ce cas de
+    recouvrement exact (vérifié par capture d'écran : invisible tant que l'ordre de dessin n'était
+    pas inversé, visible ensuite).
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction Playwright : distance au
+  centre de l'arc balayé sur la circonférence et du point mobile mesurée sur toute la trajectoire
+  du chemin SVG (pas seulement au point courant) — confirmée **strictement constante** (~90,00 ±
+  0,01) même à $x=3\pi$ ; rayon de l'indicateur d'angle orienté confirmé variable sur son propre
+  tracé (de ~20 à ~37 à $x=3\pi$), la preuve directe que c'est bien lui, et lui seul, qui
+  "s'enroule". `0` erreur console, `0` `$` isolé, `0` `NaN` ; `tsc`/`oxlint`/`build` propres ;
+  sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

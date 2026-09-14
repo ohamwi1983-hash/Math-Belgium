@@ -13,13 +13,14 @@
 
   // --- Panneau cercle -------------------------------------------------
   var C_TAILLE = 260, C_CX = 130, C_CY = 130, C_R = 90;
-  // Au-delà de 2π, l'angle continue de tourner mais on ne peut plus le distinguer visuellement
-  // d'un tour précédent si on le redessine sur le même cercle — on fait donc grandir le rayon du
-  // TRACÉ (pas du cercle lui-même, qui reste fixe) uniquement pour la portion au-delà de 2π,
-  // ce qui donne l'effet "ressort circulaire" demandé, sans jamais faire varier la taille du
-  // cercle trigonométrique de référence (piège déjà rencontré 2 fois cette session : ne jamais
-  // laisser un affichage se recadrer/se déformer selon le paramètre qu'il est censé montrer).
-  var RESSORT_CROISSANCE = 46;
+  // L'INDICATEUR D'ANGLE ORIENTÉ (petit arc près du sommet, PAS l'arc balayé sur la circonférence
+  // ni le rayon/point mobile) est le seul élément dont le rayon grandit au-delà de 2π — corrigé
+  // sur retour utilisateur : la première version faisait grandir l'arc SUR le cercle (et le point
+  // mobile avec), ce qui déformait à tort la référence fixe. Le cercle, le point mobile et le
+  // rayon restent maintenant TOUJOURS sur le vrai cercle (rayon C_R constant, jamais déformé) ;
+  // seul ce petit indicateur près du centre s'enroule en "ressort circulaire" au-delà d'un tour.
+  var R_ANGLE_BASE = 20;
+  var ANGLE_RESSORT_CROISSANCE = 34;
 
   // --- Panneau graphe ---------------------------------------------------
   var G_LARGEUR = 380, G_HAUTEUR = 260, G_MARGE_G = 30, G_MARGE_D = 14, G_MARGE_H = 16, G_MARGE_B = 30;
@@ -53,6 +54,30 @@
     return el;
   }
 
+  // Rayon de l'indicateur d'angle orienté : fixe tant que t<=2π, grandit ensuite avec l'excédent
+  // au-delà d'un tour complet — c'est ce grandissement qui produit l'effet "ressort circulaire".
+  function rayonAngleIndicateur(t) {
+    if (t <= DEUX_PI) return R_ANGLE_BASE;
+    return R_ANGLE_BASE + ANGLE_RESSORT_CROISSANCE * ((t - DEUX_PI) / DEUX_PI);
+  }
+
+  // Dessine un vecteur (ligne + tête de flèche triangulaire) de (x1,y1) vers (x2,y2), dans le
+  // sens de la flèche — fonctionne pour n'importe quelle direction (vertical, horizontal...).
+  function dessinerVecteur(ns, svg, x1, y1, x2, y2, classeLigne, classeTete) {
+    svg.appendChild(svgEl(ns, "line", { x1: x1, y1: y1, x2: x2, y2: y2, class: classeLigne }));
+    var dx = x2 - x1, dy = y2 - y1;
+    var longueur = Math.hypot(dx, dy);
+    if (longueur < 0.5) return;
+    var ux = dx / longueur, uy = dy / longueur;
+    var taille = 8, largeur = 4.5;
+    var baseX = x2 - ux * taille, baseY = y2 - uy * taille;
+    var perpX = -uy, perpY = ux;
+    var p1x = baseX + perpX * largeur, p1y = baseY + perpY * largeur;
+    var p2x = baseX - perpX * largeur, p2y = baseY - perpY * largeur;
+    var points = x2 + "," + y2 + " " + p1x.toFixed(2) + "," + p1y.toFixed(2) + " " + p2x.toFixed(2) + "," + p2y.toFixed(2);
+    svg.appendChild(svgEl(ns, "polygon", { points: points, class: classeTete }));
+  }
+
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
     '<style>' +
@@ -65,16 +90,20 @@
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.3;}' +
     '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:1;}' +
     '.cercle-ref{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
-    '.arc-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;fill:none;stroke-linecap:round;}' +
+    '.arc-cercle-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;fill:none;stroke-linecap:round;}' +
+    '.angle-oriente{stroke:var(--plan,#5b4ea3);stroke-width:2;fill:none;stroke-linecap:round;opacity:0.85;}' +
     '.rayon-violet{stroke:var(--plan,#5b4ea3);stroke-width:2.6;stroke-linecap:round;}' +
     '.point-mobile{fill:var(--plan,#5b4ea3);}' +
     '.segment-rouge{stroke:var(--bad,#b23a3a);stroke-width:2.8;stroke-linecap:round;}' +
     '.point-rouge{fill:var(--bad,#b23a3a);}' +
     '.guide-rouge{stroke:var(--bad,#b23a3a);stroke-width:1.1;stroke-dasharray:3 3;}' +
+    '.vecteur-vert-ligne{stroke:var(--good,#2f7a4f);stroke-width:2.4;stroke-linecap:round;}' +
+    '.vecteur-vert-tete{fill:var(--good,#2f7a4f);}' +
     '.axe-x-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;stroke-linecap:round;}' +
     '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.4;fill:none;}' +
     '.asymptote{stroke:var(--line,#e2d8c8);stroke-width:1;stroke-dasharray:4 3;}' +
     '.etiquette{font-size:11.5px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.etiquette-angle{font-size:12px;font-weight:600;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.legende-panneau{text-align:center;font-size:0.82rem;color:var(--ink-faint,#9c9083);margin:4px 0 0;font-family:var(--sans,sans-serif);}' +
     '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
     '.stat{flex:1 1 0;min-width:88px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
@@ -88,7 +117,7 @@
     '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
     '.curseur-row{display:flex;align-items:center;gap:12px;}' +
     '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
-    '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:64px;text-align:right;font-size:0.92rem;}' +
+    '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:128px;text-align:right;font-size:0.9rem;}' +
     '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
@@ -164,14 +193,6 @@
     this._resetBtn.removeEventListener("click", this._onReset);
   };
 
-  // Rayon du point mobile sur le cercle : fixe (=C_R) tant que x <= 2π, puis grandit
-  // progressivement au-delà — c'est ce grandissement, combiné à l'angle qui continue de tourner,
-  // qui dessine le "ressort circulaire" demandé pour représenter un angle > un tour complet.
-  function rayonPourAngle(x) {
-    if (x <= DEUX_PI) return C_R;
-    return C_R + RESSORT_CROISSANCE * ((x - DEUX_PI) / DEUX_PI);
-  }
-
   CercleTrigoWidgetClass.prototype._dessinerCercle = function () {
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svgCercle;
@@ -179,49 +200,58 @@
     var x = this._x, fn = this._fn;
 
     svg.appendChild(svgEl(ns, "circle", { cx: C_CX, cy: C_CY, r: C_R, class: "cercle-ref" }));
-    svg.appendChild(svgEl(ns, "line", { x1: G_MARGE_G, x2: G_MARGE_G, y1: C_CY, y2: C_CY, class: "axe" }));
-    // axes
     svg.appendChild(svgEl(ns, "line", { x1: C_CX - C_R - 20, x2: C_CX + C_R + 20, y1: C_CY, y2: C_CY, class: "axe" }));
     svg.appendChild(svgEl(ns, "line", { x1: C_CX, x2: C_CX, y1: C_CY - C_R - 20, y2: C_CY + C_R + 20, class: "axe" }));
 
-    // Arc/spirale violet(te) balayé(e) de 0 à x, échantillonné finement — le rayon suit
-    // rayonPourAngle(t) pour chaque point, ce qui produit un arc simple tant que t<=2π puis une
-    // spirale sortante au-delà.
-    var n = Math.max(2, Math.round((x / X_MAX) * 400));
-    var d = "";
-    for (var i = 0; i <= n; i++) {
-      var t = (i / n) * x;
-      var r = rayonPourAngle(t);
-      var px = C_CX + r * Math.cos(t);
-      var py = C_CY - r * Math.sin(t);
-      d += (i === 0 ? "M" : "L") + px.toFixed(2) + " " + py.toFixed(2) + " ";
-    }
-    if (x > 0) {
-      svg.appendChild(svgEl(ns, "path", { d: d.trim(), class: "arc-violet" }));
-    }
-
-    // Rayon (segment centre -> point courant) et point mobile, en violet
-    var rActuel = rayonPourAngle(x);
-    var pxActuel = C_CX + rActuel * Math.cos(x);
-    var pyActuel = C_CY - rActuel * Math.sin(x);
-    svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxActuel.toFixed(2), y2: pyActuel.toFixed(2), class: "rayon-violet" }));
-    svg.appendChild(svgEl(ns, "circle", { cx: pxActuel.toFixed(2), cy: pyActuel.toFixed(2), r: 4.5, class: "point-mobile" }));
-
-    // Point sur le VRAI cercle (rayon fixe C_R), utilisé pour les projections rouges — toujours
-    // sur le cercle de référence, même quand x > 2π (le point violet, lui, peut être sur la spirale).
+    // Point vrai sur le cercle de référence — rayon TOUJOURS fixe (= C_R), jamais déformé par x,
+    // quel que soit le nombre de tours. Utilisé pour le rayon, le point mobile, le vecteur vert et
+    // les projections rouges.
     var pxVrai = C_CX + C_R * Math.cos(x);
     var pyVrai = C_CY - C_R * Math.sin(x);
 
+    if (x > 0) {
+      // Arc balayé sur le VRAI cercle (rayon fixe) : se retrace sur lui-même au-delà de 2π, ne
+      // grandit jamais — ce n'est PAS lui qui prend la forme d'un ressort (corrigé sur retour
+      // utilisateur : la première version le faisait grandir à tort).
+      var nArc = Math.max(2, Math.round((x / X_MAX) * 400));
+      var dArc = "";
+      for (var i = 0; i <= nArc; i++) {
+        var t = (i / nArc) * x;
+        var pxa = C_CX + C_R * Math.cos(t);
+        var pya = C_CY - C_R * Math.sin(t);
+        dArc += (i === 0 ? "M" : "L") + pxa.toFixed(2) + " " + pya.toFixed(2) + " ";
+      }
+      svg.appendChild(svgEl(ns, "path", { d: dArc.trim(), class: "arc-cercle-violet" }));
+
+      // Angle orienté : petit arc près du sommet. C'EST LUI qui s'enroule en "ressort circulaire"
+      // au-delà de 2π (son rayon grandit avec l'excédent au-delà d'un tour complet), puisqu'un
+      // simple arc à rayon fixe ne peut pas montrer visuellement plus d'un tour.
+      var nAng = Math.max(2, Math.round((x / X_MAX) * 400));
+      var dAng = "";
+      for (var j = 0; j <= nAng; j++) {
+        var tj = (j / nAng) * x;
+        var rj = rayonAngleIndicateur(tj);
+        var pxj = C_CX + rj * Math.cos(tj);
+        var pyj = C_CY - rj * Math.sin(tj);
+        dAng += (j === 0 ? "M" : "L") + pxj.toFixed(2) + " " + pyj.toFixed(2) + " ";
+      }
+      svg.appendChild(svgEl(ns, "path", { d: dAng.trim(), class: "angle-oriente" }));
+    }
+
+    // Rayon + point mobile : toujours sur le vrai cercle, jamais de rayon variable.
+    svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxVrai.toFixed(2), y2: pyVrai.toFixed(2), class: "rayon-violet" }));
+    svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4.5, class: "point-mobile" }));
+
+    // Projections rouges (sin/cos/tan) — inchangées. Dessinées AVANT le vecteur vert : pour
+    // cos(x), les deux représentent exactement le même segment (centre -> abscisse du point) —
+    // le vecteur vert, dessiné en second, reste visible par-dessus au lieu d'être recouvert.
     if (fn === "sin") {
-      // projection verticale : segment rouge du point vrai jusqu'à l'axe des x
       svg.appendChild(svgEl(ns, "line", { x1: pxVrai.toFixed(2), y1: pyVrai.toFixed(2), x2: pxVrai.toFixed(2), y2: C_CY, class: "segment-rouge" }));
       svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4, class: "point-rouge" }));
     } else if (fn === "cos") {
-      // projection horizontale : segment rouge du centre jusqu'à la position x du point vrai
       svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxVrai.toFixed(2), y2: C_CY, class: "segment-rouge" }));
       svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4, class: "point-rouge" }));
     } else {
-      // tangente : segment vertical sur la droite tangente au point (1,0) du cercle, longueur tan(x)
       var cosX = Math.cos(x);
       if (Math.abs(cosX) > 0.02) {
         var tanX = Math.tan(x);
@@ -232,6 +262,19 @@
         svg.appendChild(svgEl(ns, "circle", { cx: pxTang, cy: pyTang.toFixed(2), r: 4, class: "point-rouge" }));
       }
     }
+
+    // Vecteur vert : du centre vers l'ordonnée du point intercepté par l'angle x (sin/tan,
+    // vertical) ou vers son abscisse (cos, horizontal).
+    if (fn === "cos") {
+      dessinerVecteur(ns, svg, C_CX, C_CY, pxVrai.toFixed(2), C_CY, "vecteur-vert-ligne", "vecteur-vert-tete");
+    } else {
+      dessinerVecteur(ns, svg, C_CX, C_CY, C_CX, pyVrai.toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
+    }
+
+    // Indication : valeur de l'angle en π rad, directement sur le cercle.
+    var etiqAngle = svgEl(ns, "text", { x: C_CX, y: C_TAILLE - 6, "text-anchor": "middle", class: "etiquette-angle" });
+    etiqAngle.textContent = "x = " + formatEnPi(x);
+    svg.appendChild(etiqAngle);
   };
 
   CercleTrigoWidgetClass.prototype._toPxGraphe = function (xMath, yMath, yMin, yMax) {
@@ -278,6 +321,11 @@
     if (x > 0) {
       var pViolet0 = toPx(0, 0), pViolet1 = toPx(x, 0);
       svg.appendChild(svgEl(ns, "line", { x1: pViolet0[0].toFixed(2), x2: pViolet1[0].toFixed(2), y1: pViolet0[1].toFixed(2), y2: pViolet1[1].toFixed(2), class: "axe-x-violet" }));
+
+      // Indication : valeur de l'angle en π rad, sur l'abscisse du segment qui évolue.
+      var etiqAbsc = svgEl(ns, "text", { x: pViolet1[0].toFixed(2), y: (origine[1] + 16).toFixed(2), "text-anchor": "middle", class: "etiquette-angle" });
+      etiqAbsc.textContent = formatEnPi(x);
+      svg.appendChild(etiqAbsc);
     }
 
     // Courbe tracée progressivement de 0 à x (pas au-delà) — se "dessine au fur et à mesure"
@@ -312,11 +360,14 @@
       });
 
       // Marqueur rouge à la pointe (x, f(x)) + guide pointillé vers l'axe Y, pour relier
-      // explicitement au segment rouge du cercle ("cela correspond à l'ordonnée du graphe").
+      // explicitement au segment rouge du cercle ("cela correspond à l'ordonnée du graphe") — et
+      // vecteur vert (nouveau) du point d'abscisse x vers ce même point de la courbe.
       var yPointe = f(x);
       var pointeValide = yPointe >= yMin && yPointe <= yMax && !(fn === "tan" && ASYMPTOTES_TAN.some(function (xa) { return Math.abs(x - xa) < 0.05; }));
       if (pointeValide) {
         var pPointe = toPx(x, yPointe);
+        var pAbscisse = toPx(x, 0);
+        dessinerVecteur(ns, svg, pAbscisse[0].toFixed(2), pAbscisse[1].toFixed(2), pPointe[0].toFixed(2), pPointe[1].toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
         svg.appendChild(svgEl(ns, "line", { x1: G_MARGE_G, x2: pPointe[0].toFixed(2), y1: pPointe[1].toFixed(2), y2: pPointe[1].toFixed(2), class: "guide-rouge" }));
         svg.appendChild(svgEl(ns, "circle", { cx: pPointe[0].toFixed(2), cy: pPointe[1].toFixed(2), r: 4, class: "point-rouge" }));
       }
@@ -325,7 +376,7 @@
 
   CercleTrigoWidgetClass.prototype._rendre = function () {
     var x = this._x, fn = this._fn;
-    this._valeurX.textContent = formatNombreFr(x, 2) + " rad";
+    this._valeurX.textContent = formatNombreFr(x, 2) + " rad (" + formatEnPi(x) + ")";
     this._valXRad.textContent = formatNombreFr(x, 2);
     this._valXPi.textContent = formatEnPi(x);
     this._labelFn.textContent = FN[fn].symbole;
