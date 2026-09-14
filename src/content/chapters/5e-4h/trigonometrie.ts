@@ -579,6 +579,15 @@ export const trigonometrie: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'sinusoide-widget',
+          label: 'Manipule toi-même — fais varier A, ω, φ et b',
+          caption:
+            'Le graphe et les encadrés Période/Maximum/Minimum se mettent à jour en direct. ' +
+            'Fais bouger un seul curseur à la fois pour bien voir l\'effet propre à chaque ' +
+            'paramètre, avant de lire le rôle de chacun ci-dessous.',
+        },
+        {
           kind: 'intuition',
           label: 'Pour visualiser',
           text:

@@ -707,3 +707,52 @@ paths:
   3,46410) et $n=30$ (3,13585 ≤ π ≤ 3,15313) — exactement les valeurs attendues ; `0` erreur
   console, `0` `$` isolé. `tsc -b`/`npm run build`/`npm run lint` propres ; sitewide
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+  **Choix d'échelle corrigé deux fois après coup, sur signalement direct de l'utilisateur avec
+  capture d'écran** (le cercle "ne remplissait pas son cadre", puis "n'avait pas vraiment
+  grandi") : le premier correctif (ci-dessus) gardait implicitement TOUT le viewBox proportionnel
+  au rayon du cercle — la marge de sécurité pour n=3 (pire cas, facteur 1/cos60°=2) grandissait
+  donc dans la même proportion que le cercle, annulant presque tout le gain visuel (mesuré :
+  208px→216px, +4%, imperceptible). Root cause démontrée par calcul : garantir 0 rognage à n=3 sur
+  le MÊME viewBox qui fixe l'échelle d'affichage plafonne mathématiquement le cercle à ~50% de la
+  largeur affichée, quelle que soit la valeur absolue choisie pour son rayon. Correctif final : ne
+  protéger du rognage que jusqu'à n=5 (au lieu du pire cas n=3) — à n=3 et un peu n=4, le polygone
+  circonscrit dépasse désormais le bord réel du SVG et y est rogné net (comportement standard du
+  viewport SVG, pas un bug) ; le cercle, lui, ne bouge jamais. Diamètre RÉEL du cercle mesuré à
+  l'écran (`getBoundingClientRect`, pas un attribut interne du viewBox — la mesure utilisée pour
+  les deux premiers correctifs, insuffisante) : 333px, contre 208px avant, +60%, constant pour
+  n=3/4/6/30. **Leçon retenue** : pour un widget dont une grandeur doit rester visuellement fixe
+  quel que soit un paramètre variable, mesurer la taille RENDUE À L'ÉCRAN de cette grandeur
+  précise (pas un attribut interne ni la taille du conteneur global) avant de conclure qu'un
+  correctif a fonctionné — un rayon interne plus grand ne veut rien dire si le facteur d'échelle
+  global a diminué d'autant.
+  **Bug distinct, repéré par l'utilisateur au même moment** : les 3 graphes `curvePlot` (sin, cos,
+  tan) juste avant ce widget portaient `compact: true` (`.diagram-frame--compact`, limite à 50% de
+  large) sans raison — retiré. En vérifiant plus largement (grep sur tout `src/content/chapters/`),
+  42 autres illustrations dans 6 autres fichiers portaient le même flag inutile (voir commit
+  correspondant) — corrigées dans la foulée, sur demande explicite de l'utilisateur ("remets
+  toutes les images... à leur taille normale").
+
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : second widget interactif porté
+  (`sinusoide-widget`), inséré en section "Paramètres d'une fonction sinusoïdale" juste après les 3
+  graphes de référence (sin, cos, tan), avant le callout `intuition` "Pour visualiser" (l'analogie
+  de la balançoire) et le `rappel` du rôle de chaque paramètre — emplacement demandé explicitement
+  par l'utilisateur. $f(x) = A\sin(\omega x + \varphi) + b$ avec 4 curseurs (A, ω, φ, b), formule
+  affichée en direct, courbe recalculée en temps réel, et 3 encadrés (Période T, Maximum, Minimum)
+  sur le modèle visuel déjà établi par `archimede-widget`. Un bouton "Réinitialiser" (comme
+  `parabole-widget`) ramène aux valeurs par défaut ($A=2, \omega=1, \varphi=0, b=0$).
+  **Fenêtre de tracé entièrement dynamique**, contrairement à `archimede-widget` (qui doit composer
+  avec une grandeur RÉELLE fixe, le rayon du cercle) : ce widget n'a aucune grandeur à garder fixe
+  entre deux réglages, donc la fenêtre X est recalculée à chaque rendu pour toujours montrer
+  exactement 5 périodes ($x \in [-2{,}5T ; 2{,}5T]$, $T=2\pi/\omega$) et la fenêtre Y est cadrée sur
+  le maximum/minimum réels ($b\pm A$, plus une marge, tout en gardant $y=0$ toujours visible) — la
+  courbe remplit donc TOUJOURS bien le cadre, quel que soit le réglage, sans le compromis subi par
+  `archimede-widget`. Repères verticaux ajoutés à chaque période ($k \cdot T$, étiquetés "T", "2T",
+  "−T"...) plutôt que des graduations génériques en π, pour rendre la période directement lisible
+  sur le graphe et pas seulement dans l'encadré numérique.
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction réelle des 4 curseurs
+  (Playwright, navigation clavier à travers la frontière du Shadow DOM) : formule, période, maximum
+  et minimum recalculés à chaque pas et recoupés à la main ($T=2\pi/\omega$, $max=b+A$, $min=b-A$
+  vérifiés après chaque curseur bougé isolément) ; bouton de réinitialisation confirmé ramener
+  exactement aux valeurs par défaut ; `0` erreur console, `0` `$` isolé. `tsc -b`/`npm run
+  build`/`npm run lint` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur,
+  `0` `NaN`, `0` `$` isolé.

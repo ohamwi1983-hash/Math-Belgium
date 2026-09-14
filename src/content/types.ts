@@ -11,6 +11,7 @@ export type InteractiveWidgetTag =
   | 'parabole-widget'
   | 'transformations-widget'
   | 'archimede-widget'
+  | 'sinusoide-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

@@ -10,6 +10,7 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'parabole-widget': () => import('../../interactive/register-parabole-widget.js'),
   'transformations-widget': () => import('../../interactive/register-transformations-widget.js'),
   'archimede-widget': () => import('../../interactive/register-archimede-widget.js'),
+  'sinusoide-widget': () => import('../../interactive/register-sinusoide-widget.js'),
 }
 
 /**
