@@ -889,3 +889,44 @@ paths:
   visuellement le sens du prolongement pointillé (vers $x=1$ quand $\cos x>0$, vers le bord opposé
   sinon). `0` erreur console, `0` `$` isolé, `0` `NaN` ; `tsc`/`oxlint`/`build` propres ; sitewide
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **6e (6h), Chapitre 2 — Fonctions exponentielles** (`fonctions-exponentielles`) : un widget
+  interactif et une illustration statique, sur demande explicite de l'utilisateur (capture d'écran
+  fournie des deux graphes statiques a=2/a=0,5 déjà en place).
+  - **Widget `exponentielle-widget`** — $f(x)=a^x$, un seul curseur $a$ de 0 à 4 par pas de 0,1
+    (défaut $a=2$), inséré juste après les deux graphes statiques existants (a=2, a=0,5) et avant
+    le callout astuce "Le cas de e", à l'emplacement exact demandé par l'utilisateur. Fenêtre de
+    tracé **fixe** ($x\in[-3;3]$, $y\in[-0{,}5;9]$), reprenant exactement celle des deux graphes
+    statiques juste au-dessus pour ne pas créer de saut d'échelle visuel à la suite immédiate —
+    toujours la même leçon (jamais de cadrage qui se recale sur le paramètre variable). Point
+    $(0;1)$ toujours affiché (fixe, quel que soit $a$) ; point $(1;a)$ mobile, avec pointillés vers
+    les deux axes et la valeur numérique affichée à chaque intersection (« préciser les valeurs des
+    coordonnées sur les axes X et Y », demandé explicitement). Cas limite $a=0$ (borne basse du
+    curseur) géré explicitement : $a^x$ vaut $0$ pour $x>0$, $1$ en $x=0$ (convention JS
+    `Math.pow(0,0)=1`, cohérente avec le point fixe), et $+\infty$ pour $x<0$ — le tracé est
+    découpé par segments et exclut toute portion hors fenêtre (même technique que pour les
+    asymptotes de tan(x) dans `cercle-trigo-widget`), pour ne jamais laisser fuiter un texte
+    `Infinity` dans le DOM.
+    Vérifié par rendu navigateur réel (clair et sombre) et interaction Playwright : placement
+    confirmé par `compareDocumentPosition` (juste après le second graphe statique, avant le
+    callout "Le cas de e") ; formule/type croissante-décroissante/point affiché recoupés à la main
+    pour $a=0$ (borne min), $a=1$ (cas limite constante), $a=4$ (borne max), et après
+    réinitialisation ; tracé confirmé différent à chaque changement de $a$. `0` erreur console,
+    `0` `$` isolé, `0` `NaN`, `0` occurrence de `Infinity` dans le texte affiché. `tsc -p
+    tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
+    les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+  - **Illustration statique `curvePlot`** pour $(1+1/x)^x$, $x>0$, asymptote horizontale $y=e$ —
+    insérée à l'endroit exact où le nombre d'Euler est défini par cette limite (dans l'
+    `exempleLibre` "Démonstration — pourquoi exp est sa propre dérivée"), juste après le paragraphe
+    qui pose la définition et avant celui sur $\ln(e)=1$, comme demandé. Fenêtre
+    $x\in[0\,;25]$ (échantillonnage à partir de $x=0{,}05$ pour éviter la division par une valeur
+    proche de 0), $y\in[0\,;3{,}2]$, asymptote $y=e\approx 2{,}718$, deux points repères
+    $(1;2)$ et $(10;2{,}594)$ pour ancrer visuellement la convergence. Pas de nouveau kind
+    d'illustration : réutilise `curvePlot` tel quel (déjà utilisé partout ailleurs dans ce
+    chapitre), la seule fonction étant nouvelle.
+    Vérifié par rendu navigateur réel : figure retrouvée au bon endroit du DOM (juste après le
+    paragraphe de définition de $e$), caption rendue avec KaTeX (le champ `caption` d'une
+    illustration passe par `RichText`, contrairement au `caption` d'un bloc `atelier` qui reste en
+    texte brut — distinction déjà documentée dans `.claude/rules/content-authoring.md`). `0` erreur
+    console, `0` `$` isolé ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0`
+    `NaN`, `0` `$` isolé (nombre de `<svg>` de ce chapitre passé de 29 à 30, confirmant l'ajout).

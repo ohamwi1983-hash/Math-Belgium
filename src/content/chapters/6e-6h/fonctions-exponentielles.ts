@@ -229,6 +229,16 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'exponentielle-widget',
+          label: 'Manipule toi-même — fais varier la base a',
+          caption:
+            'Le graphe se met à jour en direct. Repère le point fixe (0;1), toujours présent, ' +
+            'et le point (1;a) qui bouge avec le curseur — ses pointillés donnent directement ' +
+            'sa valeur sur les deux axes. Observe le basculement croissante/décroissante ' +
+            'autour de a=1.',
+        },
+        {
           kind: 'astuce',
           label: '💡 Le cas de e',
           text:
@@ -564,6 +574,28 @@ export const fonctionsExponentielles: ChapterContent = {
                 "(l'existence de cette limite est admise). La fonction exponentielle de base " +
                 "$e$ porte un nom à part, **fonction exponentielle népérienne**, et se note " +
                 '$\\exp$ plutôt que $\\exp_e$.',
+            },
+            {
+              kind: 'illustration',
+              illustration: {
+                kind: 'curvePlot',
+                curves: [{ fn: (x) => Math.pow(1 + 1 / x, x), tone: 'accent', xMin: 0.05 }],
+                xMin: 0,
+                xMax: 25,
+                xTicks: [5, 10, 15, 20],
+                fixedYRange: { min: 0, max: 3.2 },
+                horizontalAsymptotes: [{ y: Math.E, label: 'asymptote y=e≈2,718' }],
+                points: [
+                  { x: 1, y: 2, label: '(1;2)', tone: 'accent' },
+                  { x: 10, y: Math.pow(1.1, 10), label: '(10;2,594)', tone: 'accent' },
+                ],
+                xAxisLabel: 'x',
+                yAxisLabel: 'y',
+                caption:
+                  'La fonction $(1+1/x)^x$ pour $x>0$ : croissante, elle se rapproche de plus ' +
+                  'en plus de $e$ sans jamais l\'atteindre — exactement la limite qui définit ' +
+                  'le nombre d\'Euler.',
+              },
             },
             {
               kind: 'para',
