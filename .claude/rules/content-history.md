@@ -957,3 +957,35 @@ paths:
   --noEmit`/`oxlint`/`npm run build` propres ; `0` erreur console, `0` `$` isolé ; sitewide
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé (aucune
   illustration ajoutée, uniquement du texte).
+
+- **4e, Chapitre 2 — Équations et inéquations du second degré** (suite) : nouvelle démonstration
+  ajoutée — factorisation $ax^2+bx+c=a(x-x_1)(x-x_2)$ pour $\Delta\geq0$ — demandée explicitement,
+  avec placement précis ("après les formules de Viète") et détail comparable aux deux
+  démonstrations déjà présentes. Insérée entre la démonstration de Viète et le sous-titre "Écrire
+  une équation à partir de ses solutions" : un `subheading` ("Factoriser un trinôme grâce à ses
+  racines"), un `para` de transition qui justifie l'intérêt de cette factorisation (elle rend la
+  section suivante — étudier le signe d'un trinôme — bien plus simple, puisque le signe d'un
+  produit de facteurs du premier degré se lit facilement), un `rappel` énonçant le résultat, puis
+  l'`exempleLibre` "Démonstration" détaillée en 4 étapes.
+  **Démonstration construite pour réutiliser les résultats déjà établis**, plutôt que repartir de
+  zéro : part directement de la forme $a(x+b/2a)^2-\Delta/(4a)$ obtenue à l'étape 4 de la
+  démonstration du discriminant (juste au-dessus dans le chapitre), réécrit le terme constant
+  comme un carré ($\Delta/(4a)=a(\sqrt\Delta/(2a))^2$), factorise la différence de deux carrés via
+  $u^2-v^2=(u-v)(u+v)$, puis identifie chaque facteur à $x-x_1$/$x-x_2$ en reprenant les mêmes
+  $x_1$, $x_2$ que la démonstration de Viète juste avant. Conclut par le cas particulier
+  $\Delta=0$ (racine double, factorisation $a(x+b/2a)^2$), qui referme la boucle avec le "carré
+  parfait" déjà rencontré comme raccourci en tout début de section.
+  **Piège vérifié en pratique, rencontré et corrigé pendant la rédaction** : deux libellés
+  d'étape écrits d'abord comme `'**Étape 3 — ... $u^2-v^2=...$**'` (le `$...$` À L'INTÉRIEUR du
+  `**gras**`) — exactement le piège documenté plus haut dans ce fichier de règles : le tokenizer
+  capture tout le texte entre `**...**` comme gras littéral, dollars compris, jamais reparsé par
+  KaTeX. Détecté par un scan Playwright des nœuds texte de la page contenant `$` (pas seulement un
+  comptage brut du nombre de `$`, qui restait pair et donc invisible en grep) : 2 occurrences
+  trouvées ("Étape 3 — appliquer l'identité $u^2-v^2=(u-v)(u+v)$", "Étape 4 — reconnaître $x_1$ et
+  $x_2$"). Corrigées en refermant le gras AVANT le premier `$` (ex. `'**Étape 3 — appliquer
+  l'identité**'` puis `' $u^2-v^2=(u-v)(u+v)$, avec '` en segments adjacents, jamais imbriqués).
+  Vérifié par rendu navigateur réel : placement confirmé par `compareDocumentPosition` (après la
+  démonstration de Viète, avant "Écrire une équation à partir de ses solutions") ; tout le KaTeX
+  rendu correctement après le correctif (`0` `$` isolé, contre `6` avant). `tsc -p
+  tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
+  les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

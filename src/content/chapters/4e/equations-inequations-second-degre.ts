@@ -303,6 +303,81 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             },
           ],
         },
+        { kind: 'subheading', text: 'Factoriser un trinôme grâce à ses racines' },
+        {
+          kind: 'para',
+          text:
+            'Il y a encore une chose à savoir sur $x_1$ et $x_2$ : ils permettent aussi ' +
+            "d'**écrire le trinôme sous forme factorisée**, sans jamais développer. C'est ce " +
+            'qui rendra la section suivante — étudier le signe d\'un trinôme — beaucoup plus ' +
+            "simple : le signe d'un produit de deux facteurs du premier degré se lit bien plus " +
+            'facilement que le signe direct de $ax^2+bx+c$.',
+        },
+        {
+          kind: 'rappel',
+          label: 'Forme factorisée du trinôme',
+          items: [
+            "Si $\\Delta \\geq 0$, avec $x_1$ et $x_2$ les racines de $ax^2+bx+c=0$ (éventuellement " +
+              "confondues si $\\Delta=0$), alors pour tout x réel : " +
+              '$ax^2+bx+c = a(x-x_1)(x-x_2)$.',
+          ],
+        },
+        {
+          kind: 'exempleLibre',
+          label: 'Démonstration',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "On repart de la forme obtenue à l'étape 4 de la démonstration du " +
+                'discriminant, valable pour **toute** équation $ax^2+bx+c=0$ : ' +
+                '$ax^2+bx+c = a\\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{\\Delta}{4a}$. On suppose ' +
+                'maintenant $\\Delta \\geq 0$, pour pouvoir écrire $\\sqrt{\\Delta}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1 — réécrire le terme constant comme un carré.** Puisque ' +
+                '$\\Delta \\geq 0$, $\\sqrt{\\Delta}$ existe, et ' +
+                '$\\dfrac{\\Delta}{4a}=a\\cdot\\dfrac{\\Delta}{4a^2}=a\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2$ ' +
+                '(on vérifie : $\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2=\\dfrac{\\Delta}{4a^2}$, ' +
+                "puis on multiplie par a). L'expression devient : " +
+                '$ax^2+bx+c = a\\left(x+\\dfrac{b}{2a}\\right)^2-a\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2 — mettre a en évidence.** ' +
+                '$ax^2+bx+c = a\\left[\\left(x+\\dfrac{b}{2a}\\right)^2-\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2\\right]$ ' +
+                '— une différence de deux carrés, à l\'intérieur des crochets.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 3 — appliquer l\'identité** $u^2-v^2=(u-v)(u+v)$, avec ' +
+                '$u=x+\\dfrac{b}{2a}$ et $v=\\dfrac{\\sqrt{\\Delta}}{2a}$ : ' +
+                '$\\left(x+\\dfrac{b}{2a}\\right)^2-\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2 = ' +
+                '\\left(x+\\dfrac{b}{2a}-\\dfrac{\\sqrt{\\Delta}}{2a}\\right)\\left(x+\\dfrac{b}{2a}+\\dfrac{\\sqrt{\\Delta}}{2a}\\right)$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 4 — reconnaître** $x_1$ et $x_2$. Chaque facteur se réécrit ' +
+                '$x-(\\ldots)$ : ' +
+                '$x+\\dfrac{b}{2a}-\\dfrac{\\sqrt{\\Delta}}{2a}=x-\\dfrac{-b+\\sqrt{\\Delta}}{2a}=x-x_1$, ' +
+                'et $x+\\dfrac{b}{2a}+\\dfrac{\\sqrt{\\Delta}}{2a}=x-\\dfrac{-b-\\sqrt{\\Delta}}{2a}=x-x_2$, ' +
+                'en reprenant les mêmes $x_1$ et $x_2$ que dans la démonstration précédente.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Donc, pour $\\Delta \\geq 0$ : $ax^2+bx+c = a(x-x_1)(x-x_2)$. ' +
+                '$\\qquad \\blacksquare$ Cas particulier $\\Delta=0$ : $x_1=x_2=-\\dfrac{b}{2a}$, et ' +
+                'la factorisation devient $a\\left(x+\\dfrac{b}{2a}\\right)^2$ — le carré parfait ' +
+                'déjà rencontré au tout début de la section.',
+            },
+          ],
+        },
         { kind: 'subheading', text: 'Écrire une équation à partir de ses solutions' },
         {
           kind: 'rappel',
