@@ -329,52 +329,43 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             {
               kind: 'para',
               text:
-                "On repart de la forme obtenue à l'étape 4 de la démonstration du " +
-                'discriminant, valable pour **toute** équation $ax^2+bx+c=0$ : ' +
-                '$ax^2+bx+c = a\\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{\\Delta}{4a}$. On suppose ' +
-                'maintenant $\\Delta \\geq 0$, pour pouvoir écrire $\\sqrt{\\Delta}$.',
+                'On part cette fois de la forme factorisée elle-même, et on va retrouver ' +
+                '$ax^2+bx+c$ en la distribuant, puis en utilisant les relations de Viète ' +
+                'démontrées juste au-dessus.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 1 — réécrire le terme constant comme un carré.** Puisque ' +
-                '$\\Delta \\geq 0$, $\\sqrt{\\Delta}$ existe, et ' +
-                '$\\dfrac{\\Delta}{4a}=a\\cdot\\dfrac{\\Delta}{4a^2}=a\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2$ ' +
-                '(on vérifie : $\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2=\\dfrac{\\Delta}{4a^2}$, ' +
-                "puis on multiplie par a). L'expression devient : " +
-                '$ax^2+bx+c = a\\left(x+\\dfrac{b}{2a}\\right)^2-a\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2$.',
+                "**Étape 1 — distribuer** $(x-x_1)(x-x_2)$. Chaque terme du premier facteur " +
+                'multiplie chaque terme du second : ' +
+                '$(x-x_1)(x-x_2) = x \\cdot x - x \\cdot x_2 - x_1 \\cdot x + x_1 \\cdot x_2 = ' +
+                'x^2 - (x_1+x_2)x + x_1 x_2$, en regroupant les deux termes en x.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 2 — mettre a en évidence.** ' +
-                '$ax^2+bx+c = a\\left[\\left(x+\\dfrac{b}{2a}\\right)^2-\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2\\right]$ ' +
-                '— une différence de deux carrés, à l\'intérieur des crochets.',
+                '**Étape 2 — remultiplier par a.** ' +
+                '$a(x-x_1)(x-x_2) = a\\left[x^2 - (x_1+x_2)x + x_1 x_2\\right]$.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 3 — appliquer l\'identité** $u^2-v^2=(u-v)(u+v)$, avec ' +
-                '$u=x+\\dfrac{b}{2a}$ et $v=\\dfrac{\\sqrt{\\Delta}}{2a}$ : ' +
-                '$\\left(x+\\dfrac{b}{2a}\\right)^2-\\left(\\dfrac{\\sqrt{\\Delta}}{2a}\\right)^2 = ' +
-                '\\left(x+\\dfrac{b}{2a}-\\dfrac{\\sqrt{\\Delta}}{2a}\\right)\\left(x+\\dfrac{b}{2a}+\\dfrac{\\sqrt{\\Delta}}{2a}\\right)$.',
+                '**Étape 3 — remplacer par les relations de Viète.** On a démontré ' +
+                'juste avant que $x_1+x_2 = -\\dfrac{b}{a}$ et $x_1 \\cdot x_2 = \\dfrac{c}{a}$ : ' +
+                '$a\\left[x^2 - \\left(-\\dfrac{b}{a}\\right)x + \\dfrac{c}{a}\\right] = ' +
+                'a\\left[x^2 + \\dfrac{b}{a}x + \\dfrac{c}{a}\\right]$.',
             },
             {
               kind: 'para',
               text:
-                '**Étape 4 — reconnaître** $x_1$ et $x_2$. Chaque facteur se réécrit ' +
-                '$x-(\\ldots)$ : ' +
-                '$x+\\dfrac{b}{2a}-\\dfrac{\\sqrt{\\Delta}}{2a}=x-\\dfrac{-b+\\sqrt{\\Delta}}{2a}=x-x_1$, ' +
-                'et $x+\\dfrac{b}{2a}+\\dfrac{\\sqrt{\\Delta}}{2a}=x-\\dfrac{-b-\\sqrt{\\Delta}}{2a}=x-x_2$, ' +
-                'en reprenant les mêmes $x_1$ et $x_2$ que dans la démonstration précédente.',
+                '**Étape 4 — distribuer le a.** ' +
+                '$a \\cdot x^2 + a \\cdot \\dfrac{b}{a}x + a \\cdot \\dfrac{c}{a} = ax^2+bx+c$, ' +
+                'puisque $a$ se simplifie avec le $a$ du dénominateur dans les deux derniers termes.',
             },
             {
               kind: 'para',
               text:
-                'Donc, pour $\\Delta \\geq 0$ : $ax^2+bx+c = a(x-x_1)(x-x_2)$. ' +
-                '$\\qquad \\blacksquare$ Cas particulier $\\Delta=0$ : $x_1=x_2=-\\dfrac{b}{2a}$, et ' +
-                'la factorisation devient $a\\left(x+\\dfrac{b}{2a}\\right)^2$ — le carré parfait ' +
-                'déjà rencontré au tout début de la section.',
+                'Donc, pour $\\Delta \\geq 0$ : $a(x-x_1)(x-x_2) = ax^2+bx+c$. $\\qquad \\blacksquare$',
             },
           ],
         },

@@ -989,3 +989,16 @@ paths:
   rendu correctement après le correctif (`0` `$` isolé, contre `6` avant). `tsc -p
   tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
   les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+  **Démonstration réécrite dans l'autre sens, sur retour utilisateur** ("trop compliquée") :
+  l'aller-retour complétion-du-carré → différence de deux carrés → identification de $x_1$/$x_2$
+  était correct mais indirect pour un résultat aussi simple. Remplacée par le sens naturel —
+  partir de la forme factorisée $a(x-x_1)(x-x_2)$, la **distribuer** ($x^2-(x_1+x_2)x+x_1x_2$),
+  puis substituer directement les relations de Viète ($x_1+x_2=-b/a$, $x_1\cdot x_2=c/a$,
+  démontrées juste au-dessus) pour retomber sur $ax^2+bx+c$ — 4 étapes courtes au lieu de 6, sans
+  repasser par $\sqrt\Delta$ ni par une identité remarquable de type $u^2-v^2$. Retire au passage
+  le renvoi au cas particulier $\Delta=0$ (n'apporte plus rien dans ce sens de la preuve, la
+  substitution de Viète fonctionne identiquement que les racines soient distinctes ou confondues).
+  Vérifié par rendu navigateur réel et scan Playwright des nœuds texte contenant un `$` isolé (`0`
+  cette fois, aucun piège de gras imbriqué réintroduit) ; `0` erreur console. `tsc -p
+  tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
+  les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
