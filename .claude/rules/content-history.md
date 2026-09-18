@@ -930,3 +930,30 @@ paths:
     texte brut — distinction déjà documentée dans `.claude/rules/content-authoring.md`). `0` erreur
     console, `0` `$` isolé ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0`
     `NaN`, `0` `$` isolé (nombre de `<svg>` de ce chapitre passé de 29 à 30, confirmant l'ajout).
+
+- **4e, Chapitre 2 — Équations et inéquations du second degré** (`equations-inequations-second-degre`) :
+  les deux `Démonstration` du chapitre (formule du discriminant, relations de Viète) largement
+  détaillées, sur demande explicite de l'utilisateur ("détaille beaucoup plus les démonstrations").
+  Les deux étaient des blocs `methode` compressés (3-4 puces sans le détail de chaque manipulation
+  algébrique) — converties en `exempleLibre` (une séquence de `para`, une manipulation par bloc,
+  le format déjà utilisé ailleurs sur le site pour une démonstration détaillée, ex. $\exp'=\exp$
+  dans `6e-6h/fonctions-exponentielles.ts`).
+  - **Formule du discriminant** : 4 puces → 6 étapes explicites, chacune justifiée. Ajouts
+    concrets : l'identité $(x+k)^2=x^2+2kx+k^2$ utilisée pour identifier $k=b/(2a)$ (au lieu de
+    l'affirmer directement) ; le détail de la distribution du $a$ sur les crochets
+    ($a\cdot\frac{b^2}{4a^2}=\frac{b^2}{4a}$) ; la mise au même dénominateur des deux termes
+    constants, étape par étape, jusqu'à $-\Delta/(4a)$ ; la division explicite par $a$ pour isoler
+    le carré (étape absente avant, le passage de $a(...)^2=\Delta/(4a)$ à $x=...$ se faisait en un
+    seul saut) ; et la justification de la condition $\Delta\geq0$ pour pouvoir prendre la racine
+    carrée (avec la conclusion "aucune solution réelle" si $\Delta<0$, qui n'était pas explicite
+    dans la version précédente).
+  - **Relations de Viète** : 3 puces → 4 blocs, avec le calcul du produit désormais détaillé via
+    l'identité $(u+v)(u-v)=u^2-v^2$ explicitée ($u=-b$, $v=\sqrt\Delta$) plutôt qu'un résultat
+    donné directement.
+  Aucun changement de fond (mêmes résultats, mêmes formules finales) — uniquement plus de détail
+  intermédiaire, sans toucher au reste du chapitre.
+  Vérifié par rendu navigateur réel : les deux blocs retrouvés au bon endroit du DOM, tout le
+  KaTeX rendu correctement (aucune formule affichée en texte brut). `tsc -p tsconfig.app.json
+  --noEmit`/`oxlint`/`npm run build` propres ; `0` erreur console, `0` `$` isolé ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé (aucune
+  illustration ajoutée, uniquement du texte).

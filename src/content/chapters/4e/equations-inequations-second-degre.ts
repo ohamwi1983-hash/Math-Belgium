@@ -128,16 +128,82 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'discriminant. Elle marche **toujours**. Voici comment on la retrouve, étape par étape.',
         },
         {
-          kind: 'methode',
+          kind: 'exempleLibre',
           label: 'Démonstration — étape par étape',
-          items: [
-            'On met a en évidence. Mais seulement sur les deux premiers termes : ' +
-              '$ax^2+bx+c = a[x^2 + \\dfrac{b}{a}x] + c$.',
-            'On complète le carré. **Attention** : la moitié de b/a, c\'est b/(2a) — pas b/a ! ' +
-              'On obtient : $a(x+\\dfrac{b}{2a})^2 - \\dfrac{\\Delta}{4a}$, avec $\\Delta = b^2-4ac$.',
-            'On isole le carré : $a(x+\\dfrac{b}{2a})^2 = \\dfrac{\\Delta}{4a}$.',
-            'On prend la racine carrée des deux côtés. C\'est possible seulement si Δ ≥ 0 : ' +
-              '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$.',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                "On part de l'équation générale $ax^2+bx+c=0$ (avec $a \\neq 0$), et on va " +
+                'faire apparaître un **carré parfait** pour isoler x — cette technique ' +
+                "s'appelle **compléter le carré**.",
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 1 — mettre a en évidence.** Attention, seulement sur les deux premiers ' +
+                'termes, jamais sur c : $ax^2+bx+c = a\\left(x^2+\\dfrac{b}{a}x\\right)+c$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 2 — repérer le carré parfait à faire apparaître.** On veut ' +
+                'transformer $x^2+\\dfrac{b}{a}x$ en un carré de la forme ' +
+                '$(x+k)^2 = x^2+2kx+k^2$. En identifiant $2k=\\dfrac{b}{a}$, on trouve ' +
+                '$k=\\dfrac{b}{2a}$ — la **moitié** de $b/a$, pas $b/a$ tout court, piège classique.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Donc $\\left(x+\\dfrac{b}{2a}\\right)^2 = x^2+\\dfrac{b}{a}x+\\dfrac{b^2}{4a^2}$, ' +
+                'ce qui donne $x^2+\\dfrac{b}{a}x = \\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{b^2}{4a^2}$ ' +
+                "— le carré complet, moins le terme en trop qu'on vient d'ajouter.",
+            },
+            {
+              kind: 'para',
+              text:
+                "**Étape 3 — réinjecter dans l'expression de départ.** " +
+                '$a\\left(x^2+\\dfrac{b}{a}x\\right)+c = ' +
+                'a\\left[\\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{b^2}{4a^2}\\right]+c = ' +
+                'a\\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{b^2}{4a}+c$ (en distribuant le a ' +
+                'dans les crochets : $a\\cdot\\dfrac{b^2}{4a^2}=\\dfrac{b^2}{4a}$).',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 4 — regrouper les deux termes constants.** Même dénominateur $4a$ : ' +
+                '$-\\dfrac{b^2}{4a}+c = -\\dfrac{b^2}{4a}+\\dfrac{4ac}{4a} = ' +
+                '\\dfrac{4ac-b^2}{4a} = -\\dfrac{b^2-4ac}{4a} = -\\dfrac{\\Delta}{4a}$, en posant ' +
+                '$\\Delta=b^2-4ac$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "L'équation $ax^2+bx+c=0$ s'écrit donc " +
+                '$a\\left(x+\\dfrac{b}{2a}\\right)^2-\\dfrac{\\Delta}{4a}=0$, soit ' +
+                '$a\\left(x+\\dfrac{b}{2a}\\right)^2=\\dfrac{\\Delta}{4a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Étape 5 — isoler le carré.** On divise les deux membres par $a$ (possible ' +
+                'car $a \\neq 0$) : $\\left(x+\\dfrac{b}{2a}\\right)^2=\\dfrac{\\Delta}{4a^2}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                "**Étape 6 — prendre la racine carrée.** C'est seulement possible si le membre " +
+                'de droite est positif ou nul — donc si $\\Delta \\geq 0$, puisque $4a^2$ est ' +
+                'toujours strictement positif. Si $\\Delta < 0$ : l\'équation n\'a **aucune ' +
+                'solution réelle**.',
+            },
+            {
+              kind: 'para',
+              text:
+                'Si $\\Delta \\geq 0$ : $x+\\dfrac{b}{2a}=\\pm\\dfrac{\\sqrt{\\Delta}}{2a}$, donc ' +
+                '$x=-\\dfrac{b}{2a}\\pm\\dfrac{\\sqrt{\\Delta}}{2a}=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$. ' +
+                '$\\qquad \\blacksquare$',
+            },
           ],
         },
         {
@@ -203,15 +269,38 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
         },
         {
-          kind: 'methode',
+          kind: 'exempleLibre',
           label: 'Démonstration',
-          items: [
-            'On part des deux racines de la formule : $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et ' +
-              '$x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$.',
-            'On les additionne. Les termes en $\\sqrt{\\Delta}$ s\'annulent. Il reste : ' +
-              '$x_1+x_2 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}+\\dfrac{-b-\\sqrt{\\Delta}}{2a} = -\\dfrac{b}{a}$.',
-            'On les multiplie. On obtient : $x_1 \\cdot x_2 = \\dfrac{(-b+\\sqrt{\\Delta})(-b-\\sqrt{\\Delta})}{4a^2} = ' +
-              '\\dfrac{b^2-(b^2-4ac)}{4a^2} = \\dfrac{c}{a}$.',
+          blocks: [
+            {
+              kind: 'para',
+              text:
+                'On part des deux racines données par la formule du discriminant (avec ' +
+                '$\\Delta > 0$) : $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et ' +
+                '$x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Somme.** On additionne les deux fractions, même dénominateur $2a$ : ' +
+                '$x_1+x_2 = \\dfrac{(-b+\\sqrt{\\Delta})+(-b-\\sqrt{\\Delta})}{2a}$. Au numérateur, ' +
+                'les termes en $\\sqrt{\\Delta}$ s\'annulent ($+\\sqrt{\\Delta}-\\sqrt{\\Delta}=0$), ' +
+                'il reste $-b-b=-2b$ : $x_1+x_2 = \\dfrac{-2b}{2a} = -\\dfrac{b}{a}$.',
+            },
+            {
+              kind: 'para',
+              text:
+                '**Produit.** On multiplie les deux fractions : ' +
+                '$x_1 \\cdot x_2 = \\dfrac{(-b+\\sqrt{\\Delta})(-b-\\sqrt{\\Delta})}{(2a)^2}$. Le ' +
+                'numérateur est de la forme $(u+v)(u-v)=u^2-v^2$ avec $u=-b$ et ' +
+                '$v=\\sqrt{\\Delta}$ : $(-b)^2-(\\sqrt{\\Delta})^2 = b^2-\\Delta$.',
+            },
+            {
+              kind: 'para',
+              text:
+                'On remplace $\\Delta$ par $b^2-4ac$ : $b^2-\\Delta = b^2-(b^2-4ac) = 4ac$. ' +
+                'Donc $x_1 \\cdot x_2 = \\dfrac{4ac}{4a^2} = \\dfrac{c}{a}$. $\\qquad \\blacksquare$',
+            },
           ],
         },
         { kind: 'subheading', text: 'Écrire une équation à partir de ses solutions' },
