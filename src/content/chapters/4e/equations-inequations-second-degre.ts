@@ -224,6 +224,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             '$x = \\dfrac{b \\pm \\sqrt{\\Delta}}{2a}$. Ici, ça donne $x=-4$ ou $x=-1$ : deux ' +
             'réponses fausses, même si Δ était bien calculé.',
         },
+        {
+          kind: 'atelier',
+          tag: 'discriminant-racines-widget',
+          label: 'Manipule toi-même — a, b, c et le discriminant',
+          caption:
+            'Fais varier a, b et c : Δ se recalcule en direct, et la parabole change de couleur ' +
+            'selon son signe. Observe combien de fois elle coupe l\'axe des x selon que Δ est ' +
+            'positif, nul ou négatif.',
+        },
         { kind: 'subheading', text: 'Le cas caché — mettre une expression entière en évidence' },
         {
           kind: 'para',
@@ -507,6 +516,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'Pose-toi toujours la question — ne réponds pas par automatisme.',
         },
         {
+          kind: 'atelier',
+          tag: 'signe-trinome-widget',
+          label: 'Manipule toi-même — le tableau de signes en direct',
+          caption:
+            'Règle a, b et c, choisis le symbole ◇, et regarde le tableau de signes se ' +
+            'construire tout seul sous la parabole colorée — puis l\'ensemble-solution S calculé ' +
+            'avec la bonne notation à crochets.',
+        },
+        {
           kind: 'entrainement',
           title: 'Tableau de signes',
           generatorId: 'gen2',
@@ -646,6 +664,15 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'signe partout : celui de son propre a. Pas de colonne en plus pour ce facteur ! ' +
             'C\'est différent d\'un facteur qu\'on peut factoriser : lui, il ajoute ses propres ' +
             'racines au tableau.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'signe-produit-widget',
+          label: 'Manipule toi-même — 2 ou 3 facteurs à la fois',
+          caption:
+            'Règle la racine de chaque facteur (active le 3e si besoin) : la grille se construit ' +
+            'ligne par ligne, la courbe du produit se colore en direct, et S se calcule pour le ' +
+            'symbole choisi — reprend par défaut l\'exemple (x−1)·x·(x−3) résolu ci-dessus.',
         },
         {
           kind: 'entrainement',

@@ -18,6 +18,9 @@ export type InteractiveWidgetTag =
   | 'reciproque-miroir-widget'
   | 'cyclometrique-miroir-widget'
   | 'cyclometrique-tangente-widget'
+  | 'discriminant-racines-widget'
+  | 'signe-trinome-widget'
+  | 'signe-produit-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

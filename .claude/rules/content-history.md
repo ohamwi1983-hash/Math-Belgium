@@ -1189,3 +1189,61 @@ paths:
   partout. `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé (SVG du chapitre
   passés de 58 à 61, confirmant les 3 ajouts).
+
+- **4e, Chapitre 2 — Équations et inéquations du second degré**
+  (`equations-inequations-second-degre`) : 3 nouveaux widgets interactifs, même processus que le
+  chapitre précédent (suggestion faite d'abord, jamais implémentée sans validation explicite).
+  Les 3 widgets partagent un même principe — courbe **coupée exactement aux racines** (jamais
+  interpolée : les bornes de chaque segment tracé sont les racines elles-mêmes, le signe de
+  chaque segment évalué en son milieu, jamais déduit) et colorée directement en vert/rouge
+  (`--good`/`--bad`) plutôt qu'une seule couleur — pour que la couleur de la courbe et celle du
+  tableau de signes se répondent visuellement sans effort de lecture.
+  - **`discriminant-racines-widget`** — section 1, inséré juste après le piège "Erreur de signe
+    classique" qui clôt le cas général, avant "Le cas caché". Curseurs a, b, c (a ne peut jamais
+    valoir 0 : un passage par 0 est repoussé au pas suivant dans le sens du déplacement, jamais
+    laissé à 0 pile), Δ et le nombre de solutions recalculés en direct, racines marquées sur
+    l'axe. Valeurs par défaut $a=1,b=-1,c=-6$ : reprend tel quel l'exemple $x^2-x-6\ge0$ déjà
+    résolu section 2, pour que le widget démarre sur un cas déjà familier.
+  - **`signe-trinome-widget`** — section 2, inséré juste après l'astuce sur la notation à
+    crochets inversés, avant la carte `entrainement` gen2. Mêmes curseurs a/b/c, plus un
+    sélecteur ◇ ∈ {>,≥,<,≤} : une grille de signes HTML (pas SVG, construite en chaîne de
+    caractères à chaque rendu) apparaît sous la courbe, et $S$ est calculé et affiché avec la
+    notation exacte du site (`]−∞ ; −2] ∪ [3 ; +∞[`).
+  - **`signe-produit-widget`** — section 3, inséré juste après l'attention "Facteur quadratique
+    irréductible", avant la carte `entrainement` gen5. 2 ou 3 facteurs du premier degré à racine
+    réglable (case à cocher pour activer/désactiver le 3e), une ligne de grille par facteur PLUS
+    une ligne "produit", et $S$ pour ◇ ∈ {>,<} seulement (les cas ≥/≤ avec point isolé auraient
+    demandé un algorithme de fusion de bornes nettement plus complexe pour un gain pédagogique
+    marginal — simplification assumée, disclosed ici plutôt que silencieuse). Valeurs par défaut
+    $r_1=0,r_2=1,r_3=3$ : reprend exactement l'exemple $(x-1)\cdot x\cdot(x-3)>0$ déjà résolu
+    juste au-dessus, vérifié en confrontant la grille et le $S$ du widget à ceux de l'exemple
+    statique — identiques caractère pour caractère.
+  **Grille de signes générique** (les deux derniers widgets) : chaque cellule, borne OU écart,
+  est obtenue en évaluant **directement** la fonction de sa ligne à cet endroit précis (jamais un
+  signe "déduit" par grille de règles) — ce qui donne automatiquement 0 dans la colonne du propre
+  facteur, et le vrai signe (jamais un blanc) dans la colonne d'un autre facteur, exactement comme
+  la grille de référence déjà présente dans le contenu de la section 3. Les deux infinis sont
+  toujours évalués à ±3 au-delà de la dernière racine finie, jamais une vraie évaluation infinie.
+  **Bug réel trouvé et corrigé avant tout commit**, découvert par une vérification systématique
+  des valeurs affichées (pas seulement une capture d'écran) : `signe-trinome-widget._calculerSolution`
+  utilisait le MÊME sens de crochet (`large ? "[" : "]"`) pour les racines finies ET pour ±∞,
+  alors que ±∞ doit **toujours** porter un crochet ouvert vers l'extérieur, quel que soit le
+  symbole — règle explicitement énoncée dans le contenu de cette section même
+  ("$-\infty$ et $+\infty$ ont toujours un crochet ouvert vers l'extérieur : on ne les atteint
+  jamais !"). Avec ◇=≥, le widget affichait `S = [−∞ ; −2] ∪ [3 ; +∞]` (crochets fermés,
+  mathématiquement absurdes) au lieu de `]−∞ ; −2] ∪ [3 ; +∞[`. Corrigé en distinguant
+  explicitement le crochet d'une borne infinie (toujours ouvert) de celui d'une borne finie
+  (dépend de `large`), via deux fonctions `ouvrant(v)`/`fermant(v)` plutôt qu'une seule paire
+  `o1`/`o2` réutilisée partout.
+  Vérifié par interaction Playwright réelle (pas seulement une lecture de code) : valeurs de Δ et
+  des racines recoupées à la main sur 3 cas ($\Delta>0$, $\Delta<0$, $\Delta=0$ — ce dernier avec
+  $a=1,b=-4,c=4\to$ racine double $x=2$, après avoir d'abord découvert que $c=9$ dépassait la
+  borne max du curseur $c$ et se faisait clamper à 6 par le navigateur, fausse alerte de la
+  méthode de test plutôt qu'un bug du widget) ; les deux grilles de signes (widget 2 et widget 3)
+  et les 3 textes $S$ produits confrontés cellule par cellule et caractère par caractère aux
+  exemples déjà résolus statiquement dans le contenu — identiques. `0` erreur console, `0` `^`/`$`
+  isolé/`NaN`/`Infinity`/`undefined` (scan `document.createTreeWalker` des 3 `shadowRoot`).
+  `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé ; les 3 widgets
+  confirmés présents dans le DOM du chapitre (un `document.querySelector` par tag, réussi pour
+  les trois).
