@@ -1002,3 +1002,38 @@ paths:
   cette fois, aucun piège de gras imbriqué réintroduit) ; `0` erreur console. `tsc -p
   tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
   les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **6e (6h), Chapitre 2 — Fonctions exponentielles** (`fonctions-exponentielles`) : nouveau widget
+  `tangente-exponentielle-widget` — $f(x)=a^x$, curseur $a$ de 1 à 3 par pas de $0{,}0001$ (très
+  fin, demandé explicitement pour permettre de "trouver" $e$ à la main), avec deux cases à cocher
+  indépendantes : « Tangente en x=0 » et « f'(x) » (la fonction dérivée tracée en entier, pas
+  seulement au point 0). Inséré juste après l'illustration statique qui compare déjà les pentes de
+  $2^x$ et $e^x$ en $(0\,;1)$ (section 2, « Domaine et dérivée »), avant la démonstration
+  « pourquoi exp est sa propre dérivée » — emplacement choisi car ce widget en est la version
+  interactive : l'élève peut faire varier $a$ en continu et voir la tangente pivoter, plutôt que
+  comparer seulement deux valeurs fixes.
+  **Couleurs distinctes par élément**, demandé explicitement : $f(x)=a^x$ en `--accent` (orange,
+  toujours visible), tangente en `--plan` (violet, pointillée, uniquement si cochée), $f'(x)$ en
+  `--good` (vert, uniquement si cochée) — une légende colorée apparaît dans le coin du graphe pour
+  chaque élément affiché. La valeur $f'(0)=\ln(a)$ est affichée en permanence dans un encadré
+  statistique (pas seulement quand la case tangente est cochée), avec 4 décimales pour que l'effet
+  du pas très fin du curseur reste visible sur ce nombre précis — c'est en réglant $a$ pour que
+  cet affichage tombe exactement sur $1{,}0000$ que l'élève retrouve $e$ par lui-même, juste avant
+  que la section ne l'introduise formellement par la limite $(1+1/x)^x$.
+  **Fenêtre de tracé fixe** ($x\in[-2{,}2\,;2{,}2]$, $y\in[-2\,;9]$), même principe que tous les
+  widgets précédents de la session — testé mathématiquement pour rester valide sur tout
+  $a\in[1;3]$ (pente maximale $\ln(3)\approx1{,}0986$, aux bords de la fenêtre X la tangente reste
+  dans la fenêtre Y grâce à la marge basse à $-2$, plus généreuse que $-1$ pour cette raison
+  précise). Cas limite $a=1$ (borne basse du curseur) vérifié explicitement : $f(x)=1^x=1$
+  (constante), $f'(0)=\ln(1)=0$ — aucun NaN, aucune valeur infinie, la tangente devient
+  simplement horizontale et $f'(x)$ une droite plate à $y=0$.
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction Playwright : placement
+  confirmé par `compareDocumentPosition` ; comptage direct des éléments SVG par classe pour
+  confirmer que chaque case à cocher fait bien apparaître/disparaître son propre tracé
+  indépendamment de l'autre ; valeurs de $f'(0)$ recoupées à la main pour $a=1$ ($0$), $a=2$
+  ($\ln 2\approx0{,}6931$), $a=3$ ($\ln 3\approx1{,}0986$) et $a=2{,}71828$ (**exactement**
+  $1{,}0000$ affiché, confirmant que le widget permet bien de retrouver $e$) ; capture d'écran à
+  $a\approx e$ montrant visuellement $f(x)$ et $f'(x)$ presque confondues, cohérent avec
+  $\ln(e)=1$. `0` erreur console, `0` `$` isolé, `0` `NaN`, `0` occurrence de `Infinity`. `tsc -p
+  tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
+  les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

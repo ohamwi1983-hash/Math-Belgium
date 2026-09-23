@@ -563,6 +563,16 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'tangente-exponentielle-widget',
+          label: 'Manipule toi-même — trouve la base dont la tangente a une pente de 1',
+          caption:
+            'Fais varier a et observe comment la tangente en (0;1) pivote. Coche « Tangente en ' +
+            'x=0 » pour la voir, et « f\'(x) » pour voir la fonction dérivée tout entière. ' +
+            'Peux-tu régler a pour que f\'(0) affiche exactement 1 ? La valeur que tu trouves, ' +
+            "c'est e — la démonstration ci-dessous explique pourquoi.",
+        },
+        {
           kind: 'exempleLibre',
           label: "Démonstration — pourquoi exp est sa propre dérivée",
           blocks: [

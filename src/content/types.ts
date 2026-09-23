@@ -14,6 +14,7 @@ export type InteractiveWidgetTag =
   | 'sinusoide-widget'
   | 'cercle-trigo-widget'
   | 'exponentielle-widget'
+  | 'tangente-exponentielle-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
