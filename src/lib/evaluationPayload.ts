@@ -1,15 +1,43 @@
 import type { Block, ChapterSection } from '../content/types'
 
 /**
- * Pont vers le « Générateur d'évaluations » de plateforme-maths (`/6e-6h/evaluation`) — /admin
- * construit un payload compact (identifiants seulement pour les exercices générés et le vrai/faux,
- * plateforme-maths ayant déjà ces données ; texte complet pour les questions ouvertes, dérivées ici
- * du contenu déjà écrit dans ce dépôt) et ouvre cette URL. Portée de ce premier lot (pilote) :
- * 6e (6h), Chapitre 1 — Fonctions réciproques & cyclométriques, ses 5 sections. Voir le plan
- * approuvé pour le détail de l'architecture (query string base64, pas de backend).
+ * Pont vers le « Générateur d'évaluations » de plateforme-maths — /admin construit un payload
+ * compact (identifiants seulement pour les exercices générés et le vrai/faux, plateforme-maths
+ * ayant déjà ces données ; texte complet pour les questions ouvertes, dérivées ici du contenu déjà
+ * écrit dans ce dépôt) et ouvre cette URL. Portée actuelle : seul 6e (6h), Chapitre 1 — Fonctions
+ * réciproques & cyclométriques, est réellement câblé côté plateforme-maths (les autres
+ * niveaux/chapitres restent sélectionnables dans le formulaire mais désactivés « bientôt »,
+ * l'armature niveau/heures/chapitre étant pensée pour être générique dès ce lot).
  */
 
-export const EVALUATION_BASE_URL = 'https://plateforme-maths.vercel.app/6e-6h/evaluation'
+export const EVALUATION_BASE_URL_6E_6H = 'https://plateforme-maths.vercel.app/6e-6h/evaluation'
+
+/** Niveau + nombre d'heures ne se combinent pas librement : seules ces 3 combinaisons existent
+ * réellement dans les deux dépôts à ce jour (voir `LEVELS` dans `chaptersIndex.ts`). `null` = pas
+ * encore de chantier plateforme-maths pour cette combinaison. */
+export type NiveauCode = '4e' | '5e' | '6e'
+
+export const HEURES_PAR_NIVEAU: Record<NiveauCode, string[]> = {
+  '4e': [],
+  '5e': ['4H', '5H', '6H'],
+  '6e': ['4H', '5H', '6H'],
+}
+
+const NIVEAU_HEURES_VERS_LEVELSLUG: Record<string, string> = {
+  '4e|': '4e',
+  '5e|4H': '5e-4h',
+  '6e|6H': '6e-6h',
+}
+
+export function resoudreLevelSlug(niveau: NiveauCode, heures: string): string | null {
+  return NIVEAU_HEURES_VERS_LEVELSLUG[`${niveau}|${heures}`] ?? null
+}
+
+/** Seul ce chapitre a un « générateur d'évaluations » fonctionnel côté plateforme-maths — les
+ * autres apparaissent dans le sélecteur mais restent désactivés. */
+export const LEVELSLUG_FONCTIONNEL = '6e-6h'
+export const CHAPITRE_FONCTIONNEL_SLUG = 'fonctions-reciproques-cyclometriques'
+export const EVALUATION_BASE_URL = EVALUATION_BASE_URL_6E_6H
 
 export type IdGenerateurPilote = '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5'
 
@@ -51,53 +79,52 @@ function extraireParagraphes(blocks: Block[]): string[] {
 }
 
 /**
- * Dérive une question ouverte à partir du premier bloc `exemple`/`exempleLibre` « exploitable » de
- * la section — jamais une banque dédiée à écrire (décision prise avec l'utilisateur). Préfère un
- * exemple concret à une démonstration formelle (label commençant par « Démonstration — ») quand les
- * deux existent, une démonstration restant néanmoins une question ouverte valide (justification
- * rédigée) à défaut d'exemple concret dans la section. `null` si la section n'a ni l'un ni l'autre.
+ * Dérive TOUTES les questions ouvertes exploitables d'une section — un bloc `exemple`/
+ * `exempleLibre` de premier niveau = une question (jamais une banque dédiée à écrire, décision
+ * prise avec l'utilisateur). Une section sans aucun de ces blocs (aucune formule/démonstration)
+ * renvoie un tableau vide, conformément à la règle donnée : pas de question théorique là où il n'y
+ * a ni formule ni démonstration.
  */
-export function deriveQuestionOuverte(section: ChapterSection): QuestionOuverte | null {
-  const exemples = section.blocks.filter(
+export function deriveQuestionsOuvertes(section: ChapterSection): QuestionOuverte[] {
+  const candidats = section.blocks.filter(
     (b): b is Extract<Block, { kind: 'exemple' } | { kind: 'exempleLibre' }> => b.kind === 'exemple' || b.kind === 'exempleLibre',
   )
-  if (exemples.length === 0) return null
 
-  const candidat =
-    exemples.find((b) => b.kind === 'exemple') ??
-    exemples.find((b) => b.kind === 'exempleLibre' && !(b.label ?? '').startsWith('Démonstration')) ??
-    exemples[0]
+  return candidats.map((candidat) => {
+    if (candidat.kind === 'exemple') {
+      const enonceBrut = [candidat.badge, candidat.formula].filter(Boolean).join(' — ')
+      const enonce = enonceBrut ? nettoyerRichText(enonceBrut) : "Résous l'exercice suivant."
+      const etapes = candidat.steps.map((s) => `${nettoyerRichText(s.tag)} : ${nettoyerRichText(s.text)}`)
+      const resultat = candidat.result.text ? [`${nettoyerRichText(candidat.result.tag)} : ${nettoyerRichText(candidat.result.text)}`] : []
+      return { enonce, corrige: [...etapes, ...resultat].join('\n') }
+    }
 
-  if (candidat.kind === 'exemple') {
-    const enonceBrut = [candidat.badge, candidat.formula].filter(Boolean).join(' — ')
-    const enonce = enonceBrut ? nettoyerRichText(enonceBrut) : "Résous l'exercice suivant."
-    const etapes = candidat.steps.map((s) => `${nettoyerRichText(s.tag)} : ${nettoyerRichText(s.text)}`)
-    const resultat = candidat.result.text ? [`${nettoyerRichText(candidat.result.tag)} : ${nettoyerRichText(candidat.result.text)}`] : []
-    return { enonce, corrige: [...etapes, ...resultat].join('\n') }
-  }
-
-  const enonce = candidat.label ? nettoyerRichText(candidat.label) : 'Justifie le raisonnement suivant.'
-  const corrige = extraireParagraphes(candidat.blocks).join('\n\n')
-  return { enonce, corrige: corrige || 'Voir le cours.' }
+    const enonce = candidat.label ? nettoyerRichText(candidat.label) : 'Justifie le raisonnement suivant.'
+    const corrige = extraireParagraphes(candidat.blocks).join('\n\n')
+    return { enonce, corrige: corrige || 'Voir le cours.' }
+  })
 }
 
-export type TypeQuestionEvaluation = 'exercice' | 'vraiFaux' | 'ouverte'
+export type TypeQuestionEvaluation = 'ouverte' | 'vraiFaux' | 'exercice'
+export type Processus = 1 | 2 | 3
 
 export interface LigneSelection {
   sectionId: string
+  processus: Processus
   type: TypeQuestionEvaluation
-  active: boolean
+  /** 0 = ligne non incluse. */
+  nombre: number
+  /** Points par question (chaque question générée par cette ligne vaut ce nombre de points). */
   points: number
-  /** Uniquement pour `type === 'vraiFaux'` — nombre de questions piochées dans la banque. */
-  nombreVraiFaux?: number
 }
 
 interface ItemPayload {
+  processus: Processus
   titreSection: string
   points: number
-  exercice?: { generatorId: IdGenerateurPilote }
+  exercice?: { generatorId: IdGenerateurPilote; nombre: number }
   vraiFaux?: { theme: string; nombre: number }
-  ouverte?: QuestionOuverte
+  ouvertes?: QuestionOuverte[]
 }
 
 /** Encode un objet JS en base64 sûr pour l'UTF-8 (accents français compris) — décodage symétrique
@@ -107,16 +134,23 @@ function encoderPayload(payload: unknown): string {
   return btoa(unescape(encodeURIComponent(json)))
 }
 
+export interface EnTeteEvaluation {
+  numero: string
+  date: string
+  titre: string
+  niveauLabel: string
+}
+
 /**
- * Construit l'URL complète vers `/6e-6h/evaluation` à partir de la sélection de l'utilisateur —
- * `null` si aucune ligne active (rien à générer). `sections` doit être les sections RÉELLES du
- * chapitre pilote (pour dériver les questions ouvertes) — voir `chaptersIndex.ts`.
+ * Construit l'URL complète vers le générateur d'évaluations à partir de la sélection de
+ * l'utilisateur — `null` si aucune ligne active (rien à générer). `sections` doit être les sections
+ * RÉELLES du chapitre choisi (pour dériver les questions ouvertes) — voir `chaptersIndex.ts`.
  */
-export function buildEvaluationUrl(titre: string, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
+export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
   const items: ItemPayload[] = []
 
   for (const ligne of lignes) {
-    if (!ligne.active) continue
+    if (ligne.nombre <= 0) continue
     const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.sectionId === ligne.sectionId)
     const section = sections.find((s) => s.id === ligne.sectionId)
     if (!config || !section) continue
@@ -124,17 +158,17 @@ export function buildEvaluationUrl(titre: string, lignes: LigneSelection[], sect
     const titreSection = `${section.number}. ${section.title}`
 
     if (ligne.type === 'exercice') {
-      items.push({ titreSection, points: ligne.points, exercice: { generatorId: config.generatorId } })
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, nombre: ligne.nombre } })
     } else if (ligne.type === 'vraiFaux') {
-      items.push({ titreSection, points: ligne.points, vraiFaux: { theme: config.quizTheme, nombre: ligne.nombreVraiFaux ?? 3 } })
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
-      const ouverte = deriveQuestionOuverte(section)
-      if (ouverte) items.push({ titreSection, points: ligne.points, ouverte })
+      const ouvertes = deriveQuestionsOuvertes(section).slice(0, ligne.nombre)
+      if (ouvertes.length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertes })
     }
   }
 
   if (items.length === 0) return null
 
-  const base64 = encoderPayload({ titre, items })
+  const base64 = encoderPayload({ numero: entete.numero, date: entete.date, titre: entete.titre, niveauLabel: entete.niveauLabel, items })
   return `${EVALUATION_BASE_URL}?d=${encodeURIComponent(base64)}`
 }

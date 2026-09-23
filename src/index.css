@@ -577,34 +577,49 @@ table.feature-table td { white-space: normal; }
 .admin-panel-empty p { margin: 0 0 8px; }
 .admin-panel-empty p:last-child { margin-bottom: 0; }
 
-.admin-eval { max-width: 640px; margin: 24px 0; display: flex; flex-direction: column; gap: 20px; }
+.admin-eval { max-width: 720px; margin: 24px 0; display: flex; flex-direction: column; gap: 20px; }
 .admin-eval-intro { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
-.admin-eval-field { display: flex; flex-direction: column; gap: 6px; }
-.admin-eval-field label { font-weight: 700; color: var(--ink); }
-.admin-eval-field input[type='text'] {
+
+.admin-eval-entete { display: flex; flex-wrap: wrap; gap: 16px; }
+.admin-eval-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 140px; }
+.admin-eval-field-large { flex: 2 1 260px; }
+.admin-eval-field label { font-weight: 700; color: var(--ink); font-size: 0.9rem; }
+.admin-eval-field input, .admin-eval-field select {
   padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius);
   font: inherit; color: var(--ink); background: var(--paper);
 }
-.admin-eval-section {
+.admin-eval-field select:disabled, .admin-eval-field input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.admin-eval-indisponible {
+  margin: 0; padding: 12px 16px; background: var(--surface); border: 1px dashed var(--line);
+  border-radius: var(--radius); color: var(--ink-soft); font-size: 0.9rem;
+}
+
+.admin-eval-processus {
   border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
   background: var(--surface); display: flex; flex-direction: column; gap: 12px;
 }
-.admin-eval-section legend { padding: 0 6px; font-weight: 700; color: var(--ink); }
-.admin-eval-ligne { display: flex; flex-direction: column; gap: 8px; }
-.admin-eval-checkbox { display: flex; align-items: center; gap: 8px; color: var(--ink); cursor: pointer; }
-.admin-eval-options {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-left: 26px;
+.admin-eval-processus-toggle { display: flex; align-items: center; gap: 8px; color: var(--ink); cursor: pointer; }
+
+.admin-eval-arbre { display: flex; flex-direction: column; gap: 8px; }
+.admin-eval-point { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; }
+.admin-eval-point summary { font-weight: 700; color: var(--ink); cursor: pointer; padding: 4px 0; }
+.admin-eval-point[open] summary { margin-bottom: 8px; }
+
+.admin-eval-ligne {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 0;
+  border-top: 1px solid var(--line);
 }
-.admin-eval-options label {
+.admin-eval-ligne:first-of-type { border-top: none; }
+.admin-eval-ligne-label { flex: 1 1 240px; color: var(--ink); font-size: 0.9rem; }
+.admin-eval-ligne label {
   display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--ink-soft);
 }
-.admin-eval-options input[type='number'] {
+.admin-eval-ligne input[type='number'] {
   width: 4.5em; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius);
   font: inherit; color: var(--ink); background: var(--paper);
 }
-.admin-eval-apercu {
-  margin: 0; flex-basis: 100%; font-style: italic; color: var(--ink-faint); font-size: 0.85rem;
-}
+
 .admin-eval-total { margin: 0; font-weight: 700; color: var(--ink); }
 .admin-eval-lien { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
 
