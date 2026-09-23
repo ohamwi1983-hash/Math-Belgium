@@ -1,7 +1,7 @@
 // Garde-fou léger côté client pour /admin — pas une vraie authentification : le site est 100%
 // statique (aucun backend), donc n'importe qui peut lire ce fichier sur GitHub et retrouver le
 // mot de passe en clair. Ça décourage un visiteur qui tomberait sur l'URL par hasard, rien de plus.
-const PASSWORD_HASH_HEX = '21d9a0b7528dc48a48e7aeb43a49479944856adbbf5040bf463c8086fe066cc9'
+const PASSWORD_HASH_HEX = '1bbd174404efbce95f1af489ef93f4aa0f4d55718f24c3504682216afa7b7fb1'
 const SESSION_KEY = 'math-belgium-admin-authed'
 
 async function sha256Hex(text: string): Promise<string> {
