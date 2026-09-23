@@ -550,6 +550,33 @@ table.feature-table td { white-space: normal; }
 /* ---------- KaTeX sizing tweak ---------- */
 .katex { font-size: 1.02em; }
 
+/* ---------- page /admin ---------- */
+.admin-gate {
+  display: flex; flex-direction: column; gap: 10px; max-width: 320px;
+  margin: 24px 0; padding: 24px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.admin-gate-label { font-weight: 700; color: var(--ink); }
+.admin-gate-input {
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius);
+  font: inherit; color: var(--ink); background: var(--paper);
+}
+.admin-gate-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.admin-gate-submit {
+  padding: 10px 14px; border: 1px solid var(--accent); border-radius: var(--radius);
+  background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; font: inherit;
+  cursor: pointer; transition: background-color .15s ease;
+}
+.admin-gate-submit:hover:not(:disabled) { background: var(--accent-soft-line); }
+.admin-gate-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.admin-gate-error { margin: 0; color: var(--bad); font-size: 0.9rem; }
+.admin-panel-empty {
+  margin: 24px 0; padding: 24px; background: var(--surface); border: 1px dashed var(--line);
+  border-radius: var(--radius); color: var(--ink-soft);
+}
+.admin-panel-empty p { margin: 0 0 8px; }
+.admin-panel-empty p:last-child { margin-bottom: 0; }
+
 @media (max-width: 480px) {
   .page { padding: 40px 16px 72px; }
   .section-num { font-size: 2.1rem; }
