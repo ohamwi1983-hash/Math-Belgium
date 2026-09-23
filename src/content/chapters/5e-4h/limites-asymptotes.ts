@@ -396,6 +396,15 @@ export const limitesAsymptotes: ChapterContent = {
             'AUTOUR de x=2. Mais jamais pour affirmer que f(2)=−1 ! f n\'est même pas définie en x=2.',
         },
         {
+          kind: 'atelier',
+          tag: 'point-vide-ou-asymptote-widget',
+          label: 'Manipule toi-même — nid-de-poule ou gouffre ?',
+          caption:
+            'Règle les deux racines du numérateur : dès que l\'une d\'elles vaut −3 (la racine du ' +
+            'dénominateur), un rond creux vert apparaît — le point vide, comblé. Sinon, une ligne ' +
+            'violette pointillée matérialise la vraie asymptote — le gouffre, infranchissable.',
+        },
+        {
           kind: 'astuce',
           label: 'Repérer la forme AVANT de se lancer dans le calcul',
           text:
@@ -570,6 +579,16 @@ export const limitesAsymptotes: ChapterContent = {
             'Si deg(N)=deg(D), inutile de chercher une oblique : c\'est une horizontale, avec ' +
             'a=0. Si deg(N)≥deg(D)+2, inutile aussi : aucune droite ne peut suivre une ' +
             'divergence aussi rapide.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'degre-asymptote-widget',
+          label: 'Manipule toi-même — les 4 cas du degré en direct',
+          caption:
+            'Dénominateur x−1 fixe, choisis le degré du numérateur : bascule entre les 4 cas de ' +
+            'la méthode ci-dessus — horizontale y=0, horizontale par les coefficients dominants, ' +
+            'oblique (le degré 2, réglage par défaut, reproduit exactement l\'exemple résolu), ou ' +
+            'aucune asymptote de cette forme.',
         },
         {
           kind: 'entrainement',
@@ -804,6 +823,15 @@ export const limitesAsymptotes: ChapterContent = {
             'elle (un plafond, ex. une concentration qui se stabilise), la limite donne la ' +
             'valeur théorique idéale. Elle n\'est jamais réellement atteinte pour un x fini, ' +
             'aussi grand soit-il.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'plancher-plafond-widget',
+          label: 'Manipule toi-même — le plancher, jamais atteint',
+          caption:
+            'Règle le coût fixe F et le coût variable v, puis déplace x : l\'écart au plancher ' +
+            'reste toujours strictement positif, aussi grand que x devienne. Réglages par défaut ' +
+            '(F=240, v=8) reproduisent exactement l\'exemple résolu.',
         },
         {
           kind: 'entrainement',

@@ -1676,3 +1676,74 @@ paths:
   `tsc -p tsconfig.app.json --noEmit`/`oxlint` (12 fichiers .js + les 4 fichiers TS/TSX
   modifiés, `0` avertissement après retrait d'une variable inutilisée)/`npm run build` propres ;
   sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **4e, Chapitre 4 — Statistique descriptive** (`statistique-descriptive`), **5e (4h), Chapitre 4 —
+  Limites et asymptotes** (`limites-asymptotes`) **et 6e (6h), Chapitre 4 — Intégrales et
+  primitives** (`primitives-integrales`) : 9 nouveaux widgets (3 par chapitre), proposés puis
+  validés explicitement (même mécanisme que les lots précédents). Aucun des trois chapitres
+  n'avait encore d'atelier. Conventions du lot précédent reprises dès la première passe : flèches
+  sur tous les axes, fenêtres jamais recalculées depuis un curseur librement déplacé.
+  - **`seuil-cumule-widget`** (4e, section « Médiane, quartiles et mode »), inséré juste après
+    l'exemple résolu (n=20, xᵢ=2/6/9/12), avant la méthode d'interpolation par classes. 4
+    curseurs d'effectifs, sélecteur médiane/Q1/Q3, tableau des cumulés construit en direct :
+    la ligne dont le cumulé égale PILE le seuil se surligne en rouge (« pas encore ! »), la
+    première qui le dépasse en vert. Réglages par défaut (5,8,4,3) reproduisent exactement
+    l'exemple résolu — Q1 sélectionné reproduit même le cas-piège exact du texte (cumulé=5=seuil).
+  - **`frontiere-classe-widget`** (4e, section « Histogramme »), inséré avant l'entraînement.
+    Point x déplaçable sur les 4 classes de l'exemple ([0;2[…[6;8]) : dès qu'il tombe pile sur
+    une frontière, verdict rouge précisant la classe qui COMMENCE ici (jamais celle qui se
+    termine) — avec le cas particulier x=8 (borne supérieure de la toute dernière classe, qui
+    l'inclut par exception) testé et confirmé séparément par capture.
+  - **`dispersion-comparee-widget`** (4e, section « Dispersion »), inséré avant l'entraînement.
+    Curseur d (demi-écart), série symétrique x̄−d/x̄+d à effectif égal — x̄=12 reste TOUJOURS fixe
+    (repère violet immobile) pendant que d change variance (=d²) et écart-type (=d) en direct.
+    d=8 reproduit exactement l'exemple narratif de l'intro (moitié à 4, moitié à 20), confirmé à
+    l'écran ; cette section n'avait auparavant aucune illustration, seulement un texte.
+  - **`point-vide-ou-asymptote-widget`** (5e, section « Limites, reconnaissance et calcul »),
+    inséré juste après le piège « Diviser par (x−a) n'est valable que pour x≠a ». f(x)=(x−r1)
+    (x−r2)/(x+3), 2 curseurs de racines : dès que l'une vaut −3, un rond creux vert (point vide)
+    apparaît et une droite se dessine ; sinon, une ligne violette pointillée (vraie asymptote)
+    avec la courbe qui diverge de part et d'autre. Réglages par défaut (r1=−3, r2=3) reproduisent
+    exactement l'exemple résolu (x²−9)/(x+3), limite=−6. Testé aussi un tirage extrême (r1=1,
+    r2=3) qui clippe entièrement une branche hors fenêtre — comportement attendu (fenêtre fixe),
+    confirmé qu'un tirage modéré (r1=−2) montre bien les deux branches.
+  - **`degre-asymptote-widget`** (5e, section « Asymptote oblique »), inséré après l'astuce
+    « vérifier le degré avant de se lancer », avant l'entraînement. Dénominateur x−1 fixe,
+    sélecteur du DEGRÉ du numérateur (0 à 3, 4 presets fixes) : reproduit en direct les 4 cas de
+    la méthode (y=0 ; horizontale par les coefficients dominants ; oblique ; aucune asymptote de
+    cette forme, testés tous les 4 par capture). Degré 2 (par défaut) reproduit exactement
+    l'exemple résolu (x²−3x+5)/(x−1) → y=x−2.
+  - **`plancher-plafond-widget`** (5e, section « Limites et asymptotes en contexte »), inséré
+    avant l'entraînement. Curseurs F (coût fixe) et v (coût variable), point x déplaçable :
+    l'écart au plancher affiché reste toujours strictement positif, quel que soit x. Réglages par
+    défaut (F=240, v=8) reproduisent exactement l'exemple résolu du coût unitaire.
+  - **`famille-primitives-widget`** (6e, section « Calcul de primitives »), inséré juste après
+    l'illustration statique des 3 primitives (C=−2/0/2), avant la notation intégrale indéfinie.
+    Curseur C pour F(x)=x²+C : un petit segment tangent en x=1 (pente 2, toujours) reste
+    horizontalement immobile pendant que la courbe glisse verticalement — matérialise
+    littéralement l'intuition du texte (« fais-la glisser verticalement… la pente ne change
+    jamais »). Testé C=2 : reproduit exactement la 3e courbe de l'illustration statique.
+  - **`condition-initiale-widget`** (6e, section « Quelle primitive ? »), inséré juste après le
+    piège central (« oublier C dès le premier calcul »). Point (x₀;y₀) déplaçable (couleur rouge/
+    bad, reprise de l'illustration statique existante), C=y₀−x₀² résolu en direct, courbe active
+    tracée sur fond de primitives fanées de la même famille. Réglages par défaut (1;4)
+    reproduisent exactement l'illustration statique (C=3), confirmé à l'écran.
+  - **`sommes-riemann-widget`** (6e, section « Intégrales définies »), inséré juste après
+    l'exemple résolu des trapèzes (∫₀⁴x²dx≈22 contre 64/3≈21,33), avant la sous-section valeur
+    moyenne. Curseur n (1 à 20), sélecteur minorant/majorant/trapèzes : rectangles ou trapèzes
+    redessinés en direct, erreur par rapport à la valeur exacte affichée. n=4 en trapèzes
+    reproduit exactement l'exemple résolu (22,00 contre 21,33) ; testé aussi n=20 (erreur
+    tombant de 0,667 à 0,027 — « plus n est grand, plus c'est précis », littéralement vérifié) et
+    le mode minorant (14,00, sous-estimation confirmée, cohérent avec l'illustration statique).
+  Vérifié : script Playwright dédié (chromium headless, défilement complet pour déclencher le
+  montage paresseux des ateliers) sur les 3 pages, thèmes clair ET sombre — `0` erreur console/
+  page pour les 9 ; positions des lignes `.axe` identiques avant/après un glissement simultané de
+  tous les curseurs (les widgets sans SVG/axes cartésiens — tableau ou droite graduée — vérifiés
+  séparément, stables par construction) ; captures d'écran réelles recoupées à la main avec les
+  exemples résolus et illustrations statiques déjà présents dans chaque section, comme détaillé
+  ci-dessus ; les cas-pièges et cas limites testés explicitement par capture pour chacun des 9
+  (seuil pile, frontière x=4 ET x=8, d=8, point-vide/vraie-asymptote/branche clippée, les 4 degrés,
+  n=20 vs n=4, mode minorant). `tsc -p tsconfig.app.json --noEmit`/`oxlint` (18 fichiers .js + les
+  5 fichiers TS/TSX modifiés, `0` avertissement après retrait de 2 variables inutilisées)/
+  `npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0`
+  `NaN`, `0` `$` isolé.

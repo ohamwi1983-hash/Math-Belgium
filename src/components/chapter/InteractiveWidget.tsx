@@ -38,6 +38,15 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'transformation-8-parametres-widget': () => import('../../interactive/register-transformation-8-parametres-widget.js'),
   'familles-parite-widget': () => import('../../interactive/register-familles-parite-widget.js'),
   'inverse-monotonie-widget': () => import('../../interactive/register-inverse-monotonie-widget.js'),
+  'seuil-cumule-widget': () => import('../../interactive/register-seuil-cumule-widget.js'),
+  'frontiere-classe-widget': () => import('../../interactive/register-frontiere-classe-widget.js'),
+  'dispersion-comparee-widget': () => import('../../interactive/register-dispersion-comparee-widget.js'),
+  'point-vide-ou-asymptote-widget': () => import('../../interactive/register-point-vide-ou-asymptote-widget.js'),
+  'degre-asymptote-widget': () => import('../../interactive/register-degre-asymptote-widget.js'),
+  'plancher-plafond-widget': () => import('../../interactive/register-plancher-plafond-widget.js'),
+  'famille-primitives-widget': () => import('../../interactive/register-famille-primitives-widget.js'),
+  'condition-initiale-widget': () => import('../../interactive/register-condition-initiale-widget.js'),
+  'sommes-riemann-widget': () => import('../../interactive/register-sommes-riemann-widget.js'),
 }
 
 /**

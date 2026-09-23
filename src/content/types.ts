@@ -39,6 +39,15 @@ export type InteractiveWidgetTag =
   | 'transformation-8-parametres-widget'
   | 'familles-parite-widget'
   | 'inverse-monotonie-widget'
+  | 'seuil-cumule-widget'
+  | 'frontiere-classe-widget'
+  | 'dispersion-comparee-widget'
+  | 'point-vide-ou-asymptote-widget'
+  | 'degre-asymptote-widget'
+  | 'plancher-plafond-widget'
+  | 'famille-primitives-widget'
+  | 'condition-initiale-widget'
+  | 'sommes-riemann-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

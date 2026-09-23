@@ -83,6 +83,15 @@ export const primitivesIntegrales: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'famille-primitives-widget',
+          label: 'Manipule toi-même — fais glisser C',
+          caption:
+            'La courbe se déplace verticalement pendant que le petit segment violet (la tangente ' +
+            'en x=1) reste TOUJOURS à la même pente — exactement l\'idée du texte : le glissement ' +
+            'vertical ne change jamais la dérivée.',
+        },
+        {
           kind: 'definition',
           label: 'Notation — intégrale indéfinie',
           items: [
@@ -330,6 +339,15 @@ export const primitivesIntegrales: ChapterContent = {
             '**symbolique** jusqu\'à ce que la condition initiale l\'évalue, jamais fixé « provisoirement » à 0.',
         },
         {
+          kind: 'atelier',
+          tag: 'condition-initiale-widget',
+          label: 'Manipule toi-même — choisis la bonne piste',
+          caption:
+            'Déplace le point (x₀;y₀) : C = y₀−x₀² se résout en direct, et la primitive qui passe ' +
+            'exactement par ce point se distingue des autres (fanées) de la même famille. ' +
+            'Réglages par défaut (1;4) reproduisent exactement l\'illustration ci-dessus (C=3).',
+        },
+        {
           kind: 'astuce',
           label: 'Deux mots, deux sens',
           text:
@@ -526,6 +544,15 @@ export const primitivesIntegrales: ChapterContent = {
                 'parabole est **concave vers le haut** — chaque trapèze passe donc au-dessus de la courbe.',
             },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'sommes-riemann-widget',
+          label: 'Manipule toi-même — plus n grandit, plus c\'est précis',
+          caption:
+            'Bascule entre minorant/majorant/trapèzes et fais grandir n : regarde l\'erreur par ' +
+            'rapport à la valeur exacte (64/3) fondre à mesure que les rectangles ou trapèzes se ' +
+            'resserrent. n=4 en trapèzes reproduit exactement l\'exemple résolu ci-dessus.',
         },
         { kind: 'subheading', text: 'Valeur moyenne d\'une fonction sur un intervalle' },
         {

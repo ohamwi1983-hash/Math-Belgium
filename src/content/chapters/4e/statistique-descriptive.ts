@@ -215,6 +215,15 @@ export const statistiqueDescriptive: ChapterContent = {
           ],
         },
         {
+          kind: 'atelier',
+          tag: 'frontiere-classe-widget',
+          label: 'Manipule toi-même — sur quelle classe tombe x ?',
+          caption:
+            'Fais glisser x le long des 4 classes de l\'exemple : dès qu\'il tombe pile sur une ' +
+            'frontière, le point devient rouge et le texte précise explicitement la classe ' +
+            'SUIVANTE — sauf tout à la fin, où la dernière classe fait exception.',
+        },
+        {
           kind: 'entrainement',
           title: 'Regroupement en classes et histogramme',
           generatorId: 'gen31',
@@ -361,6 +370,16 @@ export const statistiqueDescriptive: ChapterContent = {
             { kind: 'para', text: 'Q3 — seuil 3n/4 = 15 : premier cumulé > 15 est 17 (à x=9) → Q3 = 9.' },
             { kind: 'para', text: 'Résultat : min=2, Q1=6, médiane=6, Q3=9, max=12, mode=6 (effectif 8, le plus grand).' },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'seuil-cumule-widget',
+          label: 'Manipule toi-même — le piège du seuil en direct',
+          caption:
+            'Choisis médiane/Q1/Q3 et règle les effectifs : la ligne du tableau qui atteint ' +
+            'exactement le seuil se surligne en rouge avec la mention « pas encore ! », celle qui ' +
+            'le dépasse la PREMIÈRE en vert. Avec les réglages par défaut et Q1 sélectionné, tu es ' +
+            'exactement dans le cas-piège du texte (cumulé=5=seuil pile).',
         },
         {
           kind: 'methode',
@@ -582,6 +601,15 @@ export const statistiqueDescriptive: ChapterContent = {
             { kind: 'para', text: 'Somme : $80+32+16+112=240$, $n=24$. Variance : $240/24=10$ (exacte, pas d\'arrondi ici).' },
             { kind: 'para', text: 'Écart-type : $\\sqrt{10} \\approx 3{,}16$ (ici un vrai arrondi — on écrit « ≈ », pas « = »).' },
           ],
+        },
+        {
+          kind: 'atelier',
+          tag: 'dispersion-comparee-widget',
+          label: 'Manipule toi-même — même moyenne, dispersion différente',
+          caption:
+            'Fais glisser d : la moyenne x̄=12 reste TOUJOURS fixe (repère violet immobile), ' +
+            'seul l\'écartement des deux valeurs change — variance et écart-type recalculés en ' +
+            'direct. À d=8, tu retrouves exactement l\'exemple du texte (moitié à 4, moitié à 20).',
         },
         {
           kind: 'entrainement',
