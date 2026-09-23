@@ -22,6 +22,9 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'signe-produit-widget': () => import('../../interactive/register-signe-produit-widget.js'),
   'composition-machine-widget': () => import('../../interactive/register-composition-machine-widget.js'),
   'domaine-composee-widget': () => import('../../interactive/register-domaine-composee-widget.js'),
+  'parite-derivee-widget': () => import('../../interactive/register-parite-derivee-widget.js'),
+  'inequation-exponentielle-widget': () => import('../../interactive/register-inequation-exponentielle-widget.js'),
+  'croissance-saturation-widget': () => import('../../interactive/register-croissance-saturation-widget.js'),
 }
 
 /**

@@ -757,6 +757,15 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'parite-derivee-widget',
+          label: 'Manipule toi-même — f(x) et f(−x), leurs deux tangentes',
+          caption:
+            'Fais glisser x : son symétrique −x suit automatiquement. Compare les deux pentes ' +
+            "affichées — elles sont toujours opposées, exactement ce que dit « la dérivée d'une " +
+            'fonction paire est impaire ».',
+        },
+        {
           kind: 'piege',
           text:
             "Oublier le signe négatif en dérivant $e^{-kx}$ transforme par erreur une fonction " +
@@ -1170,6 +1179,15 @@ export const fonctionsExponentielles: ChapterContent = {
               'GAUCHE du sien, donc 0,5ˣ ≥ 4 ⟺ x ≤ −2. Le comparateur écrit est le même — ' +
               "l'ensemble-solution part du côté opposé.",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'inequation-exponentielle-widget',
+          label: 'Manipule toi-même — le piège central, en direct',
+          caption:
+            'Fais glisser a de part et d\'autre de 1 : regarde S basculer de « x ≥ … » à ' +
+            '« x ≤ … » sans que tu n\'aies rien changé au symbole ◇ ni à k — c\'est exactement ' +
+            'le principe (a)-(h) ci-dessus, ici entièrement visuel.',
         },
         {
           kind: 'exemple',
@@ -1662,6 +1680,15 @@ export const fonctionsExponentielles: ChapterContent = {
             yAxisLabel: 'y',
             caption: "Modèle de saturation : approche de l'asymptote y=1 sans jamais l'atteindre",
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'croissance-saturation-widget',
+          label: 'Manipule toi-même — un seul modèle, deux visages',
+          caption:
+            'Bascule entre croissance libre et saturation, règle les paramètres et déplace le ' +
+            'curseur t pour lire la valeur à un instant précis — les réglages par défaut ' +
+            'reprennent les deux exemples déjà résolus ci-dessus.',
         },
         {
           kind: 'astuce',

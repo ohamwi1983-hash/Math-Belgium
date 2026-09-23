@@ -1,0 +1,244 @@
+(function () {
+  "use strict";
+
+  /* ================================================================
+   * <inequation-exponentielle-widget> — atelier interactif : curseurs a
+   * (base) et k (constante comparée), sélecteur ◇ ∈ {>,≥,<,≤}. Généralise
+   * l'illustration statique juste au-dessus (2ˣ contre 0,5ˣ, comparées à 4)
+   * à une base continûment réglable — le piège central du chapitre (le sens
+   * du comparateur qui s'inverse quand 0<a<1) devient visible en faisant
+   * passer a de part et d'autre de 1. Web Component (Shadow DOM).
+   * ================================================================ */
+
+  var DEFAUT = { a: 2, k: 4 };
+  var BORNES_A = { min: 0.3, max: 2.6, step: 0.02 };
+  var BORNES_K = { min: 0.5, max: 9, step: 0.1 };
+  var X_MIN = -4, X_MAX = 4, Y_MIN = 0, Y_MAX = 10;
+  var LARGEUR = 420, HAUTEUR = 300, MARGE = 34;
+
+  function formatNombreFr(n, decimales) {
+    var facteur = Math.pow(10, decimales);
+    var arrondi = Math.round(n * facteur) / facteur;
+    return arrondi.toFixed(decimales).replace(".", ",").replace("-", "−");
+  }
+
+  function svgEl(ns, tag, attrs) {
+    var el = document.createElementNS(ns, tag);
+    for (var key in attrs) el.setAttribute(key, attrs[key]);
+    return el;
+  }
+
+  var TEMPLATE = document.createElement("template");
+  TEMPLATE.innerHTML =
+    '<style>' +
+    ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
+    '*{box-sizing:border-box;}' +
+    '.formule-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}' +
+    '.formule{font-family:var(--serif,serif);font-style:italic;font-size:1.1rem;font-weight:600;color:var(--ink,#241f1a);}' +
+    '.formule-row select{font-family:inherit;font-size:1.05rem;font-weight:700;color:var(--accent-ink,#7a3212);background:var(--surface,#fff);border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:3px 8px;cursor:pointer;}' +
+    '.graphe-zone{display:flex;justify-content:center;margin-bottom:12px;}' +
+    'svg{width:100%;max-width:420px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
+    '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
+    '.ligne-k{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
+    '.segment-pos{stroke:var(--good,#2f7a4f);stroke-width:2.6;fill:none;}' +
+    '.segment-neg{stroke:var(--bad,#a8322f);stroke-width:2.6;fill:none;}' +
+    '.point-x0{fill:var(--ink,#241f1a);}' +
+    '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.etiquette-x0{font-size:11.5px;font-weight:600;fill:var(--ink,#241f1a);font-family:var(--mono,monospace);}' +
+    '.resultat{text-align:center;font-family:var(--mono,monospace);font-size:1rem;font-weight:700;color:var(--accent-ink,#7a3212);margin:0 0 18px;}' +
+    '.controles{display:flex;flex-direction:column;gap:12px;}' +
+    '.curseur{display:flex;flex-direction:column;gap:6px;}' +
+    '.curseur label{font-family:var(--serif,serif);font-style:italic;font-weight:700;color:var(--accent-ink,#7a3212);}' +
+    '.curseur-row{display:flex;align-items:center;gap:12px;}' +
+    '.curseur-row input[type="range"]{flex:1 1 auto;accent-color:var(--accent,#a8471f);}' +
+    '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
+    '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
+    '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
+    '</style>' +
+    '<div class="formule-row"><span class="formule" id="formule"></span>' +
+    '<select id="symbole">' +
+    '<option value="gt">&gt; k</option>' +
+    '<option value="ge">&ge; k</option>' +
+    '<option value="lt">&lt; k</option>' +
+    '<option value="le">&le; k</option>' +
+    '</select></div>' +
+    '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<p class="resultat" id="resultat"></p>' +
+    '<div class="controles">' +
+    '<div class="curseur"><label for="a">a — base</label><div class="curseur-row">' +
+    '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT.a + '">' +
+    '<span class="curseur-valeur" id="a-valeur"></span></div></div>' +
+    '<div class="curseur"><label for="k">k — constante</label><div class="curseur-row">' +
+    '<input type="range" id="k" min="' + BORNES_K.min + '" max="' + BORNES_K.max + '" step="' + BORNES_K.step + '" value="' + DEFAUT.k + '">' +
+    '<span class="curseur-valeur" id="k-valeur"></span></div></div>' +
+    '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>';
+
+  class InequationExponentielleWidgetClass extends HTMLElement {
+    constructor() {
+      super();
+      this._init();
+    }
+  }
+
+  InequationExponentielleWidgetClass.prototype._init = function () {
+    var shadow = this.attachShadow({ mode: "open" });
+    shadow.appendChild(TEMPLATE.content.cloneNode(true));
+    this._a = DEFAUT.a;
+    this._k = DEFAUT.k;
+    this._symbole = "ge";
+    this._svg = shadow.getElementById("svg");
+    this._formule = shadow.getElementById("formule");
+    this._selectSymbole = shadow.getElementById("symbole");
+    this._resultat = shadow.getElementById("resultat");
+    this._inputA = shadow.getElementById("a");
+    this._inputK = shadow.getElementById("k");
+    this._valeurA = shadow.getElementById("a-valeur");
+    this._valeurK = shadow.getElementById("k-valeur");
+    this._resetBtn = shadow.getElementById("reset");
+    this._selectSymbole.value = this._symbole;
+  };
+
+  InequationExponentielleWidgetClass.prototype.connectedCallback = function () {
+    var self = this;
+    this._onInputA = function () { self._a = parseFloat(self._inputA.value); self._rendre(); };
+    this._onInputK = function () { self._k = parseFloat(self._inputK.value); self._rendre(); };
+    this._onChangeSymbole = function () { self._symbole = self._selectSymbole.value; self._rendre(); };
+    this._onReset = function () {
+      self._a = DEFAUT.a; self._k = DEFAUT.k; self._symbole = "ge";
+      self._inputA.value = String(DEFAUT.a);
+      self._inputK.value = String(DEFAUT.k);
+      self._selectSymbole.value = "ge";
+      self._rendre();
+    };
+    this._inputA.addEventListener("input", this._onInputA);
+    this._inputK.addEventListener("input", this._onInputK);
+    this._selectSymbole.addEventListener("change", this._onChangeSymbole);
+    this._resetBtn.addEventListener("click", this._onReset);
+    this._rendre();
+  };
+
+  InequationExponentielleWidgetClass.prototype.disconnectedCallback = function () {
+    this._inputA.removeEventListener("input", this._onInputA);
+    this._inputK.removeEventListener("input", this._onInputK);
+    this._selectSymbole.removeEventListener("change", this._onChangeSymbole);
+    this._resetBtn.removeEventListener("click", this._onReset);
+  };
+
+  InequationExponentielleWidgetClass.prototype._toPx = function (xMath, yMath) {
+    var px = MARGE + (xMath - X_MIN) / (X_MAX - X_MIN) * (LARGEUR - 2 * MARGE);
+    var py = HAUTEUR - MARGE - (yMath - Y_MIN) / (Y_MAX - Y_MIN) * (HAUTEUR - 2 * MARGE);
+    return [px, py];
+  };
+
+  InequationExponentielleWidgetClass.prototype._traceIntervalle = function (svg, ns, xMin, xMax, f, classe) {
+    var self = this;
+    if (xMax - xMin < 1e-6) return;
+    var n = Math.max(4, Math.round(160 * (xMax - xMin) / (X_MAX - X_MIN)));
+    var segments = [], courant = "", dernierValide = false;
+    for (var i = 0; i <= n; i++) {
+      var xx = xMin + (i / n) * (xMax - xMin);
+      var yy = f(xx);
+      var valide = isFinite(yy) && yy >= Y_MIN - 0.3 && yy <= Y_MAX + 0.3;
+      if (valide) {
+        var p = self._toPx(xx, Math.max(Y_MIN, Math.min(Y_MAX, yy)));
+        courant += (!dernierValide ? "M" : "L") + p[0].toFixed(2) + " " + p[1].toFixed(2) + " ";
+      } else if (dernierValide && courant) {
+        segments.push(courant.trim());
+        courant = "";
+      }
+      dernierValide = valide;
+    }
+    if (courant) segments.push(courant.trim());
+    segments.forEach(function (seg) {
+      svg.appendChild(svgEl(ns, "path", { d: seg, class: classe }));
+    });
+  };
+
+  // Trace aˣ coupée exactement en x0 (où aˣ=k, si a≠1) et colorée selon aˣ ≥ k ou < k.
+  InequationExponentielleWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, x0) {
+    var bornes = [X_MIN];
+    if (isFinite(x0) && x0 > X_MIN && x0 < X_MAX) bornes.push(x0);
+    bornes.push(X_MAX);
+    for (var i = 0; i < bornes.length - 1; i++) {
+      var lo = bornes[i], hi = bornes[i + 1];
+      if (hi - lo < 1e-6) continue;
+      var mid = (lo + hi) / 2;
+      var classe = f(mid) >= this._k ? "segment-pos" : "segment-neg";
+      this._traceIntervalle(svg, ns, lo, hi, f, classe);
+    }
+  };
+
+  var FORMAT_BORNE = function (v) {
+    if (v === -Infinity) return "−∞";
+    if (v === Infinity) return "+∞";
+    return formatNombreFr(v, 2);
+  };
+
+  InequationExponentielleWidgetClass.prototype._rendre = function () {
+    var a = this._a, k = this._k;
+    var f = function (x) { return Math.pow(a, x); };
+    this._formule.textContent = formatNombreFr(a, 2) + "ˣ";
+    this._valeurA.textContent = formatNombreFr(a, 2);
+    this._valeurK.textContent = formatNombreFr(k, 1);
+
+    var lnA = Math.log(a);
+    var x0 = Math.abs(lnA) < 1e-9 ? NaN : Math.log(k) / lnA;
+
+    var large = this._symbole === "ge" || this._symbole === "le";
+    var veutSup = this._symbole === "gt" || this._symbole === "ge";
+
+    var texteS;
+    if (Math.abs(lnA) < 1e-9) {
+      // a = 1 : aˣ = 1 partout, une constante comparée à k — pas de x0, S = ℝ ou ∅
+      var vrai = veutSup ? (1 > k || (large && 1 >= k)) : (1 < k || (large && 1 <= k));
+      texteS = "S = " + (vrai ? "ℝ" : "∅");
+    } else {
+      // aˣ ◇ k ⟺ x·ln(a) ◇ ln(k) ⟺ x ◇ x0, sens conservé si ln(a)>0 (a>1), inversé sinon —
+      // exactement le principe (a)-(h) déjà posé dans le contenu de cette section.
+      var sensConserve = lnA > 0;
+      var direction = (veutSup === sensConserve); // true → x > x0 (ou ≥), false → x < x0 (ou ≤)
+      if (direction) {
+        texteS = "S = " + (large ? "[" : "]") + FORMAT_BORNE(x0) + " ; +∞[";
+      } else {
+        texteS = "S = ]−∞ ; " + FORMAT_BORNE(x0) + (large ? "]" : "[");
+      }
+    }
+    this._resultat.textContent = texteS;
+
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = this._svg;
+    svg.innerHTML = "";
+    var self = this;
+
+    var origine = self._toPx(0, 0);
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: MARGE, y2: HAUTEUR - MARGE, class: "axe" }));
+    var etiqX = svgEl(ns, "text", { x: LARGEUR - MARGE + 6, y: origine[1] + 4, class: "etiquette" });
+    etiqX.textContent = "x";
+    svg.appendChild(etiqX);
+
+    var pK0 = self._toPx(X_MIN, k), pK1 = self._toPx(X_MAX, k);
+    if (k >= Y_MIN && k <= Y_MAX) {
+      svg.appendChild(svgEl(ns, "line", { x1: pK0[0].toFixed(2), y1: pK0[1].toFixed(2), x2: pK1[0].toFixed(2), y2: pK1[1].toFixed(2), class: "ligne-k" }));
+      var etK = svgEl(ns, "text", { x: (MARGE + 4).toFixed(2), y: (pK0[1] - 5).toFixed(2), class: "etiquette" });
+      etK.textContent = "y=" + formatNombreFr(k, 1);
+      svg.appendChild(etK);
+    }
+
+    this._traceCourbeSignee(svg, ns, f, x0);
+
+    if (isFinite(x0) && x0 >= X_MIN && x0 <= X_MAX) {
+      var pX0 = self._toPx(x0, k);
+      svg.appendChild(svgEl(ns, "circle", { cx: pX0[0].toFixed(2), cy: pX0[1].toFixed(2), r: 4.5, class: "point-x0" }));
+      var proche = pX0[0] > LARGEUR - 70;
+      var etX0 = svgEl(ns, "text", { x: (pX0[0] + (proche ? -8 : 8)).toFixed(2), y: (origine[1] + 18).toFixed(2), "text-anchor": proche ? "end" : "start", class: "etiquette-x0" });
+      etX0.textContent = "x=" + formatNombreFr(x0, 2);
+      svg.appendChild(etX0);
+    }
+  };
+
+  if (!customElements.get("inequation-exponentielle-widget")) {
+    customElements.define("inequation-exponentielle-widget", InequationExponentielleWidgetClass);
+  }
+})();

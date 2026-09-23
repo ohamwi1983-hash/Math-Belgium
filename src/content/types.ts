@@ -23,6 +23,9 @@ export type InteractiveWidgetTag =
   | 'signe-produit-widget'
   | 'composition-machine-widget'
   | 'domaine-composee-widget'
+  | 'parite-derivee-widget'
+  | 'inequation-exponentielle-widget'
+  | 'croissance-saturation-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

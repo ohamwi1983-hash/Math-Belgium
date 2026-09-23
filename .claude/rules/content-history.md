@@ -1297,3 +1297,52 @@ paths:
   `document.createTreeWalker` des 2 `shadowRoot`). `tsc -p tsconfig.app.json
   --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres :
   `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **6e (6h), Chapitre 2 — Fonctions exponentielles** (`fonctions-exponentielles`) : 3 widgets
+  interactifs supplémentaires, correspondant aux 3 suggestions faites plus tôt dans la même
+  session (jamais implémentées sans validation explicite) — demandées ensuite mot pour mot par
+  l'utilisateur (« fais les widgets que tu voulais rajouter »).
+  - **`parite-derivee-widget`** — section 3 (« Graphique de la dérivée »), inséré juste après
+    l'illustration statique de l'exemple résolu ($f(x)=\cosh(x)$, $f'(x)=\sinh(x)$), avant le
+    piège sur le signe oublié dans $e^{-kx}$. 2 préréglages (cosh/sinh par défaut, puis
+    $e^{-x^2}$), curseur $x \ge 0$ déplaçant simultanément un point sur $f$ ET son symétrique en
+    $-x$, avec leurs deux tangentes (clippées au cadre, même technique que
+    `cyclometrique-tangente-widget`) et les deux pentes affichées côte à côte — rend visible que
+    $f'(-x)=-f'(x)$ sans jamais l'énoncer autrement que par les deux nombres opposés à l'écran.
+  - **`inequation-exponentielle-widget`** — section 5 (« Résoudre une inéquation
+    exponentielle »), inséré juste après l'illustration statique déjà présente ($2^x$ contre
+    $0{,}5^x$, comparées à la constante 4) qui montre déjà le piège central du chapitre sur DEUX
+    valeurs de base fixes. Le widget généralise cette même figure à une base $a$ continûment
+    réglable ($a \in [0{,}3\,;2{,}6]$) plus un curseur $k$ et un sélecteur ◇ ∈ {>,≥,<,≤} :
+    $S$ recalculé par la règle $a^x \diamond k \iff x \diamond x_0$ (sens conservé si $a>1$,
+    inversé sinon) — exactement le principe (a)-(h) déjà posé juste au-dessus dans le contenu.
+    Valeurs par défaut $a=2,k=4$ : reproduisent le premier côté de l'illustration statique
+    ($S=[2\,;+\infty[$) ; faire glisser $a$ vers $0{,}5$ (sans toucher au symbole ni à $k$)
+    reproduit l'AUTRE côté de la même illustration ($S=]-\infty\,;-2]$), rendant le piège visible
+    comme un continuum plutôt que deux cas isolés.
+  - **`croissance-saturation-widget`** — section 7 (« Exponentielles : problèmes »), inséré juste
+    après l'illustration statique du modèle de saturation, avant l'astuce « trouver un instant
+    précis ». Un sélecteur bascule entre les deux modèles de la section, chacun avec ses propres
+    curseurs reconstruits dynamiquement (`_construireControles`, qui détache proprement les
+    écouteurs du mode précédent avant d'en attacher de nouveaux — jamais de fuite d'écouteur
+    orphelin sur un curseur retiré du DOM) : croissance libre $Q(t)=Q_0\cdot r^t$
+    ($Q_0=100,r=1{,}5$ par défaut, reprend l'exemple résolu $Q(t)=100\cdot1{,}5^t$) et saturation
+    $p(t)=L\cdot(1-e^{-kt})$ ($L=100,k=0{,}15$ par défaut, reprend les paramètres de
+    l'illustration statique juste au-dessus). Un curseur $t$ commun affiche la valeur atteinte et,
+    en saturation, le pourcentage du plafond $L$ déjà atteint.
+  **Bug réel trouvé et corrigé avant tout commit** (scan `document.createTreeWalker` du
+  `shadowRoot`, pas une simple relecture) : la formule affichée en mode saturation utilisait un
+  `^` littéral (`"p(t) = 100·(1−e^(−0,15t))"`) — piège déjà documenté plusieurs fois dans ce même
+  fichier d'historique (aucune `.formule` de widget ne passe par KaTeX, un `^` y reste affiché
+  tel quel). Corrigé par une fonction `versExposant` dédiée qui convertit un exposant composé
+  (chiffres, signe moins, la lettre t) caractère par caractère en unicode superscript et
+  l'encadre par `⁽`/`⁾` — même convention que celle déjà établie pour les exposants composés du
+  chapitre (ex. `3^(x⁴−x)` → `3⁽ˣ⁴⁻ˣ⁾`) ; aucune virgule superscript n'existe en Unicode, laissée
+  telle quelle (meilleure approximation possible), tout comme les précédents de ce fichier.
+  Vérifié par interaction Playwright réelle : pour le 1er widget, $f'(1{,}2)=\sinh(1{,}2)\approx
+  1{,}51$ et $f'(-1{,}2)\approx-1{,}51$ recoupés à la main ; pour le 2e, les 3 textes $S$ produits
+  (par $a=2$/$a=0{,}5$/symbole `<`) confrontés à un calcul indépendant de $x_0=\ln(k)/\ln(a)$ ;
+  pour le 3e, $Q(3)=100\cdot1{,}5^3=337{,}5$ et $p(10)=100\cdot(1-e^{-1,5})\approx77{,}69$
+  recoupés à la main. `0` erreur console, `0` `^`/`$`/`NaN`/`Infinity`/`undefined` isolé (scan des
+  3 `shadowRoot`, après correctif). `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build`
+  propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
