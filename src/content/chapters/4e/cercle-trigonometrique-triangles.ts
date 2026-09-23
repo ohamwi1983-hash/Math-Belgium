@@ -263,6 +263,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'cos θ = −4/5, tan θ = −3/4' },
         },
         {
+          kind: 'atelier',
+          tag: 'identite-signe-widget',
+          label: 'Manipule toi-même : le piège du ±',
+          caption:
+            'Fais glisser sin θ, puis choisis le quadrant : les deux valeurs candidates de ' +
+            'cos θ sont toujours affichées, une seule est cochée. Le réglage de départ ' +
+            'reproduit l\'exemple ci-dessus (sin θ=0,6, quadrant II).',
+        },
+        {
           kind: 'entrainement',
           title: 'L\'un sans l\'autre',
           generatorId: 'gen16',
@@ -570,6 +579,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           result: { tag: 'résultat', text: 'α = 120° ou α = 240°' },
         },
         {
+          kind: 'atelier',
+          tag: 'equation-trig-cas-limite-widget',
+          label: 'Manipule toi-même : quand 2 solutions deviennent 1',
+          caption:
+            'Fais glisser k vers ±1 pour sin ou cos : les deux points se rapprochent puis ' +
+            'fusionnent. Passe en mode tan α = k : il y a toujours exactement 2 solutions, ' +
+            'quel que soit k. Le réglage de départ (cos α=−0,5) reproduit l\'exemple ci-dessus.',
+        },
+        {
           kind: 'entrainement',
           title: 'Quel angle ?',
           generatorId: 'gen18',
@@ -618,6 +636,15 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Elle est utile dès que tu connais **2 angles et 1 côté** (AAS). Ou **2 côtés et un ' +
             'angle non compris** entre eux (SSA — le « cas ambigu », qui peut donner 0, 1 ou 2 ' +
             'triangles).',
+        },
+        {
+          kind: 'atelier',
+          tag: 'triangle-cas-ambigu-widget',
+          label: 'Manipule toi-même : le cas ambigu (SSA)',
+          caption:
+            'A est fixé, le côté b et l\'angle Â placent C. Fais glisser a (le côté opposé à ' +
+            'Â, « swingué » depuis C) : selon sa longueur comparée à h=b·sinÂ et à b, tu obtiens ' +
+            '0, 1 ou 2 triangles possibles.',
         },
         {
           kind: 'para',

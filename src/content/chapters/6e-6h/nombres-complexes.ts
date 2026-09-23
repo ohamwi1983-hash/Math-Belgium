@@ -675,6 +675,15 @@ export const nombresComplexes: ChapterContent = {
             's\'ADDITIONNENT, ils ne se multiplient jamais.',
         },
         {
+          kind: 'atelier',
+          tag: 'produit-modules-arguments-widget',
+          label: 'Manipule toi-même : modules et arguments',
+          caption:
+            'Fais glisser r₁, θ₁, r₂, θ₂, puis bascule entre produit et quotient. Le réglage de ' +
+            'départ (r₁=2, θ₁=60°, r₂=3, θ₂=30°) reproduit exactement l\'exemple ci-dessus : ' +
+            'z₁z₂ = 6e^(iπ/2).',
+        },
+        {
           kind: 'astuce',
           label: 'Angles remarquables',
           text:
@@ -920,6 +929,14 @@ export const nombresComplexes: ChapterContent = {
             'isobarycentre est le centre du cercle, l\'origine $O$.',
         },
         {
+          kind: 'atelier',
+          tag: 'racines-niemes-widget',
+          label: 'Manipule toi-même : n racines, un polygone régulier',
+          caption:
+            'Fais glisser n, r et θ. Le réglage de départ (n=4, r=1, θ=0) reproduit exactement ' +
+            'les 4 racines quatrièmes de l\'unité citées plus haut : 1, i, −1, −i.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Démonstration — pourquoi cette somme est nulle',
           blocks: [
@@ -1087,6 +1104,15 @@ export const nombresComplexes: ChapterContent = {
             '$\\pi/2$ (module 1 : pas d\'homothétie). $z\'=i^2z=-z$ : deux rotations de ' +
             '$\\pi/2$ composées, donc une rotation de $\\pi$ — c\'est la symétrie centrale de ' +
             'centre $O$ : $M$ et $M\'$ alignés avec $O$, à égale distance de part et d\'autre.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'transformation-az-b-widget',
+          label: 'Manipule toi-même : classer z′=az+b',
+          caption:
+            'Fais glisser |a|, arg(a), Re(b), Im(b). Le réglage de départ (|a|=1, arg(a)=90°, ' +
+            'b=0) reproduit exactement le cas z′=iz de l\'astuce ci-dessus : rotation de ' +
+            'centre O et d\'angle π/2.',
         },
         {
           kind: 'definition',

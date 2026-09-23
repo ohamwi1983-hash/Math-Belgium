@@ -48,6 +48,15 @@ export type InteractiveWidgetTag =
   | 'famille-primitives-widget'
   | 'condition-initiale-widget'
   | 'sommes-riemann-widget'
+  | 'identite-signe-widget'
+  | 'equation-trig-cas-limite-widget'
+  | 'triangle-cas-ambigu-widget'
+  | 'point-critique-signe-widget'
+  | 'extrema-bornes-widget'
+  | 'recette-benefice-widget'
+  | 'racines-niemes-widget'
+  | 'produit-modules-arguments-widget'
+  | 'transformation-az-b-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

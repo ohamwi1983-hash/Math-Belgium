@@ -706,6 +706,15 @@ export const deriveesApplications: ChapterContent = {
             'jamais après le seul calcul de f\'(a)=0 !',
         },
         {
+          kind: 'atelier',
+          tag: 'point-critique-signe-widget',
+          label: 'Manipule toi-même : point critique ou vrai extremum ?',
+          caption:
+            'f(x)=x³−3kx : fais glisser k. Pour k>0, f\' change de signe aux deux zéros ' +
+            '(2 vrais extremums, comme l\'exemple ci-dessus en k=1). Pour k=0, f\'(x)=3x² ne ' +
+            'change jamais de signe : point critique SANS extremum.',
+        },
+        {
           kind: 'entrainement',
           title: 'Étude locale (extremums et points critiques)',
           generatorId: '5gen29',
@@ -1112,6 +1121,15 @@ export const deriveesApplications: ChapterContent = {
             'mathématiquement valide, pas un échec !',
         },
         {
+          kind: 'atelier',
+          tag: 'recette-benefice-widget',
+          label: 'Manipule toi-même : Rm=Cm au bénéfice maximal',
+          caption:
+            'R(x) et C(x) sont ceux de l\'exemple ci-dessus. Fais glisser x : regarde R\', C\' ' +
+            'se rapprocher (ou s\'éloigner) l\'un de l\'autre, et le verdict changer de sens ' +
+            'selon lequel des deux dépasse l\'autre.',
+        },
+        {
           kind: 'entrainement',
           title: 'Contexte économique',
           generatorId: '5gen33',
@@ -1211,6 +1229,15 @@ export const deriveesApplications: ChapterContent = {
             'Regroupe TOUJOURS dans une seule liste : valeurs aux extremums locaux ET valeurs ' +
             'aux deux bornes. Compare cette liste d\'un coup d\'œil. Le plus grand nombre est le ' +
             'maximum absolu, le plus petit le minimum absolu — sans exception ni cas particulier à retenir.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'extrema-bornes-widget',
+          label: 'Manipule toi-même : le basculement vers la borne',
+          caption:
+            'f(t)=t³−6t²+9t+2, comme dans l\'exemple. Fais glisser la borne b : à partir d\'un ' +
+            'certain point (b=4), la valeur à la borne dépasse le maximum local — le maximum ' +
+            'absolu change alors de camp.',
         },
         {
           kind: 'entrainement',

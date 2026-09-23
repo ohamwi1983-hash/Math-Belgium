@@ -47,6 +47,15 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'famille-primitives-widget': () => import('../../interactive/register-famille-primitives-widget.js'),
   'condition-initiale-widget': () => import('../../interactive/register-condition-initiale-widget.js'),
   'sommes-riemann-widget': () => import('../../interactive/register-sommes-riemann-widget.js'),
+  'identite-signe-widget': () => import('../../interactive/register-identite-signe-widget.js'),
+  'equation-trig-cas-limite-widget': () => import('../../interactive/register-equation-trig-cas-limite-widget.js'),
+  'triangle-cas-ambigu-widget': () => import('../../interactive/register-triangle-cas-ambigu-widget.js'),
+  'point-critique-signe-widget': () => import('../../interactive/register-point-critique-signe-widget.js'),
+  'extrema-bornes-widget': () => import('../../interactive/register-extrema-bornes-widget.js'),
+  'recette-benefice-widget': () => import('../../interactive/register-recette-benefice-widget.js'),
+  'racines-niemes-widget': () => import('../../interactive/register-racines-niemes-widget.js'),
+  'produit-modules-arguments-widget': () => import('../../interactive/register-produit-modules-arguments-widget.js'),
+  'transformation-az-b-widget': () => import('../../interactive/register-transformation-az-b-widget.js'),
 }
 
 /**

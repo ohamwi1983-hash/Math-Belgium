@@ -1747,3 +1747,108 @@ paths:
   5 fichiers TS/TSX modifiés, `0` avertissement après retrait de 2 variables inutilisées)/
   `npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0`
   `NaN`, `0` `$` isolé.
+
+- **4e, Chapitre 5 — Cercle trigonométrique et triangles quelconques**
+  (`cercle-trigonometrique-triangles`), **5e (4h), Chapitre 5 — Dérivées et applications**
+  (`derivees-applications`) **et 6e (6h), Chapitre 4 — Nombres complexes** (`nombres-complexes`,
+  section « Forme trigonométrique, module, argument » = section 4 malgré le numéro de chapitre 5
+  demandé par l'utilisateur — chapitre réellement visé confirmé par grep avant construction) : 9
+  nouveaux widgets (3 par chapitre), proposés puis validés explicitement (« Fais les 9 », même
+  mécanisme que les lots précédents). Aucun des trois chapitres n'avait encore d'atelier dans les
+  sections visées. Conventions des lots précédents reprises dès la première passe : flèches sur
+  tous les axes, fenêtres jamais recalculées depuis un curseur librement déplacé, couleurs
+  `--accent`/`--good`/`--bad`/`--plan` par rôle.
+  - **`identite-signe-widget`** (4e, section « L'identité fondamentale : retrouver sin ou cos »),
+    inséré juste après l'exemple résolu (sin θ=3/5, θ∈]90°;180°[), avant l'entraînement.
+    Matérialise littéralement le piège « Oublier le ± » : curseur sin θ, sélecteur de quadrant
+    limité aux 2 quadrants compatibles avec son signe, les DEUX candidats ±√(1−sin²θ) toujours
+    affichés côte à côte — un seul coché (✓ vert), l'autre barré (✗ rouge). Réglages par défaut
+    (sin θ=0,60, quadrant II) reproduisent exactement l'exemple résolu : cos θ=−0,80, tan
+    θ=−0,75 ; confirmé à l'écran. Testé aussi le passage sin θ<0 (bascule automatique vers
+    III/IV, les boutons I/II se grisent).
+  - **`equation-trig-cas-limite-widget`** (4e, section « Résoudre une équation trigonométrique »),
+    inséré juste après l'exemple résolu (cos α=−1/2), avant l'entraînement. Matérialise le
+    callout Attention « Cas limites » : sélecteur sin/cos/tan, curseur k — pour sin/cos, les 2
+    points du cercle se rapprochent puis fusionnent en un SEUL exactement à |k|=1 (point coloré
+    en vert, distinct des points normaux en orange) ; en mode tan, toujours 2 solutions
+    diamétralement opposées quel que soit k (testé jusqu'à k=4). Réglages par défaut (cos
+    α=−0,5) reproduisent exactement l'exemple résolu (120°, 240°) ; testé aussi k=1 en sin
+    (fusion en α=90° confirmée par capture) et le mode tan (α₁=45°, α₂=225° pour k=1).
+  - **`triangle-cas-ambigu-widget`** (4e, section « Le triangle quelconque »), inséré juste après
+    le paragraphe introduisant le « cas ambigu » (SSA, 0/1/2 triangles) dans la présentation de
+    la loi des sinus — avant même l'exemple SAS de fin de section, puisqu'aucun exemple chiffré
+    du cas SSA n'existe dans le texte pour ancrer un défaut. A fixé à l'origine, [AB] sur l'axe
+    horizontal, curseurs Â, b (=AC) et a (=BC, swingué depuis C) : le cercle de rayon a centré en
+    C coupe la base en 0, 1 ou 2 points valides (abscisse positive) selon a comparé à h=b·sinÂ et
+    à b — les 2 triangles solutions dessinés en vert (B aigu) et orange (B obtus) quand ils
+    coexistent. Réglages par défaut (Â=30°, b=8, a=5) choisis pour illustrer d'emblée le cas
+    ambigu (h=4<a=5<b=8 → 2 triangles) ; testés et capturés séparément les 3 autres régimes :
+    a=2 (aucun triangle, a<h), a=4 (cas limite tangent, angle droit en B), a≥b (1 seul triangle,
+    l'autre intersection tombe côté x<0 et n'est pas dessinée).
+  - **`point-critique-signe-widget`** (5e, section « Étude locale (extremums et points
+    critiques) »), inséré juste après l'astuce « Vérifie TOUJOURS les deux côtés d'un zéro de
+    f' », avant l'entraînement. Famille f(x)=x³−3kx, curseur k unique : pour k>0, f'(x)=3(x²−k)
+    change de signe aux deux zéros ±√k (2 vrais extremums, tangentes horizontales pointillées
+    tracées à chaque point) ; pour k=0, f'(x)=3x²≥0 ne change JAMAIS de signe (même dérivée que
+    l'exemple f(x)=x³+2 de la section — point critique sans extremum, testé et capturé) ; pour
+    k<0, f'(x)>0 partout, aucun point critique du tout (testé et capturé). k=1 (défaut) reproduit
+    exactement le tableau de signes complet de l'exemple résolu (extremums en x=±1, f=∓2, valeurs
+    confirmées à l'écran).
+  - **`extrema-bornes-widget`** (5e, section « Extrema en contexte borné »), inséré juste après
+    l'astuce « Dresse une liste unique de candidats », avant l'entraînement. f(t)=t³−6t²+9t+2
+    FIXE (exactement l'exemple résolu), seul curseur : la borne droite b. Matérialise le piège
+    « S'arrêter au tableau de signes sans regarder les bornes » : le basculement entre max local
+    (f(1)=6) et valeur à la borne (f(b)) a lieu exactement en b=4 (racine double de f(b)=6,
+    calculée analytiquement lors de la conception) — testé et capturé b=3,6 (le local l'emporte
+    encore) et b=5 par défaut (la borne l'emporte, max absolu=22, reproduit exactement l'exemple
+    résolu et confirmé à l'écran).
+  - **`recette-benefice-widget`** (5e, section « Contexte économique »), inséré juste après
+    l'astuce « L'existence d'un extremum n'est pas garantie », avant l'entraînement. R(x)=50x−x²
+    et C(x)=x²+10x+20 FIXES (exactement l'exemple résolu), seul curseur : la quantité x — lecture
+    en direct de R, C, B=R−C, R' et C', verdict qui bascule de sens selon lequel des deux
+    marginales dépasse l'autre. x=10 (défaut) reproduit exactement l'exemple résolu (R=400 €,
+    C=220 €, B=180 €, Rm=Cm=30, confirmé à l'écran). Le piège « maximiser la recette n'est pas
+    maximiser le bénéfice » est rappelé en texte fixe sous le graphe (B(25)=625−895=−270 €,
+    calculé et vérifié à part, hors de la fenêtre du graphe pour ne pas casser la convention de
+    fenêtre fixe alignée sur l'illustration statique de la section).
+  - **`racines-niemes-widget`** (6e, section « Racines n-ièmes d'un nombre complexe »), inséré
+    juste après l'astuce « La somme des racines n-ièmes de l'unité vaut 0 », avant la
+    démonstration de cette même astuce. Curseurs n (2 à 8), r=|z| et θ=arg(z) : les n racines
+    z_k=r^(1/n)·e^(i(θ+2kπ)/n) dessinées sur un cercle de rayon r^(1/n), reliées en polygone
+    régulier, isobarycentre marqué en violet à l'origine (confirmation visuelle permanente de
+    l'astuce « somme nulle »). Réglages par défaut (n=4, r=1, θ=0) reproduisent exactement
+    l'exemple cité dans le texte : les 4 racines quatrièmes de l'unité sont 1, i, −1, −i,
+    confirmé à l'écran (4 points cardinaux exacts). Testé aussi le cas n=2, r=2 (rayon maximal du
+    curseur, √2≈1,414 — dans la fenêtre fixe, aucun clipping).
+  - **`produit-modules-arguments-widget`** (6e, section « Forme trigonométrique, module,
+    argument »), inséré juste après le piège « Les modules se MULTIPLIENT… jamais ne
+    s'additionnent », avant l'astuce sur les angles remarquables. Curseurs r₁, θ₁, r₂, θ₂,
+    sélecteur produit/quotient : les 2 vecteurs z₁ (orange), z₂ (vert) et leur produit ou
+    quotient (rouge) tracés depuis l'origine, lecture textuelle « modules : ... | arguments :
+    ... » recalculée en direct. Réglages par défaut (r₁=2, θ₁=60°, r₂=3, θ₂=30°, mode produit)
+    reproduisent exactement l'exemple résolu de la section : z₁z₂=6e^(iπ/2), confirmé à l'écran
+    (point du produit exactement sur l'axe imaginaire positif, à distance 6).
+  - **`transformation-az-b-widget`** (6e, section « Transformations du plan »), inséré juste
+    après l'astuce « Deux cas particuliers utiles » (qui cite z'=iz et z'=−z), avant la
+    définition de la similitude directe. Curseurs |a|, arg(a), Re(b), Im(b) appliqués à un petit
+    triangle asymétrique (forme fixe, pour que la rotation/réflexion reste visible sans
+    ambiguïté) via z'=az+b — classification en direct (translation/rotation/homothétie/
+    similitude générale, featureTable de la section) avec centre Ω=b/(1−a) marqué en violet
+    quand a≠1. Réglages par défaut (|a|=1, arg(a)=90°, b=0) reproduisent exactement le cas z'=iz
+    de l'astuce : rotation de centre O et d'angle π/2, confirmé à l'écran (le triangle image
+    tourné de 90° exactement, centre Ω affiché à l'origine). Testé aussi le cas homothétie (a=2
+    réel, b=1 → centre Ω=b/(1−a)=−1, calculé et confirmé à l'écran).
+  Vérifié : script Playwright dédié (chromium headless, défilement complet pour déclencher le
+  montage paresseux des ateliers) sur les 3 pages, thèmes clair ET sombre — `0` erreur console/
+  page réelle pour les 9 (seules des `ERR_CERT_AUTHORITY_INVALID` sur des polices Google Fonts
+  bloquées par le sandbox réseau, non liées aux widgets, filtrées comme dans `regress_all.mjs`) ;
+  positions des lignes `.axe` identiques avant/après un glissement de curseur sur les 3 widgets à
+  fenêtre cartésienne fixe testés (`triangle-cas-ambigu-widget`, `point-critique-signe-widget`,
+  `racines-niemes-widget`) ; captures d'écran réelles recoupées à la main avec les exemples
+  résolus et illustrations/astuces déjà présents dans chaque section, comme détaillé ci-dessus ;
+  les cas-pièges et cas limites testés explicitement par capture pour chacun des 9 (bascule de
+  quadrant, fusion à k=±1 et mode tan, les 3 régimes 0/1/2 triangles, k<0/k=0/k=1 pour le point
+  critique, b=3,6 vs b=5 pour les bornes, homothétie pour la transformation). `tsc -p
+  tsconfig.app.json --noEmit`/`oxlint` (18 fichiers .js + les 5 fichiers TS/TSX modifiés, `0`
+  avertissement)/`npm run build` propres ; sitewide `regress_all_4321.mjs` sur les 23 chapitres :
+  `0` erreur, `0` `NaN`/`undefined`, `0` `$` isolé.
