@@ -1852,3 +1852,83 @@ paths:
   tsconfig.app.json --noEmit`/`oxlint` (18 fichiers .js + les 5 fichiers TS/TSX modifiés, `0`
   avertissement)/`npm run build` propres ; sitewide `regress_all_4321.mjs` sur les 23 chapitres :
   `0` erreur, `0` `NaN`/`undefined`, `0` `$` isolé.
+
+- **4e, Chapitre 6 — Calcul vectoriel** (`calcul-vectoriel`) **et 6e (6h), Chapitre 6 — Les
+  probabilités** (`probabilites`) : 6 nouveaux widgets (3 par chapitre), proposés puis validés
+  explicitement (« Les 6 », même mécanisme que les lots précédents). Aucun des deux chapitres
+  n'avait encore d'atelier. Conventions des lots précédents reprises dès la première passe :
+  flèches sur tous les axes, fenêtres jamais recalculées depuis un curseur librement déplacé,
+  couleurs `--accent`/`--good`/`--bad`/`--plan` par rôle. Deux widgets de ce lot (probabilités)
+  sont purement tabulaires/HTML plutôt que SVG (`venn-double-entree-widget`,
+  `bayes-test-medical-widget`), le concept concerné n'ayant pas de repère cartésien naturel —
+  même principe que `seuil-cumule-widget`/`frontiere-classe-widget` d'un lot antérieur.
+  - **`test-colinearite-widget`** (4e, section « Colinéarité de vecteurs et alignement de
+    points »), inséré juste après le piège « Ne pas confondre avec l'orthogonalité », avant
+    l'entraînement. A(0;0) et B(2;1) fixes, C déplaçable, sélecteur colinéarité/orthogonalité :
+    les DEUX formules ($x_uy_v-y_ux_v$ et $x_ux_v+y_uy_v$) affichées côte à côte, une seule
+    active selon le mode choisi, appliquées aux mêmes vecteurs AB/AC pour rendre tangible que ce
+    sont deux tests différents. Réglage par défaut (C(6;3), mode colinéarité) reproduit
+    exactement l'exemple résolu : déterminant nul, A/B/C alignés, confirmé à l'écran. Testé aussi
+    le mode orthogonalité avec C(−1;2) : produit scalaire nul, orthogonaux confirmé — et C hors
+    ligne (déterminant ≠0 dans les deux cas), écran recoupé.
+  - **`milieu-piege-widget`** (4e, section « Vecteurs, translation et milieu »), inséré juste
+    après le piège « Milieu ≠ différence de coordonnées », avant l'entraînement. A et u
+    déplaçables, B=A+u calculé : le vrai milieu M (vert) et le faux « milieu » que confond le
+    piège — le point (x_B−x_A;y_B−y_A), qui vaut TOUJOURS exactement (x_u;y_u) — affichés côte à
+    côte. Réglage par défaut (A(1;1), u=(4;2)) reproduit exactement l'exemple résolu : B(5;3),
+    M(3;2), confirmé à l'écran. Bug trouvé et corrigé en cours de vérification : au réglage par
+    défaut, M et le point-piège partagent la même hauteur en pixels (yM=yFaux=2, coïncidence
+    numérique du cas 3yA=yB) — leurs étiquettes se chevauchaient illisiblement ; corrigé en fixant
+    l'étiquette de M toujours au-dessus du point et celle du piège toujours en dessous (au lieu du
+    même décalage par défaut pour les deux), plutôt qu'une détection dynamique de collision —
+    reconfirmé par capture après correctif, y compris sur un réglage éloigné (A(0;6), u=(−4;−4)).
+  - **`resultante-vecteurs-widget`** (4e, section « Applications physiques : la résultante »),
+    inséré juste après l'exemple résolu, avant le rappel de notation. Curseurs F₁, F₂, θ : la
+    règle du parallélogramme (vecteurs + parallélogramme pointillé + résultante) redessinée en
+    direct, R et la déviation recalculés par les lois des cosinus/sinus. Réglage par défaut
+    (F₁=50N, F₂=30N, θ=60°) reproduit exactement l'exemple résolu : R=70N, déviation≈21,8°,
+    confirmé à l'écran. Testé aussi un cas extrême (F₁=F₂=70N, θ=160°, quasi-opposées) : R chute à
+    24,3N, aucun débordement de la fenêtre fixe malgré F₂ pointant vers les x négatifs.
+  - **`venn-double-entree-widget`** (6e, section « Probabilités et ensembles »), inséré juste
+    après le piège « La case "ni A ni B"… JAMAIS 1−P(A)−P(B) », avant le bloc intuition sur le
+    conditionnement. n(A), n(B), n(A∩B) déplaçables (N=40 fixe, comme l'exemple), tableau à double
+    entrée recalculé en direct, avec le calcul CORRECT et le calcul FAUTÉ affichés côte à côte
+    pour les deux pièges de la section (additionner sans retirer l'intersection ; complémentaire
+    sans passer par P(A∪B)). Réglage par défaut (n(A)=18, n(B)=15, n(A∩B)=6) reproduit exactement
+    l'exemple résolu : P(A∪B)=27/40, tableau 12/9/13, confirmé à l'écran. Le curseur n(A∩B) voit
+    sa borne max recalculée dynamiquement à min(n(A),n(B)) — testé explicitement en tentant de le
+    pousser à 30 avec n(A)=n(B)=5 : bien clampé à 5, sans jamais afficher un tableau incohérent.
+  - **`bayes-test-medical-widget`** (6e, section « Indépendance, conditionnement et Bayes »),
+    inséré juste après le piège central de la section, avant l'illustration statique
+    `naturalFrequencies` (qui reste inchangée, l'atelier vient en complément dynamique). P(malade),
+    P(T⁺|malade), P(T⁺|non malade) déplaçables : colonnes de fréquences naturelles (malades/non
+    malades/positifs) recalculées en direct, avec le contraste explicite P(T⁺|malade) vs
+    P(malade|T⁺) — exactement le piège cité mot pour mot dans le texte. Réglage par défaut
+    (P(malade)=10%, P(T⁺|malade)=90%, P(T⁺|non malade)=20%) reproduit exactement l'exemple résolu
+    : P(T⁺)=27%, P(malade|T⁺)=1/3≈33%, confirmé à l'écran (mêmes effectifs que l'illustration
+    statique : 100/90/900/180/270). Testé aussi une maladie très rare (P(malade)=1%) : P(malade|T⁺)
+    chute à 4,3%, démontrant concrètement que même un test fiable à 90% devient peu informatif
+    quand la maladie est rare.
+  - **`binomiale-positions-widget`** (6e, section « Probabilités : problèmes »), inséré juste
+    après le piège « additionner les p… IMPOSSIBLE », avant l'illustration statique
+    `complementBar` (inchangée). Curseurs n, p, sélecteur k : la distribution complète P(X=0..n)
+    redessinée en direct (barre du k courant surlignée), avec les DEUX pièges de la section
+    contrastés numériquement (oublier de compter les positions C(n,k) ; additionner les p au lieu
+    du complément). Réglage par défaut (n=5, p=0,3, k=2) reproduit exactement l'exemple résolu :
+    C(5;2)=10, P(X=2)=0,3087, P(au moins 1)=0,83193, confirmé à l'écran — les 6 barres
+    reproduisent même exactement les valeurs de l'illustration statique `categoricalBarChart`
+    (0,168/0,360/0,309/0,132/0,028/0,002). Testé aussi le cas limite n=1 (une seule position
+    possible, C(1;1)=1 — le widget reste cohérent sans division par zéro ni valeur aberrante).
+  Vérifié : script Playwright dédié (chromium headless, routes de polices Google avorté comme
+  dans `regress_all_4321.mjs`, défilement complet pour déclencher le montage paresseux des
+  ateliers) sur les 2 pages, thèmes clair ET sombre — `0` erreur console/page réelle pour les 6 ;
+  positions des lignes `.axe` identiques avant/après un glissement de curseur sur les 2 widgets à
+  fenêtre cartésienne fixe testés (`test-colinearite-widget`, `resultante-vecteurs-widget`) ;
+  captures d'écran réelles recoupées à la main avec les exemples résolus et illustrations/pièges
+  déjà présents dans chaque section, comme détaillé ci-dessus ; les cas-pièges et cas limites
+  testés explicitement par capture pour chacun des 6 (mode orthogonalité vérifié, C hors ligne,
+  réglage A/u éloigné après le correctif d'étiquettes, F₁=F₂=70N à θ=160°, clamp de n(A∩B),
+  maladie rare à 1%, n=1 pour la binomiale). `tsc -p tsconfig.app.json --noEmit`/`oxlint` (12
+  fichiers .js + les 4 fichiers TS/TSX modifiés — 2 avertissements de variable inutilisée trouvés
+  et corrigés avant commit, `0` restant)/`npm run build` propres ; sitewide `regress_all_4321.mjs`
+  sur les 23 chapitres : `0` erreur, `0` `NaN`/`undefined`, `0` `$` isolé.

@@ -223,6 +223,15 @@ export const probabilites: ChapterContent = {
             '1−18/40−15/40=7/40.',
         },
         {
+          kind: 'atelier',
+          tag: 'venn-double-entree-widget',
+          label: 'Manipule toi-même : les deux pièges du tableau',
+          caption:
+            'Fais glisser n(A), n(B) et n(A∩B) (sur N=40 personnes, comme l\'exemple) : le ' +
+            'tableau à double entrée se remplit en direct, avec le calcul correct ET le calcul ' +
+            'fauté affichés côte à côte pour les deux pièges ci-dessus.',
+        },
+        {
           kind: 'intuition',
           label: 'Conditionner, c\'est zoomer',
           text:
@@ -594,6 +603,16 @@ export const probabilites: ChapterContent = {
             'de la rareté de la maladie ($P(malade)$=0,1, ici assez rare) et du taux de faux positifs.',
         },
         {
+          kind: 'atelier',
+          tag: 'bayes-test-medical-widget',
+          label: 'Manipule toi-même : le piège central de Bayes',
+          caption:
+            'Fais glisser P(malade), P(T⁺|malade) et P(T⁺|non malade) : les colonnes de ' +
+            'fréquences naturelles et le contraste P(T⁺|malade)/P(malade|T⁺) se recalculent en ' +
+            'direct. Le réglage de départ reproduit exactement l\'exemple ci-dessus (P(T⁺)=27%, ' +
+            'P(malade|T⁺)≈33%).',
+        },
+        {
           kind: 'illustration',
           illustration: {
             kind: 'naturalFrequencies',
@@ -863,6 +882,16 @@ export const probabilites: ChapterContent = {
             'dépasse jamais 1 ! Cette méthode « additionner les $p$ » est toujours fausse. La ' +
             'seule méthode fiable, c\'est le complément, quelle que soit la valeur de $p$ (il ' +
             'fonctionne pour tout $p$ entre 0 et 1, pas seulement $p$=0,5).',
+        },
+        {
+          kind: 'atelier',
+          tag: 'binomiale-positions-widget',
+          label: 'Manipule toi-même : positions et complément',
+          caption:
+            'Fais glisser n, p, choisis k : la distribution complète se redessine, avec le ' +
+            'calcul correct et les deux pièges (oublier les positions, additionner les p) ' +
+            'contrastés en direct. Le réglage de départ (n=5, p=0,3, k=2) reproduit exactement ' +
+            'l\'exemple ci-dessus.',
         },
         {
           kind: 'illustration',

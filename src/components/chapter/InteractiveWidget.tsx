@@ -56,6 +56,12 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'racines-niemes-widget': () => import('../../interactive/register-racines-niemes-widget.js'),
   'produit-modules-arguments-widget': () => import('../../interactive/register-produit-modules-arguments-widget.js'),
   'transformation-az-b-widget': () => import('../../interactive/register-transformation-az-b-widget.js'),
+  'test-colinearite-widget': () => import('../../interactive/register-test-colinearite-widget.js'),
+  'milieu-piege-widget': () => import('../../interactive/register-milieu-piege-widget.js'),
+  'resultante-vecteurs-widget': () => import('../../interactive/register-resultante-vecteurs-widget.js'),
+  'venn-double-entree-widget': () => import('../../interactive/register-venn-double-entree-widget.js'),
+  'bayes-test-medical-widget': () => import('../../interactive/register-bayes-test-medical-widget.js'),
+  'binomiale-positions-widget': () => import('../../interactive/register-binomiale-positions-widget.js'),
 }
 
 /**

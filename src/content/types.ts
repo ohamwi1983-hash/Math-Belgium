@@ -57,6 +57,12 @@ export type InteractiveWidgetTag =
   | 'racines-niemes-widget'
   | 'produit-modules-arguments-widget'
   | 'transformation-az-b-widget'
+  | 'test-colinearite-widget'
+  | 'milieu-piege-widget'
+  | 'resultante-vecteurs-widget'
+  | 'venn-double-entree-widget'
+  | 'bayes-test-medical-widget'
+  | 'binomiale-positions-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

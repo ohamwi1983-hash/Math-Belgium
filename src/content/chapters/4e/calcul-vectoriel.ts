@@ -722,6 +722,15 @@ export const calculVectoriel: ChapterContent = {
             'donne les composantes de $\\vec{AB}$ — un objet complètement différent du milieu.',
         },
         {
+          kind: 'atelier',
+          tag: 'milieu-piege-widget',
+          label: 'Manipule toi-même : milieu contre différence',
+          caption:
+            'Fais glisser A et u : B=A+u se recalcule, et le vrai milieu M (vert) reste bien ' +
+            'distinct du point « différence » (rouge) que confond le piège. Le réglage de ' +
+            'départ (A(1;1), u=(4;2)) reproduit exactement l\'exemple ci-dessus.',
+        },
+        {
           kind: 'entrainement',
           title: 'Relation vectorielle (guidée)',
           generatorId: 'gen20',
@@ -809,6 +818,15 @@ export const calculVectoriel: ChapterContent = {
             '$x_u \\cdot y_v - y_u \\cdot x_v = 0$ teste la **colinéarité**. ' +
             '$x_u \\cdot x_v + y_u \\cdot y_v = 0$ teste l\'**orthogonalité** (section 14). ' +
             'Ces deux formules se ressemblent, mais attention : elles testent deux relations opposées !',
+        },
+        {
+          kind: 'atelier',
+          tag: 'test-colinearite-widget',
+          label: 'Manipule toi-même : colinéarité ou orthogonalité ?',
+          caption:
+            'A(0;0) et B(2;1) sont fixes. Fais glisser C, puis bascule entre les deux tests : ' +
+            'les deux formules sont affichées côte à côte, une seule active. Le réglage de ' +
+            'départ (C(6;3), test colinéarité) reproduit exactement l\'exemple ci-dessus.',
         },
         {
           kind: 'entrainement',
@@ -1133,6 +1151,15 @@ export const calculVectoriel: ChapterContent = {
             { tag: 'déviation (loi des sinus)', text: '$\\sin(\\text{déviation})/F_2 = \\sin\\theta/R \\Rightarrow \\sin(\\text{déviation}) = 30 \\times \\sin 60°/70 \\approx 0{,}371$' },
           ],
           result: { tag: 'résultat', text: 'R = 70 N, déviation ≈ 21,8° par rapport à F₁' },
+        },
+        {
+          kind: 'atelier',
+          tag: 'resultante-vecteurs-widget',
+          label: 'Manipule toi-même : la règle du parallélogramme',
+          caption:
+            'Fais glisser F₁, F₂ et l\'angle θ entre elles : le parallélogramme, R et la ' +
+            'déviation se recalculent en direct. Le réglage de départ (F₁=50N, F₂=30N, θ=60°) ' +
+            'reproduit exactement l\'exemple ci-dessus.',
         },
         {
           kind: 'rappel',
