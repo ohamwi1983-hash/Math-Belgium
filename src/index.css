@@ -110,8 +110,9 @@
      l'ordre des sources — à spécificité égale (un seul sélecteur `body` de chaque côté), c'est elle
      qui l'emporterait sans !important, y compris à l'impression. Repéré en vérifiant le rendu
      imprimé réel (Playwright, @media print), pas supposé : le quadrillage restait visible tant que
-     ce !important n'y était pas. */
-  body { background: #ffffff !important; }
+     ce !important n'y était pas. Même raison pour `font-size` ci-dessous (17px sur `body` hors
+     media query, même sélecteur, même ordre des sources). */
+  body { background: #ffffff !important; font-size: 12px !important; }
 }
 
 * { box-sizing: border-box; }
