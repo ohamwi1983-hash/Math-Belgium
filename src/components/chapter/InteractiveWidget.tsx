@@ -20,6 +20,8 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'discriminant-racines-widget': () => import('../../interactive/register-discriminant-racines-widget.js'),
   'signe-trinome-widget': () => import('../../interactive/register-signe-trinome-widget.js'),
   'signe-produit-widget': () => import('../../interactive/register-signe-produit-widget.js'),
+  'composition-machine-widget': () => import('../../interactive/register-composition-machine-widget.js'),
+  'domaine-composee-widget': () => import('../../interactive/register-domaine-composee-widget.js'),
 }
 
 /**

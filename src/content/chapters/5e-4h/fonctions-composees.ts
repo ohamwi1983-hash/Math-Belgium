@@ -249,6 +249,16 @@ export const fonctionsComposees: ChapterContent = {
             'En général, $f\\circ g \\ne g\\circ f$ : l’ordre compte. Par exemple avec $f(x) = x+1$ ' +
             'et $g(x) = x^2$ : $(f\\circ g)(2) = f(4) = 5$ alors que $(g\\circ f)(2) = g(3) = 9$.',
         },
+        {
+          kind: 'atelier',
+          tag: 'composition-machine-widget',
+          label: 'Manipule toi-même — la machine à composer',
+          caption:
+            'Fais glisser a et regarde la valeur « rebondir » d\'un graphe à l\'autre. Choisis ' +
+            'l\'ordre (f∘g) ou (g∘f) pour retrouver, par toi-même, les deux résultats différents ' +
+            'du piège ci-dessus (5 et 9) — puis essaie le préréglage « domaine restreint » pour ' +
+            'voir un cas où la composée « n\'existe pas ».',
+        },
         { kind: 'subheading', text: 'Décomposer : remonter d’une écriture composée vers ses étages' },
         {
           kind: 'para',
@@ -431,6 +441,16 @@ export const fonctionsComposees: ChapterContent = {
             'Ce n’est pas une erreur de calcul : g(x) = −x² ne prend jamais que des valeurs ' +
             'négatives ou nulles, alors que $\\operatorname{dom} f$ exige une valeur d’au moins 10 — ' +
             'les deux mondes ne se touchent jamais. Une réponse « dom = ∅ » est une réponse tout à fait valable.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'domaine-composee-widget',
+          label: 'Manipule toi-même — la double condition, visualisée',
+          caption:
+            'Les 3 droites reprennent les 3 étapes de la méthode : dom de la fonction intérieure, ' +
+            'la condition qui la relie à l\'extérieure, puis leur intersection. Fais glisser x et ' +
+            'regarde le marqueur passer du vert au gris sur chaque ligne selon la condition ' +
+            'vérifiée ou non — reprend les 2 exemples déjà résolus ci-dessus.',
         },
         {
           kind: 'entrainement',

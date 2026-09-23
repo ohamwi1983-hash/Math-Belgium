@@ -1247,3 +1247,53 @@ paths:
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé ; les 3 widgets
   confirmés présents dans le DOM du chapitre (un `document.querySelector` par tag, réussi pour
   les trois).
+
+- **5e (4h), Chapitre 1 — Fonctions : rappels et compléments** (`fonctions-composees`) : 2
+  nouveaux widgets interactifs, même processus que les deux chapitres précédents (suggestion
+  faite d'abord, jamais implémentée sans validation explicite).
+  - **`composition-machine-widget`** — section 2, inséré juste après le piège
+    "$f\circ g \ne g\circ f$" ($f(x)=x+1$, $g(x)=x^2$), avant "Décomposer : remonter...". Reprend
+    le **même langage visuel** que l'illustration statique déjà présente plus loin dans le
+    chapitre (`compositionNumeric` — deux graphes empilés, guides pointillés, le "rebond"
+    couleur accent puis couleur good), mais rendu interactif : 3 préréglages de paires
+    $(f,g)$ + un sélecteur d'ordre $(f\circ g)$/$(g\circ f)$ + un curseur $a$. Le premier
+    préréglage ($f(x)=x+1$, $g(x)=x^2$, $a=2$ par défaut) reproduit **exactement** les deux
+    valeurs du piège juste au-dessus (5 pour $f\circ g$, 9 pour $g\circ f$) — vérifié en
+    changeant seulement le sélecteur d'ordre, sans toucher au curseur. Un 2e préréglage
+    ($f(x)=\sqrt{x}$, $g(x)=x-3$) illustre le cas "n'existe pas" (valeur intermédiaire hors
+    domaine) sur un exemple concret plutôt qu'en abstrait.
+    **Fenêtres calculées par échantillonnage, jamais par formule dérivée à la main** : pour
+    chaque préréglage/ordre, la fenêtre Y du graphe du haut est l'étendue réellement atteinte
+    par la première fonction sur son domaine (avec marge), et la fenêtre X du graphe du bas est
+    cette même étendue (elle devient le domaine d'entrée de la seconde fonction) — seule façon
+    robuste de garder un cadrage cohérent alors que les fonctions sont interchangeables via les
+    préréglages, sans recalculer une formule de portée à la main pour chaque cas.
+  - **`domaine-composee-widget`** — section 3, inséré juste après le second exemple résolu
+    (domaine vide) et son paragraphe d'explication, avant la carte `entrainement` 5gen3. Visualise
+    la **triple droite graduée** de la méthode "double condition" déjà enseignée juste au-dessus
+    (dom de la fonction intérieure ; la condition qui la relie à l'extérieure ; leur
+    intersection), avec un curseur $x$ dont le marqueur passe du vert (condition vérifiée) au
+    gris (non vérifiée) sur les 3 lignes simultanément. 2 préréglages, qui reprennent **mot pour
+    mot** les 2 exemples déjà résolus algébriquement dans le contenu — $f(x)=\sqrt{-3x+6}$,
+    $g(x)=\sqrt{-2x+4}$ (dom(g∘f)=[2/3;2]) et $f(x)=\sqrt{x-10}$, $g(x)=-x^2$ (dom(f∘g)=∅).
+    **Prédicats fournis par préréglage sous forme algébrique directe** (ex. `x => -3*x+6 <= 4`,
+    traduction littérale de la condition déjà posée dans le contenu), jamais dérivés en évaluant
+    la fonction elle-même (qui vaudrait `NaN` hors domaine et empêcherait de tester la condition
+    2 sur tout le reste de la droite) — les segments où chaque prédicat est vrai sont ensuite
+    trouvés par échantillonnage + bissection (frontière affinée numériquement, jamais une borne
+    câblée en dur), un mécanisme générique qui n'a pas besoin de connaître la nature algébrique
+    de la condition. Le texte du résultat final (`dom(g∘f) = [2/3 ; 2]` / `dom(f∘g) = ∅`) reste
+    néanmoins écrit par préréglage plutôt que déduit des segments trouvés — simplification
+    assumée : les deux exemples n'utilisant que des inégalités larges, les crochets sont toujours
+    fermés aux bornes finies, un cas trop particulier pour justifier une détection générique du
+    sens du crochet (contrairement au chapitre précédent, où cette détection servait à un
+    sélecteur `>`/`≥`/`<`/`≤` vraiment interactif).
+  Vérifié par interaction Playwright réelle : pour le premier widget, les 4 valeurs affichées
+  recoupées à la main sur 2 préréglages × 2 ordres/points (dont le cas "n'existe pas" ET le cas
+  qui existe, sur le même préréglage, pour confirmer que ce n'est pas systématique) ; pour le
+  second, le texte résultat et l'état vert/gris du marqueur confirmés à 3 points de test
+  différents (dans l'intersection, hors intersection, et le préréglage à intersection vide).
+  `0` erreur console, `0` `^`/`$`/`NaN`/`Infinity`/`undefined` isolé (scan
+  `document.createTreeWalker` des 2 `shadowRoot`). `tsc -p tsconfig.app.json
+  --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres :
+  `0` erreur, `0` `NaN`, `0` `$` isolé.

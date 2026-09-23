@@ -21,6 +21,8 @@ export type InteractiveWidgetTag =
   | 'discriminant-racines-widget'
   | 'signe-trinome-widget'
   | 'signe-produit-widget'
+  | 'composition-machine-widget'
+  | 'domaine-composee-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }
