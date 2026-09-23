@@ -206,6 +206,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         },
       },
       {
+        kind: 'atelier',
+        tag: 'familles-parite-widget',
+        label: 'Manipule toi-même — miroir ou demi-tour ?',
+        caption:
+          'Choisis une famille et fais glisser t : son symétrique en −t apparaît automatiquement ' +
+          '— miroir vertical (paire) ou symétrie centrale par l\'origine (impaire). Pour la ' +
+          'racine carrée, aucun symétrique n\'apparaît : le domaine à sens unique ne contient ' +
+          'tout simplement pas −t.',
+      },
+      {
         kind: 'astuce',
         label: 'Astuce — deux paires de fonctions réciproques',
         text:
@@ -244,6 +254,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           '$f(-1) = -1$ et $f(1) = 1$. Bien que $-1 < 1$, on a $f(-1) < f(1)$ : ça, c\'est le ' +
           'signe d\'une croissance, pas d\'une décroissance. La monotonie d\'une fonction ne se ' +
           'prolonge jamais automatiquement à travers une valeur interdite du domaine.',
+      },
+      {
+        kind: 'atelier',
+        tag: 'inverse-monotonie-widget',
+        label: 'Manipule toi-même — teste toi-même la monotonie',
+        caption:
+          'Fais glisser x₁ et x₂ n\'importe où sur les deux branches. Tant qu\'ils restent du ' +
+          'même côté, la décroissance se confirme. Dès qu\'ils passent chacun d\'un côté ' +
+          'différent, le verdict bascule en rouge — exactement le contre-exemple f(−1)=−1 et ' +
+          'f(1)=1 du texte, mais que tu peux maintenant reproduire (ou déjouer) toi-même.',
       },
     ],
   },
@@ -539,6 +559,16 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'interchangeables. Seule la racine carrée (domaine à sens unique) donne à SOY un ' +
             'rôle réellement indépendant : il détermine de quel côté du point caractéristique le ' +
             'domaine s\'étend.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'transformation-8-parametres-widget',
+          label: 'Manipule toi-même — les 8 paramètres en direct',
+          caption:
+            'Choisis une famille, règle TH/TV/CH·EH/EV·CV et coche SOX/SOY : le point ' +
+            'caractéristique (violet) reste TOUJOURS exactement en x=TH, quoi que tu règles par ' +
+            'ailleurs. Fais glisser TH vers la gauche ou la droite pour vérifier le piège du ' +
+            'signe : la courbe se déplace du MÊME côté que TH, jamais de l\'opposé.',
         },
         { kind: 'video', title: 'Transformations des fonctions de référence', youtubeId: 'ARPAa4MkGgA' },
         {

@@ -33,6 +33,12 @@ export type InteractiveWidgetTag =
   | 'modele-sinusoidal-widget'
   | 'equation-trig-widget'
   | 'secteur-segment-widget'
+  | 'suite-recurrente-affine-widget'
+  | 'convergence-suite-widget'
+  | 'comparaison-suites-widget'
+  | 'transformation-8-parametres-widget'
+  | 'familles-parite-widget'
+  | 'inverse-monotonie-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

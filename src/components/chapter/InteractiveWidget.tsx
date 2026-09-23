@@ -32,6 +32,12 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'modele-sinusoidal-widget': () => import('../../interactive/register-modele-sinusoidal-widget.js'),
   'equation-trig-widget': () => import('../../interactive/register-equation-trig-widget.js'),
   'secteur-segment-widget': () => import('../../interactive/register-secteur-segment-widget.js'),
+  'suite-recurrente-affine-widget': () => import('../../interactive/register-suite-recurrente-affine-widget.js'),
+  'convergence-suite-widget': () => import('../../interactive/register-convergence-suite-widget.js'),
+  'comparaison-suites-widget': () => import('../../interactive/register-comparaison-suites-widget.js'),
+  'transformation-8-parametres-widget': () => import('../../interactive/register-transformation-8-parametres-widget.js'),
+  'familles-parite-widget': () => import('../../interactive/register-familles-parite-widget.js'),
+  'inverse-monotonie-widget': () => import('../../interactive/register-inverse-monotonie-widget.js'),
 }
 
 /**

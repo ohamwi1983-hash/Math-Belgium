@@ -1603,3 +1603,76 @@ paths:
   tsconfig.app.json --noEmit`/`oxlint` (8 fichiers .js + les 3 fichiers TS/TSX modifiés)/
   `npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0`
   `NaN`, `0` `$` isolé.
+
+- **5e (4h), Chapitre 3 — Suites** (`suites`) **et 4e, Chapitre 3 — Caractéristiques d'une
+  fonction et fonctions de référence** (`caracteristiques-fonctions-reference`) : 6 nouveaux
+  widgets (3 par chapitre), proposés puis validés explicitement (même mécanisme que pour les
+  chapitres précédents), avec la demande explicite de « respecter les détails (axes,
+  annotations, etc.) » — donc appliqués dès la première passe (pas en correctif après coup) :
+  flèches sur tous les axes, aucune fenêtre recalculée depuis un curseur librement déplacé
+  (seulement depuis un sélecteur de famille/mode, jamais depuis le paramètre en cours de
+  démonstration), couleurs cohérentes avec la solution/le piège affiché (jamais un critère fixe
+  déconnecté du symbole ou du cas choisi). Aucun des deux chapitres n'avait encore d'atelier.
+  - **`suite-recurrente-affine-widget`** (section « Suite récurrente affine »), inséré juste
+    après l'Attention « toujours vérifier |a|<1 avant de calculer L », avant l'astuce sur le
+    calcul pas à pas. Curseurs A, b, u₁ (a exclu à 1 pile, curseur repoussé, même technique que
+    ailleurs) ; la ligne L=b/(1−a) est **toujours** tracée (la formule donne toujours un
+    nombre) mais bascule en rouge dès que |a|≥1, avec le texte « ce nombre n'est PAS une limite »
+    — visualise exactement le piège du texte. Réglages par défaut (a=0,7 ; b=3 ; u₁=1)
+    reproduisent exactement l'exemple résolu de la dilution (termes et L=10 identiques,
+    confirmé à l'écran). Étiquette de la ligne L décalée automatiquement vers le bas quand elle
+    croiserait celle du dernier terme (même parade que `SequencePlot.tsx`).
+  - **`convergence-suite-widget`** (section « Convergence »), inséré juste après l'illustration
+    `sequencePlot` existante, avant le sous-titre sur le cas quelconque. Sélecteur
+    arithmétique/géométrique, curseur de raison (r ou q, q allant jusqu'à ±2 pour atteindre
+    q=−1 pile et au-delà), classification en direct reprenant mot pour mot les deux
+    `featureTable` de la section ; points et connecteur passent en rouge sur q=−1 et q<−1 (les
+    deux cas de l'Attention « ne diverge PAS vers l'infini »), verts/neutres sinon. Réglages par
+    défaut (géométrique, q=0,65, u₁=6) reproduisent exactement les 9 termes de l'illustration
+    statique déjà présente (confirmé à l'écran).
+  - **`comparaison-suites-widget`** (section « Comparaison numérique »), inséré juste après
+    l'Attention « deux pièges fréquents », avant l'entraînement. Curseurs population/croissance
+    des deux villes, balayage sur 20 ans, repère lui-même le **premier** rang où B dépasse A en
+    vérifiant explicitement le rang précédent (le premier piège du texte), puis traduit ce rang
+    en année (le second piège). Réglages par défaut reproduisent exactement l'exemple résolu des
+    deux villes (bascule n=13, année 2032, confirmé à l'écran).
+  - **`transformation-8-parametres-widget`** (section « Transformer »), inséré juste après
+    l'astuce « SOX et SOY se confondent parfois », avant la vidéo. Sélecteur des 6 familles,
+    curseurs TH/TV/CH·EH/EV·CV (CH/EH et EV/CV chacun combinés en un seul facteur positif,
+    conformément à la colonne « Effet » du featureTable qui les traite déjà comme un seul
+    cadran), cases SOX/SOY séparées. Le point caractéristique (marqueur violet) reste
+    **toujours** exactement en x=TH quels que soient les autres réglages — matérialise l'astuce
+    du même nom ; testé en changeant CH/EH/EV/CV/SOX/SOY sans jamais voir le point bouger.
+    Testé aussi le piège du signe : famille cube, TH=−3, reproduit exactement l'exemple du texte
+    $(x+3)^3$ (le point d'inflexion apparaît bien à gauche de l'origine, formule affichée
+    "x+3,0" cohérente). Réglages par défaut (inverse, TH=3, TV=2) reproduisent l'exemple résolu
+    $1/(x-3)+2$ (asymptotes en x=3 et y=2, confirmé à l'écran).
+  - **`familles-parite-widget`** (bloc intro, juste après les 6 courbes statiques et juste avant
+    l'astuce sur les fonctions réciproques). Sélecteur des 6 familles, curseur t>0 qui place un
+    point (t;f(t)) et calcule son symétrique en −t : miroir vertical (axe Oy, ligne pointillée)
+    pour les familles **paires**, droite passant par l'origine (symétrie centrale) pour les
+    **impaires** — reprend explicitement l'image du texte (« miroir sur Oy » / « rotation d'un
+    demi-tour »). Pour la racine carrée, aucun point symétrique n'est tracé : un message rouge
+    explique que le domaine à sens unique ne contient pas −t (testé avec −t visible et hors
+    fenêtre : le message et le marqueur ne s'affichent que quand −t est réellement dans le
+    cadre).
+  - **`inverse-monotonie-widget`** (bloc intro, juste après le Piège « l'inverse n'est pas
+    décroissante sur ℝ\{0} », dernier bloc de l'intro). Deux points x₁, x₂ déplaçables
+    **librement** sur tout le domaine (curseur repoussé loin de 0, même technique que pour a=1
+    ailleurs) : même branche → confirmation verte de la décroissance locale ; branches
+    différentes → verdict rouge reprenant mot pour mot le contre-exemple du texte. Réglages par
+    défaut (x₁=−1, x₂=1) reproduisent exactement f(−1)=−1 et f(1)=1 du piège ; testé aussi le cas
+    « même branche » (x₁=0,5, x₂=3 → confirmation verte).
+  Vérifié : script Playwright dédié (chromium headless, défilement complet pour déclencher le
+  montage paresseux) sur les 2 pages, thèmes clair ET sombre — `0` erreur console/page pour les
+  6 ; positions des lignes `.axe` identiques avant/après un glissement simultané de TOUS les
+  curseurs à 85% de leur course, sur les 6 widgets ; captures d'écran réelles recoupées à la
+  main avec les exemples résolus et les valeurs des illustrations statiques déjà présentes dans
+  chaque section (détaillé ci-dessus) ; les 2 états-piège (`q=−1`, `a≥1`) et le cas particulier
+  `√x` (racine, sans parité) testés explicitement par capture. Un chevauchement d'étiquettes
+  repéré à l'écran (la ligne L proche du dernier terme) corrigé en repoussant l'étiquette de L
+  vers le bas quand elle est trop proche du dernier point, sur `suite-recurrente-affine-widget`
+  ET `convergence-suite-widget` (même parade que `SequencePlot.tsx`, `Y_MIN`/`Y_MAX` inchangés).
+  `tsc -p tsconfig.app.json --noEmit`/`oxlint` (12 fichiers .js + les 4 fichiers TS/TSX
+  modifiés, `0` avertissement après retrait d'une variable inutilisée)/`npm run build` propres ;
+  sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

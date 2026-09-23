@@ -484,6 +484,15 @@ export const suites: ChapterContent = {
             caption: 'w_n = 6×0,65^(n−1) : suite géométrique de raison 0<q<1, elle converge vers 0',
           },
         },
+        {
+          kind: 'atelier',
+          tag: 'convergence-suite-widget',
+          label: 'Manipule toi-même — les 4 comportements en direct',
+          caption:
+            'Bascule entre arithmétique et géométrique, puis fais glisser la raison : passe par ' +
+            'q=−1 pile (les points passent en rouge) pour voir l\'oscillation qui ne diverge PAS ' +
+            'vers l\'infini — à ne surtout pas confondre avec q>1, qui grandit sans borne.',
+        },
         { kind: 'subheading', text: "Le cas d'une suite quelconque — comparer les degrés" },
         {
           kind: 'para',
@@ -778,6 +787,15 @@ export const suites: ChapterContent = {
             'dans le calcul intermédiaire.',
         },
         {
+          kind: 'atelier',
+          tag: 'comparaison-suites-widget',
+          label: 'Manipule toi-même — trouve le rang de bascule',
+          caption:
+            'Règle les deux villes et observe le balayage sur 20 ans : le widget repère lui-même ' +
+            'le PREMIER rang où B dépasse A, en vérifiant explicitement qu\'au rang précédent ce ' +
+            'n\'était pas encore le cas — exactement la vérification demandée dans l\'Attention.',
+        },
+        {
           kind: 'entrainement',
           title: 'Comparaison numérique de deux suites',
           generatorId: '5gen18',
@@ -908,6 +926,16 @@ export const suites: ChapterContent = {
             'fréquente ! Si $|a| \\geq 1$, la formule produit quand même un nombre — mais ce ' +
             'nombre n\'est **pas** une limite. La suite diverge, et son régime permanent ' +
             'n\'existe pas, peu importe la valeur calculée.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'suite-recurrente-affine-widget',
+          label: 'Manipule toi-même — le piège de L en direct',
+          caption:
+            'Fais glisser a au-delà de 1 (ou en dessous de −1) : la ligne L continue de ' +
+            's\'afficher — la formule donne TOUJOURS un nombre — mais elle bascule en rouge et ' +
+            'les termes s\'en éloignent au lieu de s\'en rapprocher. Repasse sous |a|<1 pour la ' +
+            'voir redevenir un vrai régime permanent (verte).',
         },
         {
           kind: 'astuce',
