@@ -25,6 +25,9 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'parite-derivee-widget': () => import('../../interactive/register-parite-derivee-widget.js'),
   'inequation-exponentielle-widget': () => import('../../interactive/register-inequation-exponentielle-widget.js'),
   'croissance-saturation-widget': () => import('../../interactive/register-croissance-saturation-widget.js'),
+  'log-exp-miroir-widget': () => import('../../interactive/register-log-exp-miroir-widget.js'),
+  'inequation-logarithmique-widget': () => import('../../interactive/register-inequation-logarithmique-widget.js'),
+  'parametres-graphiques-widget': () => import('../../interactive/register-parametres-graphiques-widget.js'),
 }
 
 /**

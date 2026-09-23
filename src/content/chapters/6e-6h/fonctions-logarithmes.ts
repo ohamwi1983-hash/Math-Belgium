@@ -212,6 +212,15 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'log-exp-miroir-widget',
+          label: 'Manipule toi-même — le miroir expₐ / logₐ',
+          caption:
+            'Fais glisser r : le point (r;aʳ) sur expₐ a toujours son symétrique (aʳ;r) sur ' +
+            'logₐ, de l\'autre côté de y=x. Fais aussi varier la base a, y compris en dessous ' +
+            'de 1, pour voir que la réciprocité tient quelle que soit la base.',
+        },
+        {
           kind: 'intuition',
           label: 'L\'astuce qui a rendu le log indispensable, avant les calculatrices',
           text:
@@ -1214,6 +1223,15 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'inequation-logarithmique-widget',
+          label: 'Manipule toi-même — le même piège, côté logarithme',
+          caption:
+            'Fais glisser a de part et d\'autre de 1 : regarde S basculer de « x ≥ … » à ' +
+            '« x ≤ … » sans rien changer au symbole ◇ ni à k — les réglages par défaut (a≈e, ' +
+            'k=2) reproduisent presque exactement le côté ln de l\'illustration ci-dessus.',
+        },
+        {
           kind: 'exempleLibre',
           label: 'Exemple résolu — base e > 1 (sens conservé)',
           blocks: [
@@ -1901,6 +1919,15 @@ export const fonctionsLogarithmes: ChapterContent = {
               'f(x) = 1 + 2·ln(x) : en x=1, f(1)=1=a lit directement a ; la pente de la ' +
               'tangente en x=1 vaut 2=b',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'parametres-graphiques-widget',
+          label: 'Manipule toi-même — a, b et le piège du point en x=e',
+          caption:
+            'Fais varier a et b : le point (1;a) et la tangente de pente b suivent en direct. ' +
+            'Coche « révéler le point en x=e » pour voir pourquoi f(e)=a+b, pas simplement a — ' +
+            'le piège juste en dessous.',
         },
         {
           kind: 'exempleLibre',

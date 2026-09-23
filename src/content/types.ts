@@ -26,6 +26,9 @@ export type InteractiveWidgetTag =
   | 'parite-derivee-widget'
   | 'inequation-exponentielle-widget'
   | 'croissance-saturation-widget'
+  | 'log-exp-miroir-widget'
+  | 'inequation-logarithmique-widget'
+  | 'parametres-graphiques-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

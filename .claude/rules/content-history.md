@@ -1346,3 +1346,48 @@ paths:
   recoupés à la main. `0` erreur console, `0` `^`/`$`/`NaN`/`Infinity`/`undefined` isolé (scan des
   3 `shadowRoot`, après correctif). `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build`
   propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **6e (6h), Chapitre 3 — Fonctions logarithmes** (`fonctions-logarithmes`) : 3 widgets
+  interactifs, correspondant aux 3 suggestions faites plus tôt dans la même session (suggérées
+  puis validées explicitement, comme pour les deux chapitres précédents). Ce chapitre étant le
+  miroir conceptuel du chapitre 2 (log = réciproque de exp), deux des trois widgets reprennent
+  délibérément le mécanisme déjà éprouvé sur les exponentielles, appliqué cette fois au logarithme.
+  - **`log-exp-miroir-widget`** — section 1, inséré juste après les deux illustrations statiques
+    qui montrent déjà expₐ/logₐ en miroir (cas $a>1$ et $0<a<1$), avant l'intuition sur la règle
+    à calcul. Généralise `reciproque-miroir-widget` (chapitre 1) avec une base $a$ **continûment
+    réglable** (curseur, pas un sélecteur fermé de 2-3 fonctions) : point $(r;a^r)$ sur expₐ, son
+    symétrique $(a^r;r)$ sur logₐ. Réglages par défaut $a=2,r=0{,}8$ : reproduisent
+    **exactement** le point $(r;s)$ marqué dans la première illustration statique.
+    **Fenêtre carrée calculée dynamiquement** (jamais une formule dérivée à la main) : combine le
+    domaine fixe de $r$ ($[-1{,}5;1{,}5]$) avec l'étendue réellement atteinte par $a^r$ sur ce
+    domaine (échantillonnage), pour que $y=x$ reste à 45° quelle que soit la base — sans ce
+    calcul, une base éloignée de 1 aurait fait sortir une bonne partie de l'une des deux courbes
+    du cadre. Base $a=1$ exclue par curseur repoussé (même technique que le curseur $a$ du
+    chapitre 2 pour $a=0$) : $\log_1$ n'existe pas du tout, pas seulement un cas dégénéré.
+  - **`inequation-logarithmique-widget`** — section 3, inséré juste après l'illustration
+    statique qui compare déjà $\ln(x)\le2$ et $\log_{0,5}(x)\le2$, avant le premier exemple
+    résolu. Réplique exactement `inequation-exponentielle-widget` (chapitre 2) mais pour
+    $\log_a(x) \diamond k \iff x \diamond a^k$ (au lieu de $a^x \diamond k \iff x \diamond
+    \ln(k)/\ln(a)$) — sens conservé si $a>1$, inversé sinon, la condition de domaine $x>0$ étant
+    automatiquement satisfaite puisque $a^k>0$ pour tout $a>0$, sans intersection supplémentaire
+    à coder. Réglages par défaut $a\approx e$ ($2{,}72$), $k=2$ : $x_0=a^k\approx7{,}40$,
+    quasiment identique au $e^2\approx7{,}39$ de l'illustration statique ; faire glisser $a$ vers
+    $0{,}5$ (sans toucher à $k$ ni au symbole) reproduit l'AUTRE côté de la même illustration
+    ($x=0{,}25$ exactement).
+  - **`parametres-graphiques-widget`** — section 6, inséré juste après l'illustration statique de
+    l'exemple résolu ($f(x)=1+2\ln(x)$, point $(1;1)$, tangente de pente 2), avant l'exemple
+    suivant. Curseurs $a,b$ pour $f(x)=a+b\cdot\ln(x)$, point $(1;a)$ toujours affiché, tangente
+    en $x=1$ de pente $b$ tracée (clippée au cadre), et une case à cocher qui révèle le point en
+    $x=e$ avec $f(e)=a+b$ affiché **symboliquement** — démontre en direct le piège juste en
+    dessous dans le contenu (confondre le point en $x=1$, où $b$ s'annule, avec celui en $x=e$,
+    où $a$ **et** $b$ interviennent). Réglages par défaut $a=1,b=2$ : reproduisent exactement
+    l'illustration statique juste au-dessus.
+  Vérifié par interaction Playwright réelle : pour le 1er widget, le point $(0{,}8;2^{0,8})$
+  recoupé à la main pour $a=2$ ET pour $a=0{,}5$ (les deux illustrations statiques de la
+  section) ; pour le 2e, les deux textes $S$ produits ($a\approx e$ et $a=0{,}5$, mêmes $k$ et
+  symbole) confrontés indépendamment à $x_0=a^k$ — l'un très proche de $e^2$, l'autre égal à
+  $0{,}25$ exactement, comme l'illustration statique ; pour le 3e, $f(1)=a$ et $f'(1)=b$
+  recoupés pour les réglages par défaut ET pour $a=4,b=3$ (l'exemple résolu qui suit dans le
+  contenu). `0` erreur console, `0` `^`/`$`/`NaN`/`Infinity`/`undefined` isolé (scan des 3
+  `shadowRoot`). `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
