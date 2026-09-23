@@ -79,33 +79,189 @@ function extraireParagraphes(blocks: Block[]): string[] {
 }
 
 /**
- * Dérive TOUTES les questions ouvertes exploitables d'une section — un bloc `exemple`/
- * `exempleLibre` de premier niveau = une question (jamais une banque dédiée à écrire, décision
- * prise avec l'utilisateur). Une section sans aucun de ces blocs (aucune formule/démonstration)
- * renvoie un tableau vide, conformément à la règle donnée : pas de question théorique là où il n'y
- * a ni formule ni démonstration.
+ * Phrasé soigné des questions « formules/démonstrations » du chapitre pilote — un simple label de
+ * bloc recopié tel quel (ex. « Exemple résolu — décomposition de f ») n'est pas une consigne, juste
+ * un titre. Chaque section a ici un énoncé écrit à la main par position (0-indexée, dans l'ordre
+ * des blocs `exemple`/`exempleLibre` de la section), à la forme impérative attendue d'un énoncé
+ * d'évaluation (« Démontre que… », « Démontre la relation suivante : … », etc.). Chaque futur
+ * chapitre ajouté demandera sa propre liste, construite au cas par cas — une section absente de
+ * cette table (ou un index sans entrée) retombe sur le label brut, voir `deriveQuestionsOuvertes`.
+ */
+const ENONCES_DEMONSTRATION: Record<string, string[]> = {
+  reciproques: [
+    "Démontre que si $f$ est injective, sa relation réciproque est une fonction.",
+    "Démontre que, pour $f$ injective, $(f^{-1})^{-1} = f$, et que $g = f^{-1} \\iff f = g^{-1}$.",
+    "Détermine l'expression de $f^{-1}$ pour $f(x) = \\dfrac{5}{x-1}$, en décomposant $f$ en une chaîne d'opérations élémentaires puis en la défaisant dans l'ordre inverse.",
+    "Retrouve $f^{-1}$ pour $f(x) = \\dfrac{5}{x-1}$ par la méthode de la permutation (échanger $x$ et $y$, puis isoler $y$).",
+    "Explique pourquoi $f : \\mathbb{R} \\to \\mathbb{R} : x \\mapsto x^2$ n'a pas de relation réciproque fonctionnelle, et détermine la réciproque de sa restriction à $\\mathbb{R}^+$.",
+    "Pour $f(x) = x^3$, calcule $(\\sqrt[3]{x})'$ à l'aide du théorème de la dérivée d'une réciproque.",
+    "Pour $f(x) = \\dfrac{5}{x-1}$ et $f^{-1}(x) = 1 + \\dfrac{5}{x}$, calcule $(f^{-1})'(-5)$ de deux façons différentes, et vérifie que les deux méthodes concordent.",
+  ],
+  cyclometriques: [
+    'Démontre que arcsin est une fonction impaire.',
+    "Démontre la relation suivante : $\\arccos(x) + \\arccos(-x) = \\pi$.",
+    'Démontre que arctan est une fonction impaire.',
+  ],
+  equations: [
+    "Démontre la relation suivante : $\\arcsin(x) + \\arccos(x) = \\pi/2$.",
+    "Résous l'équation $\\arcsin(2x-1) = \\arcsin(x)$, en posant la condition d'existence.",
+    "Résous l'équation $\\arccos(x^2-1) = \\arccos(1-x)$, en vérifiant si les solutions trouvées respectent la condition d'existence.",
+  ],
+  derivees: [
+    "Démontre que $\\arcsin'(x) = \\dfrac{1}{\\sqrt{1-x^2}}$.",
+    "Démontre que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$, en utilisant l'identité $\\arccos(x) = \\pi/2 - \\arcsin(x)$.",
+    "Démontre, sans utiliser l'identité complémentaire, que $\\arccos'(x) = -\\dfrac{1}{\\sqrt{1-x^2}}$.",
+    "Démontre que $\\arctan'(x) = \\dfrac{1}{1+x^2}$.",
+    'Démontre que arcsin n\'est dérivable ni en $1$, ni en $-1$.',
+    "Calcule la dérivée de $\\arcsin(2x-1)$.",
+  ],
+  graphiques: [],
+}
+
+/**
+ * Dérive TOUTES les questions ouvertes « formules/démonstrations » exploitables d'une section — un
+ * bloc `exemple`/`exempleLibre` de premier niveau = une question. Une section sans aucun de ces
+ * blocs (aucune formule/démonstration) renvoie un tableau vide, conformément à la règle donnée :
+ * pas de question de ce type là où il n'y a ni formule ni démonstration. Le corrigé reste dérivé
+ * mécaniquement du contenu du bloc (fiable) ; l'énoncé préfère le phrasé soigné de
+ * `ENONCES_DEMONSTRATION` quand il existe, sinon retombe sur le label brut du bloc.
  */
 export function deriveQuestionsOuvertes(section: ChapterSection): QuestionOuverte[] {
   const candidats = section.blocks.filter(
     (b): b is Extract<Block, { kind: 'exemple' } | { kind: 'exempleLibre' }> => b.kind === 'exemple' || b.kind === 'exempleLibre',
   )
+  const enoncesSoignes = ENONCES_DEMONSTRATION[section.id]
 
-  return candidats.map((candidat) => {
+  return candidats.map((candidat, index) => {
+    const enonceSoigne = enoncesSoignes?.[index]
+
     if (candidat.kind === 'exemple') {
       const enonceBrut = [candidat.badge, candidat.formula].filter(Boolean).join(' — ')
-      const enonce = enonceBrut ? nettoyerRichText(enonceBrut) : "Résous l'exercice suivant."
+      const enonce = enonceSoigne ?? (enonceBrut ? nettoyerRichText(enonceBrut) : "Résous l'exercice suivant.")
       const etapes = candidat.steps.map((s) => `${nettoyerRichText(s.tag)} : ${nettoyerRichText(s.text)}`)
       const resultat = candidat.result.text ? [`${nettoyerRichText(candidat.result.tag)} : ${nettoyerRichText(candidat.result.text)}`] : []
       return { enonce, corrige: [...etapes, ...resultat].join('\n') }
     }
 
-    const enonce = candidat.label ? nettoyerRichText(candidat.label) : 'Justifie le raisonnement suivant.'
+    const enonce = enonceSoigne ?? (candidat.label ? nettoyerRichText(candidat.label) : 'Justifie le raisonnement suivant.')
     const corrige = extraireParagraphes(candidat.blocks).join('\n\n')
     return { enonce, corrige: corrige || 'Voir le cours.' }
   })
 }
 
-export type TypeQuestionEvaluation = 'ouverte' | 'vraiFaux' | 'exercice'
+/**
+ * Banque de questions ouvertes de « compréhension » — distinctes des questions
+ * formules/démonstrations ci-dessus (décision explicite de l'utilisateur : les deux catégories
+ * coexistent, la compréhension s'ajoute plutôt que remplace). Entièrement écrites à la main, pas
+ * dérivées d'un bloc de contenu : elles testent le POURQUOI et les liens entre notions d'un point
+ * du chapitre, jamais la restitution d'une preuve ou d'un calcul déjà résolu dans le cours. Chaque
+ * futur chapitre ajouté demandera sa propre liste (peut rester vide pour une section qui n'en a pas
+ * encore).
+ */
+const QUESTIONS_COMPREHENSION: Record<string, QuestionOuverte[]> = {
+  reciproques: [
+    {
+      enonce: "Pourquoi une fonction non injective ne peut-elle pas avoir de relation réciproque qui soit elle-même une fonction ?",
+      corrige:
+        "Un même x de Image(f) serait alors associé à plusieurs y distincts (tous ceux qui ont cette image par f) — ce qui contredit la définition d'une fonction, où chaque entrée n'a qu'une seule sortie. C'est exactement ce qui arrive pour f(x)=x² sur ℝ : x=1 a pour image 1, mais -1 aussi ; la relation réciproque associerait donc à la fois -1 et 1 à l'entrée 1.",
+    },
+    {
+      enonce: 'Que représente géométriquement le graphe de f⁻¹ par rapport à celui de f, et pourquoi ?',
+      corrige:
+        "Le graphe de f⁻¹ est le symétrique du graphe de f par rapport à la droite y=x. Cela vient directement de la construction de la relation réciproque : chaque point (a;b) de f devient (b;a) sur f⁻¹ — abscisse et ordonnée échangées, exactement l'effet d'une symétrie par rapport à y=x.",
+    },
+    {
+      enonce: "Pourquoi la restriction d'une fonction non injective à un intervalle plus petit peut-elle redevenir injective, et donc avoir une réciproque ?",
+      corrige:
+        "L'injectivité dépend du domaine considéré : réduire le domaine peut supprimer les paires de valeurs qui donnaient la même image. f(x)=x² n'est pas injective sur ℝ (1 et -1 ont la même image), mais sa restriction à ℝ⁺ l'est (deux réels positifs distincts ont toujours des carrés distincts) — c'est cette restriction qui a une réciproque, √x.",
+    },
+    {
+      enonce: 'f⁻¹(x) et 1/f(x) désignent-ils la même chose ? Justifie.',
+      corrige:
+        "Non — ce sont deux objets sans aucun rapport, malgré la notation qui se ressemble. f⁻¹(x) est la valeur qui, par f, redonne x (la fonction réciproque) ; 1/f(x) est simplement l'inverse numérique de f(x). Pour f(x)=5/(x-1), f⁻¹(x)=1+5/x, alors que 1/f(x)=(x-1)/5 — deux expressions bien distinctes.",
+    },
+  ],
+  cyclometriques: [
+    {
+      enonce: "Pourquoi sin, cos et tan n'ont-elles pas de réciproque sur ℝ tout entier ?",
+      corrige:
+        "Parce qu'elles sont périodiques : une infinité de valeurs de x donnent la même image (sin(0)=sin(π)=sin(2π)=0, par exemple). Elles ne sont donc jamais injectives sur ℝ tout entier, et sans injectivité, pas de relation réciproque qui soit une fonction.",
+    },
+    {
+      enonce: "Sur quel critère choisit-on l'intervalle de restriction de sin, cos et tan pour construire arcsin, arccos et arctan ?",
+      corrige:
+        "Le plus court intervalle possible contenant 0 sur lequel la fonction redevient bijective — [−π/2;π/2] pour sin, [0;π] pour cos, ]−π/2;π/2[ pour tan. Un intervalle plus long recontiendrait plusieurs fois la même valeur (perte d'injectivité) ; mal centré, il ne contiendrait pas toute l'image.",
+    },
+    {
+      enonce: 'Pourquoi peut-on dire que arcsin(1/2) est déjà connu depuis le cercle trigonométrique, sans calcul supplémentaire ?',
+      corrige:
+        "Une arcfonction pose la même question à l'envers : sin(π/6)=1/2 était déjà su, donc directement arcsin(1/2)=π/6 — chercher l'arc dont le sinus vaut x, c'est juste relire le cercle trigonométrique dans l'autre sens.",
+    },
+    {
+      enonce: 'arccos(−x) est-il égal à −arccos(x) ? Justifie à partir de la parité de arccos.',
+      corrige:
+        "Non — contrairement à arcsin et arctan, arccos n'est pas impaire. La relation correcte est arccos(−x) = π − arccos(x), pas arccos(−x) = −arccos(x).",
+    },
+  ],
+  equations: [
+    {
+      enonce: "Pourquoi la condition d'existence est-elle indispensable avant de résoudre une équation avec arcsin ou arccos, alors qu'elle ne l'est jamais pour arctan ?",
+      corrige:
+        "arcsin(u) et arccos(u) n'existent que si u∈[−1;1] — un domaine borné — alors qu'arctan(u) existe pour tout réel u. Poser la CE pour arcsin/arccos revient à vérifier que l'argument reste dans ce domaine restreint, une vérification qui n'a simplement pas lieu d'être pour arctan.",
+    },
+    {
+      enonce: 'Pourquoi arcsin(A) = arcsin(B) ⟺ A = B, alors que ce n\'est PAS vrai pour sin (sin(A)=sin(B) n\'entraîne pas A=B en général) ?',
+      corrige:
+        "Parce que arcsin est injective sur son domaine [−1;1] — contrairement à sin sur ℝ tout entier, qui est périodique et prend chaque valeur une infinité de fois. C'est la restriction du domaine qui rend l'implication valide pour arcsin, là où sin ne la vérifie pas.",
+    },
+    {
+      enonce: "Dans la méthode en 3 temps pour résoudre une équation avec des arcfonctions, pourquoi l'étape 3 (vérifier la CE) ne peut-elle jamais être sautée ?",
+      corrige:
+        "Résoudre l'équation simplifiée (étape 2) peut faire apparaître des solutions qui ne respectent pas la CE posée en étape 1 — arccos(x²−1)=arccos(1−x) le montre : x=−2 est une racine correcte de l'équation simplifiée, mais elle est hors CE et doit être rejetée, car arccos(3) n'existe tout simplement pas.",
+    },
+  ],
+  derivees: [
+    {
+      enonce: 'Pourquoi la dérivée de arccos comporte-t-elle un signe moins, alors que celle de arcsin n\'en a pas ?',
+      corrige:
+        "Ce signe vient de la dérivée de cos, qui vaut −sin (alors que (sin)'=cos) — ce n'est pas un choix arbitraire du signe de la racine (positif dans les deux démonstrations). Il traduit un fait visible sur le graphe : arccos est décroissante, alors que arcsin est croissante.",
+    },
+    {
+      enonce: 'Pourquoi arctan est-elle dérivable sur ℝ tout entier, alors que arcsin et arccos ne le sont que sur ]−1;1[ ?',
+      corrige:
+        "La dérivée de arctan, 1/(1+x²), a un dénominateur qui ne s'annule jamais. Celles de arcsin et arccos ont un dénominateur √(1−x²), qui s'annule en x=±1 — et on démontre par l'absurde qu'elles n'y sont effectivement pas dérivables, contrairement à arctan.",
+    },
+    {
+      enonce: 'Le fait que la formule 1/√(1−x²) ne soit pas définie en x=±1 suffit-il à prouver que arcsin n\'y est pas dérivable ? Justifie.',
+      corrige:
+        "Non — une formule non définie en un point ne prouve rien à elle seule : elle vient d'un théorème dont les hypothèses ne sont pas vérifiées en ce point, et des hypothèses non vérifiées n'établissent jamais la non-dérivabilité. Seul un raisonnement par l'absurde direct établit réellement que arcsin n'est pas dérivable en ±1.",
+    },
+  ],
+  graphiques: [
+    {
+      enonce: "Un graphe a un domaine non borné (ℝ tout entier) et deux asymptotes horizontales. De quelle arcfonction peut-il s'agir, et pourquoi ces deux critères suffisent-ils à trancher ?",
+      corrige:
+        "Il s'agit d'arctan — la seule des trois dont le domaine est ℝ tout entier (arcsin et arccos sont bornées à [−1;1]), et la seule à posséder des asymptotes horizontales (y=±π/2). Ces deux critères l'identifient sans ambiguïté, sans même observer le sens de variation.",
+    },
+    {
+      enonce: 'Comment distinguer le graphe d\'arcsin de celui d\'arccos à partir du seul sens de variation ?',
+      corrige:
+        "arcsin est strictement croissante, arccos est strictement décroissante — le critère le plus rapide pour les distinguer, puisque les deux ont le même domaine borné [−1;1] (un domaine borné seul ne suffit donc pas à les différencier).",
+    },
+    {
+      enonce: "Pourquoi un graphe au domaine borné à [−1;1] ne peut-il jamais correspondre à arctan ?",
+      corrige:
+        "Parce qu'arctan a pour domaine ℝ tout entier — jamais restreinte à [−1;1]. Un domaine borné à [−1;1] élimine donc automatiquement arctan et ne laisse que arcsin ou arccos, à départager ensuite par le sens de variation.",
+    },
+  ],
+}
+
+/** `[]` pour une section absente de la table — même convention que `deriveQuestionsOuvertes`. */
+export function deriveQuestionsComprehension(sectionId: string): QuestionOuverte[] {
+  return QUESTIONS_COMPREHENSION[sectionId] ?? []
+}
+
+export type TypeQuestionEvaluation = 'demonstration' | 'comprehension' | 'vraiFaux' | 'exercice'
 export type Processus = 1 | 2 | 3
 
 export interface LigneSelection {
@@ -162,7 +318,8 @@ export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelect
     } else if (ligne.type === 'vraiFaux') {
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
-      const ouvertes = deriveQuestionsOuvertes(section).slice(0, ligne.nombre)
+      const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(section) : deriveQuestionsComprehension(section.id)
+      const ouvertes = banque.slice(0, ligne.nombre)
       if (ouvertes.length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertes })
     }
   }

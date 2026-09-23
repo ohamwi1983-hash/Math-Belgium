@@ -6,6 +6,7 @@ import {
   HEURES_PAR_NIVEAU,
   LEVELSLUG_FONCTIONNEL,
   buildEvaluationUrl,
+  deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
   resoudreLevelSlug,
   type LigneSelection,
@@ -17,12 +18,13 @@ import {
 const NIVEAUX: NiveauCode[] = ['4e', '5e', '6e']
 
 const LABEL_TYPE: Record<TypeQuestionEvaluation, string> = {
-  ouverte: 'Questions ouvertes (formules / démonstrations)',
+  demonstration: 'Questions ouvertes — formules / démonstrations',
+  comprehension: 'Questions ouvertes — compréhension',
   vraiFaux: 'Vrai / Faux (avec justification)',
   exercice: 'Exercice généré',
 }
 
-const POINTS_DEFAUT: Record<TypeQuestionEvaluation, number> = { ouverte: 3, vraiFaux: 1, exercice: 4 }
+const POINTS_DEFAUT: Record<TypeQuestionEvaluation, number> = { demonstration: 3, comprehension: 2, vraiFaux: 1, exercice: 4 }
 const MAX_VRAI_FAUX = 35
 const MAX_EXERCICE = 10
 
@@ -30,7 +32,8 @@ function lignesInitiales(chapitre: ChapterContent | undefined): LigneSelection[]
   if (!chapitre) return []
   const lignes: LigneSelection[] = []
   for (const section of chapitre.sections) {
-    lignes.push({ sectionId: section.id, processus: 1, type: 'ouverte', nombre: 0, points: POINTS_DEFAUT.ouverte })
+    lignes.push({ sectionId: section.id, processus: 1, type: 'demonstration', nombre: 0, points: POINTS_DEFAUT.demonstration })
+    lignes.push({ sectionId: section.id, processus: 1, type: 'comprehension', nombre: 0, points: POINTS_DEFAUT.comprehension })
     lignes.push({ sectionId: section.id, processus: 1, type: 'vraiFaux', nombre: 0, points: POINTS_DEFAUT.vraiFaux })
     lignes.push({ sectionId: section.id, processus: 2, type: 'exercice', nombre: 0, points: POINTS_DEFAUT.exercice })
   }
@@ -61,10 +64,18 @@ export function EvaluationGeneratorPanel() {
 
   const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitre))
 
-  const apercusOuvertes = useMemo(() => {
+  const apercusDemonstration = useMemo(() => {
     const map = new Map<string, number>()
     if (chapitreFonctionnel && chapitre) {
       for (const section of chapitre.sections) map.set(section.id, deriveQuestionsOuvertes(section).length)
+    }
+    return map
+  }, [chapitre, chapitreFonctionnel])
+
+  const apercusComprehension = useMemo(() => {
+    const map = new Map<string, number>()
+    if (chapitreFonctionnel && chapitre) {
+      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsComprehension(section.id).length)
     }
     return map
   }, [chapitre, chapitreFonctionnel])
@@ -219,14 +230,22 @@ export function EvaluationGeneratorPanel() {
                           {section.number}. {section.title}
                         </summary>
                         {lignesSection.map((ligne) => {
-                          const disponibles = ligne.type === 'ouverte' ? apercusOuvertes.get(section.id) ?? 0 : ligne.type === 'vraiFaux' ? MAX_VRAI_FAUX : MAX_EXERCICE
-                          const indisponible = ligne.type === 'ouverte' && disponibles === 0
+                          const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
+                          const disponibles = estBanqueFixe
+                            ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(section.id) ?? 0
+                            : ligne.type === 'vraiFaux'
+                              ? MAX_VRAI_FAUX
+                              : MAX_EXERCICE
+                          const indisponible = estBanqueFixe && disponibles === 0
                           return (
                             <div className="admin-eval-ligne" key={ligne.type}>
                               <span className="admin-eval-ligne-label">
                                 {LABEL_TYPE[ligne.type]}
-                                {ligne.type === 'ouverte' && ` (${disponibles} disponible${disponibles > 1 ? 's' : ''})`}
-                                {indisponible && ' — aucune formule/démonstration dans ce point'}
+                                {estBanqueFixe && ` (${disponibles} disponible${disponibles > 1 ? 's' : ''})`}
+                                {indisponible &&
+                                  (ligne.type === 'demonstration'
+                                    ? ' — aucune formule/démonstration dans ce point'
+                                    : ' — aucune question de compréhension pour ce point')}
                               </span>
                               <label>
                                 Nombre
