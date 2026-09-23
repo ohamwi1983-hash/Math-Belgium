@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { SiteHeader } from '../components/SiteHeader'
+import { EvaluationGeneratorPanel } from '../components/admin/EvaluationGeneratorPanel'
 import { checkAdminPassword, isAdminSessionAuthed, markAdminSessionAuthed } from '../lib/adminAuth'
 
 export function AdminPage() {
@@ -50,10 +51,7 @@ export function AdminPage() {
             {error && <p className="admin-gate-error">Mot de passe incorrect.</p>}
           </form>
         ) : (
-          <div className="admin-panel-empty">
-            <p>Aucune option pour l’instant.</p>
-            <p>Dis-moi ce que tu veux ajouter ici, et ça apparaîtra à cet endroit.</p>
-          </div>
+          <EvaluationGeneratorPanel />
         )}
       </div>
     </>
