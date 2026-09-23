@@ -29,6 +29,10 @@ export type InteractiveWidgetTag =
   | 'log-exp-miroir-widget'
   | 'inequation-logarithmique-widget'
   | 'parametres-graphiques-widget'
+  | 'extremums-sinusoide-widget'
+  | 'modele-sinusoidal-widget'
+  | 'equation-trig-widget'
+  | 'secteur-segment-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

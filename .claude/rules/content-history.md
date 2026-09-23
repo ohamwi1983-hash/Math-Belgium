@@ -1529,3 +1529,77 @@ paths:
   --noEmit`/`oxlint` (4 fichiers)/`npm run build` propres ; re-passage du script Playwright dédié
   du correctif précédent (14 widgets × 2 thèmes, `0` échec) et de `regress_all.mjs` sur les 23
   chapitres (`0` erreur) pour confirmer l'absence de régression.
+
+- **5e (4h), Chapitre 2 — Trigonométrie** (`trigonometrie`) : 4 nouveaux widgets interactifs,
+  proposés puis validés explicitement (même mécanisme que pour les chapitres précédents),
+  identifiés dans les 4 sections qui n'avaient encore aucun atelier alors que le chapitre en
+  comptait déjà 3 (`archimede-widget`, `cercle-trigo-widget`, `sinusoide-widget`, non retouchés).
+  - **`extremums-sinusoide-widget`** — section 6 (Extremums), inséré juste après l'astuce
+    « relis toujours la question », avant l'entraînement. Curseurs A, ω, φ, b pour
+    $f(x)=A\sin(\omega x+\varphi)+b$, sélecteur maximums/minimums/réunis, DEUX panneaux (même
+    langage visuel que `cercle-trigo-widget`) : à gauche un cercle trigonométrique montrant que
+    les deux points $u=\pi/2$ (max, $\sin u=1$) et $u=-\pi/2$ (min, $\sin u=-1$) restent
+    **TOUJOURS** aux deux mêmes positions sur le cercle — un diamètre (« π rad ») les relie
+    quand ils sont réunis — quels que soient A/ω/φ/b réglés ; à droite le graphe de f avec les
+    marqueurs d'extremums réels (couleurs `accent`/`good` reprises telles quelles de
+    l'illustration statique déjà présente dans cette section) et une lecture directe de la
+    période effective (mesure demandée explicitement par l'utilisateur : « en faisant le lien
+    équivalent avec un cercle trigonométrique où on retrouve ces paramètres »). Fenêtre du
+    graphe FIXE ($x\in[-10;10]$, $y\in[-6;6]$, borné par le pire cas $A_{max}+|b|_{max}=5$) —
+    jamais recalculée depuis les curseurs, conformément à la règle déjà renforcée dans les
+    correctifs précédents.
+  - **`modele-sinusoidal-widget`** — section 7 (Modéliser), inséré juste après l'astuce de
+    vérification par une deuxième donnée, avant l'entraînement. Reprend **exactement** la
+    méthode de la section (jamais une variante) : curseurs rayon $r$, hauteur du centre $h$,
+    période $T$ — $A=r$, $b=h$, $\omega=2\pi/T$ toujours calculés, jamais réglables directement.
+    Un sélecteur de position de départ (bas/haut/mi-hauteur montant/descendant) — $\varphi$ n'est
+    **jamais** un curseur libre : il est toujours DÉDUIT de la position choisie
+    ($-\pi/2,\pi/2,0,\pi$), pour ne jamais contredire le principe pédagogique central de cette
+    section (φ vient d'une condition initiale, pas d'un réglage arbitraire). Panneau cercle
+    (position de départ sur la roue, même convention d'orientation que `cercle-trigo-widget` :
+    point $=(cx+R\cos\varphi, cy-R\sin\varphi)$) + panneau courbe (hauteur(t), lignes min/max,
+    point à $t=0$ et point de vérification à $t=T/2$, reprenant l'astuce du demi-tour). Réglages
+    par défaut ($r=15,h=17,T=8$, départ bas) reproduisent **exactement** l'exemple résolu de la
+    grande roue déjà dans le contenu ($\omega\approx\pi/4$, $\varphi\approx-\pi/2$, max=32,
+    min=2, vérifié à $t=4$) — confirmé à l'écran. Fenêtre du graphe FIXE ($x\in[0;24]$,
+    $y\in[-2;42]$, pire cas $h_{max}+r_{max}=40$ / $h_{min}-r_{max}=0$).
+  - **`equation-trig-widget`** — section 8 (Équations), inséré juste après l'exemple résolu
+    « deux familles de solutions », avant le piège sur la division par a. Sélecteur sin/cos/tan,
+    curseurs a, b (en **multiples de π**, pour rester dans des angles usuels), k. Panneau cercle
+    unique reprenant **exactement** la convention des 3 illustrations statiques déjà présentes
+    dans cette section (`circleAngles` : points reliés par une corde, ligne de repère
+    horizontale $y=k$ pour sin / verticale $x=k$ pour cos, rien pour tan) — le cercle ne dépend
+    **jamais** de a ni b (seule sa traduction en x, affichée juste en dessous, en dépend), ce qui
+    matérialise directement le principe demandé. Bornes de k volontairement élargies à
+    $[-1{,}3;1{,}3]$ pour sin/cos (au lieu de rester strictement dans $[-1;1]$) : glisser k
+    au-delà de 1 fait apparaître « |k| > 1 : aucune solution » directement sur le cercle et dans
+    le texte, réutilisant l'Attention déjà présente dans le contenu plutôt que de la contredire
+    en l'empêchant d'arriver. Résultat texte multi-lignes (α, x₁/x₂ ou x pour tan, avec la
+    période $2\pi/a$ ou $\pi/a$ déjà divisée — le piège de la section, donc jamais reproduit ici).
+  - **`secteur-segment-widget`** — section 3 (Problèmes de géométrie du cercle, pas la section 2
+    « Polygones » malgré la proposition initiale qui visait les deux : celle-ci calcule
+    spécifiquement secteur/triangle/segment/corde, exactement ce que fait ce widget), inséré
+    juste après l'astuce sur le triangle isocèle, avant l'entraînement. Curseurs n (nombre de
+    côtés, 3 à 12) et r (rayon). Diagramme : polygone régulier inscrit en trait fin, secteur OAB
+    mis en évidence (rayons OA/OB, corde AB, petit arc θ étiqueté), segment circulaire (entre la
+    corde et l'arc) rempli en couleur via un path SVG arc+ligne+Z. 4 stats (aire secteur, aire
+    triangle, aire segment, corde AB) puis une ligne de **vérification en direct** de l'astuce
+    déjà donnée dans le contenu ($n\times$segment = cercle − polygone), toujours cohérente quels
+    que soient n et r (vérifié analytiquement, pas juste affiché). Réglages par défaut ($n=6,r=4$)
+    reproduisent **exactement** l'exemple résolu de l'hexagone déjà dans le contenu (secteur
+    8,38 ; triangle 6,93 ; segment 1,45 ; vérification 8,70=8,70) — confirmé à l'écran. Testé
+    aussi aux bornes n=3 (triangle, grand segment) et n=12 (dodécagone, segment fin) : aucune
+    erreur, tracé cohérent dans les deux cas.
+  Vérifié : script Playwright dédié (chromium headless, `vite preview`, défilement complet de la
+  page pour déclencher le montage paresseux des 4 nouveaux ateliers — `IntersectionObserver`,
+  `BlockRenderer.tsx`) sur la page, thèmes clair ET sombre — `0` erreur console/page pour les 4 ;
+  captures d'écran réelles confirmant chaque widget (recoupées à la main avec les exemples
+  résolus du contenu, comme détaillé ci-dessus, pour `modele-sinusoidal-widget` et
+  `secteur-segment-widget`) ; positions des lignes `.axe`/`line.axe` identiques avant/après un
+  glissement simultané de TOUS les curseurs à 85% de leur course, sur les 3 widgets à fenêtre
+  fixe (`extremums-sinusoide-widget` — cercle ET graphe, `modele-sinusoidal-widget` — graphe,
+  `equation-trig-widget` — cercle) ; état « aucune solution » de `equation-trig-widget` testé en
+  poussant k à 1,25 (capture confirmant le message sur le cercle ET dans le texte). `tsc -p
+  tsconfig.app.json --noEmit`/`oxlint` (8 fichiers .js + les 3 fichiers TS/TSX modifiés)/
+  `npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0`
+  `NaN`, `0` `$` isolé.

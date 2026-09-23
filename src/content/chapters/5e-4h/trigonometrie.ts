@@ -463,6 +463,16 @@ export const trigonometrie: ChapterContent = {
             'besoin de connaître la hauteur ni la base.',
         },
         {
+          kind: 'atelier',
+          tag: 'secteur-segment-widget',
+          label: 'Manipule toi-même — secteur, triangle et segment en direct',
+          caption:
+            'Fais varier le nombre de côtés n et le rayon r : l\'aire du secteur, celle du ' +
+            'triangle isocèle et leur différence (le segment) se recalculent en direct, ainsi ' +
+            'que la corde AB. En bas, la vérification par l\'astuce ci-dessus (n × segment = ' +
+            'cercle − polygone) reste toujours exacte, quels que soient n et r.',
+        },
+        {
           kind: 'entrainement',
           title: 'Problèmes de géométrie du cercle',
           generatorId: '5gen12',
@@ -895,6 +905,17 @@ export const trigonometrie: ChapterContent = {
             'qu\'à la toute fin, si la question le demande explicitement.',
         },
         {
+          kind: 'atelier',
+          tag: 'extremums-sinusoide-widget',
+          label: 'Manipule toi-même — le lien avec le cercle trigonométrique',
+          caption:
+            'Sur le cercle (à gauche), les deux points « max » et « min » restent TOUJOURS à ' +
+            'la même position (à π l\'un de l\'autre), même quand tu règles le déphasage φ ou ' +
+            'la pulsation ω — seule leur TRADUCTION en x (à droite) en dépend. Sur le graphe, ' +
+            'regarde la période effective se diviser par deux quand tu bascules sur « tous ' +
+            'les extremums réunis ».',
+        },
+        {
           kind: 'entrainement',
           title: "Extremums d'une fonction sinusoïdale",
           generatorId: '5gen11',
@@ -1021,6 +1042,17 @@ export const trigonometrie: ChapterContent = {
             'de l\'énoncé — ici, le point haut à t=4, un demi-tour plus tard, comme dans ' +
             'l\'exemple ci-dessus. Une erreur de signe sur φ se détecte tout de suite si la ' +
             'vérification donne un minimum au lieu d\'un maximum, ou l\'inverse.',
+        },
+        {
+          kind: 'atelier',
+          tag: 'modele-sinusoidal-widget',
+          label: 'Manipule toi-même — construis le modèle pas à pas',
+          caption:
+            'Règle le rayon, la hauteur du centre et la période, puis choisis la position de ' +
+            'départ (t=0) sur la roue — A, b, ω et φ se recalculent en direct exactement selon ' +
+            'la méthode ci-dessus. φ n\'est jamais réglé directement : il est toujours DÉDUIT ' +
+            'de la position choisie, comme dans la méthode. La vérification affichée reprend ' +
+            'l\'astuce du demi-tour plus tard.',
         },
         {
           kind: 'entrainement',
@@ -1163,6 +1195,16 @@ export const trigonometrie: ChapterContent = {
             verticalLine: { x: 0.5, label: 'cos(u)=1/2' },
             caption: 'les deux points du cercle où l\'abscisse (cosinus) vaut 1/2 — symétriques par rapport à l\'axe horizontal',
           },
+        },
+        {
+          kind: 'atelier',
+          tag: 'equation-trig-widget',
+          label: 'Manipule toi-même — résous trig(ax+b) = k en direct',
+          caption:
+            'Choisis sin, cos ou tan, règle a, b et k : le cercle affiche les points-solutions ' +
+            'de u = ax+b (il ne dépend jamais de a ni b — seule la traduction en x, juste en ' +
+            'dessous, en dépend). Fais glisser k au-delà de 1 (sin/cos) pour voir « aucune ' +
+            'solution » apparaître, exactement comme dans l\'Attention ci-dessous.',
         },
         {
           kind: 'piege',

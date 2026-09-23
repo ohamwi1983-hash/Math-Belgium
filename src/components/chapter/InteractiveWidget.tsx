@@ -28,6 +28,10 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'log-exp-miroir-widget': () => import('../../interactive/register-log-exp-miroir-widget.js'),
   'inequation-logarithmique-widget': () => import('../../interactive/register-inequation-logarithmique-widget.js'),
   'parametres-graphiques-widget': () => import('../../interactive/register-parametres-graphiques-widget.js'),
+  'extremums-sinusoide-widget': () => import('../../interactive/register-extremums-sinusoide-widget.js'),
+  'modele-sinusoidal-widget': () => import('../../interactive/register-modele-sinusoidal-widget.js'),
+  'equation-trig-widget': () => import('../../interactive/register-equation-trig-widget.js'),
+  'secteur-segment-widget': () => import('../../interactive/register-secteur-segment-widget.js'),
 }
 
 /**
