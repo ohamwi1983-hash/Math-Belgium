@@ -44,8 +44,8 @@
     '.segment-neg{stroke:var(--bad,#a8322f);stroke-width:2.6;fill:none;}' +
     '.racine{fill:var(--ink,#241f1a);}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
-    '.table-zone{display:flex;justify-content:center;margin-bottom:14px;overflow-x:auto;}' +
-    'table.grille{border-collapse:collapse;font-family:var(--mono,monospace);font-size:12.5px;}' +
+    '.table-zone{margin-bottom:14px;overflow-x:auto;}' +
+    'table.grille{border-collapse:collapse;font-family:var(--mono,monospace);font-size:12.5px;margin:0 auto;}' +
     'table.grille th,table.grille td{border:1px solid var(--line,#e2d8c8);padding:6px 10px;text-align:center;min-width:34px;}' +
     'table.grille th{background:var(--surface-2,#faf6f0);color:var(--ink-faint,#9c9083);font-weight:500;}' +
     'table.grille td.rowlabel{text-align:left;font-family:var(--sans,sans-serif);font-weight:600;color:var(--ink-soft,#6b6055);background:var(--surface-2,#faf6f0);}' +
@@ -183,13 +183,16 @@
     });
   };
 
-  SigneTrinomeWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, racines) {
+  // Colore la courbe selon la solution de l'inéquation SÉLECTIONNÉE (vert = satisfait ◇ 0, rouge
+  // = ne satisfait pas), pas selon le signe brut de f — c'est le tableau de signes juste en
+  // dessous qui montre le signe brut (+/−), la courbe montre directement S.
+  SigneTrinomeWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, racines, veutPositif) {
     var bornes = [X_MIN].concat(racines.filter(function (r) { return r > X_MIN && r < X_MAX; }).sort(function (a, b) { return a - b; })).concat([X_MAX]);
     for (var i = 0; i < bornes.length - 1; i++) {
       var lo = bornes[i], hi = bornes[i + 1];
       if (hi - lo < 1e-6) continue;
       var mid = (lo + hi) / 2;
-      var classe = f(mid) >= 0 ? "segment-pos" : "segment-neg";
+      var classe = (f(mid) > 0) === veutPositif ? "segment-pos" : "segment-neg";
       this._traceIntervalle(svg, ns, lo, hi, f, classe);
     }
   };
@@ -296,7 +299,8 @@
     etiqX.textContent = "x";
     svg.appendChild(etiqX);
 
-    this._traceCourbeSignee(svg, ns, f, racines);
+    var veutPositif = this._symbole === "gt" || this._symbole === "ge";
+    this._traceCourbeSignee(svg, ns, f, racines, veutPositif);
     racines.forEach(function (r) {
       if (r < X_MIN || r > X_MAX) return;
       var p = self._toPx(r, 0);

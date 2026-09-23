@@ -169,8 +169,11 @@
     });
   };
 
-  // Trace logₐ(x) sur x>0, coupée exactement en x0=aᵏ, colorée selon logₐ(x) ≥ k ou < k.
-  InequationLogarithmiqueWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, x0) {
+  // Trace logₐ(x) sur x>0, coupée exactement en x0=aᵏ, colorée selon la solution de
+  // l'inéquation SÉLECTIONNÉE (vert = satisfait le symbole ◇ choisi, rouge = ne le satisfait
+  // pas) — jamais un simple ">=k" fixe, sinon la couleur contredit le surlignage vert/rouge de
+  // la demi-droite solution sur l'axe des x dès que le symbole est < ou ≤.
+  InequationLogarithmiqueWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, x0, veutSup) {
     var xDebut = 0.01;
     var bornes = [xDebut];
     if (isFinite(x0) && x0 > xDebut && x0 < X_MAX) bornes.push(x0);
@@ -179,7 +182,7 @@
       var lo = bornes[i], hi = bornes[i + 1];
       if (hi - lo < 1e-6) continue;
       var mid = (lo + hi) / 2;
-      var classe = f(mid) >= this._k ? "segment-pos" : "segment-neg";
+      var classe = (f(mid) > this._k) === veutSup ? "segment-pos" : "segment-neg";
       this._traceIntervalle(svg, ns, lo, hi, f, classe);
     }
   };
@@ -243,7 +246,7 @@
       svg.appendChild(etK);
     }
 
-    this._traceCourbeSignee(svg, ns, f, x0);
+    this._traceCourbeSignee(svg, ns, f, x0, veutSup);
 
     // Demi-droite solution surlignée en vert sur l'axe des x, extrémité en point
     // vert (borne incluse) ou rouge (borne exclue). Le domaine est x>0 : côté

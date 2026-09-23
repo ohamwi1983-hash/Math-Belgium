@@ -159,8 +159,11 @@
     });
   };
 
-  // Trace aˣ coupée exactement en x0 (où aˣ=k, si a≠1) et colorée selon aˣ ≥ k ou < k.
-  InequationExponentielleWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, x0) {
+  // Trace aˣ coupée exactement en x0 (où aˣ=k, si a≠1), colorée selon la solution de
+  // l'inéquation SÉLECTIONNÉE (vert = satisfait le symbole ◇ choisi, rouge = ne le satisfait
+  // pas) — jamais un simple ">=k" fixe, sinon la couleur contredit le surlignage vert/rouge de
+  // la demi-droite solution sur l'axe des x dès que le symbole est < ou ≤.
+  InequationExponentielleWidgetClass.prototype._traceCourbeSignee = function (svg, ns, f, x0, veutSup) {
     var bornes = [X_MIN];
     if (isFinite(x0) && x0 > X_MIN && x0 < X_MAX) bornes.push(x0);
     bornes.push(X_MAX);
@@ -168,7 +171,7 @@
       var lo = bornes[i], hi = bornes[i + 1];
       if (hi - lo < 1e-6) continue;
       var mid = (lo + hi) / 2;
-      var classe = f(mid) >= this._k ? "segment-pos" : "segment-neg";
+      var classe = (f(mid) > this._k) === veutSup ? "segment-pos" : "segment-neg";
       this._traceIntervalle(svg, ns, lo, hi, f, classe);
     }
   };
@@ -236,7 +239,7 @@
       svg.appendChild(etK);
     }
 
-    this._traceCourbeSignee(svg, ns, f, x0);
+    this._traceCourbeSignee(svg, ns, f, x0, veutSup);
 
     // Demi-droite solution surlignée en vert sur l'axe des x, extrémité en point
     // vert (borne incluse) ou rouge (borne exclue) — clampée à la fenêtre visible.

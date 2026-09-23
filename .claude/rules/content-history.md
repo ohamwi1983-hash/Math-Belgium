@@ -1479,3 +1479,53 @@ paths:
   avec flèche ; `domaine-composee-widget` : flèches en bout des 3 droites graduées). `tsc -p
   tsconfig.app.json --noEmit`/`oxlint` (les 14 fichiers)/`npm run build` propres ; sitewide
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **Retour utilisateur immédiat sur le lot ci-dessus, avec 3 captures d'écran à l'appui** : « les
+  couleurs des courbes sont fausses par rapport aux inégalités » et « les tableaux sont tronqués
+  dans les petits écrans (smartphone) ». Deux bugs distincts, tous deux dans les widgets à
+  sélecteur ◇ ajouté juste avant.
+  - **Couleurs de courbe incohérentes avec le symbole sélectionné**
+    (`inequation-exponentielle-widget`, `inequation-logarithmique-widget`,
+    `signe-trinome-widget`, `signe-produit-widget`) : `_traceCourbeSignee` colorait chaque segment
+    selon un critère FIXE (`f(x)≥k` ou `f(x)≥0`, vert/rouge), indépendant du symbole ◇
+    effectivement choisi dans le sélecteur. Résultat visible dans la capture jointe : pour
+    `inequation-exponentielle-widget` avec le symbole `< k`, le segment de gauche (qui EST la
+    solution $S=]-\infty;x_0[$, déjà surligné en vert sur l'axe par le correctif précédent) était
+    tracé en ROUGE sur la courbe elle-même — une contradiction directe entre les deux couleurs
+    visibles à l'écran en même temps. Corrigé en recalculant la classe depuis le symbole courant :
+    `(f(mid) > k) === veutSup` (widgets `k`) ou `(f(mid) > 0) === veutPositif` (widgets `0`), où
+    `veutSup`/`veutPositif` sont déjà calculés ailleurs dans `_rendre` pour construire le texte
+    $S=...$ — jamais une nouvelle logique parallèle. `_traceCourbeSignee` prend maintenant ce
+    booléen en paramètre explicite plutôt que de lire une constante fixe.
+    **`discriminant-racines-widget` délibérément exclu** : ce widget n'a AUCUN sélecteur ◇ (il ne
+    montre que Δ et le nombre de racines), donc son codage par signe brut (vert=positif,
+    rouge=négatif) n'a rien à quoi se comparer et reste correct tel quel — vérifié en relisant le
+    fichier (pas de `<select>` dans son template).
+    **Le tableau de signes n'a PAS été touché** (`signe-trinome-widget`, `signe-produit-widget`) :
+    sa ligne "signe de f(x)" / "produit" montre délibérément le signe BRUT (+/−), c'est tout le
+    sens d'un tableau de signes — seule la courbe SVG, qui n'a pas cette fonction de référence,
+    devait suivre la solution plutôt que le signe.
+  - **Tableaux de signes tronqués sur petit écran** (`signe-trinome-widget`,
+    `signe-produit-widget`) : `.table-zone{display:flex;justify-content:center;overflow-x:auto}`
+    centrait la table dans son conteneur scrollable — quand la table est plus large que l'écran,
+    la centrer revient à faire déborder autant à gauche qu'à droite, donc au chargement l'écran
+    montre le MILIEU de la table (ni l'étiquette de ligne à gauche, ni la dernière colonne à
+    droite), sans indice visuel qu'il faut faire défiler dans les deux sens pour tout voir — sur
+    mobile, où les barres de défilement sont souvent invisibles, ça se lit comme un tableau
+    simplement cassé. Corrigé en reprenant le motif déjà utilisé par le vrai `SignTable`
+    React du site (`.table-scroll{overflow-x:auto}` + table sans centrage forcé, `src/index.css`
+    ligne 484) : `.table-zone` perd `display:flex;justify-content:center` (simple
+    `overflow-x:auto` de bloc), et `table.grille` gagne `margin:0 auto` — centrée quand elle tient
+    dans l'écran, mais démarre à gauche (étiquette de ligne visible en premier, défilement
+    seulement vers la droite) dès qu'elle déborde, comme n'importe quel tableau qu'on lit de
+    gauche à droite.
+  Vérifié : script Playwright dédié changeant le symbole en direct sur
+  `inequation-exponentielle-widget` (`< k`) — capture d'écran confirmant le segment gauche
+  maintenant vert, cohérent avec le surlignage d'axe ; inspection programmatique des 4 segments de
+  `signe-produit-widget` en `> 0` (`]-\infty;0[` rouge, `]0;1[` vert, `]1;3[` rouge, `]3;+\infty[`
+  vert — recoupé à la main avec $S=]0;1[\cup]3;+\infty[$) ; capture d'écran mobile (390px,
+  `signe-trinome-widget` en `< 0`) confirmant le tableau entier visible sans défilement, étiquette
+  "signe de f(x)" et les 3 colonnes de bornes toutes à l'écran. `tsc -p tsconfig.app.json
+  --noEmit`/`oxlint` (4 fichiers)/`npm run build` propres ; re-passage du script Playwright dédié
+  du correctif précédent (14 widgets × 2 thèmes, `0` échec) et de `regress_all.mjs` sur les 23
+  chapitres (`0` erreur) pour confirmer l'absence de régression.
