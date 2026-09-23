@@ -129,7 +129,7 @@
     '.legende-panneau{text-align:center;font-size:0.82rem;color:var(--ink-faint,#9c9083);margin:4px 0 0;font-family:var(--sans,sans-serif);}' +
     '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
     '.stat{flex:1 1 0;min-width:88px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
-    '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;text-transform:uppercase;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
+    '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
     '.controles{display:flex;flex-direction:column;gap:14px;}' +
     '.ligne-select{display:flex;align-items:center;gap:10px;justify-content:center;}' +

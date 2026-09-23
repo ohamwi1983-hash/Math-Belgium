@@ -1094,3 +1094,42 @@ paths:
   Vérifié par rendu navigateur réel ; `0` erreur console, `0` `$` isolé. `tsc -p tsconfig.app.json
   --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres :
   `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **Bug sitewide — `text-transform: uppercase` mettait en majuscule des variables/paramètres
+  censés rester en minuscule** (`kicker` de section, `label` de callout, `label` d'`atelier`,
+  `.stat-label` des widgets interactifs) : sur signalement direct de l'utilisateur avec un
+  exemple précis (`fonctions-exponentielles.ts`, kicker "(aˣ)' = ln(a)·aˣ — et le cas particulier
+  de e" rendu "(AˣY = LN(A)·Aˣ — ET LE CAS PARTICULIER DE E"). Ces champs sont du texte BRUT (pas
+  de RichText/KaTeX, voir `.claude/rules/content-authoring.md`), donc une variable comme `a` ou
+  `e` tapée en minuscule dans le contenu — cohérente avec le rendu KaTeX partout ailleurs sur la
+  page — se retrouvait visuellement transformée en `A`/`E` par la seule feuille de style, sans
+  aucun moyen de le distinguer d'une vraie majuscule.
+  **Audit complet effectué avant toute correction** (agent dédié, tous les `text-transform:
+  uppercase` de `src/index.css` et de tous les widgets `src/interactive/*.js`), pour ne corriger
+  que les règles réellement concernées et ne pas casser les usages sûrs :
+  - **Confirmées bugguées, corrigées** (retrait de `text-transform: uppercase`, le reste de la
+    règle CSS conservé — famille de police mono, espacement des lettres, couleur — pour garder le
+    même rôle visuel de "petite étiquette") : `.section-kicker`, `.callout-label`,
+    `.atelier-label`, `.wrong-right .tag` (`src/index.css`) ; `.stat-label` dans
+    `archimede-widget.js`, `cercle-trigo-widget.js`, `exponentielle-widget.js`,
+    `sinusoide-widget.js`, `tangente-exponentielle-widget.js` (widgets interactifs — même
+    correctif appliqué aux 2 widgets nouvellement créés dans cette session, ex. le stat-label "a"
+    de `tangente-exponentielle-widget` s'affichait "A").
+  - **Confirmées non-bugguées, volontairement inchangées** : `.exemple-head .badge` (une règle
+    `text-transform: none` existait déjà en override sur ce sous-élément précisément pour cette
+    raison — piège déjà anticipé ailleurs dans le CSS) ; `.level-kicker`/`.chapter-card-eyebrow`/
+    `.eyebrow`/`.toc-label`/`.generator-head .eyebrow2` (texte d'interface fixe ou généré, jamais
+    de variable mathématique authored) ; `.entete` de `gen7-widget.js`/`gen8-widget.js` (noms
+    d'étapes multi-mots type "Coefficients"/"Allure", jamais de variable seule).
+  Un exemple a révélé que la casse peut être **sémantiquement significative** et non un simple
+  artefact de police : le kicker de `cercle-trigonometrique-triangles.ts` ("a/sinA = b/sinB =
+  c/sinC...") mélange délibérément minuscules (côtés a, b, c) et majuscules (sommets/angles A, B,
+  C), une convention explicitée juste en dessous dans le contenu ("le côté minuscule est toujours
+  opposé au sommet de même lettre majuscule") — avec `text-transform: uppercase` actif, cette
+  distinction était purement et simplement effacée visuellement ; sans lui, elle redevient
+  lisible telle qu'écrite.
+  Vérifié par rendu navigateur réel (clair et sombre, sur deux chapitres différents) et lecture du
+  `text-transform` calculé (`getComputedStyle`) sur `.section-kicker`/`.callout-label`/
+  `.atelier-label`/`.stat-label` des widgets — confirmé `none` partout après correctif. `0` erreur
+  console, `0` `$` isolé. `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ;
+  sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

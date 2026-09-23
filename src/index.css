@@ -272,7 +272,6 @@ h2.section-title { font-size: 1.55rem; font-weight: 600; }
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--ink-faint);
   margin: -14px 0 20px 0;
 }
@@ -295,10 +294,10 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 }
 .callout p:last-child { margin-bottom: 0; }
 .callout-label {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
   margin: 0 0 8px; font-weight: 600; display: flex; align-items: center; gap: 6px;
 }
-.callout-label .icon { font-size: 13px; text-transform: none; letter-spacing: 0; }
+.callout-label .icon { font-size: 13px; letter-spacing: 0; }
 .callout-rappel { border-left-color: var(--ink-faint); }
 .callout-rappel .callout-label { color: var(--ink-faint); }
 .callout-piege { border-left-color: var(--bad); background: var(--bad-soft); }
@@ -354,7 +353,7 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .wrong-right .wrong { background: var(--bad-soft); border: 1px dashed var(--bad); }
 .wrong-right .right { background: var(--good-soft); border: 1px solid var(--good); }
 .wrong-right .wrong .tag, .wrong-right .right .tag {
-  display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 5px;
+  display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em; margin-bottom: 5px;
 }
 .wrong-right .wrong .tag { color: var(--bad); }
 .wrong-right .right .tag { color: var(--good); }
@@ -441,7 +440,7 @@ figcaption {
   background: var(--surface); text-align: center;
 }
 .atelier-label {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
   color: var(--accent-ink); margin: 0 0 18px; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .atelier-caption { margin: 18px 0 0; font-size: 0.88rem; color: var(--ink-faint); }
