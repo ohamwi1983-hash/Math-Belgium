@@ -15,6 +15,9 @@ export type InteractiveWidgetTag =
   | 'cercle-trigo-widget'
   | 'exponentielle-widget'
   | 'tangente-exponentielle-widget'
+  | 'reciproque-miroir-widget'
+  | 'cyclometrique-miroir-widget'
+  | 'cyclometrique-tangente-widget'
 
 export type IllustrationSpec =
   | { kind: 'machine' }

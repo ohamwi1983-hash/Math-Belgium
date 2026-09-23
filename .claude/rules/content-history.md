@@ -1133,3 +1133,59 @@ paths:
   `.atelier-label`/`.stat-label` des widgets — confirmé `none` partout après correctif. `0` erreur
   console, `0` `$` isolé. `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ;
   sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **6e (6h), Chapitre 1 — Fonctions réciproques & cyclométriques**
+  (`fonctions-reciproques-cyclometriques`) : 3 nouveaux widgets interactifs, sur demande explicite
+  de l'utilisateur après une suggestion (jamais implémentée sans validation préalable) faite en
+  réponse à sa question « y a-t-il d'autres widgets intéressants à mettre ? ». Premier chapitre du
+  site à recevoir des widgets qui n'illustrent pas un paramètre numérique (a, b, c...) mais une
+  **relation géométrique** — la symétrie par rapport à $y=x$ — d'où un mécanisme commun aux deux
+  premiers, factorisé en deux fichiers distincts plutôt qu'un seul paramétrable, pour rester
+  fidèle à la convention "un widget = un fichier = un Web Component".
+  - **`reciproque-miroir-widget`** — section 1, inséré juste après l'illustration statique
+    $f(x)=2x+1$/$f^{-1}(x)=(x-1)/2$, avant "Propriétés de la réciproque". Sélecteur entre une
+    fonction linéaire ($2x+1$) et une cubique ($x^3$), curseur $x$ déplaçant un point sur $f$
+    (orange) ; son symétrique sur $f^{-1}$ (vert) suit automatiquement, relié par un pointillé
+    violet perpendiculaire à la diagonale $y=x$ (grise). Fenêtre **carrée** ($x,y \in [-7;7]$),
+    condition nécessaire pour que $y=x$ apparaisse bien à 45° et que le symétrique se lise
+    vraiment comme un reflet — un domaine non carré aurait cassé cette lecture géométrique.
+  - **`cyclometrique-miroir-widget`** — section 2, inséré juste après l'illustration qui montre
+    déjà sin/arcsin en miroir (points $(\pi/2;1)$ et $(1;\pi/2)$ marqués), avant "D'où vient le
+    mot « arc » ?". Instancie exactement le même mécanisme que le widget précédent, mais
+    restreint à sin/cos/tan (sélecteur), avec une fenêtre carrée **propre à chaque fonction**
+    (span identique en x et y, mais pas nécessairement centrée en 0 — ex. cos : $x,y \in
+    [-1,3;3,6]$, pour contenir à la fois le domaine $[0;\pi]$ de la restriction et l'image
+    $[0;\pi]$ de arccos). tan/arctan tronqués à $x \in [-1,3;1,3]$ (bien en-deçà des asymptotes
+    $\pm\pi/2\approx1,5708$) pour rester dans une fenêtre finie sans jamais s'approcher d'une
+    division par 0.
+  - **`cyclometrique-tangente-widget`** — section 4, inséré juste après le `piege` sur le signe
+    moins de arccos, avant "Pour aller plus loin — d'où viennent ces trois formules ?".
+    Sélecteur arcsin/arccos/arctan, curseur $x$ déplaçant un point sur la courbe avec sa
+    tangente (trait plein, sur le modèle de `tangente-exponentielle-widget`) et sa pente
+    affichée en direct, calculée par la formule exacte du tableau juste au-dessus (jamais une
+    dérivée numérique approchée). Bornes de curseur **volontairement ouvertes** pour
+    arcsin/arccos ($x \in [-0,99;0,99]$, jamais $\pm1$ pile) : la pente y explose (dérivée non
+    définie en $\pm1$, démontrée juste après dans la même section) — en s'approchant du bord,
+    l'élève voit la tangente devenir presque verticale, lien direct et volontaire avec la
+    démonstration par l'absurde qui suit. Tangente **clippée proprement au cadre** par
+    intersection droite/rectangle paramétrique (jamais coupée net ni laissée déborder) — piège
+    anticipé dès la conception, contrairement aux autres widgets de la session où un dépassement
+    avait été découvert après coup.
+  **Bug de rognage trouvé et corrigé sur les deux widgets "miroir"**, avant tout commit (capture
+  d'écran prise pendant la vérification, pas après un signalement utilisateur) : l'étiquette
+  d'un point mobile, toujours ancrée à droite du point (`x+8`), se faisait couper par le bord du
+  cadre SVG dès que le point s'approchait de la limite droite de la fenêtre (ex. $(5,83;1,80)$
+  sur la fonction cubique) — un `<svg>` racine a un `overflow:hidden` implicite, contrairement à
+  une simple sortie de viewBox qui resterait visible. Corrigé par une méthode `_etiquettePoint`
+  commune aux deux widgets, qui choisit l'ancrage (gauche/droite, haut/bas) selon la proximité
+  réelle du point aux bords du cadre plutôt qu'un décalage fixe — vérifié par capture d'écran
+  avant/après sur le cas qui avait révélé le bug.
+  Vérifié par rendu navigateur réel (clair et sombre) et interaction Playwright réelle
+  (changement de sélecteur + curseur au maximum, pour chaque widget) : valeurs recoupées à la
+  main ($f(1{,}80)=1{,}80^3=5{,}832$ pour le widget 1 ; $\tan(1{,}3)\approx3{,}602$ pour le
+  widget 2 ; $\text{arcsin}'(0{,}98)=1/\sqrt{1-0{,}98^2}\approx5{,}025$ et
+  $\text{arctan}'(6)=1/37\approx0{,}027$ pour le widget 3) ; scan `document.createTreeWalker` du
+  `shadowRoot` de chaque widget à la recherche de `^`/`$`/`NaN`/`Infinity`/`undefined` — `0`
+  partout. `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé (SVG du chapitre
+  passés de 58 à 61, confirmant les 3 ajouts).

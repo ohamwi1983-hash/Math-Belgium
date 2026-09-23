@@ -296,6 +296,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           },
         },
         {
+          kind: 'atelier',
+          tag: 'reciproque-miroir-widget',
+          label: 'Manipule toi-même — le miroir f / f⁻¹',
+          caption:
+            'Fais glisser le point sur f (en orange) : son symétrique suit automatiquement sur ' +
+            'f⁻¹ (en vert), de l\'autre côté de la droite y = x. Bascule entre une fonction ' +
+            'linéaire et une fonction cubique pour voir que le miroir marche pour toute ' +
+            'fonction bijective, pas seulement pour une droite.',
+        },
+        {
           kind: 'definition',
           label: 'Propriétés de la réciproque',
           items: [
@@ -806,6 +816,16 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               'correspondent. Même figure, mutatis mutandis, pour cos/arccos et tan/arctan.',
           },
         },
+        {
+          kind: 'atelier',
+          tag: 'cyclometrique-miroir-widget',
+          label: 'Manipule toi-même — le même miroir, appliqué à sin/cos/tan',
+          caption:
+            'Choisis sin, cos ou tan : le point mobile sur la restriction bijective (en orange) ' +
+            'a toujours son symétrique sur l\'arcfonction (en vert), par rapport à y = x — ' +
+            'exactement le miroir de la section précédente, appliqué ici aux trois fonctions ' +
+            'cyclométriques.',
+        },
         { kind: 'subheading', text: "D'où vient le mot « arc » ?" },
         {
           kind: 'para',
@@ -1212,6 +1232,17 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'Attention au signe **moins** devant la dérivée de arccos : c\'est la seule des ' +
             "trois qui est négative ! Comme pour toute composée, n'oublie pas de multiplier " +
             "par $u'(x)$ (règle de la chaîne).",
+        },
+        {
+          kind: 'atelier',
+          tag: 'cyclometrique-tangente-widget',
+          label: 'Manipule toi-même — la tangente et sa pente',
+          caption:
+            'Choisis arcsin, arccos ou arctan, puis fais glisser le point sur la courbe : la ' +
+            'pente affichée est calculée par la formule du tableau ci-dessus. Rapproche-toi de ' +
+            '±1 en arcsin/arccos pour voir la tangente devenir presque verticale — la pente ' +
+            'explose, exactement ce que la démonstration de non-dérivabilité en ±1 établira ' +
+            'plus loin.',
         },
         { kind: 'subheading', text: 'Pour aller plus loin — d\'où viennent ces trois formules ?' },
         {

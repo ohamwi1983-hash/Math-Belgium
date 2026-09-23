@@ -14,6 +14,9 @@ const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
   'cercle-trigo-widget': () => import('../../interactive/register-cercle-trigo-widget.js'),
   'exponentielle-widget': () => import('../../interactive/register-exponentielle-widget.js'),
   'tangente-exponentielle-widget': () => import('../../interactive/register-tangente-exponentielle-widget.js'),
+  'reciproque-miroir-widget': () => import('../../interactive/register-reciproque-miroir-widget.js'),
+  'cyclometrique-miroir-widget': () => import('../../interactive/register-cyclometrique-miroir-widget.js'),
+  'cyclometrique-tangente-widget': () => import('../../interactive/register-cyclometrique-tangente-widget.js'),
 }
 
 /**
