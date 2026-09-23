@@ -104,6 +104,14 @@
     --ink-faint: #4c5960;
     --line: #7c8a93;
     --line-soft: #a9b6bd;
+    /* Tous les titres/sous-titres (h1.chapter-title, h2.section-title, h3.sub-title,
+       .section-num, .chapter-lede, kickers/labels…) sont dimensionnés en `rem`, donc relatifs à
+       cette racine — jamais un `em` du corps de texte. Le seul point commun avec le `body` en px
+       ci-dessous est le même ratio d'impression (12/17) : le réduire ici les fait tous rétrécir
+       PROPORTIONNELLEMENT, sans toucher chaque sélecteur un par un. `:root` n'a aucune règle
+       `font-size` hors media query avec laquelle entrer en conflit de spécificité — pas besoin de
+       !important ici (contrairement au `body` juste en dessous). */
+    font-size: calc(16px * 12 / 17);
   }
   /* !important nécessaire : la règle `body { background: <quadrillage>, var(--paper) }` plus bas
      dans ce fichier est hors media query (s'applique toujours) et arrive APRÈS ce bloc dans
