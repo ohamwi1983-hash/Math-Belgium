@@ -100,7 +100,7 @@ export const fonctionsExponentielles: ChapterContent = {
             xTicks: [1, 2, 3],
             fixedYRange: { min: -1, max: 10 },
             textLabels: [
-              { x: 3.45, y: 2.4, text: 'S₀·2^t : ×2 par semaine', tone: 'accent', anchor: 'end' },
+              { x: 3.45, y: 2.4, text: 'S₀·2ᵗ : ×2 par semaine', tone: 'accent', anchor: 'end' },
               { x: 0.2, y: 6.1, text: '1,2t+3 : +1,2 par semaine', tone: 'faint', anchor: 'start' },
             ],
             points: [
@@ -404,9 +404,9 @@ export const fonctionsExponentielles: ChapterContent = {
           headers: ['Notation fonctionnelle', 'En pratique', 'Exemple'],
           rows: [
             ["expₐ′ = ln(a)·expₐ", "(aˣ)′ = aˣ·ln(a)", "(3ˣ)′ = 3ˣ·ln(3)"],
-            ["(expₐ ∘ f)′ = ln(a)·f′·(expₐ ∘ f)", "(a^f(x))′ = f′(x)·a^f(x)·ln(a)", "(3^(x⁴−x))′ = (4x³−1)·3^(x⁴−x)·ln(3)"],
+            ["(expₐ ∘ f)′ = ln(a)·f′·(expₐ ∘ f)", "(aᶠ⁽ˣ⁾)′ = f′(x)·aᶠ⁽ˣ⁾·ln(a)", "(3⁽ˣ⁴⁻ˣ⁾)′ = (4x³−1)·3⁽ˣ⁴⁻ˣ⁾·ln(3)"],
             ["exp′ = exp", "(eˣ)′ = eˣ", "(eˣ)′ = eˣ"],
-            ["(exp ∘ f)′ = f′·(exp ∘ f)", "(e^f(x))′ = f′(x)·e^f(x)", "(e^sin x)′ = cos(x)·e^sin x"],
+            ["(exp ∘ f)′ = f′·(exp ∘ f)", "(eᶠ⁽ˣ⁾)′ = f′(x)·eᶠ⁽ˣ⁾", "(eˢⁱⁿ ˣ)′ = cos(x)·eˢⁱⁿ ˣ"],
           ],
         },
         { kind: 'subheading', text: "Composer une exponentielle peut restreindre le domaine" },
@@ -546,10 +546,10 @@ export const fonctionsExponentielles: ChapterContent = {
             xTicks: [-1, 1],
             fixedYRange: { min: -0.6, max: 4.2 },
             textLabels: [
-              { x: -1.45, y: 4.0, text: 'y=e^x', tone: 'accent', anchor: 'start' },
-              { x: -1.45, y: 3.45, text: 'y=2^x', tone: 'good', anchor: 'start' },
-              { x: -1.45, y: 2.9, text: 'tangente à e^x : pente 1', tone: 'faint', anchor: 'start' },
-              { x: -1.45, y: 2.35, text: 'tangente à 2^x : pente ln(2)≈0,69', tone: 'faint', anchor: 'start' },
+              { x: -1.45, y: 4.0, text: 'y=eˣ', tone: 'accent', anchor: 'start' },
+              { x: -1.45, y: 3.45, text: 'y=2ˣ', tone: 'good', anchor: 'start' },
+              { x: -1.45, y: 2.9, text: 'tangente à eˣ : pente 1', tone: 'faint', anchor: 'start' },
+              { x: -1.45, y: 2.35, text: 'tangente à 2ˣ : pente ln(2)≈0,69', tone: 'faint', anchor: 'start' },
             ],
             points: [{ x: 0, y: 1, label: '(0;1)', tone: 'accent', labelPos: 'right' }],
             xAxisLabel: 'x',
@@ -557,7 +557,7 @@ export const fonctionsExponentielles: ChapterContent = {
             caption:
               "Toutes les exponentielles passent par (0;1), mais elles n'y arrivent pas avec la " +
               'même pente. Les deux droites grises sont les tangentes en ce point : la plus ' +
-              "pentue est celle de e^x, de pente exactement 1 ; l'autre est celle de 2^x, de " +
+              "pentue est celle de eˣ, de pente exactement 1 ; l'autre est celle de 2ˣ, de " +
               "pente ln(2) ≈ 0,69. C'est cette pente — et rien d'autre — que l'on appelle " +
               'ln(a) ; la base e est celle, et la seule, pour laquelle elle vaut 1.',
           },
@@ -663,8 +663,8 @@ export const fonctionsExponentielles: ChapterContent = {
             xTicks: [-2, -1, 1, 2],
             fixedYRange: { min: -0.6, max: 5 },
             textLabels: [
-              { x: -2.15, y: 4.6, text: 'y=2^x', tone: 'accent', anchor: 'start' },
-              { x: -2.15, y: 3.95, text: 'y=ln(2)·2^x', tone: 'good', anchor: 'start' },
+              { x: -2.15, y: 4.6, text: 'y=2ˣ', tone: 'accent', anchor: 'start' },
+              { x: -2.15, y: 3.95, text: 'y=ln(2)·2ˣ', tone: 'good', anchor: 'start' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -686,8 +686,8 @@ export const fonctionsExponentielles: ChapterContent = {
             xTicks: [-2, -1, 1, 2],
             fixedYRange: { min: -3.5, max: 5 },
             textLabels: [
-              { x: 2.15, y: 4.6, text: 'y=0,5^x', tone: 'accent', anchor: 'end' },
-              { x: 2.15, y: 3.9, text: 'y=ln(0,5)·0,5^x', tone: 'good', anchor: 'end' },
+              { x: 2.15, y: 4.6, text: 'y=0,5ˣ', tone: 'accent', anchor: 'end' },
+              { x: 2.15, y: 3.9, text: 'y=ln(0,5)·0,5ˣ', tone: 'good', anchor: 'end' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
@@ -882,13 +882,13 @@ export const fonctionsExponentielles: ChapterContent = {
             testLine: { y: 8, points: [{ x: 3 }] },
             textLabels: [
               { x: -0.9, y: 8.5, text: 'y=8', tone: 'faint', anchor: 'start' },
-              { x: 2.3, y: 9.6, text: 'y=2^x', tone: 'accent', anchor: 'end' },
+              { x: 2.3, y: 9.6, text: 'y=2ˣ', tone: 'accent', anchor: 'end' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              "Lecture graphique de l'injectivité. Résoudre 2^x = 8, c'est chercher les " +
-              'abscisses où la courbe rencontre la droite horizontale y = 8. Comme 2^x est ' +
+              "Lecture graphique de l'injectivité. Résoudre 2ˣ = 8, c'est chercher les " +
+              'abscisses où la courbe rencontre la droite horizontale y = 8. Comme 2ˣ est ' +
               "strictement croissante, elle ne peut couper cette droite qu'une seule fois : il " +
               "y a donc au plus une solution — et comme 8 = 2³, c'est x = 3. Toute horizontale " +
               'y = k avec k > 0 donnerait de même exactement un point.',
@@ -1155,19 +1155,19 @@ export const fonctionsExponentielles: ChapterContent = {
             fixedYRange: { min: -1, max: 9 },
             testLine: { y: 4, points: [{ x: 2 }, { x: -2 }] },
             textLabels: [
-              { x: -3.3, y: 5.4, text: '0,5^x', tone: 'bad', anchor: 'start' },
+              { x: -3.3, y: 5.4, text: '0,5ˣ', tone: 'bad', anchor: 'start' },
               { x: -3.3, y: 4.4, text: 'y=4', tone: 'faint', anchor: 'start' },
-              { x: 3.3, y: 5.4, text: '2^x', tone: 'accent', anchor: 'end' },
+              { x: 3.3, y: 5.4, text: '2ˣ', tone: 'accent', anchor: 'end' },
               { x: 2.05, y: 3.3, text: 'x=2', tone: 'accent', anchor: 'start' },
               { x: -2.05, y: 3.3, text: 'x=−2', tone: 'bad', anchor: 'end' },
             ],
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              'Une même comparaison à la constante 4, dans deux bases. 2^x (base 2 > 1) est ' +
+              'Une même comparaison à la constante 4, dans deux bases. 2ˣ (base 2 > 1) est ' +
               'croissante : elle dépasse 4 à DROITE de son point de rencontre, donc ' +
-              '2^x ≥ 4 ⟺ x ≥ 2. 0,5^x (base 0,5 < 1) est décroissante : elle dépasse 4 à ' +
-              'GAUCHE du sien, donc 0,5^x ≥ 4 ⟺ x ≤ −2. Le comparateur écrit est le même — ' +
+              '2ˣ ≥ 4 ⟺ x ≥ 2. 0,5ˣ (base 0,5 < 1) est décroissante : elle dépasse 4 à ' +
+              'GAUCHE du sien, donc 0,5ˣ ≥ 4 ⟺ x ≤ −2. Le comparateur écrit est le même — ' +
               "l'ensemble-solution part du côté opposé.",
           },
         },
@@ -1384,7 +1384,7 @@ export const fonctionsExponentielles: ChapterContent = {
         },
         {
           kind: 'signTable',
-          caption: "Tableau de variations de f(x)=e^(−x²) — variation et concavité réunies",
+          caption: "Tableau de variations de f(x)=e⁽⁻ˣ²⁾ — variation et concavité réunies",
           rows: [
             {
               label: 'x',
@@ -1461,7 +1461,7 @@ export const fonctionsExponentielles: ChapterContent = {
             xAxisLabel: 'x',
             yAxisLabel: 'y',
             caption:
-              "f(x)=e^(−x²) : maximum en 0 (point plein), deux points d'inflexion (points " +
+              "f(x)=e⁽⁻ˣ²⁾ : maximum en 0 (point plein), deux points d'inflexion (points " +
               'creux) — la fameuse « courbe en cloche »',
           },
         },
@@ -1582,7 +1582,7 @@ export const fonctionsExponentielles: ChapterContent = {
             xTicks: [1, 2, 3],
             fixedYRange: { min: -40, max: 420 },
             textLabels: [
-              { x: 0.15, y: 330, text: 'Q(t)=100·1,5^t', tone: 'accent', anchor: 'start' },
+              { x: 0.15, y: 330, text: 'Q(t)=100·1,5ᵗ', tone: 'accent', anchor: 'start' },
               { x: 0.5, y: 190, text: '×1,5', tone: 'good', anchor: 'middle' },
               { x: 1.5, y: 260, text: '×1,5', tone: 'good', anchor: 'middle' },
               { x: 2.5, y: 370, text: '×1,5', tone: 'good', anchor: 'middle' },
@@ -1603,7 +1603,7 @@ export const fonctionsExponentielles: ChapterContent = {
               'Quatre mesures prises à intervalles de temps égaux : 100, 150, 225 et 337,5. ' +
               'Les DIFFÉRENCES (+50, +75, +112,5) ne sont pas constantes, mais les RAPPORTS le ' +
               'sont : 150/100 = 225/150 = 337,5/225 = 1,5. Le modèle est donc exponentiel, de ' +
-              "taux a = 1,5 et de valeur initiale b = 100 — d'où Q(t) = 100·1,5^t, la courbe " +
+              "taux a = 1,5 et de valeur initiale b = 100 — d'où Q(t) = 100·1,5ᵗ, la courbe " +
               'qui passe exactement par les quatre points.',
           },
         },

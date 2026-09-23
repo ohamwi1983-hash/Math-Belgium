@@ -39,9 +39,12 @@
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
     '.courbe-f{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
     '.courbe-derivee{stroke:var(--good,#2f7a4f);stroke-width:2.4;fill:none;}' +
-    '.tangente{stroke:var(--plan,#5b4ea3);stroke-width:2.2;stroke-dasharray:6 4;}' +
+    '.tangente{stroke:var(--plan,#5b4ea3);stroke-width:2.2;}' +
     '.point{fill:var(--accent,#a8471f);}' +
+    '.point-tangente{fill:var(--plan,#5b4ea3);}' +
+    '.guide-tangente{stroke:var(--plan,#5b4ea3);stroke-width:1.1;stroke-dasharray:4 3;opacity:0.7;}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.etiquette-tangente{font-size:11.5px;font-weight:600;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.legende{font-size:11.5px;font-weight:600;font-family:var(--sans,sans-serif);}' +
     '.legende-f{fill:var(--accent-ink,#7a3212);}' +
     '.legende-tangente{fill:var(--plan,#5b4ea3);}' +
@@ -175,7 +178,7 @@
   TangenteExponentielleWidgetClass.prototype._rendre = function () {
     var a = this._a;
     var lnA = Math.log(a);
-    this._formule.textContent = "f(x) = " + formatNombreFr(a, 4) + "^x";
+    this._formule.textContent = "f(x) = " + formatNombreFr(a, 4) + "ˣ";
     this._valeurA.textContent = formatNombreFr(a, 4);
     this._valA.textContent = formatNombreFr(a, 4);
     this._valFprime0.textContent = formatNombreFr(lnA, 4);
@@ -202,11 +205,39 @@
       this._traceFonction(svg, ns, function (x) { return lnA * Math.pow(a, x); }, "courbe-derivee");
     }
 
-    // Tangente en x=0 : y = 1 + f'(0)·x = 1 + ln(a)·x — droite entière sur la fenêtre.
+    // Tangente en x=0 : y = 1 + f'(0)·x = 1 + ln(a)·x — droite entière sur la fenêtre, en trait
+    // plein (pas pointillée : c'est une droite à part entière, pas une construction auxiliaire).
     if (this._tangenteVisible) {
       var pTan0 = self._toPx(X_MIN, 1 + lnA * X_MIN);
       var pTan1 = self._toPx(X_MAX, 1 + lnA * X_MAX);
       svg.appendChild(svgEl(ns, "line", { x1: pTan0[0].toFixed(2), y1: pTan0[1].toFixed(2), x2: pTan1[0].toFixed(2), y2: pTan1[1].toFixed(2), class: "tangente" }));
+
+      // Point de la tangente en x=1 (ordonnée réelle 1+ln(a), puisque la droite passe par (0;1)
+      // avec une pente ln(a)) — guides pointillés vers les deux axes, avec la valeur affichée à
+      // chaque intersection, sur le même principe que le point (1;a) du widget exponentielle-widget.
+      var yTan1 = 1 + lnA;
+      if (yTan1 >= Y_MIN && yTan1 <= Y_MAX) {
+        var pPointTan = self._toPx(1, yTan1);
+        var pAxeX1 = self._toPx(1, 0);
+        var pAxeY1 = self._toPx(0, yTan1);
+        svg.appendChild(svgEl(ns, "line", { x1: pPointTan[0].toFixed(2), y1: pPointTan[1].toFixed(2), x2: pAxeX1[0].toFixed(2), y2: pAxeX1[1].toFixed(2), class: "guide-tangente" }));
+        svg.appendChild(svgEl(ns, "line", { x1: pPointTan[0].toFixed(2), y1: pPointTan[1].toFixed(2), x2: pAxeY1[0].toFixed(2), y2: pAxeY1[1].toFixed(2), class: "guide-tangente" }));
+
+        var etX1 = svgEl(ns, "text", { x: pAxeX1[0].toFixed(2), y: (origine[1] + 16).toFixed(2), "text-anchor": "middle", class: "etiquette-tangente" });
+        etX1.textContent = "1";
+        svg.appendChild(etX1);
+        var etY1 = svgEl(ns, "text", { x: (origine[0] - 6).toFixed(2), y: (pAxeY1[1] + 4).toFixed(2), "text-anchor": "end", class: "etiquette-tangente" });
+        etY1.textContent = formatNombreFr(yTan1, 4);
+        svg.appendChild(etY1);
+
+        svg.appendChild(svgEl(ns, "circle", { cx: pPointTan[0].toFixed(2), cy: pPointTan[1].toFixed(2), r: 4, class: "point-tangente" }));
+        var etPointTan = svgEl(ns, "text", { x: (pPointTan[0] + 8).toFixed(2), y: (pPointTan[1] - 8).toFixed(2), class: "etiquette-tangente" });
+        // Point RÉEL de la tangente en x=1 : (1 ; 1+ln(a)), pas (1 ; ln(a)) — la droite passe par
+        // (0;1), pas par l'origine, donc son ordonnée en x=1 vaut 1 PLUS la pente. Étiqueté sous
+        // forme symbolique pour rester sans ambiguïté avec la valeur numérique juste au-dessus.
+        etPointTan.textContent = "(1;1+ln(a))";
+        svg.appendChild(etPointTan);
+      }
     }
 
     // f(x) = a^x — toujours visible, dessinée en dernier pour rester au premier plan.

@@ -1037,3 +1037,60 @@ paths:
   $\ln(e)=1$. `0` erreur console, `0` `$` isolé, `0` `NaN`, `0` occurrence de `Infinity`. `tsc -p
   tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur
   les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+  **Deux corrections sur retour utilisateur direct** :
+  - **Tangente en trait plein** (était pointillée) — c'est une droite à part entière, pas une
+    construction auxiliaire, contrairement au prolongement pointillé de `cercle-trigo-widget`. Les
+    guides projetant un point de cette tangente vers les axes restent, eux, en pointillé (rôle
+    différent : lecture de coordonnées, pas tracé de la droite elle-même).
+  - **Point de la tangente en x=1, projeté sur les deux axes** (nouveau) : guides pointillés +
+    valeurs affichées à chaque intersection, même principe que le point (1;a) d'`exponentielle-
+    widget`. **Vérification mathématique faite avant d'implémenter** : la tangente passe par
+    $(0;1)$ avec une pente $\ln(a)$, donc son équation est $y=1+\ln(a)\cdot x$ — en $x=1$,
+    l'ordonnée vaut $1+\ln(a)$, **pas** $\ln(a)$ comme l'énonçait la demande au premier abord (le
+    point $(1;\ln(a))$ n'est pas sur cette droite, sauf à passer par l'origine, ce qu'elle ne fait
+    pas). Implémenté avec la valeur réelle $1+\ln(a)$, étiquette du point volontairement
+    symbolique (`(1;1+ln(a))`) plutôt que numérique, pour ne jamais donner l'impression que le
+    point vaut littéralement $\ln(a)$ — la valeur $f'(0)=\ln(a)$ elle-même reste lisible séparément
+    dans l'encadré statistique déjà présent, inchangé.
+  - **Fix identique appliqué à `exponentielle-widget`** (chapitre 2, widget précédent) et à
+    `tangente-exponentielle-widget` : leur propre affichage de la formule ("f(x) = 2,0000^x")
+    utilisait encore un `^` littéral dans un `<p>` en texte brut (pas du KaTeX) — invisible au
+    premier scan Playwright de cette session car un `document.createTreeWalker` sur `document.body`
+    ne traverse PAS les Shadow DOM par défaut ; découvert seulement en inspectant la capture
+    d'écran du widget rendu. Corrigé en remplaçant `"^x"` par `"ˣ"` (caractère unicode) dans les
+    deux fichiers `.js`.
+  Vérifié par rendu navigateur réel et interaction Playwright : `stroke-dasharray` de la tangente
+  confirmé `none` (trait plein) ; guides et étiquettes de coordonnées comptés et lus après avoir
+  coché la case ; valeur $1+\ln(2)\approx1{,}6931$ recoupée à la main pour $a=2$. `0` erreur
+  console, `0` `$` isolé ; sitewide `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`,
+  `0` `$` isolé.
+
+- **6e (6h), Chapitre 2 — Fonctions exponentielles** (suite) : tous les `^` du chapitre remplacés
+  par l'indice en exposant unicode correspondant (ex. `a^6` → `a⁶`), sur demande explicite de
+  l'utilisateur ("beaucoup d'exponentielles étaient écrites avec des ^ dans les légendes des
+  graphes"). **Distinction cruciale faite avant toute modification** : les `^` À L'INTÉRIEUR d'une
+  paire `$...$` (LaTeX, déjà rendu par KaTeX comme un vrai exposant) ne devaient PAS être touchés —
+  seuls les `^` en texte BRUT (jamais passés par KaTeX) posaient réellement le problème visuel
+  décrit : `textLabels` de `curvePlot` (légendes directement sur le graphe), `caption` d'illustration/
+  `signTable` (passe par `RichText`, mais `RichText` ne traite QUE `$...$`/`**...**` — un `^` hors
+  de ces paires reste littéral), lignes de `featureTable` (les cellules passent par `RichText`,
+  donc pareil). Environ 25 occurrences corrigées sur 4 illustrations, 2 lignes de `featureTable`,
+  et un `signTable`, réparties sur tout le chapitre (dont une zone entière, lignes ~860-1150,
+  ratée au premier passage de grep et retrouvée par un second passage plus systématique).
+  **Cas particuliers de correspondance caractère-par-caractère** (aucun superscript unicode natif
+  pour "f(x)" ou "sin x" en un seul glyphe) : `a^f(x)` → `aᶠ⁽ˣ⁾` (chaque caractère de l'exposant
+  composé, y compris les parenthèses, a son propre équivalent unicode `⁽`/`ᶠ`/`ˣ`/`⁾`) ; `e^sin x`
+  → `eˢⁱⁿ ˣ` ; `3^(x⁴−x)` → `3⁽ˣ⁴⁻ˣ⁾` (le `⁴` déjà présent dans l'exposant reste tel quel — Unicode
+  n'a pas de "super-exposant", c'est la meilleure approximation possible hors KaTeX) ;
+  `e^(−x²)` → `e⁽⁻ˣ²⁾`.
+  **Vérification robuste, pas seulement un grep ligne par ligne** (qui donnait de faux positifs
+  sur les chaînes JS concaténées où une paire `$...$` LaTeX s'étend sur plusieurs lignes/fragments
+  de template) : script Node qui charge tout le fichier, retire globalement chaque portion
+  `$...$` (regex non gourmande sur le contenu complet, pas ligne par ligne), puis cherche les `^`
+  restants — `0` trouvé après correction. Complété par un scan Playwright en profondeur de la page
+  rendue ET des deux Shadow DOM des widgets du chapitre (`exponentielle-widget`,
+  `tangente-exponentielle-widget`) à la recherche d'un `^` dans un nœud texte — `0` partout,
+  page et widgets compris.
+  Vérifié par rendu navigateur réel ; `0` erreur console, `0` `$` isolé. `tsc -p tsconfig.app.json
+  --noEmit`/`oxlint`/`npm run build` propres ; sitewide `regress_all.mjs` sur les 23 chapitres :
+  `0` erreur, `0` `NaN`, `0` `$` isolé.

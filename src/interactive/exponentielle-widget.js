@@ -120,7 +120,7 @@
   ExponentielleWidgetClass.prototype._rendre = function () {
     var a = this._a;
     this._valeurA.textContent = formatNombreFr(a, 1);
-    this._formule.textContent = "f(x) = " + formatNombreFr(a, 1) + "^x";
+    this._formule.textContent = "f(x) = " + formatNombreFr(a, 1) + "ˣ";
     this._valType.textContent = a > 1 ? "croissante (a>1)" : a === 1 ? "constante (a=1)" : "décroissante (0≤a<1)";
     this._valPoint.textContent = "(1;" + formatNombreFr(a, 1) + ")";
 
