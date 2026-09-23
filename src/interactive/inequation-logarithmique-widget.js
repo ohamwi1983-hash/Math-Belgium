@@ -41,10 +41,13 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:12px;}' +
     'svg{width:100%;max-width:420px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
-    '.asymptote{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.ligne-k{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
     '.segment-pos{stroke:var(--good,#2f7a4f);stroke-width:2.6;fill:none;}' +
     '.segment-neg{stroke:var(--bad,#a8322f);stroke-width:2.6;fill:none;}' +
+    '.segment-solution{stroke:var(--good,#2f7a4f);stroke-width:5;stroke-linecap:round;}' +
+    '.point-inclus{fill:var(--good,#2f7a4f);stroke:var(--surface,#fff);stroke-width:1.5;}' +
+    '.point-exclus{fill:var(--bad,#a8322f);stroke:var(--surface,#fff);stroke-width:1.5;}' +
     '.point-x0{fill:var(--ink,#241f1a);}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.etiquette-x0{font-size:11.5px;font-weight:600;fill:var(--ink,#241f1a);font-family:var(--mono,monospace);}' +
@@ -217,15 +220,20 @@
     svg.innerHTML = "";
     var self = this;
 
+    var defs = svgEl(ns, "defs", {});
+    var fleche = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    fleche.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(fleche);
+    svg.appendChild(defs);
+
     var origine = self._toPx(0, 0);
-    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
-    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: MARGE, y2: HAUTEUR - MARGE, class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
+    // La verticale x=0 est ici à la fois axe des ordonnées ET asymptote verticale du
+    // logarithme (domaine x>0) : une seule ligne solide suffit, avec flèche vers le haut.
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: HAUTEUR - MARGE, y2: MARGE, class: "axe", "marker-end": "url(#fleche)" }));
     var etiqX = svgEl(ns, "text", { x: LARGEUR - MARGE + 6, y: origine[1] + 4, class: "etiquette" });
     etiqX.textContent = "x";
     svg.appendChild(etiqX);
-
-    var pA0 = self._toPx(0, Y_MIN), pA1 = self._toPx(0, Y_MAX);
-    svg.appendChild(svgEl(ns, "line", { x1: pA0[0].toFixed(2), y1: pA0[1].toFixed(2), x2: pA1[0].toFixed(2), y2: pA1[1].toFixed(2), class: "asymptote" }));
 
     if (k >= Y_MIN && k <= Y_MAX) {
       var pK0 = self._toPx(X_MIN, k), pK1 = self._toPx(X_MAX, k);
@@ -236,6 +244,21 @@
     }
 
     this._traceCourbeSignee(svg, ns, f, x0);
+
+    // Demi-droite solution surlignée en vert sur l'axe des x, extrémité en point
+    // vert (borne incluse) ou rouge (borne exclue). Le domaine est x>0 : côté
+    // ]0 ; x0[, la surbrillance s'arrête à l'asymptote (pas de point là, ce n'est
+    // pas une borne de solution) plutôt que de déborder vers X_MIN négatif.
+    var xDebut = direction ? Math.max(x0, X_MIN) : 0;
+    var xFin = direction ? X_MAX : Math.min(x0, X_MAX);
+    if (xDebut <= xFin) {
+      var pSeg0 = self._toPx(xDebut, 0), pSeg1 = self._toPx(xFin, 0);
+      svg.appendChild(svgEl(ns, "line", { x1: pSeg0[0].toFixed(2), y1: pSeg0[1].toFixed(2), x2: pSeg1[0].toFixed(2), y2: pSeg1[1].toFixed(2), class: "segment-solution" }));
+    }
+    if (x0 >= X_MIN && x0 <= X_MAX) {
+      var pPointSol = self._toPx(x0, 0);
+      svg.appendChild(svgEl(ns, "circle", { cx: pPointSol[0].toFixed(2), cy: pPointSol[1].toFixed(2), r: 5, class: large ? "point-inclus" : "point-exclus" }));
+    }
 
     if (isFinite(x0) && x0 >= X_MIN && x0 <= X_MAX) {
       var pX0 = self._toPx(x0, k);

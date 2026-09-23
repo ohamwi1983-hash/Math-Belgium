@@ -55,6 +55,7 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:16px;}' +
     'svg{width:100%;max-width:340px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.diagonale{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
     '.courbe-f{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
     '.courbe-finv{stroke:var(--good,#2f7a4f);stroke-width:2.6;fill:none;}' +
@@ -190,10 +191,17 @@
     svg.innerHTML = "";
     var self = this;
 
-    // Axes
+    var defs = svgEl(ns, "defs", {});
+    var marker = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    marker.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    // Axes — flèches en bout (marker-end), la ligne verticale est dessinée du bas vers le haut
+    // pour que son "end" (donc la flèche) pointe vers le haut, pas vers l'origine.
     var origine = self._toPx(0, 0);
-    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: TAILLE - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
-    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: MARGE, y2: TAILLE - MARGE, class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: TAILLE - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: TAILLE - MARGE, y2: MARGE, class: "axe", "marker-end": "url(#fleche)" }));
 
     // Diagonale y = x
     var pD0 = self._toPx(-DOMAINE, -DOMAINE);

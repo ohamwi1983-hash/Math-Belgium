@@ -13,6 +13,10 @@
   var BORNES_A = { min: 0.3, max: 2.6, step: 0.02 };
   var R_MIN = -1.5, R_MAX = 1.5;
   var TAILLE = 340, MARGE = 30;
+  // Fenêtre carrée FIXE (jamais recalculée depuis a/r courants, sinon les axes bougent avec le
+  // point qu'on est en train de faire glisser). Bornes = pire cas de expₐ(r) sur BORNES_A×[R_MIN,R_MAX] :
+  // max≈6,086 en (a=0,3 ; r=−1,5), min≈0,164 en (a=0,3 ; r=1,5) — toujours dans [R_MIN,R_MAX] côté bas.
+  var DOMAINE_MIN = -2.2, DOMAINE_MAX = 6.8;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -34,6 +38,7 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:16px;}' +
     'svg{width:100%;max-width:340px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.diagonale{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
     '.courbe-exp{stroke:var(--good,#2f7a4f);stroke-width:2.6;fill:none;}' +
     '.courbe-log{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
@@ -166,27 +171,24 @@
     this._valPointExp.textContent = "(" + formatNombreFr(r, 2) + " ; " + formatNombreFr(s, 2) + ")";
     this._valPointLog.textContent = "(" + formatNombreFr(s, 2) + " ; " + formatNombreFr(r, 2) + ")";
 
-    // Fenêtre carrée dynamique : combine le domaine de r et l'étendue réellement atteinte par
-    // expₐ sur ce domaine, pour que y=x reste à 45° quelle que soit la base choisie.
-    var sMin = Infinity, sMax = -Infinity;
-    for (var i = 0; i <= 60; i++) {
-      var rr = R_MIN + (i / 60) * (R_MAX - R_MIN);
-      var vv = expA(rr);
-      if (vv < sMin) sMin = vv;
-      if (vv > sMax) sMax = vv;
-    }
-    var lo = Math.min(R_MIN, sMin), hi = Math.max(R_MAX, sMax);
-    var marge = (hi - lo) * 0.08;
-    var win = { min: lo - marge, max: hi + marge };
+    // Fenêtre carrée fixe (voir DOMAINE_MIN/DOMAINE_MAX) — y=x reste à 45° quelle que soit la
+    // base choisie puisqu'elle est toujours carrée, mais ne bouge plus quand a ou r varie.
+    var win = { min: DOMAINE_MIN, max: DOMAINE_MAX };
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
     svg.innerHTML = "";
     var self = this;
 
+    var defs = svgEl(ns, "defs", {});
+    var fleche = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    fleche.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(fleche);
+    svg.appendChild(defs);
+
     var origine = self._toPx(win, 0, 0);
-    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: TAILLE - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
-    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: MARGE, y2: TAILLE - MARGE, class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: TAILLE - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: TAILLE - MARGE, y2: MARGE, class: "axe", "marker-end": "url(#fleche)" }));
 
     var pD0 = self._toPx(win, win.min, win.min);
     var pD1 = self._toPx(win, win.max, win.max);

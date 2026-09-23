@@ -98,6 +98,7 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:14px;}' +
     'svg{width:100%;max-width:420px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.ligne{stroke:var(--line,#e2d8c8);stroke-width:2;}' +
+    '.fleche{fill:var(--line,#e2d8c8);}' +
     '.segment{stroke:var(--good,#2f7a4f);stroke-width:6;stroke-linecap:round;}' +
     '.tick{stroke:var(--ink-soft,#6b6055);stroke-width:1.2;}' +
     '.tick-label{font-size:10.5px;fill:var(--ink-faint,#9c9083);font-family:var(--mono,monospace);}' +
@@ -172,7 +173,7 @@
   };
 
   DomaineComposeeWidgetClass.prototype._dessinerLigne = function (svg, ns, y, xMin, xMax, predicat, label, x) {
-    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: y, y2: y, class: "ligne" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: y, y2: y, class: "ligne", "marker-end": "url(#fleche)" }));
     var segs = segmentsVrais(predicat, xMin, xMax);
     segs.forEach(function (s) {
       var p0 = xPx(xMin, xMax, s[0]), p1 = xPx(xMin, xMax, s[1]);
@@ -203,6 +204,12 @@
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
     svg.innerHTML = "";
+
+    var defs = svgEl(ns, "defs", {});
+    var fleche = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    fleche.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(fleche);
+    svg.appendChild(defs);
 
     this._dessinerLigne(svg, ns, Y_LIGNES[0], preset.xMin, preset.xMax, preset.cond1, "dom(" + preset.labelInt + ")", x);
     this._dessinerLigne(svg, ns, Y_LIGNES[1], preset.xMin, preset.xMax, preset.cond2, preset.labelInt + "(x) ∈ dom(" + preset.labelExt + ")", x);

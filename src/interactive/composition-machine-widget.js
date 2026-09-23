@@ -78,6 +78,7 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:14px;}' +
     'svg{width:100%;max-width:440px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.courbe{stroke:var(--ink,#241f1a);stroke-width:2.4;fill:none;opacity:0.75;}' +
     '.guide-1{stroke:var(--accent,#a8471f);stroke-width:1.4;stroke-dasharray:4 3;}' +
     '.guide-2{stroke:var(--good,#2f7a4f);stroke-width:1.4;stroke-dasharray:4 3;}' +
@@ -193,9 +194,11 @@
 
   function dessinerAxes(svg, ns, xMin, xMax, yMin, yMax, y0Px, y1Px, label) {
     var origineY = toPx(xMin, xMax, y0Px, y1Px, yMin, yMax, xMin, Math.max(yMin, Math.min(yMax, 0)))[1];
-    svg.appendChild(svgEl(ns, "line", { x1: X_LEFT, x2: X_RIGHT, y1: origineY.toFixed(2), y2: origineY.toFixed(2), class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: X_LEFT, x2: X_RIGHT, y1: origineY.toFixed(2), y2: origineY.toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
     var origineX = toPx(xMin, xMax, y0Px, y1Px, yMin, yMax, Math.max(xMin, Math.min(xMax, 0)), yMin)[0];
-    svg.appendChild(svgEl(ns, "line", { x1: origineX.toFixed(2), x2: origineX.toFixed(2), y1: y1Px, y2: y0Px, class: "axe" }));
+    // Verticale dessinée du bas (y0Px) vers le haut (y1Px) pour que la flèche (marker-end)
+    // pointe vers le haut plutôt que vers l'origine.
+    svg.appendChild(svgEl(ns, "line", { x1: origineX.toFixed(2), x2: origineX.toFixed(2), y1: y0Px, y2: y1Px, class: "axe", "marker-end": "url(#fleche)" }));
     var et = svgEl(ns, "text", { x: X_LEFT, y: y1Px - 8, class: "etiquette-graphe" });
     et.textContent = label;
     svg.appendChild(et);
@@ -219,6 +222,12 @@
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
     svg.innerHTML = "";
+
+    var defs = svgEl(ns, "defs", {});
+    var marker = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    marker.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(marker);
+    svg.appendChild(defs);
 
     var yTop = etendue(premiere.fn, preset.aMin, preset.aMax);
     dessinerAxes(svg, ns, preset.aMin, preset.aMax, yTop.min, yTop.max, TOP_Y0, TOP_Y1, "C_" + labelInt);

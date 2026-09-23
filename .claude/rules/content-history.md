@@ -1391,3 +1391,91 @@ paths:
   contenu). `0` erreur console, `0` `^`/`$`/`NaN`/`Infinity`/`undefined` isolé (scan des 3
   `shadowRoot`). `tsc -p tsconfig.app.json --noEmit`/`oxlint`/`npm run build` propres ; sitewide
   `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.
+
+- **Retour utilisateur sur les 14 widgets auto-conçus (5 chapitres) : flèches d'axes manquantes,
+  axe vertical parfois absent, axes qui bougent avec la courbe, demi-droite solution non
+  surlignée** — lot de correctifs transversal sur `reciproque-miroir-widget`,
+  `cyclometrique-miroir-widget`, `cyclometrique-tangente-widget`, `discriminant-racines-widget`,
+  `signe-trinome-widget`, `signe-produit-widget`, `composition-machine-widget`,
+  `parite-derivee-widget`, `inequation-exponentielle-widget`, `croissance-saturation-widget`,
+  `log-exp-miroir-widget`, `inequation-logarithmique-widget`, `parametres-graphiques-widget`,
+  `domaine-composee-widget` (chapitres 6e-6h/fonctions-reciproques-cyclometriques, 4e/equations-
+  inequations-second-degre, 5e-4h/fonctions-composees, 6e-6h/fonctions-exponentielles, 6e-6h/
+  fonctions-logarithmes) — délibérément **hors scope** les widgets pour lesquels l'utilisateur
+  avait donné une spécification détaillée (`tangente-exponentielle-widget`, `exponentielle-widget`,
+  `archimede-widget`, `sinusoide-widget`, `cercle-trigo-widget`), le retour portant explicitement
+  sur « ceux où je ne t'avais donné aucune explication ».
+  - **Flèches en bout d'axe** (les 14 fichiers) : convention reprise telle quelle du composant React
+    du site, `DomainNumberLine.tsx` (`<marker id="..." markerWidth="8" markerHeight="8" refX="6"
+    refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z".../></marker>` + `marker-end`). Un bloc
+    `<defs><marker>` est reconstruit à chaque rendu juste après `svg.innerHTML = ""` (qui efface
+    aussi les defs précédents) ; id `"fleche"` réutilisé tel quel dans tous les fichiers (aucun
+    risque de collision, chaque instance de Web Component a son propre Shadow Root). Piège
+    d'orientation : une ligne verticale dessinée classiquement de haut en bas (`y1=MARGE,
+    y2=HAUTEUR-MARGE`) place son "bout" (`marker-end`) côté origine, donc une flèche pointant vers
+    le bas — toutes les verticales ont donc été inversées (`y1=HAUTEUR-MARGE, y2=MARGE`) pour que
+    `marker-end` pointe naturellement vers le haut, plutôt que de risquer `marker-start` (sémantique
+    moins portable d'un navigateur à l'autre). Étendu par cohérence à `domaine-composee-widget`
+    (droites graduées horizontales, même motif que `DomainNumberLine.tsx`) bien qu'il n'ait pas
+    d'axes cartésiens à proprement parler.
+  - **Axe vertical effectivement absent** : deux bugs distincts trouvés, chacun propre à un seul
+    fichier (pas un défaut générique des 14).
+    - `parametres-graphiques-widget` : la verticale $x=0$ était dessinée deux fois au même endroit
+      — une fois en `.axe` (solide), puis immédiatement recouverte par une seconde ligne en
+      `.asymptote` (pointillée), ce qui la faisait apparaître pointillée sans flèche à l'écran.
+      Cette seconde ligne redondante a été supprimée ; la classe `.asymptote` (devenue inutilisée
+      dans ce fichier) retirée du CSS.
+    - `inequation-logarithmique-widget` : même symptôme, cause différente — la verticale $x=0$ **est
+      elle-même**, mathématiquement, l'asymptote verticale du logarithme (domaine $x>0$), donc le
+      widget redessinait délibérément une seconde ligne pointillée exactement à l'emplacement de
+      l'axe déjà tracé. Là aussi supprimée (une seule ligne solide avec flèche suffit, un
+      commentaire explique pourquoi dans le code).
+  - **Axes qui bougent avec la courbe/le curseur** : fenêtres de tracé recalculées dynamiquement à
+    chaque rendu depuis les valeurs courantes des curseurs, sur 3 fichiers — corrigées en fenêtres
+    **fixes** (constantes, jamais recalculées), quitte à couper les combinaisons de curseurs les
+    plus extrêmes (`_traceCourbe`/`_traceFonction`/`_traceIntervalle` clippent déjà les points hors
+    fenêtre, ce n'était donc qu'un changement de bornes, pas de logique de tracé) :
+    - `croissance-saturation-widget` : `Y_MAX_CROISSANCE=8000` (couvre le réglage par défaut,
+      $Q(10)=100\cdot1{,}5^{10}\approx5767$, avec marge) et `Y_MAX_SATURATION=220` (borne
+      mathématiquement valable pour tout réglage puisque $p(t)<L\le200$ toujours, $L_{max}$ des
+      curseurs). La fonction `etendueY` devenue totalement inutilisée a été supprimée.
+    - `log-exp-miroir-widget` : `DOMAINE_MIN=-2,2 ; DOMAINE_MAX=6,8`, calculées à la main comme pire
+      cas de $a^r$ sur $a\in[0{,}3;2{,}6]$ (bornes du curseur) $\times$ $r\in[-1{,}5;1{,}5]$ (domaine
+      fixe déjà en place) : maximum $\approx6{,}086$ en $(a=0{,}3;r=-1{,}5)$, minimum $\approx0{,}164$
+      en $(a=0{,}3;r=1{,}5)$, toujours dans $[-1{,}5;1{,}5]$ côté bas — vérifié par calcul, pas
+      deviné.
+    - `parametres-graphiques-widget` : `Y_MIN_FIXE=-20 ; Y_MAX_FIXE=22`, pire cas de
+      $f(x)=a+b\ln(x)$ sur $a\in[-3;5]$, $b\in[-4;4]$, $x\in[0{,}02;8]$ : maximum $\approx20{,}65$
+      en $(a=5,b=-4,x=0{,}02)$, minimum $\approx-18{,}65$ en $(a=-3,b=4,x=0{,}02)$ — la constante
+      $b\cdot\ln(x)$ est maximale soit à $x=8$ (si $b>0$) soit à $x=0{,}02$ (si $b<0$), et
+      $|\ln(0{,}02)|>|\ln(8)|$ donc le pire cas de chaque signe de $b$ est toujours du côté
+      $x=0{,}02$.
+    `composition-machine-widget` a été audité mais **exclu** de ce correctif : sa fenêtre dépend
+    uniquement du preset/de l'ordre choisi (`preset.aMin/aMax`), jamais du curseur de position `a`
+    lui-même — vérifié en lisant le code (pas supposé), donc pas de bug ici.
+  - **Demi-droite solution surlignée** (`inequation-exponentielle-widget`,
+    `inequation-logarithmique-widget`) : nouveau segment épais (classe `.segment-solution`, couleur
+    `--good`) tracé sur l'axe des x lui-même, de l'extrémité $x_0$ (déjà calculée par le widget pour
+    le texte $S=...$) jusqu'au bord de la fenêtre dans la direction de la solution (`direction`,
+    déjà calculée) — puis un point à $x_0$, vert (`.point-inclus`) si la borne est incluse (symbole
+    large, `large===true`) ou rouge (`.point-exclus`) si elle est exclue (strict). Bornes clampées à
+    la fenêtre visible : si $x_0$ tombe hors cadre, tout ou rien du segment se dessine sans point
+    (borne non visible), au lieu de déborder ou de planter. Cas particuliers gérés séparément :
+    - `inequation-exponentielle-widget`, base $a=1$ ($\ln a=0$, pas de $x_0$) : $S=\mathbb{R}$
+      (toute la fenêtre surlignée, aucun point) ou $S=\varnothing$ (rien tracé).
+    - `inequation-logarithmique-widget`, domaine $x>0$ : le côté $]0;x_0[$/$]0;x_0]$ s'arrête à la
+      frontière du domaine ($x=0$, l'asymptote) plutôt que de continuer vers le $X_{MIN}$ négatif de
+      la fenêtre, et aucun point n'y est dessiné (ce n'est pas une borne de solution, juste la limite
+      du domaine).
+  Vérifié par script Playwright dédié (headless Chromium, `vite preview`) sur les 5 chapitres
+  concernés, thèmes clair ET sombre : présence d'au moins 1 `<marker>` et 1 référence `marker-end`
+  par widget, présence d'une ligne `.axe` solide (sauf `domaine-composee-widget`, qui n'a pas cette
+  classe par conception), positions des lignes `.axe` identiques avant/après un glissement de
+  curseur à 85% de sa course (comparaison JSON stricte), présence d'au moins un `.segment-solution`
+  ou point `.point-inclus`/`.point-exclus` après glissement pour les 2 widgets d'inéquation — `0`
+  échec sur `14` widgets × `2` thèmes, `0` erreur console/page. Confirmé aussi par captures d'écran
+  réelles (`inequation-exponentielle-widget` : flèches visibles, segment vert de $x=2{,}00$ à $+\infty$
+  avec point vert car symbole $\ge$ ; `parametres-graphiques-widget` : axe vertical redevenu solide
+  avec flèche ; `domaine-composee-widget` : flèches en bout des 3 droites graduées). `tsc -p
+  tsconfig.app.json --noEmit`/`oxlint` (les 14 fichiers)/`npm run build` propres ; sitewide
+  `regress_all.mjs` sur les 23 chapitres : `0` erreur, `0` `NaN`, `0` `$` isolé.

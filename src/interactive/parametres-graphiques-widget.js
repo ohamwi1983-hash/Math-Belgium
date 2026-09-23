@@ -15,6 +15,10 @@
   var BORNES_B = { min: -4, max: 4, step: 0.5 };
   var X_MIN = -0.6;
   var LARGEUR = 420, HAUTEUR = 320, MARGE = 34;
+  // Fenêtre Y FIXE (jamais recalculée depuis a/b courants) : pire cas de f(x)=a+b·ln(x) sur
+  // BORNES_A × BORNES_B × x∈[0,02 ; 8] — max≈20,65 (a=5, b=−4, x=0,02), min≈−18,65 (a=−3, b=4,
+  // x=0,02), avec marge.
+  var Y_MIN_FIXE = -20, Y_MAX_FIXE = 22;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -37,7 +41,7 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:12px;}' +
     'svg{width:100%;max-width:420px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
-    '.asymptote{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.courbe-f{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
     '.tangente{stroke:var(--plan,#5b4ea3);stroke-width:2.2;}' +
     '.point-1{fill:var(--accent,#a8471f);}' +
@@ -178,29 +182,22 @@
     this._valFp1.textContent = formatNombreFr(b, 1);
 
     var xMax = 8;
-    // Fenêtre Y calculée par échantillonnage (jamais une formule dérivée à la main) sur le
-    // domaine affiché, pour rester correcte quels que soient a et b.
-    var yMin = Infinity, yMax = -Infinity;
-    for (var i = 1; i <= 200; i++) {
-      var xx = 0.02 + (i / 200) * (xMax - 0.02);
-      var yy = f(xx);
-      if (isFinite(yy)) { if (yy < yMin) yMin = yy; if (yy > yMax) yMax = yy; }
-    }
-    if (yMin > yMax) { yMin = -1; yMax = 1; }
-    if (yMin > 0) yMin = 0;
-    if (yMax < 0) yMax = 0;
-    var margeY = Math.max(1, (yMax - yMin) * 0.12);
-    var win = { xMax: xMax, yMin: yMin - margeY, yMax: yMax + margeY };
+    var win = { xMax: xMax, yMin: Y_MIN_FIXE, yMax: Y_MAX_FIXE };
 
     var ns = "http://www.w3.org/2000/svg";
     var svg = this._svg;
     svg.innerHTML = "";
     var self = this;
 
+    var defs = svgEl(ns, "defs", {});
+    var fleche = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    fleche.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(fleche);
+    svg.appendChild(defs);
+
     var origine = self._toPx(win, 0, 0);
-    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
-    var pAxeY0 = self._toPx(win, 0, win.yMin), pAxeY1 = self._toPx(win, 0, win.yMax);
-    svg.appendChild(svgEl(ns, "line", { x1: pAxeY0[0].toFixed(2), y1: pAxeY0[1].toFixed(2), x2: pAxeY1[0].toFixed(2), y2: pAxeY1[1].toFixed(2), class: "asymptote" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: HAUTEUR - MARGE, y2: MARGE, class: "axe", "marker-end": "url(#fleche)" }));
     var etiqX = svgEl(ns, "text", { x: LARGEUR - MARGE + 6, y: origine[1] + 4, class: "etiquette" });
     etiqX.textContent = "x";
     svg.appendChild(etiqX);

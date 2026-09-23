@@ -42,22 +42,13 @@
     return el;
   }
 
-  function etendueY(fn, xMin, xMax) {
-    var min = Infinity, max = -Infinity;
-    var n = 200;
-    for (var i = 0; i <= n; i++) {
-      var x = xMin + (i / n) * (xMax - xMin);
-      var y = fn(x);
-      if (isFinite(y)) {
-        if (y < min) min = y;
-        if (y > max) max = y;
-      }
-    }
-    if (min > max) { min = 0; max = 1; }
-    if (min > 0) min = 0; // toujours montrer l'axe des t
-    var marge = Math.max(0.5, (max - min) * 0.12);
-    return { min: min - marge * 0.2, max: max + marge };
-  }
+  // Fenêtres Y fixes (jamais recalculées depuis les curseurs courants) : les axes ne doivent
+  // pas bouger pendant qu'on fait varier Q₀/r/L/k, sous peine d'effacer l'effet pédagogique du
+  // curseur. 8000 couvre largement le cas par défaut (Q₀=100, r=1,5 → Q(10)≈5767) ; les combinaisons
+  // extrêmes (Q₀=500, r=2) sortent de la fenêtre et sont simplement coupées (_traceCourbe clippe déjà
+  // les points hors [yMin,yMax]). 220 couvre tout p(t) puisque p(t) < L ≤ 200 (BORNES_L.max) toujours.
+  var Y_MAX_CROISSANCE = 8000;
+  var Y_MAX_SATURATION = 220;
 
   var TEMPLATE = document.createElement("template");
   TEMPLATE.innerHTML =
@@ -70,6 +61,7 @@
     '.graphe-zone{display:flex;justify-content:center;margin-bottom:16px;}' +
     'svg{width:100%;max-width:420px;height:auto;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.4;}' +
+    '.fleche{fill:var(--ink-soft,#6b6055);}' +
     '.asymptote{stroke:var(--ink-faint,#9c9083);stroke-width:1.3;stroke-dasharray:5 4;}' +
     '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.6;fill:none;}' +
     '.guide{stroke:var(--good,#2f7a4f);stroke-width:1.2;stroke-dasharray:4 3;opacity:0.8;}' +
@@ -236,9 +228,7 @@
     if (this._mode === "croissance") {
       var c = this._croissance;
       f = function (x) { return c.Q0 * Math.pow(c.r, x); };
-      win = { xMin: 0, xMax: DEFAUT_CROISSANCE.tMax, yMin: 0, yMax: 0 };
-      var etY = etendueY(f, win.xMin, win.xMax);
-      win.yMin = etY.min; win.yMax = etY.max;
+      win = { xMin: 0, xMax: DEFAUT_CROISSANCE.tMax, yMin: 0, yMax: Y_MAX_CROISSANCE };
       t = c.t;
       valeur = f(t);
       this._formule.textContent = "Q(t) = " + formatNombreFr(c.Q0, 0) + "·" + formatNombreFr(c.r, 2) + "ᵗ";
@@ -248,7 +238,7 @@
     } else {
       var s = this._saturation;
       f = function (x) { return s.L * (1 - Math.exp(-s.k * x)); };
-      win = { xMin: 0, xMax: DEFAUT_SATURATION.tMax, yMin: 0, yMax: s.L * 1.18 };
+      win = { xMin: 0, xMax: DEFAUT_SATURATION.tMax, yMin: 0, yMax: Y_MAX_SATURATION };
       t = s.t;
       valeur = f(t);
       var exposant = versExposant("−" + formatNombreFr(s.k, 2) + "t");
@@ -260,9 +250,15 @@
 
     this._valY.textContent = formatNombreFr(valeur, 2);
 
+    var defs = svgEl(ns, "defs", {});
+    var fleche = svgEl(ns, "marker", { id: "fleche", markerWidth: "8", markerHeight: "8", refX: "6", refY: "4", orient: "auto" });
+    fleche.appendChild(svgEl(ns, "path", { d: "M0,0 L8,4 L0,8 Z", class: "fleche" }));
+    defs.appendChild(fleche);
+    svg.appendChild(defs);
+
     var origine = self._toPx(win, win.xMin, 0);
-    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
-    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: MARGE, y2: HAUTEUR - MARGE, class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: MARGE, x2: LARGEUR - MARGE, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe", "marker-end": "url(#fleche)" }));
+    svg.appendChild(svgEl(ns, "line", { x1: origine[0].toFixed(2), x2: origine[0].toFixed(2), y1: HAUTEUR - MARGE, y2: MARGE, class: "axe", "marker-end": "url(#fleche)" }));
     var etiqT = svgEl(ns, "text", { x: LARGEUR - MARGE + 6, y: origine[1] + 4, class: "etiquette" });
     etiqT.textContent = "t";
     svg.appendChild(etiqT);
