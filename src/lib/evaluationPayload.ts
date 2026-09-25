@@ -11,6 +11,9 @@ import type { Block, ChapterSection } from '../content/types'
  */
 
 export const EVALUATION_BASE_URL_6E_6H = 'https://plateforme-maths.vercel.app/6e-6h/evaluation'
+/** 4e n'a pas de préfixe de chantier dans ses URL (voir `.claude/rules/content-authoring.md`,
+ * convention de lien vers un générateur) — sa page `/evaluation` est donc à la racine. */
+export const EVALUATION_BASE_URL_4E = 'https://plateforme-maths.vercel.app/evaluation'
 
 /** Niveau + nombre d'heures ne se combinent pas librement : seules ces 3 combinaisons existent
  * réellement dans les deux dépôts à ce jour (voir `LEVELS` dans `chaptersIndex.ts`). `null` = pas
@@ -45,59 +48,118 @@ export const NIVEAU_NUMERO: Record<NiveauCode, number> = { '4e': 4, '5e': 5, '6e
 export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5e': '4', '6e': '6' }
 
 /** Chapitres ayant un « générateur d'évaluations » fonctionnel côté plateforme-maths — les autres
- * apparaissent dans le sélecteur mais restent désactivés. Chaque entrée associe le chapitre à son
- * numéro (1 ou 2), transmis à plateforme-maths pour choisir la bonne banque vrai/faux (les
- * `quizTheme` des deux chapitres ne sont PAS garantis disjoints en tant que simples chaînes — voir
- * `CHAPITRE_NUMERO`). */
-export const LEVELSLUG_FONCTIONNEL = '6e-6h'
+ * apparaissent dans le sélecteur mais restent désactivés. */
+export const LEVELSLUG_FONCTIONNEL_6E = '6e-6h'
+export const LEVELSLUG_FONCTIONNEL_4E = '4e'
 
+/** Numéro de chapitre — utilisé UNIQUEMENT pour départager les 2 banques vrai/faux de
+ * `AppEvaluation6e.tsx` (6e n'a qu'UNE page d'évaluation qui sert ses 2 chapitres ; 4e a sa propre
+ * page dédiée, `AppEvaluation4e.tsx`, qui n'a pour l'instant qu'une seule banque et n'a donc pas
+ * besoin de ce champ — voir `QuizThemeConfig.quizChapitre`). */
 export type ChapitreFonctionnel = 1 | 2
 
-export const CHAPITRE_NUMERO: Record<string, ChapitreFonctionnel> = {
-  'fonctions-reciproques-cyclometriques': 1,
-  'fonctions-exponentielles': 2,
-}
-
-/** Conservé pour compat (chapitre par défaut à la sélection d'un niveau) — préférer
+/** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
  * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
 export const CHAPITRE_FONCTIONNEL_SLUG = 'fonctions-reciproques-cyclometriques'
-export const EVALUATION_BASE_URL = EVALUATION_BASE_URL_6E_6H
+
+/** Chapitres réellement câblés côté plateforme-maths, un (levelSlug, chapitreSlug) par entrée —
+ * chaque chapitre a sa propre page d'évaluation chez plateforme-maths (URL différente selon le
+ * niveau, voir `EVALUATION_BASE_URL_PAR_LEVELSLUG`). */
+const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
+  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-reciproques-cyclometriques' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-exponentielles' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'fonction-second-degre' },
+]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
-  return levelSlug === LEVELSLUG_FONCTIONNEL && chapitreSlug in CHAPITRE_NUMERO
+  return CHAPITRES_FONCTIONNELS.some((c) => c.levelSlug === levelSlug && c.chapitreSlug === chapitreSlug)
 }
 
-export type IdGenerateurPilote = '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
+const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
+  [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
+  [LEVELSLUG_FONCTIONNEL_4E]: EVALUATION_BASE_URL_4E,
+}
 
-export interface SectionEvaluationConfig {
+export type IdGenerateurPilote =
+  | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
+  | 'gen7' | 'gen8' | 'gen9'
+
+export interface GeneratorConfig {
   chapitreSlug: string
   sectionId: string
   generatorId: IdGenerateurPilote
-  quizTheme: string
+  /** Affiché au-dessus du catalogue de variantes quand une section a PLUSIEURS générateurs (ex.
+   * chapitre 1 de 4e, section « Transformer » : gen8 ET gen9) — ignoré (un seul générateur, pas
+   * besoin de le nommer) sinon. */
+  label: string
 }
 
-/** Correspondance section Math-Belgium ↔ générateur plateforme-maths ↔ thème de la banque vrai/faux
- * — établie à la main, chapitre par chapitre (alignement 1:1 confirmé dans le code source de
- * plateforme-maths : `quizFonctionsReciproquesCyclometriques/banque.ts` pour le chapitre 1,
- * `quizFonctionsExponentielles/banque.ts` — 6gen65 — pour le chapitre 2). Chaque ligne est scopée
- * par `chapitreSlug` : le chapitre 2 a lui aussi une section `sectionId: 'equations'`
- * (équations exponentielles, 6gen9) qui entrerait sinon en collision avec celle du chapitre 1
- * (équations cyclométriques, 6gen3) — toute recherche dans cette table DOIT filtrer sur les deux
- * clés, jamais `sectionId` seul. */
-export const SECTIONS_EVALUATION_PILOTE: SectionEvaluationConfig[] = [
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen1', quizTheme: 'injectiviteSurjectiviteBijectivite' },
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', quizTheme: 'fonctionsCyclometriques' },
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', quizTheme: 'equationsCyclometriques' },
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', quizTheme: 'deriveesCyclometriques' },
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', quizTheme: 'graphiquesCyclometriques' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', quizTheme: 'limitesExponentielles' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen7', quizTheme: 'domaineDeriveeExponentielles' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', generatorId: '6gen8', quizTheme: 'graphiquesDeriveeExponentielles' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'equations', generatorId: '6gen9', quizTheme: 'equationsExponentielles' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'inequations', generatorId: '6gen10', quizTheme: 'inequationsExponentielles' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'etude', generatorId: '6gen11', quizTheme: 'etudeFonctionExponentielle' },
-  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen12', quizTheme: 'exponentiellesProblemes' },
+export interface QuizThemeConfig {
+  chapitreSlug: string
+  sectionId: string
+  quizTheme: string
+  label: string
+  /** Réservé aux chapitres servis par `AppEvaluation6e.tsx` (2 banques sur la même page) — voir
+   * `CHAPITRE_NUMERO`. Absent pour 4e (une seule banque sur sa propre page). */
+  quizChapitre?: ChapitreFonctionnel
+}
+
+/** Correspondance section Math-Belgium ↔ générateur(s) plateforme-maths — établie à la main,
+ * chapitre par chapitre. Une section peut avoir PLUSIEURS générateurs (ex. chapitre 1 de 4e,
+ * section « Transformer » : gen8 ET gen9) — chaque ligne devient sa propre ligne d'exercice dans
+ * le formulaire /admin, jamais fusionnée. Scopée par `chapitreSlug` : le chapitre 2 de 6e a lui
+ * aussi une section `sectionId: 'equations'` (équations exponentielles, 6gen9) qui entrerait
+ * sinon en collision avec celle du chapitre 1 (équations cyclométriques, 6gen3) — toute recherche
+ * dans cette table DOIT filtrer sur les deux clés, jamais `sectionId` seul. */
+export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen1', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen7', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', generatorId: '6gen8', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'equations', generatorId: '6gen9', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'inequations', generatorId: '6gen10', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'etude', generatorId: '6gen11', label: '' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen12', label: '' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen8', label: 'Transformations graphiques (gen8)' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen9', label: 'Forme canonique et transformations (gen9)' },
 ]
+
+/** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
+ * principe que `GENERATEURS_EVALUATION_PILOTE` (une section peut avoir plusieurs thèmes, ex.
+ * chapitre 1 de 4e : 3 thèmes pour « Étudier », 2 pour « Transformer »), scopée par `chapitreSlug`
+ * pour la même raison. */
+export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', quizTheme: 'injectiviteSurjectiviteBijectivite', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', quizTheme: 'fonctionsCyclometriques', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', quizTheme: 'equationsCyclometriques', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', quizTheme: 'deriveesCyclometriques', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', quizTheme: 'graphiquesCyclometriques', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', quizTheme: 'limitesExponentielles', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', quizTheme: 'domaineDeriveeExponentielles', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', quizTheme: 'graphiquesDeriveeExponentielles', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'equations', quizTheme: 'equationsExponentielles', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'inequations', quizTheme: 'inequationsExponentielles', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'etude', quizTheme: 'etudeFonctionExponentielle', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', quizTheme: 'exponentiellesProblemes', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'coefficientsAllure', label: 'Coefficients, concavité et allure' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'racinesFactorisation', label: 'Racines par factorisation' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'domaineImageTableaux', label: 'Domaine, image et tableaux' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'formeCanoniqueSommet', label: 'Forme canonique, sommet et axe' },
+  { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'transformationsGraphiques', label: 'Transformations graphiques' },
+]
+
+export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
+  return GENERATEURS_EVALUATION_PILOTE.filter((g) => g.chapitreSlug === chapitreSlug && g.sectionId === sectionId)
+}
+
+export function themesPourSection(chapitreSlug: string, sectionId: string): QuizThemeConfig[] {
+  return QUIZ_THEMES_EVALUATION_PILOTE.filter((t) => t.chapitreSlug === chapitreSlug && t.sectionId === sectionId)
+}
 
 export interface CatalogueVarianteEntree {
   id: string
@@ -212,14 +274,24 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'F', label: 'F — Saturation donnée, coûts/revenus' },
     { id: 'G', label: 'G — Seuil critique, décision' },
   ],
+  gen7: [
+    { id: 'mise_en_evidence', label: 'Mise en évidence (c=0)' },
+    { id: 'binome_conjugue', label: 'Binôme conjugué (b=0)' },
+    { id: 'produit_remarquable', label: 'Produit remarquable (Δ=0)' },
+    { id: 'irreductible', label: 'Irréductible (Δ<0, aucune racine réelle)' },
+  ],
+  /** gen8/gen9 n'ont PAS de catalogue de familles côté plateforme-maths (un seul type d'exercice
+   * chacun, pas de `CATALOGUE_FAMILLES`/`CATALOGUE_VARIANTES`) — entrée unique factice : le
+   * formulaire affiche quand même un seul champ « Nombre » (comme pour tout générateur), et
+   * `genererInstanceAvecVariante` est absent côté adaptateur plateforme-maths, qui retombe donc
+   * sur `genererInstance()` en ignorant cet id (voir `AppEvaluation4e.tsx::construireItemsExercice`). */
+  gen8: [{ id: 'defaut', label: 'Lecture graphique' }],
+  gen9: [{ id: 'defaut', label: 'Développée → canonique' }],
 }
 
-/** `[]` pour une section absente de `SECTIONS_EVALUATION_PILOTE` — même convention que
- * `deriveQuestionsOuvertes`. Scopée par `chapitreSlug` (voir la note sur `SECTIONS_EVALUATION_PILOTE`
- * — sinon la section `'equations'` du chapitre 2 récupérerait le catalogue du chapitre 1). */
-export function catalogueVariantesExercice(chapitreSlug: string, sectionId: string): CatalogueVarianteEntree[] {
-  const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.chapitreSlug === chapitreSlug && c.sectionId === sectionId)
-  return config ? CATALOGUES_VARIANTES_EXERCICE[config.generatorId] : []
+/** `[]` pour un générateur sans catalogue connu. */
+export function catalogueVariantesExercice(generatorId: IdGenerateurPilote): CatalogueVarianteEntree[] {
+  return CATALOGUES_VARIANTES_EXERCICE[generatorId] ?? []
 }
 
 /** Fragment texte/latex — même forme que `FragmentConsigne` côté plateforme-maths
@@ -456,6 +528,12 @@ export interface LigneSelection {
   sectionId: string
   processus: Processus
   type: TypeQuestionEvaluation
+  /** Discriminateur secondaire, requis dès qu'une section a PLUSIEURS générateurs
+   * (`type==='exercice'`, valeur = `generatorId`) ou PLUSIEURS thèmes vrai/faux
+   * (`type==='vraiFaux'`, valeur = `quizTheme`) — voir `generateursPourSection`/
+   * `themesPourSection`. Une section n'a jamais plus d'une ligne `demonstration`/`comprehension`,
+   * `cle` y reste donc absent. */
+  cle?: string
   /** 0 = ligne non incluse. Pour `type==='exercice'`, DÉRIVÉ automatiquement de la somme de
    * `parVariante` (jamais éditable directement dans ce cas) — voir `sommeParVariante`. */
   nombre: number
@@ -476,9 +554,10 @@ interface ItemPayload {
   titreSection: string
   points: number
   exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number }[] }
-  /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths — voir
-   * `CHAPITRE_NUMERO` et la note de `SECTIONS_EVALUATION_PILOTE`. */
-  vraiFaux?: { chapitre: ChapitreFonctionnel; theme: string; nombre: number }
+  /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths quand
+   * une même page en sert plusieurs (`AppEvaluation6e.tsx`, voir `QuizThemeConfig.quizChapitre`) —
+   * absent pour les chapitres à banque unique (4e). */
+  vraiFaux?: { chapitre?: ChapitreFonctionnel; theme: string; nombre: number }
   /** Une entrée par série anti-triche — voir `construireOuvertesParSerie`. */
   ouvertesParSerie?: QuestionOuverte[][]
 }
@@ -533,32 +612,40 @@ export interface EnTeteEvaluation {
 
 /**
  * Construit l'URL complète vers le générateur d'évaluations à partir de la sélection de
- * l'utilisateur — `null` si aucune ligne active (rien à générer). `sections` doit être les sections
- * RÉELLES du chapitre choisi (pour dériver les questions ouvertes) — voir `chaptersIndex.ts`.
- * `chapitreSlug` scope toutes les recherches dans `SECTIONS_EVALUATION_PILOTE` (voir sa note sur la
- * collision `'equations'` entre les deux chapitres) et sélectionne la banque vrai/faux.
+ * l'utilisateur — `null` si aucune ligne active (rien à générer), ou si `levelSlug` n'a pas de
+ * page d'évaluation connue (voir `EVALUATION_BASE_URL_PAR_LEVELSLUG`). `sections` doit être les
+ * sections RÉELLES du chapitre choisi (pour dériver les questions ouvertes) — voir
+ * `chaptersIndex.ts`. `chapitreSlug` scope toutes les recherches dans
+ * `GENERATEURS_EVALUATION_PILOTE`/`QUIZ_THEMES_EVALUATION_PILOTE` (voir leur note sur la collision
+ * `'equations'` entre les deux chapitres de 6e) — une ligne `exercice`/`vraiFaux` cherche sa
+ * config via `ligne.cle` (`generatorId`/`quizTheme`) quand la section a plusieurs générateurs/thèmes.
  */
-export function buildEvaluationUrl(chapitreSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
+export function buildEvaluationUrl(levelSlug: string, chapitreSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
+  const baseUrl = EVALUATION_BASE_URL_PAR_LEVELSLUG[levelSlug]
+  if (!baseUrl) return null
+
   const items: ItemPayload[] = []
   const nombreSeries = Math.max(1, entete.nombreSeries)
-  const chapitreNumero = CHAPITRE_NUMERO[chapitreSlug]
 
   for (const ligne of lignes) {
     if (ligne.nombre <= 0) continue
-    const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.chapitreSlug === chapitreSlug && c.sectionId === ligne.sectionId)
     const section = sections.find((s) => s.id === ligne.sectionId)
-    if (!config || !section || !chapitreNumero) continue
+    if (!section) continue
 
     const titreSection = `${section.number}. ${section.title}`
 
     if (ligne.type === 'exercice') {
+      const config = generateursPourSection(chapitreSlug, ligne.sectionId).find((g) => g.generatorId === ligne.cle)
+      if (!config) continue
       const parVariante = Object.entries(ligne.parVariante ?? {})
         .filter(([, nombre]) => nombre > 0)
         .map(([varianteId, nombre]) => ({ varianteId, nombre }))
       if (parVariante.length === 0) continue
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante } })
     } else if (ligne.type === 'vraiFaux') {
-      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { chapitre: chapitreNumero, theme: config.quizTheme, nombre: ligne.nombre } })
+      const config = themesPourSection(chapitreSlug, ligne.sectionId).find((t) => t.quizTheme === ligne.cle)
+      if (!config) continue
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { chapitre: config.quizChapitre, theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
       const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(chapitreSlug, section) : deriveQuestionsComprehension(chapitreSlug, section.id)
       const ouvertesParSerie = construireOuvertesParSerie(banque, ligne.nombre, nombreSeries)
@@ -579,5 +666,5 @@ export function buildEvaluationUrl(chapitreSlug: string, entete: EnTeteEvaluatio
     nombreSeries,
     items,
   })
-  return `${EVALUATION_BASE_URL}?d=${encodeURIComponent(base64)}`
+  return `${baseUrl}?d=${encodeURIComponent(base64)}`
 }

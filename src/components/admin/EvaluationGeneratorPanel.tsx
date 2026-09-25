@@ -11,8 +11,11 @@ import {
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
   estChapitreFonctionnel,
+  generateursPourSection,
   resoudreLevelSlug,
   sommeParVariante,
+  themesPourSection,
+  type IdGenerateurPilote,
   type LigneSelection,
   type NiveauCode,
   type Processus,
@@ -34,14 +37,22 @@ const POINTS_DEFAUT: Record<TypeQuestionEvaluation, number> = { demonstration: 3
 const MAX_VRAI_FAUX = 35
 const MAX_EXERCICE = 10
 
-function lignesInitiales(chapitre: ChapterContent | undefined): LigneSelection[] {
+/** Une ligne `exercice`/`vraiFaux` PAR générateur/thème réellement câblé pour la section (voir
+ * `generateursPourSection`/`themesPourSection`) — une section sans générateur/thème câblé (ex.
+ * chapitre 1 de 4e, sections « Utiliser »/« Révision », hors périmètre pour l'instant) n'en reçoit
+ * simplement aucune, plutôt qu'une ligne qui échouerait silencieusement à la génération. */
+function lignesInitiales(chapitre: ChapterContent | undefined, chapitreSlug: string): LigneSelection[] {
   if (!chapitre) return []
   const lignes: LigneSelection[] = []
   for (const section of chapitre.sections) {
     lignes.push({ sectionId: section.id, processus: 1, type: 'demonstration', nombre: 0, points: POINTS_DEFAUT.demonstration })
     lignes.push({ sectionId: section.id, processus: 1, type: 'comprehension', nombre: 0, points: POINTS_DEFAUT.comprehension })
-    lignes.push({ sectionId: section.id, processus: 1, type: 'vraiFaux', nombre: 0, points: POINTS_DEFAUT.vraiFaux })
-    lignes.push({ sectionId: section.id, processus: 2, type: 'exercice', nombre: 0, parVariante: {}, points: POINTS_DEFAUT.exercice })
+    for (const theme of themesPourSection(chapitreSlug, section.id)) {
+      lignes.push({ sectionId: section.id, processus: 1, type: 'vraiFaux', cle: theme.quizTheme, nombre: 0, points: POINTS_DEFAUT.vraiFaux })
+    }
+    for (const generateur of generateursPourSection(chapitreSlug, section.id)) {
+      lignes.push({ sectionId: section.id, processus: 2, type: 'exercice', cle: generateur.generatorId, nombre: 0, parVariante: {}, points: POINTS_DEFAUT.exercice })
+    }
   }
   return lignes
 }
@@ -70,7 +81,7 @@ export function EvaluationGeneratorPanel() {
   const chapitre = niveauEntry?.chapters.find((c) => c.slug === chapitreSlug)
   const chapitreFonctionnel = estChapitreFonctionnel(levelSlug, chapitreSlug)
 
-  const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitre))
+  const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitre, chapitreSlug))
 
   const apercusDemonstration = useMemo(() => {
     const map = new Map<string, number>()
@@ -96,7 +107,7 @@ export function EvaluationGeneratorPanel() {
     const prochainNiveauEntry = prochainLevelSlug ? LEVELS.find((l) => l.slug === prochainLevelSlug) : undefined
     const prochainChapitre = prochainNiveauEntry?.chapters[0]
     setChapitreSlug(prochainChapitre?.slug ?? '')
-    setLignes(lignesInitiales(prochainChapitre))
+    setLignes(lignesInitiales(prochainChapitre, prochainChapitre?.slug ?? ''))
     setUrlGeneree(null)
   }
 
@@ -107,7 +118,7 @@ export function EvaluationGeneratorPanel() {
   function changerChapitre(slug: string) {
     setChapitreSlug(slug)
     const prochainChapitre = niveauEntry?.chapters.find((c) => c.slug === slug)
-    setLignes(lignesInitiales(prochainChapitre))
+    setLignes(lignesInitiales(prochainChapitre, slug))
     setUrlGeneree(null)
   }
 
@@ -115,18 +126,18 @@ export function EvaluationGeneratorPanel() {
     setProcessusActifs((prev) => ({ ...prev, [processus]: !prev[processus] }))
   }
 
-  function mettreAJourLigne(sectionId: string, type: TypeQuestionEvaluation, patch: Partial<LigneSelection>) {
-    setLignes((prev) => prev.map((l) => (l.sectionId === sectionId && l.type === type ? { ...l, ...patch } : l)))
+  function mettreAJourLigne(sectionId: string, type: TypeQuestionEvaluation, cle: string | undefined, patch: Partial<LigneSelection>) {
+    setLignes((prev) => prev.map((l) => (l.sectionId === sectionId && l.type === type && l.cle === cle ? { ...l, ...patch } : l)))
     setUrlGeneree(null)
   }
 
-  /** Met à jour le nombre d'exercices d'UNE famille/variante précise (ligne `type==='exercice'`
-   * uniquement) — `nombre` de la ligne reste toujours la somme de `parVariante` (voir
-   * `sommeParVariante`), jamais éditable directement pour ce type. */
-  function mettreAJourVariante(sectionId: string, varianteId: string, nombre: number) {
+  /** Met à jour le nombre d'exercices d'UNE famille/variante précise, pour UN générateur précis
+   * (ligne `type==='exercice'`, `cle===generatorId`) — `nombre` de la ligne reste toujours la
+   * somme de `parVariante` (voir `sommeParVariante`), jamais éditable directement pour ce type. */
+  function mettreAJourVariante(sectionId: string, generatorId: string, varianteId: string, nombre: number) {
     setLignes((prev) =>
       prev.map((l) => {
-        if (l.sectionId !== sectionId || l.type !== 'exercice') return l
+        if (l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
         const parVariante = { ...l.parVariante, [varianteId]: nombre }
         return { ...l, parVariante, nombre: sommeParVariante(parVariante) }
       }),
@@ -137,10 +148,11 @@ export function EvaluationGeneratorPanel() {
   const totalPoints = lignes.reduce((total, l) => total + l.points * l.nombre, 0)
 
   function genererEvaluation() {
-    if (!chapitre) return
+    if (!chapitre || !levelSlug) return
     const titreFinal = titre || `Évaluation — ${chapitre.title}`
     const niveauLabel = niveauEntry?.label ?? niveau
     const url = buildEvaluationUrl(
+      levelSlug,
       chapitreSlug,
       { numero, date, titre: titreFinal, niveauLabel, niveauNumero: NIVEAU_NUMERO[niveau], heuresSemaine, calculatrice, nombreSeries },
       lignes,
@@ -159,8 +171,9 @@ export function EvaluationGeneratorPanel() {
   return (
     <div className="admin-eval">
       <p className="admin-eval-intro">
-        Seuls les chapitres 1 et 2 de 6e (6h) — Fonctions réciproques &amp; cyclométriques, et Fonctions exponentielles — sont fonctionnels pour
-        l'instant. Les autres niveaux/chapitres apparaissent ci-dessous mais restent désactivés (« bientôt ») — l'extension se fera lot par lot.
+        Seuls les chapitres 1 et 2 de 6e (6h) — Fonctions réciproques &amp; cyclométriques, et Fonctions exponentielles — et le chapitre 1 de 4e —
+        La fonction du second degré (sections « Étudier » et « Transformer » uniquement pour l'instant) — sont fonctionnels. Les autres
+        niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés (« bientôt ») — l'extension se fera lot par lot.
       </p>
 
       <div className="admin-eval-entete">
@@ -289,10 +302,11 @@ export function EvaluationGeneratorPanel() {
                         </summary>
                         {lignesSection.map((ligne) => {
                           if (ligne.type === 'exercice') {
-                            const catalogue = catalogueVariantesExercice(chapitreSlug, section.id)
+                            const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
+                            const generateur = generateursPourSection(chapitreSlug, section.id).find((g) => g.generatorId === ligne.cle)
                             return (
-                              <div className="admin-eval-exercice" key={ligne.type}>
-                                <span className="admin-eval-ligne-label">{LABEL_TYPE.exercice}</span>
+                              <div className="admin-eval-exercice" key={ligne.type + (ligne.cle ?? '')}>
+                                <span className="admin-eval-ligne-label">{generateur?.label || LABEL_TYPE.exercice}</span>
                                 {catalogue.map((variante) => (
                                   <div className="admin-eval-ligne" key={variante.id}>
                                     <span className="admin-eval-ligne-label admin-eval-ligne-label-variante">{variante.label}</span>
@@ -304,7 +318,12 @@ export function EvaluationGeneratorPanel() {
                                         max={MAX_EXERCICE}
                                         value={ligne.parVariante?.[variante.id] ?? 0}
                                         onChange={(e) =>
-                                          mettreAJourVariante(section.id, variante.id, Math.min(MAX_EXERCICE, Math.max(0, Number(e.target.value) || 0)))
+                                          mettreAJourVariante(
+                                            section.id,
+                                            ligne.cle ?? '',
+                                            variante.id,
+                                            Math.min(MAX_EXERCICE, Math.max(0, Number(e.target.value) || 0)),
+                                          )
                                         }
                                       />
                                     </label>
@@ -318,7 +337,7 @@ export function EvaluationGeneratorPanel() {
                                       type="number"
                                       min={1}
                                       value={ligne.points}
-                                      onChange={(e) => mettreAJourLigne(section.id, ligne.type, { points: Number(e.target.value) || 1 })}
+                                      onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
                                     />
                                   </label>
                                 </div>
@@ -331,10 +350,12 @@ export function EvaluationGeneratorPanel() {
                             ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(section.id) ?? 0
                             : MAX_VRAI_FAUX
                           const indisponible = estBanqueFixe && disponibles === 0
+                          const theme = ligne.type === 'vraiFaux' ? themesPourSection(chapitreSlug, section.id).find((t) => t.quizTheme === ligne.cle) : undefined
                           return (
-                            <div className="admin-eval-ligne" key={ligne.type}>
+                            <div className="admin-eval-ligne" key={ligne.type + (ligne.cle ?? '')}>
                               <span className="admin-eval-ligne-label">
                                 {LABEL_TYPE[ligne.type]}
+                                {theme?.label && ` — ${theme.label}`}
                                 {estBanqueFixe && ` (${disponibles} disponible${disponibles > 1 ? 's' : ''})`}
                                 {indisponible &&
                                   (ligne.type === 'demonstration'
@@ -350,7 +371,7 @@ export function EvaluationGeneratorPanel() {
                                   value={ligne.nombre}
                                   disabled={indisponible}
                                   onChange={(e) =>
-                                    mettreAJourLigne(section.id, ligne.type, { nombre: Math.min(disponibles, Math.max(0, Number(e.target.value) || 0)) })
+                                    mettreAJourLigne(section.id, ligne.type, ligne.cle, { nombre: Math.min(disponibles, Math.max(0, Number(e.target.value) || 0)) })
                                   }
                                 />
                               </label>
@@ -361,7 +382,7 @@ export function EvaluationGeneratorPanel() {
                                   min={1}
                                   value={ligne.points}
                                   disabled={indisponible}
-                                  onChange={(e) => mettreAJourLigne(section.id, ligne.type, { points: Number(e.target.value) || 1 })}
+                                  onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
                                 />
                               </label>
                             </div>
