@@ -70,23 +70,37 @@ export const SECTIONS_EVALUATION_PILOTE: SectionEvaluationConfig[] = [
   { sectionId: 'graphiques', generatorId: '6gen5', quizTheme: 'graphiquesCyclometriques' },
 ]
 
+/** Fragment texte/latex — même forme que `FragmentConsigne` côté plateforme-maths
+ * (`src/ui/formatEquationDroite.ts`), pour que les questions ouvertes envoyées dans le payload s'y
+ * rendent en vrai KaTeX plutôt qu'en texte brut. */
+export interface FragmentTexte {
+  type: 'texte' | 'latex'
+  valeur: string
+}
+
 export interface QuestionOuverte {
-  enonce: string
-  corrige: string
+  enonce: FragmentTexte[]
+  corrige: FragmentTexte[][]
 }
 
-/** Retire la mini-syntaxe `RichText` (`$latex$`, `**gras**`, voir `.claude/rules/
- * content-authoring.md`) — la page d'évaluation de plateforme-maths affiche ce texte tel quel
- * (`texte(...)`, jamais interprété comme LaTeX/markdown), donc les délimiteurs doivent disparaître
- * avant l'envoi plutôt que s'afficher littéralement sur la copie imprimée. Le contenu LaTeX interne
- * reste visible en texte brut (ex. "f^{-1}") — imparfait mais lisible, amélioration possible d'un
- * lot futur (envoyer de vrais fragments latex/texte séparés plutôt qu'une chaîne aplatie). */
-function nettoyerRichText(texte: string): string {
-  return texte.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\$([^$]+)\$/g, '$1')
+/** Découpe la mini-syntaxe `RichText` (`$latex$`, `**gras**`, voir `.claude/rules/
+ * content-authoring.md`) en fragments texte/latex distincts — chaque segment `$...$` devient un
+ * fragment `latex` (rendu KaTeX côté plateforme-maths), au lieu de laisser les signes `$` et le code
+ * LaTeX brut s'afficher littéralement sur la copie imprimée. Le gras n'a pas d'équivalent dans
+ * `FragmentTexte` et est donc aplati (délimiteurs retirés, texte conservé). */
+function parseRichText(texte: string): FragmentTexte[] {
+  const sansGras = texte.replace(/\*\*(.*?)\*\*/g, '$1')
+  const morceaux = sansGras.split(/\$([^$]+)\$/g)
+  const fragments: FragmentTexte[] = []
+  morceaux.forEach((valeur, i) => {
+    if (valeur === '') return
+    fragments.push({ type: i % 2 === 1 ? 'latex' : 'texte', valeur })
+  })
+  return fragments.length > 0 ? fragments : [{ type: 'texte', valeur: '' }]
 }
 
-function extraireParagraphes(blocks: Block[]): string[] {
-  return blocks.filter((b): b is Extract<Block, { kind: 'para' }> => b.kind === 'para').map((b) => nettoyerRichText(b.text))
+function extraireParagraphes(blocks: Block[]): FragmentTexte[][] {
+  return blocks.filter((b): b is Extract<Block, { kind: 'para' }> => b.kind === 'para').map((b) => parseRichText(b.text))
 }
 
 /**
@@ -144,19 +158,20 @@ export function deriveQuestionsOuvertes(section: ChapterSection): QuestionOuvert
   const enoncesSoignes = ENONCES_DEMONSTRATION[section.id]
 
   return candidats.map((candidat, index) => {
-    const enonceSoigne = enoncesSoignes?.[index]
+    const enonceSoigneTexte = enoncesSoignes?.[index]
 
     if (candidat.kind === 'exemple') {
       const enonceBrut = [candidat.badge, candidat.formula].filter(Boolean).join(' — ')
-      const enonce = enonceSoigne ?? (enonceBrut ? nettoyerRichText(enonceBrut) : "Résous l'exercice suivant.")
-      const etapes = candidat.steps.map((s) => `${nettoyerRichText(s.tag)} : ${nettoyerRichText(s.text)}`)
-      const resultat = candidat.result.text ? [`${nettoyerRichText(candidat.result.tag)} : ${nettoyerRichText(candidat.result.text)}`] : []
-      return { enonce, corrige: [...etapes, ...resultat].join('\n') }
+      const enonceTexte = enonceSoigneTexte ?? (enonceBrut || "Résous l'exercice suivant.")
+      const etapes = candidat.steps.map((s) => parseRichText(`${s.tag} : ${s.text}`))
+      const resultat = candidat.result.text ? [parseRichText(`${candidat.result.tag} : ${candidat.result.text}`)] : []
+      return { enonce: parseRichText(enonceTexte), corrige: [...etapes, ...resultat] }
     }
 
-    const enonce = enonceSoigne ?? (candidat.label ? nettoyerRichText(candidat.label) : 'Justifie le raisonnement suivant.')
-    const corrige = extraireParagraphes(candidat.blocks).join('\n\n')
-    return { enonce, corrige: corrige || 'Voir le cours.' }
+    const enonceTexte = enonceSoigneTexte ?? (candidat.label || 'Justifie le raisonnement suivant.')
+    const corrigeParagraphes = extraireParagraphes(candidat.blocks)
+    const corrige = corrigeParagraphes.length > 0 ? corrigeParagraphes : [parseRichText('Voir le cours.')]
+    return { enonce: parseRichText(enonceTexte), corrige }
   })
 }
 
@@ -169,7 +184,12 @@ export function deriveQuestionsOuvertes(section: ChapterSection): QuestionOuvert
  * futur chapitre ajouté demandera sa propre liste (peut rester vide pour une section qui n'en a pas
  * encore).
  */
-const QUESTIONS_COMPREHENSION: Record<string, QuestionOuverte[]> = {
+interface QuestionOuverteBrute {
+  enonce: string
+  corrige: string
+}
+
+const QUESTIONS_COMPREHENSION: Record<string, QuestionOuverteBrute[]> = {
   reciproques: [
     {
       enonce: "Pourquoi une fonction non injective ne peut-elle pas avoir de relation réciproque qui soit elle-même une fonction ?",
@@ -269,7 +289,8 @@ const QUESTIONS_COMPREHENSION: Record<string, QuestionOuverte[]> = {
 
 /** `[]` pour une section absente de la table — même convention que `deriveQuestionsOuvertes`. */
 export function deriveQuestionsComprehension(sectionId: string): QuestionOuverte[] {
-  return QUESTIONS_COMPREHENSION[sectionId] ?? []
+  const questions = QUESTIONS_COMPREHENSION[sectionId] ?? []
+  return questions.map((q) => ({ enonce: parseRichText(q.enonce), corrige: [parseRichText(q.corrige)] }))
 }
 
 export type TypeQuestionEvaluation = 'demonstration' | 'comprehension' | 'vraiFaux' | 'exercice'
