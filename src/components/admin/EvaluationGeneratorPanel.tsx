@@ -8,9 +8,11 @@ import {
   LEVELSLUG_FONCTIONNEL,
   NIVEAU_NUMERO,
   buildEvaluationUrl,
+  catalogueVariantesExercice,
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
   resoudreLevelSlug,
+  sommeParVariante,
   type LigneSelection,
   type NiveauCode,
   type Processus,
@@ -39,7 +41,7 @@ function lignesInitiales(chapitre: ChapterContent | undefined): LigneSelection[]
     lignes.push({ sectionId: section.id, processus: 1, type: 'demonstration', nombre: 0, points: POINTS_DEFAUT.demonstration })
     lignes.push({ sectionId: section.id, processus: 1, type: 'comprehension', nombre: 0, points: POINTS_DEFAUT.comprehension })
     lignes.push({ sectionId: section.id, processus: 1, type: 'vraiFaux', nombre: 0, points: POINTS_DEFAUT.vraiFaux })
-    lignes.push({ sectionId: section.id, processus: 2, type: 'exercice', nombre: 0, points: POINTS_DEFAUT.exercice })
+    lignes.push({ sectionId: section.id, processus: 2, type: 'exercice', nombre: 0, parVariante: {}, points: POINTS_DEFAUT.exercice })
   }
   return lignes
 }
@@ -116,6 +118,20 @@ export function EvaluationGeneratorPanel() {
 
   function mettreAJourLigne(sectionId: string, type: TypeQuestionEvaluation, patch: Partial<LigneSelection>) {
     setLignes((prev) => prev.map((l) => (l.sectionId === sectionId && l.type === type ? { ...l, ...patch } : l)))
+    setUrlGeneree(null)
+  }
+
+  /** Met à jour le nombre d'exercices d'UNE famille/variante précise (ligne `type==='exercice'`
+   * uniquement) — `nombre` de la ligne reste toujours la somme de `parVariante` (voir
+   * `sommeParVariante`), jamais éditable directement pour ce type. */
+  function mettreAJourVariante(sectionId: string, varianteId: string, nombre: number) {
+    setLignes((prev) =>
+      prev.map((l) => {
+        if (l.sectionId !== sectionId || l.type !== 'exercice') return l
+        const parVariante = { ...l.parVariante, [varianteId]: nombre }
+        return { ...l, parVariante, nombre: sommeParVariante(parVariante) }
+      }),
+    )
     setUrlGeneree(null)
   }
 
@@ -272,12 +288,48 @@ export function EvaluationGeneratorPanel() {
                           {section.number}. {section.title}
                         </summary>
                         {lignesSection.map((ligne) => {
+                          if (ligne.type === 'exercice') {
+                            const catalogue = catalogueVariantesExercice(section.id)
+                            return (
+                              <div className="admin-eval-exercice" key={ligne.type}>
+                                <span className="admin-eval-ligne-label">{LABEL_TYPE.exercice}</span>
+                                {catalogue.map((variante) => (
+                                  <div className="admin-eval-ligne" key={variante.id}>
+                                    <span className="admin-eval-ligne-label admin-eval-ligne-label-variante">{variante.label}</span>
+                                    <label>
+                                      Nombre
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        max={MAX_EXERCICE}
+                                        value={ligne.parVariante?.[variante.id] ?? 0}
+                                        onChange={(e) =>
+                                          mettreAJourVariante(section.id, variante.id, Math.min(MAX_EXERCICE, Math.max(0, Number(e.target.value) || 0)))
+                                        }
+                                      />
+                                    </label>
+                                  </div>
+                                ))}
+                                <div className="admin-eval-ligne">
+                                  <span className="admin-eval-ligne-label">Points / question (toutes variantes)</span>
+                                  <label>
+                                    Points
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      value={ligne.points}
+                                      onChange={(e) => mettreAJourLigne(section.id, ligne.type, { points: Number(e.target.value) || 1 })}
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            )
+                          }
+
                           const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
                           const disponibles = estBanqueFixe
                             ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(section.id) ?? 0
-                            : ligne.type === 'vraiFaux'
-                              ? MAX_VRAI_FAUX
-                              : MAX_EXERCICE
+                            : MAX_VRAI_FAUX
                           const indisponible = estBanqueFixe && disponibles === 0
                           return (
                             <div className="admin-eval-ligne" key={ligne.type}>

@@ -629,6 +629,10 @@ table.feature-table td { white-space: normal; }
   font: inherit; color: var(--ink); background: var(--paper);
 }
 
+.admin-eval-exercice { display: flex; flex-direction: column; }
+.admin-eval-exercice > .admin-eval-ligne-label { flex: 0 0 auto; padding-top: 8px; font-weight: 600; color: var(--ink); }
+.admin-eval-ligne-label-variante { padding-left: 12px; font-size: 0.85rem; }
+
 .admin-eval-total { margin: 0; font-weight: 700; color: var(--ink); }
 .admin-eval-lien { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
 

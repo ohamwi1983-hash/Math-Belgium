@@ -70,6 +70,70 @@ export const SECTIONS_EVALUATION_PILOTE: SectionEvaluationConfig[] = [
   { sectionId: 'graphiques', generatorId: '6gen5', quizTheme: 'graphiquesCyclometriques' },
 ]
 
+export interface CatalogueVarianteEntree {
+  id: string
+  label: string
+}
+
+/** Catalogues des familles/variantes forçables par générateur — MIROIR MANUEL des
+ * `CATALOGUE_FAMILLES`/`CATALOGUE_VARIANTES` définis côté plateforme-maths
+ * (`generateurs6e/{nom}/index.ts`, convention "Catalogue de variantes" documentée dans son
+ * CLAUDE.md) : les `id` doivent rester EXACTEMENT synchronisés avec ceux-là (aucun code partagé
+ * entre les deux dépôts) — un id qui ne correspond à aucune variante connue côté plateforme-maths
+ * ferait simplement échouer silencieusement la génération de cette ligne. Permet au formulaire
+ * /admin de choisir un nombre d'exercices PAR FAMILLE plutôt qu'un total tiré au hasard parmi
+ * toutes les familles. */
+export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, CatalogueVarianteEntree[]> = {
+  '6gen1': [
+    { id: 'puissanceAffine', label: '(ax+b)^n' },
+    { id: 'racineNieme', label: '(ax+b)^(1/n)' },
+    { id: 'puissanceMonome', label: 'a·xⁿ+b' },
+    { id: 'racinePlusConstante', label: '√(ax+b)+c' },
+    { id: 'homographique', label: '(ax+b)/(cx+d)' },
+    { id: 'quadratique', label: 'ax²+bx+c' },
+  ],
+  '6gen2': [
+    { id: 'directe', label: 'Lecture directe' },
+    { id: 'arcTrig_existe', label: 'arcfonction(trig(θ)) — existe' },
+    { id: 'arcTrig_inexistant', label: "arcfonction(trig(θ)) — n'existe pas" },
+    { id: 'trigArc_existe', label: 'trig(arcfonction(n)) — existe' },
+    { id: 'trigArc_causeDomaine', label: 'trig(arcfonction(n)) — cause hors domaine' },
+    { id: 'trigArc_causePiSur2', label: 'trig(arcfonction(n)) — cause angle π/2' },
+  ],
+  '6gen3': [
+    { id: 'angleLineaire', label: 'arcfonction(ax+b) = angle' },
+    { id: 'memeArcfonction', label: 'arcfonction(ax+b) = arcfonction(cx+d)' },
+    { id: 'angleQuadratique', label: 'arcfonction(ax²+bx+c) = angle' },
+    { id: 'arcfonctionsDifferentes_asin_acos', label: 'arcsin(ax+b) = arccos(cx+d)' },
+    { id: 'arcfonctionsDifferentes_asin_atan', label: 'arcsin(ax+b) = arctan(cx+d)' },
+    { id: 'arcfonctionsDifferentes_acos_atan', label: 'arccos(ax+b) = arctan(cx+d)' },
+  ],
+  '6gen4': [
+    { id: 'A', label: 'Application directe' },
+    { id: 'B', label: 'Règle du produit' },
+    { id: 'C', label: 'Règle du quotient, sans identité' },
+    { id: 'D', label: 'Quotient avec identité arcsin+arccos=π/2' },
+    { id: 'E', label: 'Composition imbriquée, sans identité' },
+    { id: 'F', label: 'Composition imbriquée + identité trigonométrique' },
+    { id: 'G', label: 'Réciproque vs argument-fraction' },
+  ],
+  '6gen5': [
+    { id: 'A', label: 'A. arcsin/arccos, argument linéaire' },
+    { id: 'B', label: 'B. arctan, argument linéaire' },
+    { id: 'C', label: 'C. Argument en x² (fonction paire)' },
+    { id: 'D', label: 'D. arctan(k/(x-p)), point exclu isolé' },
+    { id: 'E', label: "E. Racine d'une expression affine en arcfonction(x)" },
+    { id: 'F', label: 'F. Carré d\'une arcfonction affine, décalé' },
+  ],
+}
+
+/** `[]` pour une section absente de `SECTIONS_EVALUATION_PILOTE` — même convention que
+ * `deriveQuestionsOuvertes`. */
+export function catalogueVariantesExercice(sectionId: string): CatalogueVarianteEntree[] {
+  const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.sectionId === sectionId)
+  return config ? CATALOGUES_VARIANTES_EXERCICE[config.generatorId] : []
+}
+
 /** Fragment texte/latex — même forme que `FragmentConsigne` côté plateforme-maths
  * (`src/ui/formatEquationDroite.ts`), pour que les questions ouvertes envoyées dans le payload s'y
  * rendent en vrai KaTeX plutôt qu'en texte brut. */
@@ -300,17 +364,26 @@ export interface LigneSelection {
   sectionId: string
   processus: Processus
   type: TypeQuestionEvaluation
-  /** 0 = ligne non incluse. */
+  /** 0 = ligne non incluse. Pour `type==='exercice'`, DÉRIVÉ automatiquement de la somme de
+   * `parVariante` (jamais éditable directement dans ce cas) — voir `sommeParVariante`. */
   nombre: number
+  /** Réservé à `type==='exercice'` — nombre d'exercices PAR FAMILLE/VARIANTE forcée (clé = `id` du
+   * catalogue, voir `catalogueVariantesExercice`), pour un contrôle fin plutôt qu'un total tiré au
+   * hasard parmi toutes les familles. Absent (ou vide) pour les autres types. */
+  parVariante?: Record<string, number>
   /** Points par question (chaque question générée par cette ligne vaut ce nombre de points). */
   points: number
+}
+
+export function sommeParVariante(parVariante: Record<string, number> | undefined): number {
+  return Object.values(parVariante ?? {}).reduce((total, n) => total + n, 0)
 }
 
 interface ItemPayload {
   processus: Processus
   titreSection: string
   points: number
-  exercice?: { generatorId: IdGenerateurPilote; nombre: number }
+  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number }[] }
   vraiFaux?: { theme: string; nombre: number }
   /** Une entrée par série anti-triche — voir `construireOuvertesParSerie`. */
   ouvertesParSerie?: QuestionOuverte[][]
@@ -382,7 +455,11 @@ export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelect
     const titreSection = `${section.number}. ${section.title}`
 
     if (ligne.type === 'exercice') {
-      items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, nombre: ligne.nombre } })
+      const parVariante = Object.entries(ligne.parVariante ?? {})
+        .filter(([, nombre]) => nombre > 0)
+        .map(([varianteId, nombre]) => ({ varianteId, nombre }))
+      if (parVariante.length === 0) continue
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante } })
     } else if (ligne.type === 'vraiFaux') {
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
