@@ -5,12 +5,12 @@ import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
   HEURES_SEMAINE_DEFAUT,
-  LEVELSLUG_FONCTIONNEL,
   NIVEAU_NUMERO,
   buildEvaluationUrl,
   catalogueVariantesExercice,
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
+  estChapitreFonctionnel,
   resoudreLevelSlug,
   sommeParVariante,
   type LigneSelection,
@@ -66,28 +66,27 @@ export function EvaluationGeneratorPanel() {
 
   const levelSlug = resoudreLevelSlug(niveau, heures)
   const niveauEntry = levelSlug ? LEVELS.find((l) => l.slug === levelSlug) : undefined
-  const levelFonctionnel = levelSlug === LEVELSLUG_FONCTIONNEL
 
   const chapitre = niveauEntry?.chapters.find((c) => c.slug === chapitreSlug)
-  const chapitreFonctionnel = levelFonctionnel && chapitreSlug === CHAPITRE_FONCTIONNEL_SLUG
+  const chapitreFonctionnel = estChapitreFonctionnel(levelSlug, chapitreSlug)
 
   const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitre))
 
   const apercusDemonstration = useMemo(() => {
     const map = new Map<string, number>()
     if (chapitreFonctionnel && chapitre) {
-      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsOuvertes(section).length)
+      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsOuvertes(chapitreSlug, section).length)
     }
     return map
-  }, [chapitre, chapitreFonctionnel])
+  }, [chapitre, chapitreFonctionnel, chapitreSlug])
 
   const apercusComprehension = useMemo(() => {
     const map = new Map<string, number>()
     if (chapitreFonctionnel && chapitre) {
-      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsComprehension(section.id).length)
+      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsComprehension(chapitreSlug, section.id).length)
     }
     return map
-  }, [chapitre, chapitreFonctionnel])
+  }, [chapitre, chapitreFonctionnel, chapitreSlug])
 
   function reglerNiveauHeures(prochainNiveau: NiveauCode, prochainesHeures: string) {
     setNiveau(prochainNiveau)
@@ -142,6 +141,7 @@ export function EvaluationGeneratorPanel() {
     const titreFinal = titre || `Évaluation — ${chapitre.title}`
     const niveauLabel = niveauEntry?.label ?? niveau
     const url = buildEvaluationUrl(
+      chapitreSlug,
       { numero, date, titre: titreFinal, niveauLabel, niveauNumero: NIVEAU_NUMERO[niveau], heuresSemaine, calculatrice, nombreSeries },
       lignes,
       chapitre.sections,
@@ -159,8 +159,8 @@ export function EvaluationGeneratorPanel() {
   return (
     <div className="admin-eval">
       <p className="admin-eval-intro">
-        Seul le chapitre 6e (6h) — Fonctions réciproques &amp; cyclométriques est fonctionnel pour l'instant. Les autres niveaux/chapitres
-        apparaissent ci-dessous mais restent désactivés (« bientôt ») — l'extension se fera lot par lot.
+        Seuls les chapitres 1 et 2 de 6e (6h) — Fonctions réciproques &amp; cyclométriques, et Fonctions exponentielles — sont fonctionnels pour
+        l'instant. Les autres niveaux/chapitres apparaissent ci-dessous mais restent désactivés (« bientôt ») — l'extension se fera lot par lot.
       </p>
 
       <div className="admin-eval-entete">
@@ -220,9 +220,9 @@ export function EvaluationGeneratorPanel() {
           <select id="eval-chapitre" value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)} disabled={!niveauEntry}>
             {!niveauEntry && <option value="">Aucun chapitre disponible pour l'instant</option>}
             {niveauEntry?.chapters.map((c) => (
-              <option key={c.slug} value={c.slug} disabled={!(levelFonctionnel && c.slug === CHAPITRE_FONCTIONNEL_SLUG)}>
+              <option key={c.slug} value={c.slug} disabled={!estChapitreFonctionnel(levelSlug, c.slug)}>
                 {c.chapterNumber}. {c.title}
-                {levelFonctionnel && c.slug === CHAPITRE_FONCTIONNEL_SLUG ? '' : ' (bientôt)'}
+                {estChapitreFonctionnel(levelSlug, c.slug) ? '' : ' (bientôt)'}
               </option>
             ))}
           </select>
@@ -289,7 +289,7 @@ export function EvaluationGeneratorPanel() {
                         </summary>
                         {lignesSection.map((ligne) => {
                           if (ligne.type === 'exercice') {
-                            const catalogue = catalogueVariantesExercice(section.id)
+                            const catalogue = catalogueVariantesExercice(chapitreSlug, section.id)
                             return (
                               <div className="admin-eval-exercice" key={ligne.type}>
                                 <span className="admin-eval-ligne-label">{LABEL_TYPE.exercice}</span>

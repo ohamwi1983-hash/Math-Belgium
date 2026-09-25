@@ -44,30 +44,59 @@ export const NIVEAU_NUMERO: Record<NiveauCode, number> = { '4e': 4, '5e': 5, '6e
  * (donc quels générateurs) est utilisé, celui-là n'est qu'un texte affiché sur la copie. */
 export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5e': '4', '6e': '6' }
 
-/** Seul ce chapitre a un « générateur d'évaluations » fonctionnel côté plateforme-maths — les
- * autres apparaissent dans le sélecteur mais restent désactivés. */
+/** Chapitres ayant un « générateur d'évaluations » fonctionnel côté plateforme-maths — les autres
+ * apparaissent dans le sélecteur mais restent désactivés. Chaque entrée associe le chapitre à son
+ * numéro (1 ou 2), transmis à plateforme-maths pour choisir la bonne banque vrai/faux (les
+ * `quizTheme` des deux chapitres ne sont PAS garantis disjoints en tant que simples chaînes — voir
+ * `CHAPITRE_NUMERO`). */
 export const LEVELSLUG_FONCTIONNEL = '6e-6h'
+
+export type ChapitreFonctionnel = 1 | 2
+
+export const CHAPITRE_NUMERO: Record<string, ChapitreFonctionnel> = {
+  'fonctions-reciproques-cyclometriques': 1,
+  'fonctions-exponentielles': 2,
+}
+
+/** Conservé pour compat (chapitre par défaut à la sélection d'un niveau) — préférer
+ * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
 export const CHAPITRE_FONCTIONNEL_SLUG = 'fonctions-reciproques-cyclometriques'
 export const EVALUATION_BASE_URL = EVALUATION_BASE_URL_6E_6H
 
-export type IdGenerateurPilote = '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5'
+export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
+  return levelSlug === LEVELSLUG_FONCTIONNEL && chapitreSlug in CHAPITRE_NUMERO
+}
+
+export type IdGenerateurPilote = '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
 
 export interface SectionEvaluationConfig {
+  chapitreSlug: string
   sectionId: string
   generatorId: IdGenerateurPilote
   quizTheme: string
 }
 
 /** Correspondance section Math-Belgium ↔ générateur plateforme-maths ↔ thème de la banque vrai/faux
- * — établie à la main pour ce chapitre pilote (alignement 1:1 confirmé dans le code source de
- * plateforme-maths, voir `src/generateurs6e/quizFonctionsReciproquesCyclometriques/banque.ts`).
- * Chaque futur chapitre ajouté demandera sa propre table, construite au cas par cas. */
+ * — établie à la main, chapitre par chapitre (alignement 1:1 confirmé dans le code source de
+ * plateforme-maths : `quizFonctionsReciproquesCyclometriques/banque.ts` pour le chapitre 1,
+ * `quizFonctionsExponentielles/banque.ts` — 6gen65 — pour le chapitre 2). Chaque ligne est scopée
+ * par `chapitreSlug` : le chapitre 2 a lui aussi une section `sectionId: 'equations'`
+ * (équations exponentielles, 6gen9) qui entrerait sinon en collision avec celle du chapitre 1
+ * (équations cyclométriques, 6gen3) — toute recherche dans cette table DOIT filtrer sur les deux
+ * clés, jamais `sectionId` seul. */
 export const SECTIONS_EVALUATION_PILOTE: SectionEvaluationConfig[] = [
-  { sectionId: 'reciproques', generatorId: '6gen1', quizTheme: 'injectiviteSurjectiviteBijectivite' },
-  { sectionId: 'cyclometriques', generatorId: '6gen2', quizTheme: 'fonctionsCyclometriques' },
-  { sectionId: 'equations', generatorId: '6gen3', quizTheme: 'equationsCyclometriques' },
-  { sectionId: 'derivees', generatorId: '6gen4', quizTheme: 'deriveesCyclometriques' },
-  { sectionId: 'graphiques', generatorId: '6gen5', quizTheme: 'graphiquesCyclometriques' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'reciproques', generatorId: '6gen1', quizTheme: 'injectiviteSurjectiviteBijectivite' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', quizTheme: 'fonctionsCyclometriques' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', quizTheme: 'equationsCyclometriques' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', quizTheme: 'deriveesCyclometriques' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', quizTheme: 'graphiquesCyclometriques' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', quizTheme: 'limitesExponentielles' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen7', quizTheme: 'domaineDeriveeExponentielles' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', generatorId: '6gen8', quizTheme: 'graphiquesDeriveeExponentielles' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'equations', generatorId: '6gen9', quizTheme: 'equationsExponentielles' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'inequations', generatorId: '6gen10', quizTheme: 'inequationsExponentielles' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'etude', generatorId: '6gen11', quizTheme: 'etudeFonctionExponentielle' },
+  { chapitreSlug: 'fonctions-exponentielles', sectionId: 'problemes', generatorId: '6gen12', quizTheme: 'exponentiellesProblemes' },
 ]
 
 export interface CatalogueVarianteEntree {
@@ -125,12 +154,71 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'E', label: "E. Racine d'une expression affine en arcfonction(x)" },
     { id: 'F', label: 'F. Carré d\'une arcfonction affine, décalé' },
   ],
+  '6gen6': [
+    { id: 'A', label: 'A — Limite directe' },
+    { id: 'B', label: 'B — Somme, terme exponentiel dominant' },
+    { id: 'C', label: 'C — Produit, FI ∞·0' },
+    { id: 'D', label: 'D — 0/0 via sin(x)/x' },
+    { id: 'E', label: 'E — 0/0 via (aˣ−1)/x → ln(a)' },
+    { id: 'F', label: 'F — Même référence + manipulation' },
+    { id: 'G', label: 'G — ∞−∞ avancée (instance unique)' },
+  ],
+  '6gen7': [
+    { id: 'A', label: 'A — Application directe' },
+    { id: 'B', label: 'B — Exposant à domaine restreint' },
+    { id: 'C', label: 'C — Produit avec terme exponentiel' },
+    { id: 'D', label: 'D — Quotient avec terme exponentiel' },
+    { id: 'E', label: 'E — Simplifier avant de dériver' },
+    { id: 'F', label: 'F — Composition triple (trig/cyclométrique)' },
+  ],
+  '6gen8': [
+    { id: 'A', label: "A. Dérivée d'un produit simple" },
+    { id: 'B', label: "B. Dérivée d'un quotient logistique" },
+    { id: 'C', label: "C. Dérivée d'une somme symétrique" },
+    { id: 'D', label: "D. Dérivée d'une réciproque, point exclu" },
+  ],
+  '6gen9': [
+    { id: 'A1', label: 'A1 — Même base, direct' },
+    { id: 'A2', label: 'A2 — Même base, avec racine' },
+    { id: 'A3', label: 'A3 — Même base, second degré en x' },
+    { id: 'B', label: 'B — √(baseᵘ)=baseᵛ (∅ possible)' },
+    { id: 'C-direct', label: 'C — Changement de variable (présentation directe)' },
+    { id: 'C-carreDeguise', label: 'C — Changement de variable (base² déguisée)' },
+    { id: 'C-regroupement', label: 'C — Changement de variable (regroupement de coefficient)' },
+    { id: 'D1', label: 'D1 — c·baseᶠ⁽ˣ⁾=0, toujours ∅' },
+    { id: 'D2', label: 'D2 — somme de puissances +k=0, toujours ∅' },
+  ],
+  '6gen10': [
+    { id: 'A', label: 'A — Même base, sens préservé/inversé' },
+    { id: 'B', label: 'B — Toujours ∅' },
+    { id: 'C-f', label: 'C — Toujours ℝ (produit de signes coïncidents)' },
+    { id: 'C-k', label: 'C — Toujours ℝ (regroupement, discriminant négatif)' },
+    { id: 'D-constant', label: 'D — Produit, 1 facteur à signe constant' },
+    { id: 'D-variable', label: 'D — Produit, 2 facteurs variables (tableau de signes)' },
+    { id: 'E', label: 'E — Bases différentes, même exposant' },
+  ],
+  '6gen11': [
+    { id: 'A', label: 'A. Exponentielle simple, e^(mx+n)' },
+    { id: 'B', label: 'B. Point exclu, asymptote asymétrique' },
+    { id: 'C', label: 'C. Asymptote oblique' },
+    { id: 'D', label: 'D. Produit a·x·eˣ (réutilise 6gen8)' },
+  ],
+  '6gen12': [
+    { id: 'A', label: 'A — Évaluer/résoudre Q(t)=Q0·r^t' },
+    { id: 'B', label: 'B — Modèle complémentaire (asymptote-objectif)' },
+    { id: 'C', label: 'C — 2 points, taux inconnu' },
+    { id: 'D', label: 'D — Asymptote non nulle, 3 points' },
+    { id: 'E', label: 'E — Optimisation puissance×exponentielle' },
+    { id: 'F', label: 'F — Saturation donnée, coûts/revenus' },
+    { id: 'G', label: 'G — Seuil critique, décision' },
+  ],
 }
 
 /** `[]` pour une section absente de `SECTIONS_EVALUATION_PILOTE` — même convention que
- * `deriveQuestionsOuvertes`. */
-export function catalogueVariantesExercice(sectionId: string): CatalogueVarianteEntree[] {
-  const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.sectionId === sectionId)
+ * `deriveQuestionsOuvertes`. Scopée par `chapitreSlug` (voir la note sur `SECTIONS_EVALUATION_PILOTE`
+ * — sinon la section `'equations'` du chapitre 2 récupérerait le catalogue du chapitre 1). */
+export function catalogueVariantesExercice(chapitreSlug: string, sectionId: string): CatalogueVarianteEntree[] {
+  const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.chapitreSlug === chapitreSlug && c.sectionId === sectionId)
   return config ? CATALOGUES_VARIANTES_EXERCICE[config.generatorId] : []
 }
 
@@ -176,7 +264,8 @@ function extraireParagraphes(blocks: Block[]): FragmentTexte[][] {
  * chapitre ajouté demandera sa propre liste, construite au cas par cas — une section absente de
  * cette table (ou un index sans entrée) retombe sur le label brut, voir `deriveQuestionsOuvertes`.
  */
-const ENONCES_DEMONSTRATION: Record<string, string[]> = {
+const ENONCES_DEMONSTRATION: Record<string, Record<string, string[]>> = {
+  'fonctions-reciproques-cyclometriques': {
   reciproques: [
     "Démontre que si $f$ est injective, sa relation réciproque est une fonction.",
     "Démontre que, pour $f$ injective, $(f^{-1})^{-1} = f$, et que $g = f^{-1} \\iff f = g^{-1}$.",
@@ -205,6 +294,7 @@ const ENONCES_DEMONSTRATION: Record<string, string[]> = {
     "Calcule la dérivée de $\\arcsin(2x-1)$.",
   ],
   graphiques: [],
+  },
 }
 
 /**
@@ -215,11 +305,11 @@ const ENONCES_DEMONSTRATION: Record<string, string[]> = {
  * mécaniquement du contenu du bloc (fiable) ; l'énoncé préfère le phrasé soigné de
  * `ENONCES_DEMONSTRATION` quand il existe, sinon retombe sur le label brut du bloc.
  */
-export function deriveQuestionsOuvertes(section: ChapterSection): QuestionOuverte[] {
+export function deriveQuestionsOuvertes(chapitreSlug: string, section: ChapterSection): QuestionOuverte[] {
   const candidats = section.blocks.filter(
     (b): b is Extract<Block, { kind: 'exemple' } | { kind: 'exempleLibre' }> => b.kind === 'exemple' || b.kind === 'exempleLibre',
   )
-  const enoncesSoignes = ENONCES_DEMONSTRATION[section.id]
+  const enoncesSoignes = ENONCES_DEMONSTRATION[chapitreSlug]?.[section.id]
 
   return candidats.map((candidat, index) => {
     const enonceSoigneTexte = enoncesSoignes?.[index]
@@ -253,7 +343,8 @@ interface QuestionOuverteBrute {
   corrige: string
 }
 
-const QUESTIONS_COMPREHENSION: Record<string, QuestionOuverteBrute[]> = {
+const QUESTIONS_COMPREHENSION: Record<string, Record<string, QuestionOuverteBrute[]>> = {
+  'fonctions-reciproques-cyclometriques': {
   reciproques: [
     {
       enonce: "Pourquoi une fonction non injective ne peut-elle pas avoir de relation réciproque qui soit elle-même une fonction ?",
@@ -349,11 +440,12 @@ const QUESTIONS_COMPREHENSION: Record<string, QuestionOuverteBrute[]> = {
         "Parce qu'arctan a pour domaine ℝ tout entier — jamais restreinte à [−1;1]. Un domaine borné à [−1;1] élimine donc automatiquement arctan et ne laisse que arcsin ou arccos, à départager ensuite par le sens de variation.",
     },
   ],
+  },
 }
 
 /** `[]` pour une section absente de la table — même convention que `deriveQuestionsOuvertes`. */
-export function deriveQuestionsComprehension(sectionId: string): QuestionOuverte[] {
-  const questions = QUESTIONS_COMPREHENSION[sectionId] ?? []
+export function deriveQuestionsComprehension(chapitreSlug: string, sectionId: string): QuestionOuverte[] {
+  const questions = QUESTIONS_COMPREHENSION[chapitreSlug]?.[sectionId] ?? []
   return questions.map((q) => ({ enonce: parseRichText(q.enonce), corrige: [parseRichText(q.corrige)] }))
 }
 
@@ -384,7 +476,9 @@ interface ItemPayload {
   titreSection: string
   points: number
   exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number }[] }
-  vraiFaux?: { theme: string; nombre: number }
+  /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths — voir
+   * `CHAPITRE_NUMERO` et la note de `SECTIONS_EVALUATION_PILOTE`. */
+  vraiFaux?: { chapitre: ChapitreFonctionnel; theme: string; nombre: number }
   /** Une entrée par série anti-triche — voir `construireOuvertesParSerie`. */
   ouvertesParSerie?: QuestionOuverte[][]
 }
@@ -441,16 +535,19 @@ export interface EnTeteEvaluation {
  * Construit l'URL complète vers le générateur d'évaluations à partir de la sélection de
  * l'utilisateur — `null` si aucune ligne active (rien à générer). `sections` doit être les sections
  * RÉELLES du chapitre choisi (pour dériver les questions ouvertes) — voir `chaptersIndex.ts`.
+ * `chapitreSlug` scope toutes les recherches dans `SECTIONS_EVALUATION_PILOTE` (voir sa note sur la
+ * collision `'equations'` entre les deux chapitres) et sélectionne la banque vrai/faux.
  */
-export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
+export function buildEvaluationUrl(chapitreSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
   const items: ItemPayload[] = []
   const nombreSeries = Math.max(1, entete.nombreSeries)
+  const chapitreNumero = CHAPITRE_NUMERO[chapitreSlug]
 
   for (const ligne of lignes) {
     if (ligne.nombre <= 0) continue
-    const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.sectionId === ligne.sectionId)
+    const config = SECTIONS_EVALUATION_PILOTE.find((c) => c.chapitreSlug === chapitreSlug && c.sectionId === ligne.sectionId)
     const section = sections.find((s) => s.id === ligne.sectionId)
-    if (!config || !section) continue
+    if (!config || !section || !chapitreNumero) continue
 
     const titreSection = `${section.number}. ${section.title}`
 
@@ -461,9 +558,9 @@ export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelect
       if (parVariante.length === 0) continue
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante } })
     } else if (ligne.type === 'vraiFaux') {
-      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { theme: config.quizTheme, nombre: ligne.nombre } })
+      items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { chapitre: chapitreNumero, theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
-      const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(section) : deriveQuestionsComprehension(section.id)
+      const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(chapitreSlug, section) : deriveQuestionsComprehension(chapitreSlug, section.id)
       const ouvertesParSerie = construireOuvertesParSerie(banque, ligne.nombre, nombreSeries)
       if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie })
     }
