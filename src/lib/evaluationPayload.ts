@@ -72,6 +72,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-exponentielles' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'fonction-second-degre' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
@@ -88,6 +89,7 @@ export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | 'gen7' | 'gen8' | 'gen9'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
+  | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -137,6 +139,14 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', generatorId: '5gen4', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', generatorId: '5gen5', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', generatorId: '5gen6', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'polygones', generatorId: '5gen7', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', generatorId: '5gen12', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'parametres', generatorId: '5gen8', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'lecture-graphique', generatorId: '5gen9', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'extremums', generatorId: '5gen11', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen13', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'equations', generatorId: '5gen10', label: '' },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
@@ -161,13 +171,21 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'domaineImageTableaux', label: 'Domaine, image et tableaux' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'formeCanoniqueSommet', label: 'Forme canonique, sommet et axe' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'transformationsGraphiques', label: 'Transformations graphiques' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', quizTheme: 'decomposition', label: '' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', quizTheme: 'composition', label: '' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', quizTheme: 'lectureGraphique', label: '' },
-  { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', quizTheme: 'problemesContexte', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', quizTheme: 'decomposition', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', quizTheme: 'composition', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', quizTheme: 'lectureGraphique', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', quizTheme: 'problemesContexte', label: '', quizChapitre: 1 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', quizTheme: 'arcsEtSecteurs', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'parametres', quizTheme: 'parametresSinusoide', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'lecture-graphique', quizTheme: 'graphesSinusoides', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'equations', quizTheme: 'equationsTrigonometriques', label: 'Équations trigonométriques', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'equations', quizTheme: 'identitesEtFactorisation', label: 'Identités et factorisation', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'extremums', quizTheme: 'extremumsSinusoide', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', quizTheme: 'geometrieEtModelisation', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', quizTheme: 'geometrieEtModelisation', label: '', quizChapitre: 2 },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
@@ -340,6 +358,32 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'B4', label: 'Modèle B4' },
     { id: 'B5', label: 'Modèle B5' },
   ],
+  '5gen6': [
+    { id: 'deuxVersTrois', label: '2 données → 3 inconnues' },
+    { id: 'conversion', label: 'Conversion degrés ↔ radians' },
+  ],
+  '5gen7': [
+    { id: 'aucun', label: 'Sans écran bonus' },
+    { id: 'arc', label: '+ arc multi-pas' },
+    { id: 'secteur', label: '+ secteur multi-pas' },
+    { id: 'les-deux', label: '+ arc et secteur multi-pas' },
+  ],
+  '5gen8': [
+    { id: 'developpee', label: 'Forme développée (A·sin(Bx+C)+b)' },
+    { id: 'prefactorisee', label: 'Forme pré-factorisée (A·sin((2π/T)(x-φ))+b)' },
+  ],
+  '5gen9': [{ id: 'defaut', label: 'Lecture graphique' }],
+  '5gen10': [{ id: 'defaut', label: 'Équation trig(ax+b)=k' }],
+  '5gen11': [
+    { id: 'sin', label: 'sin' },
+    { id: 'cos', label: 'cos' },
+  ],
+  '5gen12': [
+    { id: 'secteurBalaye', label: 'Secteur balayé (essuie-glace)' },
+    { id: 'segmentCirculaire', label: 'Segment circulaire' },
+    { id: 'lentille', label: 'Lentille (deux cercles sécants)' },
+  ],
+  '5gen13': [{ id: 'defaut', label: 'Système à 2 points (technique B3)' }],
 }
 
 /** `[]` pour un générateur sans catalogue connu. */
