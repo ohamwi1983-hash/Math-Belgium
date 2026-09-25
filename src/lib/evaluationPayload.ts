@@ -14,6 +14,7 @@ export const EVALUATION_BASE_URL_6E_6H = 'https://plateforme-maths.vercel.app/6e
 /** 4e n'a pas de préfixe de chantier dans ses URL (voir `.claude/rules/content-authoring.md`,
  * convention de lien vers un générateur) — sa page `/evaluation` est donc à la racine. */
 export const EVALUATION_BASE_URL_4E = 'https://plateforme-maths.vercel.app/evaluation'
+export const EVALUATION_BASE_URL_5E_4H = 'https://plateforme-maths.vercel.app/5e-4h/evaluation'
 
 /** Niveau + nombre d'heures ne se combinent pas librement : seules ces 3 combinaisons existent
  * réellement dans les deux dépôts à ce jour (voir `LEVELS` dans `chaptersIndex.ts`). `null` = pas
@@ -51,6 +52,7 @@ export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5
  * apparaissent dans le sélecteur mais restent désactivés. */
 export const LEVELSLUG_FONCTIONNEL_6E = '6e-6h'
 export const LEVELSLUG_FONCTIONNEL_4E = '4e'
+export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
 
 /** Numéro de chapitre — utilisé UNIQUEMENT pour départager les 2 banques vrai/faux de
  * `AppEvaluation6e.tsx` (6e n'a qu'UNE page d'évaluation qui sert ses 2 chapitres ; 4e a sa propre
@@ -69,6 +71,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-reciproques-cyclometriques' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-exponentielles' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'fonction-second-degre' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
@@ -78,11 +81,13 @@ export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: s
 const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
   [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
   [LEVELSLUG_FONCTIONNEL_4E]: EVALUATION_BASE_URL_4E,
+  [LEVELSLUG_FONCTIONNEL_5E]: EVALUATION_BASE_URL_5E_4H,
 }
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | 'gen7' | 'gen8' | 'gen9'
+  | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -127,6 +132,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen8', label: 'Transformations graphiques (gen8)' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen9', label: 'Forme canonique et transformations (gen9)' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', generatorId: '5gen4', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', generatorId: '5gen5', label: '' },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
@@ -151,6 +161,13 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'domaineImageTableaux', label: 'Domaine, image et tableaux' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'formeCanoniqueSommet', label: 'Forme canonique, sommet et axe' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'transformationsGraphiques', label: 'Transformations graphiques' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', quizTheme: 'decomposition', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'composer', quizTheme: 'composition', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'graphique', quizTheme: 'lectureGraphique', label: '' },
+  { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', quizTheme: 'problemesContexte', label: '' },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
@@ -287,6 +304,42 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
    * sur `genererInstance()` en ignorant cet id (voir `AppEvaluation4e.tsx::construireItemsExercice`). */
   gen8: [{ id: 'defaut', label: 'Lecture graphique' }],
   gen9: [{ id: 'defaut', label: 'Développée → canonique' }],
+  '5gen1': [
+    { id: 'rationnelle', label: 'Rationnelle' },
+    { id: 'irrationnelleSimple', label: 'Irrationnelle simple' },
+    { id: 'racineSurFraction', label: 'Racine sur fraction' },
+    { id: 'fractionSousRacine', label: 'Fraction sous racine (bonus)' },
+    { id: 'pasDeCE', label: 'Pas de CE' },
+    { id: 'racineImpaireDenominateur', label: 'Racine impaire au dénominateur' },
+  ],
+  '5gen2': [
+    { id: '2', label: '2 couches' },
+    { id: '3', label: '3 couches' },
+    { id: '4', label: '4 couches' },
+  ],
+  '5gen3': [
+    { id: 'rationnelle+rationnelle', label: 'rationnelle + rationnelle' },
+    { id: 'irrationnelleSimple+irrationnelleSimple', label: 'racine simple + racine simple' },
+    { id: 'racineSurFraction+racineSurFraction', label: 'racine sur fraction + racine sur fraction' },
+    { id: 'fractionSousRacine+fractionSousRacine', label: 'fraction sous racine + fraction sous racine' },
+    { id: 'rationnelle+irrationnelleSimple', label: 'rationnelle + racine simple' },
+    { id: 'rationnelle+racineSurFraction', label: 'rationnelle + racine sur fraction' },
+    { id: 'rationnelle+fractionSousRacine', label: 'rationnelle + fraction sous racine' },
+    { id: 'irrationnelleSimple+racineSurFraction', label: 'racine simple + racine sur fraction' },
+    { id: 'irrationnelleSimple+fractionSousRacine', label: 'racine simple + fraction sous racine' },
+    { id: 'racineSurFraction+fractionSousRacine', label: 'racine sur fraction + fraction sous racine' },
+  ],
+  '5gen4': [
+    { id: 'f', label: 'f restreinte' },
+    { id: 'g', label: 'g restreinte' },
+  ],
+  '5gen5': [
+    { id: 'B1', label: 'Modèle B1' },
+    { id: 'B2', label: 'Modèle B2' },
+    { id: 'B3', label: 'Modèle B3' },
+    { id: 'B4', label: 'Modèle B4' },
+    { id: 'B5', label: 'Modèle B5' },
+  ],
 }
 
 /** `[]` pour un générateur sans catalogue connu. */
