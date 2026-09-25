@@ -33,6 +33,17 @@ export function resoudreLevelSlug(niveau: NiveauCode, heures: string): string | 
   return NIVEAU_HEURES_VERS_LEVELSLUG[`${niveau}|${heures}`] ?? null
 }
 
+/** Sert au bloc titre imprimé (« Classe : 4G..... », « 4ème » du pied de page) — jamais le
+ * « nombre d'heures » du chantier plateforme-maths ci-dessus (notion indépendante, voir
+ * `HEURES_SEMAINE_DEFAUT`). */
+export const NIVEAU_NUMERO: Record<NiveauCode, number> = { '4e': 4, '5e': 5, '6e': 6 }
+
+/** Volume horaire hebdomadaire par défaut affiché « Mathématiques {X}h/sem » — valeur observée sur
+ * un modèle réel par niveau, modifiable dans le formulaire (une classe précise peut différer). Sans
+ * rapport avec `HEURES_PAR_NIVEAU` ci-dessus : celui-ci détermine quel chantier plateforme-maths
+ * (donc quels générateurs) est utilisé, celui-là n'est qu'un texte affiché sur la copie. */
+export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5e': '4', '6e': '6' }
+
 /** Seul ce chapitre a un « générateur d'évaluations » fonctionnel côté plateforme-maths — les
  * autres apparaissent dans le sélecteur mais restent désactivés. */
 export const LEVELSLUG_FONCTIONNEL = '6e-6h'
@@ -280,7 +291,8 @@ interface ItemPayload {
   points: number
   exercice?: { generatorId: IdGenerateurPilote; nombre: number }
   vraiFaux?: { theme: string; nombre: number }
-  ouvertes?: QuestionOuverte[]
+  /** Une entrée par série anti-triche — voir `construireOuvertesParSerie`. */
+  ouvertesParSerie?: QuestionOuverte[][]
 }
 
 /** Encode un objet JS en base64 sûr pour l'UTF-8 (accents français compris) — décodage symétrique
@@ -290,11 +302,45 @@ function encoderPayload(payload: unknown): string {
   return btoa(unescape(encodeURIComponent(json)))
 }
 
+/** Choisit `nombre` éléments distincts au hasard (Fisher-Yates partiel) — même algorithme que
+ * `piocherQuestions` côté plateforme-maths (`AppEvaluation6e.tsx`), dupliqué ici volontairement :
+ * deux dépôts séparés, pas de code partagé entre eux. */
+function piocherAleatoire<T>(banque: T[], nombre: number): T[] {
+  const copie = [...banque]
+  const n = Math.min(nombre, copie.length)
+  for (let i = copie.length - 1; i > copie.length - 1 - n; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copie[i], copie[j]] = [copie[j], copie[i]]
+  }
+  return copie.slice(copie.length - n)
+}
+
+/** Construit une sélection de `nombre` questions ouvertes PAR SÉRIE — indépendamment randomisée
+ * quand le vivier le permet (`banque.length > nombre`), pour que les séries anti-triche diffèrent
+ * aussi sur les questions ouvertes, pas seulement sur les exercices générés/le vrai-faux (déjà
+ * randomisés à la génération côté plateforme-maths). Vivier insuffisant : toutes les séries
+ * reçoivent la même sélection (rien d'autre à distribuer). */
+function construireOuvertesParSerie(banque: QuestionOuverte[], nombre: number, nombreSeries: number): QuestionOuverte[][] {
+  if (banque.length <= nombre) {
+    const selection = banque.slice(0, nombre)
+    return Array.from({ length: nombreSeries }, () => selection)
+  }
+  return Array.from({ length: nombreSeries }, () => piocherAleatoire(banque, nombre))
+}
+
 export interface EnTeteEvaluation {
   numero: string
   date: string
   titre: string
   niveauLabel: string
+  /** 4, 5 ou 6 — voir `NIVEAU_NUMERO`. */
+  niveauNumero: number
+  /** Texte affiché « Mathématiques {X}h/sem » — voir `HEURES_SEMAINE_DEFAUT`. */
+  heuresSemaine: string
+  calculatrice: 'interdite' | 'autorisee'
+  /** Nombre de versions anti-triche à générer (>= 1, lettrées A, B, C...) — chacune indépendamment
+   * randomisée (générateurs, vrai/faux, et questions ouvertes quand le vivier le permet). */
+  nombreSeries: number
 }
 
 /**
@@ -304,6 +350,7 @@ export interface EnTeteEvaluation {
  */
 export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
   const items: ItemPayload[] = []
+  const nombreSeries = Math.max(1, entete.nombreSeries)
 
   for (const ligne of lignes) {
     if (ligne.nombre <= 0) continue
@@ -319,13 +366,23 @@ export function buildEvaluationUrl(entete: EnTeteEvaluation, lignes: LigneSelect
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
       const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(section) : deriveQuestionsComprehension(section.id)
-      const ouvertes = banque.slice(0, ligne.nombre)
-      if (ouvertes.length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertes })
+      const ouvertesParSerie = construireOuvertesParSerie(banque, ligne.nombre, nombreSeries)
+      if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie })
     }
   }
 
   if (items.length === 0) return null
 
-  const base64 = encoderPayload({ numero: entete.numero, date: entete.date, titre: entete.titre, niveauLabel: entete.niveauLabel, items })
+  const base64 = encoderPayload({
+    numero: entete.numero,
+    date: entete.date,
+    titre: entete.titre,
+    niveauLabel: entete.niveauLabel,
+    niveauNumero: entete.niveauNumero,
+    heuresSemaine: entete.heuresSemaine,
+    calculatrice: entete.calculatrice,
+    nombreSeries,
+    items,
+  })
   return `${EVALUATION_BASE_URL}?d=${encodeURIComponent(base64)}`
 }

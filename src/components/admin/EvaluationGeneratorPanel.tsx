@@ -4,7 +4,9 @@ import type { ChapterContent } from '../../content/types'
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
+  HEURES_SEMAINE_DEFAUT,
   LEVELSLUG_FONCTIONNEL,
+  NIVEAU_NUMERO,
   buildEvaluationUrl,
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
@@ -16,6 +18,8 @@ import {
 } from '../../lib/evaluationPayload'
 
 const NIVEAUX: NiveauCode[] = ['4e', '5e', '6e']
+
+const LABEL_PROCESSUS: Record<Processus, string> = { 1: 'Connaître', 2: 'Appliquer', 3: 'Transférer' }
 
 const LABEL_TYPE: Record<TypeQuestionEvaluation, string> = {
   demonstration: 'Questions ouvertes — formules / démonstrations',
@@ -51,6 +55,9 @@ export function EvaluationGeneratorPanel() {
   const [heures, setHeures] = useState('6H')
   const [chapitreSlug, setChapitreSlug] = useState(CHAPITRE_FONCTIONNEL_SLUG)
   const [titre, setTitre] = useState('')
+  const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT['6e'])
+  const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
+  const [nombreSeries, setNombreSeries] = useState(1)
   const [processusActifs, setProcessusActifs] = useState<Record<Processus, boolean>>({ 1: false, 2: false, 3: false })
   const [erreur, setErreur] = useState(false)
   const [urlGeneree, setUrlGeneree] = useState<string | null>(null)
@@ -83,6 +90,7 @@ export function EvaluationGeneratorPanel() {
   function reglerNiveauHeures(prochainNiveau: NiveauCode, prochainesHeures: string) {
     setNiveau(prochainNiveau)
     setHeures(prochainesHeures)
+    setHeuresSemaine(HEURES_SEMAINE_DEFAUT[prochainNiveau])
     const prochainLevelSlug = resoudreLevelSlug(prochainNiveau, prochainesHeures)
     const prochainNiveauEntry = prochainLevelSlug ? LEVELS.find((l) => l.slug === prochainLevelSlug) : undefined
     const prochainChapitre = prochainNiveauEntry?.chapters[0]
@@ -117,7 +125,11 @@ export function EvaluationGeneratorPanel() {
     if (!chapitre) return
     const titreFinal = titre || `Évaluation — ${chapitre.title}`
     const niveauLabel = niveauEntry?.label ?? niveau
-    const url = buildEvaluationUrl({ numero, date, titre: titreFinal, niveauLabel }, lignes, chapitre.sections)
+    const url = buildEvaluationUrl(
+      { numero, date, titre: titreFinal, niveauLabel, niveauNumero: NIVEAU_NUMERO[niveau], heuresSemaine, calculatrice, nombreSeries },
+      lignes,
+      chapitre.sections,
+    )
     if (!url) {
       setErreur(true)
       setUrlGeneree(null)
@@ -201,6 +213,37 @@ export function EvaluationGeneratorPanel() {
         </div>
       </div>
 
+      <div className="admin-eval-entete">
+        <div className="admin-eval-field">
+          <label htmlFor="eval-heures-semaine">Volume horaire/sem</label>
+          <input id="eval-heures-semaine" type="text" value={heuresSemaine} onChange={(e) => setHeuresSemaine(e.target.value)} />
+        </div>
+        <div className="admin-eval-field">
+          <label htmlFor="eval-calculatrice">Calculatrice</label>
+          <select id="eval-calculatrice" value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
+            <option value="interdite">Interdite</option>
+            <option value="autorisee">Autorisée</option>
+          </select>
+        </div>
+        <div className="admin-eval-field">
+          <label htmlFor="eval-series">Nombre de séries</label>
+          <input
+            id="eval-series"
+            type="number"
+            min={1}
+            max={26}
+            value={nombreSeries}
+            onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
+          />
+        </div>
+      </div>
+      {nombreSeries > 1 && (
+        <p className="admin-eval-indisponible">
+          {nombreSeries} versions anti-triche (A à {String.fromCharCode(64 + nombreSeries)}) seront générées — mêmes questions, exercices/vrai-faux/questions
+          ouvertes indépendamment randomisés par série quand c'est possible.
+        </p>
+      )}
+
       {!chapitreFonctionnel && (
         <p className="admin-eval-indisponible">Ce chapitre n'est pas encore câblé côté plateforme-maths — reviens sur le chapitre pilote ci-dessus.</p>
       )}
@@ -211,8 +254,7 @@ export function EvaluationGeneratorPanel() {
             <div className="admin-eval-processus" key={processus}>
               <label className="admin-eval-processus-toggle">
                 <input type="checkbox" checked={processusActifs[processus]} onChange={() => toggleProcessus(processus)} />
-                <strong>Processus {processus}</strong> —{' '}
-                {processus === 1 ? 'Questions théoriques' : processus === 2 ? 'Exercices générés' : 'Exercices type problèmes (avec contexte)'}
+                <strong>Processus {processus}</strong> — {LABEL_PROCESSUS[processus]}
               </label>
 
               {processusActifs[processus] && processus === 3 && (
@@ -284,7 +326,7 @@ export function EvaluationGeneratorPanel() {
           <p className="admin-eval-total">Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}</p>
 
           <button type="button" className="admin-gate-submit" onClick={genererEvaluation}>
-            Générer l'évaluation (énoncé + corrigé, HTML A4)
+            {nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé + corrigé)
           </button>
           {erreur && <p className="admin-gate-error">Coche au moins une question (nombre &gt; 0) avant de générer.</p>}
           {urlGeneree && (
