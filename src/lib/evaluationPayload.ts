@@ -99,6 +99,12 @@ export interface GeneratorConfig {
    * chapitre 1 de 4e, section « Transformer » : gen8 ET gen9) — ignoré (un seul générateur, pas
    * besoin de le nommer) sinon. */
   label: string
+  /** Processus par défaut de la ligne créée pour ce générateur (voir `lignesInitiales`,
+   * `EvaluationGeneratorPanel.tsx`) — `2` (Appliquer) si absent, la valeur historique de tous les
+   * générateurs avant l'introduction de ce champ. Un générateur peut relever du processus 3
+   * (Transférer) plutôt que 2 quand l'exercice mobilise plusieurs notions combinées au lieu
+   * d'appliquer une procédure isolée (ex. 6gen5, chapitre 1 de 6e 6h). */
+  processus?: Processus
 }
 
 export interface QuizThemeConfig {
@@ -123,7 +129,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'cyclometriques', generatorId: '6gen2', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'equations', generatorId: '6gen3', label: '' },
   { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'derivees', generatorId: '6gen4', label: '' },
-  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '' },
+  { chapitreSlug: 'fonctions-reciproques-cyclometriques', sectionId: 'graphiques', generatorId: '6gen5', label: '', processus: 3 },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'limites', generatorId: '6gen6', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'derivee', generatorId: '6gen7', label: '' },
   { chapitreSlug: 'fonctions-exponentielles', sectionId: 'graphique', generatorId: '6gen8', label: '' },

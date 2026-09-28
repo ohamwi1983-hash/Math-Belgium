@@ -51,7 +51,7 @@ function lignesInitiales(chapitre: ChapterContent | undefined, chapitreSlug: str
       lignes.push({ sectionId: section.id, processus: 1, type: 'vraiFaux', cle: theme.quizTheme, nombre: 0, points: POINTS_DEFAUT.vraiFaux })
     }
     for (const generateur of generateursPourSection(chapitreSlug, section.id)) {
-      lignes.push({ sectionId: section.id, processus: 2, type: 'exercice', cle: generateur.generatorId, nombre: 0, parVariante: {}, points: POINTS_DEFAUT.exercice })
+      lignes.push({ sectionId: section.id, processus: generateur.processus ?? 2, type: 'exercice', cle: generateur.generatorId, nombre: 0, parVariante: {}, points: POINTS_DEFAUT.exercice })
     }
   }
   return lignes
@@ -286,11 +286,11 @@ export function EvaluationGeneratorPanel() {
                 <strong>Processus {processus}</strong> — {LABEL_PROCESSUS[processus]}
               </label>
 
-              {processusActifs[processus] && processus === 3 && (
+              {processusActifs[processus] && !lignes.some((l) => l.processus === processus) && (
                 <p className="admin-eval-indisponible">Aucun exercice de ce type dans ce chapitre pour l'instant.</p>
               )}
 
-              {processusActifs[processus] && processus !== 3 && (
+              {processusActifs[processus] && lignes.some((l) => l.processus === processus) && (
                 <div className="admin-eval-arbre">
                   {chapitre.sections.map((section) => {
                     const lignesSection = lignes.filter((l) => l.sectionId === section.id && l.processus === processus)
