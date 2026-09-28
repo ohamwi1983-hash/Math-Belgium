@@ -71,6 +71,7 @@ export function EvaluationGeneratorPanel() {
   const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT['6e'])
   const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
   const [nombreSeries, setNombreSeries] = useState(1)
+  const [afficherTitresSection, setAfficherTitresSection] = useState(true)
   const [processusActifs, setProcessusActifs] = useState<Record<Processus, boolean>>({ 1: false, 2: false, 3: false })
   const [erreur, setErreur] = useState(false)
   const [urlGeneree, setUrlGeneree] = useState<string | null>(null)
@@ -154,7 +155,7 @@ export function EvaluationGeneratorPanel() {
     const url = buildEvaluationUrl(
       levelSlug,
       chapitreSlug,
-      { numero, date, titre: titreFinal, niveauLabel, niveauNumero: NIVEAU_NUMERO[niveau], heuresSemaine, calculatrice, nombreSeries },
+      { numero, date, titre: titreFinal, niveauLabel, niveauNumero: NIVEAU_NUMERO[niveau], heuresSemaine, calculatrice, nombreSeries, afficherTitresSection },
       lignes,
       chapitre.sections,
     )
@@ -264,6 +265,12 @@ export function EvaluationGeneratorPanel() {
             value={nombreSeries}
             onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
           />
+        </div>
+        <div className="admin-eval-field">
+          <label htmlFor="eval-titres-section">
+            <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
+            {' '}Afficher les titres de section
+          </label>
         </div>
       </div>
       {nombreSeries > 1 && (

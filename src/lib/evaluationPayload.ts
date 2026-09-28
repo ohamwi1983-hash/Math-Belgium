@@ -711,6 +711,11 @@ export interface EnTeteEvaluation {
   /** Nombre de versions anti-triche à générer (>= 1, lettrées A, B, C...) — chacune indépendamment
    * randomisée (générateurs, vrai/faux, et questions ouvertes quand le vivier le permet). */
   nombreSeries: number
+  /** `false` : masque, dans les 2 documents générés, le titre du point du chapitre auquel
+   * appartient chaque question (ex. « 1. Fonction réciproque d'une fonction bijective ») — utile
+   * pour une évaluation qui ne doit pas révéler à quel point de matière appartient chaque question.
+   * `true` par défaut (titres affichés, comportement historique). */
+  afficherTitresSection: boolean
 }
 
 /**
@@ -767,6 +772,7 @@ export function buildEvaluationUrl(levelSlug: string, chapitreSlug: string, ente
     heuresSemaine: entete.heuresSemaine,
     calculatrice: entete.calculatrice,
     nombreSeries,
+    afficherTitresSection: entete.afficherTitresSection,
     items,
   })
   return `${baseUrl}?d=${encodeURIComponent(base64)}`
