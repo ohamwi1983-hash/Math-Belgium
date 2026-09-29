@@ -172,9 +172,9 @@ export function EvaluationGeneratorPanel() {
   return (
     <div className="admin-eval">
       <p className="admin-eval-intro">
-        Sont fonctionnels : chapitres 1 et 2 de 6e (6h) — Fonctions réciproques &amp; cyclométriques, et Fonctions exponentielles ; chapitres 1
-        (sections « Étudier » et « Transformer » uniquement), 2 et 3 de 4e ; chapitres 1 et 2 de 5e (4h). Les autres niveaux/chapitres/sections
-        apparaissent ci-dessous mais restent désactivés (« bientôt ») — l'extension se fera lot par lot.
+        Sont fonctionnels : chapitres 1 à 3 de 6e (6h) ; chapitres 1 (sections « Étudier » et « Transformer » uniquement), 2 et 3 de 4e ;
+        chapitres 1 à 3 de 5e (4h). Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés (« bientôt ») —
+        l'extension se fera lot par lot.
       </p>
 
       <div className="admin-eval-entete">
