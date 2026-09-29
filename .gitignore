@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Worktrees for background subagents (ephemeral, cleaned up when agents finish)
+.claude/worktrees/
