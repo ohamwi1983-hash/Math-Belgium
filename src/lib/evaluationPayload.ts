@@ -74,6 +74,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'caracteristiques-fonctions-reference' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
@@ -91,6 +92,7 @@ export type IdGenerateurPilote =
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen10' | 'gen11' | 'gen12' | 'gen13'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
+  | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -164,6 +166,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'trigonometrie', sectionId: 'extremums', generatorId: '5gen11', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', generatorId: '5gen13', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'equations', generatorId: '5gen10', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'suites-arithmetiques', generatorId: '5gen14', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'suites-geometriques', generatorId: '5gen15', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'convergence', generatorId: '5gen16', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'problemes-classiques', generatorId: '5gen17', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'comparaison-suites', generatorId: '5gen18', label: '' },
+  { chapitreSlug: 'suites', sectionId: 'recurrente-affine', generatorId: '5gen19', label: '' },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
@@ -217,6 +225,13 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'trigonometrie', sectionId: 'extremums', quizTheme: 'extremumsSinusoide', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', quizTheme: 'geometrieEtModelisation', label: '', quizChapitre: 2 },
   { chapitreSlug: 'trigonometrie', sectionId: 'modeliser', quizTheme: 'geometrieEtModelisation', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'suites', sectionId: 'suites-arithmetiques', quizTheme: 'suitesArithmetiques', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'suites', sectionId: 'suites-geometriques', quizTheme: 'suitesGeometriques', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'suites', sectionId: 'convergence', quizTheme: 'convergenceDivergence', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'suites', sectionId: 'problemes-classiques', quizTheme: 'problemesClassiques', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'suites', sectionId: 'comparaison-suites', quizTheme: 'comparaisonNumerique', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'suites', sectionId: 'recurrente-affine', quizTheme: 'suiteRecurrenteAffine', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'suites', sectionId: 'recurrente-affine', quizTheme: 'transversal', label: 'Transversal (tout le chapitre)', quizChapitre: 3 },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
@@ -487,6 +502,50 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'lentille', label: 'Lentille (deux cercles sécants)' },
   ],
   '5gen13': [{ id: 'defaut', label: 'Système à 2 points (technique B3)' }],
+  '5gen14': [
+    { id: 'principal', label: 'Pipeline u1/r (2 données → le reste)' },
+    { id: 'coherence', label: 'Vérification de cohérence (r, up, uq sur-spécifiés)' },
+    { id: 'algebriqueTermeGeneral', label: 'Isoler x — via up et un (relation générale)' },
+    { id: 'algebriqueSommeSn-A', label: 'Isoler x — Sn, sous-cas A (u1(x) algébrique)' },
+    { id: 'algebriqueSommeSn-B', label: 'Isoler x — Sn, sous-cas B (r(x) algébrique)' },
+    { id: 'algebriqueSommeSn-C', label: 'Isoler x — Sn, sous-cas C (u1(x) et r(x) algébriques)' },
+    { id: 'algebriqueSommeSn-D', label: 'Isoler x — Sn, sous-cas D (Sn(x) algébrique)' },
+    { id: 'algebriqueRangN', label: 'Isoler le rang n' },
+  ],
+  '5gen15': [
+    { id: 'principal', label: 'Pipeline u1/q (2 données → le reste)' },
+    { id: 'algebriqueTermeGeneral', label: 'Isoler x — via up et un (relation générale)' },
+    { id: 'algebriqueSommeSn-A', label: 'Isoler x — Sn, sous-cas A (u1(x) algébrique)' },
+    { id: 'algebriqueSommeSn-B', label: 'Isoler x — Sn, sous-cas B (Sn(x) algébrique)' },
+    { id: 'algebriqueRangN', label: 'Isoler le rang n (réduction à la même base)' },
+  ],
+  '5gen16': [
+    { id: 'arithmetique', label: 'Suite arithmétique' },
+    { id: 'geometrique', label: 'Suite géométrique' },
+    { id: 'quelconque', label: 'Suite rationnelle un=P(n)/Q(n)' },
+  ],
+  '5gen17': [
+    { id: 'echiquier', label: "L'échiquier et les grains de blé" },
+    { id: 'papyrusRhind', label: 'Le papyrus de Rhind' },
+    { id: 'suitesCombinees', label: 'Suite arithmétique et géométrique combinées' },
+    { id: 'vitesse', label: 'À toute allure' },
+    { id: 'fibonacci', label: 'La suite de Fibonacci' },
+    { id: 'trianglesZigzag', label: 'Triangles emboîtés et zigzag' },
+    { id: 'carresEmboites', label: 'Des carrés emboîtés' },
+  ],
+  '5gen18': [
+    { id: 'villesCroissance', label: 'Suite arithmétique vs suite géométrique' },
+    { id: 'stockDemande', label: 'Suite arithmétique vs arithmétique' },
+    { id: 'epargneCroissance', label: 'Suite géométrique vs géométrique' },
+  ],
+  /** gen19 n'a PAS de catalogue de contextes câblé côté plateforme-maths — même raison que
+   * gen8/gen9/gen12 ci-dessus (`genererInstanceAvecVariante` absent, retombe sur `genererInstance()`
+   * qui tire un des 60 contextes narratifs au hasard), MAIS pour une raison différente cette fois :
+   * un catalogue de 60 entrées ferait exploser la taille de l'URL du payload dès qu'on force
+   * plusieurs instances (constaté : 431 "Request Header Fields Too Large" côté plateforme-maths) et
+   * produirait 60 lignes dans le formulaire pour un seul générateur — voir le commentaire de tête de
+   * `suiteRecurrenteAffine/exportEvaluation.ts` côté plateforme-maths. */
+  '5gen19': [{ id: 'defaut', label: 'Contexte aléatoire (60 scénarios)' }],
 }
 
 /** `[]` pour un générateur sans catalogue connu. */
