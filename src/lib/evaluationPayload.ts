@@ -56,8 +56,8 @@ export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
 
 /** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
  * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
- * 7 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
-export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5 | 6 | 7
+ * 8 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
+export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 /** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
  * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
@@ -77,6 +77,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'cercle-trigonometrique-triangles' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'calcul-vectoriel' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'geometrie-analytique-plane' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'geometrie-dans-espace' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
@@ -100,6 +101,7 @@ export type IdGenerateurPilote =
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
   | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
+  | 'gen39' | 'gen40' | 'gen41'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
@@ -212,6 +214,9 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: 'Forme développée (gen52)' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: 'Construction (gen53)' },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen54', label: '', processus: 3 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', generatorId: 'gen39', label: '' },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', generatorId: 'gen40', label: '' },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', generatorId: 'gen41', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
@@ -318,6 +323,9 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', quizTheme: 'sommetFoyerParabole', label: 'Sommet et foyer', quizChapitre: 7 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', quizTheme: 'constructionParabole', label: 'Construction', quizChapitre: 7 },
   { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', quizTheme: 'lieuxGeometriques', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'position', quizTheme: 'positionDroitePlan', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'section', quizTheme: 'sectionPlaneSolide', label: '', quizChapitre: 8 },
+  { chapitreSlug: 'geometrie-dans-espace', sectionId: 'ombre', quizTheme: 'ombreSoleil', label: '', quizChapitre: 8 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
@@ -865,6 +873,22 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'droiteParabole_0', label: 'Droite-parabole — aucune intersection' },
     { id: 'droiteParabole_1', label: 'Droite-parabole — 1 point (tangente)' },
     { id: 'droiteParabole_2', label: 'Droite-parabole — 2 points' },
+  ],
+  gen39: [
+    { id: 'incluse', label: 'Droite incluse dans le plan' },
+    { id: 'parallele', label: 'Droite parallèle au plan' },
+    { id: 'secante', label: 'Droite sécante au plan' },
+  ],
+  gen40: [
+    { id: 'parallelepipede', label: 'Parallélépipède rectangle ABCD-EFGH' },
+    { id: 'cube', label: 'Cube ABCD-EFGH' },
+    { id: 'prisme', label: 'Prisme droit à base triangulaire ABC-DEF' },
+    { id: 'tetraedre', label: 'Tétraèdre ABCD' },
+  ],
+  gen41: [
+    { id: 'simple', label: 'Ombre simple sur sol plat' },
+    { id: 'obstacle', label: 'Ombre avec obstacle' },
+    { id: 'directionInconnue', label: 'Direction inconnue à déduire' },
   ],
   '5gen1': [
     { id: 'rationnelle', label: 'Rationnelle' },
