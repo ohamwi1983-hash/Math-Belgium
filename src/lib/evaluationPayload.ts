@@ -56,8 +56,8 @@ export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
 
 /** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
  * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
- * 3 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
-export type ChapitreFonctionnel = 1 | 2 | 3
+ * 4 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
+export type ChapitreFonctionnel = 1 | 2 | 3 | 4
 
 /** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
  * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
@@ -73,6 +73,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'fonction-second-degre' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'equations-inequations-second-degre' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'caracteristiques-fonctions-reference' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'statistique-descriptive' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
@@ -92,6 +93,7 @@ export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen10' | 'gen11' | 'gen12' | 'gen13'
+  | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
@@ -165,6 +167,15 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', generatorId: 'gen13', label: '' },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen10', label: 'Transformations graphiques (gen10)' },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen11', label: 'Forme canonique et transformations (gen11)' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', generatorId: 'gen30', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', generatorId: 'gen31', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', generatorId: 'gen32', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'position', generatorId: 'gen33', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', generatorId: 'gen34', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'boite', generatorId: 'gen36', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'tchebychev', generatorId: 'gen37', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'comparaison', generatorId: 'gen38', label: '' },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'revision', generatorId: 'gen35', label: '', processus: 3 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
@@ -232,6 +243,16 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'inverse', label: 'Inverse', quizChapitre: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'valeurAbsolue', label: 'Valeur absolue', quizChapitre: 3 },
   { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', quizTheme: 'transformations', label: '', quizChapitre: 3 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'frequences', quizTheme: 'effectifsFrequences', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'histogramme', quizTheme: 'graphiques', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'moyenne', quizTheme: 'moyenne', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'position', quizTheme: 'medianeQuartiles', label: 'Médiane et quartiles', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'position', quizTheme: 'mode', label: 'Mode', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'boite', quizTheme: 'boiteMoustaches', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'dispersion', quizTheme: 'dispersion', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'tchebychev', quizTheme: 'bienaymeTchebychev', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'comparaison', quizTheme: 'comparaisonSeries', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'statistique-descriptive', sectionId: 'revision', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 4 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
@@ -567,6 +588,48 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'racine_cubique', label: 'Racine cubique (∛x)' },
     { id: 'inverse', label: 'Inverse (1/x)' },
     { id: 'valeur_absolue', label: 'Valeur absolue (|x|)' },
+  ],
+  /** gen30 n'a PAS de catalogue de familles côté plateforme-maths (même raison que gen8/gen9/gen12
+   * ci-dessus — un seul type d'exercice, pas de `CATALOGUE_VARIANTES`). */
+  gen30: [{ id: 'defaut', label: 'Tableau de fréquences' }],
+  gen31: [
+    { id: 'effectif', label: 'Hauteur = effectif' },
+    { id: 'frequence', label: 'Hauteur = fréquence (%)' },
+  ],
+  gen32: [
+    { id: 'discrete', label: 'Données discrètes (x_i / n_i)' },
+    { id: 'classes', label: 'Données groupées en classes' },
+  ],
+  gen33: [
+    { id: 'discrete', label: 'Données discrètes (x_i / n_i)' },
+    { id: 'classes', label: 'Données groupées en classes (interpolation)' },
+  ],
+  /** gen34 n'a PAS de catalogue de familles côté plateforme-maths (même raison que gen30
+   * ci-dessus). */
+  gen34: [{ id: 'defaut', label: 'Variance et écart-type' }],
+  gen35: [
+    { id: 'discrete', label: 'Données discrètes (x_i / n_i)' },
+    { id: 'classes', label: 'Données groupées en classes' },
+  ],
+  gen36: [
+    { id: 'construction', label: 'Construction (glisser les 5 marqueurs)' },
+    { id: 'lecture', label: 'Lecture (relever les 5 valeurs)' },
+    { id: 'comparaison', label: 'Comparaison de deux séries' },
+  ],
+  gen37: [
+    { id: 'intervalleVersPourcent', label: 'Intervalle donné → pourcentage minimal' },
+    { id: 'pourcentVersIntervalle', label: 'Pourcentage minimal donné → intervalle' },
+    { id: 'intervalleVersNombre', label: 'Intervalle donné → nombre minimal d\'individus' },
+    { id: 'nombreVersIntervalle', label: 'Nombre minimal donné → intervalle' },
+    { id: 'intervalleVersSigma', label: 'Intervalle + % minimal donnés → trouver σ' },
+    { id: 'intervalleVersXBar', label: 'Intervalle + % minimal donnés → trouver x̄' },
+    { id: 'nombreVersSigma', label: 'Intervalle + n + nombre minimal donnés → trouver σ' },
+    { id: 'nombreVersXBar', label: 'Intervalle + n + nombre minimal donnés → trouver x̄' },
+  ],
+  gen38: [
+    { id: 'tableaux', label: 'Tableaux x_i / n_i' },
+    { id: 'recapitulatif', label: 'Tableau récapitulatif déjà calculé' },
+    { id: 'graphique', label: 'Courbes cumulées (graphique)' },
   ],
   '5gen1': [
     { id: 'rationnelle', label: 'Rationnelle' },
