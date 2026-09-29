@@ -56,8 +56,8 @@ export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
 
 /** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
  * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
- * 6 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
-export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5 | 6
+ * 7 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
+export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 /** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
  * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
@@ -76,6 +76,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'statistique-descriptive' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'cercle-trigonometrique-triangles' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'calcul-vectoriel' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'geometrie-analytique-plane' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
@@ -98,6 +99,7 @@ export type IdGenerateurPilote =
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
   | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
+  | 'gen42' | 'gen43' | 'gen44' | 'gen45' | 'gen46' | 'gen47' | 'gen48' | 'gen49' | 'gen50' | 'gen51' | 'gen52' | 'gen53' | 'gen54'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
@@ -197,6 +199,19 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen27', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', generatorId: 'gen28', label: '' },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen29', label: '', processus: 3 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'reperer', generatorId: 'gen42', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen43', label: 'Lecture graphique (gen43)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', generatorId: 'gen44', label: 'Construction graphique (gen44)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'caracteristiques', generatorId: 'gen46', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', generatorId: 'gen45', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'intersection', generatorId: 'gen48', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', generatorId: 'gen47', label: '' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen49', label: 'Forme graphique (gen49)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', generatorId: 'gen50', label: 'Forme développée (gen50)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen51', label: 'Forme graphique (gen51)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen52', label: 'Forme développée (gen52)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', generatorId: 'gen53', label: 'Construction (gen53)' },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', generatorId: 'gen54', label: '', processus: 3 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
@@ -290,6 +305,19 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', quizTheme: 'chasles', label: '', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', quizTheme: 'comparaisonVisuelle', label: '', quizChapitre: 6 },
   { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', quizTheme: 'applicationsPhysiques', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'reperer', quizTheme: 'equationDroite', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', quizTheme: 'lectureGraphiqueDroite', label: 'Lecture graphique', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lire-tracer', quizTheme: 'constructionDroite', label: 'Construction graphique', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'caracteristiques', quizTheme: 'caracteristiquesDroite', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'relations', quizTheme: 'relationsDroites', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'intersection', quizTheme: 'intersectionDroites', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'distance', quizTheme: 'distancePointDroite', label: '', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', quizTheme: 'equationCercleGraphe', label: 'Forme graphique', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'cercle', quizTheme: 'centreRayonCercle', label: 'Centre et rayon', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', quizTheme: 'equationParaboleGraphe', label: 'Forme graphique', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', quizTheme: 'sommetFoyerParabole', label: 'Sommet et foyer', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'parabole', quizTheme: 'constructionParabole', label: 'Construction', quizChapitre: 7 },
+  { chapitreSlug: 'geometrie-analytique-plane', sectionId: 'lieux', quizTheme: 'lieuxGeometriques', label: '', quizChapitre: 7 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
@@ -767,6 +795,76 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
   gen29: [
     { id: 'angleDroit', label: 'Angle droit entre les vecteurs composants' },
     { id: 'angleQuelconque', label: 'Angle quelconque entre les vecteurs composants' },
+  ],
+  gen42: [
+    { id: 'deux_points', label: '2 points' },
+    { id: 'point_vecteur', label: 'Point + vecteur directeur' },
+    { id: 'angle_ox', label: 'Angle avec Ox + point' },
+    { id: 'angle_oy', label: 'Angle avec Oy + point' },
+    { id: 'pente', label: 'Pente + point' },
+  ],
+  gen43: [
+    { id: 'cartesienne', label: 'Équation cartésienne (forme libre)' },
+    { id: 'parametrique', label: 'Équations paramétriques' },
+  ],
+  gen44: [
+    { id: 'parametrique', label: 'Représentation paramétrique' },
+    { id: 'implicite', label: 'Équation cartésienne (implicite)' },
+    { id: 'explicite_y', label: 'Équation réduite y = mx + p' },
+    { id: 'explicite_x', label: 'Équation réduite x = ny + q' },
+  ],
+  gen45: [
+    { id: 'cart_vers_cart_parallele', label: 'Cartésienne → cartésienne, parallèle' },
+    { id: 'cart_vers_cart_perpendiculaire', label: 'Cartésienne → cartésienne, perpendiculaire' },
+    { id: 'cart_vers_param_parallele', label: 'Cartésienne → paramétrique, parallèle' },
+    { id: 'cart_vers_param_perpendiculaire', label: 'Cartésienne → paramétrique, perpendiculaire' },
+    { id: 'param_vers_cart_parallele', label: 'Paramétrique → cartésienne, parallèle' },
+    { id: 'param_vers_cart_perpendiculaire', label: 'Paramétrique → cartésienne, perpendiculaire' },
+  ],
+  gen46: [
+    { id: 'implicite', label: 'Implicite (ax+by+c=0)' },
+    { id: 'explicite_y', label: 'Explicite (y=mx+p)' },
+    { id: 'explicite_x', label: 'Explicite (x=ny+q)' },
+    { id: 'parametrique', label: 'Paramétrique' },
+  ],
+  gen47: [
+    { id: 'point', label: "Distance d'un point à une droite" },
+    { id: 'paralleles', label: 'Distance entre deux droites parallèles' },
+  ],
+  gen48: [
+    { id: 'cart_cart', label: 'Cartésienne × cartésienne' },
+    { id: 'param_cart', label: 'Paramétrique × cartésienne' },
+    { id: 'param_param', label: 'Paramétrique × paramétrique' },
+  ],
+  gen49: [
+    { id: 'rayon_direct', label: 'Rayon lu directement sur la grille' },
+    { id: 'rayon_indirect', label: 'Rayon retrouvé par la distance (triplet pythagoricien)' },
+  ],
+  gen50: [
+    { id: 'rationnel', label: 'Rayon rationnel' },
+    { id: 'irrationnel', label: 'Rayon irrationnel' },
+  ],
+  gen51: [
+    { id: 'vertical', label: 'Axe vertical' },
+    { id: 'horizontal', label: 'Axe horizontal' },
+  ],
+  gen52: [
+    { id: 'vertical', label: 'Axe vertical' },
+    { id: 'horizontal', label: 'Axe horizontal' },
+  ],
+  /** gen53 n'a PAS de catalogue de familles côté plateforme-maths (même raison que gen23
+   * ci-dessus). */
+  gen53: [{ id: 'defaut', label: 'Construction au compas (foyer + directrice)' }],
+  gen54: [
+    { id: 'cercleDroite_0', label: 'Cercle-droite — aucune intersection' },
+    { id: 'cercleDroite_1', label: 'Cercle-droite — 1 point (tangente)' },
+    { id: 'cercleDroite_2', label: 'Cercle-droite — 2 points' },
+    { id: 'cercleCercle_0', label: 'Cercle-cercle — aucune intersection' },
+    { id: 'cercleCercle_1', label: 'Cercle-cercle — 1 point (tangente)' },
+    { id: 'cercleCercle_2', label: 'Cercle-cercle — 2 points' },
+    { id: 'droiteParabole_0', label: 'Droite-parabole — aucune intersection' },
+    { id: 'droiteParabole_1', label: 'Droite-parabole — 1 point (tangente)' },
+    { id: 'droiteParabole_2', label: 'Droite-parabole — 2 points' },
   ],
   '5gen1': [
     { id: 'rationnelle', label: 'Rationnelle' },
