@@ -54,11 +54,10 @@ export const LEVELSLUG_FONCTIONNEL_6E = '6e-6h'
 export const LEVELSLUG_FONCTIONNEL_4E = '4e'
 export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
 
-/** Numéro de chapitre — utilisé UNIQUEMENT pour départager les 2 banques vrai/faux de
- * `AppEvaluation6e.tsx` (6e n'a qu'UNE page d'évaluation qui sert ses 2 chapitres ; 4e a sa propre
- * page dédiée, `AppEvaluation4e.tsx`, qui n'a pour l'instant qu'une seule banque et n'a donc pas
- * besoin de ce champ — voir `QuizThemeConfig.quizChapitre`). */
-export type ChapitreFonctionnel = 1 | 2
+/** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
+ * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
+ * 3 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
+export type ChapitreFonctionnel = 1 | 2 | 3
 
 /** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
  * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
@@ -71,6 +70,8 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-reciproques-cyclometriques' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-exponentielles' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'fonction-second-degre' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'equations-inequations-second-degre' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'caracteristiques-fonctions-reference' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
 ]
@@ -87,7 +88,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
-  | 'gen7' | 'gen8' | 'gen9'
+  | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen10' | 'gen11' | 'gen12' | 'gen13'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
 
@@ -140,6 +141,16 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen8', label: 'Transformations graphiques (gen8)' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen9', label: 'Forme canonique et transformations (gen9)' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', generatorId: 'gen1', label: '' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'signe-trinome', generatorId: 'gen2', label: '' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'simplifier', generatorId: 'gen3', label: '' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'inconnue-denominateur', generatorId: 'gen4', label: '' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'signe-produit', generatorId: 'gen5', label: '' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'inequations-rationnelles', generatorId: 'gen6', label: '' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'lire', generatorId: 'gen12', label: '' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', generatorId: 'gen13', label: '' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen10', label: 'Transformations graphiques (gen10)' },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', generatorId: 'gen11', label: 'Forme canonique et transformations (gen11)' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
@@ -177,6 +188,20 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', quizTheme: 'domaineImageTableaux', label: 'Domaine, image et tableaux' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'formeCanoniqueSommet', label: 'Forme canonique, sommet et axe' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', quizTheme: 'transformationsGraphiques', label: 'Transformations graphiques' },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 2 },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'sansDiscriminant', label: 'Sans discriminant', quizChapitre: 2 },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'discriminant', label: 'Discriminant', quizChapitre: 2 },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'demonstration', label: 'Démonstration', quizChapitre: 2 },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'sommeProduitRacines', label: 'Somme et produit des racines', quizChapitre: 2 },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'resoudre', quizTheme: 'factorisationGenerale', label: 'Factorisation générale', quizChapitre: 2 },
+  { chapitreSlug: 'equations-inequations-second-degre', sectionId: 'signe-trinome', quizTheme: 'inequations', label: '', quizChapitre: 2 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'lire', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'sixFonctions', label: 'Les 6 fonctions de référence', quizChapitre: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'carreCube', label: 'Carré et cube', quizChapitre: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'racines', label: 'Racines carrée et cubique', quizChapitre: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'inverse', label: 'Inverse', quizChapitre: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'algebrique', quizTheme: 'valeurAbsolue', label: 'Valeur absolue', quizChapitre: 3 },
+  { chapitreSlug: 'caracteristiques-fonctions-reference', sectionId: 'transformer', quizTheme: 'transformations', label: '', quizChapitre: 3 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
@@ -328,6 +353,78 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
    * sur `genererInstance()` en ignorant cet id (voir `AppEvaluation4e.tsx::construireItemsExercice`). */
   gen8: [{ id: 'defaut', label: 'Lecture graphique' }],
   gen9: [{ id: 'defaut', label: 'Développée → canonique' }],
+  gen1: [
+    { id: 'mise_en_evidence', label: 'Mise en évidence (c=0)' },
+    { id: 'binome_conjugue', label: 'Binôme conjugué (b=0, différence de deux carrés)' },
+    { id: 'produit_remarquable', label: 'Produit remarquable (Δ=0, carré parfait)' },
+    { id: 'cas_general', label: 'Cas général (formule du discriminant)' },
+    { id: 'mise_en_evidence_generalisee', label: 'Mise en évidence généralisée ((x+p)²=m(x+p))' },
+  ],
+  gen2: [
+    { id: 'deltaNegatif', label: 'Δ < 0 (aucune racine réelle)' },
+    { id: 'deltaNul', label: 'Δ = 0 (racine double)' },
+    { id: 'deltaPositif', label: 'Δ > 0 (deux racines distinctes)' },
+  ],
+  gen3: [
+    { id: 'P2/P2', label: 'Numérateur et dénominateur du 2nd degré' },
+    { id: 'P1/P2', label: 'Numérateur du 1er degré, dénominateur du 2nd degré' },
+    { id: 'P2/P1', label: 'Numérateur du 2nd degré, dénominateur du 1er degré' },
+  ],
+  gen4: [
+    { id: 'un_denominateur', label: 'Un seul dénominateur (A/(x-p) = x-q)' },
+    { id: 'deux_denominateurs', label: 'Deux dénominateurs avec un facteur commun' },
+    { id: 'deux_fractions_lineaires', label: 'Deux fractions du 1er degré (P1/P1 = P1/P1)' },
+    { id: 'p2_sur_p1', label: 'P2/P1 = P0/P1 (numérateur gauche du 2nd degré)' },
+    { id: 'p1_sur_p2', label: 'P1/P2 = P1/P0 (dénominateur gauche du 2nd degré)' },
+  ],
+  gen5: [
+    { id: 'deux_lineaires', label: '2 facteurs linéaires (2L)' },
+    { id: 'lineaire_irreductible', label: '1 facteur linéaire + 1 facteur irréductible (1L-1QI)' },
+    { id: 'lineaire_factorisable', label: '1 facteur linéaire + 1 facteur factorisable (1L-1QF)' },
+    { id: 'irreductible_factorisable', label: '1 facteur irréductible + 1 facteur factorisable (1QI-1QF)' },
+    { id: 'trois_lineaires', label: '3 facteurs linéaires (3L)' },
+    { id: 'deux_lineaires_irreductible', label: '2 facteurs linéaires + 1 facteur irréductible (2L-1QI)' },
+    { id: 'lineaire_deux_irreductibles', label: '1 facteur linéaire + 2 facteurs irréductibles (1L-2QI)' },
+    { id: 'lineaire_irreductible_factorisable', label: '1 facteur linéaire + 1 facteur irréductible + 1 facteur factorisable (1L-1QI-1QF)' },
+    { id: 'deux_irreductibles_factorisable', label: '2 facteurs irréductibles + 1 facteur factorisable (2QI-1QF)' },
+  ],
+  gen6: [
+    { id: 'niveau1', label: 'Niveau 1 — quotient de deux polynômes du 1er degré' },
+    { id: 'niveau2', label: 'Niveau 2 — quotient égal à une constante' },
+    { id: 'niveau3', label: 'Niveau 3 — quotient égal à un polynôme du 1er degré' },
+    { id: 'niveau4', label: 'Niveau 4 — quotient de deux fractions du 1er degré' },
+    { id: 'denominateurCarre', label: 'Dénominateur au carré' },
+    { id: 'facteurCommun', label: 'Facteur commun à simplifier' },
+    { id: 'sansFacteurCommun', label: 'Numérateur et dénominateur du 2nd degré, sans facteur commun' },
+    { id: 'cubique', label: 'Numérateur du 3e degré (mise en évidence de x)' },
+  ],
+  gen10: [
+    { id: 'carre', label: 'Carré (x²)' },
+    { id: 'cube', label: 'Cube (x³)' },
+    { id: 'racine_carree', label: 'Racine carrée (√x)' },
+    { id: 'racine_cubique', label: 'Racine cubique (∛x)' },
+    { id: 'inverse', label: 'Inverse (1/x)' },
+    { id: 'valeur_absolue', label: 'Valeur absolue (|x|)' },
+  ],
+  gen11: [
+    { id: 'carre', label: 'Carré (x²)' },
+    { id: 'cube', label: 'Cube (x³)' },
+    { id: 'racine_carree', label: 'Racine carrée (√x)' },
+    { id: 'racine_cubique', label: 'Racine cubique (∛x)' },
+    { id: 'inverse', label: 'Inverse (1/x)' },
+    { id: 'valeur_absolue', label: 'Valeur absolue (|x|)' },
+  ],
+  /** gen12 n'a PAS de catalogue de familles côté plateforme-maths (même raison que gen8/gen9
+   * ci-dessus — un seul type d'exercice, pas de `CATALOGUE_VARIANTES`). */
+  gen12: [{ id: 'defaut', label: 'Lecture graphique' }],
+  gen13: [
+    { id: 'carre', label: 'Carré (x²)' },
+    { id: 'cube', label: 'Cube (x³)' },
+    { id: 'racine_carree', label: 'Racine carrée (√x)' },
+    { id: 'racine_cubique', label: 'Racine cubique (∛x)' },
+    { id: 'inverse', label: 'Inverse (1/x)' },
+    { id: 'valeur_absolue', label: 'Valeur absolue (|x|)' },
+  ],
   '5gen1': [
     { id: 'rationnelle', label: 'Rationnelle' },
     { id: 'irrationnelleSimple', label: 'Irrationnelle simple' },
