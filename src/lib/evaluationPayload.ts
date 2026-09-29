@@ -56,8 +56,8 @@ export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
 
 /** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
  * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
- * 5 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
-export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5
+ * 6 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
+export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5 | 6
 
 /** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
  * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
@@ -75,6 +75,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'caracteristiques-fonctions-reference' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'statistique-descriptive' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'cercle-trigonometrique-triangles' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'calcul-vectoriel' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
@@ -96,6 +97,7 @@ export type IdGenerateurPilote =
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen10' | 'gen11' | 'gen12' | 'gen13'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
+  | 'gen20' | 'gen21' | 'gen22' | 'gen23' | 'gen24' | 'gen25' | 'gen26' | 'gen27' | 'gen28' | 'gen29'
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
@@ -185,6 +187,16 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'equations', generatorId: 'gen18', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'triangle', generatorId: 'gen19', label: '' },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'triangulation', generatorId: 'gen58', label: '', processus: 3 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'relation', generatorId: 'gen20', label: "Point via translation/milieu (gen20)" },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'relation', generatorId: 'gen21', label: 'Relation vectorielle générale (gen21)' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationReperes', generatorId: 'gen22', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationGeometrique', generatorId: 'gen23', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'colinearite', generatorId: 'gen24', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', generatorId: 'gen25', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'norme', generatorId: 'gen26', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', generatorId: 'gen27', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', generatorId: 'gen28', label: '' },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', generatorId: 'gen29', label: '', processus: 3 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', generatorId: '5gen1', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'decomposer', generatorId: '5gen2', label: '' },
   { chapitreSlug: 'fonctions-composees', sectionId: 'composer', generatorId: '5gen3', label: '' },
@@ -269,6 +281,15 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'equations', quizTheme: 'resoudreAngle', label: '', quizChapitre: 5 },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'triangle', quizTheme: 'triangleQuelconque', label: '', quizChapitre: 5 },
   { chapitreSlug: 'cercle-trigonometrique-triangles', sectionId: 'triangulation', quizTheme: 'trianglesLies', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'relation', quizTheme: 'relationVectorielle', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationReperes', quizTheme: 'combinaisonLineaire', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'multiplicationGeometrique', quizTheme: 'constructionGraphique', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'colinearite', quizTheme: 'colinearite', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'orthogonalite', quizTheme: 'orthogonalite', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'norme', quizTheme: 'normeDistance', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'chasles', quizTheme: 'chasles', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'comparaison', quizTheme: 'comparaisonVisuelle', label: '', quizChapitre: 6 },
+  { chapitreSlug: 'calcul-vectoriel', sectionId: 'applications', quizTheme: 'applicationsPhysiques', label: '', quizChapitre: 6 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'vocabulaire', label: 'Vocabulaire', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRationnel', label: 'Domaine — fonctions rationnelles', quizChapitre: 1 },
   { chapitreSlug: 'fonctions-composees', sectionId: 'domaine', quizTheme: 'domaineRacines', label: 'Domaine — racines', quizChapitre: 1 },
@@ -693,6 +714,59 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'naviresConvergents', label: 'Distance entre 2 navires (sommet partagé)' },
     { id: 'randonneursSommet', label: 'Distance entre 2 randonneurs vers un sommet commun (sommet partagé)' },
     { id: 'avionsConvergents', label: 'Aire entre 2 avions convergeant vers un aéroport (sommet partagé)' },
+  ],
+  gen20: [
+    { id: 'translation', label: 'Image par une translation' },
+    { id: 'milieu', label: "Milieu d'un segment" },
+    { id: 'relationGenerale', label: 'Relation vectorielle générale' },
+  ],
+  gen21: [
+    { id: 'translation', label: 'Translation par un vecteur (a,b)' },
+    { id: 'relationGenerale', label: 'Relation vectorielle générale (avec milieu)' },
+  ],
+  gen22: [
+    { id: 'plate', label: 'Sans parenthèses' },
+    { id: 'parentheses', label: 'Parenthèses avec coefficient distribué' },
+    { id: 'vecteur-repete', label: 'Vecteur répété entre plusieurs termes' },
+    { id: 'paire-opposee', label: 'Paire de points en sens opposé (AB/BA)' },
+    { id: 'complete', label: 'Complexité maximale' },
+  ],
+  /** gen23 n'a PAS de catalogue de familles côté plateforme-maths (même raison que gen30/gen34
+   * ci-dessus). */
+  gen23: [{ id: 'defaut', label: 'Construction graphique (k·u)' }],
+  gen24: [
+    { id: 'vecteurs', label: 'Colinéarité de deux vecteurs' },
+    { id: 'parametre', label: 'Déterminer x pour la colinéarité' },
+    { id: 'points', label: 'Alignement de trois points' },
+    { id: 'pointsParametre', label: 'Alignement avec x' },
+  ],
+  gen25: [
+    { id: 'test', label: "Tester l'orthogonalité de deux vecteurs" },
+    { id: 'parametre', label: "Déterminer x pour l'orthogonalité" },
+    { id: 'triangle', label: 'Triangle rectangle via ses vecteurs' },
+    { id: 'triangleParametre', label: 'Triangle rectangle avec x' },
+  ],
+  gen26: [
+    { id: 'vecteur', label: "Norme d'un vecteur donné" },
+    { id: 'distance', label: 'Distance entre deux points' },
+    { id: 'isocele', label: 'Triangle isocèle/scalène' },
+    { id: 'parametre', label: 'Déterminer x pour une norme cible' },
+    { id: 'pythagore', label: 'Pythagore, méthode alternative' },
+  ],
+  gen27: [
+    { id: 'hexagone', label: 'Hexagone régulier + centre' },
+    { id: 'etoile', label: 'Étoile à 6 branches' },
+    { id: 'trapeze', label: 'Trapèze + diagonales' },
+    { id: 'triangleMedianes', label: 'Triangle + médianes' },
+  ],
+  gen28: [
+    { id: 'longueur', label: 'Longueur' },
+    { id: 'direction', label: 'Direction' },
+    { id: 'sens', label: 'Sens' },
+  ],
+  gen29: [
+    { id: 'angleDroit', label: 'Angle droit entre les vecteurs composants' },
+    { id: 'angleQuelconque', label: 'Angle quelconque entre les vecteurs composants' },
   ],
   '5gen1': [
     { id: 'rationnelle', label: 'Rationnelle' },
