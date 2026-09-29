@@ -983,7 +983,8 @@ function construireOuvertesParSerie(banque: QuestionOuverte[], nombre: number, n
 }
 
 export interface EnTeteEvaluation {
-  numero: string
+  /** Absent en mode `exercice` — voir `mode` ci-dessous. */
+  numero?: string
   date: string
   titre: string
   niveauLabel: string
@@ -991,15 +992,22 @@ export interface EnTeteEvaluation {
   niveauNumero: number
   /** Texte affiché « Mathématiques {X}h/sem » — voir `HEURES_SEMAINE_DEFAUT`. */
   heuresSemaine: string
-  calculatrice: 'interdite' | 'autorisee'
+  /** Absent en mode `exercice` — voir `mode` ci-dessous. */
+  calculatrice?: 'interdite' | 'autorisee'
   /** Nombre de versions anti-triche à générer (>= 1, lettrées A, B, C...) — chacune indépendamment
-   * randomisée (générateurs, vrai/faux, et questions ouvertes quand le vivier le permet). */
+   * randomisée (générateurs, vrai/faux, et questions ouvertes quand le vivier le permet). Toujours
+   * `1` en mode `exercice` (jamais de séries anti-triche pour une feuille d'exercices). */
   nombreSeries: number
   /** `false` : masque, dans les 2 documents générés, le titre du point du chapitre auquel
    * appartient chaque question (ex. « 1. Fonction réciproque d'une fonction bijective ») — utile
    * pour une évaluation qui ne doit pas révéler à quel point de matière appartient chaque question.
    * `true` par défaut (titres affichés, comportement historique). */
   afficherTitresSection: boolean
+  /** `'exercice'` : feuille d'exercices générée depuis `/exercice` (page publique, accessible aux
+   * élèves) — le document imprimé n'a alors ni numéro d'évaluation, ni mention de calculatrice, ni
+   * série anti-triche (voir `EnteteEvaluation.mode` côté plateforme-maths,
+   * `assemblerEvaluationHtml.ts`). `'evaluation'`/absent = comportement historique (`/admin`). */
+  mode?: 'evaluation' | 'exercice'
 }
 
 /**
@@ -1057,6 +1065,7 @@ export function buildEvaluationUrl(levelSlug: string, chapitreSlug: string, ente
     calculatrice: entete.calculatrice,
     nombreSeries,
     afficherTitresSection: entete.afficherTitresSection,
+    mode: entete.mode,
     items,
   })
   return `${baseUrl}?d=${encodeURIComponent(base64)}`

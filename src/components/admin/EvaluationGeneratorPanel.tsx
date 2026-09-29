@@ -61,7 +61,11 @@ function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export function EvaluationGeneratorPanel() {
+/** `mode==='exercice'` : page `/exercice` (publique, accessible aux élèves) — feuille d'exercices
+ * sans numéro, calculatrice, ni séries anti-triche (voir `EnTeteEvaluation.mode`). `'evaluation'`
+ * (défaut) = page `/admin` historique. */
+export function EvaluationGeneratorPanel({ mode = 'evaluation' }: { mode?: 'evaluation' | 'exercice' }) {
+  const estExercice = mode === 'exercice'
   const [numero, setNumero] = useState('1')
   const [date, setDate] = useState(aujourdhui)
   const [niveau, setNiveau] = useState<NiveauCode>('6e')
@@ -71,6 +75,7 @@ export function EvaluationGeneratorPanel() {
   const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT['6e'])
   const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
   const [nombreSeries, setNombreSeries] = useState(1)
+  const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
   const [afficherTitresSection, setAfficherTitresSection] = useState(true)
   const [processusActifs, setProcessusActifs] = useState<Record<Processus, boolean>>({ 1: false, 2: false, 3: false })
   const [erreur, setErreur] = useState(false)
@@ -150,12 +155,23 @@ export function EvaluationGeneratorPanel() {
 
   function genererEvaluation() {
     if (!chapitre || !levelSlug) return
-    const titreFinal = titre || `Évaluation — ${chapitre.title}`
+    const titreFinal = titre || `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitre.title}`
     const niveauLabel = niveauEntry?.label ?? niveau
     const url = buildEvaluationUrl(
       levelSlug,
       chapitreSlug,
-      { numero, date, titre: titreFinal, niveauLabel, niveauNumero: NIVEAU_NUMERO[niveau], heuresSemaine, calculatrice, nombreSeries, afficherTitresSection },
+      {
+        numero: estExercice ? undefined : numero,
+        date,
+        titre: titreFinal,
+        niveauLabel,
+        niveauNumero: NIVEAU_NUMERO[niveau],
+        heuresSemaine,
+        calculatrice: estExercice ? undefined : calculatrice,
+        nombreSeries: nombreSeriesEffectif,
+        afficherTitresSection,
+        mode,
+      },
       lignes,
       chapitre.sections,
     )
@@ -178,20 +194,22 @@ export function EvaluationGeneratorPanel() {
       </p>
 
       <div className="admin-eval-entete">
-        <div className="admin-eval-field">
-          <label htmlFor="eval-numero">N° de l'évaluation</label>
-          <input id="eval-numero" type="text" value={numero} onChange={(e) => setNumero(e.target.value)} />
-        </div>
+        {!estExercice && (
+          <div className="admin-eval-field">
+            <label htmlFor="eval-numero">N° de l'évaluation</label>
+            <input id="eval-numero" type="text" value={numero} onChange={(e) => setNumero(e.target.value)} />
+          </div>
+        )}
         <div className="admin-eval-field">
           <label htmlFor="eval-date">Date</label>
           <input id="eval-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
         <div className="admin-eval-field admin-eval-field-large">
-          <label htmlFor="eval-titre">Titre de l'évaluation</label>
+          <label htmlFor="eval-titre">Titre {estExercice ? "de la feuille d'exercices" : "de l'évaluation"}</label>
           <input
             id="eval-titre"
             type="text"
-            placeholder={chapitre ? `Évaluation — ${chapitre.title}` : 'Titre'}
+            placeholder={chapitre ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitre.title}` : 'Titre'}
             value={titre}
             onChange={(e) => setTitre(e.target.value)}
           />
@@ -248,24 +266,28 @@ export function EvaluationGeneratorPanel() {
           <label htmlFor="eval-heures-semaine">Volume horaire/sem</label>
           <input id="eval-heures-semaine" type="text" value={heuresSemaine} onChange={(e) => setHeuresSemaine(e.target.value)} />
         </div>
-        <div className="admin-eval-field">
-          <label htmlFor="eval-calculatrice">Calculatrice</label>
-          <select id="eval-calculatrice" value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
-            <option value="interdite">Interdite</option>
-            <option value="autorisee">Autorisée</option>
-          </select>
-        </div>
-        <div className="admin-eval-field">
-          <label htmlFor="eval-series">Nombre de séries</label>
-          <input
-            id="eval-series"
-            type="number"
-            min={1}
-            max={26}
-            value={nombreSeries}
-            onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
-          />
-        </div>
+        {!estExercice && (
+          <div className="admin-eval-field">
+            <label htmlFor="eval-calculatrice">Calculatrice</label>
+            <select id="eval-calculatrice" value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
+              <option value="interdite">Interdite</option>
+              <option value="autorisee">Autorisée</option>
+            </select>
+          </div>
+        )}
+        {!estExercice && (
+          <div className="admin-eval-field">
+            <label htmlFor="eval-series">Nombre de séries</label>
+            <input
+              id="eval-series"
+              type="number"
+              min={1}
+              max={26}
+              value={nombreSeries}
+              onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
+            />
+          </div>
+        )}
         <div className="admin-eval-field">
           <label htmlFor="eval-titres-section">
             <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
@@ -273,7 +295,7 @@ export function EvaluationGeneratorPanel() {
           </label>
         </div>
       </div>
-      {nombreSeries > 1 && (
+      {!estExercice && nombreSeries > 1 && (
         <p className="admin-eval-indisponible">
           {nombreSeries} versions anti-triche (A à {String.fromCharCode(64 + nombreSeries)}) seront générées — mêmes questions, exercices/vrai-faux/questions
           ouvertes indépendamment randomisés par série quand c'est possible.
@@ -406,7 +428,8 @@ export function EvaluationGeneratorPanel() {
           <p className="admin-eval-total">Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}</p>
 
           <button type="button" className="admin-gate-submit" onClick={genererEvaluation}>
-            {nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé + corrigé)
+            {estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé
+            + corrigé)
           </button>
           {erreur && <p className="admin-gate-error">Coche au moins une question (nombre &gt; 0) avant de générer.</p>}
           {urlGeneree && (
