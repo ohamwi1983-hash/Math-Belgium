@@ -82,6 +82,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'limites-asymptotes' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'derivees-applications' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
@@ -107,6 +108,7 @@ export type IdGenerateurPilote =
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
   | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
+  | '5gen25' | '5gen26' | '5gen27' | '5gen28' | '5gen29' | '5gen30' | '5gen31' | '5gen32' | '5gen33' | '5gen34' | '5gen35'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -243,6 +245,17 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'limites-asymptotes', sectionId: 'lecture-graphique', generatorId: '5gen22', label: '' },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-contexte', generatorId: '5gen23', label: '' },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', generatorId: '5gen24', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'signe-derivees', generatorId: '5gen25', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'definition-derivee', generatorId: '5gen26', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'fonction-derivee', generatorId: '5gen27', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'tangentes', generatorId: '5gen28', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', generatorId: '5gen29', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'lecture-graphique-derivees', generatorId: '5gen30', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', generatorId: '5gen31', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', generatorId: '5gen32', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', generatorId: '5gen33', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', generatorId: '5gen34', label: '' },
+  { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', generatorId: '5gen35', label: '' },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
@@ -361,6 +374,17 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-contexte', quizTheme: 'limitesEnContexte', label: '', quizChapitre: 4 },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', quizTheme: 'etudeComplete', label: '', quizChapitre: 4 },
   { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', quizTheme: 'piegesClassiques', label: 'Pièges classiques', quizChapitre: 4 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'signe-derivees', quizTheme: 'reconnaissanceGraphique', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'definition-derivee', quizTheme: 'calculParDefinition', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'fonction-derivee', quizTheme: 'fonctionDerivee', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'tangentes', quizTheme: 'tangentes', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etude-locale', quizTheme: 'etudeLocaleEtGraphique', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'lecture-graphique-derivees', quizTheme: 'etudeLocaleEtGraphique', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'etudier-fonction', quizTheme: 'etudeComplete', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'optimisation-geometrique', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'contexte-economique', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'extrema-bornes', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
+  { chapitreSlug: 'derivees-applications', sectionId: 'vitesse-position', quizTheme: 'applicationsEnContexte', label: '', quizChapitre: 5 },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
@@ -1060,6 +1084,99 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
    * produirait 60 lignes dans le formulaire pour un seul générateur — voir le commentaire de tête de
    * `suiteRecurrenteAffine/exportEvaluation.ts` côté plateforme-maths. */
   '5gen19': [{ id: 'defaut', label: 'Contexte aléatoire (60 scénarios)' }],
+  '5gen25': [
+    { id: 'grapheDerivee-3', label: 'A — Graphe f ↔ graphe f\' (3 éléments)' },
+    { id: 'grapheDerivee-5', label: 'A — Graphe f ↔ graphe f\' (5 éléments)' },
+    { id: 'grapheVerbal-3', label: 'B — Graphe f ↔ énoncé verbal (3 éléments)' },
+    { id: 'grapheVerbal-5', label: 'B — Graphe f ↔ énoncé verbal (5 éléments)' },
+    { id: 'symbolique-3', label: 'C — f ↔ f\' symbolique (3 éléments)' },
+    { id: 'symbolique-5', label: 'C — f ↔ f\' symbolique (5 éléments)' },
+  ],
+  '5gen26': [
+    { id: 'affine', label: '1. Affine — f(x)=mx+p' },
+    { id: 'quadratique', label: '2. Quadratique — f(x)=mx²+p' },
+    { id: 'rationnelleSimple', label: '3. Rationnelle simple — f(x)=k/x ou k/x²' },
+    { id: 'rationnelleLineaire', label: '4. Rationnelle linéaire — f(x)=(mx+p)/(x-q)' },
+  ],
+  '5gen27': [
+    { id: 'reglebase-sans-trig', label: '1a. Règle de base — sans trig' },
+    { id: 'reglebase-avec-trig', label: '1b. Règle de base — avec trig' },
+    { id: 'produit-sans-trig', label: '2a. Produit u·v — sans trig' },
+    { id: 'produit-avec-trig', label: '2b. Produit u·v — avec trig' },
+    { id: 'quotient-sans-trig', label: '3a. Quotient u/v — sans trig' },
+    { id: 'quotient-avec-trig', label: '3b. Quotient u/v — avec trig' },
+    { id: 'quotient-ambigu', label: '3c. Quotient ambigu — 1/trig(ax+b)²' },
+    { id: 'composee-sans-trig', label: '4a. Composée (chaîne) — sans trig' },
+    { id: 'composee-avec-trig', label: '4b. Composée (chaîne) — avec trig' },
+  ],
+  '5gen28': [
+    { id: 'pointDonne-polynomiale', label: 'A. Point donné — polynomiale' },
+    { id: 'pointDonne-radicale', label: 'A. Point donné — radicale' },
+    { id: 'horizontale-double', label: 'B. Horizontale — racine double' },
+    { id: 'horizontale-distinct', label: 'B. Horizontale — 2 racines distinctes' },
+    { id: 'doubleTangence', label: 'C. Double tangence (bonus)' },
+  ],
+  '5gen29': [
+    { id: 'polynomiale-simple-base', label: 'Polynomiale — racines simples (base)' },
+    { id: 'polynomiale-simple-avance', label: 'Polynomiale — racines simples (avancé)' },
+    { id: 'polynomiale-double-base', label: 'Polynomiale — racine double (base)' },
+    { id: 'polynomiale-double-avance', label: 'Polynomiale — racine double (avancé)' },
+    { id: 'polynomiale-irrationnelle-base', label: 'Polynomiale — racines irrationnelles (base)' },
+    { id: 'polynomiale-irrationnelle-avance', label: 'Polynomiale — racines irrationnelles (avancé)' },
+    { id: 'rationnelleSansCE-base', label: 'Rationnelle sans CE (base)' },
+    { id: 'rationnelleSansCE-avance', label: 'Rationnelle sans CE (avancé)' },
+    { id: 'rationnelleAvecCE-base', label: 'Rationnelle avec CE (base)' },
+  ],
+  '5gen30': [
+    { id: '0va-horizontale-0ext-0pi', label: '0 AV — horizontale, 0 extremum, 0 PI' },
+    { id: '0va-horizontale-1ext-0pi', label: '0 AV — horizontale, 1 extremum' },
+    { id: '0va-horizontale-2ext-1pi', label: '0 AV — horizontale, 2 extrema, 1 PI' },
+    { id: '0va-horizontale-3ext-2pi', label: '0 AV — horizontale, 3 extrema, 2 PI' },
+    { id: '0va-oblique-2ext-0pi', label: '0 AV — oblique, 2 extrema' },
+    { id: '1va-horizontale-1ext-1pi', label: '1 AV — horizontale, 1 extremum, 1 PI' },
+    { id: '1va-oblique-2ext-1pi', label: '1 AV — oblique, 2 extrema, 1 PI' },
+    { id: '1va-aucune-0ext-0pi', label: '1 AV — aucune, 0 extremum, 0 PI' },
+    { id: '2va-opposes-horizontale-2ext-2pi', label: '2 AV — horizontale, 2 extrema, 2 PI' },
+    { id: '2va-mixte-oblique-3ext-2pi', label: '2 AV — oblique, 3 extrema, 2 PI' },
+    { id: '2va-pointIsole-1ext-1pi', label: '2 AV (point isolé) — 1 extremum, 1 PI' },
+  ],
+  '5gen31': [
+    { id: 'polynomiale-simple', label: 'Polynomiale — racines simples (aucune asymptote)' },
+    { id: 'polynomiale-double', label: 'Polynomiale — racine double (aucune asymptote)' },
+    { id: 'polynomiale-irrationnelle', label: 'Polynomiale — racines irrationnelles (aucune asymptote)' },
+    { id: 'rationnelleSansCE', label: 'Rationnelle sans CE (AH y=0)' },
+    { id: 'rationnelleAvecCE', label: 'Rationnelle avec CE (AH y=0 + 2×AV)' },
+    { id: 'rationnelleAO-exacte', label: 'Rationnelle — asymptote oblique (racines exactes)' },
+    { id: 'rationnelleAO-irrationnelle', label: 'Rationnelle — asymptote oblique (racines irrationnelles)' },
+    { id: 'rationnelleAO-sansExtremum', label: 'Rationnelle — asymptote oblique (aucun extremum)' },
+  ],
+  '5gen32': [
+    { id: 'trapeze', label: 'A. Trapèze isocèle (angle α, signe de A\'\')' },
+    { id: 'cylindre', label: 'B. Cylindre à volume fixé' },
+    { id: 'cylindre-application', label: 'B. Cylindre — bonus application numérique' },
+    { id: 'margesA', label: 'C(a). Marges — aire totale fixée, maximiser l\'aire imprimée' },
+    { id: 'margesB', label: 'C(b). Marges — aire imprimée fixée, minimiser l\'aire totale' },
+    { id: 'fenetreA', label: 'D(a). Fenêtre — périmètre fixé, maximiser l\'aire' },
+    { id: 'fenetreB', label: 'D(b). Fenêtre — aire fixée, minimiser le périmètre' },
+    { id: 'cubique', label: 'Bonus 2. Reconstruction d\'un polynôme cubique' },
+  ],
+  '5gen33': [
+    { id: 'A-degre2', label: 'Famille A — coût degré 2' },
+    { id: 'A-degre3-extremum', label: 'Famille A — coût degré 3, extremum existe' },
+    { id: 'A-degre3-sans-extremum', label: 'Famille A — coût degré 3, pas d\'extremum' },
+    { id: 'B', label: 'Famille B — bénéfice maximum' },
+    { id: 'bonus', label: 'Bonus — dichotomie (coût moyen)' },
+  ],
+  '5gen34': [
+    { id: 'max-local-min-local', label: 'Max local — min local (2 racines)' },
+    { id: 'max-local-min-borne', label: 'Max local — min à une borne (3 racines)' },
+    { id: 'max-borne-min-local', label: 'Max à une borne — min local (3 racines)' },
+    { id: 'max-borne-min-borne', label: 'Max à une borne — min à une borne (2 racines)' },
+  ],
+  '5gen35': [
+    { id: 'A', label: 'A. Course simple' },
+    { id: 'B', label: 'B. Course en segments' },
+  ],
 }
 
 /** `[]` pour un générateur sans catalogue connu. */
