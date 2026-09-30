@@ -81,6 +81,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'limites-asymptotes' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
@@ -105,6 +106,7 @@ export type IdGenerateurPilote =
   | '5gen1' | '5gen2' | '5gen3' | '5gen4' | '5gen5'
   | '5gen6' | '5gen7' | '5gen8' | '5gen9' | '5gen10' | '5gen11' | '5gen12' | '5gen13'
   | '5gen14' | '5gen15' | '5gen16' | '5gen17' | '5gen18' | '5gen19'
+  | '5gen20' | '5gen21' | '5gen22' | '5gen23' | '5gen24'
 
 export interface GeneratorConfig {
   chapitreSlug: string
@@ -236,6 +238,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'suites', sectionId: 'problemes-classiques', generatorId: '5gen17', label: '' },
   { chapitreSlug: 'suites', sectionId: 'comparaison-suites', generatorId: '5gen18', label: '' },
   { chapitreSlug: 'suites', sectionId: 'recurrente-affine', generatorId: '5gen19', label: '' },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-calcul', generatorId: '5gen20', label: '' },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'asymptote-oblique', generatorId: '5gen21', label: '' },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'lecture-graphique', generatorId: '5gen22', label: '' },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-contexte', generatorId: '5gen23', label: '' },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', generatorId: '5gen24', label: '' },
 ]
 
 /** Correspondance section Math-Belgium ↔ thème(s) de la banque vrai/faux plateforme-maths — même
@@ -348,6 +355,12 @@ export const QUIZ_THEMES_EVALUATION_PILOTE: QuizThemeConfig[] = [
   { chapitreSlug: 'suites', sectionId: 'comparaison-suites', quizTheme: 'comparaisonNumerique', label: '', quizChapitre: 3 },
   { chapitreSlug: 'suites', sectionId: 'recurrente-affine', quizTheme: 'suiteRecurrenteAffine', label: '', quizChapitre: 3 },
   { chapitreSlug: 'suites', sectionId: 'recurrente-affine', quizTheme: 'transversal', label: 'Transversal (tout le chapitre)', quizChapitre: 3 },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-calcul', quizTheme: 'reconnaissanceEtCalcul', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'asymptote-oblique', quizTheme: 'asymptoteOblique', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'lecture-graphique', quizTheme: 'lectureGraphique', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'limites-contexte', quizTheme: 'limitesEnContexte', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', quizTheme: 'etudeComplete', label: '', quizChapitre: 4 },
+  { chapitreSlug: 'limites-asymptotes', sectionId: 'etude-complete', quizTheme: 'piegesClassiques', label: 'Pièges classiques', quizChapitre: 4 },
 ]
 
 export function generateursPourSection(chapitreSlug: string, sectionId: string): GeneratorConfig[] {
@@ -889,6 +902,57 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'simple', label: 'Ombre simple sur sol plat' },
     { id: 'obstacle', label: 'Ombre avec obstacle' },
     { id: 'directionInconnue', label: 'Direction inconnue à déduire' },
+  ],
+  '5gen20': [
+    { id: 'limiteReelle', label: 'Nombre réel' },
+    { id: 'formeIndeterminee', label: 'Forme 0/0' },
+    { id: 'limiteInfiniePoint-racineSimple', label: 'Limite infinie en un point — racine simple' },
+    { id: 'limiteInfiniePoint-racineDouble', label: 'Limite infinie en un point — racine double' },
+    { id: 'limiteInfini-degresEgaux', label: "Limite à l'infini — degrés égaux" },
+    { id: 'limiteInfini-numerateurPlusGrand', label: "Limite à l'infini — numérateur plus grand" },
+    { id: 'limiteInfini-numerateurPlusPetit', label: "Limite à l'infini — numérateur plus petit" },
+  ],
+  '5gen21': [
+    { id: 'divisionEuclidienne-degre1', label: 'Via division euclidienne — P2/P1' },
+    { id: 'divisionEuclidienne-degre2', label: 'Via division euclidienne — P3/P2' },
+    { id: 'viaLimites-degre1', label: 'Via les limites — P2/P1' },
+    { id: 'viaLimites-degre2', label: 'Via les limites — P3/P2' },
+  ],
+  '5gen22': [
+    { id: '0va-horizontale', label: '0 AV — horizontale (identique)' },
+    { id: '0va-horizontale-distincte', label: '0 AV — horizontale (différente en ±∞)' },
+    { id: '0va-oblique', label: '0 AV — oblique' },
+    { id: '0va-aucune', label: '0 AV — aucune (diverge)' },
+    { id: '1va-opposes-horizontale', label: '1 AV, signes opposés — horizontale' },
+    { id: '1va-identiques-horizontale', label: '1 AV, signes identiques — horizontale' },
+    { id: '1va-opposes-oblique', label: '1 AV, signes opposés — oblique' },
+    { id: '1va-aucune', label: '1 AV — aucune (diverge)' },
+    { id: '1va-pointIsole', label: '1 AV — point isolé (continuité)' },
+    { id: '2va-opposes-horizontale', label: '2 AV, opposés/opposés — horizontale' },
+    { id: '2va-mixte-oblique', label: '2 AV, opposés/identiques — oblique' },
+    { id: '2va-pointIsole', label: '2 AV — point isolé sur une AV' },
+  ],
+  '5gen23': [
+    { id: 'prixRevient', label: 'A — Prix de revient' },
+    { id: 'eauSalee', label: 'B — Eau salée' },
+    { id: 'clubLoisirs', label: 'C — Club de loisirs' },
+    { id: 'population', label: 'D — Population' },
+  ],
+  '5gen24': [
+    { id: '1-vaSimple-ahZero', label: '1 exclusion, AV simple — AH=0' },
+    { id: '1-vaSimple-ahNonNul', label: '1 exclusion, AV simple — AH≠0' },
+    { id: '1-vaSimple-ao', label: '1 exclusion, AV simple — AO' },
+    { id: '1-vaSimple-aucune', label: '1 exclusion, AV simple — aucune asymptote' },
+    { id: '1-vaDouble-ahNonNul', label: '1 exclusion, AV double — AH≠0' },
+    { id: '1-vaDouble-ao-special', label: '1 exclusion, AV double — AO + recoupement' },
+    { id: '2-vaSimple-vaSimple-ah', label: '2 exclusions, simple+simple — AH' },
+    { id: '2-vaSimple-vaSimple-ao', label: '2 exclusions, simple+simple — AO' },
+    { id: '2-vaSimple-vaDouble-ahNonNul-special', label: '2 exclusions, simple+double — AH + recoupement' },
+    { id: '2-vaDouble-vaDouble-ao', label: '2 exclusions, double+double — AO (D degré 4, affichage P2·P2)' },
+    { id: '2-pointVide-vaSimple-ahNonNul', label: '2 exclusions, point vide + simple — AH≠0' },
+    { id: '2-pointVide-vaDouble-ao', label: '2 exclusions, point vide + double — AO' },
+    { id: '2-pointVide-vaSimple-aucune', label: '2 exclusions, point vide + simple — aucune' },
+    { id: 'bonus', label: 'Bonus — construction inverse' },
   ],
   '5gen1': [
     { id: 'rationnelle', label: 'Rationnelle' },
