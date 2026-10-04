@@ -467,10 +467,13 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'A', label: 'A — Limite directe' },
     { id: 'B', label: 'B — Somme, terme exponentiel dominant' },
     { id: 'C', label: 'C — Produit, FI ∞·0' },
-    { id: 'D', label: 'D — 0/0 via sin(x)/x' },
-    { id: 'E', label: 'E — 0/0 via (aˣ−1)/x → ln(a)' },
-    { id: 'F', label: 'F — Même référence + manipulation' },
     { id: 'G', label: 'G — ∞−∞ avancée (instance unique)' },
+    { id: 'H', label: "H — L'Hôpital, 0/0 pur exponentiel" },
+    { id: 'I', label: "I — L'Hôpital, 0/0 mixte trigonométrique" },
+    { id: 'J', label: "J — L'Hôpital, 0/0 mixte arcfonction" },
+    { id: 'K', label: "K — L'Hôpital, deux applications" },
+    { id: 'L', label: 'L — FI 1^∞ via pivot e' },
+    { id: 'N', label: 'N — FI ∞^0/0^0 via loi des puissances' },
   ],
   '6gen7': [
     { id: 'A', label: 'A — Application directe' },
@@ -1239,7 +1242,7 @@ function extraireParagraphes(blocks: Block[]): FragmentTexte[][] {
  * chapitre ajouté demandera sa propre liste, construite au cas par cas — une section absente de
  * cette table (ou un index sans entrée) retombe sur le label brut, voir `deriveQuestionsOuvertes`.
  */
-const ENONCES_DEMONSTRATION: Record<string, Record<string, string[]>> = {
+const ENONCES_DEMONSTRATION: Record<string, Record<string, (string | undefined)[]>> = {
   'fonctions-reciproques-cyclometriques': {
   reciproques: [
     "Démontre que si $f$ est injective, sa relation réciproque est une fonction.",
@@ -1269,6 +1272,38 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, string[]>> = {
     "Calcule la dérivée de $\\arcsin(2x-1)$.",
   ],
   graphiques: [],
+  },
+  'fonctions-exponentielles': {
+  limites: [
+    "Démontre que, pour une surface dont l'aire double chaque semaine, la formule $S(t) = S_0 \\cdot 2^t$ reste valable pour tout $t$ **rationnel** (pas seulement entier), en détaillant le raisonnement pour une durée exprimée en jours (facteur multiplicatif quotidien $k$ tel que $k^7=2$).",
+  ],
+  derivee: [
+    "Calcule la dérivée de chacune des fonctions suivantes, en justifiant à chaque fois la présence ou l'absence d'un facteur $\\ln$ : $f(x)=5^x$, $g(x)=e^{3x-1}$, $k(x)=3^{x^4-x}$, $m(x)=e^{\\sin(x)}$.",
+    "Détermine le domaine de définition de $h(x) = e^{\\sqrt{x-2}}$, en justifiant la contrainte imposée par chacune des deux fonctions composées.",
+    "Démontre, à partir de la définition du nombre dérivé comme limite du taux d'accroissement, que pour $a \\in \\mathbb{R}_0^+$ et $f(x)=a^x$, on a $f'(x) = f'(0) \\cdot a^x$ — c'est-à-dire que la dérivée d'une exponentielle est un multiple d'elle-même.",
+    "En utilisant la formule $(a^x)' = \\ln(a) \\cdot a^x$ et le résultat $\\ln(e)=1$, démontre que $(e^x)' = e^x$.",
+  ],
+  graphique: [
+    "Pour $f(x) = \\dfrac{e^x+e^{-x}}{2}$, démontre que $f$ est paire et que sa dérivée $f'(x) = \\dfrac{e^x-e^{-x}}{2}$ est impaire.",
+  ],
+  equations: [
+    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$, $a^x = a^y \\iff x = y$ — en justifiant pourquoi la condition $a \\neq 1$ est indispensable.",
+  ],
+  inequations: [
+    undefined,
+    undefined,
+    "Démontre que, pour $0 < a < 1$, $a^x < a^y \\iff x > y$ (en détaillant les deux sens de l'équivalence, dont un par l'absurde), puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
+    "Démontre que, pour $a > 1$, $a^x < a^y \\iff x < y$ (en détaillant les deux sens de l'équivalence, dont un par l'absurde), puis déduis-en les trois autres cas ($\\le$, $>$, $\\ge$).",
+  ],
+  etude: [
+    "Étudie complètement la fonction $f(x) = x \\cdot e^x$ : domaine, dérivée et son signe (extremum), dérivée seconde et son signe (point d'inflexion), limites en $-\\infty$ et $+\\infty$.",
+    "Étudie complètement la fonction $f(x) = e^{-x^2}$ : domaine, signe, dérivée première (extremum), dérivée seconde (points d'inflexion), limites en $-\\infty$ et $+\\infty$.",
+  ],
+  problemes: [
+    "Démontre que, pour $a \\in \\mathbb{R}_0^+ \\setminus \\{1\\}$ et $f(x) = k \\cdot a^x$ ($k \\neq 0$), le rapport $\\dfrac{f(s)}{f(r)}$ ne dépend que de l'écart $s-r$ — jamais des valeurs de $r$ et $s$ elles-mêmes.",
+    'Une population de 1000 individus croît de 5 % par an. Détermine une expression de $Q(t)$, puis calcule la population après 10 ans.',
+    "Pour le modèle de saturation $p(t) = 1 - e^{-0{,}1t}$, explique pourquoi $p(t)$ se rapproche de 100 % sans jamais l'atteindre, puis calcule $p(10)$.",
+  ],
   },
 }
 
