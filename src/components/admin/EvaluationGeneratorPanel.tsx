@@ -414,18 +414,20 @@ export function EvaluationGeneratorPanel({
                                     </label>
                                   </div>
                                 ))}
-                                <div className="admin-eval-ligne">
-                                  <span className="admin-eval-ligne-label">Points / question (toutes variantes)</span>
-                                  <label>
-                                    Points
-                                    <input
-                                      type="number"
-                                      min={1}
-                                      value={ligne.points}
-                                      onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
-                                    />
-                                  </label>
-                                </div>
+                                {!estExercice && (
+                                  <div className="admin-eval-ligne">
+                                    <span className="admin-eval-ligne-label">Points / question (toutes variantes)</span>
+                                    <label>
+                                      Points
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        value={ligne.points}
+                                        onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
+                                      />
+                                    </label>
+                                  </div>
+                                )}
                               </div>
                             )
                           }
@@ -460,16 +462,18 @@ export function EvaluationGeneratorPanel({
                                   }
                                 />
                               </label>
-                              <label>
-                                Points / question
-                                <input
-                                  type="number"
-                                  min={1}
-                                  value={ligne.points}
-                                  disabled={indisponible}
-                                  onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
-                                />
-                              </label>
+                              {!estExercice && (
+                                <label>
+                                  Points / question
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={ligne.points}
+                                    disabled={indisponible}
+                                    onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
+                                  />
+                                </label>
+                              )}
                             </div>
                           )
                         })}
@@ -481,7 +485,7 @@ export function EvaluationGeneratorPanel({
             </div>
           ))}
 
-          <p className="admin-eval-total">Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}</p>
+          {!estExercice && <p className="admin-eval-total">Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}</p>}
 
           <button type="button" className="admin-gate-submit" onClick={genererEvaluation}>
             {estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé
