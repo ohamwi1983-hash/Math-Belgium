@@ -13,6 +13,7 @@ import {
   estChapitreFonctionnel,
   generateursPourSection,
   resoudreLevelSlug,
+  resoudreNiveauHeures,
   sommeParVariante,
   themesPourSection,
   type IdGenerateurPilote,
@@ -63,16 +64,29 @@ function aujourdhui(): string {
 
 /** `mode==='exercice'` : page `/exercice` (publique, accessible aux élèves) — feuille d'exercices
  * sans numéro, calculatrice, ni séries anti-triche (voir `EnTeteEvaluation.mode`). `'evaluation'`
- * (défaut) = page `/admin` historique. */
-export function EvaluationGeneratorPanel({ mode = 'evaluation' }: { mode?: 'evaluation' | 'exercice' }) {
+ * (défaut) = page `/admin` historique.
+ *
+ * `verrouille` : réservé à `ChapterExercicePage.tsx` (page `/{levelSlug}/{chapterSlug}/exercices`,
+ * lien « Générer une feuille d'exercices » en bas de chaque page de chapitre) — pré-sélectionne
+ * niveau/heures/chapitre d'après l'URL de la page de chapitre et REMPLACE les 3 sélecteurs
+ * Niveau/Nombre d'heures/Chapitre par un simple rappel en lecture seule (un élève arrivant depuis
+ * un chapitre précis n'a pas à en choisir un autre). */
+export function EvaluationGeneratorPanel({
+  mode = 'evaluation',
+  verrouille,
+}: {
+  mode?: 'evaluation' | 'exercice'
+  verrouille?: { levelSlug: string; chapitreSlug: string }
+}) {
   const estExercice = mode === 'exercice'
+  const niveauHeuresVerrouille = verrouille ? resoudreNiveauHeures(verrouille.levelSlug) : null
   const [numero, setNumero] = useState('1')
   const [date, setDate] = useState(aujourdhui)
-  const [niveau, setNiveau] = useState<NiveauCode>('6e')
-  const [heures, setHeures] = useState('6H')
-  const [chapitreSlug, setChapitreSlug] = useState(CHAPITRE_FONCTIONNEL_SLUG)
+  const [niveau, setNiveau] = useState<NiveauCode>(niveauHeuresVerrouille?.niveau ?? '6e')
+  const [heures, setHeures] = useState(niveauHeuresVerrouille?.heures ?? '6H')
+  const [chapitreSlug, setChapitreSlug] = useState(verrouille?.chapitreSlug ?? CHAPITRE_FONCTIONNEL_SLUG)
   const [titre, setTitre] = useState('')
-  const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT['6e'])
+  const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT[niveauHeuresVerrouille?.niveau ?? '6e'])
   const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
   const [nombreSeries, setNombreSeries] = useState(1)
   const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
@@ -187,11 +201,13 @@ export function EvaluationGeneratorPanel({ mode = 'evaluation' }: { mode?: 'eval
 
   return (
     <div className="admin-eval">
-      <p className="admin-eval-intro">
-        Sont fonctionnels : chapitres 1 à 3 de 6e (6h) ; chapitres 1 (sections « Étudier » et « Transformer » uniquement), 2 et 3 de 4e ;
-        chapitres 1 à 3 de 5e (4h). Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés (« bientôt ») —
-        l'extension se fera lot par lot.
-      </p>
+      {!verrouille && (
+        <p className="admin-eval-intro">
+          Sont fonctionnels : chapitres 1 à 3 de 6e (6h) ; chapitres 1 (sections « Étudier » et « Transformer » uniquement), 2 et 3 de 4e ;
+          chapitres 1 à 3 de 5e (4h). Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés (« bientôt ») —
+          l'extension se fera lot par lot.
+        </p>
+      )}
 
       <div className="admin-eval-entete">
         {!estExercice && (
@@ -216,50 +232,56 @@ export function EvaluationGeneratorPanel({ mode = 'evaluation' }: { mode?: 'eval
         </div>
       </div>
 
-      <div className="admin-eval-entete">
-        <div className="admin-eval-field">
-          <label htmlFor="eval-niveau">Niveau</label>
-          <select id="eval-niveau" value={niveau} onChange={(e) => changerNiveau(e.target.value as NiveauCode)}>
-            {NIVEAUX.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="admin-eval-field">
-          <label htmlFor="eval-heures">Nombre d'heures</label>
-          <select
-            id="eval-heures"
-            value={heures}
-            onChange={(e) => reglerNiveauHeures(niveau, e.target.value)}
-            disabled={HEURES_PAR_NIVEAU[niveau].length === 0}
-          >
-            {HEURES_PAR_NIVEAU[niveau].length === 0 ? (
-              <option value="">— (non applicable)</option>
-            ) : (
-              HEURES_PAR_NIVEAU[niveau].map((h) => (
-                <option key={h} value={h} disabled={resoudreLevelSlug(niveau, h) === null}>
-                  {h}
-                  {resoudreLevelSlug(niveau, h) === null ? ' (bientôt)' : ''}
+      {verrouille ? (
+        <p className="admin-eval-chapitre-verrouille">
+          {niveauEntry?.label ?? niveau} — Chapitre {chapitre ? `${chapitre.chapterNumber}. ${chapitre.title}` : verrouille.chapitreSlug}
+        </p>
+      ) : (
+        <div className="admin-eval-entete">
+          <div className="admin-eval-field">
+            <label htmlFor="eval-niveau">Niveau</label>
+            <select id="eval-niveau" value={niveau} onChange={(e) => changerNiveau(e.target.value as NiveauCode)}>
+              {NIVEAUX.map((n) => (
+                <option key={n} value={n}>
+                  {n}
                 </option>
-              ))
-            )}
-          </select>
+              ))}
+            </select>
+          </div>
+          <div className="admin-eval-field">
+            <label htmlFor="eval-heures">Nombre d'heures</label>
+            <select
+              id="eval-heures"
+              value={heures}
+              onChange={(e) => reglerNiveauHeures(niveau, e.target.value)}
+              disabled={HEURES_PAR_NIVEAU[niveau].length === 0}
+            >
+              {HEURES_PAR_NIVEAU[niveau].length === 0 ? (
+                <option value="">— (non applicable)</option>
+              ) : (
+                HEURES_PAR_NIVEAU[niveau].map((h) => (
+                  <option key={h} value={h} disabled={resoudreLevelSlug(niveau, h) === null}>
+                    {h}
+                    {resoudreLevelSlug(niveau, h) === null ? ' (bientôt)' : ''}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+          <div className="admin-eval-field admin-eval-field-large">
+            <label htmlFor="eval-chapitre">Chapitre</label>
+            <select id="eval-chapitre" value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)} disabled={!niveauEntry}>
+              {!niveauEntry && <option value="">Aucun chapitre disponible pour l'instant</option>}
+              {niveauEntry?.chapters.map((c) => (
+                <option key={c.slug} value={c.slug} disabled={!estChapitreFonctionnel(levelSlug, c.slug)}>
+                  {c.chapterNumber}. {c.title}
+                  {estChapitreFonctionnel(levelSlug, c.slug) ? '' : ' (bientôt)'}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="admin-eval-field admin-eval-field-large">
-          <label htmlFor="eval-chapitre">Chapitre</label>
-          <select id="eval-chapitre" value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)} disabled={!niveauEntry}>
-            {!niveauEntry && <option value="">Aucun chapitre disponible pour l'instant</option>}
-            {niveauEntry?.chapters.map((c) => (
-              <option key={c.slug} value={c.slug} disabled={!estChapitreFonctionnel(levelSlug, c.slug)}>
-                {c.chapterNumber}. {c.title}
-                {estChapitreFonctionnel(levelSlug, c.slug) ? '' : ' (bientôt)'}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      )}
 
       <div className="admin-eval-entete">
         <div className="admin-eval-field">
@@ -303,7 +325,11 @@ export function EvaluationGeneratorPanel({ mode = 'evaluation' }: { mode?: 'eval
       )}
 
       {!chapitreFonctionnel && (
-        <p className="admin-eval-indisponible">Ce chapitre n'est pas encore câblé côté plateforme-maths — reviens sur le chapitre pilote ci-dessus.</p>
+        <p className="admin-eval-indisponible">
+          {verrouille
+            ? "Ce chapitre n'a pas encore de feuille d'exercices disponible — reviens bientôt."
+            : "Ce chapitre n'est pas encore câblé côté plateforme-maths — reviens sur le chapitre pilote ci-dessus."}
+        </p>
       )}
 
       {chapitreFonctionnel && chapitre && (

@@ -588,6 +588,10 @@ table.feature-table td { white-space: normal; }
 
 .admin-eval { max-width: 720px; margin: 24px 0; display: flex; flex-direction: column; gap: 20px; }
 .admin-eval-intro { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
+.admin-eval-chapitre-verrouille {
+  margin: 0; padding: 12px 16px; background: var(--accent-soft); border: 1px solid var(--accent-soft-line);
+  border-radius: var(--radius); color: var(--accent-ink); font-weight: 700; font-size: 0.95rem;
+}
 
 .admin-eval-entete { display: flex; flex-wrap: wrap; gap: 16px; }
 .admin-eval-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 140px; }

@@ -37,6 +37,19 @@ export function resoudreLevelSlug(niveau: NiveauCode, heures: string): string | 
   return NIVEAU_HEURES_VERS_LEVELSLUG[`${niveau}|${heures}`] ?? null
 }
 
+/** Inverse de `resoudreLevelSlug` — utilisé par `EvaluationGeneratorPanel` en mode verrouillé
+ * (page `/{levelSlug}/{chapterSlug}/exercices`, voir `ChapterExercicePage.tsx`) pour retrouver le
+ * `niveau`/`heures` à partir du seul `levelSlug` déjà connu de l'URL de la page de chapitre. */
+export function resoudreNiveauHeures(levelSlug: string): { niveau: NiveauCode; heures: string } | null {
+  for (const [cle, valeur] of Object.entries(NIVEAU_HEURES_VERS_LEVELSLUG)) {
+    if (valeur === levelSlug) {
+      const [niveau, heures] = cle.split('|')
+      return { niveau: niveau as NiveauCode, heures }
+    }
+  }
+  return null
+}
+
 /** Sert au bloc titre imprimé (« Classe : 4G..... », « 4ème » du pied de page) — jamais le
  * « nombre d'heures » du chantier plateforme-maths ci-dessus (notion indépendante, voir
  * `HEURES_SEMAINE_DEFAUT`). */
