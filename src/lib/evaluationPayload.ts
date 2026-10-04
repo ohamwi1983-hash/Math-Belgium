@@ -1305,6 +1305,353 @@ const ENONCES_DEMONSTRATION: Record<string, Record<string, (string | undefined)[
     "Pour le modèle de saturation $p(t) = 1 - e^{-0{,}1t}$, explique pourquoi $p(t)$ se rapproche de 100 % sans jamais l'atteindre, puis calcule $p(10)$.",
   ],
   },
+  'fonction-second-degre': {
+  etudier: [
+    "Détermine si la fonction donnée par le tableau de valeurs $x=0,1,2,3,4$ et $f(x)=1,2,5,10,17$ est du premier ou du second degré, en calculant ses accroissements successifs puis les accroissements de ces accroissements.",
+    undefined,
+    undefined,
+    undefined,
+  ],
+  },
+  'equations-inequations-second-degre': {
+  resoudre: [
+    undefined,
+    undefined,
+    undefined,
+    "Démontre, en complétant le carré, que les solutions de $ax^2+bx+c=0$ (avec $a \\neq 0$) sont $x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$ lorsque $\\Delta = b^2-4ac \\geq 0$, et qu'il n'y a aucune solution réelle si $\\Delta < 0$.",
+    undefined,
+    undefined,
+    "Démontre, à partir des racines $x_1 = \\dfrac{-b+\\sqrt{\\Delta}}{2a}$ et $x_2 = \\dfrac{-b-\\sqrt{\\Delta}}{2a}$ (avec $\\Delta \\geq 0$), que $x_1+x_2 = -\\dfrac{b}{a}$ et que $x_1 \\cdot x_2 = \\dfrac{c}{a}$.",
+    "Démontre que, si $\\Delta \\geq 0$ et $x_1,x_2$ sont les racines de $ax^2+bx+c=0$, alors $a(x-x_1)(x-x_2) = ax^2+bx+c$, en distribuant le produit puis en substituant les relations de Viète $x_1+x_2=-\\dfrac{b}{a}$ et $x_1 \\cdot x_2=\\dfrac{c}{a}$.",
+    undefined,
+  ],
+  'signe-produit': [
+    "Étudie le signe du produit $(x-1) \\cdot x \\cdot (x-3)$ à l'aide d'un tableau de signes à 3 facteurs, puis résous l'inéquation $(x-1) \\cdot x \\cdot (x-3) > 0$.",
+  ],
+  'inequations-rationnelles': [
+    "Résous l'inéquation $\\dfrac{x-2}{x+1} \\geq 0$, en posant la condition d'existence et en construisant un tableau de signes faisant apparaître la valeur non définie.",
+  ],
+  },
+  'statistique-descriptive': {
+  moyenne: [
+    "Calcule la moyenne pondérée $\\bar{x}$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$.",
+  ],
+  position: [
+    "Détermine la médiane, le premier quartile $Q_1$ et le troisième quartile $Q_3$ de la série de valeurs $x_i=2,6,9,12$ et d'effectifs respectifs $n_i=5,8,4,3$ (effectif total $n=20$), à l'aide de la règle du seuil strictement dépassé sur les effectifs cumulés.",
+    undefined,
+  ],
+  dispersion: [
+    "Calcule la variance puis l'écart-type de la série de valeurs $x_i=6,8,12,14$ et d'effectifs respectifs $n_i=5,8,4,7$ (effectif total $n=24$), sachant que $\\bar{x}=10$.",
+  ],
+  },
+  'cercle-trigonometrique-triangles': {
+    identite: [
+      "Énonce l'identité fondamentale $\\cos^2\\theta + \\sin^2\\theta = 1$, valable pour tout angle $\\theta$, et explique comment elle permet de retrouver $\\cos\\theta$ à partir de $\\sin\\theta$ (ou l'inverse).",
+      undefined,
+    ],
+    triangle: [
+      "Démontre la loi des sinus $\\dfrac{a}{\\sin\\hat{A}} = \\dfrac{b}{\\sin\\hat{B}}$ en abaissant, dans le triangle $ABC$, la hauteur issue de $C$ jusqu'en $H$ sur $[AB]$.",
+      "Démontre la loi des cosinus $a^2 = b^2+c^2-2bc\\cos\\hat{A}$ en plaçant $A$ à l'origine d'un repère, $B$ sur l'axe horizontal à distance $c$, et $C$ au point $(b\\cos\\hat{A}\\,;\\,b\\sin\\hat{A})$, puis en appliquant le théorème de Pythagore au côté $BC=a$.",
+      "Démontre que l'aire du triangle $ABC$ vaut $\\dfrac{1}{2}bc\\sin\\hat{A}$, en exprimant la hauteur issue de $C$ au-dessus de $[AB]$ sous la forme $b\\sin\\hat{A}$.",
+      undefined,
+    ],
+  },
+  'calcul-vectoriel': {
+    norme: [
+      "Démontre, à l'aide du théorème de Pythagore, que pour deux points $A(x_A\\,;\\,y_A)$ et $B(x_B\\,;\\,y_B)$, $\\|\\vec{AB}\\| = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$.",
+      undefined,
+    ],
+    colinearite: [
+      undefined,
+      "Démontre que deux vecteurs $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont colinéaires si et seulement si $x_u\\cdot y_v - y_u\\cdot x_v = 0$.",
+    ],
+    orthogonalite: [
+      undefined,
+      "Démontre que si $\\vec{u}\\begin{pmatrix}x_u\\\\y_u\\end{pmatrix}$ et $\\vec{v}\\begin{pmatrix}x_v\\\\y_v\\end{pmatrix}$ sont orthogonaux, alors $x_u\\cdot x_v+y_u\\cdot y_v=0$, en construisant $\\vec{v}$ comme l'image de $\\vec{u}$ par une rotation de 90°.",
+    ],
+  },
+  'trigonometrie': {
+  modeliser: [
+    "Une grande roue a un rayon de 15 m ; le centre de la roue est situé à 17 m du sol. Elle effectue un tour complet en 8 minutes. À l'instant $t=0$ (l'embarquement), une nacelle se trouve à son point le plus bas. Détermine le modèle complet $hauteur(t) = A\\sin(\\omega t + \\varphi) + b$ (avec $t$ en minutes), en justifiant chaque paramètre, puis vérifie ton résultat en calculant $hauteur(4)$.",
+  ],
+  },
+  'suites': {
+  'suites-arithmetiques': [
+    undefined,
+    "Démontre, à l'aide de la méthode de la « double échelle » — écrire $S_n$ une seconde fois à l'envers, puis additionner les deux lignes colonne par colonne — que la somme des n premiers termes d'une suite arithmétique vaut $S_n = \\dfrac{n(u_1+u_n)}{2}$.",
+    undefined,
+  ],
+  'suites-geometriques': [
+    undefined,
+    "Démontre, en multipliant $S_n$ par $q$ puis en soustrayant terme à terme les deux égalités obtenues, que la somme des n premiers termes d'une suite géométrique de raison $q \\neq 1$ vaut $S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$.",
+    undefined,
+  ],
+  'comparaison-suites': [
+    "En 2020, la ville A compte 50 000 habitants et croît de 2 000 habitants par an (croissance arithmétique). La même année, la ville B compte 30 000 habitants et croît de 8 % par an (croissance géométrique). Détermine, par balayage numérique, le premier rang — puis l'année correspondante — à partir duquel la population de B dépasse celle de A, en vérifiant explicitement que ce n'est pas encore le cas au rang précédent.",
+  ],
+  'recurrente-affine': [
+    "Démontre que, si la suite récurrente $u_{n+1} = a \\times u_n + b$ (avec $a \\neq 1$) converge, sa limite $L$ vaut nécessairement $L = \\dfrac{b}{1-a}$.",
+    undefined,
+  ],
+  },
+  'derivees-applications': {
+  'fonction-derivee': [
+    undefined,
+    "Démontre, à partir de la définition du nombre dérivé comme limite du taux d'accroissement, que pour $f(x) = \\dfrac{1}{x}$ (avec $x \\neq 0$), $f'(x) = -\\dfrac{1}{x^2}$, et que pour $f(x) = \\sqrt{x}$ (avec $x \\geq 0$), $f'(x) = \\dfrac{1}{2\\sqrt{x}}$ — en multipliant, pour ce second cas, par l'expression conjuguée.",
+    undefined,
+    undefined,
+    undefined,
+  ],
+  'etude-locale': [
+    "Pour $f(x) = x^3-3x$, dresse le tableau de signes complet de $f'$, déduis-en les variations de $f$, puis classe chaque zéro de $f'$ (maximum local ou minimum local).",
+    undefined,
+  ],
+  },
+  'fonctions-logarithmes': {
+  proprietes: [
+    "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(xy) = \\log_a(x) + \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété des puissances $a^p \\cdot a^q = a^{p+q}$.",
+    "Démontre que, pour $a>0$, $a \\neq 1$, $x>0$ et $r \\in \\mathbb{R}$, $\\log_a(x^r) = r \\cdot \\log_a(x)$, en réécrivant $x$ comme une puissance de $a$ grâce à (P4), puis en utilisant la propriété $(a^p)^r = a^{p \\cdot r}$.",
+    "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x/y) = \\log_a(x) - \\log_a(y)$, en réécrivant $x$ et $y$ comme des puissances de $a$ grâce à (P4), puis en utilisant la propriété $a^p/a^q = a^{p-q}$.",
+    "Calcule $\\log_2(8) - \\log_2(2)$ en te ramenant à un seul logarithme grâce aux propriétés algébriques du logarithme.",
+    "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x \\in \\mathbb{R}$, $a^x = b^{\\,x \\cdot \\log_b(a)}$ (changement de base pour les exponentielles), en réécrivant $a$ comme une puissance de $b$ grâce à (P4) appliquée en base $b$.",
+    "Démontre que, pour $a,b>0$ avec $a \\neq 1$ et $b \\neq 1$, et tout $x>0$, $\\log_a(x) = \\dfrac{\\log_b(x)}{\\log_b(a)}$ (changement de base pour les logarithmes), en posant $y=\\log_a(x)$ et en appliquant le changement de base pour les exponentielles à l'égalité $a^y=x$.",
+    "Démontre que $\\ln(a) = \\log_e(a)$ pour tout $a>0$, en calculant la dérivée de $a^x$ de deux façons différentes — une fois via le changement de base vers $e$, une fois via la formule $(a^x)' = a^x \\cdot \\ln(a)$ déjà connue — puis en identifiant les deux résultats.",
+    "Montre que toute fonction $f(x) = r \\cdot a^{sx+t}$ ($a>0$, $a \\neq 1$, $r,s,t$ réels) peut s'écrire $f(x) = C \\cdot b^{kx}$ dans n'importe quelle autre base $b>0$, $b \\neq 1$, en explicitant $C$ et $k$ en fonction de $r,s,t,a,b$. Applique ensuite ce résultat à $f(x) = 4 \\cdot 3^{5x+2}$, réécrite en base $e$.",
+  ],
+  equations: [
+    "Résous l'équation $3^x = 20$ en appliquant $\\log_3$ aux deux membres, et donne la solution exacte ainsi qu'une valeur approchée au millième.",
+    "Résous l'équation $\\ln(2x-1) = 3$ : détermine le domaine, applique $\\exp$ aux deux membres, puis vérifie que la solution respecte la condition d'existence.",
+    "Résous l'équation $\\log_3(2w^2-1) = 4$ : détermine d'abord la condition d'existence sur $w$, résous ensuite l'équation, et vérifie que les solutions obtenues la respectent.",
+    "Démontre que, pour $a>0$, $a \\neq 1$ et $x,y>0$, $\\log_a(x) = \\log_a(y) \\iff x = y$, en démontrant séparément les deux sens de l'équivalence.",
+    "Résous l'équation $\\log_3(6w-1) = \\log_3(-4w^2+3)$ : détermine la condition d'existence, résous l'équation du second degré qui en résulte, puis rejette toute solution qui ne respecte pas la condition d'existence.",
+    "Résous l'équation $(\\ln(x))^2 - \\ln(x) - 2 = 0$ à l'aide de la substitution $t = \\ln(x)$.",
+  ],
+  inequations: [
+    "Démontre que, pour $0<a<1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u > v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$).",
+    "Démontre que, pour $a>1$ et $u,v>0$, $\\log_a(u) < \\log_a(v) \\iff u < v$, en démontrant séparément les deux sens de l'équivalence (l'un via $\\exp_a$, l'autre via la monotonie de $\\log_a$).",
+    "Démontre que, pour $0<a<1$, $u>0$ et $y \\in \\mathbb{R}$, $\\log_a(u) < y \\iff u > a^y$, en te ramenant à la comparaison de deux logarithmes de même base déjà démontrée.",
+    "Résous l'inéquation $\\ln(x) \\le 2$ : détermine le domaine, puis l'ensemble-solution en appliquant $\\exp$ aux deux membres.",
+    "Résous l'inéquation $\\ln(x-1) > 0$ : détermine le domaine, résous l'inéquation, et vérifie que l'ensemble-solution obtenu est bien inclus dans le domaine.",
+    "Résous l'inéquation $\\log_{0,5}(6w-1) \\ge \\log_{0,5}(-4w^2+3)$, puis résous la même comparaison en base $e$, $\\ln(6w-1) \\ge \\ln(-4w^2+3)$ : détermine chaque fois le domaine et compare les deux ensembles-solutions obtenus.",
+  ],
+  derivee: [
+    "Démontre que $\\ln'(x) = \\dfrac{1}{x}$ pour $x>0$, en utilisant la formule de dérivation d'une fonction réciproque appliquée à $\\exp$ et $\\ln$, sachant que $\\exp' = \\exp$.",
+    "Détermine le domaine puis calcule la dérivée de chacune des fonctions suivantes : $f(x) = \\ln(x^2+1)$ et $g(x) = \\ln(x-3)$.",
+    "Calcule la dérivée de $f(x) = x^2 \\cdot \\sqrt{x+1}$ (pour $x>0$) en utilisant la dérivation logarithmique.",
+    "Démontre que, pour $g$ dérivable et strictement positive et $h$ dérivable, $\\left((g(x))^{h(x)}\\right)' = \\left(h'(x) \\cdot \\ln(g(x)) + \\dfrac{h(x) \\cdot g'(x)}{g(x)}\\right) \\cdot (g(x))^{h(x)}$, en réécrivant $(g(x))^{h(x)}$ sous la forme $e^{h(x) \\cdot \\ln(g(x))}$.",
+    "Calcule la dérivée de $f(x) = (1+\\sqrt{x})^{2x}$ pour $x>0$, en passant par l'écriture $f(x) = e^{2x \\cdot \\ln(1+\\sqrt{x})}$.",
+    "Démontre que $(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$ pour $a>0$, $a \\neq 1$ et $x>0$, en exprimant $\\log_a$ à l'aide de $\\ln$ par changement de base.",
+  ],
+  limites: [
+    "Calcule $\\displaystyle\\lim_{x \\to 0^+} x \\cdot \\ln(x)$, en identifiant la forme indéterminée et en citant le résultat de croissance comparée qui permet de la lever.",
+    "Calcule $\\displaystyle\\lim_{x \\to 1} \\dfrac{\\ln(x)}{x-1}$, en posant $u=x-1$ et en te ramenant à la limite fondamentale $\\displaystyle\\lim_{u \\to 0} \\dfrac{\\ln(1+u)}{u} = 1$.",
+  ],
+  parametres: [
+    "Détermine $a$ et $b$ sachant que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(1;4)$ et que sa tangente en $x=1$ a pour pente $3$.",
+    "Sachant que $a=2$ et que le graphique de $f(x) = a + b \\cdot \\ln(x)$ passe par le point $(e;5)$, détermine $b$.",
+  ],
+  hyperboliques: [
+    "Vérifie numériquement l'identité $\\text{ch}^2(x) - \\text{sh}^2(x) = 1$ en $x=1$, à partir des valeurs approchées $\\text{ch}(1) \\approx 1{,}5431$ et $\\text{sh}(1) \\approx 1{,}1752$.",
+  ],
+  graphique: [
+    "Étudie le signe de la dérivée de $f(x) = x - \\ln(x)$ sur son domaine $]0;+\\infty[$, et déduis-en la nature et la valeur de son extremum.",
+  ],
+  etude: [
+    "Étudie complètement la fonction $f(x) = \\dfrac{\\ln(x)}{x}$ : domaine, dérivée et extremum, limites aux bornes du domaine et asymptotes.",
+  ],
+  problemes: [
+    "Le pH d'une solution vaut $pH = -\\log_{10}([H^+])$. Démontre que si la concentration $[H^+]$ est multipliée par $10$, le pH diminue exactement de $1$.",
+    "Un modèle de décroissance radioactive s'écrit $N(t) = N_0 \\cdot e^{-\\lambda t}$. Démontre que la demi-vie $T$ (l'instant où $N(T) = N_0/2$) vaut $T = \\dfrac{\\ln(2)}{\\lambda}$.",
+    "Pour le modèle de croissance logistique $y(t) = \\dfrac{k}{1+a \\cdot e^{-rt}}$, démontre que le point d'inflexion (croissance la plus rapide) a lieu en $y=k/2$, à l'instant $t = \\dfrac{\\ln(a)}{r}$, puis calcule cet instant et cette valeur pour $k=10$, $a=9$, $r=1$.",
+  ],
+  },
+  'primitives-integrales': {
+  primitives: [
+    "Calcule $\\int 2x \\cdot e^{x^2} \\, dx$ en identifiant la forme $u'e^u$ (avec $u(x)=x^2$).",
+    "Démontre la formule d'intégration par parties $\\int f(x) \\cdot g'(x) \\, dx = f(x) \\cdot g(x) - \\int f'(x) \\cdot g(x) \\, dx$ à partir de la dérivée d'un produit.",
+    "Calcule $\\int x \\cdot e^x \\, dx$ par intégration par parties.",
+    "Calcule $\\int x^2 \\cdot \\sin(x) \\, dx$ en effectuant deux intégrations par parties successives.",
+  ],
+  conditioninitiale: [
+    "Détermine la primitive particulière F de $f(x) = 2x$ telle que $F(0) = 5$.",
+    "Détermine la primitive particulière F de $f(x) = \\dfrac{1}{x}$ (pour $x>0$) telle que $F(1) = 2$.",
+  ],
+  integralesdefinies: [
+    "Démontre que la valeur de $\\int_a^b f(x)dx$ ne dépend pas du choix de la primitive utilisée pour la calculer.",
+    "Approche $\\int_0^4 x^2 \\, dx$ par la méthode des trapèzes avec 4 sous-intervalles ($\\Delta x=1$), puis compare le résultat à la valeur exacte.",
+    "Démontre que la valeur moyenne d'une fonction f continue sur $[a;b]$ est effectivement atteinte par f en un point de $[a;b]$ (théorème de la moyenne).",
+    "Calcule la valeur moyenne de $f(x) = x$ sur $[0;4]$.",
+    "Détermine $m > 0$ tel que $\\int_0^m 2x \\, dx = 9$.",
+  ],
+  aires: [
+    "Calcule l'aire comprise entre la courbe de $f(x) = x$ et l'axe des abscisses, sur $[-2;3]$.",
+    "Calcule l'aire de la région comprise entre les courbes $f(x) = x^2$ et $g(x) = 4$.",
+    "Calcule l'aire de la région bordée par $y=x$, $y=6-x$ et l'axe des abscisses.",
+    "Démontre, à l'aide d'une intégrale, que l'aire d'un disque de rayon r vaut $\\pi r^2$.",
+  ],
+  volumes: [
+    "Démontre que le volume engendré par la rotation, autour de l'axe des abscisses, de la région sous une courbe $f\\ge0$ sur $[a;b]$, vaut $V = \\pi\\int_a^b [f(x)]^2 dx$.",
+    "Calcule le volume engendré par la rotation de $f(x) = x$ sur $[0;3]$ autour de l'axe des abscisses.",
+    "Calcule le volume engendré par la rotation, autour de l'axe des abscisses, de la région comprise entre $f(x) = 3$ et $g(x) = x$ sur $[0;3]$.",
+    "Démontre, à l'aide de la méthode des disques, que le volume d'un tronc de cône de hauteur h, de petit rayon a et de grand rayon b vaut $V = \\dfrac{\\pi h}{3}(a^2+ab+b^2)$.",
+  ],
+  longueurarc: [
+    "Démontre que la longueur d'un arc de courbe $y=f(x)$ entre $x=a$ et $x=b$ vaut $L = \\int_a^b \\sqrt{1+[f'(x)]^2} \\, dx$.",
+    "Calcule la longueur de l'arc de $f(x) = \\dfrac{2}{3}x^{3/2}$ sur $[0;3]$.",
+    "Calcule la longueur de l'arc de $f(x) = \\text{ch}(x)$ sur $[0;a]$, en repérant le carré parfait sous la racine.",
+    "Démontre, à l'aide de la formule de longueur d'arc, que la circonférence d'un cercle de rayon r vaut $2\\pi r$.",
+  ],
+  problemes: [
+    "Un mobile a une accélération $a(t) = 2$. Sachant que $v(0) = 3$ et $x(0) = 0$, détermine $v(t)$ puis $x(t)$.",
+  ],
+  },
+  'nombres-complexes': {
+    affixesracines: [
+      undefined,
+      "Démontre que, pour résoudre $(x+iy)^2=a+bi$ grâce au système $x^2-y^2=a$ et $2xy=b$, élever ces deux équations au carré puis les additionner membre à membre donne la 3e équation $x^2+y^2=\\sqrt{a^2+b^2}$, qui permet de résoudre entièrement le système.",
+      undefined,
+      "Détermine, en détail, les deux racines carrées complexes de $5-12i$.",
+    ],
+    equationscomplexes: [
+      "Démontre que, pour $az^2+bz+c=0$ (avec $a,b,c$ réels, $a \\neq 0$ et $\\Delta<0$), la mise sous forme canonique $a(z+\\dfrac{b}{2a})^2=\\dfrac{\\Delta}{4a^2}$ — valable aussi bien dans $\\mathbb{R}$ que dans $\\mathbb{C}$ — conduit, poursuivie dans $\\mathbb{C}$, aux deux solutions conjuguées $z=\\dfrac{-b\\pm i\\sqrt{|\\Delta|}}{2a}$.",
+      undefined,
+      "Résous, dans $\\mathbb{C}$, les deux équations bicarrées $z^4-5z^2+4=0$ et $z^4+5z^2+4=0$, en posant $u=z^2$ dans chacune.",
+    ],
+    formetrigonometrique: [
+      "Démontre que, pour $z_1=r_1(\\cos\\theta_1+i\\sin\\theta_1)$ et $z_2=r_2(\\cos\\theta_2+i\\sin\\theta_2)$, le produit $z_1z_2$ additionne les arguments ($z_1z_2=r_1r_2[\\cos(\\theta_1+\\theta_2)+i\\sin(\\theta_1+\\theta_2)]$) et le quotient $z_1/z_2$ les soustrait ($z_1/z_2=\\dfrac{r_1}{r_2}[\\cos(\\theta_1-\\theta_2)+i\\sin(\\theta_1-\\theta_2)]$) — en développant le produit des deux formes trigonométriques et en reconnaissant les formules d'addition.",
+      undefined,
+    ],
+    formulemoivre: [
+      "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ pour tout entier $n$, en passant par la forme exponentielle $e^{i\\theta}$.",
+      "Démontre la formule de Moivre, $(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$, par récurrence sur $n$, sans utiliser la forme exponentielle $e^{i\\theta}$.",
+      "En développant $(\\cos x+i\\sin x)^2$ grâce à la formule de Moivre, retrouve les formules de duplication $\\cos(2x)=\\cos^2x-\\sin^2x$ et $\\sin(2x)=2\\sin x\\cos x$.",
+      "En développant $(\\cos x+i\\sin x)^3$ grâce à la formule de Moivre et au binôme de Newton, exprime $\\cos(3x)$ et $\\sin(3x)$ en fonction de $\\cos x$ et $\\sin x$.",
+    ],
+    racinesniemes: [
+      "Détermine les 4 racines quatrièmes de l'unité, puis les 3 racines cubiques de l'unité.",
+      "Démontre que, pour tout entier $n\\ge2$, la somme des $n$ racines n-ièmes de l'unité, $\\displaystyle\\sum_{k=0}^{n-1} e^{2ik\\pi/n}$, est nulle.",
+    ],
+    transformationsplan: [
+      "Démontre que, pour tout point $M$ d'affixe $z$ et $A$ le point d'affixe $c$, l'application $z \\mapsto z+c$ est la translation de vecteur $\\vec{OA}$.",
+      "Démontre que, pour $c$ complexe non nul de module $r$ et d'argument $\\alpha$, l'application $z \\mapsto c(z-z_0)+z_0$ (de centre $\\Omega$ d'affixe $z_0$) combine une rotation de centre $\\Omega$ et d'angle $\\alpha$ avec une homothétie de centre $\\Omega$ et de rapport $r$.",
+    ],
+    trianglescomplexes: [
+      "Démontre que, pour tout point $B\\neq O$ et $F$ l'image de $B$ par la rotation de centre $O$ et d'angle $\\pi/3$ (c'est-à-dire $F=B\\cdot e^{i\\pi/3}$), le triangle $OBF$ est équilatéral.",
+    ],
+    problemesavances: [
+      undefined,
+      "Démontre que, pour $a$ complexe tel que $|a|\\neq1$, si $|z|=1$ alors $|z'|=1$, où $z'=\\dfrac{z-a}{1-\\bar{a}z}$.",
+    ],
+  },
+  'probabilites': {
+    probabilitesensembles: [
+      "Démontre que, pour deux événements $A$ et $B$ quelconques, $P(A \\cup B)=P(A)+P(B)-P(A \\cap B)$, en décomposant $A$, $B$ et $A \\cup B$ en unions disjointes.",
+      undefined,
+      undefined,
+    ],
+    independancebayes: [
+      undefined,
+      "Démontre le théorème de Bayes, $P(A|B)=\\dfrac{P(B|A) \\times P(A)}{P(B)}$, à partir de la définition de la probabilité conditionnelle appliquée dans les deux sens de conditionnement.",
+      undefined,
+      undefined,
+      "Démontre que les trois écritures de l'indépendance de $A$ et $B$ — $P(A|B)=P(A)$, $P(A \\cap B)=P(A) \\times P(B)$ et $P(B|A)=P(B)$ — sont rigoureusement équivalentes.",
+    ],
+    probabilitesproblemes: [
+      "Pour une répétition de 3 épreuves indépendantes de probabilité de succès $p=0,3$, détermine, en énumérant les 8 chemins complets de l'arbre et en les regroupant par nombre de succès, la distribution complète de $P(X=k)$ pour $k=0,1,2,3$, puis vérifie que leur somme vaut 1.",
+      undefined,
+      undefined,
+    ],
+  },
+  'analyse-combinatoire': {
+    denombrementfondamental: [
+      undefined,
+      "Démontre, à partir de la définition d'une combinaison, que $A_n^k = C_n^k \\times k!$.",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      "Démontre, en appliquant la relation de Pascal, que $C_5^3+2\\times C_5^2+C_5^1 = C_7^3$, retrouvant ainsi la formule $\\Gamma_5^3 = C_{5+3-1}^3$ sans passer par le calcul direct des factorielles.",
+    ],
+    binomenewton: [
+      "En développant $(a+b)^4$ comme un produit de 4 facteurs identiques et en comptant les mots de 4 lettres $a$/$b$ obtenus, démontre que le coefficient du terme en $a^{4-i}b^i$ est $C_4^i$, puis généralise ce raisonnement à $(a+b)^n$.",
+      "Développe complètement $(2x-1)^5$ à l'aide de la formule du binôme de Newton, puis vérifie ton résultat en $x=1$.",
+      "Démontre algébriquement, à partir de la définition factorielle des combinaisons, que $C_{n-1}^{k-1}+C_{n-1}^k = C_n^k$.",
+      undefined,
+      "En substituant $a=b=1$ dans la formule du binôme de Newton, démontre que $C_n^0+C_n^1+\\ldots+C_n^n = 2^n$.",
+      undefined,
+      undefined,
+    ],
+    probabilitehypergeometrique: [
+      undefined,
+      undefined,
+      "Pour une urne de 5 boules rouges et 5 boules bleues (3 tirages sans remise), démontre que la probabilité de la composition « 2 rouges et 1 bleue » est égale à $C_3^2$ fois la probabilité d'une séquence précise, et retrouve ainsi $\\dfrac{5}{12}$.",
+      undefined,
+    ],
+  },
+  'lieux-geometriques': {
+    'methode-generale-demonstration': [
+      "Démontre, en choisissant un repère avec $A(0;0)$, $B(2a;0)$ et $D(2b;2c)$ ($a,b,c$ quelconques), que les diagonales $[AC]$ et $[BD]$ d'un parallélogramme $ABCD$ se coupent toujours en leur milieu commun.",
+    ],
+    'methode-generatrices': [
+      "Pour le rectangle $A(0;0)$, $B(4;0)$, $C(4;6)$, $D(0;6)$, les points $Z(0;\\alpha)\\in[AD]$ et $Y(4;\\alpha)\\in[BC]$ définissent les droites $(AY)$ et $(BZ)$. En éliminant le paramètre $\\alpha$, détermine le lieu géométrique du point d'intersection $(AY)\\cap(BZ)$ lorsque $\\alpha$ parcourt $]0;6[$, en précisant la restriction.",
+      "Pour le triangle $A(0;4)$, $B(0;0)$, $C(6;0)$, on trace, pour chaque hauteur $\\alpha$, la droite parallèle à $(BC)$ qui coupe $[AB]$ en D et $[AC]$ en E. Détermine, en éliminant $\\alpha$, le lieu géométrique du point d'intersection $(BE)\\cap(CD)$, et identifie la droite remarquable qu'il représente.",
+      "Pour $A(3;0)$, $B(-2;0)$ et $C(0;\\alpha)$ variable sur l'axe des ordonnées, on trace la perpendiculaire à $(AC)$ passant par A et la perpendiculaire à $(BC)$ passant par B. Détermine, en éliminant $\\alpha$, le lieu géométrique de leur point d'intersection, et précise si ce lieu contient réellement le point $(1;0)$.",
+    ],
+  },
+  coniques: {
+    excentricite: [
+      undefined,
+      "Démontre, à l'aide du théorème de Dandelin-Quételet, que la section d'un cône de révolution par un plan, lorsqu'elle est une ellipse, admet pour foyers les points de contact F et F′ des deux sphères inscrites avec ce plan — c'est-à-dire que $|PF|+|PF'|$ est constante pour tout point P de la section.",
+      "Réduis l'équation $16x^2-36y^2+80x+252y-197=0$ par translation d'axes, puis identifie la conique obtenue (nature, centre, sommets, foyers, directrices, asymptotes).",
+    ],
+    airefocale: [
+      "Pour l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ et un point P tel que $|PF|=2\\cdot|PF'|$, calcule les rayons focaux $|PF|$ et $|PF'|$, l'angle $\\widehat{FPF'}$, puis l'aire du triangle $FPF'$.",
+      "Détermine l'excentricité d'une ellipse sachant que l'angle $\\widehat{FBF'}$ est droit, où B est le sommet de l'axe non focal.",
+      "Détermine l'excentricité d'une ellipse telle que $b=c$.",
+      "Exprime l'excentricité $e$ d'une ellipse en fonction de $k$, sachant que la distance entre les deux directrices vaut $k$ fois la distance entre les deux foyers.",
+    ],
+    intersection: [
+      "Détermine les points d'intersection entre la droite passant par $A(-4;0)$ et $B(0;-3)$ et la conique de foyer $F(3;-2)$, de directrice $d' \\equiv x=-1/5$ et d'excentricité $e=5/3$.",
+    ],
+    tangentes: [
+      undefined,
+      "Détermine l'équation de la tangente à l'ellipse $\\dfrac{x^2}{25}+\\dfrac{y^2}{16}=1$ au point $P(3\\,;\\,16/5)$, par dérivation, puis vérifie ton résultat à l'aide de la forme dédoublée et du discriminant.",
+    ],
+  },
+  'variables-aleatoires': {
+  variablesdiscretes: [
+    'Une variable aléatoire $X$ prend les valeurs $\\{2,3,4,5,6\\}$ avec les probabilités $P=(0,15\\,;\\,0,25\\,;\\,0,30\\,;\\,0,20\\,;\\,0,10)$. Vérifie que cette loi est valide, puis calcule $E(X)$, $V(X)$ et $\\sigma(X)$.',
+    "Un jeu propose un gain net de $-2$ € avec une probabilité $0,4$, de $+3$ € avec une probabilité $0,35$, et de $+5$ € avec une probabilité $0,25$. Calcule l'espérance de ce jeu et précise s'il est favorable, défavorable ou équitable au joueur.",
+    "Un jeu offre un gain brut de $10$ € (probabilité $0,2$), $4$ € (probabilité $0,3$) ou $-6$ € (probabilité $0,5$). On impose une mise $m$ au joueur, si bien que son gain net devient le gain brut diminué de $m$. Détermine la valeur de $m$ qui rend ce jeu équitable.",
+    "On tire sans remise $3$ éléments dans une population de $10$ éléments dont $4$ sont des succès ($N=10$, $K=4$, $n=3$). Détermine la loi de probabilité de $X$, le nombre de succès obtenus, puis calcule $E(X)$.",
+    "Un dé équilibré à $6$ faces est lancé une fois ; $X$ désigne le résultat obtenu. Calcule $E(X)$ et $V(X)$.",
+  ],
+  loibinomiale: [
+    "Une variable aléatoire $X$ suit la loi binomiale $B(5\\,;\\,0,4)$. Détermine la loi de probabilité complète de $X$ (pour $k=0$ à $5$), puis calcule $V(X)$ et $\\sigma(X)$.",
+    "On répète une épreuve de Bernoulli de probabilité de succès $p=0,1$. Détermine le plus petit nombre d'épreuves $n$ tel que la probabilité d'obtenir au moins un succès dépasse $0,9$.",
+  ],
+  loiuniformecontinue: [
+    'Une variable aléatoire $X$ suit la loi uniforme continue sur $[0\\,;\\,60]$. Calcule $E(X)$, $V(X)$ et $\\sigma(X)$.',
+  ],
+  loinormale: [
+    "Soit $X$ une variable aléatoire suivant la loi normale $N(50\\,;\\,10)$. En utilisant la règle empirique, calcule la probabilité que $X$ soit hors de l'intervalle $[30\\,;\\,70]$.",
+    'Soit $X$ une variable aléatoire suivant la loi normale $N(50\\,;\\,10)$. Calcule $P(X\\leq65)$, $P(X\\geq65)$ et $P(X\\leq35)$.',
+    'Détermine la valeur de $z$ telle que $\\Phi(z)=0,95$.',
+  ],
+  extensionsbayes: [
+    "Deux épreuves indépendantes ont respectivement une probabilité de succès $p_1=0,5$ et $p_2=0,3$. Calcule la probabilité de réussir les deux épreuves, puis détermine le nombre minimal de répétitions $n$ de cette expérience composée pour que la probabilité d'obtenir au moins un succès dépasse $0,8$.",
+    "Une compagnie d'assurance classe ses clients en 3 catégories de risque : $30\\%$ de risque faible (probabilité de sinistre $0,10$), $45\\%$ de risque moyen (probabilité de sinistre $0,20$) et $25\\%$ de risque élevé (probabilité de sinistre $0,40$). Calcule la probabilité totale qu'un client ait un sinistre, puis la probabilité qu'un client ayant eu un sinistre appartienne à la catégorie à haut risque.",
+    "Une variable aléatoire $X$ suit la loi binomiale $B(100\\,;\\,0,5)$. Vérifie que l'on peut approximer $X$ par une loi normale, détermine les paramètres $\\mu$ et $\\sigma$ de cette approximation, puis estime $P(X\\leq55)$.",
+    "Une entreprise propose 3 formules d'abonnement : Basique à $15$ € ($20\\%$ des clients), Standard à $35$ € ($30\\%$ des clients) et Premium à $60$ € (le reste des clients). Calcule l'espérance du prix payé par un client, puis la recette totale attendue sur une population de $500$ clients.",
+  ],
+  loipoisson: [
+    "Une variable aléatoire $X$ suit la loi binomiale $B(50\\,;\\,0,08)$. Vérifie que l'on peut approximer $X$ par une loi de Poisson, et détermine le paramètre $\\lambda$ de cette approximation.",
+    'Pour une variable aléatoire $X$ suivant la loi de Poisson de paramètre $\\lambda=4$, calcule $P(X\\leq1)$, puis $P(X\\geq2)$.',
+    "Un péage voit passer en moyenne $5$ voitures par minute. Détermine le paramètre $\\lambda$ du nombre de voitures passant en $15$ minutes. Une usine compte en moyenne $3$ pièces défectueuses pour $1000$ pièces produites : détermine le paramètre $\\lambda$ du nombre de pièces défectueuses dans un lot de $500$ pièces.",
+  ],
+  },
 }
 
 /**
