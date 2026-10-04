@@ -83,11 +83,7 @@ function demandeFormeGeneraleDirecte(exercice: Exercice): boolean {
   return exercice.formeAffichage !== "produit_egale_constante";
 }
 
-interface Props {
-  onRetourAccueil: () => void;
-}
-
-export function AppMethodeRapide({ onRetourAccueil }: Props) {
+export function AppMethodeRapide() {
   const [etat, setEtat] = useState<EtatSession>(nouvelleSession);
   const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
 
@@ -161,9 +157,6 @@ export function AppMethodeRapide({ onRetourAccueil }: Props) {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <button type="button" className="btn" onClick={onRetourAccueil}>
-          ← Accueil
-        </button>
         <h1 className="app-title">Second degré — choisir la méthode la plus rapide</h1>
         <p className="app-subtitle">Équations du second degré</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />

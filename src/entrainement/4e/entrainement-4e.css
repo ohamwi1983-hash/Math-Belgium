@@ -2,57 +2,40 @@
  * depuis plateforme-maths — scopés sous .entrainement-4e pour ne jamais fuiter sur le
  * reste du site (variables CSS + sélecteurs génériques .btn/.card/.field renommés nulle
  * part, juste confinés par le sélecteur de portée). Un wrapper `<div className="entrainement-4e">`
- * doit envelopper le composant porté pour que ces règles s'appliquent. */
+ * doit envelopper le composant porté pour que ces règles s'appliquent.
+ *
+ * Thème : au lieu de ses propres couleurs (violet, coins très arrondis, ombres portées),
+ * chaque jeton `--color-*`/`--radius-*` de plateforme-maths est redirigé vers le jeton
+ * équivalent de Math-Belgium (`--accent`, `--ink`, `--radius`...), déjà définis sur `:root`
+ * — le mode sombre suit automatiquement (celui de `:root` se répercute ici), pas besoin
+ * d'un second bloc `@media (prefers-color-scheme: dark)` propre à ce générateur. */
 
 .entrainement-4e {
-  --color-bg: #f4f4fa;
-  --color-surface: #ffffff;
-  --color-text: #1b1c2b;
-  --color-text-muted: #6b6b80;
-  --color-border: #e6e6f0;
-  --color-primary: #6d28d9;
-  --color-primary-hover: #5b21b6;
-  --color-primary-bg: rgba(109, 40, 217, 0.08);
-  --color-success: #15803d;
-  --color-success-bg: rgba(21, 128, 61, 0.1);
-  --color-error: #b91c1c;
-  --color-error-bg: rgba(185, 28, 28, 0.09);
-  --color-warning: #b06600;
-  --color-warning-bg: #fff8ea;
-  --shadow-card: 0 1px 2px rgba(20, 20, 43, 0.04), 0 12px 28px rgba(20, 20, 43, 0.07);
-  --radius-md: 10px;
-  --radius-lg: 18px;
-  --pf-sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --pf-mono: ui-monospace, Consolas, monospace;
-  font: 16px/1.5 var(--pf-sans);
-  color: var(--color-text);
-  background: var(--color-bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  .entrainement-4e {
-    --color-bg: #111119;
-    --color-surface: #1a1b26;
-    --color-text: #edecf5;
-    --color-text-muted: #9c9cb3;
-    --color-border: #2c2d3d;
-    --color-primary: #a78bfa;
-    --color-primary-hover: #c4b5fd;
-    --color-primary-bg: rgba(167, 139, 250, 0.14);
-    --color-success: #4ade80;
-    --color-success-bg: rgba(74, 222, 128, 0.13);
-    --color-error: #f87171;
-    --color-error-bg: rgba(248, 113, 113, 0.14);
-    --color-warning: #f0a94e;
-    --color-warning-bg: rgba(240, 169, 78, 0.12);
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.4);
-  }
+  --color-bg: var(--paper);
+  --color-surface: var(--surface);
+  --color-text: var(--ink);
+  --color-text-muted: var(--ink-soft);
+  --color-border: var(--line);
+  --color-primary: var(--accent);
+  --color-primary-hover: var(--accent-ink);
+  --color-primary-bg: var(--accent-soft);
+  --color-success: var(--good);
+  --color-success-bg: var(--good-soft);
+  --color-error: var(--bad);
+  --color-error-bg: var(--bad-soft);
+  --color-warning: var(--attn);
+  --color-warning-bg: var(--attn-soft);
+  --shadow-card: none;
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  font: 16px/1.5 var(--sans);
+  color: var(--ink);
 }
 
 .entrainement-4e h1, .entrainement-4e h2, .entrainement-4e h3 {
-  font-family: var(--pf-sans);
+  font-family: var(--serif);
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--ink);
   margin: 0;
 }
 
@@ -62,7 +45,7 @@
 }
 
 .entrainement-4e code {
-  font-family: var(--pf-mono);
+  font-family: var(--mono);
 }
 
 .entrainement-4e .app-shell {
@@ -88,44 +71,6 @@
   color: var(--color-text-muted);
   font-size: 14px;
   margin-top: 4px;
-}
-
-.entrainement-4e .selecteur-variante-dev {
-  margin-top: 16px;
-  padding: 10px 12px;
-  border: 1px dashed #d97706;
-  border-radius: var(--radius-md);
-  background: #fffbeb;
-}
-
-.entrainement-4e .selecteur-variante-dev-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #92400e;
-  margin-bottom: 6px;
-}
-
-.entrainement-4e .selecteur-variante-dev-row {
-  display: flex;
-  gap: 8px;
-}
-
-.entrainement-4e .selecteur-variante-dev-select {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 10px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: 13px;
-}
-
-.entrainement-4e .selecteur-variante-dev-bouton {
-  flex: none;
-  padding: 8px 14px;
-  font-size: 13px;
 }
 
 .entrainement-4e .export-word-formats .btn {
@@ -181,9 +126,9 @@
   padding: 28px 20px;
   margin-bottom: 22px;
   text-align: center;
-  
+
   overflow-x: auto;
-  
+
   background-color: var(--color-primary-bg);
   background-image:
     linear-gradient(to right, var(--color-primary-bg) 50%, transparent),
@@ -282,7 +227,7 @@
   padding: 14px 16px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
 .entrainement-4e .btn:hover {
@@ -303,8 +248,8 @@
   width: 100%;
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: white;
-  font-weight: 600;
+  color: var(--on-accent);
+  font-weight: 700;
   padding: 13px 16px;
   margin-top: 4px;
 }
@@ -353,7 +298,7 @@
 .entrainement-4e .recap-item {
   font-size: 13px;
   color: var(--color-text-muted);
-  
+
   overflow-x: auto;
 }
 
@@ -369,10 +314,10 @@
 .entrainement-4e .field-label {
   display: block;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-text-muted);
+  color: var(--ink-faint);
   margin-bottom: 6px;
 }
 
@@ -551,10 +496,33 @@
 }
 
 .entrainement-4e .selecteur-variante-dev-label {
+  display: block;
   font-size: 12px;
   font-weight: 700;
   color: var(--color-warning);
   margin: 0 0 8px;
+}
+
+.entrainement-4e .selecteur-variante-dev-row {
+  display: flex;
+  gap: 8px;
+}
+
+.entrainement-4e .selecteur-variante-dev-select {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.entrainement-4e .selecteur-variante-dev-bouton {
+  flex: none;
+  padding: 8px 14px;
+  font-size: 13px;
 }
 
 .entrainement-4e .selecteur-variante-dev select.text-input {
@@ -564,7 +532,7 @@
 
 @media (max-width: 480px) {
   .entrainement-4e .morceau-row .bracket-btn,
-.entrainement-4e .morceau-row .btn:not(.bracket-btn) {
+  .entrainement-4e .morceau-row .btn:not(.bracket-btn) {
     position: relative;
     padding: 6px 5px;
     min-height: 44px;
@@ -573,7 +541,7 @@
   }
 
   .entrainement-4e .morceau-row .bracket-btn::after,
-.entrainement-4e .morceau-row .btn:not(.bracket-btn)::after {
+  .entrainement-4e .morceau-row .btn:not(.bracket-btn)::after {
     content: "";
     position: absolute;
     top: 0;
