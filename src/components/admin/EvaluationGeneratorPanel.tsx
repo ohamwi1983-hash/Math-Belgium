@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { LEVELS } from '../../content/chaptersIndex'
 import type { ChapterContent } from '../../content/types'
 import {
@@ -77,6 +77,44 @@ function lignesInitiales(chapitre: ChapterContent | undefined, chapitreSlug: str
 
 function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
+}
+
+/** Compteur +/- partagé par toutes les lignes du tableau (démonstration/compréhension/vrai-faux/
+ * exercice) — remplace l'ancien `<input type="number">` brut, plus confortable au doigt. */
+function Stepper({
+  valeur,
+  max,
+  disabled,
+  onChange,
+}: {
+  valeur: number
+  max: number
+  disabled?: boolean
+  onChange: (prochaineValeur: number) => void
+}) {
+  return (
+    <span className="admin-eval-stepper">
+      <button
+        type="button"
+        className="admin-eval-stepper-btn"
+        disabled={disabled || valeur <= 0}
+        onClick={() => onChange(Math.max(0, valeur - 1))}
+        aria-label="Diminuer"
+      >
+        −
+      </button>
+      <span className="admin-eval-stepper-valeur">{valeur}</span>
+      <button
+        type="button"
+        className="admin-eval-stepper-btn"
+        disabled={disabled || valeur >= max}
+        onClick={() => onChange(Math.min(max, valeur + 1))}
+        aria-label="Augmenter"
+      >
+        +
+      </button>
+    </span>
+  )
 }
 
 /** `mode==='exercice'` : page `/exercice` (publique, accessible aux élèves) — feuille d'exercices
@@ -233,18 +271,72 @@ export function EvaluationGeneratorPanel({
         </p>
       )}
 
-      <div className="admin-eval-entete">
+      {verrouille && (
+        <p className="admin-eval-chapitre-verrouille">
+          {niveauEntry?.label ?? niveau} — Chapitre {chapitre ? `${chapitre.chapterNumber}. ${chapitre.title}` : verrouille.chapitreSlug}
+        </p>
+      )}
+
+      <div className="admin-eval-toolbar">
+        {!verrouille && (
+          <>
+            <div className="admin-eval-tf">
+              <label htmlFor="eval-niveau">Niveau</label>
+              <select id="eval-niveau" value={niveau} onChange={(e) => changerNiveau(e.target.value as NiveauCode)}>
+                {NIVEAUX.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="admin-eval-tf">
+              <label htmlFor="eval-heures">Heures</label>
+              <select
+                id="eval-heures"
+                value={heures}
+                onChange={(e) => reglerNiveauHeures(niveau, e.target.value)}
+                disabled={HEURES_PAR_NIVEAU[niveau].length === 0}
+              >
+                {HEURES_PAR_NIVEAU[niveau].length === 0 ? (
+                  <option value="">— (non applicable)</option>
+                ) : (
+                  HEURES_PAR_NIVEAU[niveau].map((h) => (
+                    <option key={h} value={h} disabled={resoudreLevelSlug(niveau, h) === null}>
+                      {h}
+                      {resoudreLevelSlug(niveau, h) === null ? ' (bientôt)' : ''}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div className="admin-eval-tf admin-eval-tf-chapitre">
+              <label htmlFor="eval-chapitre">Chapitre</label>
+              <select id="eval-chapitre" value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)} disabled={!niveauEntry}>
+                {!niveauEntry && <option value="">Aucun chapitre disponible pour l'instant</option>}
+                {niveauEntry?.chapters.map((c) => (
+                  <option key={c.slug} value={c.slug} disabled={!estChapitreFonctionnel(levelSlug, c.slug)}>
+                    {c.chapterNumber}. {c.title}
+                    {estChapitreFonctionnel(levelSlug, c.slug) ? '' : ' (bientôt)'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <span className="admin-eval-divider" />
+          </>
+        )}
+
         {!estExercice && (
-          <div className="admin-eval-field">
-            <label htmlFor="eval-numero">N° de l'évaluation</label>
+          <div className="admin-eval-tf" style={{ width: '4.5em' }}>
+            <label htmlFor="eval-numero">N°</label>
             <input id="eval-numero" type="text" value={numero} onChange={(e) => setNumero(e.target.value)} />
           </div>
         )}
-        <div className="admin-eval-field">
+        <div className="admin-eval-tf">
           <label htmlFor="eval-date">Date</label>
           <input id="eval-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
-        <div className="admin-eval-field admin-eval-field-large">
+        <div className="admin-eval-tf" style={{ flex: '1 1 220px', minWidth: '180px' }}>
           <label htmlFor="eval-titre">Titre {estExercice ? "de la feuille d'exercices" : "de l'évaluation"}</label>
           <input
             id="eval-titre"
@@ -254,62 +346,10 @@ export function EvaluationGeneratorPanel({
             onChange={(e) => setTitre(e.target.value)}
           />
         </div>
-      </div>
+        <span className="admin-eval-divider" />
 
-      {verrouille ? (
-        <p className="admin-eval-chapitre-verrouille">
-          {niveauEntry?.label ?? niveau} — Chapitre {chapitre ? `${chapitre.chapterNumber}. ${chapitre.title}` : verrouille.chapitreSlug}
-        </p>
-      ) : (
-        <div className="admin-eval-entete">
-          <div className="admin-eval-field">
-            <label htmlFor="eval-niveau">Niveau</label>
-            <select id="eval-niveau" value={niveau} onChange={(e) => changerNiveau(e.target.value as NiveauCode)}>
-              {NIVEAUX.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="admin-eval-field">
-            <label htmlFor="eval-heures">Nombre d'heures</label>
-            <select
-              id="eval-heures"
-              value={heures}
-              onChange={(e) => reglerNiveauHeures(niveau, e.target.value)}
-              disabled={HEURES_PAR_NIVEAU[niveau].length === 0}
-            >
-              {HEURES_PAR_NIVEAU[niveau].length === 0 ? (
-                <option value="">— (non applicable)</option>
-              ) : (
-                HEURES_PAR_NIVEAU[niveau].map((h) => (
-                  <option key={h} value={h} disabled={resoudreLevelSlug(niveau, h) === null}>
-                    {h}
-                    {resoudreLevelSlug(niveau, h) === null ? ' (bientôt)' : ''}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-          <div className="admin-eval-field admin-eval-field-large">
-            <label htmlFor="eval-chapitre">Chapitre</label>
-            <select id="eval-chapitre" value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)} disabled={!niveauEntry}>
-              {!niveauEntry && <option value="">Aucun chapitre disponible pour l'instant</option>}
-              {niveauEntry?.chapters.map((c) => (
-                <option key={c.slug} value={c.slug} disabled={!estChapitreFonctionnel(levelSlug, c.slug)}>
-                  {c.chapterNumber}. {c.title}
-                  {estChapitreFonctionnel(levelSlug, c.slug) ? '' : ' (bientôt)'}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
-
-      <div className="admin-eval-entete">
-        <div className="admin-eval-field">
-          <label htmlFor="eval-heures-semaine">Volume horaire/sem</label>
+        <div className="admin-eval-tf" style={{ width: '4.5em' }}>
+          <label htmlFor="eval-heures-semaine">Vol./sem</label>
           <input
             id="eval-heures-semaine"
             type="text"
@@ -319,33 +359,33 @@ export function EvaluationGeneratorPanel({
           />
         </div>
         {!estExercice && (
-          <div className="admin-eval-field">
-            <label htmlFor="eval-calculatrice">Calculatrice</label>
-            <select id="eval-calculatrice" value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
-              <option value="interdite">Interdite</option>
-              <option value="autorisee">Autorisée</option>
-            </select>
-          </div>
+          <>
+            <div className="admin-eval-tf">
+              <label htmlFor="eval-calculatrice">Calculatrice</label>
+              <select id="eval-calculatrice" value={calculatrice} onChange={(e) => setCalculatrice(e.target.value as 'interdite' | 'autorisee')}>
+                <option value="interdite">Interdite</option>
+                <option value="autorisee">Autorisée</option>
+              </select>
+            </div>
+            <div className="admin-eval-tf" style={{ width: '4em' }}>
+              <label htmlFor="eval-series">Séries</label>
+              <input
+                id="eval-series"
+                type="number"
+                min={1}
+                max={26}
+                value={nombreSeries}
+                onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
+              />
+            </div>
+          </>
         )}
-        {!estExercice && (
-          <div className="admin-eval-field">
-            <label htmlFor="eval-series">Nombre de séries</label>
-            <input
-              id="eval-series"
-              type="number"
-              min={1}
-              max={26}
-              value={nombreSeries}
-              onChange={(e) => setNombreSeries(Math.min(26, Math.max(1, Number(e.target.value) || 1)))}
-            />
-          </div>
-        )}
-        <div className="admin-eval-field">
-          <label htmlFor="eval-titres-section">
-            <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
-            {' '}Afficher les titres de section
-          </label>
-        </div>
+        <span className="admin-eval-divider" />
+
+        <label className="admin-eval-checkbox-field" htmlFor="eval-titres-section">
+          <input id="eval-titres-section" type="checkbox" checked={afficherTitresSection} onChange={(e) => setAfficherTitresSection(e.target.checked)} />
+          Afficher les titres de section
+        </label>
       </div>
       {!estExercice && nombreSeries > 1 && (
         <p className="admin-eval-indisponible">
@@ -364,133 +404,151 @@ export function EvaluationGeneratorPanel({
 
       {chapitreFonctionnel && chapitre && (
         <>
-          {([1, 2, 3] as const).map((processus) => (
-            <div className="admin-eval-processus" key={processus}>
-              <label className="admin-eval-processus-toggle">
-                <input type="checkbox" checked={processusActifs[processus]} onChange={() => toggleProcessus(processus)} />
-                <strong>Processus {processus}</strong> — {LABEL_PROCESSUS[processus]}
-              </label>
+          <div className="admin-eval-processus-bar" role="group" aria-label="Processus">
+            {([1, 2, 3] as const).map((processus) => (
+              <button
+                key={processus}
+                type="button"
+                className="admin-eval-processus-btn"
+                aria-pressed={processusActifs[processus]}
+                onClick={() => toggleProcessus(processus)}
+              >
+                {processus === 1 ? '①' : processus === 2 ? '②' : '③'} {LABEL_PROCESSUS[processus]}
+              </button>
+            ))}
+          </div>
 
-              {processusActifs[processus] && !lignes.some((l) => l.processus === processus) && (
-                <p className="admin-eval-indisponible">Aucun exercice de ce type dans ce chapitre pour l'instant.</p>
-              )}
+          {([1, 2, 3] as const).map((processus) => {
+            if (!processusActifs[processus]) return null
+            const lignesProcessus = lignes.filter((l) => l.processus === processus)
+            if (lignesProcessus.length === 0) {
+              return (
+                <p className="admin-eval-indisponible" key={processus}>
+                  Aucun exercice de ce type dans ce chapitre pour l'instant.
+                </p>
+              )
+            }
+            return (
+              <div className="admin-eval-table-wrap" key={processus}>
+                <table className="admin-eval-table">
+                  <thead>
+                    <tr>
+                      <th>
+                        Processus {processus} — {LABEL_PROCESSUS[processus]}
+                      </th>
+                      <th>Disponible</th>
+                      <th className="admin-eval-col-nombre">Nombre</th>
+                      {!estExercice && <th>Points</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chapitre.sections.map((section) => {
+                      const lignesSection = lignes.filter((l) => l.sectionId === section.id && l.processus === processus)
+                      if (lignesSection.length === 0) return null
+                      return (
+                        <Fragment key={section.id}>
+                          <tr className="admin-eval-section-row">
+                            <td colSpan={estExercice ? 3 : 4}>
+                              {section.number}. {section.title}
+                            </td>
+                          </tr>
+                          {lignesSection.flatMap((ligne) => {
+                            if (ligne.type === 'exercice') {
+                              const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
+                              const generateur = generateursPourSection(chapitreSlug, section.id).find((g) => g.generatorId === ligne.cle)
+                              return catalogue.map((variante, index) => (
+                                <tr className="admin-eval-row" key={(ligne.cle ?? '') + variante.id}>
+                                  <td>
+                                    {generateur?.label || LABEL_TYPE.exercice} —{' '}
+                                    <span className="admin-eval-variante-label">{variante.label}</span>
+                                  </td>
+                                  <td>—</td>
+                                  <td className="admin-eval-col-nombre">
+                                    <Stepper
+                                      valeur={ligne.parVariante?.[variante.id] ?? 0}
+                                      max={MAX_EXERCICE}
+                                      onChange={(v) => mettreAJourVariante(section.id, ligne.cle ?? '', variante.id, v)}
+                                    />
+                                  </td>
+                                  {!estExercice && (
+                                    <td>
+                                      {index === 0 && (
+                                        <input
+                                          type="number"
+                                          min={1}
+                                          className="admin-eval-points-input"
+                                          value={ligne.points}
+                                          onChange={(e) =>
+                                            mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })
+                                          }
+                                          title="Points / question, toutes variantes de ce générateur"
+                                        />
+                                      )}
+                                    </td>
+                                  )}
+                                </tr>
+                              ))
+                            }
 
-              {processusActifs[processus] && lignes.some((l) => l.processus === processus) && (
-                <div className="admin-eval-arbre">
-                  {chapitre.sections.map((section) => {
-                    const lignesSection = lignes.filter((l) => l.sectionId === section.id && l.processus === processus)
-                    if (lignesSection.length === 0) return null
-                    return (
-                      <details className="admin-eval-point" key={section.id}>
-                        <summary>
-                          {section.number}. {section.title}
-                        </summary>
-                        {lignesSection.map((ligne) => {
-                          if (ligne.type === 'exercice') {
-                            const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
-                            const generateur = generateursPourSection(chapitreSlug, section.id).find((g) => g.generatorId === ligne.cle)
+                            const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
+                            const disponibles = estBanqueFixe
+                              ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(section.id) ?? 0
+                              : MAX_VRAI_FAUX
+                            const indisponible = estBanqueFixe && disponibles === 0
+                            const theme =
+                              ligne.type === 'vraiFaux' ? themesPourSection(chapitreSlug, section.id).find((t) => t.quizTheme === ligne.cle) : undefined
                             return (
-                              <div className="admin-eval-exercice" key={ligne.type + (ligne.cle ?? '')}>
-                                <span className="admin-eval-ligne-label">{generateur?.label || LABEL_TYPE.exercice}</span>
-                                {catalogue.map((variante) => (
-                                  <div className="admin-eval-ligne" key={variante.id}>
-                                    <span className="admin-eval-ligne-label admin-eval-ligne-label-variante">{variante.label}</span>
-                                    <label>
-                                      Nombre
-                                      <input
-                                        type="number"
-                                        min={0}
-                                        max={MAX_EXERCICE}
-                                        value={ligne.parVariante?.[variante.id] ?? 0}
-                                        onChange={(e) =>
-                                          mettreAJourVariante(
-                                            section.id,
-                                            ligne.cle ?? '',
-                                            variante.id,
-                                            Math.min(MAX_EXERCICE, Math.max(0, Number(e.target.value) || 0)),
-                                          )
-                                        }
-                                      />
-                                    </label>
-                                  </div>
-                                ))}
-                                {!estExercice && (
-                                  <div className="admin-eval-ligne">
-                                    <span className="admin-eval-ligne-label">Points / question (toutes variantes)</span>
-                                    <label>
-                                      Points
-                                      <input
-                                        type="number"
-                                        min={1}
-                                        value={ligne.points}
-                                        onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
-                                      />
-                                    </label>
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          }
-
-                          const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
-                          const disponibles = estBanqueFixe
-                            ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(section.id) ?? 0
-                            : MAX_VRAI_FAUX
-                          const indisponible = estBanqueFixe && disponibles === 0
-                          const theme = ligne.type === 'vraiFaux' ? themesPourSection(chapitreSlug, section.id).find((t) => t.quizTheme === ligne.cle) : undefined
-                          return (
-                            <div className="admin-eval-ligne" key={ligne.type + (ligne.cle ?? '')}>
-                              <span className="admin-eval-ligne-label">
-                                {LABEL_TYPE[ligne.type]}
-                                {theme?.label && ` — ${theme.label}`}
-                                {estBanqueFixe && ` (${disponibles} disponible${disponibles > 1 ? 's' : ''})`}
-                                {indisponible &&
-                                  (ligne.type === 'demonstration'
-                                    ? ' — aucune formule/démonstration dans ce point'
-                                    : ' — aucune question de compréhension pour ce point')}
-                              </span>
-                              <label>
-                                Nombre
-                                <input
-                                  type="number"
-                                  min={0}
-                                  max={disponibles}
-                                  value={ligne.nombre}
-                                  disabled={indisponible}
-                                  onChange={(e) =>
-                                    mettreAJourLigne(section.id, ligne.type, ligne.cle, { nombre: Math.min(disponibles, Math.max(0, Number(e.target.value) || 0)) })
-                                  }
-                                />
-                              </label>
-                              {!estExercice && (
-                                <label>
-                                  Points / question
-                                  <input
-                                    type="number"
-                                    min={1}
-                                    value={ligne.points}
+                              <tr className="admin-eval-row" key={ligne.type + (ligne.cle ?? '')}>
+                                <td>
+                                  {LABEL_TYPE[ligne.type]}
+                                  {theme?.label && ` — ${theme.label}`}
+                                  {indisponible &&
+                                    (ligne.type === 'demonstration' ? ' — aucune démonstration pour ce point' : ' — aucune question pour ce point')}
+                                </td>
+                                <td>{estBanqueFixe ? disponibles : '—'}</td>
+                                <td className="admin-eval-col-nombre">
+                                  <Stepper
+                                    valeur={ligne.nombre}
+                                    max={disponibles}
                                     disabled={indisponible}
-                                    onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
+                                    onChange={(v) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { nombre: v })}
                                   />
-                                </label>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </details>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          ))}
+                                </td>
+                                {!estExercice && (
+                                  <td>
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      className="admin-eval-points-input"
+                                      value={ligne.points}
+                                      disabled={indisponible}
+                                      onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
+                                    />
+                                  </td>
+                                )}
+                              </tr>
+                            )
+                          })}
+                        </Fragment>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
+          })}
 
-          {!estExercice && <p className="admin-eval-total">Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}</p>}
-
-          <button type="button" className="admin-gate-submit" onClick={genererEvaluation}>
-            {estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé
-            + corrigé)
-          </button>
+          <div className="admin-eval-bottombar">
+            {!estExercice && (
+              <p className="admin-eval-total">
+                Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}
+              </p>
+            )}
+            <button type="button" className="admin-gate-submit" onClick={genererEvaluation}>
+              {estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé
+              + corrigé)
+            </button>
+          </div>
           {erreur && <p className="admin-gate-error">{erreur}</p>}
           {urlGeneree && (
             <p className="admin-eval-lien">

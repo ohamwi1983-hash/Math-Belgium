@@ -586,59 +586,91 @@ table.feature-table td { white-space: normal; }
 .admin-panel-empty p { margin: 0 0 8px; }
 .admin-panel-empty p:last-child { margin-bottom: 0; }
 
-.admin-eval { max-width: 720px; margin: 24px 0; display: flex; flex-direction: column; gap: 20px; }
+.admin-eval { max-width: 1040px; margin: 24px 0; display: flex; flex-direction: column; gap: 20px; }
 .admin-eval-intro { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
 .admin-eval-chapitre-verrouille {
   margin: 0; padding: 12px 16px; background: var(--accent-soft); border: 1px solid var(--accent-soft-line);
   border-radius: var(--radius); color: var(--accent-ink); font-weight: 700; font-size: 0.95rem;
 }
 
-.admin-eval-entete { display: flex; flex-wrap: wrap; gap: 16px; }
-.admin-eval-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 140px; }
-.admin-eval-field-large { flex: 2 1 260px; }
-.admin-eval-field label { font-weight: 700; color: var(--ink); font-size: 0.9rem; }
-.admin-eval-field input, .admin-eval-field select {
-  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius);
-  font: inherit; color: var(--ink); background: var(--paper);
+/* Barre d'outils dense : tous les champs de réglage sur une seule rangée qui s'enroule, séparés
+ * par de fins traits verticaux groupant champs apparentés — densité volontaire (page admin) plutôt
+ * que des champs empilés un par un. */
+.admin-eval-toolbar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px;
 }
-.admin-eval-field select:disabled, .admin-eval-field input:disabled { opacity: 0.5; cursor: not-allowed; }
+.admin-eval-tf { display: flex; flex-direction: column; gap: 4px; }
+.admin-eval-tf label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-faint); font-weight: 700; }
+.admin-eval-tf input, .admin-eval-tf select {
+  font: inherit; font-size: 0.85rem; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--paper); color: var(--ink);
+}
+.admin-eval-tf input:disabled, .admin-eval-tf select:disabled { opacity: 0.5; cursor: not-allowed; }
+.admin-eval-tf-chapitre select { min-width: 220px; }
+.admin-eval-divider { width: 1px; align-self: stretch; background: var(--line); margin: 0 2px; }
+.admin-eval-checkbox-field { display: flex; align-items: center; gap: 7px; padding-bottom: 7px; font-size: 0.85rem; color: var(--ink); cursor: pointer; }
 
 .admin-eval-indisponible {
   margin: 0; padding: 12px 16px; background: var(--surface); border: 1px dashed var(--line);
   border-radius: var(--radius); color: var(--ink-soft); font-size: 0.9rem;
 }
 
-.admin-eval-processus {
-  border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
-  background: var(--surface); display: flex; flex-direction: column; gap: 12px;
+/* Processus : groupe de boutons segmentés (plutôt que 3 cases à cocher empilées) — sélection
+ * multiple maintenue (pas des onglets exclusifs), juste une présentation plus compacte. */
+.admin-eval-processus-bar { display: flex; flex-wrap: wrap; }
+.admin-eval-processus-btn {
+  font: inherit; font-size: 0.85rem; font-weight: 700; padding: 9px 18px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+  border-right-width: 0;
 }
-.admin-eval-processus-toggle { display: flex; align-items: center; gap: 8px; color: var(--ink); cursor: pointer; }
+.admin-eval-processus-btn:first-child { border-radius: 8px 0 0 8px; }
+.admin-eval-processus-btn:last-child { border-radius: 0 8px 8px 0; border-right-width: 1px; }
+.admin-eval-processus-btn[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); z-index: 1; position: relative; }
 
-.admin-eval-arbre { display: flex; flex-direction: column; gap: 8px; }
-.admin-eval-point { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; }
-.admin-eval-point summary { font-weight: 700; color: var(--ink); cursor: pointer; padding: 4px 0; }
-.admin-eval-point[open] summary { margin-bottom: 8px; }
-
-.admin-eval-ligne {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 0;
-  border-top: 1px solid var(--line);
+.admin-eval-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.admin-eval-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.admin-eval-table thead th {
+  text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft);
+  padding: 10px 14px; border-bottom: 2px solid var(--line); background: var(--surface);
 }
-.admin-eval-ligne:first-of-type { border-top: none; }
-.admin-eval-ligne-label { flex: 1 1 240px; color: var(--ink); font-size: 0.9rem; }
-.admin-eval-ligne label {
-  display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--ink-soft);
+.admin-eval-table tbody tr.admin-eval-row { background: var(--surface); }
+.admin-eval-table tbody tr.admin-eval-row:nth-of-type(even) { background: var(--paper); }
+.admin-eval-table tbody tr.admin-eval-row td { padding: 9px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+.admin-eval-table tbody tr.admin-eval-row td:last-child { text-align: right; }
+.admin-eval-table tbody tr.admin-eval-section-row td {
+  background: var(--accent-soft); color: var(--accent-ink); font-weight: 700;
+  padding: 8px 14px; border-top: 1px solid var(--accent-soft-line); border-bottom: 1px solid var(--accent-soft-line);
 }
-.admin-eval-ligne input[type='number'] {
-  width: 4.5em; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius);
-  font: inherit; color: var(--ink); background: var(--paper);
+.admin-eval-table td.admin-eval-col-nombre { text-align: center; }
+.admin-eval-variante-label { color: var(--ink-faint); font-size: 0.82rem; }
+
+.admin-eval-stepper { display: inline-flex; align-items: center; gap: 8px; }
+.admin-eval-stepper-valeur { width: 1.4em; display: inline-block; text-align: center; font-weight: 700; font-family: var(--mono); }
+.admin-eval-stepper-btn {
+  width: 27px; height: 27px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font-size: 1rem; font-weight: 700; line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.admin-eval-stepper-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+.admin-eval-stepper-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.admin-eval-points-input {
+  width: 3.4em; padding: 6px 7px; border: 1px solid var(--line); border-radius: 6px;
+  font: inherit; font-family: var(--mono); font-size: 0.85rem; color: var(--ink); background: var(--paper); text-align: right;
 }
 
-.admin-eval-exercice { display: flex; flex-direction: column; }
-.admin-eval-exercice > .admin-eval-ligne-label { flex: 0 0 auto; padding-top: 8px; font-weight: 600; color: var(--ink); }
-.admin-eval-ligne-label-variante { padding-left: 12px; font-size: 0.85rem; }
-
-.admin-eval-total { margin: 0; font-weight: 700; color: var(--ink); }
+.admin-eval-bottombar {
+  display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px;
+}
+.admin-eval-total { margin: 0; font-weight: 700; color: var(--ink-soft); font-size: 0.9rem; font-family: var(--mono); }
 .admin-eval-lien { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
+
+@media (max-width: 640px) {
+  .admin-eval-divider { display: none; }
+  .admin-eval-bottombar { justify-content: flex-start; }
+}
 
 @media (max-width: 480px) {
   .page { padding: 40px 16px 72px; }
