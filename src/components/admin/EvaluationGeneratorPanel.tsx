@@ -286,7 +286,13 @@ export function EvaluationGeneratorPanel({
       <div className="admin-eval-entete">
         <div className="admin-eval-field">
           <label htmlFor="eval-heures-semaine">Volume horaire/sem</label>
-          <input id="eval-heures-semaine" type="text" value={heuresSemaine} onChange={(e) => setHeuresSemaine(e.target.value)} />
+          <input
+            id="eval-heures-semaine"
+            type="text"
+            value={heuresSemaine}
+            onChange={(e) => setHeuresSemaine(e.target.value)}
+            disabled={estExercice}
+          />
         </div>
         {!estExercice && (
           <div className="admin-eval-field">
