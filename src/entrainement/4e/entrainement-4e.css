@@ -1,0 +1,668 @@
+/* Styles pour le générateur "méthode rapide" (second degré, gen1, chantier 4e) porté
+ * depuis plateforme-maths — scopés sous .entrainement-4e pour ne jamais fuiter sur le
+ * reste du site (variables CSS + sélecteurs génériques .btn/.card/.field renommés nulle
+ * part, juste confinés par le sélecteur de portée). Un wrapper `<div className="entrainement-4e">`
+ * doit envelopper le composant porté pour que ces règles s'appliquent. */
+
+.entrainement-4e {
+  --color-bg: #f4f4fa;
+  --color-surface: #ffffff;
+  --color-text: #1b1c2b;
+  --color-text-muted: #6b6b80;
+  --color-border: #e6e6f0;
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
+  --color-primary-bg: rgba(109, 40, 217, 0.08);
+  --color-success: #15803d;
+  --color-success-bg: rgba(21, 128, 61, 0.1);
+  --color-error: #b91c1c;
+  --color-error-bg: rgba(185, 28, 28, 0.09);
+  --color-warning: #b06600;
+  --color-warning-bg: #fff8ea;
+  --shadow-card: 0 1px 2px rgba(20, 20, 43, 0.04), 0 12px 28px rgba(20, 20, 43, 0.07);
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --pf-sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --pf-mono: ui-monospace, Consolas, monospace;
+  font: 16px/1.5 var(--pf-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .entrainement-4e {
+    --color-bg: #111119;
+    --color-surface: #1a1b26;
+    --color-text: #edecf5;
+    --color-text-muted: #9c9cb3;
+    --color-border: #2c2d3d;
+    --color-primary: #a78bfa;
+    --color-primary-hover: #c4b5fd;
+    --color-primary-bg: rgba(167, 139, 250, 0.14);
+    --color-success: #4ade80;
+    --color-success-bg: rgba(74, 222, 128, 0.13);
+    --color-error: #f87171;
+    --color-error-bg: rgba(248, 113, 113, 0.14);
+    --color-warning: #f0a94e;
+    --color-warning-bg: rgba(240, 169, 78, 0.12);
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.entrainement-4e h1, .entrainement-4e h2, .entrainement-4e h3 {
+  font-family: var(--pf-sans);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.entrainement-4e button, .entrainement-4e input {
+  font-family: inherit;
+  color: inherit;
+}
+
+.entrainement-4e code {
+  font-family: var(--pf-mono);
+}
+
+.entrainement-4e .app-shell {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 64px;
+}
+
+.entrainement-4e .app-header {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 20px;
+}
+
+.entrainement-4e .app-title {
+  font-size: 26px;
+  letter-spacing: -0.01em;
+}
+
+.entrainement-4e .app-subtitle {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.entrainement-4e .selecteur-variante-dev {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px dashed #d97706;
+  border-radius: var(--radius-md);
+  background: #fffbeb;
+}
+
+.entrainement-4e .selecteur-variante-dev-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 6px;
+}
+
+.entrainement-4e .selecteur-variante-dev-row {
+  display: flex;
+  gap: 8px;
+}
+
+.entrainement-4e .selecteur-variante-dev-select {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.entrainement-4e .selecteur-variante-dev-bouton {
+  flex: none;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.entrainement-4e .export-word-formats .btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12.5px;
+}
+
+.entrainement-4e .progress {
+  margin-top: 22px;
+}
+
+.entrainement-4e .progress-label {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.entrainement-4e .progress-label span:first-child {
+  white-space: nowrap;
+}
+
+.entrainement-4e .progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.entrainement-4e .progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.entrainement-4e .card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 32px;
+}
+
+.entrainement-4e .equation-box {
+  border-radius: var(--radius-md);
+  padding: 28px 20px;
+  margin-bottom: 22px;
+  text-align: center;
+  
+  overflow-x: auto;
+  
+  background-color: var(--color-primary-bg);
+  background-image:
+    linear-gradient(to right, var(--color-primary-bg) 50%, transparent),
+    linear-gradient(to left, var(--color-primary-bg) 50%, transparent),
+    linear-gradient(to right, rgba(0, 0, 0, 0.28), transparent),
+    linear-gradient(to left, rgba(0, 0, 0, 0.28), transparent);
+  background-repeat: no-repeat;
+  background-size: 20px 100%, 20px 100%, 16px 100%, 16px 100%;
+  background-position: left, right, left, right;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.entrainement-4e .equation-box .katex {
+  font-size: 1.3em;
+  color: var(--color-text);
+}
+
+.entrainement-4e .equation-box-termes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.entrainement-4e .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box {
+  background: none;
+  padding: 0;
+  margin-bottom: 8px;
+  box-shadow: none;
+}
+
+.entrainement-4e .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box .katex {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.entrainement-4e .outil-trace-vecteurs .btn {
+  margin-bottom: 18px;
+}
+
+.entrainement-4e .btn-aide {
+  width: 100%;
+  margin-top: 10px;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.entrainement-4e .btn-aide:disabled {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  background: var(--color-surface);
+}
+
+.entrainement-4e .prompt-text {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0 0 14px;
+}
+
+.entrainement-4e .options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.entrainement-4e .contenu-conditionnel {
+  margin-top: 16px;
+}
+
+.entrainement-4e .apercu-expression-latex {
+  margin-bottom: 16px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.entrainement-4e .apercu-expression-latex-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-right: 8px;
+}
+
+.entrainement-4e .apercu-expression-latex-perime {
+  opacity: 0.45;
+}
+
+.entrainement-4e .btn {
+  appearance: none;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+
+.entrainement-4e .btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.entrainement-4e .btn:active {
+  transform: scale(0.98);
+}
+
+.entrainement-4e .btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.entrainement-4e .btn-primary {
+  width: 100%;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  padding: 13px 16px;
+  margin-top: 4px;
+}
+
+.entrainement-4e .btn-primary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.entrainement-4e .btn-primary:disabled {
+  background: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.entrainement-4e .btn-primary:disabled:hover {
+  background: var(--color-border);
+  border-color: var(--color-border);
+}
+
+.entrainement-4e .boutons-generation .btn-primary {
+  width: auto;
+  flex: 1 1 200px;
+}
+
+.entrainement-4e .alert-error {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.entrainement-4e .recap-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.entrainement-4e .recap-item {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  
+  overflow-x: auto;
+}
+
+.entrainement-4e .recap-libelle {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.entrainement-4e .field {
+  margin-bottom: 16px;
+}
+
+.entrainement-4e .field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.entrainement-4e .ce-select.is-erronee {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.entrainement-4e .field-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.entrainement-4e .field-inline .field-label {
+  margin-bottom: 0;
+  flex: none;
+  white-space: nowrap;
+}
+
+.entrainement-4e .field-inline .text-input {
+  flex: 1;
+}
+
+.entrainement-4e .champ-reponse-latex .text-input {
+  flex: 1 1 160px;
+  min-width: 160px;
+}
+
+.entrainement-4e .champ-reponse-latex.champ-reponse-latex-etroit .text-input {
+  flex: 0 1 90px;
+  min-width: 70px;
+}
+
+.entrainement-4e .champ-avec-unite .text-input {
+  flex: 1;
+}
+
+.entrainement-4e .text-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.entrainement-4e .text-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.entrainement-4e .text-input.is-erronee {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.entrainement-4e .result-title {
+  font-size: 20px;
+}
+
+.entrainement-4e .result-subtitle {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin: 6px 0 20px;
+}
+
+.entrainement-4e .score-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.entrainement-4e .score-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  font-size: 14px;
+}
+
+.entrainement-4e .score-value {
+  font-weight: 700;
+}
+
+.entrainement-4e .score-value.is-good {
+  color: var(--color-success);
+}
+
+.entrainement-4e .score-value.is-bad {
+  color: var(--color-error);
+}
+
+.entrainement-4e .answer-reveal {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  font-size: 14px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+}
+
+.entrainement-4e .score-hero {
+  text-align: center;
+  padding: 22px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+  margin-bottom: 20px;
+}
+
+.entrainement-4e .score-hero-value {
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+}
+
+.entrainement-4e .score-hero-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.entrainement-4e .summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 22px;
+  font-size: 13px;
+}
+
+.entrainement-4e .summary-table th,
+.entrainement-4e .summary-table td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.entrainement-4e .summary-table th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.entrainement-4e .summary-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.entrainement-4e .btn.toggle-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.entrainement-4e .btn.toggle-active.is-erronee {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement-4e .selecteur-variante-dev {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-warning);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-bg);
+}
+
+.entrainement-4e .selecteur-variante-dev-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-warning);
+  margin: 0 0 8px;
+}
+
+.entrainement-4e .selecteur-variante-dev select.text-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .entrainement-4e .morceau-row .bracket-btn,
+.entrainement-4e .morceau-row .btn:not(.bracket-btn) {
+    position: relative;
+    padding: 6px 5px;
+    min-height: 44px;
+    min-width: 30px;
+    flex: none;
+  }
+
+  .entrainement-4e .morceau-row .bracket-btn::after,
+.entrainement-4e .morceau-row .btn:not(.bracket-btn)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: max(100%, 44px);
+    transform: translateX(-50%);
+  }
+}
+
+.entrainement-4e .liste-morceaux {
+  margin-bottom: 12px;
+}
+
+.entrainement-4e .liste-morceaux-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.entrainement-4e .liste-morceaux-ligne .morceau-row {
+  flex: 1;
+}
+
+.entrainement-4e .liste-morceaux-ligne .options-grid {
+  flex-shrink: 0;
+}
+
+.entrainement-4e .liste-morceaux-retirer {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  min-height: 44px;
+  min-width: 44px;
+  font-weight: 700;
+  color: var(--color-error);
+}
+
+.entrainement-4e .liste-morceaux-ajouter {
+  margin-top: 4px;
+}
+
+.entrainement-4e .summary-table-scroll .summary-table {
+  margin-bottom: 0;
+}
+
+.entrainement-4e .toggle-signe.is-erronee {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement-4e .curseur-champ.is-erronee {
+  color: var(--color-error);
+}
+
+.entrainement-4e .curseur-champ.is-erronee input[type="range"] {
+  accent-color: var(--color-error);
+}
+
+.entrainement-4e .btn.curseur-champ {
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.entrainement-4e .btn.curseur-champ.is-erronee {
+  border-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement-4e .tf-table input.text-input {
+  width: 90px;
+  text-align: center;
+}
+
+.entrainement-4e .histogramme-barre.is-erronee {
+  fill: var(--color-error-bg);
+  stroke: var(--color-error);
+}
+
+.entrainement-4e .boite-zone-drag.is-erronee .boite-marqueur {
+  fill: var(--color-error-bg);
+  stroke: var(--color-error);
+}
+
+.entrainement-4e .error-boundary-fallback .btn-primary {
+  width: auto;
+  min-width: 200px;
+}
