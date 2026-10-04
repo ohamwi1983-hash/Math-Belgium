@@ -79,6 +79,23 @@ function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+/** Résumé flottant (position fixe, toujours visible) du nombre total de questions/exercices
+ * sélectionnés — et, en mode évaluation, du total de points — pour que l'admin/l'élève garde ce
+ * compte sous les yeux en parcourant un long tableau, sans devoir défiler jusqu'à la barre du bas. */
+function CompteurFlottant({ nombre, points }: { nombre: number; points?: number }) {
+  return (
+    <div className="admin-eval-compteur" aria-live="polite">
+      <strong>{nombre}</strong> question{nombre > 1 ? 's' : ''}/exercice{nombre > 1 ? 's' : ''}
+      {points !== undefined && (
+        <>
+          {' '}
+          · <strong>{points}</strong> point{points > 1 ? 's' : ''}
+        </>
+      )}
+    </div>
+  )
+}
+
 /** Compteur +/- partagé par toutes les lignes du tableau (démonstration/compréhension/vrai-faux/
  * exercice) — remplace l'ancien `<input type="number">` brut, plus confortable au doigt. */
 function Stepper({
@@ -146,7 +163,9 @@ export function EvaluationGeneratorPanel({
   const [nombreSeries, setNombreSeries] = useState(1)
   const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
   const [afficherTitresSection, setAfficherTitresSection] = useState(true)
-  const [processusActifs, setProcessusActifs] = useState<Record<Processus, boolean>>({ 1: false, 2: false, 3: false })
+  /** Sélection exclusive (groupe de type radio) : un seul processus affiché à la fois, jamais 2 ou 3
+   * simultanément — voir `.admin-eval-processus-bar`. */
+  const [processusActif, setProcessusActif] = useState<Processus>(1)
   const [erreur, setErreur] = useState<string | null>(null)
   const [urlGeneree, setUrlGeneree] = useState<string | null>(null)
 
@@ -197,8 +216,8 @@ export function EvaluationGeneratorPanel({
     setUrlGeneree(null)
   }
 
-  function toggleProcessus(processus: Processus) {
-    setProcessusActifs((prev) => ({ ...prev, [processus]: !prev[processus] }))
+  function selectionnerProcessus(processus: Processus) {
+    setProcessusActif(processus)
   }
 
   function mettreAJourLigne(sectionId: string, type: TypeQuestionEvaluation, cle: string | undefined, patch: Partial<LigneSelection>) {
@@ -220,6 +239,7 @@ export function EvaluationGeneratorPanel({
     setUrlGeneree(null)
   }
 
+  const totalNombre = lignes.reduce((total, l) => total + l.nombre, 0)
   const totalPoints = lignes.reduce((total, l) => total + l.points * l.nombre, 0)
 
   function genererEvaluation() {
@@ -404,22 +424,24 @@ export function EvaluationGeneratorPanel({
 
       {chapitreFonctionnel && chapitre && (
         <>
-          <div className="admin-eval-processus-bar" role="group" aria-label="Processus">
+          <div className="admin-eval-processus-bar" role="radiogroup" aria-label="Processus">
             {([1, 2, 3] as const).map((processus) => (
               <button
                 key={processus}
                 type="button"
+                role="radio"
                 className="admin-eval-processus-btn"
-                aria-pressed={processusActifs[processus]}
-                onClick={() => toggleProcessus(processus)}
+                aria-checked={processusActif === processus}
+                onClick={() => selectionnerProcessus(processus)}
               >
                 {processus === 1 ? '①' : processus === 2 ? '②' : '③'} {LABEL_PROCESSUS[processus]}
               </button>
             ))}
           </div>
 
-          {([1, 2, 3] as const).map((processus) => {
-            if (!processusActifs[processus]) return null
+          <CompteurFlottant nombre={totalNombre} points={estExercice ? undefined : totalPoints} />
+
+          {[processusActif].map((processus) => {
             const lignesProcessus = lignes.filter((l) => l.processus === processus)
             if (lignesProcessus.length === 0) {
               return (

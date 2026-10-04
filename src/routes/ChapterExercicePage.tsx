@@ -24,7 +24,7 @@ export function ChapterExercicePage() {
           { label: "Feuille d'exercices" },
         ]}
       />
-      <div className="page">
+      <div className="page-tool">
         <header className="chapter-head">
           <p className="eyebrow">{chapter.level}</p>
           <h1 className="chapter-title">Feuille d'exercices — {chapter.title}</h1>

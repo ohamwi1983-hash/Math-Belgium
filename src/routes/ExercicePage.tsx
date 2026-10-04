@@ -5,7 +5,7 @@ export function ExercicePage() {
   return (
     <>
       <SiteHeader />
-      <div className="page">
+      <div className="page-tool">
         <header className="chapter-head">
           <p className="eyebrow">Math-Belgium</p>
           <h1 className="chapter-title">Feuilles d'exercices</h1>
