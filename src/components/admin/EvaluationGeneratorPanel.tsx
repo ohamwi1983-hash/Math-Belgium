@@ -38,6 +38,23 @@ const POINTS_DEFAUT: Record<TypeQuestionEvaluation, number> = { demonstration: 3
 const MAX_VRAI_FAUX = 35
 const MAX_EXERCICE = 10
 
+/** Les questions ouvertes (démonstration/compréhension) embarquent leur énoncé ET leur corrigé en
+ * TEXTE COMPLET dans l'URL générée (`buildEvaluationUrl` — contrairement à un exercice généré,
+ * qui ne transmet qu'un identifiant + un nombre, plateforme-maths n'a aucune connaissance du
+ * contenu de ce dépôt). Sélectionner des questions ouvertes sur un chapitre bien fourni peut donc
+ * produire une URL de plusieurs dizaines de milliers de caractères — observé en pratique : 57 000
+ * caractères pour les 22 questions ouvertes de "Fonctions exponentielles" toutes sélectionnées, et
+ * même une sélection « raisonnable » d'une seule question par section dépasse déjà 14 Ko dans la
+ * majorité des tirages (mesuré : médiane ~18 000, 81 % des tirages > 14 000 sur 100 essais) tant les
+ * questions individuelles de ce chapitre sont longues. Ce n'est donc pas un cas limite rare : au-delà
+ * de 2-3 sections avec question ouverte sur un chapitre dense, le dépassement devient la norme plutôt
+ * que l'exception. 14 Ko est la limite documentée de Vercel (https://vercel.com/docs/errors/url_too_long),
+ * jamais atteinte par les URL des autres types de lignes (exercice/vraiFaux), bien plus compactes.
+ * Seuil choisi avec une marge confortable sous cette limite (et sous celle, plus basse, de certains
+ * navigateurs/proxys) — mieux vaut un message clair invitant à répartir sur plusieurs feuilles que ce
+ * lien cassé silencieusement chez l'hébergeur. */
+const LONGUEUR_URL_MAX = 12_000
+
 /** Une ligne `exercice`/`vraiFaux` PAR générateur/thème réellement câblé pour la section (voir
  * `generateursPourSection`/`themesPourSection`) — une section sans générateur/thème câblé (ex.
  * chapitre 1 de 4e, sections « Utiliser »/« Révision », hors périmètre pour l'instant) n'en reçoit
@@ -92,7 +109,7 @@ export function EvaluationGeneratorPanel({
   const nombreSeriesEffectif = estExercice ? 1 : nombreSeries
   const [afficherTitresSection, setAfficherTitresSection] = useState(true)
   const [processusActifs, setProcessusActifs] = useState<Record<Processus, boolean>>({ 1: false, 2: false, 3: false })
-  const [erreur, setErreur] = useState(false)
+  const [erreur, setErreur] = useState<string | null>(null)
   const [urlGeneree, setUrlGeneree] = useState<string | null>(null)
 
   const levelSlug = resoudreLevelSlug(niveau, heures)
@@ -190,11 +207,18 @@ export function EvaluationGeneratorPanel({
       chapitre.sections,
     )
     if (!url) {
-      setErreur(true)
+      setErreur('Coche au moins une question (nombre > 0) avant de générer.')
       setUrlGeneree(null)
       return
     }
-    setErreur(false)
+    if (url.length > LONGUEUR_URL_MAX) {
+      setErreur(
+        'Trop de contenu sélectionné pour un seul lien (surtout les questions ouvertes, qui transmettent leur texte complet) — réduis le nombre de questions ouvertes, ou génère-les en plusieurs feuilles séparées.',
+      )
+      setUrlGeneree(null)
+      return
+    }
+    setErreur(null)
     setUrlGeneree(url)
     window.open(url, '_blank', 'noopener')
   }
@@ -463,7 +487,7 @@ export function EvaluationGeneratorPanel({
             {estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé
             + corrigé)
           </button>
-          {erreur && <p className="admin-gate-error">Coche au moins une question (nombre &gt; 0) avant de générer.</p>}
+          {erreur && <p className="admin-gate-error">{erreur}</p>}
           {urlGeneree && (
             <p className="admin-eval-lien">
               Ouvert dans un nouvel onglet.{' '}
