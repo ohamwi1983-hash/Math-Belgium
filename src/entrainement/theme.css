@@ -1005,3 +1005,829 @@
 .entrainement .mafs-graph-swatch-point-live-vide {
   border-color: #1971c2;
 }
+
+/* Illustrations SVG personnalisées (cercle trigonométrique, triangles, paraboles, croquis
+ * d'optimisation, sommet/axe de parabole, cercle-quadrant, "quel angle", géométrie du cercle...) —
+ * même constat que .mafs-graph : classes jamais portées depuis l'App.css d'origine de
+ * plateforme-maths, donc les formes SVG (cercle/path/rect) retombaient sur leurs valeurs par défaut
+ * du navigateur plutôt que sur fill:none/stroke — un cercle plein NOIR au lieu d'un simple contour,
+ * notamment. Porté intégralement ici (jetons --color-* déjà remappés plus haut, aucune adaptation
+ * nécessaire) plutôt qu'au cas par cas à chaque nouveau signalement.
+ */
+.entrainement .parabola-sketch {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .parabola-axe {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .parabola-fleche {
+  fill: var(--color-text-muted);
+}
+
+.entrainement .parabola-origine {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .parabola-label-origine {
+  font-size: 10px;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .parabola-courbe {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.entrainement .parabola-racine {
+  fill: var(--color-text);
+}
+
+.entrainement .parabola-courbe-vert {
+  stroke: var(--color-success);
+}
+
+.entrainement .parabola-courbe-rouge {
+  stroke: var(--color-error);
+}
+
+.entrainement .parabola-racine-vert {
+  fill: var(--color-success);
+}
+
+.entrainement .parabola-racine-rouge {
+  fill: var(--color-error);
+}
+
+.entrainement .parabola-label-racine {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--color-text);
+}
+
+.entrainement .caract-graph {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.entrainement .caract-grille {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.entrainement .caract-axe {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.entrainement .caract-asymptote {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+  opacity: 0.7;
+}
+
+.entrainement .caract-courbe {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.entrainement .caract-marqueur-vide {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.entrainement .caract-marqueur-plein {
+  fill: var(--color-primary);
+}
+
+.entrainement .caract-label {
+  font-size: 10px;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .allure-sketch {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .allure-axe {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .allure-fleche {
+  fill: var(--color-text-muted);
+}
+
+.entrainement .allure-label-axe {
+  font-size: 12px;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .allure-courbe {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.entrainement .allure-courbe.is-neutre {
+  stroke: var(--color-text-muted);
+  stroke-dasharray: 6 6;
+}
+
+.entrainement .allure-point-c {
+  fill: var(--color-text);
+}
+
+.entrainement .allure-label-c {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--color-text);
+}
+
+.entrainement .cercle-trig-sketch {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .cercle-trig-axe {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-cercle {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .cercle-trig-arc {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.entrainement .cercle-trig-rayon {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+.entrainement .cercle-trig-point {
+  fill: var(--color-primary);
+}
+
+.entrainement .cercle-trig-label {
+  font-size: 11px;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .cercle-trig-label-quadrant {
+  font-size: 11px;
+  fill: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.entrainement .cercle-trig-label-angle {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--color-text);
+}
+
+.entrainement .cercle-trig-trajet {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .cercle-trig-spirale {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-fleche-trajet {
+  fill: var(--color-primary);
+}
+
+.entrainement .cercle-trig-rayon-question {
+  stroke: #f08c00;
+  stroke-width: 2;
+}
+
+.entrainement .cercle-trig-point-question {
+  fill: #f08c00;
+}
+
+.entrainement .cercle-trig-arc-question {
+  fill: none;
+  stroke: #f08c00;
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-fleche-question {
+  fill: #f08c00;
+}
+
+.entrainement .cercle-trig-label-question {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #f08c00;
+}
+
+.entrainement .cercle-trig-ligne-pointillee {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .cercle-trig-tangente {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-projection-cos {
+  stroke: #2f9e44;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .cercle-trig-projection-sin {
+  stroke: #1971c2;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .cercle-trig-projection-tan {
+  stroke: #f783ac;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .cercle-trig-point-cos {
+  fill: #2f9e44;
+}
+
+.entrainement .cercle-trig-point-sin {
+  fill: #1971c2;
+}
+
+.entrainement .cercle-trig-point-tan {
+  fill: #f783ac;
+}
+
+.entrainement .cercle-trig-projection-cible {
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .cercle-trig-point-cible {
+  fill: var(--color-primary);
+}
+
+.entrainement .cercle-trig-label-cible {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--color-primary);
+}
+
+.entrainement .cercle-trig-label-associe {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #f08c00;
+}
+
+.entrainement .cercle-trig-rayon-complementaire {
+  stroke: #2f9e44;
+  stroke-width: 2;
+}
+
+.entrainement .cercle-trig-point-complementaire {
+  fill: #2f9e44;
+}
+
+.entrainement .cercle-trig-arc-complementaire {
+  fill: none;
+  stroke: #2f9e44;
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-fleche-complementaire {
+  fill: #2f9e44;
+}
+
+.entrainement .cercle-trig-label-complementaire {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #2f9e44;
+}
+
+.entrainement .triangle-sketch {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .triangle-sketch-forme {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .triangle-sketch-label-sommet {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.entrainement .triangle-sketch-label-valeur {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--color-primary);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.entrainement .croquis-optimisation {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .croquis-optimisation-triangle,
+.entrainement .croquis-optimisation-carre,
+.entrainement .croquis-optimisation-triangle-forme {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .croquis-optimisation-rectangle {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .croquis-optimisation-label {
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--color-primary);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.entrainement .croquis-optimisation-legende {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.entrainement .croquis-optimisation-fil {
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.entrainement .croquis-optimisation-tick {
+  stroke: var(--color-text);
+  stroke-width: 2;
+}
+
+.entrainement .croquis-optimisation-connecteur {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  fill: none;
+}
+
+.entrainement .croquis-optimisation-angle-droit {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+.entrainement .croquis-optimisation-enclos-cloture {
+  stroke: var(--color-primary);
+  stroke-width: 4;
+  stroke-linecap: square;
+}
+
+.entrainement .croquis-optimisation-enclos-mur {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.entrainement .croquis-optimisation-hachure-trait {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .triangle-lies-sketch {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .triangle-lies-sketch-pont {
+  stroke: #1971c2;
+  stroke-width: 2;
+}
+
+.entrainement .triangle-lies-sketch-cible {
+  stroke: #f08c00;
+  stroke-width: 2;
+}
+
+.entrainement .triangle-lies-sketch-partage {
+  stroke: #2f9e44;
+  stroke-width: 3;
+}
+
+.entrainement .triangle-lies-sketch-point {
+  fill: var(--color-text-muted);
+}
+
+.entrainement .polygone-cercle-conteneur {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .polygone-cercle-label {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .triangle-lies-sketch-label {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.entrainement .cercle-trig-equation-conteneur {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .cercle-trig-equation-axe {
+  stroke: var(--color-border);
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-equation-cercle {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .cercle-trig-equation-pointille {
+  stroke: #1971c2;
+  stroke-width: 1.5;
+}
+
+.entrainement .cercle-trig-equation-point {
+  fill: #1971c2;
+}
+
+.entrainement .cercle-trig-equation-label {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .cercle-trig-equation-arc-ombre {
+  fill: #1971c2;
+  opacity: 0.18;
+  stroke: none;
+}
+
+.entrainement .geometrie-cercle-conteneur {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .geometrie-cercle-conteneur-large {
+  max-width: 320px;
+}
+
+.entrainement .geometrie-cercle-label {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .cercle-quadrant-selecteur {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .cercle-quadrant-zone {
+  /* Zone CLIQUABLE (tout le quart du carré) — toujours invisible, jamais la forme surlignée
+     elle-même (round 2, point 1.2) : voir .cercle-quadrant-disque pour le rendu visuel. */
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+}
+
+.entrainement .cercle-quadrant-cercle {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.entrainement .cercle-quadrant-disque {
+  fill: none;
+  stroke: none;
+}
+
+.entrainement .cercle-quadrant-disque.is-selected {
+  fill: var(--color-primary);
+  fill-opacity: 0.35;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+.entrainement .cercle-quadrant-axe-ligne {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+.entrainement .cercle-quadrant-axe-ligne.is-selected {
+  stroke: var(--color-primary);
+  stroke-width: 4;
+}
+
+.entrainement .cercle-quadrant-axe-zone {
+  /* Bande cliquable élargie autour de l'axe (cible tactile) — toujours invisible, jamais la
+     surbrillance elle-même (round 2, point 1.5) : voir .cercle-quadrant-axe-ligne.is-selected. */
+  fill: transparent;
+  cursor: pointer;
+}
+
+.entrainement .cercle-quadrant-label {
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.entrainement .cercle-quadrant-label-axe {
+  font-size: 12px;
+  fill: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.entrainement .cercle-quadrant-fleche {
+  fill: var(--color-text-muted);
+  stroke: none;
+  pointer-events: none;
+}
+
+.entrainement .cercle-quadrant-label-origine {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #000000;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.entrainement .axe-sommet-sketch {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .axe-sommet-axe {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .axe-sommet-fleche {
+  fill: var(--color-text-muted);
+}
+
+.entrainement .axe-sommet-label-axe {
+  font-size: 12px;
+  fill: var(--color-text-muted);
+}
+
+.entrainement .axe-sommet-courbe {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.entrainement .axe-sommet-surlignage {
+  stroke: var(--color-success);
+  stroke-width: 4;
+}
+
+.entrainement .axe-sommet-marque-ox {
+  stroke: var(--color-text);
+  stroke-width: 2;
+}
+
+.entrainement .axe-sommet-marque-ox.is-sommet {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+.entrainement .axe-sommet-label-marque {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-text);
+}
+
+.entrainement .axe-sommet-indice {
+  font-size: 0.7em;
+  baseline-shift: sub;
+}
+
+.entrainement .axe-sommet-point-c,
+.entrainement .axe-sommet-point-s {
+  fill: var(--color-primary);
+}
+
+.entrainement .axe-sommet-label-c,
+.entrainement .axe-sommet-label-s {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--color-text);
+}
+
+.entrainement .quel-angle-quadrant-surligne {
+  fill: var(--color-primary);
+  fill-opacity: 0.35;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+.entrainement .quel-angle-axe-surligne {
+  stroke: var(--color-primary);
+  stroke-width: 4;
+}
+
+.entrainement .quel-angle-arc-candidat {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.entrainement .quel-angle-fleche-candidat {
+  fill: var(--color-primary);
+}
+
+.entrainement .quel-angle-rayon-candidat {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.entrainement .quel-angle-point-candidat {
+  fill: var(--color-primary);
+}
+
+.entrainement .quel-angle-projection-candidat {
+  stroke: #f08c00;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .quel-angle-point-projection {
+  fill: #f08c00;
+}
+
+.entrainement .quel-angle-aide {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.entrainement .triangle-quelconque-sketch {
+  max-width: 280px;
+}
+
+.entrainement .triangle-quelconque-cote-surligne {
+  stroke: var(--color-primary);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.entrainement .triangle-quelconque-angle-surligne {
+  fill: var(--color-primary);
+  fill-opacity: 0.35;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .triangle-quelconque-connecteur {
+  stroke: #f08c00;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.entrainement .triangle-quelconque-aide {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow-x: auto;
+}
+
+.entrainement .courbe-graph-label {
+  margin: 0 0 6px;
+  font-weight: 700;
+  text-align: center;
+}
