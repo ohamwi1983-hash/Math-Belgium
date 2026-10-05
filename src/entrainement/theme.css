@@ -1,16 +1,19 @@
-/* Styles pour le générateur "méthode rapide" (second degré, gen1, chantier 4e) porté
- * depuis plateforme-maths — scopés sous .entrainement-4e pour ne jamais fuiter sur le
- * reste du site (variables CSS + sélecteurs génériques .btn/.card/.field renommés nulle
- * part, juste confinés par le sélecteur de portée). Un wrapper `<div className="entrainement-4e">`
- * doit envelopper le composant porté pour que ces règles s'appliquent.
+/* Thème PARTAGÉ par tous les générateurs rapatriés depuis plateforme-maths, quel que soit leur
+ * chantier (4e/5e-4h/6e-6h) — `App.css` y est commun aux 3 apps d'origine (mêmes classes
+ * `.app-shell`/`.card`/`.btn`/`.equation-box`...), donc un seul fichier scopé sous `.entrainement`
+ * suffit pour tous (voir `EntrainementPage.tsx`, qui enveloppe chaque générateur migré dans
+ * `<div className="entrainement">`). Si un futur générateur introduit une classe absente d'ici,
+ * l'ajouter à CE fichier plutôt que d'en créer un second — extraite et adaptée au départ depuis
+ * l'`App.css` d'origine de plateforme-maths (104 Ko, non repris tel quel), pour le premier
+ * générateur migré (gen1, 4e).
  *
- * Thème : au lieu de ses propres couleurs (violet, coins très arrondis, ombres portées),
- * chaque jeton `--color-*`/`--radius-*` de plateforme-maths est redirigé vers le jeton
- * équivalent de Math-Belgium (`--accent`, `--ink`, `--radius`...), déjà définis sur `:root`
- * — le mode sombre suit automatiquement (celui de `:root` se répercute ici), pas besoin
- * d'un second bloc `@media (prefers-color-scheme: dark)` propre à ce générateur. */
+ * Thème : au lieu des propres couleurs de plateforme-maths (violet, coins très arrondis, ombres
+ * portées), chaque jeton `--color-*`/`--radius-*` est redirigé vers le jeton équivalent de
+ * Math-Belgium (`--accent`, `--ink`, `--radius`...), déjà définis sur `:root` — le mode sombre
+ * suit automatiquement (celui de `:root` se répercute ici), pas besoin d'un second bloc
+ * `@media (prefers-color-scheme: dark)` propre à ces générateurs. */
 
-.entrainement-4e {
+.entrainement {
   --color-bg: var(--paper);
   --color-surface: var(--surface);
   --color-text: var(--ink);
@@ -32,23 +35,23 @@
   color: var(--ink);
 }
 
-.entrainement-4e h1, .entrainement-4e h2, .entrainement-4e h3 {
+.entrainement h1, .entrainement h2, .entrainement h3 {
   font-family: var(--serif);
   font-weight: 600;
   color: var(--ink);
   margin: 0;
 }
 
-.entrainement-4e button, .entrainement-4e input {
+.entrainement button, .entrainement input {
   font-family: inherit;
   color: inherit;
 }
 
-.entrainement-4e code {
+.entrainement code {
   font-family: var(--mono);
 }
 
-.entrainement-4e .app-shell {
+.entrainement .app-shell {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -56,13 +59,13 @@
   padding: 48px 20px 64px;
 }
 
-.entrainement-4e .app-header {
+.entrainement .app-header {
   width: 100%;
   max-width: 560px;
   margin-bottom: 24px;
 }
 
-.entrainement-4e .app-eyebrow {
+.entrainement .app-eyebrow {
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.09em;
@@ -71,19 +74,19 @@
   margin: 0 0 10px;
 }
 
-.entrainement-4e .app-title {
+.entrainement .app-title {
   font-size: 28px;
   line-height: 1.15;
   letter-spacing: -0.01em;
 }
 
-.entrainement-4e .app-subtitle {
+.entrainement .app-subtitle {
   color: var(--color-text-muted);
   font-size: 14px;
   margin-top: 6px;
 }
 
-.entrainement-4e .export-word-formats .btn {
+.entrainement .export-word-formats .btn {
   flex: 1;
   padding: 6px 8px;
   font-size: 12.5px;
@@ -93,13 +96,13 @@
  * fond `--surface-2`, filet de séparation, libellé en petites capitales mono — plutôt qu'une
  * barre de progression flottant au-dessus de la carte, isolée. La barre fine en bas du bandeau
  * (plutôt que `.progress-track` libre) rattache visuellement la progression à CETTE carte. */
-.entrainement-4e .card-progress {
+.entrainement .card-progress {
   padding: 14px 32px;
   background: var(--surface-2);
   border-bottom: 1px solid var(--color-border);
 }
 
-.entrainement-4e .card-progress-row {
+.entrainement .card-progress-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -108,7 +111,7 @@
   margin-bottom: 10px;
 }
 
-.entrainement-4e .card-progress-step {
+.entrainement .card-progress-step {
   font-family: var(--mono);
   font-size: 12px;
   text-transform: uppercase;
@@ -117,7 +120,7 @@
   white-space: nowrap;
 }
 
-.entrainement-4e .card-progress-phase {
+.entrainement .card-progress-phase {
   font-family: var(--sans);
   font-size: 11.5px;
   font-weight: 700;
@@ -128,21 +131,21 @@
   color: var(--color-text-muted);
 }
 
-.entrainement-4e .progress-track {
+.entrainement .progress-track {
   height: 3px;
   border-radius: 999px;
   background: var(--color-border);
   overflow: hidden;
 }
 
-.entrainement-4e .progress-fill {
+.entrainement .progress-fill {
   height: 100%;
   background: var(--color-primary);
   border-radius: 999px;
   transition: width 0.3s ease;
 }
 
-.entrainement-4e .card {
+.entrainement .card {
   width: 100%;
   max-width: 560px;
   background: var(--color-surface);
@@ -152,11 +155,11 @@
   overflow: hidden;
 }
 
-.entrainement-4e .card-body {
+.entrainement .card-body {
   padding: 32px;
 }
 
-.entrainement-4e .equation-box {
+.entrainement .equation-box {
   border-radius: var(--radius-md);
   padding: 28px 20px;
   margin-bottom: 22px;
@@ -166,12 +169,12 @@
   border: 1px solid var(--accent-soft-line);
 }
 
-.entrainement-4e .equation-box .katex {
+.entrainement .equation-box .katex {
   font-size: 1.35em;
   color: var(--color-text);
 }
 
-.entrainement-4e .equation-box-termes {
+.entrainement .equation-box-termes {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -179,70 +182,70 @@
   gap: 4px;
 }
 
-.entrainement-4e .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box {
+.entrainement .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box {
   background: none;
   padding: 0;
   margin-bottom: 8px;
   box-shadow: none;
 }
 
-.entrainement-4e .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box .katex {
+.entrainement .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box .katex {
   font-size: 13px;
   color: var(--color-text-muted);
 }
 
-.entrainement-4e .outil-trace-vecteurs .btn {
+.entrainement .outil-trace-vecteurs .btn {
   margin-bottom: 18px;
 }
 
-.entrainement-4e .btn-aide {
+.entrainement .btn-aide {
   width: 100%;
   margin-top: 10px;
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-.entrainement-4e .btn-aide:disabled {
+.entrainement .btn-aide:disabled {
   border-color: var(--color-border);
   color: var(--color-text-muted);
   cursor: not-allowed;
   background: var(--color-surface);
 }
 
-.entrainement-4e .prompt-text {
+.entrainement .prompt-text {
   font-size: 14px;
   color: var(--color-text-muted);
   margin: 0 0 14px;
 }
 
-.entrainement-4e .options-grid {
+.entrainement .options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
-.entrainement-4e .contenu-conditionnel {
+.entrainement .contenu-conditionnel {
   margin-top: 16px;
 }
 
-.entrainement-4e .apercu-expression-latex {
+.entrainement .apercu-expression-latex {
   margin-bottom: 16px;
   text-align: center;
   overflow-x: auto;
 }
 
-.entrainement-4e .apercu-expression-latex-label {
+.entrainement .apercu-expression-latex-label {
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text-muted);
   margin-right: 8px;
 }
 
-.entrainement-4e .apercu-expression-latex-perime {
+.entrainement .apercu-expression-latex-perime {
   opacity: 0.45;
 }
 
-.entrainement-4e .btn {
+.entrainement .btn {
   appearance: none;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -255,21 +258,21 @@
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
-.entrainement-4e .btn:hover {
+.entrainement .btn:hover {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
 }
 
-.entrainement-4e .btn:active {
+.entrainement .btn:active {
   transform: scale(0.98);
 }
 
-.entrainement-4e .btn:focus-visible {
+.entrainement .btn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-.entrainement-4e .btn-primary {
+.entrainement .btn-primary {
   width: 100%;
   background: var(--color-primary);
   border-color: var(--color-primary);
@@ -279,29 +282,29 @@
   margin-top: 4px;
 }
 
-.entrainement-4e .btn-primary:hover {
+.entrainement .btn-primary:hover {
   background: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
 }
 
-.entrainement-4e .btn-primary:disabled {
+.entrainement .btn-primary:disabled {
   background: var(--color-border);
   border-color: var(--color-border);
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
-.entrainement-4e .btn-primary:disabled:hover {
+.entrainement .btn-primary:disabled:hover {
   background: var(--color-border);
   border-color: var(--color-border);
 }
 
-.entrainement-4e .boutons-generation .btn-primary {
+.entrainement .boutons-generation .btn-primary {
   width: auto;
   flex: 1 1 200px;
 }
 
-.entrainement-4e .alert-error {
+.entrainement .alert-error {
   margin-top: 16px;
   padding: 10px 14px;
   border-radius: var(--radius-md);
@@ -311,7 +314,7 @@
   font-weight: 500;
 }
 
-.entrainement-4e .recap-list {
+.entrainement .recap-list {
   list-style: none;
   padding: 0;
   margin: 0 0 18px;
@@ -320,23 +323,23 @@
   gap: 4px;
 }
 
-.entrainement-4e .recap-item {
+.entrainement .recap-item {
   font-size: 13px;
   color: var(--color-text-muted);
 
   overflow-x: auto;
 }
 
-.entrainement-4e .recap-libelle {
+.entrainement .recap-libelle {
   font-weight: 600;
   color: var(--color-text);
 }
 
-.entrainement-4e .field {
+.entrainement .field {
   margin-bottom: 16px;
 }
 
-.entrainement-4e .field-label {
+.entrainement .field-label {
   display: block;
   font-size: 12px;
   font-weight: 700;
@@ -346,42 +349,42 @@
   margin-bottom: 6px;
 }
 
-.entrainement-4e .ce-select.is-erronee {
+.entrainement .ce-select.is-erronee {
   border-color: var(--color-error);
   background: var(--color-error-bg);
 }
 
-.entrainement-4e .field-inline {
+.entrainement .field-inline {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.entrainement-4e .field-inline .field-label {
+.entrainement .field-inline .field-label {
   margin-bottom: 0;
   flex: none;
   white-space: nowrap;
 }
 
-.entrainement-4e .field-inline .text-input {
+.entrainement .field-inline .text-input {
   flex: 1;
 }
 
-.entrainement-4e .champ-reponse-latex .text-input {
+.entrainement .champ-reponse-latex .text-input {
   flex: 1 1 160px;
   min-width: 160px;
 }
 
-.entrainement-4e .champ-reponse-latex.champ-reponse-latex-etroit .text-input {
+.entrainement .champ-reponse-latex.champ-reponse-latex-etroit .text-input {
   flex: 0 1 90px;
   min-width: 70px;
 }
 
-.entrainement-4e .champ-avec-unite .text-input {
+.entrainement .champ-avec-unite .text-input {
   flex: 1;
 }
 
-.entrainement-4e .text-input {
+.entrainement .text-input {
   width: 100%;
   padding: 10px 12px;
   border-radius: var(--radius-md);
@@ -391,28 +394,28 @@
   font-size: 15px;
 }
 
-.entrainement-4e .text-input:focus {
+.entrainement .text-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
-.entrainement-4e .text-input.is-erronee {
+.entrainement .text-input.is-erronee {
   border-color: var(--color-error);
   background: var(--color-error-bg);
 }
 
-.entrainement-4e .result-title {
+.entrainement .result-title {
   font-size: 20px;
 }
 
-.entrainement-4e .result-subtitle {
+.entrainement .result-subtitle {
   color: var(--color-text-muted);
   font-size: 14px;
   margin: 6px 0 20px;
 }
 
-.entrainement-4e .score-list {
+.entrainement .score-list {
   list-style: none;
   padding: 0;
   margin: 0 0 16px;
@@ -421,7 +424,7 @@
   gap: 8px;
 }
 
-.entrainement-4e .score-item {
+.entrainement .score-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -431,19 +434,19 @@
   font-size: 14px;
 }
 
-.entrainement-4e .score-value {
+.entrainement .score-value {
   font-weight: 700;
 }
 
-.entrainement-4e .score-value.is-good {
+.entrainement .score-value.is-good {
   color: var(--color-success);
 }
 
-.entrainement-4e .score-value.is-bad {
+.entrainement .score-value.is-bad {
   color: var(--color-error);
 }
 
-.entrainement-4e .answer-reveal {
+.entrainement .answer-reveal {
   padding: 12px 14px;
   border-radius: var(--radius-md);
   background: var(--color-error-bg);
@@ -453,7 +456,7 @@
   overflow-x: auto;
 }
 
-.entrainement-4e .score-hero {
+.entrainement .score-hero {
   text-align: center;
   padding: 24px 22px;
   border-radius: var(--radius-md);
@@ -462,7 +465,7 @@
   margin-bottom: 20px;
 }
 
-.entrainement-4e .score-hero-value {
+.entrainement .score-hero-value {
   font-family: var(--serif);
   font-size: 42px;
   font-weight: 600;
@@ -471,27 +474,27 @@
   font-variant-numeric: tabular-nums;
 }
 
-.entrainement-4e .score-hero-label {
+.entrainement .score-hero-label {
   font-size: 13px;
   color: var(--color-text-muted);
   margin-top: 2px;
 }
 
-.entrainement-4e .summary-table {
+.entrainement .summary-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 22px;
   font-size: 13px;
 }
 
-.entrainement-4e .summary-table th,
-.entrainement-4e .summary-table td {
+.entrainement .summary-table th,
+.entrainement .summary-table td {
   padding: 10px 8px;
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
 
-.entrainement-4e .summary-table th {
+.entrainement .summary-table th {
   color: var(--color-text-muted);
   font-weight: 600;
   font-size: 11px;
@@ -499,24 +502,24 @@
   letter-spacing: 0.04em;
 }
 
-.entrainement-4e .summary-table tbody tr:last-child td {
+.entrainement .summary-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.entrainement-4e .btn.toggle-active {
+.entrainement .btn.toggle-active {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
   color: var(--accent-ink);
   font-weight: 700;
 }
 
-.entrainement-4e .btn.toggle-active.is-erronee {
+.entrainement .btn.toggle-active.is-erronee {
   border-color: var(--color-error);
   background: var(--color-error-bg);
   color: var(--color-error);
 }
 
-.entrainement-4e .selecteur-variante-dev {
+.entrainement .selecteur-variante-dev {
   margin-top: 18px;
   padding: 12px 14px;
   border: 1px dashed var(--color-warning);
@@ -524,7 +527,7 @@
   background: var(--color-warning-bg);
 }
 
-.entrainement-4e .selecteur-variante-dev-label {
+.entrainement .selecteur-variante-dev-label {
   display: block;
   font-size: 12px;
   font-weight: 700;
@@ -532,12 +535,12 @@
   margin: 0 0 8px;
 }
 
-.entrainement-4e .selecteur-variante-dev-row {
+.entrainement .selecteur-variante-dev-row {
   display: flex;
   gap: 8px;
 }
 
-.entrainement-4e .selecteur-variante-dev-select {
+.entrainement .selecteur-variante-dev-select {
   flex: 1;
   min-width: 0;
   padding: 8px 10px;
@@ -548,20 +551,20 @@
   font-size: 13px;
 }
 
-.entrainement-4e .selecteur-variante-dev-bouton {
+.entrainement .selecteur-variante-dev-bouton {
   flex: none;
   padding: 8px 14px;
   font-size: 13px;
 }
 
-.entrainement-4e .selecteur-variante-dev select.text-input {
+.entrainement .selecteur-variante-dev select.text-input {
   flex: 1 1 auto;
   min-width: 0;
 }
 
 @media (max-width: 480px) {
-  .entrainement-4e .morceau-row .bracket-btn,
-  .entrainement-4e .morceau-row .btn:not(.bracket-btn) {
+  .entrainement .morceau-row .bracket-btn,
+  .entrainement .morceau-row .btn:not(.bracket-btn) {
     position: relative;
     padding: 6px 5px;
     min-height: 44px;
@@ -569,8 +572,8 @@
     flex: none;
   }
 
-  .entrainement-4e .morceau-row .bracket-btn::after,
-  .entrainement-4e .morceau-row .btn:not(.bracket-btn)::after {
+  .entrainement .morceau-row .bracket-btn::after,
+  .entrainement .morceau-row .btn:not(.bracket-btn)::after {
     content: "";
     position: absolute;
     top: 0;
@@ -581,25 +584,25 @@
   }
 }
 
-.entrainement-4e .liste-morceaux {
+.entrainement .liste-morceaux {
   margin-bottom: 12px;
 }
 
-.entrainement-4e .liste-morceaux-ligne {
+.entrainement .liste-morceaux-ligne {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.entrainement-4e .liste-morceaux-ligne .morceau-row {
+.entrainement .liste-morceaux-ligne .morceau-row {
   flex: 1;
 }
 
-.entrainement-4e .liste-morceaux-ligne .options-grid {
+.entrainement .liste-morceaux-ligne .options-grid {
   flex-shrink: 0;
 }
 
-.entrainement-4e .liste-morceaux-retirer {
+.entrainement .liste-morceaux-retirer {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -611,55 +614,55 @@
   color: var(--color-error);
 }
 
-.entrainement-4e .liste-morceaux-ajouter {
+.entrainement .liste-morceaux-ajouter {
   margin-top: 4px;
 }
 
-.entrainement-4e .summary-table-scroll .summary-table {
+.entrainement .summary-table-scroll .summary-table {
   margin-bottom: 0;
 }
 
-.entrainement-4e .toggle-signe.is-erronee {
+.entrainement .toggle-signe.is-erronee {
   border-color: var(--color-error);
   background: var(--color-error-bg);
   color: var(--color-error);
 }
 
-.entrainement-4e .curseur-champ.is-erronee {
+.entrainement .curseur-champ.is-erronee {
   color: var(--color-error);
 }
 
-.entrainement-4e .curseur-champ.is-erronee input[type="range"] {
+.entrainement .curseur-champ.is-erronee input[type="range"] {
   accent-color: var(--color-error);
 }
 
-.entrainement-4e .btn.curseur-champ {
+.entrainement .btn.curseur-champ {
   width: fit-content;
   margin-bottom: 16px;
 }
 
-.entrainement-4e .btn.curseur-champ.is-erronee {
+.entrainement .btn.curseur-champ.is-erronee {
   border-color: var(--color-error);
   background: var(--color-error-bg);
   color: var(--color-error);
 }
 
-.entrainement-4e .tf-table input.text-input {
+.entrainement .tf-table input.text-input {
   width: 90px;
   text-align: center;
 }
 
-.entrainement-4e .histogramme-barre.is-erronee {
+.entrainement .histogramme-barre.is-erronee {
   fill: var(--color-error-bg);
   stroke: var(--color-error);
 }
 
-.entrainement-4e .boite-zone-drag.is-erronee .boite-marqueur {
+.entrainement .boite-zone-drag.is-erronee .boite-marqueur {
   fill: var(--color-error-bg);
   stroke: var(--color-error);
 }
 
-.entrainement-4e .error-boundary-fallback .btn-primary {
+.entrainement .error-boundary-fallback .btn-primary {
   width: auto;
   min-width: 200px;
 }

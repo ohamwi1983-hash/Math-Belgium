@@ -1,20 +1,10 @@
-import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { HomePage } from './routes/HomePage'
 import { ChapterRoute } from './routes/ChapterRoute'
 import { AdminPage } from './routes/AdminPage'
 import { ExercicePage } from './routes/ExercicePage'
 import { ChapterExercicePage } from './routes/ChapterExercicePage'
-
-/** Chargé à la demande (`React.lazy`) plutôt qu'en import statique : un générateur rapatrié depuis
- * plateforme-maths (voir `src/entrainement/`) embarque tout son code (core/moteur/générateurs/ui/
- * components) dans le bundle qui l'importe — à l'échelle de QUELQUES générateurs ce n'est déjà plus
- * négligeable (le premier, à lui seul, a fait grimper le chunk principal au-delà de la limite de
- * précache PWA par défaut), et la fusion vise à terme ~190 générateurs. Charger chaque page
- * `/entrainement/...` à la demande garde le bundle principal (chargé par CHAQUE visiteur, y compris
- * ceux qui ne s'entraînent jamais) proportionnel au site de cours, pas à la somme de tous les
- * générateurs portés — le pattern à répliquer pour chaque futur générateur migré. */
-const EntrainementGen1Page = lazy(() => import('./routes/EntrainementGen1Page').then((m) => ({ default: m.EntrainementGen1Page })))
+import { EntrainementPage } from './routes/EntrainementPage'
 
 function App() {
   return (
@@ -23,14 +13,14 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/exercice" element={<ExercicePage />} />
-        <Route
-          path="/entrainement/4e/gen1"
-          element={
-            <Suspense fallback={null}>
-              <EntrainementGen1Page />
-            </Suspense>
-          }
-        />
+        {/* Un seul générateur rapatrié depuis plateforme-maths = une entrée dans
+         * `ENTRAINEMENT_REGISTRY` (voir `src/entrainement/registry.ts`), jamais une nouvelle route
+         * ici — `EntrainementPage` charge le bon composant à la demande (`React.lazy`), lu depuis
+         * le registre selon `:generatorId`. Indispensable dès qu'on dépasse un ou deux générateurs
+         * embarqués : chacun embarque tout son code (core/moteur/générateurs/ui/components), le
+         * premier à lui seul avait déjà fait dépasser la limite de précache PWA par défaut sans
+         * lazy-loading. */}
+        <Route path="/entrainement/:chantier/:generatorId" element={<EntrainementPage />} />
         <Route path="/:levelSlug/:chapterSlug/exercices" element={<ChapterExercicePage />} />
         <Route path="/:levelSlug/:chapterSlug" element={<ChapterRoute />} />
         <Route path="*" element={<HomePage />} />
