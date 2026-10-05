@@ -157,16 +157,20 @@ export function AppMethodeRapide() {
   return (
     <div className="app-shell">
       <header className="app-header">
+        <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Second degré — choisir la méthode la plus rapide</h1>
         <p className="app-subtitle">Équations du second degré</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+      </header>
+
+      <main className="card">
         {enCoursDeSession && (
-          <div className="progress">
-            <div className="progress-label">
-              <span>
+          <div className="card-progress">
+            <div className="card-progress-row">
+              <span className="card-progress-step">
                 Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
               </span>
-              <span>{LIBELLE_PHASE[etat.phase]}</span>
+              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
             </div>
             <div className="progress-track">
               <div
@@ -176,9 +180,7 @@ export function AppMethodeRapide() {
             </div>
           </div>
         )}
-      </header>
-
-      <main className="card">
+        <div className="card-body">
         {dernierBilan ? (
           <ResultatPanel
             resultat={dernierBilan.resultat}
@@ -268,6 +270,7 @@ export function AppMethodeRapide() {
             )}
           </>
         )}
+        </div>
       </main>
     </div>
   );
