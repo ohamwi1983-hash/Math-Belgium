@@ -44,6 +44,8 @@ const CH_4E_FONCTION_SECOND_DEGRE: ChapitreInfo = { chantier: '4e', chapitreSlug
 const CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'equations-inequations-second-degre', chapitreTitle: 'Équations et inéquations du second degré' }
 const CH_5E_FONCTIONS_COMPOSEES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'fonctions-composees', chapitreTitle: 'Fonctions : rappels et compléments' }
 const CH_5E_TRIGONOMETRIE: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'trigonometrie', chapitreTitle: 'Trigonométrie' }
+const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-reciproques-cyclometriques', chapitreTitle: 'Fonctions réciproques & cyclométriques' }
+const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-exponentielles', chapitreTitle: 'Fonctions exponentielles' }
 
 export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   // --- 4e, chapitre 1 : La fonction du second degré ---
@@ -81,4 +83,21 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen12': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen12').then((m) => ({ default: m.App5gen12 }))),
   '5gen13': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen13').then((m) => ({ default: m.App5gen13 }))),
   '5gen40': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen40').then((m) => ({ default: m.App5gen40 }))),
+
+  // --- 6e, chapitre 1 : Fonctions réciproques & cyclométriques ---
+  '6gen1': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen1').then((m) => ({ default: m.App6gen1 }))),
+  '6gen2': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen2').then((m) => ({ default: m.App6gen2 }))),
+  '6gen3': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen3').then((m) => ({ default: m.App6gen3 }))),
+  '6gen4': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen4').then((m) => ({ default: m.App6gen4 }))),
+  '6gen5': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen5').then((m) => ({ default: m.App6gen5 }))),
+
+  // --- 6e, chapitre 2 : Fonctions exponentielles ---
+  '6gen6': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen6').then((m) => ({ default: m.App6gen6 }))),
+  '6gen7': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen7').then((m) => ({ default: m.App6gen7 }))),
+  '6gen8': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen8').then((m) => ({ default: m.App6gen8 }))),
+  '6gen9': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen9').then((m) => ({ default: m.App6gen9 }))),
+  '6gen10': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen10').then((m) => ({ default: m.App6gen10 }))),
+  '6gen11': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen11').then((m) => ({ default: m.App6gen11 }))),
+  '6gen12': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen12').then((m) => ({ default: m.App6gen12 }))),
+  '6gen65': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen65').then((m) => ({ default: m.App6gen65 }))),
 }
