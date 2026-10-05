@@ -194,8 +194,32 @@
   color: var(--color-text-muted);
 }
 
+.entrainement .figure-reduction-sketch {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .outil-trace-vecteurs {
+  text-align: center;
+}
+
 .entrainement .outil-trace-vecteurs .btn {
   margin-bottom: 18px;
+}
+
+.entrainement .outil-trace-vecteurs-liste {
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.entrainement .outil-trace-vecteurs-cible {
+  fill: transparent;
+  cursor: pointer;
 }
 
 .entrainement .btn-aide {
