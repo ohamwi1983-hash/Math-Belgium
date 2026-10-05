@@ -277,8 +277,34 @@ export function EvaluationGeneratorPanel({
     setUrlGeneree(null)
   }
 
+  /** Met à jour le barème d'UNE famille/variante précise, pour UN générateur précis (ligne
+   * `type==='exercice'`, `cle===generatorId`) — chaque variante peut valoir un nombre de points
+   * différent, voir `LigneSelection.pointsParVariante`. */
+  function mettreAJourPointsVariante(chapitreSlug: string, sectionId: string, generatorId: string, varianteId: string, points: number) {
+    setLignes((prev) =>
+      prev.map((l) => {
+        if (l.chapitreSlug !== chapitreSlug || l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
+        return { ...l, pointsParVariante: { ...l.pointsParVariante, [varianteId]: points } }
+      }),
+    )
+    setUrlGeneree(null)
+  }
+
+  /** Points totaux d'une ligne — pour `type==='exercice'`, somme par variante (`pointsParVariante`,
+   * replié sur `points` tant qu'une variante n'a pas encore son propre barème édité) ; pour les
+   * autres types, simple produit `points × nombre` (pas de notion de variante). */
+  function pointsLigne(ligne: LigneSelection): number {
+    if (ligne.type === 'exercice') {
+      return Object.entries(ligne.parVariante ?? {}).reduce(
+        (total, [varianteId, nombre]) => total + (ligne.pointsParVariante?.[varianteId] ?? ligne.points) * nombre,
+        0,
+      )
+    }
+    return ligne.points * ligne.nombre
+  }
+
   const totalNombre = lignes.reduce((total, l) => total + l.nombre, 0)
-  const totalPoints = lignes.reduce((total, l) => total + l.points * l.nombre, 0)
+  const totalPoints = lignes.reduce((total, l) => total + pointsLigne(l), 0)
 
   function genererEvaluation() {
     if (chapitres.length === 0 || !levelSlug) return
@@ -556,7 +582,7 @@ export function EvaluationGeneratorPanel({
                                   if (ligne.type === 'exercice') {
                                     const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
                                     const generateur = generateursPourSection(chapitreCourant.slug, section.id).find((g) => g.generatorId === ligne.cle)
-                                    return catalogue.map((variante, index) => (
+                                    return catalogue.map((variante) => (
                                       <tr className="admin-eval-row" key={(ligne.cle ?? '') + variante.id}>
                                         <td>
                                           {generateur?.label || LABEL_TYPE.exercice} —{' '}
@@ -572,20 +598,16 @@ export function EvaluationGeneratorPanel({
                                         </td>
                                         {!estExercice && (
                                           <td>
-                                            {index === 0 && (
-                                              <input
-                                                type="number"
-                                                min={1}
-                                                className="admin-eval-points-input"
-                                                value={ligne.points}
-                                                onChange={(e) =>
-                                                  mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, {
-                                                    points: Number(e.target.value) || 1,
-                                                  })
-                                                }
-                                                title="Points / question, toutes variantes de ce générateur"
-                                              />
-                                            )}
+                                            <input
+                                              type="number"
+                                              min={1}
+                                              className="admin-eval-points-input"
+                                              value={ligne.pointsParVariante?.[variante.id] ?? ligne.points}
+                                              onChange={(e) =>
+                                                mettreAJourPointsVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', variante.id, Number(e.target.value) || 1)
+                                              }
+                                              title={`Points / question pour la variante « ${variante.label} »`}
+                                            />
                                           </td>
                                         )}
                                       </tr>

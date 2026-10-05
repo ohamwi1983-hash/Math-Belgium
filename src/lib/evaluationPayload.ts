@@ -4253,8 +4253,16 @@ export interface LigneSelection {
    * catalogue, voir `catalogueVariantesExercice`), pour un contrôle fin plutôt qu'un total tiré au
    * hasard parmi toutes les familles. Absent (ou vide) pour les autres types. */
   parVariante?: Record<string, number>
-  /** Points par question (chaque question générée par cette ligne vaut ce nombre de points). */
+  /** Points par question. Pour `type==='exercice'`, sert de SEUL repli quand une variante n'a pas
+   * encore d'entrée dans `pointsParVariante` (ex. juste après avoir forcé un nombre sur une
+   * nouvelle variante) — l'édition réelle du barème passe alors par `pointsParVariante`, jamais
+   * cette valeur directement. Pour les autres types (sans notion de variante), c'est le seul champ
+   * de barème et reste directement éditable. */
   points: number
+  /** Réservé à `type==='exercice'` — barème PAR FAMILLE/VARIANTE (clé = `id` du catalogue, même
+   * clé que `parVariante`), pour que deux variantes d'un même générateur puissent valoir un nombre
+   * de points différent sur la feuille d'évaluation. Absent (ou vide) pour les autres types. */
+  pointsParVariante?: Record<string, number>
 }
 
 export function sommeParVariante(parVariante: Record<string, number> | undefined): number {
@@ -4265,7 +4273,7 @@ interface ItemPayload {
   processus: Processus
   titreSection: string
   points: number
-  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number }[] }
+  exercice?: { generatorId: IdGenerateurPilote; parVariante: { varianteId: string; nombre: number; points: number }[] }
   /** `chapitre` lève l'ambiguïté sur la banque vrai/faux à interroger côté plateforme-maths quand
    * une même page en sert plusieurs (`AppEvaluation6e.tsx`, voir `QuizThemeConfig.quizChapitre`) —
    * absent pour les chapitres à banque unique (4e). */
@@ -4381,7 +4389,7 @@ export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, 
       if (!config) continue
       const parVariante = Object.entries(ligne.parVariante ?? {})
         .filter(([, nombre]) => nombre > 0)
-        .map(([varianteId, nombre]) => ({ varianteId, nombre }))
+        .map(([varianteId, nombre]) => ({ varianteId, nombre, points: ligne.pointsParVariante?.[varianteId] ?? ligne.points }))
       if (parVariante.length === 0) continue
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante } })
     } else if (ligne.type === 'vraiFaux') {
