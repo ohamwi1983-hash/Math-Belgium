@@ -621,7 +621,17 @@ table.feature-table td { white-space: normal; }
   background: var(--paper); color: var(--ink);
 }
 .admin-eval-tf input:disabled, .admin-eval-tf select:disabled { opacity: 0.5; cursor: not-allowed; }
-.admin-eval-tf-chapitre select { min-width: 220px; }
+/* `flex: 1 1 100%` : force un retour à la ligne dans `.admin-eval-toolbar` (flex-wrap) avant et
+ * après ce champ — la sélection multi-chapitres (chips) occupe toute la largeur disponible plutôt
+ * que de s'entasser dans la rangée dense niveau/heures. */
+.admin-eval-tf-chapitre { flex: 1 1 100%; }
+.admin-eval-chapitres-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-eval-chapitre-chip {
+  font: inherit; font-size: 0.8rem; padding: 6px 11px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+}
+.admin-eval-chapitre-chip[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
+.admin-eval-chapitre-chip:disabled { opacity: 0.45; cursor: not-allowed; }
 .admin-eval-divider { width: 1px; align-self: stretch; background: var(--line); margin: 0 2px; }
 .admin-eval-checkbox-field { display: flex; align-items: center; gap: 7px; padding-bottom: 7px; font-size: 0.85rem; color: var(--ink); cursor: pointer; }
 
@@ -669,6 +679,14 @@ table.feature-table td { white-space: normal; }
 .admin-eval-table tbody tr.admin-eval-section-row td {
   background: var(--accent-soft); color: var(--accent-ink); font-weight: 700;
   padding: 8px 14px; border-top: 1px solid var(--accent-soft-line); border-bottom: 1px solid var(--accent-soft-line);
+}
+/* Groupement par chapitre (sélection multi-chapitres uniquement, > 1 chapitre coché) — un cran
+ * au-dessus de `.admin-eval-section-row` : fond plus sombre, texte en capitales pour rester
+ * visuellement distinct du groupement par section qui le suit immédiatement en dessous. */
+.admin-eval-table tbody tr.admin-eval-chapitre-row td {
+  background: var(--ink); color: var(--paper); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.78rem;
+  padding: 8px 14px;
 }
 .admin-eval-table td.admin-eval-col-nombre { text-align: center; }
 .admin-eval-variante-label { color: var(--ink-faint); font-size: 0.82rem; }

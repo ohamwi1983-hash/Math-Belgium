@@ -4232,6 +4232,11 @@ export type TypeQuestionEvaluation = 'demonstration' | 'comprehension' | 'vraiFa
 export type Processus = 1 | 2 | 3
 
 export interface LigneSelection {
+  /** Chapitre d'origine de la ligne (voir `ChapitreAvecSections`, `buildEvaluationUrl`) — nécessaire
+   * dès qu'une sélection couvre plusieurs chapitres : `sectionId` seul n'est PAS unique entre deux
+   * chapitres (ex. chapitre 1 et chapitre 2 de 6e ont chacun une section `equations`), donc toute
+   * correspondance ligne↔section DOIT filtrer sur les deux clés. */
+  chapitreSlug: string
   sectionId: string
   processus: Processus
   type: TypeQuestionEvaluation
@@ -4340,22 +4345,39 @@ export interface EnTeteEvaluation {
  * `'equations'` entre les deux chapitres de 6e) — une ligne `exercice`/`vraiFaux` cherche sa
  * config via `ligne.cle` (`generatorId`/`quizTheme`) quand la section a plusieurs générateurs/thèmes.
  */
-export function buildEvaluationUrl(levelSlug: string, chapitreSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], sections: ChapterSection[]): string | null {
+export interface ChapitreAvecSections {
+  chapitreSlug: string
+  chapterNumber: number
+  title: string
+  sections: ChapterSection[]
+}
+
+/** `chapitres` : UN ou PLUSIEURS chapitres du même niveau/heures (voir `EvaluationGeneratorPanel`,
+ * sélection multi-chapitres) — `ItemPayload` ne porte déjà aucune notion de chapitre (seulement
+ * `titreSection`), donc mélanger plusieurs chapitres dans un même envoi ne demande RIEN côté
+ * plateforme-maths, seulement de retrouver ici la bonne section de chaque ligne via son
+ * `ligne.chapitreSlug` plutôt qu'un chapitre unique implicite. `titreSection` gagne un préfixe
+ * `N. Titre du chapitre — ` dès que `lignes` couvre RÉELLEMENT plus d'un chapitre (au moins une
+ * ligne retenue, `nombre>0`, dans chacun) — jamais quand un seul est effectivement représenté,
+ * pour ne rien changer au rendu d'une feuille mono-chapitre existante. */
+export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], chapitres: ChapitreAvecSections[]): string | null {
   const baseUrl = EVALUATION_BASE_URL_PAR_LEVELSLUG[levelSlug]
   if (!baseUrl) return null
 
   const items: ItemPayload[] = []
   const nombreSeries = Math.max(1, entete.nombreSeries)
+  const multiChapitres = new Set(lignes.filter((l) => l.nombre > 0).map((l) => l.chapitreSlug)).size > 1
 
   for (const ligne of lignes) {
     if (ligne.nombre <= 0) continue
-    const section = sections.find((s) => s.id === ligne.sectionId)
-    if (!section) continue
+    const chapitre = chapitres.find((c) => c.chapitreSlug === ligne.chapitreSlug)
+    const section = chapitre?.sections.find((s) => s.id === ligne.sectionId)
+    if (!chapitre || !section) continue
 
-    const titreSection = `${section.number}. ${section.title}`
+    const titreSection = multiChapitres ? `${chapitre.chapterNumber}. ${chapitre.title} — ${section.number}. ${section.title}` : `${section.number}. ${section.title}`
 
     if (ligne.type === 'exercice') {
-      const config = generateursPourSection(chapitreSlug, ligne.sectionId).find((g) => g.generatorId === ligne.cle)
+      const config = generateursPourSection(ligne.chapitreSlug, ligne.sectionId).find((g) => g.generatorId === ligne.cle)
       if (!config) continue
       const parVariante = Object.entries(ligne.parVariante ?? {})
         .filter(([, nombre]) => nombre > 0)
@@ -4363,11 +4385,11 @@ export function buildEvaluationUrl(levelSlug: string, chapitreSlug: string, ente
       if (parVariante.length === 0) continue
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, exercice: { generatorId: config.generatorId, parVariante } })
     } else if (ligne.type === 'vraiFaux') {
-      const config = themesPourSection(chapitreSlug, ligne.sectionId).find((t) => t.quizTheme === ligne.cle)
+      const config = themesPourSection(ligne.chapitreSlug, ligne.sectionId).find((t) => t.quizTheme === ligne.cle)
       if (!config) continue
       items.push({ processus: ligne.processus, titreSection, points: ligne.points, vraiFaux: { chapitre: config.quizChapitre, theme: config.quizTheme, nombre: ligne.nombre } })
     } else {
-      const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(chapitreSlug, section) : deriveQuestionsComprehension(chapitreSlug, section.id)
+      const banque = ligne.type === 'demonstration' ? deriveQuestionsOuvertes(ligne.chapitreSlug, section) : deriveQuestionsComprehension(ligne.chapitreSlug, section.id)
       const ouvertesParSerie = construireOuvertesParSerie(banque, ligne.nombre, nombreSeries)
       if (ouvertesParSerie[0].length > 0) items.push({ processus: ligne.processus, titreSection, points: ligne.points, ouvertesParSerie })
     }

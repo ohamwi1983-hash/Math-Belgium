@@ -23,6 +23,13 @@ import {
   type TypeQuestionEvaluation,
 } from '../../lib/evaluationPayload'
 
+/** Clé composite (chapitre, section) — `sectionId` seul n'est pas unique entre 2 chapitres
+ * (voir `LigneSelection.chapitreSlug`), toute table `Map` indexée par section DOIT donc en passer
+ * par cette clé plutôt que `sectionId` seul. */
+function cleSection(chapitreSlug: string, sectionId: string): string {
+  return `${chapitreSlug}::${sectionId}`
+}
+
 const NIVEAUX: NiveauCode[] = ['4e', '5e', '6e']
 
 const LABEL_PROCESSUS: Record<Processus, string> = { 1: 'Connaître', 2: 'Appliquer', 3: 'Transférer' }
@@ -58,18 +65,31 @@ const LONGUEUR_URL_MAX = 12_000
 /** Une ligne `exercice`/`vraiFaux` PAR générateur/thème réellement câblé pour la section (voir
  * `generateursPourSection`/`themesPourSection`) — une section sans générateur/thème câblé (ex.
  * chapitre 1 de 4e, sections « Utiliser »/« Révision », hors périmètre pour l'instant) n'en reçoit
- * simplement aucune, plutôt qu'une ligne qui échouerait silencieusement à la génération. */
-function lignesInitiales(chapitre: ChapterContent | undefined, chapitreSlug: string): LigneSelection[] {
-  if (!chapitre) return []
+ * simplement aucune, plutôt qu'une ligne qui échouerait silencieusement à la génération.
+ *
+ * Prend UN OU PLUSIEURS chapitres (sélection multi-chapitres, voir `chapitresSlugs`) — chaque ligne
+ * produite porte son `chapitreSlug` d'origine, jamais déduit implicitement d'un chapitre unique. */
+function lignesInitiales(chapitres: ChapterContent[]): LigneSelection[] {
   const lignes: LigneSelection[] = []
-  for (const section of chapitre.sections) {
-    lignes.push({ sectionId: section.id, processus: 1, type: 'demonstration', nombre: 0, points: POINTS_DEFAUT.demonstration })
-    lignes.push({ sectionId: section.id, processus: 1, type: 'comprehension', nombre: 0, points: POINTS_DEFAUT.comprehension })
-    for (const theme of themesPourSection(chapitreSlug, section.id)) {
-      lignes.push({ sectionId: section.id, processus: 1, type: 'vraiFaux', cle: theme.quizTheme, nombre: 0, points: POINTS_DEFAUT.vraiFaux })
-    }
-    for (const generateur of generateursPourSection(chapitreSlug, section.id)) {
-      lignes.push({ sectionId: section.id, processus: generateur.processus ?? 2, type: 'exercice', cle: generateur.generatorId, nombre: 0, parVariante: {}, points: POINTS_DEFAUT.exercice })
+  for (const chapitre of chapitres) {
+    for (const section of chapitre.sections) {
+      lignes.push({ chapitreSlug: chapitre.slug, sectionId: section.id, processus: 1, type: 'demonstration', nombre: 0, points: POINTS_DEFAUT.demonstration })
+      lignes.push({ chapitreSlug: chapitre.slug, sectionId: section.id, processus: 1, type: 'comprehension', nombre: 0, points: POINTS_DEFAUT.comprehension })
+      for (const theme of themesPourSection(chapitre.slug, section.id)) {
+        lignes.push({ chapitreSlug: chapitre.slug, sectionId: section.id, processus: 1, type: 'vraiFaux', cle: theme.quizTheme, nombre: 0, points: POINTS_DEFAUT.vraiFaux })
+      }
+      for (const generateur of generateursPourSection(chapitre.slug, section.id)) {
+        lignes.push({
+          chapitreSlug: chapitre.slug,
+          sectionId: section.id,
+          processus: generateur.processus ?? 2,
+          type: 'exercice',
+          cle: generateur.generatorId,
+          nombre: 0,
+          parVariante: {},
+          points: POINTS_DEFAUT.exercice,
+        })
+      }
     }
   }
   return lignes
@@ -156,7 +176,10 @@ export function EvaluationGeneratorPanel({
   const [date, setDate] = useState(aujourdhui)
   const [niveau, setNiveau] = useState<NiveauCode>(niveauHeuresVerrouille?.niveau ?? '6e')
   const [heures, setHeures] = useState(niveauHeuresVerrouille?.heures ?? '6H')
-  const [chapitreSlug, setChapitreSlug] = useState(verrouille?.chapitreSlug ?? CHAPITRE_FONCTIONNEL_SLUG)
+  /** Sélection multi-chapitres (même niveau/heures — un seul chantier plateforme-maths par envoi,
+   * voir `EVALUATION_BASE_URL_PAR_LEVELSLUG`) : coché via `.admin-eval-chapitre-chip`, jamais un
+   * `<select>` simple dès que `!verrouille`. En mode `verrouille`, reste figé à `[verrouille.chapitreSlug]`. */
+  const [chapitresSlugs, setChapitresSlugs] = useState<string[]>(verrouille ? [verrouille.chapitreSlug] : [CHAPITRE_FONCTIONNEL_SLUG])
   const [titre, setTitre] = useState('')
   const [heuresSemaine, setHeuresSemaine] = useState(HEURES_SEMAINE_DEFAUT[niveauHeuresVerrouille?.niveau ?? '6e'])
   const [calculatrice, setCalculatrice] = useState<'interdite' | 'autorisee'>('interdite')
@@ -172,26 +195,31 @@ export function EvaluationGeneratorPanel({
   const levelSlug = resoudreLevelSlug(niveau, heures)
   const niveauEntry = levelSlug ? LEVELS.find((l) => l.slug === levelSlug) : undefined
 
-  const chapitre = niveauEntry?.chapters.find((c) => c.slug === chapitreSlug)
-  const chapitreFonctionnel = estChapitreFonctionnel(levelSlug, chapitreSlug)
+  /** Chapitres fonctionnels parmi ceux cochés — `.admin-eval-chapitre-chip` désactive déjà toute
+   * sélection d'un chapitre non câblé (voir plus bas), donc en pratique `chapitres` est toujours
+   * entièrement fonctionnel ; le filtre reste une garantie défensive si `levelSlug` change sous les
+   * pieds d'une sélection déjà faite. */
+  const chapitres = (niveauEntry?.chapters.filter((c) => chapitresSlugs.includes(c.slug)) ?? []).filter((c) => estChapitreFonctionnel(levelSlug, c.slug))
 
-  const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitre, chapitreSlug))
+  const [lignes, setLignes] = useState<LigneSelection[]>(() => lignesInitiales(chapitres))
 
   const apercusDemonstration = useMemo(() => {
     const map = new Map<string, number>()
-    if (chapitreFonctionnel && chapitre) {
-      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsOuvertes(chapitreSlug, section).length)
+    for (const chapitre of chapitres) {
+      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsOuvertes(chapitre.slug, section).length)
     }
     return map
-  }, [chapitre, chapitreFonctionnel, chapitreSlug])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `chapitresSlugs.join('|')` + `levelSlug` identifient la sélection réelle (clés primitives stables), `chapitres` lui-même change de référence à chaque rendu.
+  }, [chapitresSlugs.join('|'), levelSlug])
 
   const apercusComprehension = useMemo(() => {
     const map = new Map<string, number>()
-    if (chapitreFonctionnel && chapitre) {
-      for (const section of chapitre.sections) map.set(section.id, deriveQuestionsComprehension(chapitreSlug, section.id).length)
+    for (const chapitre of chapitres) {
+      for (const section of chapitre.sections) map.set(cleSection(chapitre.slug, section.id), deriveQuestionsComprehension(chapitre.slug, section.id).length)
     }
     return map
-  }, [chapitre, chapitreFonctionnel, chapitreSlug])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- voir apercusDemonstration ci-dessus.
+  }, [chapitresSlugs.join('|'), levelSlug])
 
   function reglerNiveauHeures(prochainNiveau: NiveauCode, prochainesHeures: string) {
     setNiveau(prochainNiveau)
@@ -200,8 +228,8 @@ export function EvaluationGeneratorPanel({
     const prochainLevelSlug = resoudreLevelSlug(prochainNiveau, prochainesHeures)
     const prochainNiveauEntry = prochainLevelSlug ? LEVELS.find((l) => l.slug === prochainLevelSlug) : undefined
     const prochainChapitre = prochainNiveauEntry?.chapters[0]
-    setChapitreSlug(prochainChapitre?.slug ?? '')
-    setLignes(lignesInitiales(prochainChapitre, prochainChapitre?.slug ?? ''))
+    setChapitresSlugs(prochainChapitre ? [prochainChapitre.slug] : [])
+    setLignes(lignesInitiales(prochainChapitre ? [prochainChapitre] : []))
     setUrlGeneree(null)
   }
 
@@ -209,10 +237,18 @@ export function EvaluationGeneratorPanel({
     reglerNiveauHeures(prochain, HEURES_PAR_NIVEAU[prochain][0] ?? '')
   }
 
-  function changerChapitre(slug: string) {
-    setChapitreSlug(slug)
-    const prochainChapitre = niveauEntry?.chapters.find((c) => c.slug === slug)
-    setLignes(lignesInitiales(prochainChapitre, slug))
+  /** Coche/décoche UN chapitre dans la sélection multi-chapitres — `setLignes` AJOUTE (nouvelles
+   * lignes à zéro, `lignesInitiales`) ou RETIRE (toutes les lignes de ce chapitre) sans jamais
+   * toucher aux lignes des autres chapitres déjà cochés : les comptages déjà saisis ailleurs
+   * survivent au basculement d'un chapitre voisin. */
+  function basculerChapitre(slug: string) {
+    const etaitCoche = chapitresSlugs.includes(slug)
+    setChapitresSlugs((prev) => (etaitCoche ? prev.filter((s) => s !== slug) : [...prev, slug]))
+    setLignes((prev) => {
+      if (etaitCoche) return prev.filter((l) => l.chapitreSlug !== slug)
+      const chapitreObj = niveauEntry?.chapters.find((c) => c.slug === slug)
+      return chapitreObj ? [...prev, ...lignesInitiales([chapitreObj])] : prev
+    })
     setUrlGeneree(null)
   }
 
@@ -220,18 +256,20 @@ export function EvaluationGeneratorPanel({
     setProcessusActif(processus)
   }
 
-  function mettreAJourLigne(sectionId: string, type: TypeQuestionEvaluation, cle: string | undefined, patch: Partial<LigneSelection>) {
-    setLignes((prev) => prev.map((l) => (l.sectionId === sectionId && l.type === type && l.cle === cle ? { ...l, ...patch } : l)))
+  function mettreAJourLigne(chapitreSlug: string, sectionId: string, type: TypeQuestionEvaluation, cle: string | undefined, patch: Partial<LigneSelection>) {
+    setLignes((prev) =>
+      prev.map((l) => (l.chapitreSlug === chapitreSlug && l.sectionId === sectionId && l.type === type && l.cle === cle ? { ...l, ...patch } : l)),
+    )
     setUrlGeneree(null)
   }
 
   /** Met à jour le nombre d'exercices d'UNE famille/variante précise, pour UN générateur précis
    * (ligne `type==='exercice'`, `cle===generatorId`) — `nombre` de la ligne reste toujours la
    * somme de `parVariante` (voir `sommeParVariante`), jamais éditable directement pour ce type. */
-  function mettreAJourVariante(sectionId: string, generatorId: string, varianteId: string, nombre: number) {
+  function mettreAJourVariante(chapitreSlug: string, sectionId: string, generatorId: string, varianteId: string, nombre: number) {
     setLignes((prev) =>
       prev.map((l) => {
-        if (l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
+        if (l.chapitreSlug !== chapitreSlug || l.sectionId !== sectionId || l.type !== 'exercice' || l.cle !== generatorId) return l
         const parVariante = { ...l.parVariante, [varianteId]: nombre }
         return { ...l, parVariante, nombre: sommeParVariante(parVariante) }
       }),
@@ -243,12 +281,15 @@ export function EvaluationGeneratorPanel({
   const totalPoints = lignes.reduce((total, l) => total + l.points * l.nombre, 0)
 
   function genererEvaluation() {
-    if (!chapitre || !levelSlug) return
-    const titreFinal = titre || `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitre.title}`
+    if (chapitres.length === 0 || !levelSlug) return
+    const titreFinal =
+      titre ||
+      (chapitres.length === 1
+        ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
+        : `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`)
     const niveauLabel = niveauEntry?.label ?? niveau
     const url = buildEvaluationUrl(
       levelSlug,
-      chapitreSlug,
       {
         numero: estExercice ? undefined : numero,
         date,
@@ -262,7 +303,7 @@ export function EvaluationGeneratorPanel({
         mode,
       },
       lignes,
-      chapitre.sections,
+      chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections })),
     )
     if (!url) {
       setErreur('Coche au moins une question (nombre > 0) avant de générer.')
@@ -293,7 +334,11 @@ export function EvaluationGeneratorPanel({
 
       {verrouille && (
         <p className="admin-eval-chapitre-verrouille">
-          {niveauEntry?.label ?? niveau} — Chapitre {chapitre ? `${chapitre.chapterNumber}. ${chapitre.title}` : verrouille.chapitreSlug}
+          {niveauEntry?.label ?? niveau} — Chapitre{' '}
+          {(() => {
+            const c = niveauEntry?.chapters.find((c) => c.slug === verrouille.chapitreSlug)
+            return c ? `${c.chapterNumber}. ${c.title}` : verrouille.chapitreSlug
+          })()}
         </p>
       )}
 
@@ -331,16 +376,29 @@ export function EvaluationGeneratorPanel({
               </select>
             </div>
             <div className="admin-eval-tf admin-eval-tf-chapitre">
-              <label htmlFor="eval-chapitre">Chapitre</label>
-              <select id="eval-chapitre" value={chapitreSlug} onChange={(e) => changerChapitre(e.target.value)} disabled={!niveauEntry}>
-                {!niveauEntry && <option value="">Aucun chapitre disponible pour l'instant</option>}
-                {niveauEntry?.chapters.map((c) => (
-                  <option key={c.slug} value={c.slug} disabled={!estChapitreFonctionnel(levelSlug, c.slug)}>
-                    {c.chapterNumber}. {c.title}
-                    {estChapitreFonctionnel(levelSlug, c.slug) ? '' : ' (bientôt)'}
-                  </option>
-                ))}
-              </select>
+              <label id="eval-chapitres-label">Chapitres (plusieurs possibles)</label>
+              {!niveauEntry ? (
+                <p className="admin-eval-indisponible">Aucun chapitre disponible pour l'instant.</p>
+              ) : (
+                <div className="admin-eval-chapitres-chips" role="group" aria-labelledby="eval-chapitres-label">
+                  {niveauEntry.chapters.map((c) => {
+                    const fonctionnel = estChapitreFonctionnel(levelSlug, c.slug)
+                    return (
+                      <button
+                        key={c.slug}
+                        type="button"
+                        className="admin-eval-chapitre-chip"
+                        aria-pressed={chapitresSlugs.includes(c.slug)}
+                        disabled={!fonctionnel}
+                        onClick={() => basculerChapitre(c.slug)}
+                      >
+                        {c.chapterNumber}. {c.title}
+                        {fonctionnel ? '' : ' (bientôt)'}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
             <span className="admin-eval-divider" />
           </>
@@ -361,7 +419,13 @@ export function EvaluationGeneratorPanel({
           <input
             id="eval-titre"
             type="text"
-            placeholder={chapitre ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitre.title}` : 'Titre'}
+            placeholder={
+              chapitres.length === 1
+                ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
+                : chapitres.length > 1
+                  ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`
+                  : 'Titre'
+            }
             value={titre}
             onChange={(e) => setTitre(e.target.value)}
           />
@@ -414,15 +478,17 @@ export function EvaluationGeneratorPanel({
         </p>
       )}
 
-      {!chapitreFonctionnel && (
+      {chapitres.length === 0 && (
         <p className="admin-eval-indisponible">
           {verrouille
             ? "Ce chapitre n'a pas encore de feuille d'exercices disponible — reviens bientôt."
-            : "Ce chapitre n'est pas encore câblé côté plateforme-maths — reviens sur le chapitre pilote ci-dessus."}
+            : chapitresSlugs.length === 0
+              ? 'Coche au moins un chapitre ci-dessus.'
+              : "Aucun des chapitres cochés n'est encore câblé côté plateforme-maths — reviens sur le chapitre pilote ci-dessus."}
         </p>
       )}
 
-      {chapitreFonctionnel && chapitre && (
+      {chapitres.length > 0 && (
         <>
           <div className="admin-eval-processus-bar" role="radiogroup" aria-label="Processus">
             {([1, 2, 3] as const).map((processus) => (
@@ -446,7 +512,7 @@ export function EvaluationGeneratorPanel({
             if (lignesProcessus.length === 0) {
               return (
                 <p className="admin-eval-indisponible" key={processus}>
-                  Aucun exercice de ce type dans ce chapitre pour l'instant.
+                  Aucun exercice de ce type dans {chapitres.length > 1 ? 'ces chapitres' : 'ce chapitre'} pour l'instant.
                 </p>
               )
             }
@@ -464,91 +530,116 @@ export function EvaluationGeneratorPanel({
                     </tr>
                   </thead>
                   <tbody>
-                    {chapitre.sections.map((section) => {
-                      const lignesSection = lignes.filter((l) => l.sectionId === section.id && l.processus === processus)
-                      if (lignesSection.length === 0) return null
+                    {chapitres.map((chapitreCourant) => {
+                      const lignesChapitre = lignes.filter((l) => l.chapitreSlug === chapitreCourant.slug && l.processus === processus)
+                      if (lignesChapitre.length === 0) return null
                       return (
-                        <Fragment key={section.id}>
-                          <tr className="admin-eval-section-row">
-                            <td colSpan={estExercice ? 3 : 4}>
-                              {section.number}. {section.title}
-                            </td>
-                          </tr>
-                          {lignesSection.flatMap((ligne) => {
-                            if (ligne.type === 'exercice') {
-                              const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
-                              const generateur = generateursPourSection(chapitreSlug, section.id).find((g) => g.generatorId === ligne.cle)
-                              return catalogue.map((variante, index) => (
-                                <tr className="admin-eval-row" key={(ligne.cle ?? '') + variante.id}>
-                                  <td>
-                                    {generateur?.label || LABEL_TYPE.exercice} —{' '}
-                                    <span className="admin-eval-variante-label">{variante.label}</span>
-                                  </td>
-                                  <td>—</td>
-                                  <td className="admin-eval-col-nombre">
-                                    <Stepper
-                                      valeur={ligne.parVariante?.[variante.id] ?? 0}
-                                      max={MAX_EXERCICE}
-                                      onChange={(v) => mettreAJourVariante(section.id, ligne.cle ?? '', variante.id, v)}
-                                    />
-                                  </td>
-                                  {!estExercice && (
-                                    <td>
-                                      {index === 0 && (
-                                        <input
-                                          type="number"
-                                          min={1}
-                                          className="admin-eval-points-input"
-                                          value={ligne.points}
-                                          onChange={(e) =>
-                                            mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })
-                                          }
-                                          title="Points / question, toutes variantes de ce générateur"
-                                        />
-                                      )}
-                                    </td>
-                                  )}
-                                </tr>
-                              ))
-                            }
-
-                            const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
-                            const disponibles = estBanqueFixe
-                              ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(section.id) ?? 0
-                              : MAX_VRAI_FAUX
-                            const indisponible = estBanqueFixe && disponibles === 0
-                            const theme =
-                              ligne.type === 'vraiFaux' ? themesPourSection(chapitreSlug, section.id).find((t) => t.quizTheme === ligne.cle) : undefined
+                        <Fragment key={chapitreCourant.slug}>
+                          {chapitres.length > 1 && (
+                            <tr className="admin-eval-chapitre-row">
+                              <td colSpan={estExercice ? 3 : 4}>
+                                {chapitreCourant.chapterNumber}. {chapitreCourant.title}
+                              </td>
+                            </tr>
+                          )}
+                          {chapitreCourant.sections.map((section) => {
+                            const lignesSection = lignesChapitre.filter((l) => l.sectionId === section.id)
+                            if (lignesSection.length === 0) return null
                             return (
-                              <tr className="admin-eval-row" key={ligne.type + (ligne.cle ?? '')}>
-                                <td>
-                                  {LABEL_TYPE[ligne.type]}
-                                  {theme?.label && ` — ${theme.label}`}
-                                  {indisponible &&
-                                    (ligne.type === 'demonstration' ? ' — aucune démonstration pour ce point' : ' — aucune question pour ce point')}
-                                </td>
-                                <td>{estBanqueFixe ? disponibles : '—'}</td>
-                                <td className="admin-eval-col-nombre">
-                                  <Stepper
-                                    valeur={ligne.nombre}
-                                    max={disponibles}
-                                    disabled={indisponible}
-                                    onChange={(v) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { nombre: v })}
-                                  />
-                                </td>
-                                {!estExercice && (
-                                  <td>
-                                    <input
-                                      type="number"
-                                      min={1}
-                                      className="admin-eval-points-input"
-                                      value={ligne.points}
-                                      disabled={indisponible}
-                                      onChange={(e) => mettreAJourLigne(section.id, ligne.type, ligne.cle, { points: Number(e.target.value) || 1 })}
-                                    />
+                              <Fragment key={chapitreCourant.slug + section.id}>
+                                <tr className="admin-eval-section-row">
+                                  <td colSpan={estExercice ? 3 : 4}>
+                                    {section.number}. {section.title}
                                   </td>
-                                )}
-                              </tr>
+                                </tr>
+                                {lignesSection.flatMap((ligne) => {
+                                  if (ligne.type === 'exercice') {
+                                    const catalogue = catalogueVariantesExercice(ligne.cle as IdGenerateurPilote)
+                                    const generateur = generateursPourSection(chapitreCourant.slug, section.id).find((g) => g.generatorId === ligne.cle)
+                                    return catalogue.map((variante, index) => (
+                                      <tr className="admin-eval-row" key={(ligne.cle ?? '') + variante.id}>
+                                        <td>
+                                          {generateur?.label || LABEL_TYPE.exercice} —{' '}
+                                          <span className="admin-eval-variante-label">{variante.label}</span>
+                                        </td>
+                                        <td>—</td>
+                                        <td className="admin-eval-col-nombre">
+                                          <Stepper
+                                            valeur={ligne.parVariante?.[variante.id] ?? 0}
+                                            max={MAX_EXERCICE}
+                                            onChange={(v) => mettreAJourVariante(chapitreCourant.slug, section.id, ligne.cle ?? '', variante.id, v)}
+                                          />
+                                        </td>
+                                        {!estExercice && (
+                                          <td>
+                                            {index === 0 && (
+                                              <input
+                                                type="number"
+                                                min={1}
+                                                className="admin-eval-points-input"
+                                                value={ligne.points}
+                                                onChange={(e) =>
+                                                  mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, {
+                                                    points: Number(e.target.value) || 1,
+                                                  })
+                                                }
+                                                title="Points / question, toutes variantes de ce générateur"
+                                              />
+                                            )}
+                                          </td>
+                                        )}
+                                      </tr>
+                                    ))
+                                  }
+
+                                  const estBanqueFixe = ligne.type === 'demonstration' || ligne.type === 'comprehension'
+                                  const disponibles = estBanqueFixe
+                                    ? (ligne.type === 'demonstration' ? apercusDemonstration : apercusComprehension).get(
+                                        cleSection(chapitreCourant.slug, section.id),
+                                      ) ?? 0
+                                    : MAX_VRAI_FAUX
+                                  const indisponible = estBanqueFixe && disponibles === 0
+                                  const theme =
+                                    ligne.type === 'vraiFaux'
+                                      ? themesPourSection(chapitreCourant.slug, section.id).find((t) => t.quizTheme === ligne.cle)
+                                      : undefined
+                                  return (
+                                    <tr className="admin-eval-row" key={ligne.type + (ligne.cle ?? '')}>
+                                      <td>
+                                        {LABEL_TYPE[ligne.type]}
+                                        {theme?.label && ` — ${theme.label}`}
+                                        {indisponible &&
+                                          (ligne.type === 'demonstration' ? ' — aucune démonstration pour ce point' : ' — aucune question pour ce point')}
+                                      </td>
+                                      <td>{estBanqueFixe ? disponibles : '—'}</td>
+                                      <td className="admin-eval-col-nombre">
+                                        <Stepper
+                                          valeur={ligne.nombre}
+                                          max={disponibles}
+                                          disabled={indisponible}
+                                          onChange={(v) => mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, { nombre: v })}
+                                        />
+                                      </td>
+                                      {!estExercice && (
+                                        <td>
+                                          <input
+                                            type="number"
+                                            min={1}
+                                            className="admin-eval-points-input"
+                                            value={ligne.points}
+                                            disabled={indisponible}
+                                            onChange={(e) =>
+                                              mettreAJourLigne(chapitreCourant.slug, section.id, ligne.type, ligne.cle, {
+                                                points: Number(e.target.value) || 1,
+                                              })
+                                            }
+                                          />
+                                        </td>
+                                      )}
+                                    </tr>
+                                  )
+                                })}
+                              </Fragment>
                             )
                           })}
                         </Fragment>
