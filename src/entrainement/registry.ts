@@ -52,6 +52,9 @@ const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapit
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
 const CH_4E_STATISTIQUE_DESCRIPTIVE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'statistique-descriptive', chapitreTitle: 'Statistique descriptive à une variable' }
 const CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES: ChapitreInfo = { chantier: '4e', chapitreSlug: 'cercle-trigonometrique-triangles', chapitreTitle: 'Cercle trigonométrique & triangles quelconques' }
+const CH_4E_CALCUL_VECTORIEL: ChapitreInfo = { chantier: '4e', chapitreSlug: 'calcul-vectoriel', chapitreTitle: 'Calcul vectoriel' }
+const CH_4E_GEOMETRIE_ANALYTIQUE_PLANE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'geometrie-analytique-plane', chapitreTitle: 'Géométrie analytique plane' }
+const CH_4E_GEOMETRIE_DANS_ESPACE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'geometrie-dans-espace', chapitreTitle: "Géométrie dans l'espace" }
 
 export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   // --- 4e, chapitre 1 : La fonction du second degré ---
@@ -99,6 +102,41 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen37: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppBienaymeTchebychev').then((m) => ({ default: m.AppBienaymeTchebychev }))),
   gen38: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppComparaisonSeries').then((m) => ({ default: m.AppComparaisonSeries }))),
   gen59: entree(CH_4E_STATISTIQUE_DESCRIPTIVE, () => import('./4e/AppQuizStatistiqueDescriptive').then((m) => ({ default: m.AppQuizStatistiqueDescriptive }))),
+
+  // --- 4e, chapitre 6 : Calcul vectoriel ---
+  gen20: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppPointVectoriel').then((m) => ({ default: m.AppPointVectoriel }))),
+  gen21: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppRelationVectorielle').then((m) => ({ default: m.AppRelationVectorielle }))),
+  gen22: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppCombinaisonVecteurs').then((m) => ({ default: m.AppCombinaisonVecteurs }))),
+  gen23: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppConstructionVectorielle').then((m) => ({ default: m.AppConstructionVectorielle }))),
+  gen24: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppColinearite').then((m) => ({ default: m.AppColinearite }))),
+  gen25: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppOrthogonalite').then((m) => ({ default: m.AppOrthogonalite }))),
+  gen26: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppNormeDistance').then((m) => ({ default: m.AppNormeDistance }))),
+  gen27: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppReductionVectorielle').then((m) => ({ default: m.AppReductionVectorielle }))),
+  gen28: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppComparaisonVecteurs').then((m) => ({ default: m.AppComparaisonVecteurs }))),
+  gen29: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppApplicationPhysique').then((m) => ({ default: m.AppApplicationPhysique }))),
+  gen64: entree(CH_4E_CALCUL_VECTORIEL, () => import('./4e/AppQuizCalculVectoriel').then((m) => ({ default: m.AppQuizCalculVectoriel }))),
+
+  // --- 4e, chapitre 7 : Géométrie analytique plane ---
+  gen42: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppEquationDroite').then((m) => ({ default: m.AppEquationDroite }))),
+  gen43: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppLectureGraphiqueDroite').then((m) => ({ default: m.AppLectureGraphiqueDroite }))),
+  gen44: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppConstructionDroite').then((m) => ({ default: m.AppConstructionDroite }))),
+  gen45: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppRelationsDroites').then((m) => ({ default: m.AppRelationsDroites }))),
+  gen46: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppCaracteristiquesDroite').then((m) => ({ default: m.AppCaracteristiquesDroite }))),
+  gen47: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppDistanceDroite').then((m) => ({ default: m.AppDistanceDroite }))),
+  gen48: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppIntersectionDroites').then((m) => ({ default: m.AppIntersectionDroites }))),
+  gen49: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppEquationCercle').then((m) => ({ default: m.AppEquationCercle }))),
+  gen50: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppEquationCercleDeveloppee').then((m) => ({ default: m.AppEquationCercleDeveloppee }))),
+  gen51: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppEquationParabole').then((m) => ({ default: m.AppEquationParabole }))),
+  gen52: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppEquationParaboleDeveloppee').then((m) => ({ default: m.AppEquationParaboleDeveloppee }))),
+  gen53: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppConstructionParabole').then((m) => ({ default: m.AppConstructionParabole }))),
+  gen54: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppLieuxGeometriques').then((m) => ({ default: m.AppLieuxGeometriques }))),
+  gen65: entree(CH_4E_GEOMETRIE_ANALYTIQUE_PLANE, () => import('./4e/AppQuizGeometrieAnalytique').then((m) => ({ default: m.AppQuizGeometrieAnalytique }))),
+
+  // --- 4e, chapitre 8 : Géométrie dans l'espace ---
+  gen39: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppPositionDroitePlan').then((m) => ({ default: m.AppPositionDroitePlan }))),
+  gen40: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppSectionPlaneSolide').then((m) => ({ default: m.AppSectionPlaneSolide }))),
+  gen41: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppOmbreSoleil').then((m) => ({ default: m.AppOmbreSoleil }))),
+  gen66: entree(CH_4E_GEOMETRIE_DANS_ESPACE, () => import('./4e/AppQuizGeometrieEspace').then((m) => ({ default: m.AppQuizGeometrieEspace }))),
 
   // --- 5e, chapitre 1 : Fonctions : rappels et compléments ---
   '5gen1': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen1').then((m) => ({ default: m.App5gen1 }))),
