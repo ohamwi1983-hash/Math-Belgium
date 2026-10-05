@@ -42,6 +42,8 @@ function entree(chapitre: ChapitreInfo, importComponent: EntrainementEntry['impo
 
 const CH_4E_FONCTION_SECOND_DEGRE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'fonction-second-degre', chapitreTitle: 'La fonction du second degré' }
 const CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'equations-inequations-second-degre', chapitreTitle: 'Équations et inéquations du second degré' }
+const CH_5E_FONCTIONS_COMPOSEES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'fonctions-composees', chapitreTitle: 'Fonctions : rappels et compléments' }
+const CH_5E_TRIGONOMETRIE: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'trigonometrie', chapitreTitle: 'Trigonométrie' }
 
 export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   // --- 4e, chapitre 1 : La fonction du second degré ---
@@ -60,4 +62,23 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   gen5: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppSignesProduit').then((m) => ({ default: m.AppSignesProduit }))),
   gen6: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppInequationRationnelle').then((m) => ({ default: m.AppInequationRationnelle }))),
   gen61: entree(CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE, () => import('./4e/AppQuizEquationsSecondDegre').then((m) => ({ default: m.AppQuizEquationsSecondDegre }))),
+
+  // --- 5e, chapitre 1 : Fonctions : rappels et compléments ---
+  '5gen1': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen1').then((m) => ({ default: m.App5gen1 }))),
+  '5gen2': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen2').then((m) => ({ default: m.App5gen2 }))),
+  '5gen3': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen3').then((m) => ({ default: m.App5gen3 }))),
+  '5gen4': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen4').then((m) => ({ default: m.App5gen4 }))),
+  '5gen5': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen5').then((m) => ({ default: m.App5gen5 }))),
+  '5gen39': entree(CH_5E_FONCTIONS_COMPOSEES, () => import('./5e-4h/App5gen39').then((m) => ({ default: m.App5gen39 }))),
+
+  // --- 5e, chapitre 2 : Trigonométrie ---
+  '5gen6': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen6').then((m) => ({ default: m.App5gen6 }))),
+  '5gen7': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen7').then((m) => ({ default: m.App5gen7 }))),
+  '5gen8': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen8').then((m) => ({ default: m.App5gen8 }))),
+  '5gen9': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen9').then((m) => ({ default: m.App5gen9 }))),
+  '5gen10': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen10').then((m) => ({ default: m.App5gen10 }))),
+  '5gen11': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen11').then((m) => ({ default: m.App5gen11 }))),
+  '5gen12': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen12').then((m) => ({ default: m.App5gen12 }))),
+  '5gen13': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen13').then((m) => ({ default: m.App5gen13 }))),
+  '5gen40': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen40').then((m) => ({ default: m.App5gen40 }))),
 }
