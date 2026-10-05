@@ -44,6 +44,9 @@ const CH_4E_FONCTION_SECOND_DEGRE: ChapitreInfo = { chantier: '4e', chapitreSlug
 const CH_4E_EQUATIONS_INEQUATIONS_SECOND_DEGRE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'equations-inequations-second-degre', chapitreTitle: 'Équations et inéquations du second degré' }
 const CH_5E_FONCTIONS_COMPOSEES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'fonctions-composees', chapitreTitle: 'Fonctions : rappels et compléments' }
 const CH_5E_TRIGONOMETRIE: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'trigonometrie', chapitreTitle: 'Trigonométrie' }
+const CH_5E_SUITES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'suites', chapitreTitle: 'Suites' }
+const CH_5E_LIMITES_ASYMPTOTES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'limites-asymptotes', chapitreTitle: 'Limites et asymptotes' }
+const CH_5E_DERIVEES_APPLICATIONS: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'derivees-applications', chapitreTitle: 'Dérivées et applications' }
 const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-reciproques-cyclometriques', chapitreTitle: 'Fonctions réciproques & cyclométriques' }
 const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-exponentielles', chapitreTitle: 'Fonctions exponentielles' }
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
@@ -115,6 +118,37 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '5gen12': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen12').then((m) => ({ default: m.App5gen12 }))),
   '5gen13': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen13').then((m) => ({ default: m.App5gen13 }))),
   '5gen40': entree(CH_5E_TRIGONOMETRIE, () => import('./5e-4h/App5gen40').then((m) => ({ default: m.App5gen40 }))),
+
+  // --- 5e, chapitre 3 : Suites ---
+  '5gen14': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen14').then((m) => ({ default: m.App5gen14 }))),
+  '5gen15': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen15').then((m) => ({ default: m.App5gen15 }))),
+  '5gen16': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen16').then((m) => ({ default: m.App5gen16 }))),
+  '5gen17': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen17').then((m) => ({ default: m.App5gen17 }))),
+  '5gen18': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen18').then((m) => ({ default: m.App5gen18 }))),
+  '5gen19': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen19').then((m) => ({ default: m.App5gen19 }))),
+  '5gen41': entree(CH_5E_SUITES, () => import('./5e-4h/App5gen41').then((m) => ({ default: m.App5gen41 }))),
+
+  // --- 5e, chapitre 4 : Limites et asymptotes ---
+  '5gen20': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen20').then((m) => ({ default: m.App5gen20 }))),
+  '5gen21': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen21').then((m) => ({ default: m.App5gen21 }))),
+  '5gen22': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen22').then((m) => ({ default: m.App5gen22 }))),
+  '5gen23': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen23').then((m) => ({ default: m.App5gen23 }))),
+  '5gen24': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen24').then((m) => ({ default: m.App5gen24 }))),
+  '5gen42': entree(CH_5E_LIMITES_ASYMPTOTES, () => import('./5e-4h/App5gen42').then((m) => ({ default: m.App5gen42 }))),
+
+  // --- 5e, chapitre 5 : Dérivées et applications ---
+  '5gen25': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen25').then((m) => ({ default: m.App5gen25 }))),
+  '5gen26': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen26').then((m) => ({ default: m.App5gen26 }))),
+  '5gen27': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen27').then((m) => ({ default: m.App5gen27 }))),
+  '5gen28': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen28').then((m) => ({ default: m.App5gen28 }))),
+  '5gen29': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen29').then((m) => ({ default: m.App5gen29 }))),
+  '5gen30': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen30').then((m) => ({ default: m.App5gen30 }))),
+  '5gen31': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen31').then((m) => ({ default: m.App5gen31 }))),
+  '5gen32': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen32').then((m) => ({ default: m.App5gen32 }))),
+  '5gen33': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen33').then((m) => ({ default: m.App5gen33 }))),
+  '5gen34': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen34').then((m) => ({ default: m.App5gen34 }))),
+  '5gen35': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen35').then((m) => ({ default: m.App5gen35 }))),
+  '5gen43': entree(CH_5E_DERIVEES_APPLICATIONS, () => import('./5e-4h/App5gen43').then((m) => ({ default: m.App5gen43 }))),
 
   // --- 6e, chapitre 1 : Fonctions réciproques & cyclométriques ---
   '6gen1': entree(CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES, () => import('./6e-6h/App6gen1').then((m) => ({ default: m.App6gen1 }))),

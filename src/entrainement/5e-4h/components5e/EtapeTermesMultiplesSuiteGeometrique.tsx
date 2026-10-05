@@ -1,0 +1,111 @@
+import { useState } from "react";
+import type { ExercicePrincipalSuiteGeometrique, ExerciceSuiteGeometrique } from "../core5e/suitesGeometriques.types";
+import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
+import {
+  consigneGenerale,
+  consignePhase,
+  formatTermesDonneesLatex,
+  labelsCalculerTermesAlgebrique,
+  labelsTermesProches,
+  texteAideNiveau1,
+  texteAideNiveau2,
+} from "../ui5e/formatSuiteGeometrique";
+import { Katex } from "../components/Katex";
+import { BoutonAide } from "./BoutonAide";
+import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
+import { formatMessageErreur } from "../ui/messageErreur";
+import type { StatutVerification } from "../moteur/statutVerification";
+
+interface Props {
+  exercice: ExerciceSuiteGeometrique;
+  phase: PhaseSuiteGeometrique;
+  tentativesUtilisees: number;
+  tentativesMax: number;
+  niveauAide: number;
+  niveauAideMax: number;
+  onActiverAide: () => void;
+  onValider: (textes: string[]) => void;
+  /** Statut à 3 valeurs (A.1) calculé côté PRÉSENTATION uniquement — optionnel. */
+  diagnostiquer?: (textes: string[]) => StatutVerification;
+  /** Diagnostic INDÉPENDANT par champ, index par index (A.2, surlignage rouge) — chaque champ de
+   * cet écran porte sa propre cible (ou son propre ensemble de cibles interchangeables pour
+   * "termesConsecutifsMoyenneRiche"), jamais une seule vérification globale. */
+  diagnostiquerChamp?: (index: number, valeur: string) => StatutVerification;
+}
+
+function labelsPourPhase(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string[] {
+  if (phase === "calculerTermesAlgebrique") return labelsCalculerTermesAlgebrique(exercice);
+  return labelsTermesProches(exercice as ExercicePrincipalSuiteGeometrique);
+}
+
+/** Écran à PLUSIEURS champs numériques FIXES (jamais add-as-needed) — réutilisé par
+ * "termesProches"/B1/B2 (4 indices, labels LaTeX) et "calculerTermesAlgebrique" (1 ou 2 champs
+ * selon la famille/le sous-cas, labels LaTeX également — voir `labelsCalculerTermesAlgebrique`). */
+export function EtapeTermesMultiplesSuiteGeometrique({
+  exercice,
+  phase,
+  tentativesUtilisees,
+  tentativesMax,
+  niveauAide,
+  niveauAideMax,
+  onActiverAide,
+  onValider,
+  diagnostiquer,
+  diagnostiquerChamp,
+}: Props) {
+  const labels = labelsPourPhase(exercice, phase);
+  const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
+  const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
+  const montrerErreurs = tentativesUtilisees > 0;
+  const complet = valeurs.every((v) => v.trim() !== "");
+  const apresEchec = tentativesUtilisees > 0;
+
+  function modifier(i: number, valeur: string) {
+    setValeurs((arr) => arr.map((v, j) => (j === i ? valeur : v)));
+  }
+  function valider() {
+    if (!complet) return;
+    if (diagnostiquer) setDernierStatut(diagnostiquer(valeurs));
+    onValider(valeurs);
+  }
+
+  const enLatex = phase.startsWith("termesProches") || phase === "calculerTermesAlgebrique";
+  const aide2 = texteAideNiveau2(exercice, phase);
+
+  return (
+    <div>
+      <p className="prompt-text">{consigneGenerale(exercice)}</p>
+      <div className="equation-box equation-box-donnees">
+        {formatTermesDonneesLatex(exercice).map((frag, i) => (
+          <Katex key={i} expression={frag} />
+        ))}
+      </div>
+      <EtatActuelSuiteGeometrique exercice={exercice} phase={phase} />
+      <p className="prompt-text">{consignePhase(exercice, phase)}</p>
+      {labels.map((label, i) => {
+        const champErronee = apresEchec && !!diagnostiquerChamp && diagnostiquerChamp(i, valeurs[i]) !== "correct";
+        return (
+          <div key={i} className="field field-inline">
+            <label className="field-label field-label-minuscule">{enLatex ? <Katex expression={label} /> : label}</label>
+            <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
+          </div>
+        );
+      })}
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+        Valider
+      </button>
+      {montrerErreurs && (
+        <p className="alert-error" role="alert">
+          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+        </p>
+      )}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, phase)} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
+    </div>
+  );
+}
