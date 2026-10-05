@@ -241,7 +241,7 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-composees', sectionId: 'contexte', generatorId: '5gen5', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'arcs-secteurs', generatorId: '5gen6', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'polygones', generatorId: '5gen7', label: '' },
-  { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', generatorId: '5gen12', label: '' },
+  { chapitreSlug: 'trigonometrie', sectionId: 'geometrie-cercle', generatorId: '5gen12', label: '', processus: 3 },
   { chapitreSlug: 'trigonometrie', sectionId: 'parametres', generatorId: '5gen8', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'lecture-graphique', generatorId: '5gen9', label: '' },
   { chapitreSlug: 'trigonometrie', sectionId: 'extremums', generatorId: '5gen11', label: '' },
