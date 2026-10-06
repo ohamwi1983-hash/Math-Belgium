@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { estModeDevActif } from "../devMode";
 
 export interface OptionVarianteDev {
   id: string;
@@ -12,16 +11,17 @@ interface Props {
 }
 
 /**
- * Panneau dev-only "forcer une variante" — voir CLAUDE.md, "Panneau dev — forcer une variante".
- * Réutilisé tel quel par les 58 générateurs de 4e qui exposent un axe de variante/famille/catégorie
- * de plus haut niveau (`CATALOGUE_VARIANTES`/`CATALOGUE_FAMILLES` + `construireAvecVarianteId`/
- * `construireAvecFamilleId`, voir CLAUDE.md "Catalogue de variantes"). Rend `null` hors mode dev —
- * jamais visible sur l'URL normale donnée aux élèves.
+ * Panneau "forcer une variante" — réutilisé tel quel par les 58 générateurs de 4e qui exposent un
+ * axe de variante/famille/catégorie de plus haut niveau (`CATALOGUE_VARIANTES`/
+ * `CATALOGUE_FAMILLES` + `construireAvecVarianteId`/`construireAvecFamilleId`, voir CLAUDE.md
+ * "Catalogue de variantes"). Toujours visible (plus seulement en mode dev — changement demandé
+ * explicitement pour que ce choix soit accessible directement depuis le lien « S'entraîner » d'un
+ * chapitre, sans manipulation d'URL). Rend `null` seulement si `options` est vide.
  */
 export function SelecteurVarianteDev({ options, onGenerer }: Props) {
   const [id, setId] = useState(options[0]?.id ?? "");
 
-  if (!estModeDevActif() || options.length === 0) return null;
+  if (options.length === 0) return null;
 
   return (
     <div className="selecteur-variante-dev">

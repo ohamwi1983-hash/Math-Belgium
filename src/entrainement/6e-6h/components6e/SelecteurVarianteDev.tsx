@@ -11,24 +11,18 @@ interface Props {
 }
 
 /**
- * Panneau DEV-ONLY "forcer une variante" — jamais destiné aux élèves, réutilisé par tous les
- * générateurs `6genX` du chantier 6e FWB (6h). Force la génération d'un exercice selon la
- * famille/variante de plus haut niveau choisie dans le menu déroulant, plutôt que le tirage
- * aléatoire habituel — utile pour tester manuellement une famille précise sans retirer jusqu'à la
- * voir apparaître.
- *
- * Actif dans deux cas SEULEMENT : en local (`import.meta.env.DEV`, toujours vrai sous `npm run
- * dev`), OU sur le déploiement de production via le paramètre d'URL `?dev=1`. Sans l'un ou
- * l'autre, rend `null` — jamais visible par défaut sur l'URL normale donnée aux élèves
- * (`/6e-6h`). Le paramètre `?dev=1` reste lu dynamiquement (jamais figé au premier rendu) via
- * `window.location.search` à chaque rendu du composant : un simple ajout du paramètre à l'URL,
- * sans recharger le module, suffit à l'activer.
+ * Panneau "forcer une variante", réutilisé par tous les générateurs `6genX` du chantier 6e FWB
+ * (6h). Force la génération d'un exercice selon la famille/variante de plus haut niveau choisie
+ * dans le menu déroulant, plutôt que le tirage aléatoire habituel — toujours visible (plus
+ * seulement en mode dev, `import.meta.env.DEV`/`?dev=1` — changement demandé explicitement pour
+ * que ce choix soit accessible directement depuis le lien « S'entraîner » d'un chapitre, sans
+ * manipulation d'URL). Rend `null` seulement si `options` est vide (aucun axe de variante
+ * identifiable pour ce générateur).
  */
 export function SelecteurVarianteDev({ options, onGenerer }: Props) {
   const [id, setId] = useState(options[0]?.id ?? "");
 
-  const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
-  if (!modeDevActif || options.length === 0) return null;
+  if (options.length === 0) return null;
 
   return (
     <div className="selecteur-variante-dev">
