@@ -322,6 +322,7 @@ export const fonctionsExponentielles: ChapterContent = {
               'directement ce qui vient dans la section suivante.',
           ],
         },
+        { kind: 'video', title: 'Calcul de limites', youtubeId: '6s2MCrsEoTw' },
         {
           kind: 'entrainement',
           title: 'Calcul de limites',
@@ -696,6 +697,7 @@ export const fonctionsExponentielles: ChapterContent = {
               "entièrement sous l'axe — la fonction décroît partout.",
           },
         },
+        { kind: 'video', title: 'Domaine et dérivée', youtubeId: 'M2Bk_FhjiQ4' },
         {
           kind: 'entrainement',
           title: 'Domaine et dérivée',
@@ -772,6 +774,7 @@ export const fonctionsExponentielles: ChapterContent = {
             'impaire en fonction paire ! Applique toujours la règle de la chaîne jusqu\'au ' +
             'bout — signe compris.',
         },
+        { kind: 'video', title: 'Graphique de la dérivée', youtubeId: 'NKY7Nsu1THM' },
         {
           kind: 'entrainement',
           title: 'Graphique de la dérivée',
@@ -946,6 +949,7 @@ export const fonctionsExponentielles: ChapterContent = {
           label: "💡 Reconnaître l'impossible",
           text: "$5 \\cdot 2^x + 3 = 0$ n'a aucune solution : une somme de quantités strictement positives ne peut jamais valoir 0 !",
         },
+        { kind: 'video', title: 'Résoudre une équation exponentielle', youtubeId: 'n7QfEIp463w' },
         {
           kind: 'entrainement',
           title: 'Équations exponentielles',
@@ -1237,6 +1241,7 @@ export const fonctionsExponentielles: ChapterContent = {
               'quantité toujours positive…) peut avoir **ℝ tout entier** comme ensemble-solution.',
           ],
         },
+        { kind: 'video', title: 'Résoudre une inéquation exponentielle', youtubeId: 'KEfl8oqQJMg' },
         {
           kind: 'entrainement',
           title: 'Inéquations exponentielles',
@@ -1483,6 +1488,7 @@ export const fonctionsExponentielles: ChapterContent = {
               'creux) — la fameuse « courbe en cloche »',
           },
         },
+        { kind: 'video', title: 'Étudier une fonction exponentielle', youtubeId: '8yEwf862Z3Q' },
         {
           kind: 'entrainement',
           title: 'Étudier une fonction exponentielle',
@@ -1699,6 +1705,7 @@ export const fonctionsExponentielles: ChapterContent = {
             'à la calculatrice — la seule situation du chapitre où ln intervient vraiment en ' +
             'pratique.',
         },
+        { kind: 'video', title: 'Exponentielles : problèmes', youtubeId: 'b5wBE_3U9nA' },
         {
           kind: 'entrainement',
           title: "Problèmes d'exponentielles",
