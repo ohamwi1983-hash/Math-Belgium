@@ -38,23 +38,33 @@
   // --- Panneau graphe ---------------------------------------------------
   // La longueur du segment violet (0 à x sur l'axe des x) doit être visuellement égale à l'arc
   // balayé sur le cercle, et la flèche verte (valeur de la fonction) doit avoir la même longueur
-  // visuelle sur les deux panneaux — donc la MÊME échelle que le cercle (C_R px par unité) sur les
-  // deux axes, pas une échelle "ajustée à la fenêtre" indépendante. zoneL/zoneH sont donc dérivées
-  // de C_R (et non l'inverse) : zoneL = X_MAX × C_R (px par radian = C_R), zoneH = (plage y de
-  // sin/cos) × C_R (px par unité = C_R, la même fenêtre ±1,4 qu'avant). tan garde une fenêtre bien
-  // plus large (±4, asymptotes) : son échelle reste donc plus petite que C_R sur ce même zoneH —
-  // seule la correspondance sin/cos est demandée ici (celle de la flèche verte en tan se construit
-  // différemment, sur la droite tangente x=1 du panneau cercle, pas sur ce panneau graphe).
+  // visuelle sur les deux panneaux, POUR LES TROIS FONCTIONS — donc la MÊME échelle que le cercle
+  // (C_R px par unité) sur les deux axes, jamais une échelle "ajustée à la fenêtre" indépendante.
+  // zoneL/zoneH sont donc dérivées de C_R (et non l'inverse) : zoneL = X_MAX × C_R (px par radian
+  // = C_R), zoneH = VALEUR_Y_MAX×2 × C_R (px par unité = C_R). Les 3 fonctions PARTAGENT la même
+  // fenêtre ±VALEUR_Y_MAX (tan y compris, resserrée depuis ±4 — voir `tanClamp` plus bas, qui
+  // utilise maintenant cette MÊME borne côté panneau cercle) : une fenêtre propre à tan, plus
+  // large, romprait l'égalité des échelles dès lors que zoneH (hauteur de panneau, en pixels, fixe
+  // pour les 3 fonctions) ne peut correspondre à C_R que pour UNE seule largeur de fenêtre à la
+  // fois.
   var G_MARGE_G = 30, G_MARGE_D = 14, G_MARGE_H = 16, G_MARGE_B = 30;
+  var VALEUR_Y_MAX = 1.4;
   var FENETRES_Y = {
-    sin: { min: -1.4, max: 1.4 },
-    cos: { min: -1.4, max: 1.4 },
-    tan: { min: -4, max: 4 },
+    sin: { min: -VALEUR_Y_MAX, max: VALEUR_Y_MAX },
+    cos: { min: -VALEUR_Y_MAX, max: VALEUR_Y_MAX },
+    tan: { min: -VALEUR_Y_MAX, max: VALEUR_Y_MAX },
   };
   var ZONE_H = (FENETRES_Y.sin.max - FENETRES_Y.sin.min) * C_R;
   var G_LARGEUR = Math.round(G_MARGE_G + G_MARGE_D + X_MAX * C_R);
   var G_HAUTEUR = Math.round(G_MARGE_H + G_MARGE_B + ZONE_H);
   var ASYMPTOTES_TAN = [Math.PI / 2, 3 * Math.PI / 2, 5 * Math.PI / 2];
+
+  // Part (%) de chacun des deux panneaux dans la largeur totale disponible — voir le commentaire
+  // CSS `.panneau:nth-child(...)` plus bas : les deux panneaux doivent rétrécir ENSEMBLE, dans
+  // cette même proportion, à n'importe quelle largeur de conteneur, pour garder la même échelle
+  // (donc les mêmes longueurs visuelles) des deux côtés.
+  var PART_CERCLE_PCT = (C_TAILLE / (C_TAILLE + G_LARGEUR)) * 100;
+  var PART_GRAPHE_PCT = 100 - PART_CERCLE_PCT;
 
   var FN = {
     sin: { f: Math.sin, symbole: "sin(x)" },
@@ -128,14 +138,30 @@
     '<style>' +
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
+    // Les deux .panneau se partagent TOUJOURS la largeur disponible dans la MÊME proportion que
+    // leurs tailles natives (flex-basis en %, grow:0, shrink:1) — jamais une largeur max-width
+    // indépendante par panneau (l'ancienne approche) : sur un écran plus étroit que leur somme
+    // (260+609≈870px, le cas courant sur mobile), un max-width par panneau laisse chacun rétrécir
+    // à SON PROPRE rythme — le panneau cercle (plus étroit, max-width atteint plus tard) finissait
+    // alors affiché à son échelle native pendant que le panneau graphe (plus large) était déjà
+    // comprimé, cassant l'égalité de longueur demandée (flèche verte, segment balayé) dès que le
+    // conteneur passait sous ~870px. Les pourcentages ci-dessous, calculés depuis C_TAILLE et
+    // G_LARGEUR, garantissent le MÊME facteur d'échelle pour les deux SVG à N'IMPORTE QUELLE
+    // largeur de conteneur (voir les constantes `PART_CERCLE_PCT`/`PART_GRAPHE_PCT` ci-dessus) ;
+    // `max-width` reste présent sur chaque SVG pour plafonner à la taille NATIVE (1:1) une fois
+    // l'espace disponible, sans jamais les faire grandir au-delà (plafonnage simultané pour les
+    // deux, par construction des mêmes pourcentages).
     '.panneaux{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:16px;}' +
-    '.panneau{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);padding:6px;}' +
-    '#svg-cercle{width:100%;max-width:260px;height:auto;display:block;}' +
-    // max-width = G_LARGEUR (taille NATIVE du viewBox, jamais un plafond arbitraire plus petit) :
-    // le panneau circulaire (max-width = C_TAILLE) s'affiche déjà à l'échelle 1:1 de son viewBox —
-    // sans ce même principe ici, le panneau graphe serait réduit par ce plafond CSS et ses
-    // longueurs en pixels RÉELS (affichés) ne correspondraient plus à celles du cercle, même si
-    // leurs échelles internes (C_R px/unité) sont égales en unités de viewBox.
+    // Jamais de padding ici (contrairement à une carte ordinaire) : un padding FIXE (px) appliqué
+    // identiquement aux deux panneaux casse la proportion flex-basis ci-dessus — une soustraction
+    // CONSTANTE ne préserve pas un RAPPORT entre deux quantités différentes (basisCercle-12 et
+    // basisGraphe-12 n'ont plus le même rapport que basisCercle et basisGraphe). Bug trouvé par
+    // mesure Playwright (rapport largeur/C_TAILLE ≠ rapport largeur/G_LARGEUR, ~4% d'écart) après
+    // avoir mis en place le partage proportionnel ci-dessus.
+    '.panneau{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);min-width:0;}' +
+    '.panneau:nth-child(1){flex:0 1 ' + PART_CERCLE_PCT.toFixed(3) + '%;}' +
+    '.panneau:nth-child(2){flex:0 1 ' + PART_GRAPHE_PCT.toFixed(3) + '%;}' +
+    '#svg-cercle{width:100%;max-width:' + C_TAILLE + 'px;height:auto;display:block;}' +
     '#svg-graphe{width:100%;max-width:' + G_LARGEUR + 'px;height:auto;display:block;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.3;}' +
     '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:1;}' +
@@ -358,10 +384,13 @@
       svg.appendChild(svgEl(ns, "line", { x1: pxVrai.toFixed(2), y1: pyVrai.toFixed(2), x2: pointeIntersection.x.toFixed(2), y2: pointeIntersection.y.toFixed(2), class: "prolongement-tan" }));
 
       // Vecteur vert de l'axe des x (sur la droite x=1) jusqu'au point qui correspond à tan(x) —
-      // seulement quand tan(x) est défini (borné pour rester dans la fenêtre visible).
+      // seulement quand tan(x) est défini (borné à VALEUR_Y_MAX pour rester dans la fenêtre
+      // visible) — MÊME borne que la fenêtre du panneau graphe (`FENETRES_Y.tan`), indispensable
+      // pour que la longueur de cette flèche corresponde à celle du panneau graphe (voir le
+      // commentaire de tête de la section "Panneau graphe").
       if (Math.abs(cosX) > 0.02) {
         var tanX = Math.tan(x);
-        var tanClamp = Math.max(-2.3, Math.min(2.3, tanX));
+        var tanClamp = Math.max(-VALEUR_Y_MAX, Math.min(VALEUR_Y_MAX, tanX));
         var pxTang = C_CX + C_R;
         var pyTang = C_CY - tanClamp * C_R;
         dessinerVecteur(ns, svg, pxTang, C_CY, pxTang, pyTang.toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
