@@ -335,40 +335,14 @@ h2.section-title { font-size: 1.55rem; font-weight: 600; }
   margin: -14px 0 20px 0;
 }
 
-/* ---------- habillage A : sobre (séparateur + chevron discret) ---------- */
-[data-variant='sobre'] details.chapter-section {
+/* Séparateur fin + léger retrait sous chaque en-tête de section, chevron discret qui pivote à
+   l'ouverture (voir .section-chevron ci-dessus) — habillage "sobre" retenu après comparaison de 3
+   propositions sur le chapitre le plus long du site (logarithmes, 10 sections). */
+details.chapter-section {
   border-top: 1px solid var(--line-soft);
   padding-top: 24px;
 }
-[data-variant='sobre'] details.chapter-section > summary:hover .section-title { color: var(--accent-ink); }
-
-/* ---------- habillage B : carte (bandeau cliquable, accent à gauche) ---------- */
-[data-variant='carte'] details.chapter-section {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-[data-variant='carte'] details.chapter-section > summary {
-  padding: 16px 20px;
-  margin-bottom: 0;
-  border-left: 4px solid var(--line);
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-[data-variant='carte'] details.chapter-section[open] > summary {
-  border-left-color: var(--accent);
-  background: var(--surface-2);
-}
-[data-variant='carte'] details.chapter-section > summary:hover { background: var(--surface-2); }
-[data-variant='carte'] details.chapter-section .section-head { margin-bottom: 0; }
-[data-variant='carte'] details.chapter-section .section-chevron { order: 1; margin-left: auto; margin-right: 4px; }
-[data-variant='carte'] details.chapter-section .section-body { padding: 28px 20px 24px; }
-[data-variant='carte'] details.chapter-section .section-num { font-size: 1.9rem; }
-
-/* ---------- habillage C : tout ouvert, repli à la demande (mêmes habits que "sobre") ---------- */
-[data-variant='controle'] details.chapter-section {
-  border-top: 1px solid var(--line-soft);
-  padding-top: 24px;
-}
+details.chapter-section > summary:hover .section-title { color: var(--accent-ink); }
 
 h3.sub-title {
   font-family: var(--sans);
