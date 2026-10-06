@@ -15,7 +15,11 @@
   var BORNES_N = { min: 3, max: 12, step: 1 };
   var BORNES_R = { min: 3, max: 10, step: 0.5 };
 
-  var TAILLE = 300, CX = 150, CY = 150, C_R = 108;
+  var TAILLE = 300, CX = 150, CY = 150;
+  // Le cercle dessiné doit changer visuellement avec r (curseur) — jamais un rayon fixe : C_R
+  // (rayon EN PIXELS) est interpolé linéairement entre C_R_MIN (à r minimal) et C_R_MAX (à r
+  // maximal), recalculé à chaque rendu plutôt qu'une constante de module (voir `_rendre`).
+  var C_R_MIN = 65, C_R_MAX = 130;
 
   function formatNombreFr(n, decimales) {
     var facteur = Math.pow(10, decimales);
@@ -63,7 +67,10 @@
     '.btn-reset{margin-top:2px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--accent-soft-line,#e8c4a4);background:var(--accent-soft,#f6e2d3);color:var(--accent-ink,#7a3212);font-weight:600;cursor:pointer;font-size:0.88rem;font-family:inherit;align-self:center;}' +
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
-    '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    // width/height explicites en plus du viewBox — voir le commentaire équivalent dans
+    // cercle-trigo-widget.js (même piège de taille de remplacement SVG par défaut, invisible ici
+    // seulement parce que TAILLE=300 coïncide avec cette valeur par défaut).
+    '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" width="' + TAILLE + '" height="' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<div class="stats">' +
     '<div class="stat"><span class="stat-label">aire secteur OAB</span><span class="stat-value" id="val-secteur"></span></div>' +
     '<div class="stat"><span class="stat-label">aire triangle OAB</span><span class="stat-value" id="val-triangle"></span></div>' +
@@ -130,6 +137,8 @@
   SecteurSegmentWidgetClass.prototype._rendre = function () {
     var n = this._n, r = this._r;
     var theta = (2 * PI) / n;
+    var C_R = C_R_MIN + ((r - BORNES_R.min) / (BORNES_R.max - BORNES_R.min)) * (C_R_MAX - C_R_MIN);
+    var rTheta = (C_R * 22) / 108;
 
     var aireSecteur = 0.5 * r * r * theta;
     var aireTriangle = 0.5 * r * r * Math.sin(theta);
@@ -183,8 +192,7 @@
     svg.appendChild(svgEl(ns, "line", { x1: CX, y1: CY, x2: B[0].toFixed(2), y2: B[1].toFixed(2), class: "rayon" }));
     svg.appendChild(svgEl(ns, "line", { x1: A[0].toFixed(2), y1: A[1].toFixed(2), x2: B[0].toFixed(2), y2: B[1].toFixed(2), class: "corde" }));
 
-    // Petit arc θ près du centre, entre les deux rayons.
-    var rTheta = 22;
+    // Petit arc θ près du centre, entre les deux rayons (rTheta déjà calculé en proportion de C_R).
     var pThetaA = [CX + rTheta * Math.cos(angleA), CY - rTheta * Math.sin(angleA)];
     var pThetaB = [CX + rTheta * Math.cos(angleB), CY - rTheta * Math.sin(angleB)];
     var dArcTheta = "M " + pThetaA[0].toFixed(2) + " " + pThetaA[1].toFixed(2) +

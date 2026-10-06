@@ -3,16 +3,29 @@
 
   /* ================================================================
    * <cercle-trigo-widget> — cercle trigonométrique (gauche) relié à un graphe
-   * sin/cos/tan qui se trace au fur et à mesure (droite), x de 0 à 3π.
+   * sin/cos/tan qui se trace au fur et à mesure (droite), x de 0 à 2π.
    * Web Component (Shadow DOM), couleurs empruntées aux variables CSS du thème.
    * ================================================================ */
 
   var DEUX_PI = 2 * Math.PI;
-  var X_MAX = 3 * Math.PI;
+  // Capé à 2π (plutôt que 3π auparavant) pour laisser la place à l'axe des x du graphe d'utiliser
+  // la MÊME échelle que le cercle (voir G_LARGEUR ci-dessous) — un tour complet est de toute façon
+  // suffisant pour illustrer sin/cos/tan.
+  var X_MAX = DEUX_PI;
   var DEFAUT_X = Math.PI / 4;
 
   // --- Panneau cercle -------------------------------------------------
-  var C_TAILLE = 260, C_CX = 130, C_CY = 130, C_R = 90;
+  // C_R choisi pour que le panneau graphe (large de G_MARGE_G + G_MARGE_D + X_MAX×C_R, voir plus
+  // bas) tienne NATIVEMENT sous le plafond de `.widget-host` (560px, `index.css`) — indispensable
+  // pour l'égalité des longueurs visuelles (segment/flèche) demandée entre les deux panneaux : si
+  // le panneau graphe devait rétrécir sous son propre viewBox pour tenir dans ce plafond alors que
+  // le panneau cercle (bien plus étroit) n'a pas besoin de rétrécir, les deux panneaux finiraient
+  // à des échelles d'affichage DIFFÉRENTES malgré un même C_R "en unités de viewBox" — voir le
+  // commentaire de tête de la section "Panneau graphe" ci-dessous pour le principe d'échelle
+  // partagée lui-même. Avec X_MAX=2π et les marges actuelles, C_R=75 donne une largeur de panneau
+  // graphe d'environ 515px (+ padding), confortablement sous 560px.
+  var C_R = 75;
+  var C_CX = C_R + 40, C_CY = C_CX, C_TAILLE = 2 * C_CX;
   // L'INDICATEUR D'ANGLE ORIENTÉ (petit arc près du sommet, PAS l'arc balayé sur la circonférence
   // ni le rayon/point mobile) est le seul élément dont le rayon grandit au-delà de 2π — corrigé
   // sur retour utilisateur : la première version faisait grandir l'arc SUR le cercle (et le point
@@ -23,12 +36,24 @@
   var ANGLE_RESSORT_CROISSANCE = 34;
 
   // --- Panneau graphe ---------------------------------------------------
-  var G_LARGEUR = 380, G_HAUTEUR = 260, G_MARGE_G = 30, G_MARGE_D = 14, G_MARGE_H = 16, G_MARGE_B = 30;
+  // La longueur du segment violet (0 à x sur l'axe des x) doit être visuellement égale à l'arc
+  // balayé sur le cercle, et la flèche verte (valeur de la fonction) doit avoir la même longueur
+  // visuelle sur les deux panneaux — donc la MÊME échelle que le cercle (C_R px par unité) sur les
+  // deux axes, pas une échelle "ajustée à la fenêtre" indépendante. zoneL/zoneH sont donc dérivées
+  // de C_R (et non l'inverse) : zoneL = X_MAX × C_R (px par radian = C_R), zoneH = (plage y de
+  // sin/cos) × C_R (px par unité = C_R, la même fenêtre ±1,4 qu'avant). tan garde une fenêtre bien
+  // plus large (±4, asymptotes) : son échelle reste donc plus petite que C_R sur ce même zoneH —
+  // seule la correspondance sin/cos est demandée ici (celle de la flèche verte en tan se construit
+  // différemment, sur la droite tangente x=1 du panneau cercle, pas sur ce panneau graphe).
+  var G_MARGE_G = 30, G_MARGE_D = 14, G_MARGE_H = 16, G_MARGE_B = 30;
   var FENETRES_Y = {
     sin: { min: -1.4, max: 1.4 },
     cos: { min: -1.4, max: 1.4 },
     tan: { min: -4, max: 4 },
   };
+  var ZONE_H = (FENETRES_Y.sin.max - FENETRES_Y.sin.min) * C_R;
+  var G_LARGEUR = Math.round(G_MARGE_G + G_MARGE_D + X_MAX * C_R);
+  var G_HAUTEUR = Math.round(G_MARGE_H + G_MARGE_B + ZONE_H);
   var ASYMPTOTES_TAN = [Math.PI / 2, 3 * Math.PI / 2, 5 * Math.PI / 2];
 
   var FN = {
@@ -106,7 +131,12 @@
     '.panneaux{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:16px;}' +
     '.panneau{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);padding:6px;}' +
     '#svg-cercle{width:100%;max-width:260px;height:auto;display:block;}' +
-    '#svg-graphe{width:100%;max-width:360px;height:auto;display:block;}' +
+    // max-width = G_LARGEUR (taille NATIVE du viewBox, jamais un plafond arbitraire plus petit) :
+    // le panneau circulaire (max-width = C_TAILLE) s'affiche déjà à l'échelle 1:1 de son viewBox —
+    // sans ce même principe ici, le panneau graphe serait réduit par ce plafond CSS et ses
+    // longueurs en pixels RÉELS (affichés) ne correspondraient plus à celles du cercle, même si
+    // leurs échelles internes (C_R px/unité) sont égales en unités de viewBox.
+    '#svg-graphe{width:100%;max-width:' + G_LARGEUR + 'px;height:auto;display:block;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.3;}' +
     '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:1;}' +
     '.cercle-ref{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
@@ -144,8 +174,19 @@
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
     '<div class="panneaux">' +
-    '<div class="panneau"><svg id="svg-cercle" viewBox="0 0 ' + C_TAILLE + ' ' + C_TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="panneau"><svg id="svg-graphe" viewBox="0 0 ' + G_LARGEUR + ' ' + G_HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    // `width`/`height` EXPLICITES (en plus du viewBox) sur les deux <svg> — indispensable pour que
+    // la mise à l'échelle CSS (`width:100%;max-width:...px;height:auto`) ait un rapport
+    // largeur/hauteur de référence : sans eux, un <svg> n'a pas de taille intrinsèque propre, et
+    // `width:100%` dans un flex item à largeur automatique (`.panneau`) devient une dépendance
+    // circulaire — le navigateur retombe alors silencieusement sur la taille de remplacement par
+    // défaut d'un SVG (300×150 CSS px), QUEL QUE SOIT `max-width`. Bug trouvé par mesure Playwright
+    // (`getBoundingClientRect` du panneau graphe rendu à ~300px de large au lieu de la taille
+    // native attendue, cassant l'égalité des longueurs demandée avec le panneau cercle) : le
+    // panneau cercle "fonctionnait" par pure coïncidence (sa taille par défaut, 300, est déjà
+    // supérieure à son max-width de 260, qui s'applique donc correctement), mais ce n'était vrai
+    // pour AUCUN des deux panneaux par construction.
+    '<div class="panneau"><svg id="svg-cercle" viewBox="0 0 ' + C_TAILLE + ' ' + C_TAILLE + '" width="' + C_TAILLE + '" height="' + C_TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<div class="panneau"><svg id="svg-graphe" viewBox="0 0 ' + G_LARGEUR + ' ' + G_HAUTEUR + '" width="' + G_LARGEUR + '" height="' + G_HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '</div>' +
     '<div class="stats">' +
     '<div class="stat"><span class="stat-label">x (rad)</span><span class="stat-value" id="val-x-rad"></span></div>' +
@@ -295,8 +336,17 @@
       // Prolongement pointillé du segment de l'angle (le rayon, au-delà du point sur le cercle) :
       // jusqu'à l'intersection avec la droite verticale x=1 quand elle est atteignable dans la
       // fenêtre visible, sinon jusqu'à la bordure de la fenêtre du contenant.
+      //
+      // yInterVrai = C_CY - tan(x)·C_R est la formule de l'intersection de la droite OP (le rayon,
+      // prolongé en LIGNE complète, pas en simple demi-droite) avec x=1 — valable quel que soit le
+      // signe de cos(x), jamais seulement cos(x)>0. BUG corrigé ici : le garde-fou précédent
+      // (`cosX > 0.02`) limitait à tort cette formule au demi-cercle droit ; pour un angle obtus
+      // (cos(x)<0, ex. x=0,74π), le prolongement partait alors dans le mauvais sens (la demi-droite
+      // au-delà du point, qui diverge loin de x=1) au lieu de traverser le centre pour atteindre
+      // x=1 de l'autre côté — c'est pourtant la même droite OP, juste prolongée de l'autre côté du
+      // centre quand cos(x)<0 (le signe de `yInterVrai` gère déjà cela correctement).
       var pointeIntersection = null;
-      if (cosX > 0.02) {
+      if (Math.abs(cosX) > 0.02) {
         var yInterVrai = C_CY - Math.tan(x) * C_R;
         if (yInterVrai >= 0 && yInterVrai <= C_TAILLE) {
           pointeIntersection = { x: C_CX + C_R, y: yInterVrai };
@@ -325,9 +375,11 @@
   };
 
   CercleTrigoWidgetClass.prototype._toPxGraphe = function (xMath, yMath, yMin, yMax) {
-    var zoneL = G_LARGEUR - G_MARGE_G - G_MARGE_D;
-    var zoneH = G_HAUTEUR - G_MARGE_H - G_MARGE_B;
-    var px = G_MARGE_G + (xMath / X_MAX) * zoneL;
+    // px par radian = C_R EXACTEMENT (jamais dérivé de G_LARGEUR, arrondi au pixel près) — c'est
+    // cette échelle qui rend le segment violet (0 à x) visuellement égal à l'arc balayé sur le
+    // cercle (voir le commentaire de tête de la section "Panneau graphe").
+    var zoneH = ZONE_H;
+    var px = G_MARGE_G + xMath * C_R;
     var py = G_HAUTEUR - G_MARGE_B - ((yMath - yMin) / (yMax - yMin)) * zoneH;
     return [px, py];
   };
