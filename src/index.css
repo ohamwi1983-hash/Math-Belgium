@@ -265,6 +265,7 @@ h1.chapter-title {
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
+.toc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .toc p.toc-label {
   font-family: var(--mono);
   font-size: 11.5px;
@@ -273,15 +274,50 @@ h1.chapter-title {
   color: var(--ink-faint);
   margin: 0 0 10px;
 }
+.toc-plier { display: flex; gap: 14px; margin-bottom: 10px; }
+.toc-plier button {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+}
+.toc-plier button:hover { color: var(--accent-ink); text-decoration-color: var(--accent-ink); }
 .toc ol { margin: 0; padding: 0 0 0 1.3em; }
 .toc li { margin: 3px 0; color: var(--ink-soft); }
 .toc a { color: var(--ink); text-decoration: none; }
 .toc a:hover { color: var(--accent-ink); }
 
-/* ---------- sections ---------- */
-section.chapter-section { margin-top: 68px; }
+/* ---------- sections (repliables) ---------- */
+.chapter-section { margin-top: 68px; }
 .intro-section { margin-top: 0; }
+
+/* `<details>` natif : fonctionne sans JS (le navigateur gère l'ouverture/fermeture et la révèle
+   automatiquement quand on navigue vers son #id depuis la table des matières), on retire juste le
+   triangle natif pour poser le nôtre dans `.section-head`. */
+details.chapter-section > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details.chapter-section > summary::-webkit-details-marker { display: none; }
+details.chapter-section > summary::marker { content: ''; }
+
 .section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.section-chevron {
+  flex: none;
+  width: 0.85rem;
+  align-self: center;
+  color: var(--ink-faint);
+  transition: transform 0.15s ease;
+}
+.section-chevron::before { content: '▸'; font-size: 0.95rem; }
+details.chapter-section[open] > summary .section-chevron { transform: rotate(90deg); }
+
 .section-num {
   font-family: var(--serif);
   font-size: 2.6rem;
@@ -297,6 +333,41 @@ h2.section-title { font-size: 1.55rem; font-weight: 600; }
   letter-spacing: 0.08em;
   color: var(--ink-faint);
   margin: -14px 0 20px 0;
+}
+
+/* ---------- habillage A : sobre (séparateur + chevron discret) ---------- */
+[data-variant='sobre'] details.chapter-section {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 24px;
+}
+[data-variant='sobre'] details.chapter-section > summary:hover .section-title { color: var(--accent-ink); }
+
+/* ---------- habillage B : carte (bandeau cliquable, accent à gauche) ---------- */
+[data-variant='carte'] details.chapter-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+[data-variant='carte'] details.chapter-section > summary {
+  padding: 16px 20px;
+  margin-bottom: 0;
+  border-left: 4px solid var(--line);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+[data-variant='carte'] details.chapter-section[open] > summary {
+  border-left-color: var(--accent);
+  background: var(--surface-2);
+}
+[data-variant='carte'] details.chapter-section > summary:hover { background: var(--surface-2); }
+[data-variant='carte'] details.chapter-section .section-head { margin-bottom: 0; }
+[data-variant='carte'] details.chapter-section .section-chevron { order: 1; margin-left: auto; margin-right: 4px; }
+[data-variant='carte'] details.chapter-section .section-body { padding: 28px 20px 24px; }
+[data-variant='carte'] details.chapter-section .section-num { font-size: 1.9rem; }
+
+/* ---------- habillage C : tout ouvert, repli à la demande (mêmes habits que "sobre") ---------- */
+[data-variant='controle'] details.chapter-section {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 24px;
 }
 
 h3.sub-title {

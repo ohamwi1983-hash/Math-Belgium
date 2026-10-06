@@ -144,6 +144,10 @@ export async function buildHtmlBlob(chapter: ChapterContent): Promise<Blob> {
 
   const clone = page.cloneNode(true) as HTMLElement
   clone.querySelectorAll('.no-export, iframe').forEach((el) => el.remove())
+  // Sections repliables (`<details class="chapter-section">`) : l'export reste du vrai DOM cloné à
+  // l'état courant de l'écran — sans ceci, une section repliée au moment du clic sur "Exporter"
+  // disparaîtrait du fichier téléchargé (le contenu d'un <details> fermé n'est pas dans le rendu).
+  clone.querySelectorAll('details').forEach((d) => d.setAttribute('open', ''))
 
   const css = await inlinerPolices(retirerPreferenceSombre(toutesLesReglesCss()))
   const titre = echapperHtml(chapter.title)
