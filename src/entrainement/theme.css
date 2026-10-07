@@ -543,47 +543,97 @@
   color: var(--color-error);
 }
 
-.entrainement .selecteur-variante-dev {
+/* Sélecteur de variante — panneau toujours visible (plus un outil de dev caché derrière ?dev=1,
+ * voir le commentaire des 3 composants `SelecteurVarianteDev`), donc un vrai combobox soigné à
+ * l'identique du reste de l'UI (`.card`/`.text-input`/`.btn-primary`), jamais le cadre pointillé
+ * couleur avertissement qui signalait auparavant un outil de debug. Un seul bloc ici, partagé par
+ * les 3 chantiers (4e/5e-4h/6e-6h) qui réutilisent tous exactement les mêmes classes. */
+.entrainement .selecteur-variante {
   margin-top: 18px;
-  padding: 12px 14px;
-  border: 1px dashed var(--color-warning);
-  border-radius: var(--radius-md);
-  background: var(--color-warning-bg);
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }
 
-.entrainement .selecteur-variante-dev-label {
+.entrainement .selecteur-variante-label {
   display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-warning);
-  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
 }
 
-.entrainement .selecteur-variante-dev-row {
+.entrainement .selecteur-variante-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.entrainement .selecteur-variante-dev-select {
-  flex: 1;
+/* Combobox personnalisé : le <select> natif perd sa flèche par défaut (`appearance: none`), une
+ * flèche dessinée en CSS (::after sur le conteneur, jamais une image) la remplace — même langage
+ * que .toc-plier/.section-chevron du site principal, pas une icône importée. */
+.entrainement .selecteur-variante-select-wrap {
+  position: relative;
+  flex: 1 1 200px;
   min-width: 0;
-  padding: 8px 10px;
+}
+
+.entrainement .selecteur-variante-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: 11px 36px 11px 13px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 13px;
+  font-family: inherit;
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.entrainement .selecteur-variante-dev-bouton {
+.entrainement .selecteur-variante-select:hover {
+  border-color: var(--color-primary);
+}
+
+.entrainement .selecteur-variante-select:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.entrainement .selecteur-variante-select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  margin-top: -5px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.entrainement .selecteur-variante-bouton {
   flex: none;
-  padding: 8px 14px;
-  font-size: 13px;
+  padding: 11px 20px;
+  font-size: 14.5px;
+  font-weight: 600;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
 }
 
-.entrainement .selecteur-variante-dev select.text-input {
-  flex: 1 1 auto;
-  min-width: 0;
+.entrainement .selecteur-variante-bouton:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 @media (max-width: 480px) {
