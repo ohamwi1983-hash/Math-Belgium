@@ -15,6 +15,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
   intro: {
     title: 'Avant de commencer : équation, racine, solution',
     blocks: [
+        { kind: 'video', title: 'Avant de commencer : équation, racine, solution', youtubeId: 'jxrUxZS1DFQ' },
       {
         kind: 'para',
         text:
@@ -52,6 +53,9 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: 'Résoudre une équation du second degré',
       kicker: '4 raccourcis à connaître, le discriminant seulement en dernier recours',
       blocks: [
+        { kind: 'video', title: 'Résoudre une équation du second degré (1/3) : les raccourcis avant le discriminant', youtubeId: '6WDdAWpUZW8' },
+        { kind: 'video', title: 'Résoudre une équation du second degré (2/3) : le discriminant', youtubeId: 'Vv3ZyYvgF5A' },
+        { kind: 'video', title: 'Résoudre une équation du second degré (3/3) : cas caché, Viète, factorisation', youtubeId: 'PvUzvCBSqks' },
         {
           kind: 'para',
           text:
@@ -410,7 +414,6 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           ],
           result: { tag: 'équation', text: '$x^2 - 7x + 10 = 0$' },
         },
-        { kind: 'video', title: 'Résoudre une équation du second degré, méthode par méthode' },
         {
           kind: 'entrainement',
           title: 'Méthode la plus rapide',
@@ -431,6 +434,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: "Étudier le signe d'un trinôme",
       kicker: 'un tableau de signes en 3 étapes, toujours dans le même ordre',
       blocks: [
+        { kind: 'video', title: 'Étudier le signe d\'un trinôme', youtubeId: 'gZ82w5l4vWQ' },
         {
           kind: 'para',
           text:
@@ -543,6 +547,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: 'Signe d\'un produit de plusieurs facteurs',
       kicker: 'le même principe, appliqué à 2 ou 3 facteurs à la fois',
       blocks: [
+        { kind: 'video', title: 'Signe d\'un produit de plusieurs facteurs', youtubeId: '2jApAPJkfRw' },
         {
           kind: 'para',
           text:
@@ -693,6 +698,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: 'Simplifier une fraction rationnelle',
       kicker: 'tout factoriser d\'abord, éliminer ensuite ce qui est identique',
       blocks: [
+        { kind: 'video', title: 'Simplifier une fraction rationnelle', youtubeId: '0Sp2z_qx-S8' },
         {
           kind: 'para',
           text:
@@ -751,6 +757,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: 'L\'inconnue au dénominateur',
       kicker: 'résoudre, puis toujours écarter les racines étrangères',
       blocks: [
+        { kind: 'video', title: 'L\'inconnue au dénominateur', youtubeId: '-9pfuHh_OLI' },
         {
           kind: 'para',
           text:
@@ -832,6 +839,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: 'Inéquations rationnelles',
       kicker: 'une grille de quotient, avec une valeur « non définie » à part entière',
       blocks: [
+        { kind: 'video', title: 'Inéquations rationnelles', youtubeId: 'nMZsTQUZQKE' },
         {
           kind: 'para',
           text:
@@ -965,6 +973,7 @@ export const equationsInequationsSecondDegre: ChapterContent = {
       title: 'Révision — vrai ou faux',
       kicker: '140 affirmations, 7 thèmes, discriminant et relations de Viète inclus',
       blocks: [
+        { kind: 'video', title: 'Révision : présentation du quiz et synthèse du chapitre', youtubeId: 'Z7YvxgvtaIM' },
         {
           kind: 'para',
           text:
