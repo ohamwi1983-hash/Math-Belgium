@@ -19,6 +19,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Calcul de limites',
       kicker: "la position de la base par rapport à 1, puis la dominance sur tout polynôme",
       blocks: [
+        { kind: 'video', title: 'Calcul de limites', youtubeId: '6s2MCrsEoTw' },
         {
           kind: 'intuition',
           label: 'Une bactérie qui se divise',
@@ -341,6 +342,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Domaine et dérivée',
       kicker: "(aˣ)' = ln(a)·aˣ — et le cas particulier de e",
       blocks: [
+        { kind: 'video', title: 'Domaine et dérivée', youtubeId: 'M2Bk_FhjiQ4' },
         {
           kind: 'para',
           text:
@@ -715,6 +717,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Graphique de la dérivée',
       kicker: 'la dérivée d\'une fonction paire est impaire, et réciproquement',
       blocks: [
+        { kind: 'video', title: 'Graphique de la dérivée', youtubeId: 'NKY7Nsu1THM' },
         {
           kind: 'para',
           text:
@@ -791,6 +794,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Résoudre une équation exponentielle',
       kicker: 'même base d\'abord, substitution ensuite',
       blocks: [
+        { kind: 'video', title: 'Résoudre une équation exponentielle', youtubeId: 'n7QfEIp463w' },
         {
           kind: 'methode',
           label: 'Méthode 1 — même base',
@@ -965,6 +969,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Résoudre une inéquation exponentielle',
       kicker: 'le sens du comparateur dépend de la base',
       blocks: [
+        { kind: 'video', title: 'Résoudre une inéquation exponentielle', youtubeId: 'KEfl8oqQJMg' },
         {
           kind: 'piege',
           label: 'Piège central du chapitre',
@@ -1256,6 +1261,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Étudier une fonction exponentielle',
       kicker: 'domaine, limites, asymptotes, variation, concavité',
       blocks: [
+        { kind: 'video', title: 'Étudier une fonction exponentielle', youtubeId: '8yEwf862Z3Q' },
         {
           kind: 'para',
           text:
@@ -1502,6 +1508,7 @@ export const fonctionsExponentielles: ChapterContent = {
       title: 'Exponentielles : problèmes',
       kicker: 'croissance, décroissance, saturation — un seul modèle, plusieurs contextes',
       blocks: [
+        { kind: 'video', title: 'Exponentielles : problèmes', youtubeId: 'b5wBE_3U9nA' },
         {
           kind: 'para',
           text:
