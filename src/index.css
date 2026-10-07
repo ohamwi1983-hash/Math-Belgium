@@ -293,6 +293,153 @@ h1.chapter-title {
 .toc a { color: var(--ink); text-decoration: none; }
 .toc a:hover { color: var(--accent-ink); }
 
+/* ---------- aides de navigation mobile (chapitre long) ----------
+   Barre de progression + en-tête de section collant + sommaire flottant + bouton "remonter en
+   haut", voir `LectureAids.tsx`. Comparées et validées avec l'utilisateur via un artefact
+   interactif avant implémentation ("Je prends toutes les options. C'est parfait."). z-index élevé
+   (au-dessus de tout le reste du gabarit, dont les callouts/illustrations qui n'en ont pas) mais
+   sous celui d'un éventuel futur modal plus prioritaire. */
+.lecture-progress {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--line-soft);
+  z-index: 60;
+}
+.lecture-progress-fill { height: 100%; background: var(--accent); }
+
+.lecture-sticky-head {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 3px);
+  left: 0;
+  right: 0;
+  z-index: 59;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 9px 20px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  transform: translateY(-100%);
+  transition: transform 0.18s ease;
+}
+.lecture-sticky-head.visible { transform: translateY(0); }
+.lecture-sticky-head .num { color: var(--accent); font-weight: 600; }
+
+.lecture-fab-top,
+.lecture-fab-toc {
+  position: fixed;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 58;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  border: none;
+}
+.lecture-fab-top {
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.lecture-fab-top.visible { opacity: 1; pointer-events: auto; }
+.lecture-fab-top svg { width: 16px; height: 16px; }
+
+.lecture-fab-toc {
+  left: 18px;
+  padding: 11px 17px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.lecture-fab-toc:hover { background: var(--accent-ink); }
+
+.lecture-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(10, 14, 18, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.lecture-sheet.open { opacity: 1; pointer-events: auto; }
+.lecture-sheet-body {
+  width: 100%;
+  max-width: 560px;
+  max-height: 76vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 18px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(12px);
+  transition: transform 0.18s ease;
+}
+.lecture-sheet.open .lecture-sheet-body { transform: translateY(0); }
+.lecture-sheet-title {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 12px;
+}
+.lecture-sheet-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 11px 6px;
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.98rem;
+}
+.lecture-sheet-item:hover { background: var(--surface-2); }
+.lecture-sheet-item.current { color: var(--accent-ink); font-weight: 600; }
+.lecture-sheet-item .n {
+  font-family: var(--serif);
+  color: var(--accent);
+  width: 1.6em;
+  flex: none;
+}
+.lecture-sheet-close {
+  display: block;
+  margin: 14px auto 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 /* ---------- sections (repliables) ---------- */
 .chapter-section { margin-top: 68px; }
 .intro-section { margin-top: 0; }

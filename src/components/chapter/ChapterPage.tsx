@@ -4,6 +4,7 @@ import { BlockList } from './BlockRenderer'
 import { RecapFinal } from './RecapFinal'
 import { ExerciseGeneratorSection } from './ExerciseGeneratorSection'
 import { ExportSection } from './ExportSection'
+import { LectureAids } from './LectureAids'
 
 /** Ouvre ou referme toutes les sections repliables du chapitre affiché (manipulation DOM directe,
  * volontairement hors de l'état React : `<details>` gère déjà son état d'ouverture nativement, pas
@@ -23,6 +24,7 @@ function toutesLesSections(open: boolean) {
 export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
   return (
     <div className={`page chapter-${chapter.slug}`}>
+      <LectureAids chapter={chapter} />
       <header className="chapter-head">
         <p className="eyebrow">
           {chapter.level} — Chapitre {chapter.chapterNumber}
