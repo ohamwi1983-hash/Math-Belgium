@@ -21,6 +21,51 @@
       crossorigin="anonymous"
     />
     <title>Chapitres de maths — FWB</title>
+    <!-- Filet de sécurité : si l'application ne démarre pas (ancien index.html en cache qui réclame un
+         fichier JS disparu après un déploiement, service worker périmé…), on désinscrit le service
+         worker, on vide les caches et on recharge UNE seule fois (garde en sessionStorage, retirée
+         par src/main.tsx dès que l'application démarre). Script classique et inline, volontairement
+         séparé du bundle : il doit fonctionner même quand le bundle ne se charge pas. -->
+    <script>
+      (function () {
+        var KEY = 'recovery-reload'
+        function recover() {
+          try {
+            if (sessionStorage.getItem(KEY)) return
+            sessionStorage.setItem(KEY, '1')
+          } catch (e) {
+            return
+          }
+          var tasks = []
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            tasks.push(
+              navigator.serviceWorker.getRegistrations().then(function (rs) {
+                return Promise.all(rs.map(function (r) { return r.unregister() }))
+              }),
+            )
+          }
+          if (window.caches && caches.keys) {
+            tasks.push(
+              caches.keys().then(function (ks) {
+                return Promise.all(ks.map(function (k) { return caches.delete(k) }))
+              }),
+            )
+          }
+          Promise.all(tasks).catch(function () {}).then(function () { location.reload() })
+        }
+        window.addEventListener(
+          'error',
+          function (e) {
+            if (e.target && e.target.tagName === 'SCRIPT') recover()
+          },
+          true,
+        )
+        setTimeout(function () {
+          var root = document.getElementById('root')
+          if (root && !root.children.length) recover()
+        }, 10000)
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
