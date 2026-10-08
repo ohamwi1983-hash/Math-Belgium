@@ -21,6 +21,10 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Propriétés du logarithme',
       kicker: 'réciproque de exp_a, propriétés algébriques, changement de base',
       blocks: [
+        { kind: 'video', title: 'Définition du logarithme et premières propriétés (1/4)', youtubeId: 'Xg5LQ6_GBRg' },
+        { kind: 'video', title: 'Propriétés algébriques : produit, quotient, puissance (2/4)', youtubeId: 'nei3-hTjJl4' },
+        { kind: 'video', title: 'Changement de base (3/4)', youtubeId: 'tXCMV-nBNVk' },
+        { kind: 'video', title: 'Le logarithme népérien ln = log_e (4/4)', youtubeId: 's1JTV94t6D8' },
         {
           kind: 'intuition',
           label: 'La question que pose un logarithme',
@@ -797,6 +801,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Résoudre une équation exponentielle ou logarithmique',
       kicker: 'appliquer log_a ou exp_a aux deux membres',
       blocks: [
+        { kind: 'video', title: 'Résoudre une équation exponentielle ou logarithmique', youtubeId: 'X26gAVNimiU' },
         {
           kind: 'para',
           text:
@@ -1022,6 +1027,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Résoudre une inéquation logarithmique',
       kicker: 'le sens dépend de la base — domaine d\'abord, toujours',
       blocks: [
+        { kind: 'video', title: 'Résoudre une inéquation logarithmique', youtubeId: 'te3WQrHiU1c' },
         {
           kind: 'intuition',
           label: 'Le même réflexe qu\'avec les exponentielles',
@@ -1325,6 +1331,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Domaine, dérivée et dérivation logarithmique',
       kicker: "(ln x)' = 1/x, dérivation logarithmique, exposant variable",
       blocks: [
+        { kind: 'video', title: 'Domaine, dérivée et dérivation logarithmique', youtubeId: 'Pnu9FWGFghw' },
         {
           kind: 'definition',
           label: 'Dérivée de ln (cas particulier a = e)',
@@ -1677,6 +1684,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Calculer des limites',
       kicker: 'limites fondamentales, croissance comparée, classement complet',
       blocks: [
+        { kind: 'video', title: 'Calculer des limites', youtubeId: '7sw4Ch5blnY' },
         {
           kind: 'definition',
           label: 'Limites fondamentales',
@@ -1880,6 +1888,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Paramètres depuis des conditions graphiques',
       kicker: 'f(x) = a + b·ln(x) — f(1)=a, f\'(1)=b',
       blocks: [
+        { kind: 'video', title: 'Retrouver des paramètres depuis des conditions graphiques', youtubeId: 'U54C7GsoHs4' },
         {
           kind: 'para',
           text:
@@ -1989,6 +1998,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Sinus et cosinus hyperboliques',
       kicker: 'ch²−sh²=1, dérivées croisées, rien à voir avec les angles',
       blocks: [
+        { kind: 'video', title: 'Sinus et cosinus hyperboliques', youtubeId: 'g_DEAA_S8vA' },
         {
           kind: 'para',
           text:
@@ -2071,6 +2081,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Graphique de la fonction dérivée',
       kicker: 'le signe de f\' donne la variation, jamais directement la concavité',
       blocks: [
+        { kind: 'video', title: 'Graphique de la fonction dérivée', youtubeId: 'zCtu1A2BCy0' },
         {
           kind: 'para',
           text:
@@ -2138,6 +2149,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Étudier une fonction (synthèse)',
       kicker: 'domaine, limites et asymptotes, dérivée, concavité — dans l\'ordre',
       blocks: [
+        { kind: 'video', title: 'Étudier une fonction : f(x) = ln(x)/x', youtubeId: 'uZjWAZVXFTA' },
         {
           kind: 'para',
           text:
@@ -2209,6 +2221,7 @@ export const fonctionsLogarithmes: ChapterContent = {
       title: 'Logarithmes : problèmes',
       kicker: 'échelles logarithmiques, demi-vie, croissance logistique',
       blocks: [
+        { kind: 'video', title: 'Problèmes : pH, demi-vie et croissance logistique', youtubeId: 'HLIc56bYNr0' },
         {
           kind: 'para',
           text:
