@@ -36,6 +36,9 @@ export const trigonometrie: ChapterContent = {
       title: 'Arcs et secteurs',
       kicker: "radian, longueur d'arc s = rθ, aire de secteur A = ½r²θ",
       blocks: [
+        { kind: 'video', title: 'Arcs et secteurs (1/3) : encadrer π avec Archimède', youtubeId: 'PDFxI__g9nI' },
+        { kind: 'video', title: 'Arcs et secteurs (2/3) : le radian, longueur d\'arc et aire d\'un secteur', youtubeId: 't1kbJB41t6I' },
+        { kind: 'video', title: 'Arcs et secteurs (3/3) : le cercle trigonométrique', youtubeId: '_1kh3SXWfwM' },
         { kind: 'subheading', text: 'Comment encadrer le nombre π ?' },
         {
           kind: 'para',
@@ -312,6 +315,7 @@ export const trigonometrie: ChapterContent = {
       title: 'Polygones, arcs et secteurs',
       kicker: "figures composées — additionner ou soustraire des aires élémentaires",
       blocks: [
+        { kind: 'video', title: 'Polygones, arcs et secteurs : figures composées', youtubeId: 'h-q_G5tDJ-0' },
         {
           kind: 'para',
           text:
@@ -407,6 +411,7 @@ export const trigonometrie: ChapterContent = {
       title: 'Problèmes de géométrie du cercle',
       kicker: 'secteurs, segments circulaires, et la loi des cosinus',
       blocks: [
+        { kind: 'video', title: 'Problèmes de géométrie du cercle : segments circulaires et loi des cosinus', youtubeId: 'neGbIoX6UqI' },
         {
           kind: 'para',
           text:
@@ -491,6 +496,8 @@ export const trigonometrie: ChapterContent = {
       title: "Paramètres d'une fonction sinusoïdale",
       kicker: 'f(x) = A sin(ωx+φ) + b — le sens de chaque lettre',
       blocks: [
+        { kind: 'video', title: 'Paramètres d\'une sinusoïde (1/2) : sinus, cosinus, tangente', youtubeId: 'fr8hM_dcfEA' },
+        { kind: 'video', title: 'Paramètres d\'une sinusoïde (2/2) : A, ω, φ, b et construction du graphique', youtubeId: 'HUE0XAg5ImY' },
         { kind: 'subheading', text: 'Les trois fonctions de référence : sinus, cosinus, tangente' },
         {
           kind: 'para',
@@ -746,6 +753,7 @@ export const trigonometrie: ChapterContent = {
       title: "Paramètres d'une fonction sinusoïdale — lecture graphique",
       kicker: 'retrouver A, ω, φ, b sans aucune formule de départ',
       blocks: [
+        { kind: 'video', title: 'Lire A, ω, φ et b sur le graphique d\'une sinusoïde', youtubeId: '2Qf_W3tzZMI' },
         {
           kind: 'para',
           text:
@@ -840,6 +848,7 @@ export const trigonometrie: ChapterContent = {
       title: "Extremums d'une fonction sinusoïdale",
       kicker: 'sin(u)=±1 réunis — attention à la période effective',
       blocks: [
+        { kind: 'video', title: 'Extremums d\'une fonction sinusoïdale : sin(u) = ±1 réunis', youtubeId: '7kx_Zy6QCpE' },
         {
           kind: 'para',
           text:
@@ -935,6 +944,7 @@ export const trigonometrie: ChapterContent = {
       title: 'Modéliser une fonction sinusoïdale en contexte',
       kicker: 'construire A, b, T (donc ω), puis φ à partir d\'une condition initiale',
       blocks: [
+        { kind: 'video', title: 'Modéliser une situation périodique par une sinusoïde (grande roue)', youtubeId: 'fw20BqIfKCU' },
         {
           kind: 'para',
           text:
@@ -1073,6 +1083,7 @@ export const trigonometrie: ChapterContent = {
       title: 'Équations trigonométriques trig(ax+b) = k',
       kicker: 'isoler l\'argument, résoudre au cercle trigonométrique, puis diviser par a',
       blocks: [
+        { kind: 'video', title: 'Équations trigonométriques trig(ax + b) = k', youtubeId: 'ZtlKK_N3xrY' },
         { kind: 'subheading', text: 'Résoudre sin x = t, cos x = t, tan x = t' },
         {
           kind: 'para',
