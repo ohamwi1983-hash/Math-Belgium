@@ -205,6 +205,12 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen35': adaptateurEvaluationVitessePosition as unknown as AdaptateurFeuilleExercices<never>,
 }
 
+import { adaptateurEvaluationDenombrementFondamental } from '../entrainement/6e-6h/generateurs6e/denombrementFondamental/exportEvaluation'
+import { adaptateurEvaluationDenombrementCombine } from '../entrainement/6e-6h/generateurs6e/denombrementCombine/exportEvaluation'
+import { adaptateurEvaluationBinomeNewton } from '../entrainement/6e-6h/generateurs6e/binomeNewton/exportEvaluation'
+import { adaptateurEvaluationDenombrementCombinatoirePur } from '../entrainement/6e-6h/generateurs6e/denombrementCombinatoirePur/exportEvaluation'
+import { adaptateurEvaluationProbabiliteHypergeometrique } from '../entrainement/6e-6h/generateurs6e/probabiliteHypergeometrique/exportEvaluation'
+import { adaptateurEvaluationBinomialeSequenceOrdonnee } from '../entrainement/6e-6h/generateurs6e/binomialeSequenceOrdonnee/exportEvaluation'
 import { adaptateurEvaluationInjectiviteFonctions } from '../entrainement/6e-6h/generateurs6e/injectiviteFonctions/exportEvaluation'
 import { adaptateurEvaluationFonctionsCyclometriques } from '../entrainement/6e-6h/generateurs6e/fonctionsCyclometriques/exportEvaluation'
 import { adaptateurEvaluationEquationsCyclometriques } from '../entrainement/6e-6h/generateurs6e/equationsCyclometriques/exportEvaluation'
@@ -256,6 +262,12 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen21': adaptateurEvaluationEtudeFonctionLogarithme as unknown as AdaptateurFeuilleExercices<never>,
   '6gen15': adaptateurEvaluationInequationsLogarithmiques as unknown as AdaptateurFeuilleExercices<never>,
   '6gen16': adaptateurEvaluationDomaineDeriveeLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen43': adaptateurEvaluationDenombrementFondamental as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen44': adaptateurEvaluationDenombrementCombine as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen45': adaptateurEvaluationBinomeNewton as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen46': adaptateurEvaluationDenombrementCombinatoirePur as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen47': adaptateurEvaluationProbabiliteHypergeometrique as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen48': adaptateurEvaluationBinomialeSequenceOrdonnee as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas

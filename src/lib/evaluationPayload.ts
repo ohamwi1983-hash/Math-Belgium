@@ -62,45 +62,12 @@ export const NIVEAU_NUMERO: Record<NiveauCode, number> = { '4e': 4, '5e': 5, '6e
 export const HEURES_SEMAINE_DEFAUT: Record<NiveauCode, string> = { '4e': '5', '5e': '4', '6e': '6' }
 
 /** Chapitres ayant un « générateur d'évaluations » fonctionnel côté plateforme-maths — les autres
- * apparaissent dans le sélecteur mais restent désactivés. */
-export const LEVELSLUG_FONCTIONNEL_6E = '6e-6h'
-export const LEVELSLUG_FONCTIONNEL_4E = '4e'
-export const LEVELSLUG_FONCTIONNEL_5E = '5e-4h'
-
-/** Numéro de chapitre — utilisé UNIQUEMENT pour départager les banques vrai/faux d'une page
- * d'évaluation qui en sert plusieurs (`AppEvaluation6e.tsx` : 2 chapitres ; `AppEvaluation4e.tsx` :
- * 8 chapitres depuis ce lot) — voir `QuizThemeConfig.quizChapitre`. */
-export type ChapitreFonctionnel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
-
-/** Conservé pour compat (chapitre par défaut à la sélection du niveau 6e) — préférer
- * `estChapitreFonctionnel` pour tester si UN chapitre donné est câblé. */
-export const CHAPITRE_FONCTIONNEL_SLUG = 'fonctions-reciproques-cyclometriques'
-
-/** Chapitres réellement câblés côté plateforme-maths, un (levelSlug, chapitreSlug) par entrée —
- * chaque chapitre a sa propre page d'évaluation chez plateforme-maths (URL différente selon le
- * niveau, voir `EVALUATION_BASE_URL_PAR_LEVELSLUG`). */
-const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
-  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-reciproques-cyclometriques' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-exponentielles' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'fonctions-logarithmes' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'fonction-second-degre' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'equations-inequations-second-degre' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'caracteristiques-fonctions-reference' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'statistique-descriptive' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'cercle-trigonometrique-triangles' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'calcul-vectoriel' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'geometrie-analytique-plane' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_4E, chapitreSlug: 'geometrie-dans-espace' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'fonctions-composees' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'trigonometrie' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'suites' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'limites-asymptotes' },
-  { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'derivees-applications' },
-]
-
-export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
-  return CHAPITRES_FONCTIONNELS.some((c) => c.levelSlug === levelSlug && c.chapitreSlug === chapitreSlug)
-}
+ * apparaissent dans le sélecteur mais restent désactivés. Déplacé dans `chapitresFonctionnels.ts`
+ * (voir son en-tête — évite que ce fichier, volumineux et en croissance, finisse dans le chunk
+ * principal via `ExerciseGeneratorSection.tsx`, qui n'a besoin que de ces quelques éléments) —
+ * réexporté tel quel, aucun import existant ailleurs à changer. */
+export { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, CHAPITRE_FONCTIONNEL_SLUG, estChapitreFonctionnel, type ChapitreFonctionnel } from './chapitresFonctionnels'
+import { LEVELSLUG_FONCTIONNEL_6E, LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type ChapitreFonctionnel } from './chapitresFonctionnels'
 
 const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
   [LEVELSLUG_FONCTIONNEL_6E]: EVALUATION_BASE_URL_6E_6H,
@@ -111,6 +78,7 @@ const EVALUATION_BASE_URL_PAR_LEVELSLUG: Record<string, string> = {
 export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
+  | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen10' | 'gen11' | 'gen12' | 'gen13'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
@@ -179,6 +147,12 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'graphique', generatorId: '6gen20', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'etude', generatorId: '6gen21', label: '' },
   { chapitreSlug: 'fonctions-logarithmes', sectionId: 'problemes', generatorId: '6gen22', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementfondamental', generatorId: '6gen43', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementcombine', generatorId: '6gen44', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomenewton', generatorId: '6gen45', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementproblemes', generatorId: '6gen46', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'probabilitehypergeometrique', generatorId: '6gen47', label: '' },
+  { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen48', label: '' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen8', label: 'Transformations graphiques (gen8)' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen9', label: 'Forme canonique et transformations (gen9)' },
@@ -523,6 +497,68 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'E', label: 'E — Optimisation puissance×exponentielle' },
     { id: 'F', label: 'F — Saturation donnée, coûts/revenus' },
     { id: 'G', label: 'G — Seuil critique, décision' },
+  ],
+  '6gen43': [
+    { id: 'A_total', label: 'A — Nombres à n chiffres distincts : total' },
+    { id: 'A_positionFixeeDernier', label: 'A — Position fixée (dernier chiffre)' },
+    { id: 'A_positionFixeePremiers', label: 'A — Position(s) fixée(s) (premiers chiffres)' },
+    { id: 'A_contientUnChiffre', label: 'A — Contient un chiffre donné (complément)' },
+    { id: 'A_contientDeuxChiffres', label: 'A — Contient deux chiffres donnés (inclusion-exclusion)' },
+    { id: 'A_borneSuperieure', label: 'A — Borne supérieure sur le premier chiffre' },
+    { id: 'A_parite', label: 'A — Parité ou multiple de m (piège 0/non-nul)' },
+    { id: 'B_direct', label: "B — Diagonales d'un polygone : direct" },
+    { id: 'B_inverse', label: "B — Diagonales d'un polygone : trouver n" },
+    { id: 'C_cartesContraintes', label: 'C — Cartes avec contraintes (combinaison)' },
+    { id: 'C_motsLettresDistinctes', label: 'C — Mots, lettres distinctes (permutation)' },
+    { id: 'C_motsRepetition', label: 'C — Mots, répétition autorisée (puissance)' },
+    { id: 'C_motsPositionFixee', label: 'C — Mots, position fixée (permutation)' },
+    { id: 'D_grouper', label: 'D — Grouper par catégorie' },
+    { id: 'D_consecutivesOrdreFixe', label: 'D — Lettres consécutives, ordre fixé' },
+    { id: 'D_consecutivesOrdreLibre', label: 'D — Lettres consécutives, ordre libre' },
+    { id: 'E_table', label: 'E — Permutation circulaire : table ronde' },
+    { id: 'E_collier', label: 'E — Permutation circulaire : collier/bracelet' },
+  ],
+  '6gen44': [
+    { id: 'A_multinomial', label: 'A — Répartition en groupes de tailles données (multinomiale)' },
+    { id: 'B_roleDistingue', label: 'B — Rôle distingué + reste en combinaison' },
+    { id: 'B_poolsSepares', label: 'B — Pools séparés indépendants (ET)' },
+    { id: 'B_memeContrainte', label: 'B — Même contrainte sur 2 groupes (OU)' },
+    { id: 'B_partitionComplementaire', label: 'B — Partition en 2 groupes complémentaires' },
+    { id: 'C_repetition', label: 'C — Combinaisons avec répétition' },
+    { id: 'C_comparaison', label: 'C — Comparaison discernable/indiscernable' },
+    { id: 'D_exclusionPaire', label: 'D — Exclusion de paire (soustraction)' },
+    { id: 'D_coupleIndissociable', label: 'D — Couple indissociable (addition)' },
+    { id: 'D_contrainteRiche', label: 'D — Contrainte plus riche (2 catégories)' },
+  ],
+  '6gen45': [
+    { id: 'A', label: 'A — Développement complet de (ax+b)ⁿ' },
+    { id: 'B_rang', label: 'B — Terme de rang k donné' },
+    { id: 'B_puissance', label: 'B — Coefficient du terme en xᵖ' },
+    { id: 'C', label: 'C — Approximation décimale (1+ε)ⁿ' },
+  ],
+  '6gen46': [
+    { id: 'A_carre', label: 'A — Poker : carré' },
+    { id: 'A_brelan', label: 'A — Poker : brelan' },
+    { id: 'A_paire', label: 'A — Poker : une seule paire' },
+    { id: 'A_deuxPaires', label: 'A — Poker : deux paires' },
+    { id: 'B_repartition', label: 'B — Répartition en groupes de tailles données' },
+    { id: 'C_affichages', label: 'C — Dénombrement avec répétition' },
+    { id: 'D_sommeTriplets', label: 'D — Triplets ordonnés pour une somme donnée' },
+  ],
+  '6gen47': [
+    { id: 'A_aucun', label: 'A — Hypergéométrique de base : aucun succès (k=0)' },
+    { id: 'A_tous', label: 'A — Hypergéométrique de base : tous des succès (k=n)' },
+    { id: 'A_exactement', label: 'A — Hypergéométrique de base : exactement k succès' },
+    { id: 'B_ordreComposition', label: 'B — Contraste ordre vs composition (urne à 2 couleurs)' },
+    { id: 'C_lotoBonus', label: 'C — Hypergéométrique à 2 catégories croisées (loto + bonus)' },
+  ],
+  '6gen48': [
+    { id: 'A_exactement', label: 'A — Exactement k succès (terme unique)' },
+    { id: 'A_auMoins', label: 'A — Au moins k succès (somme ou complément)' },
+    { id: 'A_auPlus', label: 'A — Au plus k succès (somme ou complément)' },
+    { id: 'A_aucun', label: 'A — Aucun succès (terme unique)' },
+    { id: 'A_tous', label: 'A — Tous des succès (terme unique)' },
+    { id: 'B_sequence', label: 'B — Séquence exacte, sans remise' },
   ],
   '6gen13': [
     { id: 'produit', label: 'Produit — log_a(M·N)' },

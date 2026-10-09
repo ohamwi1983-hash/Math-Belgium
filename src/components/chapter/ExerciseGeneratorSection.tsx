@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { ChapterContent } from '../../content/types'
-import { estChapitreFonctionnel } from '../../lib/evaluationPayload'
+import { estChapitreFonctionnel } from '../../lib/chapitresFonctionnels'
 
 /** Section "S'entraîner sur ce chapitre" — lien vers `/{levelSlug}/{slug}/exercices`
  * (`ChapterExercicePage.tsx`, page publique élève), juste AVANT `ExportSection` en bas de chaque
