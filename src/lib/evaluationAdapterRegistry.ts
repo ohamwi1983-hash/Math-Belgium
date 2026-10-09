@@ -233,6 +233,11 @@ import { adaptateurEvaluationLogarithmesProblemes } from '../entrainement/6e-6h/
 import { adaptateurEvaluationEtudeFonctionLogarithme } from '../entrainement/6e-6h/generateurs6e/etudeFonctionLogarithme/exportEvaluation'
 import { adaptateurEvaluationInequationsLogarithmiques } from '../entrainement/6e-6h/generateurs6e/inequationsLogarithmiques/exportEvaluation'
 import { adaptateurEvaluationDomaineDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/domaineDeriveeLogarithme/exportEvaluation'
+import { adaptateurEvaluationVariablesDiscretesEsperance } from '../entrainement/6e-6h/generateurs6e/variablesDiscretesEsperance/exportEvaluation'
+import { adaptateurEvaluationLoiBinomiale } from '../entrainement/6e-6h/generateurs6e/loiBinomiale/exportEvaluation'
+import { adaptateurEvaluationLoiNormale } from '../entrainement/6e-6h/generateurs6e/loiNormale/exportEvaluation'
+import { adaptateurEvaluationExtensionsBinomialeNormaleBayes } from '../entrainement/6e-6h/generateurs6e/extensionsBinomialeNormaleBayes/exportEvaluation'
+import { adaptateurEvaluationLoiPoisson } from '../entrainement/6e-6h/generateurs6e/loiPoisson/exportEvaluation'
 
 /** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
  * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
@@ -268,6 +273,11 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen46': adaptateurEvaluationDenombrementCombinatoirePur as unknown as AdaptateurFeuilleExercices<never>,
   '6gen47': adaptateurEvaluationProbabiliteHypergeometrique as unknown as AdaptateurFeuilleExercices<never>,
   '6gen48': adaptateurEvaluationBinomialeSequenceOrdonnee as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen49': adaptateurEvaluationVariablesDiscretesEsperance as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen50': adaptateurEvaluationLoiBinomiale as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen51': adaptateurEvaluationLoiNormale as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen52': adaptateurEvaluationExtensionsBinomialeNormaleBayes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen53': adaptateurEvaluationLoiPoisson as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas

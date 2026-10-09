@@ -51,6 +51,7 @@ const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e
 const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-exponentielles', chapitreTitle: 'Fonctions exponentielles' }
 const CH_6E_FONCTIONS_LOGARITHMES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-logarithmes', chapitreTitle: 'Fonctions logarithmes' }
 const CH_6E_ANALYSE_COMBINATOIRE: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'analyse-combinatoire', chapitreTitle: 'Analyse combinatoire' }
+const CH_6E_VARIABLES_ALEATOIRES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'variables-aleatoires', chapitreTitle: 'Variables aléatoires et lois de probabilités' }
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
 const CH_4E_STATISTIQUE_DESCRIPTIVE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'statistique-descriptive', chapitreTitle: 'Statistique descriptive à une variable' }
 const CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES: ChapitreInfo = { chantier: '4e', chapitreSlug: 'cercle-trigonometrique-triangles', chapitreTitle: 'Cercle trigonométrique & triangles quelconques' }
@@ -227,4 +228,12 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen47': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen47').then((m) => ({ default: m.App6gen47 }))),
   '6gen48': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen48').then((m) => ({ default: m.App6gen48 }))),
   '6gen70': entree(CH_6E_ANALYSE_COMBINATOIRE, () => import('./6e-6h/App6gen70').then((m) => ({ default: m.App6gen70 }))),
+
+  // --- 6e, chapitre 8 : Variables aléatoires et lois de probabilités ---
+  '6gen49': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen49').then((m) => ({ default: m.App6gen49 }))),
+  '6gen50': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen50').then((m) => ({ default: m.App6gen50 }))),
+  '6gen51': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen51').then((m) => ({ default: m.App6gen51 }))),
+  '6gen52': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen52').then((m) => ({ default: m.App6gen52 }))),
+  '6gen53': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen53').then((m) => ({ default: m.App6gen53 }))),
+  '6gen71': entree(CH_6E_VARIABLES_ALEATOIRES, () => import('./6e-6h/App6gen71').then((m) => ({ default: m.App6gen71 }))),
 }

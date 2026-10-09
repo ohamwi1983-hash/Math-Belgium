@@ -79,6 +79,7 @@ export type IdGenerateurPilote =
   | '6gen1' | '6gen2' | '6gen3' | '6gen4' | '6gen5' | '6gen6' | '6gen7' | '6gen8' | '6gen9' | '6gen10' | '6gen11' | '6gen12'
   | '6gen13' | '6gen14' | '6gen15' | '6gen16' | '6gen17' | '6gen18' | '6gen19' | '6gen20' | '6gen21' | '6gen22'
   | '6gen43' | '6gen44' | '6gen45' | '6gen46' | '6gen47' | '6gen48'
+  | '6gen49' | '6gen50' | '6gen51' | '6gen52' | '6gen53'
   | 'gen1' | 'gen2' | 'gen3' | 'gen4' | 'gen5' | 'gen6' | 'gen7' | 'gen8' | 'gen9' | 'gen10' | 'gen11' | 'gen12' | 'gen13'
   | 'gen30' | 'gen31' | 'gen32' | 'gen33' | 'gen34' | 'gen35' | 'gen36' | 'gen37' | 'gen38'
   | 'gen14' | 'gen15' | 'gen16' | 'gen17' | 'gen18' | 'gen19' | 'gen58'
@@ -153,6 +154,11 @@ export const GENERATEURS_EVALUATION_PILOTE: GeneratorConfig[] = [
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'denombrementproblemes', generatorId: '6gen46', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'probabilitehypergeometrique', generatorId: '6gen47', label: '' },
   { chapitreSlug: 'analyse-combinatoire', sectionId: 'binomialesequence', generatorId: '6gen48', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'variablesdiscretes', generatorId: '6gen49', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loibinomiale', generatorId: '6gen50', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loinormale', generatorId: '6gen51', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'extensionsbayes', generatorId: '6gen52', label: '' },
+  { chapitreSlug: 'variables-aleatoires', sectionId: 'loipoisson', generatorId: '6gen53', label: '' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'etudier', generatorId: 'gen7', label: "Analyse d'une fonction (gen7)" },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen8', label: 'Transformations graphiques (gen8)' },
   { chapitreSlug: 'fonction-second-degre', sectionId: 'transformer', generatorId: 'gen9', label: 'Forme canonique et transformations (gen9)' },
@@ -559,6 +565,60 @@ export const CATALOGUES_VARIANTES_EXERCICE: Record<IdGenerateurPilote, Catalogue
     { id: 'A_aucun', label: 'A — Aucun succès (terme unique)' },
     { id: 'A_tous', label: 'A — Tous des succès (terme unique)' },
     { id: 'B_sequence', label: 'B — Séquence exacte, sans remise' },
+  ],
+  '6gen49': [
+    { id: 'A_contraires', label: 'A — Loi donnée : cumuls et événements contraires' },
+    { id: 'B_contexteDirect', label: 'B — Construire la loi (contexte direct) et E(X)' },
+    { id: 'B_hypergeometrique', label: 'B — Construire la loi (hypergéométrique) et E(X)' },
+    { id: 'C_verifier', label: 'C — Jeu équitable : vérifier E' },
+    { id: 'C_imposer', label: 'C — Jeu équitable : imposer m pour E=0' },
+  ],
+  '6gen50': [
+    { id: 'A_justifier', label: 'A — Justifier la loi binomiale (identification + Bernoulli)' },
+    { id: 'B_exactement', label: 'B — Exactement k succès (terme unique) + E(X)' },
+    { id: 'B_auMoins', label: 'B — Au moins k succès (somme ou complément) + E(X)' },
+    { id: 'B_auPlus', label: 'B — Au plus k succès (somme ou complément) + E(X)' },
+    { id: 'B_aucun', label: 'B — Aucun succès (terme unique) + E(X)' },
+    { id: 'B_tous', label: 'B — Tous des succès (terme unique) + E(X)' },
+    { id: 'C_trouverN', label: 'C — Trouver n via logarithme (au moins 1 succès)' },
+  ],
+  '6gen51': [
+    { id: 'A_inferieur', label: 'A — Centrée réduite, P(Z≤z)' },
+    { id: 'A_superieur', label: 'A — Centrée réduite, P(Z≥z)' },
+    { id: 'A_intervalle', label: 'A — Centrée réduite, P(z1≤Z≤z2)' },
+    { id: 'B_inferieur', label: 'B — Générale N(μ,σ), P(X≤x)' },
+    { id: 'B_superieur', label: 'B — Générale N(μ,σ), P(X≥x)' },
+    { id: 'B_intervalle', label: 'B — Générale N(μ,σ), P(x1≤X≤x2)' },
+    { id: 'C_cumulee', label: 'C — Sens inverse, P(Z≤t)=p' },
+    { id: 'C_symetrique', label: 'C — Sens inverse, P(0≤Z≤t)=p' },
+    { id: 'C_encadree', label: 'C — Sens inverse, P(t≤Z≤k)=p' },
+    { id: 'D_cumulee', label: 'D — Générale sens inverse, P(X≤a)=p' },
+    { id: 'D_symetrique', label: 'D — Générale sens inverse, P(μ≤X≤a)=p' },
+    { id: 'D_encadree', label: 'D — Générale sens inverse, P(a≤X≤b)=p' },
+    { id: 'E_deuxCotes', label: 'E — Règle empirique, hors intervalle (2 côtés)' },
+    { id: 'E_unCote', label: 'E — Règle empirique, un seul côté (piège)' },
+  ],
+  '6gen52': [
+    { id: 'A_compose', label: 'A — Indépendance composée (p1×p2) + trouver n' },
+    { id: 'A_direct', label: 'A — Probabilité directe + trouver n' },
+    { id: 'B_exactement', label: 'B — Binomial : exactement k (terme unique)' },
+    { id: 'B_auMoins', label: 'B — Binomial : au moins k' },
+    { id: 'B_auPlus', label: 'B — Binomial : au plus k' },
+    { id: 'B_aucun', label: 'B — Binomial : aucun succès' },
+    { id: 'B_tous', label: 'B — Binomial : tous succès' },
+    { id: 'C_cumulee', label: 'C — Loi normale inverse : cumulée' },
+    { id: 'C_symetrique', label: 'C — Loi normale inverse : symétrique' },
+    { id: 'C_encadree', label: 'C — Loi normale inverse : encadrée' },
+    { id: 'D_bayes3', label: 'D — Bayes à 3 catégories' },
+    { id: 'E_uniforme', label: 'E — Loi uniforme continue' },
+    { id: 'F_reconstruire', label: 'F — Reconstruire une loi + espérance appliquée' },
+  ],
+  '6gen53': [
+    { id: 'A_verifier', label: 'A — Approximation Poisson (checklist + λ + P(X=k))' },
+    { id: 'B_exactement', label: 'B — Exactement k occurrences (terme unique, 2 écrans)' },
+    { id: 'B_entreAetB', label: 'B — Entre a et b occurrences (somme, 3 écrans)' },
+    { id: 'B_auPlus', label: 'B — Au plus k occurrences (somme, 3 écrans)' },
+    { id: 'B_auMoins', label: 'B — Au moins k occurrences (complément, 3 écrans)' },
   ],
   '6gen13': [
     { id: 'produit', label: 'Produit — log_a(M·N)' },

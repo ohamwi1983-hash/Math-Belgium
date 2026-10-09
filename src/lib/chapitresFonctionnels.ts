@@ -45,6 +45,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'limites-asymptotes' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_5E, chapitreSlug: 'derivees-applications' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'analyse-combinatoire' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'variables-aleatoires' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {
