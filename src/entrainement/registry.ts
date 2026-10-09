@@ -53,6 +53,7 @@ const CH_6E_FONCTIONS_LOGARITHMES: ChapitreInfo = { chantier: '6e-6h', chapitreS
 const CH_6E_ANALYSE_COMBINATOIRE: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'analyse-combinatoire', chapitreTitle: 'Analyse combinatoire' }
 const CH_6E_VARIABLES_ALEATOIRES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'variables-aleatoires', chapitreTitle: 'Variables aléatoires et lois de probabilités' }
 const CH_6E_PRIMITIVES_INTEGRALES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'primitives-integrales', chapitreTitle: 'Intégrales et primitives' }
+const CH_6E_NOMBRES_COMPLEXES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'nombres-complexes', chapitreTitle: 'Nombres complexes' }
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
 const CH_4E_STATISTIQUE_DESCRIPTIVE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'statistique-descriptive', chapitreTitle: 'Statistique descriptive à une variable' }
 const CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES: ChapitreInfo = { chantier: '4e', chapitreSlug: 'cercle-trigonometrique-triangles', chapitreTitle: 'Cercle trigonométrique & triangles quelconques' }
@@ -245,4 +246,14 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen28': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen28').then((m) => ({ default: m.App6gen28 }))),
   '6gen29': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen29').then((m) => ({ default: m.App6gen29 }))),
   '6gen67': entree(CH_6E_PRIMITIVES_INTEGRALES, () => import('./6e-6h/App6gen67').then((m) => ({ default: m.App6gen67 }))),
+  '6gen34': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen34').then((m) => ({ default: m.App6gen34 }))),
+  '6gen35': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen35').then((m) => ({ default: m.App6gen35 }))),
+  '6gen36': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen36').then((m) => ({ default: m.App6gen36 }))),
+  '6gen37': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen37').then((m) => ({ default: m.App6gen37 }))),
+  '6gen38': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen38').then((m) => ({ default: m.App6gen38 }))),
+  '6gen39': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen39').then((m) => ({ default: m.App6gen39 }))),
+  '6gen40': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen40').then((m) => ({ default: m.App6gen40 }))),
+  '6gen41': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen41').then((m) => ({ default: m.App6gen41 }))),
+  '6gen42': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen42').then((m) => ({ default: m.App6gen42 }))),
+  '6gen68': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen68').then((m) => ({ default: m.App6gen68 }))),
 }

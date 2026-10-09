@@ -245,6 +245,15 @@ import { adaptateurEvaluationCalculAires } from '../entrainement/6e-6h/generateu
 import { adaptateurEvaluationVolumesRevolution } from '../entrainement/6e-6h/generateurs6e/volumesRevolution/exportEvaluation'
 import { adaptateurEvaluationLongueurArc } from '../entrainement/6e-6h/generateurs6e/longueurArc/exportEvaluation'
 import { adaptateurEvaluationIntegralesProblemes } from '../entrainement/6e-6h/generateurs6e/integralesProblemes/exportEvaluation'
+import { adaptateurEvaluationNombresComplexes } from '../entrainement/6e-6h/generateurs6e/nombresComplexes/exportEvaluation'
+import { adaptateurEvaluationAffixesRacines } from '../entrainement/6e-6h/generateurs6e/affixesRacines/exportEvaluation'
+import { adaptateurEvaluationEquationsComplexes } from '../entrainement/6e-6h/generateurs6e/equationsComplexes/exportEvaluation'
+import { adaptateurEvaluationFormeTrigonometrique } from '../entrainement/6e-6h/generateurs6e/formeTrigonometrique/exportEvaluation'
+import { adaptateurEvaluationFormuleMoivre } from '../entrainement/6e-6h/generateurs6e/formuleMoivre/exportEvaluation'
+import { adaptateurEvaluationRacinesNiemes } from '../entrainement/6e-6h/generateurs6e/racinesNiemes/exportEvaluation'
+import { adaptateurEvaluationTransformationsPlan } from '../entrainement/6e-6h/generateurs6e/transformationsPlan/exportEvaluation'
+import { adaptateurEvaluationTrianglesComplexes } from '../entrainement/6e-6h/generateurs6e/trianglesComplexes/exportEvaluation'
+import { adaptateurEvaluationComplexesAvances } from '../entrainement/6e-6h/generateurs6e/complexesAvances/exportEvaluation'
 
 /** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
  * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
@@ -292,6 +301,15 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen27': adaptateurEvaluationVolumesRevolution as unknown as AdaptateurFeuilleExercices<never>,
   '6gen28': adaptateurEvaluationLongueurArc as unknown as AdaptateurFeuilleExercices<never>,
   '6gen29': adaptateurEvaluationIntegralesProblemes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen34': adaptateurEvaluationNombresComplexes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen35': adaptateurEvaluationAffixesRacines as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen36': adaptateurEvaluationEquationsComplexes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen37': adaptateurEvaluationFormeTrigonometrique as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen38': adaptateurEvaluationFormuleMoivre as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen39': adaptateurEvaluationRacinesNiemes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen40': adaptateurEvaluationTransformationsPlan as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen41': adaptateurEvaluationTrianglesComplexes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen42': adaptateurEvaluationComplexesAvances as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
