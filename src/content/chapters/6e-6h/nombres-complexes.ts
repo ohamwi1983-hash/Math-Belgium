@@ -24,6 +24,8 @@ export const nombresComplexes: ChapterContent = {
       title: 'Opérations de base et puissances de i',
       kicker: 'i²=−1, forme a+bi, conjugué, division',
       blocks: [
+        { kind: 'video', title: 'Le nombre i, la forme a+bi, égalité, addition et multiplication', youtubeId: 'wx8rh7lg4Ek' },
+        { kind: 'video', title: 'Conjugué, division et puissances de i', youtubeId: '3wItJZm7MW0' },
         {
           kind: 'intuition',
           label: 'Une histoire déjà vécue',
@@ -237,6 +239,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Affixes et racines carrées',
       kicker: 'affixe, plan d\'Argand, milieu, racine carrée',
       blocks: [
+        { kind: 'video', title: 'Affixes, plan d\'Argand et racine carrée d\'un complexe', youtubeId: '44TNtPom7L0' },
         {
           kind: 'intuition',
           label: 'Le plan complexe, comme une carte',
@@ -390,6 +393,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Équations dans ℂ',
       kicker: 'Δ<0, deux solutions conjuguées ; équations bicarrées',
       blocks: [
+        { kind: 'video', title: 'Équations dans ℂ : Δ < 0, bicarrées, racines conjuguées', youtubeId: 'o3zky-zKVCo' },
         {
           kind: 'definition',
           label: 'Second degré à discriminant négatif',
@@ -527,6 +531,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Forme trigonométrique, module, argument',
       kicker: 'module, argument, forme trigonométrique et exponentielle',
       blocks: [
+        { kind: 'video', title: 'Forme trigonométrique, module, argument, produit et quotient', youtubeId: 'vu9w4a5RF20' },
         {
           kind: 'intuition',
           label: 'Le module, c\'est juste une distance',
@@ -721,6 +726,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Formule de Moivre',
       kicker: '(cosθ+isinθ)ⁿ = cos(nθ)+isin(nθ)',
       blocks: [
+        { kind: 'video', title: 'Formule de Moivre', youtubeId: 'u4Zek-B6nnk' },
         {
           kind: 'definition',
           label: 'Formule de Moivre',
@@ -857,6 +863,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Racines n-ièmes d\'un nombre complexe',
       kicker: 'zₖ = r^{1/n}e^{i(θ+2kπ)/n} — polygone régulier',
       blocks: [
+        { kind: 'video', title: 'Racines n-ièmes d\'un nombre complexe', youtubeId: 'nMCp_ZjrrjQ' },
         {
           kind: 'definition',
           label: 'Formule générale',
@@ -970,6 +977,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Transformations du plan',
       kicker: 'translation, rotation, homothétie, similitude',
       blocks: [
+        { kind: 'video', title: 'Transformations du plan : translation, rotation, homothétie, similitude', youtubeId: 'C9EqFs1JjSA' },
         {
           kind: 'intuition',
           label: 'Une idée déjà familière : tourner, agrandir, glisser',
@@ -1164,6 +1172,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Propriétés géométriques de triangles',
       kicker: 'alignement, orthogonalité, isocèle, rectangle, équilatéral',
       blocks: [
+        { kind: 'video', title: 'Propriétés géométriques de triangles', youtubeId: 'ajlCdHMn4No' },
         {
           kind: 'definition',
           label: 'Critères par un rapport d\'affixes',
@@ -1268,6 +1277,7 @@ export const nombresComplexes: ChapterContent = {
       title: 'Nombres complexes : problèmes avancés',
       kicker: 'zⁿ réel/positif, lieux géométriques, transformations avancées',
       blocks: [
+        { kind: 'video', title: 'Problèmes avancés et synthèse du chapitre', youtubeId: 'QEzQJzT83TQ' },
         {
           kind: 'definition',
           label: 'Quand zⁿ est-il réel ? réel positif ?',
