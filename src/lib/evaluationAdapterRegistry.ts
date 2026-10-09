@@ -7,11 +7,14 @@ import type { AdaptateurFeuilleExercices } from '../entrainement/export/genererF
  * générateur peut générer une évaluation/feuille d'exercices 100% localement, sans passer par
  * plateforme-maths" — `evaluationLocal.ts` la consulte avant de décider local vs redirection.
  *
- * Miroir manuel de `AppEvaluation4e.tsx::ADAPTATEURS` côté plateforme-maths, limité pour l'instant
- * au 4e (chapitres 1 à 8, 55 générateurs — voir ce fichier pour le détail des sections couvertes/
- * exclues). `as unknown as AdaptateurFeuilleExercices<never>` : chaque adaptateur a son propre
- * paramètre de type T (une instance de SON générateur), jamais unifiable dans un seul `Record` sans
- * passer par un type existentiel — même compromis déjà accepté côté plateforme-maths.
+ * Miroir manuel de `AppEvaluation4e.tsx::ADAPTATEURS`/`AppEvaluation5e.tsx::ADAPTATEURS` côté
+ * plateforme-maths — un `Record` par chantier (4e : chapitres 1 à 8, 55 générateurs ; 5e :
+ * chapitres 1 à 5, 35 générateurs — voir chaque fichier source pour le détail des sections
+ * couvertes/exclues), plus `EVALUATION_ADAPTER_REGISTRY` qui les fusionne pour un lookup unique
+ * par `generatorId` (les deux unions `gen*`/`5gen*` ne se recoupent jamais). `as unknown as
+ * AdaptateurFeuilleExercices<never>` : chaque adaptateur a son propre paramètre de type T (une
+ * instance de SON générateur), jamais unifiable dans un seul `Record` sans passer par un type
+ * existentiel — même compromis déjà accepté côté plateforme-maths.
  */
 
 import { adaptateurEvaluationSecondDegre } from '../entrainement/4e/generateurs/secondDegre/exportEvaluation'
@@ -126,4 +129,85 @@ export const EVALUATION_ADAPTER_REGISTRY_4E: Record<string, AdaptateurFeuilleExe
   gen39: adaptateurEvaluationPositionDroitePlan as unknown as AdaptateurFeuilleExercices<never>,
   gen40: adaptateurEvaluationSectionPlaneSolide as unknown as AdaptateurFeuilleExercices<never>,
   gen41: adaptateurEvaluationOmbreSoleil as unknown as AdaptateurFeuilleExercices<never>,
+}
+
+import { adaptateurEvaluationDomaineDefinition } from '../entrainement/5e-4h/generateurs5e/domaineDefinition/exportEvaluation'
+import { adaptateurEvaluationDecompositionFonction } from '../entrainement/5e-4h/generateurs5e/decompositionFonction/exportEvaluation'
+import { adaptateurEvaluationComposerFonctions } from '../entrainement/5e-4h/generateurs5e/composerFonctions/exportEvaluation'
+import { adaptateurEvaluationComposeeGraphique } from '../entrainement/5e-4h/generateurs5e/composeeGraphique/exportEvaluation'
+import { adaptateurEvaluationProblemesContexte } from '../entrainement/5e-4h/generateurs5e/problemesContexte/exportEvaluation'
+import { adaptateurEvaluationArcSecteur } from '../entrainement/5e-4h/generateurs5e/arcsSecteurs/exportEvaluation'
+import { adaptateurEvaluationPolygonesArcsSecteurs } from '../entrainement/5e-4h/generateurs5e/polygonesArcsSecteurs/exportEvaluation'
+import { adaptateurEvaluationParametresSinusoide } from '../entrainement/5e-4h/generateurs5e/parametresSinusoide/exportEvaluation'
+import { adaptateurEvaluationParametresSinusoideGraphique } from '../entrainement/5e-4h/generateurs5e/parametresSinusoideGraphique/exportEvaluation'
+import { adaptateurEvaluationEquationTrig } from '../entrainement/5e-4h/generateurs5e/equationsTrigonometriques/exportEvaluation'
+import { adaptateurEvaluationExtremumsSinusoide } from '../entrainement/5e-4h/generateurs5e/extremumsSinusoide/exportEvaluation'
+import { adaptateurEvaluationGeometrieCercle } from '../entrainement/5e-4h/generateurs5e/geometrieCercle/exportEvaluation'
+import { adaptateurEvaluationModelisationSinusoide } from '../entrainement/5e-4h/generateurs5e/modelisationSinusoide/exportEvaluation'
+import { adaptateurEvaluationSuitesArithmetiques } from '../entrainement/5e-4h/generateurs5e/suitesArithmetiques/exportEvaluation'
+import { adaptateurEvaluationSuitesGeometriques } from '../entrainement/5e-4h/generateurs5e/suitesGeometriques/exportEvaluation'
+import { adaptateurEvaluationConvergenceSuites } from '../entrainement/5e-4h/generateurs5e/convergenceSuites/exportEvaluation'
+import { adaptateurEvaluationSuitesClassiques } from '../entrainement/5e-4h/generateurs5e/suitesClassiques/exportEvaluation'
+import { adaptateurEvaluationComparaisonSuites } from '../entrainement/5e-4h/generateurs5e/comparaisonSuites/exportEvaluation'
+import { adaptateurEvaluationSuiteRecurrenteAffine } from '../entrainement/5e-4h/generateurs5e/suiteRecurrenteAffine/exportEvaluation'
+import { adaptateurEvaluationLimites } from '../entrainement/5e-4h/generateurs5e/limites/exportEvaluation'
+import { adaptateurEvaluationAsymptoteOblique } from '../entrainement/5e-4h/generateurs5e/asymptoteOblique/exportEvaluation'
+import { adaptateurEvaluationLectureGraphiqueLimites } from '../entrainement/5e-4h/generateurs5e/lectureGraphiqueLimites/exportEvaluation'
+import { adaptateurEvaluationLimitesContexte } from '../entrainement/5e-4h/generateurs5e/limitesContexte/exportEvaluation'
+import { adaptateurEvaluationEtudeComplete } from '../entrainement/5e-4h/generateurs5e/etudeComplete/exportEvaluation'
+import { adaptateurEvaluationAssociation } from '../entrainement/5e-4h/generateurs5e/association/exportEvaluation'
+import { adaptateurEvaluationDefinitionDerivee } from '../entrainement/5e-4h/generateurs5e/definitionDerivee/exportEvaluation'
+import { adaptateurEvaluationFonctionDerivee } from '../entrainement/5e-4h/generateurs5e/fonctionDerivee/exportEvaluation'
+import { adaptateurEvaluationTangentes } from '../entrainement/5e-4h/generateurs5e/tangentes/exportEvaluation'
+import { adaptateurEvaluationEtudeLocale } from '../entrainement/5e-4h/generateurs5e/etudeLocale/exportEvaluation'
+import { adaptateurEvaluationLectureGraphiqueDerivees } from '../entrainement/5e-4h/generateurs5e/lectureGraphiqueDerivees/exportEvaluation'
+import { adaptateurEvaluationEtudierFonction } from '../entrainement/5e-4h/generateurs5e/etudierFonction/exportEvaluation'
+import { adaptateurEvaluationOptimisationGeometrique } from '../entrainement/5e-4h/generateurs5e/optimisationGeometrique/exportEvaluation'
+import { adaptateurEvaluationContexteEconomique } from '../entrainement/5e-4h/generateurs5e/contexteEconomique/exportEvaluation'
+import { adaptateurEvaluationExtremaBornes } from '../entrainement/5e-4h/generateurs5e/extremaBornes/exportEvaluation'
+import { adaptateurEvaluationVitessePosition } from '../entrainement/5e-4h/generateurs5e/vitessePosition/exportEvaluation'
+
+export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExercices<never>> = {
+  '5gen1': adaptateurEvaluationDomaineDefinition as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen2': adaptateurEvaluationDecompositionFonction as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen3': adaptateurEvaluationComposerFonctions as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen4': adaptateurEvaluationComposeeGraphique as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen5': adaptateurEvaluationProblemesContexte as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen6': adaptateurEvaluationArcSecteur as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen7': adaptateurEvaluationPolygonesArcsSecteurs as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen8': adaptateurEvaluationParametresSinusoide as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen9': adaptateurEvaluationParametresSinusoideGraphique as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen10': adaptateurEvaluationEquationTrig as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen11': adaptateurEvaluationExtremumsSinusoide as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen12': adaptateurEvaluationGeometrieCercle as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen13': adaptateurEvaluationModelisationSinusoide as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen14': adaptateurEvaluationSuitesArithmetiques as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen15': adaptateurEvaluationSuitesGeometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen16': adaptateurEvaluationConvergenceSuites as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen17': adaptateurEvaluationSuitesClassiques as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen18': adaptateurEvaluationComparaisonSuites as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen19': adaptateurEvaluationSuiteRecurrenteAffine as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen20': adaptateurEvaluationLimites as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen21': adaptateurEvaluationAsymptoteOblique as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen22': adaptateurEvaluationLectureGraphiqueLimites as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen23': adaptateurEvaluationLimitesContexte as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen24': adaptateurEvaluationEtudeComplete as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen25': adaptateurEvaluationAssociation as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen26': adaptateurEvaluationDefinitionDerivee as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen27': adaptateurEvaluationFonctionDerivee as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen28': adaptateurEvaluationTangentes as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen29': adaptateurEvaluationEtudeLocale as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen30': adaptateurEvaluationLectureGraphiqueDerivees as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen31': adaptateurEvaluationEtudierFonction as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen32': adaptateurEvaluationOptimisationGeometrique as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen33': adaptateurEvaluationContexteEconomique as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen34': adaptateurEvaluationExtremaBornes as unknown as AdaptateurFeuilleExercices<never>,
+  '5gen35': adaptateurEvaluationVitessePosition as unknown as AdaptateurFeuilleExercices<never>,
+}
+
+/** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
+ * à savoir quel chantier a produit quel générateur. */
+export const EVALUATION_ADAPTER_REGISTRY: Record<string, AdaptateurFeuilleExercices<never>> = {
+  ...EVALUATION_ADAPTER_REGISTRY_4E,
+  ...EVALUATION_ADAPTER_REGISTRY_5E,
 }

@@ -367,7 +367,8 @@ export function EvaluationGeneratorPanel({
           declencherTelechargement(corrige, `${titreFinal}${suffixeSerie} — corrigé.html`)
         }
         setGenereLocalementCompte(series.length * 2)
-      } catch {
+      } catch (e) {
+        console.error(e)
         setErreur('Erreur pendant la génération — réessaie.')
       } finally {
         setGenereEnCours(false)
@@ -402,7 +403,7 @@ export function EvaluationGeneratorPanel({
         <p className="admin-eval-intro">
           Sont fonctionnels : tous les chapitres de 4e et de 5e (4h), ainsi que 3 chapitres de 6e (6h) — fonctions réciproques/cyclométriques,
           fonctions exponentielles, fonctions logarithmes. Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés
-          (« bientôt ») — l'extension se fera lot par lot. Pour 4e, la génération se fait désormais directement ici (aucune redirection), sauf
+          (« bientôt ») — l'extension se fera lot par lot. Pour 4e et 5e, la génération se fait désormais directement ici (aucune redirection), sauf
           sélection d'une question vrai/faux.
         </p>
       )}

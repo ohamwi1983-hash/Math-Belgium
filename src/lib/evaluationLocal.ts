@@ -1,34 +1,36 @@
 import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, SectionExercice } from '../entrainement/export/genererFeuilleExercices'
 import { texte } from '../entrainement/export/fragmentsDocx'
 import { genererEvaluationHtml, type EnteteEvaluation as EnteteEvaluationSerie, type ItemEvaluation } from '../entrainement/export/assemblerEvaluationHtml'
-import { EVALUATION_ADAPTER_REGISTRY_4E } from './evaluationAdapterRegistry'
-import { LEVELSLUG_FONCTIONNEL_4E, type EnTeteEvaluation, type ItemPayload } from './evaluationPayload'
+import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
+import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type EnTeteEvaluation, type ItemPayload } from './evaluationPayload'
 
 /**
  * Génération locale (SANS passer par plateforme-maths) des deux documents HTML d'une évaluation/
- * feuille d'exercices — pendant de `AppEvaluation4e.tsx` côté plateforme-maths, mais consommant
- * directement un `ItemPayload[]` déjà construit en mémoire (`construireItemsPayload`, voir
- * `evaluationPayload.ts`) plutôt qu'un payload décodé depuis l'URL : aucun encode/decode base64,
- * aucune redirection de page, le tout reste dans l'onglet de Math-Belgium.
+ * feuille d'exercices — pendant de `AppEvaluation4e.tsx`/`AppEvaluation5e.tsx` côté plateforme-
+ * maths, mais consommant directement un `ItemPayload[]` déjà construit en mémoire
+ * (`construireItemsPayload`, voir `evaluationPayload.ts`) plutôt qu'un payload décodé depuis l'URL :
+ * aucun encode/decode base64, aucune redirection de page, le tout reste dans l'onglet de
+ * Math-Belgium.
  *
- * Portée actuelle : 4e UNIQUEMENT (chapitres 1 à 8, les 55 générateurs de
- * `EVALUATION_ADAPTER_REGISTRY_4E`) — 5e/6e continuent de passer par l'URL vers plateforme-maths
- * (`buildEvaluationUrl`) tant que leurs adaptateurs n'ont pas été portés ici à leur tour. Les
- * questions `vraiFaux` restent elles aussi hors périmètre (les banques `BANQUE_QUIZ_*`, ~23 700
- * lignes au total côté plateforme-maths, n'ont pas été portées) — `peutGenererLocalement` renvoie
- * `false` dès qu'une ligne vrai/faux est sélectionnée, quel que soit le niveau, pour que l'appelant
- * retombe sur `buildEvaluationUrl` dans ce cas.
+ * Portée actuelle : 4e (chapitres 1 à 8, 55 générateurs) et 5e (chapitres 1 à 5, 35 générateurs) —
+ * voir `EVALUATION_ADAPTER_REGISTRY`. 6e continue de passer par l'URL vers plateforme-maths
+ * (`buildEvaluationUrl`) tant que ses adaptateurs n'ont pas été portés ici à leur tour. Les
+ * questions `vraiFaux` restent elles aussi hors périmètre pour tous les niveaux (les banques
+ * `BANQUE_QUIZ_*` n'ont pas été portées) — `peutGenererLocalement` renvoie `false` dès qu'une ligne
+ * vrai/faux est sélectionnée, pour que l'appelant retombe sur `buildEvaluationUrl` dans ce cas.
  */
+
+const LEVELSLUGS_GENERATION_LOCALE = new Set([LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E])
 
 /** `true` si TOUS les items peuvent être construits localement (voir portée ci-dessus) — sinon
  * l'appelant (`EvaluationGeneratorPanel.tsx`) doit retomber sur `buildEvaluationUrl` (redirection
  * vers plateforme-maths), jamais générer un sous-ensemble en silence. */
 export function peutGenererLocalement(levelSlug: string, items: ItemPayload[]): boolean {
-  if (levelSlug !== LEVELSLUG_FONCTIONNEL_4E) return false
+  if (!LEVELSLUGS_GENERATION_LOCALE.has(levelSlug)) return false
   if (items.length === 0) return false
   return items.every((item) => {
     if (item.vraiFaux) return false
-    if (item.exercice) return item.exercice.generatorId in EVALUATION_ADAPTER_REGISTRY_4E
+    if (item.exercice) return item.exercice.generatorId in EVALUATION_ADAPTER_REGISTRY
     return true
   })
 }
@@ -65,11 +67,12 @@ function construireItemRegroupe<T>(
   return { processus: item.processus, titreSection: item.titreSection, points, section, correction }
 }
 
-/** Miroir de `AppEvaluation4e.tsx::construireItemsExercice` — seule différence : l'adaptateur vient
- * de `EVALUATION_ADAPTER_REGISTRY_4E` (Math-Belgium) plutôt que de la table `ADAPTATEURS` locale à
- * plateforme-maths. `peutGenererLocalement` garantit déjà que `generatorId` y figure. */
+/** Miroir de `AppEvaluation4e.tsx`/`AppEvaluation5e.tsx::construireItemsExercice` — seule
+ * différence : l'adaptateur vient de `EVALUATION_ADAPTER_REGISTRY` (Math-Belgium, fusion 4e+5e)
+ * plutôt que de la table `ADAPTATEURS` locale à chaque page de plateforme-maths.
+ * `peutGenererLocalement` garantit déjà que `generatorId` y figure. */
 function construireItemsExercice(item: ItemPayload & { exercice: NonNullable<ItemPayload['exercice']> }): ItemEvaluation[] {
-  const adaptateur = EVALUATION_ADAPTER_REGISTRY_4E[item.exercice.generatorId]
+  const adaptateur = EVALUATION_ADAPTER_REGISTRY[item.exercice.generatorId]
   if (!adaptateur) return []
 
   const instances = item.exercice.parVariante.flatMap(({ varianteId, nombre, points }) =>
