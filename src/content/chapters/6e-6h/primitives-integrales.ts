@@ -20,6 +20,8 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Calcul de primitives',
       kicker: 'F\'=f ; primitive générale F(x)+C ; substitution ; intégration par parties',
       blocks: [
+        { kind: 'video', title: 'Calcul de primitives (1/2) : famille et tableau', youtubeId: '_g-hpY4PFSk' },
+        { kind: 'video', title: 'Calcul de primitives (2/2) : substitution et intégration par parties', youtubeId: 'L2k06qFYtc8' },
         {
           kind: 'intuition',
           label: 'Rembobiner la vidéo',
@@ -258,6 +260,7 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Quelle primitive ? (condition initiale)',
       kicker: 'isoler une primitive particulière depuis F(x₀)=y₀',
       blocks: [
+        { kind: 'video', title: 'Quelle primitive ? Condition initiale', youtubeId: '8XP9SUOn69c' },
         {
           kind: 'para',
           text:
@@ -374,6 +377,8 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Intégrales définies, paramètre et valeur moyenne',
       kicker: 'théorème fondamental, propriétés, méthode des trapèzes, valeur moyenne',
       blocks: [
+        { kind: 'video', title: 'Intégrales définies (1/2) : de l\'aire à l\'intégrale, théorème fondamental', youtubeId: 'VcBrwzQ86wc' },
+        { kind: 'video', title: 'Intégrales définies (2/2) : propriétés, trapèzes, valeur moyenne', youtubeId: 'PTTczZuLjOw' },
         {
           kind: 'intuition',
           label: 'Instantané ou accumulé ?',
@@ -646,6 +651,7 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Calcul d\'aires par intégrale',
       kicker: 'découper aux racines, sommer les valeurs absolues ; aire entre deux courbes',
       blocks: [
+        { kind: 'video', title: 'Calcul d\'aires par intégrale', youtubeId: '0LDrwlZLcoY' },
         {
           kind: 'para',
           text:
@@ -879,6 +885,8 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Volumes de révolution',
       kicker: 'méthode des disques (une courbe) et des rondelles (deux courbes)',
       blocks: [
+        { kind: 'video', title: 'Volumes de révolution (1/2) : disques et cône', youtubeId: '-zG5OaZNCXQ' },
+        { kind: 'video', title: 'Volumes de révolution (2/2) : rondelles et tronc de cône', youtubeId: '6KvZkBicCXQ' },
         {
           kind: 'para',
           text:
@@ -1068,6 +1076,7 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Longueur d\'un arc de courbe',
       kicker: 'L = ∫√(1+[f\'(x)]²)dx',
       blocks: [
+        { kind: 'video', title: 'Longueur d\'un arc de courbe', youtubeId: 'xFPokTBlOU8' },
         {
           kind: 'definition',
           label: 'Formule',
@@ -1239,6 +1248,7 @@ export const primitivesIntegrales: ChapterContent = {
       title: 'Intégrales et primitives : problèmes',
       kicker: 'cinématique (a→v→x), économie, trapèzes, volumes par soustraction',
       blocks: [
+        { kind: 'video', title: 'Intégrales et primitives : problèmes', youtubeId: 'piBkKOuDwWs' },
         {
           kind: 'para',
           text:

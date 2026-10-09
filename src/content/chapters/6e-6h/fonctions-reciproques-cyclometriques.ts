@@ -20,7 +20,8 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       number: 1,
       title: "Fonction réciproque d'une fonction bijective",
       blocks: [
-        { kind: 'video', title: 'Fonctions réciproques & cyclométriques' },
+        { kind: 'video', title: 'Fonction réciproque d\'une fonction bijective (1/2)', youtubeId: 'cljx_XgPpeE' },
+        { kind: 'video', title: 'Fonction réciproque : trouver f⁻¹ et la dériver (2/2)', youtubeId: 'fzLkgKdVM3g' },
         {
           kind: 'para',
           text:
@@ -687,6 +688,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       number: 2,
       title: 'Les fonctions cyclométriques : arcsin, arccos, arctan',
       blocks: [
+        { kind: 'video', title: 'arcsin, arccos, arctan', youtubeId: 'Z6mRx1Lzgoc' },
         {
           kind: 'para',
           text:
@@ -1062,6 +1064,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       number: 3,
       title: 'Équations avec fonctions cyclométriques',
       blocks: [
+        { kind: 'video', title: 'Équations avec fonctions cyclométriques', youtubeId: 'xt5WElsrQ5A' },
         {
           kind: 'methode',
           label: "Condition d'existence",
@@ -1216,6 +1219,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       number: 4,
       title: 'Dérivées des fonctions cyclométriques',
       blocks: [
+        { kind: 'video', title: 'Dérivées des fonctions cyclométriques', youtubeId: 'UvcxAUJF9d0' },
         { kind: 'para', text: 'Pour $u = u(x)$ une fonction dérivable :' },
         {
           kind: 'featureTable',
@@ -1562,6 +1566,7 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
       number: 5,
       title: 'Reconnaître une fonction cyclométrique à son graphe',
       blocks: [
+        { kind: 'video', title: 'Reconnaître une fonction cyclométrique à son graphe', youtubeId: 'dCyJByIOeso' },
         {
           kind: 'para',
           text: 'Face à un graphe inconnu, trois questions suffisent presque toujours à trouver la bonne arcfonction :',

@@ -14,6 +14,14 @@ import App from './App.tsx'
 // automatique dès qu'un nouveau service worker prend la main.
 registerSW({ immediate: true })
 
+// L'application a démarré : on retire la garde du filet de sécurité de index.html, pour qu'il
+// puisse rejouer une récupération si un problème survient plus tard dans le même onglet.
+try {
+  sessionStorage.removeItem('recovery-reload')
+} catch {
+  // stockage indisponible (navigation privée stricte…) : sans conséquence
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

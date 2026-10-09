@@ -71,6 +71,7 @@ export const fonctionsComposees: ChapterContent = {
       title: 'Le domaine de définition',
       kicker: 'dom f — ce que la machine accepte',
       blocks: [
+        { kind: 'video', title: 'Le domaine de définition', youtubeId: 'hqFK11mLsYE' },
         {
           kind: 'intuition',
           label: "Pourquoi s'en soucier ?",
@@ -227,6 +228,7 @@ export const fonctionsComposees: ChapterContent = {
       title: 'Composer deux fonctions — et décomposer une écriture',
       kicker: '(f ∘ g)(x) = f(g(x))',
       blocks: [
+        { kind: 'video', title: 'Composer deux fonctions et décomposer une écriture', youtubeId: '1jMYd8KobY8' },
         {
           kind: 'para',
           text:
@@ -360,6 +362,7 @@ export const fonctionsComposees: ChapterContent = {
       title: 'Composer f et g à partir de leurs expressions',
       kicker: 'écrire (f∘g)(x), puis en trouver le domaine',
       blocks: [
+        { kind: 'video', title: 'Composer f et g à partir de leurs expressions', youtubeId: 'j4BmqIT-L3k' },
         {
           kind: 'para',
           text:
@@ -472,6 +475,7 @@ export const fonctionsComposees: ChapterContent = {
       title: 'Lire une composée sur un graphique',
       kicker: '(g∘f)(a) sans aucune formule',
       blocks: [
+        { kind: 'video', title: 'Lire une composée sur un graphique', youtubeId: 'OyXADsT7-Oc' },
         {
           kind: 'para',
           text:
@@ -558,6 +562,7 @@ export const fonctionsComposees: ChapterContent = {
       title: 'Fonctions en contexte',
       kicker: 'une grandeur physique devient une fonction d’une autre',
       blocks: [
+        { kind: 'video', title: 'Fonctions en contexte : bidon cylindrique, coût unitaire', youtubeId: 'makuh8EtGt0' },
         {
           kind: 'para',
           text:

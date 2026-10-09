@@ -14,6 +14,7 @@ export const fonctionSecondDegre: ChapterContent = {
   intro: {
     title: "Avant de commencer : qu'est-ce qu'une fonction du second degré ?",
     blocks: [
+        { kind: 'video', title: 'Introduction : rappel du premier degré et définition', youtubeId: 'KprphYChaDk' },
       {
         kind: 'para',
         text:
@@ -125,6 +126,8 @@ export const fonctionSecondDegre: ChapterContent = {
       title: 'Étudier une parabole',
       kicker: "lire les propriétés d'une parabole sur son équation",
       blocks: [
+        { kind: 'video', title: 'Étudier une parabole (1/2) : allure, sommet et axe de symétrie', youtubeId: 'B4ht8n3qdV4' },
+        { kind: 'video', title: 'Étudier une parabole (2/2) : domaine, image, zéros, signes et variations', youtubeId: 'LLeP6JrBbqA' },
         { kind: 'subheading', text: "Le rôle du coefficient a — l'allure de la parabole" },
         {
           kind: 'intuition',
@@ -567,6 +570,7 @@ export const fonctionSecondDegre: ChapterContent = {
       title: 'Transformer une parabole',
       kicker: "de y = x² à n'importe quelle parabole, sans tableau de valeurs",
       blocks: [
+        { kind: 'video', title: 'Transformer une parabole : translations, étirement, forme canonique', youtubeId: 'RyQDXGNNJO8' },
         {
           kind: 'para',
           text:
@@ -765,6 +769,7 @@ export const fonctionSecondDegre: ChapterContent = {
       title: 'Utiliser la fonction du second degré',
       kicker: 'modéliser, optimiser, résoudre une équation ou une inéquation en contexte',
       blocks: [
+        { kind: 'video', title: 'Utiliser la fonction : modéliser, optimiser, résoudre en contexte', youtubeId: 'qXbyPY-Y1A0' },
         {
           kind: 'para',
           text:
@@ -856,7 +861,6 @@ export const fonctionSecondDegre: ChapterContent = {
             '**gauche** : $A(12) = -288+480 = 192$ m² — moins que les 200 m² d\'avant. Toujours ' +
             'moins, jamais plus : on s\'est éloigné du sommet théorique.',
         },
-        { kind: 'video', title: 'Optimisation avec la fonction du second degré' },
         {
           kind: 'entrainement',
           title: "Problèmes d'optimisation",
@@ -939,6 +943,7 @@ export const fonctionSecondDegre: ChapterContent = {
       title: 'Révision — vrai ou faux',
       kicker: '140 affirmations, 7 thèmes, tout le chapitre en révision transversale',
       blocks: [
+        { kind: 'video', title: 'Révision : la synthèse du chapitre en 2 minutes', youtubeId: 'vpgVztac-9g' },
         {
           kind: 'para',
           text:

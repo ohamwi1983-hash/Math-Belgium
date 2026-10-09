@@ -16,6 +16,8 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
   intro: {
     title: 'Avant de commencer : les 6 fonctions de référence',
     blocks: [
+        { kind: 'video', title: 'Avant de commencer (1/2) : les 6 fonctions de référence', youtubeId: 'FvsiKv9MylQ' },
+        { kind: 'video', title: 'Avant de commencer (2/2) : les 6 courbes de référence', youtubeId: '716Y13kFk2c' },
       {
         kind: 'para',
         text:
@@ -275,6 +277,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       title: 'Lire les caractéristiques sur un graphique',
       kicker: 'domaine, zéros, variations, ordonnée à l\'origine, valeur en un point, asymptotes',
       blocks: [
+        { kind: 'video', title: 'Lire les caractéristiques sur un graphique', youtubeId: 'Xrng-oSlUAo' },
         {
           kind: 'para',
           text:
@@ -402,6 +405,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       title: 'Étudier algébriquement une fonction de référence',
       kicker: 'f(x) = [famille](ax + b) + k — CE, domaine, isolement, zéros',
       blocks: [
+        { kind: 'video', title: 'Étudier algébriquement une fonction de référence', youtubeId: '0CERKsS8qiA' },
         {
           kind: 'para',
           text:
@@ -480,6 +484,8 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       title: 'Transformer une fonction de référence',
       kicker: 'une seule formule pour les 8 transformations, généralisée aux 6 familles',
       blocks: [
+        { kind: 'video', title: 'Transformer une fonction de référence (1/2) : la formule unifiée et les 8 paramètres', youtubeId: 'jTuYvEEo8I8' },
+        { kind: 'video', title: 'Transformer une fonction de référence (2/2) : exemples, pièges et forme canonique', youtubeId: 'OuKRjDttAXs' },
         {
           kind: 'para',
           text:
@@ -644,6 +650,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
       title: 'Révision — vrai ou faux',
       kicker: '140 affirmations, 7 thèmes, tout le chapitre en révision transversale',
       blocks: [
+        { kind: 'video', title: 'Révision vrai ou faux et synthèse du chapitre', youtubeId: '2ox8on-dIaY' },
         {
           kind: 'para',
           text:

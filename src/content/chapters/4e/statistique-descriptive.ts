@@ -15,6 +15,7 @@ export const statistiqueDescriptive: ChapterContent = {
   intro: {
     title: 'Avant de commencer : le vocabulaire de base',
     blocks: [
+      { kind: 'video', title: 'Avant de commencer : le vocabulaire de base', youtubeId: '-zwX56lSXnA' },
       {
         kind: 'para',
         text:
@@ -75,6 +76,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'Organiser des données brutes : le tableau de fréquences',
       kicker: 'liste brute → valeur, effectif, fréquence, cumulés',
       blocks: [
+        { kind: 'video', title: 'Organiser des données brutes : le tableau de fréquences', youtubeId: 'LnLwqGZ1POU' },
         {
           kind: 'para',
           text:
@@ -144,6 +146,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'Regrouper en classes : l\'histogramme',
       kicker: 'caractère continu → classes d\'amplitude constante → histogramme',
       blocks: [
+        { kind: 'video', title: 'Regrouper en classes : l\'histogramme', youtubeId: 'oftzQYXj6tA' },
         {
           kind: 'para',
           text:
@@ -242,6 +245,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'La moyenne pondérée',
       kicker: 'x̄ = Σ(xᵢ·nᵢ) / Σnᵢ',
       blocks: [
+        { kind: 'video', title: 'La moyenne pondérée', youtubeId: 'LxeW4gzXW-w' },
         {
           kind: 'para',
           text:
@@ -313,6 +317,8 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'Médiane, quartiles et mode',
       kicker: 'les paramètres de position — le rang, pas la valeur',
       blocks: [
+        { kind: 'video', title: 'Médiane, quartiles et mode (1/2) : la règle du seuil', youtubeId: 'OTT30Ux-Z8k' },
+        { kind: 'video', title: 'Médiane, quartiles et mode (2/2) : classes, mode, quelle valeur centrale ?', youtubeId: 'SOaot7PbsMo' },
         {
           kind: 'intuition',
           label: 'Pourquoi une médiane, en plus de la moyenne ?',
@@ -443,6 +449,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'La boîte à moustaches',
       kicker: 'min, Q1, médiane, Q3, max — un résumé visuel en 5 nombres',
       blocks: [
+        { kind: 'video', title: 'La boîte à moustaches', youtubeId: 'CMzCmWA9YTg' },
         {
           kind: 'intuition',
           label: 'Pour visualiser les quartiles',
@@ -525,6 +532,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'Étendue, variance et écart-type',
       kicker: 'à quel point les valeurs s\'écartent-elles de la moyenne ?',
       blocks: [
+        { kind: 'video', title: 'Étendue, variance et écart-type', youtubeId: 'C7z8U5OC_QI' },
         {
           kind: 'intuition',
           label: 'Pourquoi un nombre pour la dispersion ?',
@@ -630,6 +638,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'L\'inégalité de Bienaymé-Tchebychev',
       kicker: 'au moins (1 − 1/k²) × 100 % des valeurs dans [x̄ − kσ ; x̄ + kσ]',
       blocks: [
+        { kind: 'video', title: 'L\'inégalité de Bienaymé-Tchebychev', youtubeId: '7aV5FgCHztI' },
         {
           kind: 'para',
           text:
@@ -703,6 +712,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'Comparer deux séries statistiques',
       kicker: 'même centre ? même dispersion ? lire un seuil sur une courbe cumulée',
       blocks: [
+        { kind: 'video', title: 'Comparer deux séries statistiques', youtubeId: 'ojdBYg8_mbY' },
         {
           kind: 'para',
           text:
@@ -773,6 +783,7 @@ export const statistiqueDescriptive: ChapterContent = {
       title: 'Révision — synthèse et vrai/faux',
       kicker: 'tout le chapitre sur un seul jeu de données, puis 200 affirmations en 10 thèmes',
       blocks: [
+        { kind: 'video', title: 'Révision : la synthèse du chapitre', youtubeId: 'AN_L26bmYLg' },
         {
           kind: 'para',
           text:
