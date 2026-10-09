@@ -238,6 +238,13 @@ import { adaptateurEvaluationLoiBinomiale } from '../entrainement/6e-6h/generate
 import { adaptateurEvaluationLoiNormale } from '../entrainement/6e-6h/generateurs6e/loiNormale/exportEvaluation'
 import { adaptateurEvaluationExtensionsBinomialeNormaleBayes } from '../entrainement/6e-6h/generateurs6e/extensionsBinomialeNormaleBayes/exportEvaluation'
 import { adaptateurEvaluationLoiPoisson } from '../entrainement/6e-6h/generateurs6e/loiPoisson/exportEvaluation'
+import { adaptateurEvaluationCalculPrimitives } from '../entrainement/6e-6h/generateurs6e/calculPrimitives/exportEvaluation'
+import { adaptateurEvaluationQuellePrimitive } from '../entrainement/6e-6h/generateurs6e/quellePrimitive/exportEvaluation'
+import { adaptateurEvaluationIntegralesDefinies } from '../entrainement/6e-6h/generateurs6e/integralesDefinies/exportEvaluation'
+import { adaptateurEvaluationCalculAires } from '../entrainement/6e-6h/generateurs6e/calculAires/exportEvaluation'
+import { adaptateurEvaluationVolumesRevolution } from '../entrainement/6e-6h/generateurs6e/volumesRevolution/exportEvaluation'
+import { adaptateurEvaluationLongueurArc } from '../entrainement/6e-6h/generateurs6e/longueurArc/exportEvaluation'
+import { adaptateurEvaluationIntegralesProblemes } from '../entrainement/6e-6h/generateurs6e/integralesProblemes/exportEvaluation'
 
 /** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
  * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
@@ -278,6 +285,13 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen51': adaptateurEvaluationLoiNormale as unknown as AdaptateurFeuilleExercices<never>,
   '6gen52': adaptateurEvaluationExtensionsBinomialeNormaleBayes as unknown as AdaptateurFeuilleExercices<never>,
   '6gen53': adaptateurEvaluationLoiPoisson as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen23': adaptateurEvaluationCalculPrimitives as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen24': adaptateurEvaluationQuellePrimitive as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen25': adaptateurEvaluationIntegralesDefinies as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen26': adaptateurEvaluationCalculAires as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen27': adaptateurEvaluationVolumesRevolution as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen28': adaptateurEvaluationLongueurArc as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen29': adaptateurEvaluationIntegralesProblemes as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
