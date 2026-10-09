@@ -332,8 +332,7 @@ h1.chapter-title {
 .lecture-sticky-head .num { color: var(--accent); font-weight: 600; }
 
 .lecture-fab-top,
-.lecture-fab-toc,
-.lecture-fab-exercices {
+.lecture-fab-toc {
   position: fixed;
   bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   z-index: 58;
@@ -359,8 +358,7 @@ h1.chapter-title {
 .lecture-fab-top.visible { opacity: 1; pointer-events: auto; }
 .lecture-fab-top svg { width: 16px; height: 16px; }
 
-.lecture-fab-toc,
-.lecture-fab-exercices {
+.lecture-fab-toc {
   left: 18px;
   padding: 11px 17px;
   border-radius: 999px;
@@ -373,13 +371,7 @@ h1.chapter-title {
   align-items: center;
   gap: 7px;
 }
-.lecture-fab-toc:hover,
-.lecture-fab-exercices:hover { background: var(--accent-ink); }
-.lecture-fab-exercices {
-  bottom: calc(18px + 54px + env(safe-area-inset-bottom, 0px));
-  background: var(--ink);
-}
-.lecture-fab-exercices:hover { background: var(--ink-soft); }
+.lecture-fab-toc:hover { background: var(--accent-ink); }
 
 .lecture-sheet {
   position: fixed;
@@ -414,6 +406,28 @@ h1.chapter-title {
   color: var(--ink-faint);
   margin: 0 0 12px;
 }
+.lecture-sheet-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 4px;
+  margin: 0 0 14px;
+}
+.lecture-sheet-tab {
+  flex: 1 1 0;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 0;
+  background: none;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lecture-sheet-tab.active { background: var(--accent); color: var(--on-accent); }
 .lecture-sheet-item {
   display: flex;
   align-items: baseline;
@@ -457,6 +471,19 @@ a.lecture-sheet-item { text-decoration: none; }
   color: var(--ink-faint);
 }
 .lecture-sheet-item-exercice .arrow { flex: none; margin-left: auto; font-family: var(--mono); color: var(--ink-faint); }
+.lecture-sheet-item-video { align-items: center; }
+.lecture-sheet-video-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .lecture-sheet-close {
   display: block;
   margin: 14px auto 0;

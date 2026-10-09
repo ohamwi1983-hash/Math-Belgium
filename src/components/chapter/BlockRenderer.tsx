@@ -90,7 +90,7 @@ export function BlockRenderer({ block }: { block: Block }) {
       return <OperationChain block={block} />
     case 'video':
       return block.youtubeId ? (
-        <div className="video-embed no-export">
+        <div className="video-embed no-export" id={`video-${block.youtubeId}`}>
           <iframe
             src={`https://www.youtube.com/embed/${block.youtubeId}`}
             title={block.title}

@@ -16,16 +16,42 @@ interface GenerateurRepere {
   sectionTitle: string
 }
 
-/** Tous les blocs `entrainement` du chapitre (intro + chaque section), dans l'ordre de lecture —
- * même source que `CarteEntrainement`, jamais une liste entretenue à part. */
-function genererateursDuChapitre(chapter: ChapterContent): GenerateurRepere[] {
+interface VideoRepere {
+  title: string
+  youtubeId: string
+  sectionId: string | null
+  sectionTitle: string
+}
+
+type Onglet = 'contenu' | 'exercices' | 'videos'
+
+/** Scanne l'intro + chaque section du chapitre et ne garde que les blocs du `kind` demandé —
+ * même source que `CarteEntrainement`/`BlockRenderer`, jamais une liste entretenue à part. */
+function blocsDuChapitre<K extends 'entrainement' | 'video'>(chapter: ChapterContent, kind: K) {
   const blocsIntro = chapter.intro?.blocks ?? []
-  const toutesLesSections = [{ title: chapter.intro?.title ?? '', blocks: blocsIntro }, ...chapter.sections]
+  const toutesLesSections = [{ id: null as string | null, title: chapter.intro?.title ?? '', blocks: blocsIntro }, ...chapter.sections]
   return toutesLesSections.flatMap((section) =>
     section.blocks
-      .filter((block): block is Extract<typeof block, { kind: 'entrainement' }> => block.kind === 'entrainement')
-      .map((block) => ({ title: block.title, generatorId: block.generatorId, chantier: block.chantier, sectionTitle: section.title })),
+      .filter((block): block is Extract<typeof block, { kind: K }> => block.kind === kind)
+      .map((block) => ({ block, sectionId: section.id, sectionTitle: section.title })),
   )
+}
+
+function genererateursDuChapitre(chapter: ChapterContent): GenerateurRepere[] {
+  return blocsDuChapitre(chapter, 'entrainement').map(({ block, sectionTitle }) => ({
+    title: block.title,
+    generatorId: block.generatorId,
+    chantier: block.chantier,
+    sectionTitle,
+  }))
+}
+
+/** Seules les vidéos déjà intégrées (`youtubeId` renseigné) sont listées — un placeholder "à
+ * venir" n'a rien à montrer une fois atteint. */
+function videosDuChapitre(chapter: ChapterContent): VideoRepere[] {
+  return blocsDuChapitre(chapter, 'video')
+    .filter(({ block }) => !!block.youtubeId)
+    .map(({ block, sectionId, sectionTitle }) => ({ title: block.title, youtubeId: block.youtubeId as string, sectionId, sectionTitle }))
 }
 
 /**
@@ -37,11 +63,9 @@ function genererateursDuChapitre(chapter: ChapterContent): GenerateurRepere[] {
  *
  * - barre de progression (fixe, tout en haut) ;
  * - en-tête de section collant, juste en dessous (numéro + titre de la section actuellement lue) ;
- * - bouton flottant "Sections" (bas, gauche) qui ouvre un tiroir listant toutes les sections, la
- *   section courante repérée, pour sauter directement ailleurs sans remonter en haut ;
- * - bouton flottant "Exercices" (empilé juste au-dessus de "Sections") qui ouvre un tiroir
- *   listant tous les générateurs `entrainement` du chapitre (même source que `CarteEntrainement`),
- *   pour y accéder directement sans chercher dans quelle section ils se trouvent ;
+ * - bouton flottant "Sections" (bas, gauche) qui ouvre un tiroir à 3 onglets (Contenu / Exercices
+ *   / Vidéos — seuls ceux ayant au moins une entrée sont affichés), chacun listant les cibles
+ *   correspondantes du chapitre, validé via un artefact interactif avant implémentation ;
  * - bouton flottant "remonter en haut" (bas, droite), visible seulement après un peu de défilement.
  *
  * Toutes du DOM direct (pas de refs par section) : la liste des `<details class="chapter-section"
@@ -51,12 +75,14 @@ function genererateursDuChapitre(chapter: ChapterContent): GenerateurRepere[] {
 export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   const sections: SectionRepere[] = chapter.sections.map((s) => ({ id: s.id, number: s.number, title: s.title }))
   const generateurs = genererateursDuChapitre(chapter)
+  const videos = videosDuChapitre(chapter)
 
   const [progression, setProgression] = useState(0)
   const [indexCourant, setIndexCourant] = useState(0)
   const [enteteVisible, setEnteteVisible] = useState(false)
   const [boutonHautVisible, setBoutonHautVisible] = useState(false)
-  const [tiroirOuvert, setTiroirOuvert] = useState<'sections' | 'exercices' | null>(null)
+  const [tiroirOuvert, setTiroirOuvert] = useState(false)
+  const [ongletActif, setOngletActif] = useState<Onglet>('contenu')
   const elementsRef = useRef<HTMLElement[]>([])
 
   useEffect(() => {
@@ -103,7 +129,7 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   useEffect(() => {
     if (!tiroirOuvert) return
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setTiroirOuvert(null)
+      if (e.key === 'Escape') setTiroirOuvert(false)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -111,13 +137,21 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
 
   if (sections.length === 0) return null
 
-  function allerA(section: SectionRepere) {
-    const details = document.getElementById(section.id) as HTMLDetailsElement | null
-    if (details) {
-      details.open = true
-      details.scrollIntoView({ block: 'start', behavior: 'smooth' })
-    }
-    setTiroirOuvert(null)
+  function ouvrirSection(sectionId: string) {
+    const details = document.getElementById(sectionId) as HTMLDetailsElement | null
+    if (details) details.open = true
+    return details
+  }
+
+  function allerASection(section: SectionRepere) {
+    ouvrirSection(section.id)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    setTiroirOuvert(false)
+  }
+
+  function allerAVideo(video: VideoRepere) {
+    if (video.sectionId) ouvrirSection(video.sectionId)
+    document.getElementById(`video-${video.youtubeId}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    setTiroirOuvert(false)
   }
 
   function remonterEnHaut() {
@@ -125,6 +159,12 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   }
 
   const courante = sections[indexCourant]
+  const onglets: { id: Onglet; label: string }[] = [
+    { id: 'contenu', label: 'Contenu' },
+    ...(generateurs.length > 0 ? [{ id: 'exercices' as const, label: 'Exercices' }] : []),
+    ...(videos.length > 0 ? [{ id: 'videos' as const, label: 'Vidéos' }] : []),
+  ]
+  const ongletCourant = onglets.some((o) => o.id === ongletActif) ? ongletActif : 'contenu'
 
   return (
     <>
@@ -137,29 +177,12 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
         <span>{courante.title}</span>
       </div>
 
-      {generateurs.length > 0 && (
-        <button
-          type="button"
-          className="lecture-fab-exercices no-export"
-          onClick={() => setTiroirOuvert('exercices')}
-          aria-haspopup="dialog"
-          aria-expanded={tiroirOuvert === 'exercices'}
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 4 L10 20" />
-            <polyline points="18 8 22 12 18 16" />
-            <polyline points="6 8 2 12 6 16" />
-          </svg>
-          Exercices
-        </button>
-      )}
-
       <button
         type="button"
         className="lecture-fab-toc no-export"
-        onClick={() => setTiroirOuvert('sections')}
+        onClick={() => setTiroirOuvert(true)}
         aria-haspopup="dialog"
-        aria-expanded={tiroirOuvert === 'sections'}
+        aria-expanded={tiroirOuvert}
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
           <line x1="4" y1="6" x2="20" y2="6" />
@@ -183,79 +206,96 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
       </button>
 
       <div
-        className={`lecture-sheet no-export${tiroirOuvert === 'sections' ? ' open' : ''}`}
+        className={`lecture-sheet no-export${tiroirOuvert ? ' open' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Aller à une section"
+        aria-label="Aller à un endroit du chapitre"
         onClick={(e) => {
-          if (e.target === e.currentTarget) setTiroirOuvert(null)
+          if (e.target === e.currentTarget) setTiroirOuvert(false)
         }}
       >
         <div className="lecture-sheet-body">
-          <p className="lecture-sheet-title">Dans ce chapitre</p>
-          {sections.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              className={`lecture-sheet-item${i === indexCourant ? ' current' : ''}`}
-              onClick={() => allerA(s)}
-            >
-              <span className="n">{s.number}</span>
-              <span>{s.title}</span>
-            </button>
-          ))}
-          <button type="button" className="lecture-sheet-close" onClick={() => setTiroirOuvert(null)}>
-            Fermer
-          </button>
-        </div>
-      </div>
+          <p className="lecture-sheet-title">Ce chapitre</p>
 
-      <div
-        className={`lecture-sheet no-export${tiroirOuvert === 'exercices' ? ' open' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Aller à un générateur d'exercices"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setTiroirOuvert(null)
-        }}
-      >
-        <div className="lecture-sheet-body">
-          <p className="lecture-sheet-title">Exercices de ce chapitre</p>
-          {generateurs.map((g, i) => {
-            const href = generatorLink(g.chantier, g.generatorId)
-            const migre = estGenerateurMigre(g.chantier, g.generatorId)
-            const contenu = (
-              <>
-                <span className="lecture-sheet-exercice-id">{g.generatorId}</span>
-                <span className="lecture-sheet-exercice-texte">
-                  <span>{g.title}</span>
-                  <span className="lecture-sheet-exercice-section">{g.sectionTitle}</span>
-                </span>
-                {!migre && (
-                  <span className="arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                )}
-              </>
-            )
-            return migre ? (
-              <Link key={g.generatorId + i} className="lecture-sheet-item lecture-sheet-item-exercice" to={href} onClick={() => setTiroirOuvert(null)}>
-                {contenu}
-              </Link>
-            ) : (
-              <a
-                key={g.generatorId + i}
-                className="lecture-sheet-item lecture-sheet-item-exercice"
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setTiroirOuvert(null)}
+          {onglets.length > 1 && (
+            <div className="lecture-sheet-tabs" role="tablist">
+              {onglets.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={ongletCourant === o.id}
+                  className={`lecture-sheet-tab${ongletCourant === o.id ? ' active' : ''}`}
+                  onClick={() => setOngletActif(o.id)}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {ongletCourant === 'contenu' &&
+            sections.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`lecture-sheet-item${i === indexCourant ? ' current' : ''}`}
+                onClick={() => allerASection(s)}
               >
-                {contenu}
-              </a>
-            )
-          })}
-          <button type="button" className="lecture-sheet-close" onClick={() => setTiroirOuvert(null)}>
+                <span className="n">{s.number}</span>
+                <span>{s.title}</span>
+              </button>
+            ))}
+
+          {ongletCourant === 'exercices' &&
+            generateurs.map((g, i) => {
+              const href = generatorLink(g.chantier, g.generatorId)
+              const migre = estGenerateurMigre(g.chantier, g.generatorId)
+              const contenu = (
+                <>
+                  <span className="lecture-sheet-exercice-id">{g.generatorId}</span>
+                  <span className="lecture-sheet-exercice-texte">
+                    <span>{g.title}</span>
+                    <span className="lecture-sheet-exercice-section">{g.sectionTitle}</span>
+                  </span>
+                  {!migre && (
+                    <span className="arrow" aria-hidden="true">
+                      ↗
+                    </span>
+                  )}
+                </>
+              )
+              return migre ? (
+                <Link key={g.generatorId + i} className="lecture-sheet-item lecture-sheet-item-exercice" to={href} onClick={() => setTiroirOuvert(false)}>
+                  {contenu}
+                </Link>
+              ) : (
+                <a
+                  key={g.generatorId + i}
+                  className="lecture-sheet-item lecture-sheet-item-exercice"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setTiroirOuvert(false)}
+                >
+                  {contenu}
+                </a>
+              )
+            })}
+
+          {ongletCourant === 'videos' &&
+            videos.map((v, i) => (
+              <button key={v.youtubeId + i} type="button" className="lecture-sheet-item lecture-sheet-item-video" onClick={() => allerAVideo(v)}>
+                <span className="lecture-sheet-video-icon" aria-hidden="true">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </span>
+                <span>{v.title}</span>
+              </button>
+            ))}
+
+          <button type="button" className="lecture-sheet-close" onClick={() => setTiroirOuvert(false)}>
             Fermer
           </button>
         </div>
