@@ -205,9 +205,38 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen35': adaptateurEvaluationVitessePosition as unknown as AdaptateurFeuilleExercices<never>,
 }
 
+import { adaptateurEvaluationProprietesLogarithme } from '../entrainement/6e-6h/generateurs6e/proprietesLogarithme/exportEvaluation'
+import { adaptateurEvaluationGraphiqueDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/graphiqueDeriveeLogarithme/exportEvaluation'
+import { adaptateurEvaluationDeterminerParametresLogarithme } from '../entrainement/6e-6h/generateurs6e/determinerParametresLogarithme/exportEvaluation'
+import { adaptateurEvaluationHyperboliques } from '../entrainement/6e-6h/generateurs6e/hyperboliques/exportEvaluation'
+import { adaptateurEvaluationEquationsExpLog } from '../entrainement/6e-6h/generateurs6e/equationsExpLog/exportEvaluation'
+import { adaptateurEvaluationLimitesLogarithmiques } from '../entrainement/6e-6h/generateurs6e/limitesLogarithmiques/exportEvaluation'
+import { adaptateurEvaluationLogarithmesProblemes } from '../entrainement/6e-6h/generateurs6e/logarithmesProblemes/exportEvaluation'
+import { adaptateurEvaluationEtudeFonctionLogarithme } from '../entrainement/6e-6h/generateurs6e/etudeFonctionLogarithme/exportEvaluation'
+import { adaptateurEvaluationInequationsLogarithmiques } from '../entrainement/6e-6h/generateurs6e/inequationsLogarithmiques/exportEvaluation'
+import { adaptateurEvaluationDomaineDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/domaineDeriveeLogarithme/exportEvaluation'
+
+/** 6e (6h) — chapitre « Fonctions logarithmes » UNIQUEMENT (`6gen13` à `6gen22`), seul chapitre 6e
+ * dont les générateurs sont portés pour l'instant (chapitres « fonctions réciproques &
+ * cyclométriques »/« fonctions exponentielles » : interactif déjà migré, adaptateurs d'évaluation
+ * pas encore portés — absents d'ici tant que ce n'est pas fait). */
+export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExercices<never>> = {
+  '6gen13': adaptateurEvaluationProprietesLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen20': adaptateurEvaluationGraphiqueDeriveeLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen18': adaptateurEvaluationDeterminerParametresLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen19': adaptateurEvaluationHyperboliques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen14': adaptateurEvaluationEquationsExpLog as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen17': adaptateurEvaluationLimitesLogarithmiques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen22': adaptateurEvaluationLogarithmesProblemes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen21': adaptateurEvaluationEtudeFonctionLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen15': adaptateurEvaluationInequationsLogarithmiques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen16': adaptateurEvaluationDomaineDeriveeLogarithme as unknown as AdaptateurFeuilleExercices<never>,
+}
+
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
  * à savoir quel chantier a produit quel générateur. */
 export const EVALUATION_ADAPTER_REGISTRY: Record<string, AdaptateurFeuilleExercices<never>> = {
   ...EVALUATION_ADAPTER_REGISTRY_4E,
   ...EVALUATION_ADAPTER_REGISTRY_5E,
+  ...EVALUATION_ADAPTER_REGISTRY_6E,
 }

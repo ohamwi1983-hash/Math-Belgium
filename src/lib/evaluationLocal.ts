@@ -2,7 +2,7 @@ import type { AdaptateurFeuilleExercices, BlocCorrection, QuestionExercice, Sect
 import { texte } from '../entrainement/export/fragmentsDocx'
 import { genererEvaluationHtml, type EnteteEvaluation as EnteteEvaluationSerie, type ItemEvaluation } from '../entrainement/export/assemblerEvaluationHtml'
 import { EVALUATION_ADAPTER_REGISTRY } from './evaluationAdapterRegistry'
-import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type EnTeteEvaluation, type ItemPayload } from './evaluationPayload'
+import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E, type EnTeteEvaluation, type ItemPayload } from './evaluationPayload'
 
 /**
  * Génération locale (SANS passer par plateforme-maths) des deux documents HTML d'une évaluation/
@@ -12,15 +12,19 @@ import { LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, type EnTeteEvaluati
  * aucun encode/decode base64, aucune redirection de page, le tout reste dans l'onglet de
  * Math-Belgium.
  *
- * Portée actuelle : 4e (chapitres 1 à 8, 55 générateurs) et 5e (chapitres 1 à 5, 35 générateurs) —
- * voir `EVALUATION_ADAPTER_REGISTRY`. 6e continue de passer par l'URL vers plateforme-maths
- * (`buildEvaluationUrl`) tant que ses adaptateurs n'ont pas été portés ici à leur tour. Les
- * questions `vraiFaux` restent elles aussi hors périmètre pour tous les niveaux (les banques
+ * Portée actuelle : 4e (chapitres 1 à 8, 55 générateurs), 5e (chapitres 1 à 5, 35 générateurs) et,
+ * pour 6e, uniquement le chapitre « Fonctions logarithmes » (`6gen13`-`6gen22`) — voir
+ * `EVALUATION_ADAPTER_REGISTRY`. Les autres chapitres de 6e (fonctions réciproques &
+ * cyclométriques, fonctions exponentielles) continuent de passer par l'URL vers plateforme-maths
+ * (`buildEvaluationUrl`) tant que leurs adaptateurs n'ont pas été portés ici à leur tour — `items`
+ * mélangeant plusieurs chapitres de 6e retombe donc sur l'URL dès qu'UN item vient d'un chapitre
+ * non encore porté (`peutGenererLocalement` vérifie CHAQUE item, jamais seulement `levelSlug`).
+ * Les questions `vraiFaux` restent elles aussi hors périmètre pour tous les niveaux (les banques
  * `BANQUE_QUIZ_*` n'ont pas été portées) — `peutGenererLocalement` renvoie `false` dès qu'une ligne
  * vrai/faux est sélectionnée, pour que l'appelant retombe sur `buildEvaluationUrl` dans ce cas.
  */
 
-const LEVELSLUGS_GENERATION_LOCALE = new Set([LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E])
+const LEVELSLUGS_GENERATION_LOCALE = new Set([LEVELSLUG_FONCTIONNEL_4E, LEVELSLUG_FONCTIONNEL_5E, LEVELSLUG_FONCTIONNEL_6E])
 
 /** `true` si TOUS les items peuvent être construits localement (voir portée ci-dessus) — sinon
  * l'appelant (`EvaluationGeneratorPanel.tsx`) doit retomber sur `buildEvaluationUrl` (redirection

@@ -49,6 +49,7 @@ const CH_5E_LIMITES_ASYMPTOTES: ChapitreInfo = { chantier: '5e-4h', chapitreSlug
 const CH_5E_DERIVEES_APPLICATIONS: ChapitreInfo = { chantier: '5e-4h', chapitreSlug: 'derivees-applications', chapitreTitle: 'Dérivées et applications' }
 const CH_6E_FONCTIONS_RECIPROQUES_CYCLOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-reciproques-cyclometriques', chapitreTitle: 'Fonctions réciproques & cyclométriques' }
 const CH_6E_FONCTIONS_EXPONENTIELLES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-exponentielles', chapitreTitle: 'Fonctions exponentielles' }
+const CH_6E_FONCTIONS_LOGARITHMES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'fonctions-logarithmes', chapitreTitle: 'Fonctions logarithmes' }
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
 const CH_4E_STATISTIQUE_DESCRIPTIVE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'statistique-descriptive', chapitreTitle: 'Statistique descriptive à une variable' }
 const CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES: ChapitreInfo = { chantier: '4e', chapitreSlug: 'cercle-trigonometrique-triangles', chapitreTitle: 'Cercle trigonométrique & triangles quelconques' }
@@ -204,4 +205,16 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen11': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen11').then((m) => ({ default: m.App6gen11 }))),
   '6gen12': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen12').then((m) => ({ default: m.App6gen12 }))),
   '6gen65': entree(CH_6E_FONCTIONS_EXPONENTIELLES, () => import('./6e-6h/App6gen65').then((m) => ({ default: m.App6gen65 }))),
+
+  // --- 6e, chapitre 3 : Fonctions logarithmes ---
+  '6gen13': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen13').then((m) => ({ default: m.App6gen13 }))),
+  '6gen20': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen20').then((m) => ({ default: m.App6gen20 }))),
+  '6gen18': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen18').then((m) => ({ default: m.App6gen18 }))),
+  '6gen19': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen19').then((m) => ({ default: m.App6gen19 }))),
+  '6gen14': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen14').then((m) => ({ default: m.App6gen14 }))),
+  '6gen17': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen17').then((m) => ({ default: m.App6gen17 }))),
+  '6gen22': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen22').then((m) => ({ default: m.App6gen22 }))),
+  '6gen21': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen21').then((m) => ({ default: m.App6gen21 }))),
+  '6gen15': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen15').then((m) => ({ default: m.App6gen15 }))),
+  '6gen16': entree(CH_6E_FONCTIONS_LOGARITHMES, () => import('./6e-6h/App6gen16').then((m) => ({ default: m.App6gen16 }))),
 }
