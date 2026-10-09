@@ -1,6 +1,8 @@
 import { Fragment, useMemo, useState } from 'react'
 import { LEVELS } from '../../content/chaptersIndex'
 import type { ChapterContent } from '../../content/types'
+import { declencherTelechargement } from '../../entrainement/export/telechargerBlob'
+import { genererEvaluationLocalement, peutGenererLocalement } from '../../lib/evaluationLocal'
 import {
   CHAPITRE_FONCTIONNEL_SLUG,
   HEURES_PAR_NIVEAU,
@@ -8,6 +10,7 @@ import {
   NIVEAU_NUMERO,
   buildEvaluationUrl,
   catalogueVariantesExercice,
+  construireItemsPayload,
   deriveQuestionsComprehension,
   deriveQuestionsOuvertes,
   estChapitreFonctionnel,
@@ -16,6 +19,8 @@ import {
   resoudreNiveauHeures,
   sommeParVariante,
   themesPourSection,
+  type ChapitreAvecSections,
+  type EnTeteEvaluation,
   type IdGenerateurPilote,
   type LigneSelection,
   type NiveauCode,
@@ -191,6 +196,12 @@ export function EvaluationGeneratorPanel({
   const [processusActif, setProcessusActif] = useState<Processus>(1)
   const [erreur, setErreur] = useState<string | null>(null)
   const [urlGeneree, setUrlGeneree] = useState<string | null>(null)
+  const [genereEnCours, setGenereEnCours] = useState(false)
+  /** Nombre de fichiers téléchargés par la dernière génération LOCALE (4e, voir
+   * `peutGenererLocalement`) — `null` tant qu'aucune génération locale n'a réussi. Distinct de
+   * `urlGeneree` : la génération locale ne produit aucune URL/redirection, juste des téléchargements
+   * directs dans l'onglet courant. */
+  const [genereLocalementCompte, setGenereLocalementCompte] = useState<number | null>(null)
 
   const levelSlug = resoudreLevelSlug(niveau, heures)
   const niveauEntry = levelSlug ? LEVELS.find((l) => l.slug === levelSlug) : undefined
@@ -231,6 +242,7 @@ export function EvaluationGeneratorPanel({
     setChapitresSlugs(prochainChapitre ? [prochainChapitre.slug] : [])
     setLignes(lignesInitiales(prochainChapitre ? [prochainChapitre] : []))
     setUrlGeneree(null)
+    setGenereLocalementCompte(null)
   }
 
   function changerNiveau(prochain: NiveauCode) {
@@ -250,6 +262,7 @@ export function EvaluationGeneratorPanel({
       return chapitreObj ? [...prev, ...lignesInitiales([chapitreObj])] : prev
     })
     setUrlGeneree(null)
+    setGenereLocalementCompte(null)
   }
 
   function selectionnerProcessus(processus: Processus) {
@@ -261,6 +274,7 @@ export function EvaluationGeneratorPanel({
       prev.map((l) => (l.chapitreSlug === chapitreSlug && l.sectionId === sectionId && l.type === type && l.cle === cle ? { ...l, ...patch } : l)),
     )
     setUrlGeneree(null)
+    setGenereLocalementCompte(null)
   }
 
   /** Met à jour le nombre d'exercices d'UNE famille/variante précise, pour UN générateur précis
@@ -275,6 +289,7 @@ export function EvaluationGeneratorPanel({
       }),
     )
     setUrlGeneree(null)
+    setGenereLocalementCompte(null)
   }
 
   /** Met à jour le barème d'UNE famille/variante précise, pour UN générateur précis (ligne
@@ -288,6 +303,7 @@ export function EvaluationGeneratorPanel({
       }),
     )
     setUrlGeneree(null)
+    setGenereLocalementCompte(null)
   }
 
   /** Points totaux d'une ligne — pour `type==='exercice'`, somme par variante (`pointsParVariante`,
@@ -306,7 +322,7 @@ export function EvaluationGeneratorPanel({
   const totalNombre = lignes.reduce((total, l) => total + l.nombre, 0)
   const totalPoints = lignes.reduce((total, l) => total + pointsLigne(l), 0)
 
-  function genererEvaluation() {
+  async function genererEvaluation() {
     if (chapitres.length === 0 || !levelSlug) return
     const titreFinal =
       titre ||
@@ -314,26 +330,56 @@ export function EvaluationGeneratorPanel({
         ? `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres[0].title}`
         : `${estExercice ? "Feuille d'exercices" : 'Évaluation'} — ${chapitres.length} chapitres`)
     const niveauLabel = niveauEntry?.label ?? niveau
-    const url = buildEvaluationUrl(
-      levelSlug,
-      {
-        numero: estExercice ? undefined : numero,
-        date,
-        titre: titreFinal,
-        niveauLabel,
-        niveauNumero: NIVEAU_NUMERO[niveau],
-        heuresSemaine,
-        calculatrice: estExercice ? undefined : calculatrice,
-        nombreSeries: nombreSeriesEffectif,
-        afficherTitresSection,
-        mode,
-      },
-      lignes,
-      chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections })),
-    )
+    const entete: EnTeteEvaluation = {
+      numero: estExercice ? undefined : numero,
+      date,
+      titre: titreFinal,
+      niveauLabel,
+      niveauNumero: NIVEAU_NUMERO[niveau],
+      heuresSemaine,
+      calculatrice: estExercice ? undefined : calculatrice,
+      nombreSeries: nombreSeriesEffectif,
+      afficherTitresSection,
+      mode,
+    }
+    const chapitresPayload: ChapitreAvecSections[] = chapitres.map((c) => ({ chapitreSlug: c.slug, chapterNumber: c.chapterNumber, title: c.title, sections: c.sections }))
+    const items = construireItemsPayload(entete, lignes, chapitresPayload)
+    if (items.length === 0) {
+      setErreur('Coche au moins une question (nombre > 0) avant de générer.')
+      setUrlGeneree(null)
+      setGenereLocalementCompte(null)
+      return
+    }
+
+    // 4e (chapitres 1 à 8) : génération 100% locale, sans passer par plateforme-maths — voir
+    // `evaluationLocal.ts` pour la portée exacte (tous les générateurs sauf les questions
+    // vrai/faux, dont les banques n'ont pas encore été portées).
+    if (peutGenererLocalement(levelSlug, items)) {
+      setErreur(null)
+      setUrlGeneree(null)
+      setGenereLocalementCompte(null)
+      setGenereEnCours(true)
+      try {
+        const series = await genererEvaluationLocalement(entete, items)
+        for (const { serieLettre, enonce, corrige } of series) {
+          const suffixeSerie = series.length > 1 ? ` — série ${serieLettre}` : ''
+          declencherTelechargement(enonce, `${titreFinal}${suffixeSerie} — énoncé.html`)
+          declencherTelechargement(corrige, `${titreFinal}${suffixeSerie} — corrigé.html`)
+        }
+        setGenereLocalementCompte(series.length * 2)
+      } catch {
+        setErreur('Erreur pendant la génération — réessaie.')
+      } finally {
+        setGenereEnCours(false)
+      }
+      return
+    }
+
+    const url = buildEvaluationUrl(levelSlug, entete, lignes, chapitresPayload)
     if (!url) {
       setErreur('Coche au moins une question (nombre > 0) avant de générer.')
       setUrlGeneree(null)
+      setGenereLocalementCompte(null)
       return
     }
     if (url.length > LONGUEUR_URL_MAX) {
@@ -341,9 +387,11 @@ export function EvaluationGeneratorPanel({
         'Trop de contenu sélectionné pour un seul lien (surtout les questions ouvertes, qui transmettent leur texte complet) — réduis le nombre de questions ouvertes, ou génère-les en plusieurs feuilles séparées.',
       )
       setUrlGeneree(null)
+      setGenereLocalementCompte(null)
       return
     }
     setErreur(null)
+    setGenereLocalementCompte(null)
     setUrlGeneree(url)
     window.open(url, '_blank', 'noopener')
   }
@@ -352,9 +400,10 @@ export function EvaluationGeneratorPanel({
     <div className="admin-eval">
       {!verrouille && (
         <p className="admin-eval-intro">
-          Sont fonctionnels : chapitres 1 à 3 de 6e (6h) ; chapitres 1 (sections « Étudier » et « Transformer » uniquement), 2 et 3 de 4e ;
-          chapitres 1 à 3 de 5e (4h). Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés (« bientôt ») —
-          l'extension se fera lot par lot.
+          Sont fonctionnels : tous les chapitres de 4e et de 5e (4h), ainsi que 3 chapitres de 6e (6h) — fonctions réciproques/cyclométriques,
+          fonctions exponentielles, fonctions logarithmes. Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés
+          (« bientôt ») — l'extension se fera lot par lot. Pour 4e, la génération se fait désormais directement ici (aucune redirection), sauf
+          sélection d'une question vrai/faux.
         </p>
       )}
 
@@ -679,9 +728,10 @@ export function EvaluationGeneratorPanel({
                 Total : {totalPoints} point{totalPoints > 1 ? 's' : ''}
               </p>
             )}
-            <button type="button" className="admin-gate-submit" onClick={genererEvaluation}>
-              {estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé
-              + corrigé)
+            <button type="button" className="admin-gate-submit" onClick={genererEvaluation} disabled={genereEnCours}>
+              {genereEnCours
+                ? 'Génération en cours…'
+                : `${estExercice ? 'Générer la feuille' : nombreSeries > 1 ? `Générer les ${nombreSeries} séries` : "Générer l'évaluation"} (HTML A4, énoncé + corrigé)`}
             </button>
           </div>
           {erreur && <p className="admin-gate-error">{erreur}</p>}
@@ -694,6 +744,7 @@ export function EvaluationGeneratorPanel({
               .
             </p>
           )}
+          {genereLocalementCompte !== null && <p className="admin-eval-lien">{genereLocalementCompte} fichier(s) téléchargé(s) directement.</p>}
         </>
       )}
     </div>

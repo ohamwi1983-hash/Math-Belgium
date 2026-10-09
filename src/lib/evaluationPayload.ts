@@ -4269,7 +4269,7 @@ export function sommeParVariante(parVariante: Record<string, number> | undefined
   return Object.values(parVariante ?? {}).reduce((total, n) => total + n, 0)
 }
 
-interface ItemPayload {
+export interface ItemPayload {
   processus: Processus
   titreSection: string
   points: number
@@ -4368,10 +4368,12 @@ export interface ChapitreAvecSections {
  * `N. Titre du chapitre — ` dès que `lignes` couvre RÉELLEMENT plus d'un chapitre (au moins une
  * ligne retenue, `nombre>0`, dans chacun) — jamais quand un seul est effectivement représenté,
  * pour ne rien changer au rendu d'une feuille mono-chapitre existante. */
-export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], chapitres: ChapitreAvecSections[]): string | null {
-  const baseUrl = EVALUATION_BASE_URL_PAR_LEVELSLUG[levelSlug]
-  if (!baseUrl) return null
-
+/** Traduit la sélection utilisateur (`LigneSelection[]`) en `ItemPayload[]` — résolution
+ * chapitre/section, barème par variante, pioche des questions ouvertes par série. Factorisé pour
+ * être partagé par `buildEvaluationUrl` (sérialisation vers plateforme-maths) ET par la génération
+ * locale 4e (`evaluationLocal.ts`) : les deux chemins doivent produire EXACTEMENT les mêmes items
+ * pour une même sélection, jamais deux logiques de résolution qui pourraient diverger. */
+export function construireItemsPayload(entete: EnTeteEvaluation, lignes: LigneSelection[], chapitres: ChapitreAvecSections[]): ItemPayload[] {
   const items: ItemPayload[] = []
   const nombreSeries = Math.max(1, entete.nombreSeries)
   const multiChapitres = new Set(lignes.filter((l) => l.nombre > 0).map((l) => l.chapitreSlug)).size > 1
@@ -4403,6 +4405,14 @@ export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, 
     }
   }
 
+  return items
+}
+
+export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, lignes: LigneSelection[], chapitres: ChapitreAvecSections[]): string | null {
+  const baseUrl = EVALUATION_BASE_URL_PAR_LEVELSLUG[levelSlug]
+  if (!baseUrl) return null
+
+  const items = construireItemsPayload(entete, lignes, chapitres)
   if (items.length === 0) return null
 
   const base64 = encoderPayload({
@@ -4413,7 +4423,7 @@ export function buildEvaluationUrl(levelSlug: string, entete: EnTeteEvaluation, 
     niveauNumero: entete.niveauNumero,
     heuresSemaine: entete.heuresSemaine,
     calculatrice: entete.calculatrice,
-    nombreSeries,
+    nombreSeries: Math.max(1, entete.nombreSeries),
     afficherTitresSection: entete.afficherTitresSection,
     mode: entete.mode,
     items,

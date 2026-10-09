@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import type { FragmentConsigne } from "./genererFeuilleExercices";
 import type { AdaptateurFeuilleExercices, BlocCorrection, ProgressionGeneration, SectionExercice, ZoneReponse } from "./genererFeuilleExercices";
 import { rasteriserLatex } from "./katexImage";
 import { POLICE_MATH, POLICE_TEXTE, enregistrerPolicesPdf, necessitePoliceMath } from "./pdfFonts";

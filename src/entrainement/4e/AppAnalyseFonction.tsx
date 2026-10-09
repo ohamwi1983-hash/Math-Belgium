@@ -27,7 +27,7 @@ import {
 } from "./generateurs/analyseFonction";
 import { adaptateurExportWordAnalyseFonction } from "./generateurs/analyseFonction/exportWord";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
-import { BoutonExportWord } from "./components/BoutonExportWord";
+import { BoutonExportWord } from "../components/BoutonExportWord";
 import { EtapeCoefficients } from "./components/EtapeCoefficients";
 import { EtapeAllure } from "./components/EtapeAllure";
 import { EtapeAxeSommet } from "./components/EtapeAxeSommet";

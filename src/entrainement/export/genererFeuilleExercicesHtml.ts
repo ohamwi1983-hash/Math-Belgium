@@ -1,5 +1,5 @@
 import katex from "katex";
-import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import type { FragmentConsigne } from "./genererFeuilleExercices";
 import type { AdaptateurFeuilleExercices, BlocCorrection, ProgressionGeneration, SectionExercice, ZoneReponse } from "./genererFeuilleExercices";
 import { obtenirCssKatexAutonome } from "./katexImage";
 

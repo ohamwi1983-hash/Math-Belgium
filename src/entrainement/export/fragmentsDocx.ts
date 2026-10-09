@@ -1,5 +1,5 @@
 import { ImageRun, TextRun, type ParagraphChild } from "docx";
-import type { FragmentConsigne } from "../ui/formatEquationDroite";
+import type { FragmentConsigne } from "./genererFeuilleExercices";
 import { rasteriserLatex } from "./katexImage";
 
 /**

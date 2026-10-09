@@ -1,7 +1,18 @@
 import { Document, type FileChild, HeadingLevel, PageBreak, Packer, Paragraph, TextRun } from "docx";
-import type { FragmentConsigne } from "../ui/formatEquationDroite";
 import { fragmentsVersRunsDocx } from "./fragmentsDocx";
 import { construireTableauRempli, construireTableauVide } from "./tableauxDocx";
+
+/**
+ * Contrat texte+LaTeX partagé par tout le pipeline d'export (ce fichier, `fragmentsDocx.ts`,
+ * `genererFeuilleExercicesHtml.ts`, `genererFeuilleExercicesPdf.ts`) — défini ICI plutôt
+ * qu'importé depuis un `ui/formatEquationDroite.ts` particulier : ce module est partagé par les 3
+ * chantiers (4e/5e-4h/6e-6h, voir `src/entrainement/export/`), alors que `ui/formatEquationDroite.ts`
+ * est dupliqué un par chantier (structurellement identique partout, jamais un seul fichier commun,
+ * convention déjà en place avant ce chantier) — dépendre de l'un d'eux en particulier créerait un
+ * couplage arbitraire. Chaque `ui/formatEquationDroite.ts` de chantier garde sa propre déclaration
+ * locale, structurellement identique à celle-ci, intentionnellement laissée telle quelle.
+ */
+export type FragmentConsigne = { type: 'texte'; valeur: string } | { type: 'latex'; valeur: string }
 
 /**
  * Mécanisme générique d'export "feuille d'exercices Word" — pilote sur gen7 (Analyse d'une

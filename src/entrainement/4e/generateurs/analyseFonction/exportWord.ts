@@ -1,6 +1,6 @@
 import type { ExerciceAnalyseFonction } from "../../core/analyseFonction.types";
-import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../export/genererFeuilleExercices";
-import { latex, texte } from "../../export/fragmentsDocx";
+import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
+import { latex, texte } from "../../../export/fragmentsDocx";
 import { formatFonctionColoreeLatex, formatFonctionOrdreLatex, consigneAxeSommet } from "../../ui/formatAnalyseFonction";
 import { libelleCategorie } from "../../ui/categorieLabels";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAnalyseFonction } from "./index";
