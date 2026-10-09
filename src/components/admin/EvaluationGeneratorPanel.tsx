@@ -401,9 +401,7 @@ export function EvaluationGeneratorPanel({
     <div className="admin-eval">
       {!verrouille && (
         <p className="admin-eval-intro">
-          Sont fonctionnels : tous les chapitres de 4e et de 5e (4h), ainsi que 3 chapitres de 6e (6h) — fonctions réciproques/cyclométriques,
-          fonctions exponentielles, fonctions logarithmes. Les autres niveaux/chapitres/sections apparaissent ci-dessous mais restent désactivés
-          (« bientôt ») — l'extension se fera lot par lot. Pour 4e, 5e et les 3 chapitres fonctionnels de 6e, la génération se fait désormais
+          Sont fonctionnels : tous les chapitres de 4e, de 5e (4h) et de 6e (6h). Pour ces trois niveaux, la génération se fait désormais
           directement ici (aucune redirection), sauf sélection d'une question vrai/faux.
         </p>
       )}
