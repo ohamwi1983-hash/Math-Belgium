@@ -254,6 +254,10 @@ import { adaptateurEvaluationRacinesNiemes } from '../entrainement/6e-6h/generat
 import { adaptateurEvaluationTransformationsPlan } from '../entrainement/6e-6h/generateurs6e/transformationsPlan/exportEvaluation'
 import { adaptateurEvaluationTrianglesComplexes } from '../entrainement/6e-6h/generateurs6e/trianglesComplexes/exportEvaluation'
 import { adaptateurEvaluationComplexesAvances } from '../entrainement/6e-6h/generateurs6e/complexesAvances/exportEvaluation'
+import { adaptateurEvaluationProbabilitesEnsembles } from '../entrainement/6e-6h/generateurs6e/probabilitesEnsembles/exportEvaluation'
+import { adaptateurEvaluationTiragesArbres } from '../entrainement/6e-6h/generateurs6e/tiragesArbres/exportEvaluation'
+import { adaptateurEvaluationIndependanceBayes } from '../entrainement/6e-6h/generateurs6e/independanceBayes/exportEvaluation'
+import { adaptateurEvaluationProbabilitesProblemes } from '../entrainement/6e-6h/generateurs6e/probabilitesProblemes/exportEvaluation'
 
 /** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
  * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
@@ -310,6 +314,10 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen40': adaptateurEvaluationTransformationsPlan as unknown as AdaptateurFeuilleExercices<never>,
   '6gen41': adaptateurEvaluationTrianglesComplexes as unknown as AdaptateurFeuilleExercices<never>,
   '6gen42': adaptateurEvaluationComplexesAvances as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen30': adaptateurEvaluationProbabilitesEnsembles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen31': adaptateurEvaluationTiragesArbres as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen32': adaptateurEvaluationIndependanceBayes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen33': adaptateurEvaluationProbabilitesProblemes as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas

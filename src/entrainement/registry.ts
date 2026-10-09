@@ -54,6 +54,7 @@ const CH_6E_ANALYSE_COMBINATOIRE: ChapitreInfo = { chantier: '6e-6h', chapitreSl
 const CH_6E_VARIABLES_ALEATOIRES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'variables-aleatoires', chapitreTitle: 'Variables aléatoires et lois de probabilités' }
 const CH_6E_PRIMITIVES_INTEGRALES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'primitives-integrales', chapitreTitle: 'Intégrales et primitives' }
 const CH_6E_NOMBRES_COMPLEXES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'nombres-complexes', chapitreTitle: 'Nombres complexes' }
+const CH_6E_PROBABILITES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'probabilites', chapitreTitle: 'Les probabilités' }
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
 const CH_4E_STATISTIQUE_DESCRIPTIVE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'statistique-descriptive', chapitreTitle: 'Statistique descriptive à une variable' }
 const CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES: ChapitreInfo = { chantier: '4e', chapitreSlug: 'cercle-trigonometrique-triangles', chapitreTitle: 'Cercle trigonométrique & triangles quelconques' }
@@ -256,4 +257,9 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen41': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen41').then((m) => ({ default: m.App6gen41 }))),
   '6gen42': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen42').then((m) => ({ default: m.App6gen42 }))),
   '6gen68': entree(CH_6E_NOMBRES_COMPLEXES, () => import('./6e-6h/App6gen68').then((m) => ({ default: m.App6gen68 }))),
+  '6gen30': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen30').then((m) => ({ default: m.App6gen30 }))),
+  '6gen31': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen31').then((m) => ({ default: m.App6gen31 }))),
+  '6gen32': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen32').then((m) => ({ default: m.App6gen32 }))),
+  '6gen33': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen33').then((m) => ({ default: m.App6gen33 }))),
+  '6gen69': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen69').then((m) => ({ default: m.App6gen69 }))),
 }
