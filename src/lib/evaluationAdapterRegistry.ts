@@ -205,6 +205,18 @@ export const EVALUATION_ADAPTER_REGISTRY_5E: Record<string, AdaptateurFeuilleExe
   '5gen35': adaptateurEvaluationVitessePosition as unknown as AdaptateurFeuilleExercices<never>,
 }
 
+import { adaptateurEvaluationInjectiviteFonctions } from '../entrainement/6e-6h/generateurs6e/injectiviteFonctions/exportEvaluation'
+import { adaptateurEvaluationFonctionsCyclometriques } from '../entrainement/6e-6h/generateurs6e/fonctionsCyclometriques/exportEvaluation'
+import { adaptateurEvaluationEquationsCyclometriques } from '../entrainement/6e-6h/generateurs6e/equationsCyclometriques/exportEvaluation'
+import { adaptateurEvaluationDeriveesCyclometriques } from '../entrainement/6e-6h/generateurs6e/deriveesCyclometriques/exportEvaluation'
+import { adaptateurEvaluationGraphiquesCyclometriques } from '../entrainement/6e-6h/generateurs6e/graphiquesCyclometriques/exportEvaluation'
+import { adaptateurEvaluationLimitesExponentielles } from '../entrainement/6e-6h/generateurs6e/limitesExponentielles/exportEvaluation'
+import { adaptateurEvaluationDomaineDeriveeExponentielles } from '../entrainement/6e-6h/generateurs6e/domaineDeriveeExponentielles/exportEvaluation'
+import { adaptateurEvaluationGraphiquesDeriveeExponentielles } from '../entrainement/6e-6h/generateurs6e/graphiquesDeriveeExponentielles/exportEvaluation'
+import { adaptateurEvaluationEquationsExponentielles } from '../entrainement/6e-6h/generateurs6e/equationsExponentielles/exportEvaluation'
+import { adaptateurEvaluationInequationsExponentielles } from '../entrainement/6e-6h/generateurs6e/inequationsExponentielles/exportEvaluation'
+import { adaptateurEvaluationEtudeFonctionExponentielle } from '../entrainement/6e-6h/generateurs6e/etudeFonctionExponentielle/exportEvaluation'
+import { adaptateurEvaluationExponentiellesProblemes } from '../entrainement/6e-6h/generateurs6e/exponentiellesProblemes/exportEvaluation'
 import { adaptateurEvaluationProprietesLogarithme } from '../entrainement/6e-6h/generateurs6e/proprietesLogarithme/exportEvaluation'
 import { adaptateurEvaluationGraphiqueDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/graphiqueDeriveeLogarithme/exportEvaluation'
 import { adaptateurEvaluationDeterminerParametresLogarithme } from '../entrainement/6e-6h/generateurs6e/determinerParametresLogarithme/exportEvaluation'
@@ -216,11 +228,24 @@ import { adaptateurEvaluationEtudeFonctionLogarithme } from '../entrainement/6e-
 import { adaptateurEvaluationInequationsLogarithmiques } from '../entrainement/6e-6h/generateurs6e/inequationsLogarithmiques/exportEvaluation'
 import { adaptateurEvaluationDomaineDeriveeLogarithme } from '../entrainement/6e-6h/generateurs6e/domaineDeriveeLogarithme/exportEvaluation'
 
-/** 6e (6h) — chapitre « Fonctions logarithmes » UNIQUEMENT (`6gen13` à `6gen22`), seul chapitre 6e
- * dont les générateurs sont portés pour l'instant (chapitres « fonctions réciproques &
- * cyclométriques »/« fonctions exponentielles » : interactif déjà migré, adaptateurs d'évaluation
- * pas encore portés — absents d'ici tant que ce n'est pas fait). */
+/** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
+ * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
+ * d'adaptateur côté plateforme-maths, voir `evaluationLocal.ts`) et « fonctions logarithmes »
+ * (`6gen13`-`6gen22`) — les 7 autres chapitres de 6e restent hors périmètre (générateurs pas
+ * encore portés du tout, interactif compris). */
 export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExercices<never>> = {
+  '6gen1': adaptateurEvaluationInjectiviteFonctions as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen2': adaptateurEvaluationFonctionsCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen3': adaptateurEvaluationEquationsCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen4': adaptateurEvaluationDeriveesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen5': adaptateurEvaluationGraphiquesCyclometriques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen6': adaptateurEvaluationLimitesExponentielles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen7': adaptateurEvaluationDomaineDeriveeExponentielles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen8': adaptateurEvaluationGraphiquesDeriveeExponentielles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen9': adaptateurEvaluationEquationsExponentielles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen10': adaptateurEvaluationInequationsExponentielles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen11': adaptateurEvaluationEtudeFonctionExponentielle as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen12': adaptateurEvaluationExponentiellesProblemes as unknown as AdaptateurFeuilleExercices<never>,
   '6gen13': adaptateurEvaluationProprietesLogarithme as unknown as AdaptateurFeuilleExercices<never>,
   '6gen20': adaptateurEvaluationGraphiqueDeriveeLogarithme as unknown as AdaptateurFeuilleExercices<never>,
   '6gen18': adaptateurEvaluationDeterminerParametresLogarithme as unknown as AdaptateurFeuilleExercices<never>,
