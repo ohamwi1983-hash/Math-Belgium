@@ -21,6 +21,8 @@ export const suites: ChapterContent = {
       title: 'Suites numériques et suites arithmétiques',
       kicker: 'notation u_n, raison r, formule générale, moyenne et somme',
       blocks: [
+        { kind: 'video', title: 'Qu\'est-ce qu\'une suite numérique ? Terme, rang, formule explicite et récurrence', youtubeId: 'VL39ShU_-Yw' },
+        { kind: 'video', title: 'Suites arithmétiques : raison, formule u_n = u₁ + (n−1)r et somme des termes', youtubeId: 'aWb7XAIoPVI' },
         { kind: 'subheading', text: "Qu'est-ce qu'une suite numérique ?" },
         {
           kind: 'intuition',
@@ -229,6 +231,7 @@ export const suites: ChapterContent = {
       title: 'Suites géométriques',
       kicker: 'raison multiplicative q, formule générale, moyenne et somme',
       blocks: [
+        { kind: 'video', title: 'Suites géométriques : raison q, formule u_n = u₁·q^(n−1) et somme des termes', youtubeId: 'XWAtOBtrBRk' },
         {
           kind: 'para',
           text:
@@ -402,6 +405,7 @@ export const suites: ChapterContent = {
       title: 'Convergence et divergence des suites',
       kicker: "limite à l'infini, arithmétique, géométrique, et le cas d'une suite quelconque",
       blocks: [
+        { kind: 'video', title: 'Convergence et divergence des suites : limites, q = −1 et comparaison des degrés', youtubeId: '52jNqfKWQ_8' },
         {
           kind: 'intuition',
           label: 'Pour se représenter la convergence',
@@ -553,6 +557,7 @@ export const suites: ChapterContent = {
       title: 'Problèmes classiques sur les suites',
       kicker: 'des énigmes historiques qui se résolvent avec les mêmes outils',
       blocks: [
+        { kind: 'video', title: 'Problèmes classiques sur les suites : l\'échiquier, Fibonacci, Rhind…', youtubeId: 'UvIBl9xznRk' },
         {
           kind: 'para',
           text:
@@ -688,6 +693,7 @@ export const suites: ChapterContent = {
       title: 'Comparaison numérique de deux suites',
       kicker: 'balayage numérique, tableau, rang de bascule',
       blocks: [
+        { kind: 'video', title: 'Comparer deux suites : balayage numérique et rang de bascule', youtubeId: '058xsl_oNsE' },
         {
           kind: 'para',
           text:
@@ -815,6 +821,7 @@ export const suites: ChapterContent = {
       title: 'Suite récurrente affine et régime permanent',
       kicker: 'u_(n+1) = a·u_n + b — ni arithmétique, ni géométrique',
       blocks: [
+        { kind: 'video', title: 'Suite récurrente affine u_{n+1} = a·u_n + b et régime permanent L = b/(1−a)', youtubeId: '7ATLT1PpzIE' },
         {
           kind: 'para',
           text:
