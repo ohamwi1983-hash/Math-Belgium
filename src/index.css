@@ -202,6 +202,23 @@ img, svg { max-width: 100%; }
 .breadcrumb a { color: var(--ink-faint); text-decoration: none; }
 .breadcrumb a:hover { color: var(--accent-ink); }
 
+/* Lien "Retour à la section" en tête de page générateur (EntrainementPage) : hors du fil
+   d'Ariane (trop discret pour l'action la plus probable en sortant d'un exercice), avant le
+   composant du générateur lui-même. */
+.entrainement-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 18px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+.entrainement-retour:hover { color: var(--ink); }
+.entrainement-retour span { font-size: 15px; }
+
 /* ---------- home page ---------- */
 .home-lede { font-size: 1.05rem; color: var(--ink-soft); max-width: 62ch; }
 .level-section { margin-top: 48px; }

@@ -42,3 +42,12 @@ export const LEVELS: LevelEntry[] = [
 export function findChapter(levelSlug: string, chapterSlug: string): ChapterContent | undefined {
   return LEVELS.find((l) => l.slug === levelSlug)?.chapters.find((c) => c.slug === chapterSlug)
 }
+
+/** Retrouve la section du chapitre qui contient la carte "S'entraîner" pointant vers ce
+ * générateur — utilisé par `EntrainementPage` pour proposer un retour direct à cette section
+ * plutôt qu'au sommet du chapitre. `undefined` si le générateur n'est référencé que depuis
+ * l'intro (pas de section à rouvrir) ou pas référencé du tout. */
+export function trouverSectionGenerateur(chapter: ChapterContent, generatorId: string): { id: string; title: string } | undefined {
+  const section = chapter.sections.find((s) => s.blocks.some((b) => b.kind === 'entrainement' && b.generatorId === generatorId))
+  return section ? { id: section.id, title: section.title } : undefined
+}

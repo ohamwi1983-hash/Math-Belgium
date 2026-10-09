@@ -135,6 +135,19 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [tiroirOuvert])
 
+  // Arrivée directe sur `#sectionId` (ex. lien "Retour à la section" depuis une page de
+  // générateur, voir `EntrainementPage`) : un `<details>` fermé n'auto-scroll pas tout seul, et
+  // React n'a pas encore peint la section au moment où le navigateur tenterait son ancrage natif
+  // — il faut rouvrir puis scroller nous-mêmes, une fois montés, comme `allerASection` au clic.
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (!id) return
+    const details = document.getElementById(id) as HTMLDetailsElement | null
+    if (!details || !details.matches('details.chapter-section')) return
+    details.open = true
+    requestAnimationFrame(() => details.scrollIntoView({ block: 'start' }))
+  }, [chapter.slug]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (sections.length === 0) return null
 
   function ouvrirSection(sectionId: string) {
