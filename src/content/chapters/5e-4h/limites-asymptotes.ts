@@ -24,6 +24,11 @@ export const limitesAsymptotes: ChapterContent = {
         'bornes du domaine, définition intuitive, limite à gauche/à droite, limites de référence, ' +
         'formes indéterminées et techniques de levée',
       blocks: [
+        { kind: 'video', title: 'Introduction : que devient f(x) ?', youtubeId: 'Ox4FLOO-Fus' },
+        { kind: 'video', title: 'Notion de limite : bornes du domaine, limite à gauche/à droite, limites de référence', youtubeId: 'GXuoF1-6fLU' },
+        { kind: 'video', title: 'Formes indéterminées et opérations sur les limites : 0/0, ∞/∞, ∞−∞', youtubeId: 'BdqbQlLk19I' },
+        { kind: 'video', title: 'Calculer des limites : ∞/∞, ∞−∞ et limite qui n\'existe pas', youtubeId: 'n3lIgfR4_GQ' },
+        { kind: 'video', title: 'Point vide ou asymptote verticale ? Tester le numérateur avant de conclure', youtubeId: 'h6Ft2QTFVk4' },
         {
           kind: 'intuition',
           label: 'Tu connais déjà ça',
@@ -435,6 +440,8 @@ export const limitesAsymptotes: ChapterContent = {
         'définir une asymptote (AV/AH/AO, cas général) ; y=ax+b, avec a=lim f(x)/x et ' +
         'b=lim[f(x)−ax] — lien avec le degré de N et D',
       blocks: [
+        { kind: 'video', title: 'Définir une asymptote : verticale, horizontale, oblique', youtubeId: 'Fa8J6v_n4Pw' },
+        { kind: 'video', title: 'Asymptote oblique : comparer les degrés, deux méthodes, piège du reste', youtubeId: 'sVluREzWUF0' },
         {
           kind: 'intuition',
           label: 'Pour visualiser une asymptote horizontale',
@@ -609,6 +616,7 @@ export const limitesAsymptotes: ChapterContent = {
       title: 'Limites et asymptotes — lecture graphique',
       kicker: 'lire limites et asymptotes directement sur un graphique, sans calcul',
       blocks: [
+        { kind: 'video', title: 'Limites et asymptotes : lecture graphique', youtubeId: '6dFdWB1wZug' },
         {
           kind: 'para',
           text:
@@ -756,6 +764,7 @@ export const limitesAsymptotes: ChapterContent = {
       title: 'Limites et asymptotes en contexte',
       kicker: 'traduire saturation, seuil et long terme en limite ; interpréter une asymptote horizontale',
       blocks: [
+        { kind: 'video', title: 'Limites et asymptotes en contexte : le coût unitaire', youtubeId: 'A58J7zT6au0' },
         {
           kind: 'para',
           text:
@@ -804,7 +813,6 @@ export const limitesAsymptotes: ChapterContent = {
               'que la production augmente, sans jamais l\'atteindre',
           },
         },
-        { kind: 'video', title: 'Visualiser la baisse du coût unitaire vers son plancher' },
         {
           kind: 'attention',
           label: 'Vérifier que l\'asymptote a un sens dans le contexte',
@@ -853,6 +861,7 @@ export const limitesAsymptotes: ChapterContent = {
       title: 'Étude complète',
       kicker: 'domaine → asymptotes verticales → asymptote horizontale/oblique → limites aux bornes → synthèse',
       blocks: [
+        { kind: 'video', title: 'Étude complète d\'une fonction rationnelle : domaine, asymptotes, limites', youtubeId: 'j413TOzZQVM' },
         {
           kind: 'para',
           text:
