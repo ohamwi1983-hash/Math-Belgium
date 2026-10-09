@@ -262,6 +262,12 @@ import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrai
 import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
 import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
 import { adaptateurEvaluationMethodeGeneratrices } from '../entrainement/6e-6h/generateurs6e/methodeGeneratrices/exportEvaluation'
+import { adaptateurEvaluationIdentificationConiques } from '../entrainement/6e-6h/generateurs6e/identificationConiques/exportEvaluation'
+import { adaptateurEvaluationEquationConiqueCaracteristiques } from '../entrainement/6e-6h/generateurs6e/equationConiqueCaracteristiques/exportEvaluation'
+import { adaptateurEvaluationAireExcentriciteConique } from '../entrainement/6e-6h/generateurs6e/aireExcentriciteConique/exportEvaluation'
+import { adaptateurEvaluationIntersectionsConiques } from '../entrainement/6e-6h/generateurs6e/intersectionsConiques/exportEvaluation'
+import { adaptateurEvaluationTangentesConique } from '../entrainement/6e-6h/generateurs6e/tangentesConique/exportEvaluation'
+import { adaptateurEvaluationProprietesOptiquesConiques } from '../entrainement/6e-6h/generateurs6e/proprietesOptiquesConiques/exportEvaluation'
 
 /** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
  * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
@@ -326,6 +332,12 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen55': adaptateurEvaluationCercles as unknown as AdaptateurFeuilleExercices<never>,
   '6gen56': adaptateurEvaluationLieuxGeometriquesParametres as unknown as AdaptateurFeuilleExercices<never>,
   '6gen57': adaptateurEvaluationMethodeGeneratrices as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen58': adaptateurEvaluationIdentificationConiques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen59': adaptateurEvaluationEquationConiqueCaracteristiques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen60': adaptateurEvaluationAireExcentriciteConique as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen61': adaptateurEvaluationIntersectionsConiques as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen62': adaptateurEvaluationTangentesConique as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen63': adaptateurEvaluationProprietesOptiquesConiques as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas
