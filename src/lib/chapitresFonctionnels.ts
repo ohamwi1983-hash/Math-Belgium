@@ -49,6 +49,7 @@ const CHAPITRES_FONCTIONNELS: { levelSlug: string; chapitreSlug: string }[] = [
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'primitives-integrales' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'nombres-complexes' },
   { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'probabilites' },
+  { levelSlug: LEVELSLUG_FONCTIONNEL_6E, chapitreSlug: 'lieux-geometriques' },
 ]
 
 export function estChapitreFonctionnel(levelSlug: string | null, chapitreSlug: string): boolean {

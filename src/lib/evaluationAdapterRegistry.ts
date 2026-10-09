@@ -258,6 +258,10 @@ import { adaptateurEvaluationProbabilitesEnsembles } from '../entrainement/6e-6h
 import { adaptateurEvaluationTiragesArbres } from '../entrainement/6e-6h/generateurs6e/tiragesArbres/exportEvaluation'
 import { adaptateurEvaluationIndependanceBayes } from '../entrainement/6e-6h/generateurs6e/independanceBayes/exportEvaluation'
 import { adaptateurEvaluationProbabilitesProblemes } from '../entrainement/6e-6h/generateurs6e/probabilitesProblemes/exportEvaluation'
+import { adaptateurEvaluationPointsDroitesRemarquablesTriangle } from '../entrainement/6e-6h/generateurs6e/pointsDroitesRemarquablesTriangle/exportEvaluation'
+import { adaptateurEvaluationCercles } from '../entrainement/6e-6h/generateurs6e/cercles/exportEvaluation'
+import { adaptateurEvaluationLieuxGeometriquesParametres } from '../entrainement/6e-6h/generateurs6e/lieuxGeometriquesParametres/exportEvaluation'
+import { adaptateurEvaluationMethodeGeneratrices } from '../entrainement/6e-6h/generateurs6e/methodeGeneratrices/exportEvaluation'
 
 /** 6e (6h) — chapitres « fonctions réciproques & cyclométriques » (`6gen1`-`6gen5`), « fonctions
  * exponentielles » (`6gen6`-`6gen12` — `6gen65`, le quiz vrai/faux de ce chapitre, n'a pas
@@ -318,6 +322,10 @@ export const EVALUATION_ADAPTER_REGISTRY_6E: Record<string, AdaptateurFeuilleExe
   '6gen31': adaptateurEvaluationTiragesArbres as unknown as AdaptateurFeuilleExercices<never>,
   '6gen32': adaptateurEvaluationIndependanceBayes as unknown as AdaptateurFeuilleExercices<never>,
   '6gen33': adaptateurEvaluationProbabilitesProblemes as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen54': adaptateurEvaluationPointsDroitesRemarquablesTriangle as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen55': adaptateurEvaluationCercles as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen56': adaptateurEvaluationLieuxGeometriquesParametres as unknown as AdaptateurFeuilleExercices<never>,
+  '6gen57': adaptateurEvaluationMethodeGeneratrices as unknown as AdaptateurFeuilleExercices<never>,
 }
 
 /** Lookup unique par `generatorId`, tous chantiers portés confondus — `evaluationLocal.ts` n'a pas

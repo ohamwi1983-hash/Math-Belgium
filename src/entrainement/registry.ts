@@ -55,6 +55,7 @@ const CH_6E_VARIABLES_ALEATOIRES: ChapitreInfo = { chantier: '6e-6h', chapitreSl
 const CH_6E_PRIMITIVES_INTEGRALES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'primitives-integrales', chapitreTitle: 'Intégrales et primitives' }
 const CH_6E_NOMBRES_COMPLEXES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'nombres-complexes', chapitreTitle: 'Nombres complexes' }
 const CH_6E_PROBABILITES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'probabilites', chapitreTitle: 'Les probabilités' }
+const CH_6E_LIEUX_GEOMETRIQUES: ChapitreInfo = { chantier: '6e-6h', chapitreSlug: 'lieux-geometriques', chapitreTitle: 'Lieux géométriques' }
 const CH_4E_CARACTERISTIQUES_FONCTIONS_REFERENCE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'caracteristiques-fonctions-reference', chapitreTitle: "Caractéristiques d'une fonction et fonctions de référence" }
 const CH_4E_STATISTIQUE_DESCRIPTIVE: ChapitreInfo = { chantier: '4e', chapitreSlug: 'statistique-descriptive', chapitreTitle: 'Statistique descriptive à une variable' }
 const CH_4E_CERCLE_TRIGONOMETRIQUE_TRIANGLES: ChapitreInfo = { chantier: '4e', chapitreSlug: 'cercle-trigonometrique-triangles', chapitreTitle: 'Cercle trigonométrique & triangles quelconques' }
@@ -262,4 +263,9 @@ export const ENTRAINEMENT_REGISTRY: Record<string, EntrainementEntry> = {
   '6gen32': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen32').then((m) => ({ default: m.App6gen32 }))),
   '6gen33': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen33').then((m) => ({ default: m.App6gen33 }))),
   '6gen69': entree(CH_6E_PROBABILITES, () => import('./6e-6h/App6gen69').then((m) => ({ default: m.App6gen69 }))),
+  '6gen54': entree(CH_6E_LIEUX_GEOMETRIQUES, () => import('./6e-6h/App6gen54').then((m) => ({ default: m.App6gen54 }))),
+  '6gen55': entree(CH_6E_LIEUX_GEOMETRIQUES, () => import('./6e-6h/App6gen55').then((m) => ({ default: m.App6gen55 }))),
+  '6gen56': entree(CH_6E_LIEUX_GEOMETRIQUES, () => import('./6e-6h/App6gen56').then((m) => ({ default: m.App6gen56 }))),
+  '6gen57': entree(CH_6E_LIEUX_GEOMETRIQUES, () => import('./6e-6h/App6gen57').then((m) => ({ default: m.App6gen57 }))),
+  '6gen72': entree(CH_6E_LIEUX_GEOMETRIQUES, () => import('./6e-6h/App6gen72').then((m) => ({ default: m.App6gen72 }))),
 }
