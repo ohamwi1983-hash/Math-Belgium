@@ -21,6 +21,7 @@ export const deriveesApplications: ChapterContent = {
       title: "Calculer f'(a) par la définition",
       kicker: "taux d'accroissement, limite quand h→0, interprétation géométrique (pente de la tangente)",
       blocks: [
+        { kind: 'video', title: 'Calculer f\'(a) par la définition : taux d\'accroissement, sécante et tangente', youtubeId: 'H1pEUBMk200' },
         {
           kind: 'intuition',
           label: 'Pour visualiser',
@@ -131,6 +132,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Tangentes',
       kicker: 'y=f(a)+f\'(a)(x−a) ; tangente horizontale ⟺ f\'(a)=0 ; tangente vs sécante',
       blocks: [
+        { kind: 'video', title: 'Équation d\'une tangente : y = f(a) + f\'(a)(x − a), tangente horizontale, tangente ≠ sécante', youtubeId: 'fD-HtssXw2w' },
         {
           kind: 'intuition',
           label: 'Zoome sur la courbe',
@@ -230,6 +232,8 @@ export const deriveesApplications: ChapterContent = {
       kicker:
         'fonction dérivée, domaine de dérivabilité, interprétation du nombre dérivé, dérivées de référence, règles de la somme/produit/quotient/chaîne',
       blocks: [
+        { kind: 'video', title: 'La fonction dérivée : dérivabilité, taux de variation, dérivées de référence', youtubeId: 'ln0Bj-SX6K0' },
+        { kind: 'video', title: 'Règles de dérivation : somme, produit, quotient et règle de la chaîne', youtubeId: 'a-iBVzWtiO8' },
         {
           kind: 'intuition',
           label: 'Tu connais déjà ça',
@@ -476,6 +480,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Association graphique/mots ↔ signe de f\'/f\'\'',
       kicker: 'signe de f\' ⟺ sens de variation ; signe de f\'\' ⟺ concavité ; point d\'inflexion',
       blocks: [
+        { kind: 'video', title: 'Signe de f\' et de f\'\' : variations, extremums, concavité, point d\'inflexion', youtubeId: 'oSM5X-KVRrk' },
         {
           kind: 'para',
           text:
@@ -591,6 +596,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Étude locale (extremums et points critiques)',
       kicker: 'tableau de signes de f\', extremums locaux, point critique sans extremum',
       blocks: [
+        { kind: 'video', title: 'Étude locale : tableau de signes de f\', extremums et points critiques', youtubeId: 'MqocKqLTkqY' },
         {
           kind: 'methode',
           label: 'Tableau de signes de f\' complet',
@@ -733,6 +739,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Lecture graphique — dérivées et applications',
       kicker: 'lire directement sur un graphique de f : variations, extremums, concavité — sans calcul',
       blocks: [
+        { kind: 'video', title: 'Lecture graphique : variations, extremums, concavité et points d\'inflexion sans calcul', youtubeId: '3OzjZmJUmCU' },
         {
           kind: 'para',
           text:
@@ -859,6 +866,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Étudier une fonction',
       kicker: 'domaine → dérivée → signe → variations → extremums → limites/asymptotes → synthèse',
       blocks: [
+        { kind: 'video', title: 'Étudier une fonction : démarche complète, tableau de variations, asymptotes et synthèse', youtubeId: 'R-cGVkXmkxI' },
         {
           kind: 'para',
           text:
@@ -963,6 +971,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Optimisation géométrique',
       kicker: 'maximiser/minimiser une aire ou un volume sous contrainte, dérivée nulle au point optimal',
       blocks: [
+        { kind: 'video', title: 'Optimisation géométrique : maximiser une aire sous contrainte avec la dérivée', youtubeId: 'rFeq-NezwlM' },
         {
           kind: 'methode',
           label: 'Optimiser une grandeur géométrique',
@@ -1034,6 +1043,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Contexte économique',
       kicker: 'coût marginal = dérivée du coût total ; profit maximal ; interprétation économique de f\'',
       blocks: [
+        { kind: 'video', title: 'Contexte économique : coût marginal, recette marginale et bénéfice maximal', youtubeId: 'viSlSAGAl10' },
         {
           kind: 'rappel',
           label: 'Rappel — coût marginal',
@@ -1148,6 +1158,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Extrema en contexte borné',
       kicker: 'sur un intervalle FERMÉ [a;b] : comparer les extremums locaux ET les valeurs aux bornes',
       blocks: [
+        { kind: 'video', title: 'Extrema sur un intervalle fermé : comparer extremums locaux et valeurs aux bornes', youtubeId: 'qyRa-UM5VS0' },
         {
           kind: 'attention',
           label: 'Sur un intervalle fermé, l\'extremum ABSOLU n\'est pas toujours un extremum LOCAL',
@@ -1259,6 +1270,7 @@ export const deriveesApplications: ChapterContent = {
       title: 'Vitesse et position',
       kicker: 's(t) position, v(t)=s\'(t) vitesse, a(t)=v\'(t)=s\'\'(t) accélération',
       blocks: [
+        { kind: 'video', title: 'Vitesse et position : s, v = s\', a = v\' et interprétation du mouvement', youtubeId: 'iSGuNQqjnxc' },
         {
           kind: 'rappel',
           label: 'Rappel — dériver la position donne la vitesse, dériver la vitesse donne l\'accélération',
@@ -1321,7 +1333,6 @@ export const deriveesApplications: ChapterContent = {
               's\'annule (t=4 s) : positive avant (le mobile avance), négative après (il recule).',
           },
         },
-        { kind: 'video', title: 'Un mobile filmé, position/vitesse superposées en direct' },
         {
           kind: 'rappel',
           label: 'La vitesse n\'est qu\'UN exemple parmi d\'autres grandeurs reliées par une dérivée',
