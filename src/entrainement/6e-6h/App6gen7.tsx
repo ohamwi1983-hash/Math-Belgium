@@ -39,7 +39,7 @@ import {
   labelsDeuxChamps,
 } from "./ui6e/formatDomaineDeriveeExponentielles";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionDomaineDeriveeExponentielle {
   return demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, genererExerciceDomaineDeriveeExponentielle);

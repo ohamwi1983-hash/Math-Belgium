@@ -36,7 +36,7 @@ import { EtapeTangenteEnP } from "./components5e/EtapeTangenteEnP";
 import { ResultatPanelTangentes } from "./components5e/ResultatPanelTangentes";
 import { ResumeSessionTangentes } from "./components5e/ResumeSessionTangentes";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionTangente {
   return demarrerSessionTangentes(REGLAGES_DEMO, genererExerciceTangente);

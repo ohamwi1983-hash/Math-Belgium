@@ -20,7 +20,7 @@ import { EtapeEquationsAsymptotes } from "./components5e/EtapeEquationsAsymptote
 import { ResultatPanelLectureGraphiqueLimites } from "./components5e/ResultatPanelLectureGraphiqueLimites";
 import { ResumeSessionLectureGraphiqueLimites } from "./components5e/ResumeSessionLectureGraphiqueLimites";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionLectureGraphiqueLimites {
   return demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, genererExerciceLectureGraphiqueLimites);

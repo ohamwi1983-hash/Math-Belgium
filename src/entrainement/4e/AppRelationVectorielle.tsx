@@ -14,7 +14,7 @@ import { ResumeSessionRelationVectorielle } from "./components/ResumeSessionRela
 import { calculerRecapitulatifRelationVectorielle } from "./ui/recapitulatifRelationVectorielle";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 6,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

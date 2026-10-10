@@ -9,7 +9,7 @@ import { ResultatPanelConstructionVectorielle } from "./components/ResultatPanel
 import { ResumeSessionConstructionVectorielle } from "./components/ResumeSessionConstructionVectorielle";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

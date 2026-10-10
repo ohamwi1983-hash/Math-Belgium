@@ -29,7 +29,7 @@ import { EtapeResoudreVitessePosition } from "./components5e/EtapeResoudreVitess
 import { ResultatPanelVitessePosition } from "./components5e/ResultatPanelVitessePosition";
 import { ResumeSessionVitessePosition } from "./components5e/ResumeSessionVitessePosition";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionVitessePosition {
   return demarrerSessionVitessePosition(REGLAGES_DEMO, genererExerciceVitessePosition);

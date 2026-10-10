@@ -24,7 +24,7 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * nature (convention CLAUDE.md "add-as-needed") même si CE générateur en a toujours exactement 2.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionVolumesRevolution {
   return demarrerSessionVolumesRevolution(REGLAGES_DEMO, genererExerciceVolumesRevolution);

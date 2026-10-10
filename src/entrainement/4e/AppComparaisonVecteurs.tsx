@@ -11,7 +11,7 @@ import { ResultatPanelComparaisonVecteurs } from "./components/ResultatPanelComp
 import { ResumeSessionComparaisonVecteurs } from "./components/ResumeSessionComparaisonVecteurs";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

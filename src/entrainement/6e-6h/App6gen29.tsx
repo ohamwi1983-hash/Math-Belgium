@@ -20,7 +20,7 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * structurel) couvre donc TOUS les écrans, jamais besoin d'un composant add-as-needed dédié.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionIntegralesProblemes {
   return demarrerSessionIntegralesProblemes(REGLAGES_DEMO, genererExerciceIntegralesProblemes);

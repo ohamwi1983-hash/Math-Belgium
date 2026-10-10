@@ -9,7 +9,7 @@ import { ResultatPanelTransformationsGraphiques } from "./components/ResultatPan
 import { ResumeSessionTransformationsGraphiques } from "./components/ResumeSessionTransformationsGraphiques";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

@@ -21,7 +21,7 @@ import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur"
 import { ResultatPanelArcSecteur } from "./components5e/ResultatPanelArcSecteur";
 import { ResumeSessionArcSecteur } from "./components5e/ResumeSessionArcSecteur";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 6, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionArcSecteur {
   return demarrerSessionArcSecteur(REGLAGES_DEMO, genererExerciceArcSecteur);

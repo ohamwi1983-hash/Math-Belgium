@@ -28,7 +28,7 @@ import { ResultatPanelExtremumsSinusoide } from "./components5e/ResultatPanelExt
 import { ResumeSessionExtremumsSinusoide } from "./components5e/ResumeSessionExtremumsSinusoide";
 import type { PhaseExtremumsSinusoide } from "./moteur5e/typesExtremumsSinusoide";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionExtremumsSinusoide {
   return demarrerSessionExtremumsSinusoide(REGLAGES_DEMO, genererExerciceExtremumsSinusoide);

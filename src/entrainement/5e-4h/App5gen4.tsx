@@ -21,7 +21,7 @@ import { ResultatPanelComposeeGraphique } from "./components5e/ResultatPanelComp
 import { ResumeSessionComposeeGraphique } from "./components5e/ResumeSessionComposeeGraphique";
 import { nomInterne } from "./ui5e/formatComposeeGraphique";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionComposeeGraphique {
   return demarrerSessionComposeeGraphique(REGLAGES_DEMO, genererExerciceComposeeGraphique);

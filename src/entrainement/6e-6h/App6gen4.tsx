@@ -80,7 +80,7 @@ import {
   texteAideGDeriveeInterneNiveau2,
 } from "./ui6e/formatDeriveesCyclometriques";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 /** Convertit une aide `{texte, latex}` (dont le `latex` est en pratique toujours non-null pour les
  * fonctions utilisées ici) en 1 ligne du bloc "état actuel" — jamais la saisie brute de l'élève,

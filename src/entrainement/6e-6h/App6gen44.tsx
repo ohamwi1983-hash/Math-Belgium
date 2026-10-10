@@ -21,7 +21,7 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * famille D écran 1), piloté entièrement par `champs: ChampDef[]`.
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionDenombrementCombine {
   return demarrerSessionDenombrementCombine(REGLAGES_DEMO, genererExerciceDenombrementCombine);

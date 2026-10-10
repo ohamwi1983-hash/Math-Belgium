@@ -18,7 +18,7 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * PAS de JSX par famille/écran — un SEUL composant écran (`EtapeChampsBinomeNewton`).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionBinomeNewton {
   return demarrerSessionBinomeNewton(REGLAGES_DEMO, genererExerciceBinomeNewton);

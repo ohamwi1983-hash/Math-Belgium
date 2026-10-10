@@ -16,7 +16,7 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { ResultatPanelGeometrieCercle } from "./components5e/ResultatPanelGeometrieCercle";
 import { ResumeSessionGeometrieCercle } from "./components5e/ResumeSessionGeometrieCercle";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 /**
  * Écrans dont la cible est un angle/une aire non remarquable (acos/atan/sin sans table de valeurs

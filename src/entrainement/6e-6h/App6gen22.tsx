@@ -63,7 +63,7 @@ import { ResumeSessionLogarithmesProblemes } from "./components6e/ResumeSessionL
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel } from "./ui6e/formatLogarithmesProblemes";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionLogarithmesProblemes {
   return demarrerSessionLogarithmesProblemes(REGLAGES_DEMO, genererExerciceLogarithmesProblemes);

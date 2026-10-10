@@ -13,7 +13,7 @@ import { ResultatPanelFonctionsCyclometriques } from "./components6e/ResultatPan
 import { ResumeSessionFonctionsCyclometriques } from "./components6e/ResumeSessionFonctionsCyclometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionFonctionsCyclometriques {
   return demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, genererExerciceFonctionsCyclometriques);

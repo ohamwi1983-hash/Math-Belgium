@@ -25,7 +25,7 @@ import { EtapeEcranUnChampPolygone } from "./components5e/EtapeEcranUnChampPolyg
 import { ResultatPanelPolygone } from "./components5e/ResultatPanelPolygone";
 import { ResumeSessionPolygone } from "./components5e/ResumeSessionPolygone";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionPolygonesArcsSecteurs {
   return demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, genererExercicePolygonesArcsSecteurs);

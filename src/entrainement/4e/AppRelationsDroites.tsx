@@ -13,7 +13,7 @@ import { ResultatPanelRelationsDroites } from "./components/ResultatPanelRelatio
 import { ResumeSessionRelationsDroites } from "./components/ResumeSessionRelationsDroites";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

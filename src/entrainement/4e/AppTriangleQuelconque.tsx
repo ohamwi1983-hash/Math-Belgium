@@ -19,7 +19,7 @@ import { ResumeSessionTriangleQuelconque } from "./components/ResumeSessionTrian
 import { calculerRecapitulatifTriangleQuelconque } from "./ui/recapitulatifTriangleQuelconque";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

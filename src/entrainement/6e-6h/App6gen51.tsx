@@ -20,7 +20,7 @@ import { blocDonnees, calculerReferenceLoiNormale, champsEcran, consigneEcran, c
  * besoin d'un second composant dédié).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionLoiNormale {
   return demarrerSessionLoiNormale(REGLAGES_DEMO, genererExerciceLoiNormale, calculerReferenceLoiNormale);

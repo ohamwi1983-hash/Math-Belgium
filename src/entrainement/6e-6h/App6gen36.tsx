@@ -22,7 +22,7 @@ import { OPTIONS_EQUATION_B, OPTIONS_EQUATION_E, OPTIONS_SYSTEME_A, blocDonnees,
  * valeurs VARIABLE selon l'écran — voir `nombreCibleEnsemble`).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionEquationsComplexes {
   return demarrerSessionEquationsComplexes(REGLAGES_DEMO, genererExerciceEquationsComplexes);

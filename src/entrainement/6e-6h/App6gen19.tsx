@@ -31,7 +31,7 @@ import { ResumeSessionHyperboliques } from "./components6e/ResumeSessionHyperbol
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel } from "./ui6e/formatHyperboliques";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionHyperboliques {
   return demarrerSessionHyperboliques(REGLAGES_DEMO, genererExerciceHyperboliques);

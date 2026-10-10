@@ -69,7 +69,7 @@ const QUESTION_CE = "Quelle est la condition d'existence ?";
 const CONSIGNE_GENERALE = "Simplifier la fraction suivante :";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

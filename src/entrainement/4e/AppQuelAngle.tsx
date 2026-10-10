@@ -11,7 +11,7 @@ import { ResultatPanelQuelAngle } from "./components/ResultatPanelQuelAngle";
 import { ResumeSessionQuelAngle } from "./components/ResumeSessionQuelAngle";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

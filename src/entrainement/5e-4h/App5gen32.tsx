@@ -13,7 +13,7 @@ import { EtapeGeneriqueOptimisation } from "./components5e/EtapeGeneriqueOptimis
 import { ResultatPanelOptimisation } from "./components5e/ResultatPanelOptimisation";
 import { ResumeSessionOptimisation } from "./components5e/ResumeSessionOptimisation";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionOptimisation {
   return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisation);

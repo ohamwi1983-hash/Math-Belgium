@@ -26,7 +26,7 @@ import { EtapeCalculerFonctionDerivee } from "./components5e/EtapeCalculerFoncti
 import { ResultatPanelFonctionDerivee } from "./components5e/ResultatPanelFonctionDerivee";
 import { ResumeSessionFonctionDerivee } from "./components5e/ResumeSessionFonctionDerivee";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionFonctionDerivee {
   return demarrerSessionFonctionDerivee(REGLAGES_DEMO, genererExerciceFonctionDerivee);

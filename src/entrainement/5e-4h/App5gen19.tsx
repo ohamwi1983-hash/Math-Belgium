@@ -33,7 +33,7 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { ResultatPanelSuiteRecurrenteAffine } from "./components5e/ResultatPanelSuiteRecurrenteAffine";
 import { ResumeSessionSuiteRecurrenteAffine } from "./components5e/ResumeSessionSuiteRecurrenteAffine";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionSuiteRecurrenteAffine {
   return demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, genererExerciceSuiteRecurrenteAffine);

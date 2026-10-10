@@ -19,7 +19,7 @@ import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blo
  * `estEcranChoix`) et `moteur6e/verificationProbabilitesEnsembles.ts` (`diagnostiquerEcran`).
  */
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionProbabilitesEnsembles {
   return demarrerSessionProbabilitesEnsembles(REGLAGES_DEMO, genererExerciceProbabilitesEnsembles);

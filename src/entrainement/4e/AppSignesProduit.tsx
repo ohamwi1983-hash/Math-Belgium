@@ -47,7 +47,7 @@ import { formatTermesEnonceSignesProduitLatex } from "./ui/formatSignesProduit";
 import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE } from "./ui/categorieLabels";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

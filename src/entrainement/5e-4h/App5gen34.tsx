@@ -27,7 +27,7 @@ import { ResultatPanelExtremaBornes } from "./components5e/ResultatPanelExtremaB
 import { ResumeSessionExtremaBornes } from "./components5e/ResumeSessionExtremaBornes";
 import { labelsChampsBornes, labelsChampsExtremums, placeholdersChampsBornes, placeholdersChampsExtremums } from "./ui5e/formatExtremaBornes";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionExtremaBornes {
   return demarrerSessionExtremaBornes(REGLAGES_DEMO, genererExerciceExtremaBornes);

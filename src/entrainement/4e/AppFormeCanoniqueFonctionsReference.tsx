@@ -39,7 +39,7 @@ import { ResultatPanelFormeCanoniqueFonctionsReference } from "./components/Resu
 import { ResumeSessionFormeCanoniqueFonctionsReference } from "./components/ResumeSessionFormeCanoniqueFonctionsReference";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

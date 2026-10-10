@@ -24,7 +24,7 @@ import { ResultatPanelDefinitionDerivee } from "./components5e/ResultatPanelDefi
 import { ResumeSessionDefinitionDerivee } from "./components5e/ResumeSessionDefinitionDerivee";
 import { labelLimite, labelQuotient } from "./ui5e/formatDefinitionDerivee";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionDefinitionDerivee {
   return demarrerSessionDefinitionDerivee(REGLAGES_DEMO, genererExerciceDefinitionDerivee);

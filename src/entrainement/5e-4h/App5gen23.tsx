@@ -35,7 +35,7 @@ import { EtapeQCMLimitesContexte } from "./components5e/EtapeQCMLimitesContexte"
 import { ResultatPanelLimitesContexte } from "./components5e/ResultatPanelLimitesContexte";
 import { ResumeSessionLimitesContexte } from "./components5e/ResumeSessionLimitesContexte";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionLimitesContexte {
   return demarrerSessionLimitesContexte(REGLAGES_DEMO, genererExerciceLimitesContexte);

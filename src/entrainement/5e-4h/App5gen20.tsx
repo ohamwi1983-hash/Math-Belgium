@@ -39,7 +39,7 @@ import { EtapeTermeDominant } from "./components5e/EtapeTermeDominant";
 import { ResultatPanelLimite } from "./components5e/ResultatPanelLimite";
 import { ResumeSessionLimite } from "./components5e/ResumeSessionLimite";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 const OPTIONS_SIGNE_INFINI: [string, string] = ["+∞", "−∞"];
 

@@ -52,7 +52,7 @@ import { ResultatPanelExerciceSynthese } from "./components/ResultatPanelExercic
 import { ResumeSessionExerciceSynthese } from "./components/ResumeSessionExerciceSynthese";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

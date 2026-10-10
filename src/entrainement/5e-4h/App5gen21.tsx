@@ -21,7 +21,7 @@ import { EtapeDiviserEuclidienne } from "./components5e/EtapeDiviserEuclidienne"
 import { ResultatPanelAsymptoteOblique } from "./components5e/ResultatPanelAsymptoteOblique";
 import { ResumeSessionAsymptoteOblique } from "./components5e/ResumeSessionAsymptoteOblique";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionAsymptoteOblique {
   return demarrerSessionAsymptoteOblique(REGLAGES_DEMO, genererExerciceAsymptoteOblique);

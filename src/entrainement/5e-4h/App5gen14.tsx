@@ -143,7 +143,7 @@ function diagnostiquerPoserEquation(exercice: ExerciceSuiteArithmetique, phase: 
   }
 }
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 const PHASES_CHAMP_SIMPLE = new Set<PhaseSuiteArithmetique>([
   "trouverR",

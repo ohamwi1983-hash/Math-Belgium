@@ -44,7 +44,7 @@ import { formatEnonceLatex } from "./ui/formatEquation";
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL } from "./ui/categorieLabels";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

@@ -22,7 +22,7 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { ResultatPanelConvergenceSuites } from "./components5e/ResultatPanelConvergenceSuites";
 import { ResumeSessionConvergenceSuites } from "./components5e/ResumeSessionConvergenceSuites";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionConvergenceSuite {
   return demarrerSessionConvergenceSuite(REGLAGES_DEMO, genererExerciceConvergenceSuite);

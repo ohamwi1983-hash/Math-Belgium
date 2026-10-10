@@ -78,7 +78,7 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { ResultatPanelSuiteClassique } from "./components5e/ResultatPanelSuiteClassique";
 import { ResumeSessionSuiteClassique } from "./components5e/ResumeSessionSuiteClassique";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 const PHASES_CHAMP_SIMPLE = new Set<PhaseSuiteClassique>([
   "u64",

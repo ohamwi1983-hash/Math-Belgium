@@ -25,7 +25,7 @@ import { ResultatPanelInjectiviteFonctions } from "./components6e/ResultatPanelI
 import { ResumeSessionInjectiviteFonctions } from "./components6e/ResumeSessionInjectiviteFonctions";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionInjectiviteFonctions {
   return demarrerSessionInjectiviteFonctions(REGLAGES_DEMO, genererExerciceInjectiviteFonctions);

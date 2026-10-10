@@ -24,7 +24,7 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { ResultatPanelComparaisonSuites } from "./components5e/ResultatPanelComparaisonSuites";
 import { ResumeSessionComparaisonSuites } from "./components5e/ResumeSessionComparaisonSuites";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionComparaisonSuites {
   return demarrerSessionComparaisonSuites(REGLAGES_DEMO, genererExerciceComparaisonSuites);

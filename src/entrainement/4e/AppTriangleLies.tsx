@@ -25,7 +25,7 @@ import { ResultatPanelTriangleLies } from "./components/ResultatPanelTriangleLie
 import { ResumeSessionTriangleLies } from "./components/ResumeSessionTriangleLies";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

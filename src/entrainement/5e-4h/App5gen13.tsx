@@ -91,7 +91,7 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { ResultatPanelModelisationSinusoide } from "./components5e/ResultatPanelModelisationSinusoide";
 import { ResumeSessionModelisationSinusoide } from "./components5e/ResumeSessionModelisationSinusoide";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 const PHASES_CHAMP_SIMPLE = new Set(["amplitude", "decalage", "pulsation", "phi", "fonctionFinale", "poserExtremum", "isolerTExtremum"]);
 const PHASES_LIGNES = new Set(["isolerTResoudre", "solutionsResoudre", "solutionsExtremum"]);

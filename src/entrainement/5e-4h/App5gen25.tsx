@@ -24,7 +24,7 @@ import { ResultatPanelAssociation } from "./components5e/ResultatPanelAssociatio
 import { ResumeSessionAssociation } from "./components5e/ResumeSessionAssociation";
 import { Katex } from "./components/Katex";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionAssociation {
   return demarrerSessionAssociation(REGLAGES_DEMO, genererExerciceAssociation);

@@ -16,7 +16,7 @@ import { ResultatPanelConstructionParabole } from "./components/ResultatPanelCon
 import { ResumeSessionConstructionParabole } from "./components/ResumeSessionConstructionParabole";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

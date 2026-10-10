@@ -10,7 +10,7 @@ import { ResumeSessionProprietesLogarithme } from "./components6e/ResumeSessionP
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel, expressionDemandeeLatex } from "./ui6e/formatProprietesLogarithme";
 
-const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionProprietesLogarithme {
   return demarrerSessionProprietesLogarithme(REGLAGES_DEMO, genererExerciceProprietesLogarithme);

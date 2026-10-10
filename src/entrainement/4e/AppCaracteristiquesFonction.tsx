@@ -29,7 +29,7 @@ import { ResumeSessionCaracteristiquesFonction } from "./components/ResumeSessio
 import type { PhaseCaracteristiquesFonction } from "./core/caracteristiquesFonction.types";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,

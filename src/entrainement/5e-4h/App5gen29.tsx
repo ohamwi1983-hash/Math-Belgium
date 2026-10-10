@@ -31,7 +31,7 @@ import { ResultatPanelEtudeLocale } from "./components5e/ResultatPanelEtudeLocal
 import { ResumeSessionEtudeLocale } from "./components5e/ResumeSessionEtudeLocale";
 import { labelsChampsValeurF, precisionAnnonceeRacines, precisionAnnonceeValeursF } from "./ui5e/formatEtudeLocale";
 
-const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 5, tentativesMax: 3, penaliteActivee: true };
+const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionEtudeLocale {
   return demarrerSessionEtudeLocale(REGLAGES_DEMO, genererExerciceEtudeLocale);

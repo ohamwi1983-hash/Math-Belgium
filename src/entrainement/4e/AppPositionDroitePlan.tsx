@@ -12,7 +12,7 @@ import { ResultatPanelPositionDroitePlan } from "./components/ResultatPanelPosit
 import { ResumeSessionPositionDroitePlan } from "./components/ResumeSessionPositionDroitePlan";
 
 const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 5,
+  nombreExercices: 1,
   tentativesMax: 3,
   penaliteActivee: true,
   affichageReponseApresEchec: true,
