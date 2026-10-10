@@ -3,24 +3,13 @@ import type { ExerciceMoyennePonderee } from "../core/moyennePonderee.types";
 import type { ReponseSommes } from "../moteur/verificationMoyennePonderee";
 import { diagnostiquerSommes } from "../moteur/verificationMoyennePonderee";
 import { NIVEAU_AIDE_MAX_SOMMES } from "../moteur/sessionMoyennePonderee";
-import {
-  CONSIGNE_SOMMES,
-  INDEX_LIGNE_EXEMPLE,
-  LABEL_EFFECTIF_NI,
-  LABEL_PRODUIT_XN,
-  LABEL_VALEUR_XI,
-  PLACEHOLDER_PRODUIT,
-  PLACEHOLDER_SOMME_N,
-  PLACEHOLDER_SOMME_XN,
-  libelleBoutonAide,
-  texteAideSommesNiveau1,
-  texteAideSommesNiveau2,
-} from "../ui/formatMoyennePonderee";
+import { CONSIGNE_SOMMES, INDEX_LIGNE_EXEMPLE, LABEL_EFFECTIF_NI, LABEL_PRODUIT_XN, LABEL_VALEUR_XI, PLACEHOLDER_PRODUIT, PLACEHOLDER_SOMME_N, PLACEHOLDER_SOMME_XN, texteAideSommesNiveau1, texteAideSommesNiveau2 } from "../ui/formatMoyennePonderee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMoyennePonderee } from "./EnonceMoyennePonderee";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMoyennePonderee;
@@ -154,9 +143,7 @@ export function EtapeSommesMoyennePonderee({ exercice, tentativesUtilisees, tent
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SOMMES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SOMMES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ produits, sommeXN, sommeN })}>
         Valider

@@ -89,11 +89,6 @@ export function libelleVarianteBienaymeTchebychev(variante: VarianteBienaymeTche
   return LIBELLES_VARIANTE[variante];
 }
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 // ============================================================================
 // Précision d'arrondi affichée dans les consignes (`promptgen37correctionsgroupees.md`, point 1) —
 // cohérente avec la règle de vérification réellement appliquée

@@ -40,11 +40,6 @@ export const LABEL_CLASSE_XI = "x_i";
 export const LABEL_EFFECTIF_NI = "n_i";
 export const LABEL_FREQUENCE_FI = "f_i";
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 export function estDerniereClasse(exercice: ExerciceHistogramme, index: number): boolean {
   return index === exercice.classes.length - 1;
 }

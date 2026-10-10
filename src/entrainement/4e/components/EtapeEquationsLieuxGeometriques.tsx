@@ -3,19 +3,12 @@ import type { ExerciceLieuxGeometriques, Lieu } from "../core/lieuxGeometriques.
 import { diagnostiquerEquationLieu } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseEquations } from "../moteur/verificationLieuxGeometriques";
 import { PLACEHOLDER_EQUATION } from "../ui/formatEquationCercle";
-import {
-  CONSIGNE_GENERALE_EQUATIONS,
-  formatEquationLieuLatex,
-  latexGabaritGenerique,
-  libelleBoutonAide,
-  libelleChampEquation,
-  segmentsDescriptionLieu,
-  segmentsEnonce,
-} from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_EQUATIONS, formatEquationLieuLatex, latexGabaritGenerique, libelleChampEquation, segmentsDescriptionLieu, segmentsEnonce } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceLieuxGeometriques;
@@ -104,9 +97,7 @@ export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees,
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= 2} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, 2)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ texteLieu1, texteLieu2 })}>
         Valider

@@ -3,6 +3,7 @@ import { calculerTrajetCercleTrig } from "../ui/cercleTrigTrajet";
 import { calculerAideSignes } from "../ui/cercleTrigSignesAide";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: AngleSurCercle;
@@ -77,9 +78,7 @@ export function AideSignesCercleTrig({ exercice, aideActivee, onActiverAide }: P
           )}
         </CercleTrigTrajetBase>
       )}
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
     </div>
   );
 }

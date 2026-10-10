@@ -2,19 +2,12 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevNombreVersIntervalle, ExerciceBienaymeTchebychevPourcentVersIntervalle } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerIntervalleAttendu } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  PRECISION_UNITE,
-  type ValeurEtatActuel,
-  formatEtatActuelCombineLatex,
-  kEtatActuel,
-  libelleBoutonAide,
-  pourcentAttendu0EtatActuel,
-  texteAideIntervalleFinalNiveau1,
-} from "../ui/formatBienaymeTchebychev";
+import { PRECISION_UNITE, type ValeurEtatActuel, formatEtatActuelCombineLatex, kEtatActuel, pourcentAttendu0EtatActuel, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 type Exercice = ExerciceBienaymeTchebychevPourcentVersIntervalle | ExerciceBienaymeTchebychevNombreVersIntervalle;
 
@@ -94,9 +87,7 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
           <Katex expression={texteAideIntervalleFinalNiveau1().latex} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(borneInf, borneSup)}>
         Valider

@@ -2,25 +2,11 @@ import { useState } from "react";
 import type { ExerciceColinearPointsParametre } from "../core/colinearite.types";
 import { diagnostiquerReductionAvecX } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_REDUCTION_AVEC_X } from "../moteur/sessionColinearite";
-import {
-  CONSIGNE_REDUCTION_AVEC_X,
-  LATEX_FORMULE_COLINEARITE_VECTORIELLE,
-  LATEX_VEC_U,
-  LATEX_VEC_V,
-  PLACEHOLDER_EQUATION_REDUITE,
-  RAPPEL_VECTORIEL_COLINEARITE_APRES,
-  RAPPEL_VECTORIEL_COLINEARITE_AVANT,
-  RAPPEL_VECTORIEL_COLINEARITE_ENTRE,
-  RAPPEL_VECTORIEL_COLINEARITE_FIN,
-  consigneGlobaleColinearite,
-  etatActuelReductionAvecX,
-  formatTermesEnoncePointsParametreLatex,
-  formuleSubstitueeReductionLatex,
-  libelleBoutonAide,
-} from "../ui/formatColinearite";
+import { CONSIGNE_REDUCTION_AVEC_X, LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, etatActuelReductionAvecX, formatTermesEnoncePointsParametreLatex, formuleSubstitueeReductionLatex } from "../ui/formatColinearite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
@@ -90,9 +76,7 @@ export function EtapeReductionAvecXColinearite({ exercice, tentativesUtilisees, 
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_REDUCTION_AVEC_X} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_REDUCTION_AVEC_X)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REDUCTION_AVEC_X} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

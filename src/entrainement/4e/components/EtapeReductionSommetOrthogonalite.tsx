@@ -2,34 +2,11 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangleParametre, Sommet } from "../core/orthogonalite.types";
 import { diagnostiquerReductionSommet } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import {
-  LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE,
-  LATEX_PIEGE_B_EQUATION,
-  LATEX_PIEGE_B_SEUL,
-  LATEX_PIEGE_C_EQUATION_1,
-  LATEX_PIEGE_C_EQUATION_2,
-  LATEX_VEC_U,
-  LATEX_VEC_V,
-  PLACEHOLDER_EQUATION_REDUITE,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_APRES,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_FIN,
-  TEXTE_AIDE_PIEGE_B_APRES,
-  TEXTE_AIDE_PIEGE_B_AVANT,
-  TEXTE_AIDE_PIEGE_B_ENTRE,
-  TEXTE_AIDE_PIEGE_C_APRES,
-  TEXTE_AIDE_PIEGE_C_AVANT,
-  TEXTE_AIDE_PIEGE_C_ENTRE,
-  consigneGlobaleOrthogonalite,
-  etatActuelReductionSommet,
-  formatTermesEnonceTriangleParametreLatex,
-  formuleSubstitueeSommetTriangleParametreLatex,
-  libelleBoutonAide,
-} from "../ui/formatOrthogonalite";
+import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_PIEGE_B_EQUATION, LATEX_PIEGE_B_SEUL, LATEX_PIEGE_C_EQUATION_1, LATEX_PIEGE_C_EQUATION_2, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, TEXTE_AIDE_PIEGE_B_APRES, TEXTE_AIDE_PIEGE_B_AVANT, TEXTE_AIDE_PIEGE_B_ENTRE, TEXTE_AIDE_PIEGE_C_APRES, TEXTE_AIDE_PIEGE_C_AVANT, TEXTE_AIDE_PIEGE_C_ENTRE, consigneGlobaleOrthogonalite, etatActuelReductionSommet, formatTermesEnonceTriangleParametreLatex, formuleSubstitueeSommetTriangleParametreLatex } from "../ui/formatOrthogonalite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
@@ -129,9 +106,7 @@ export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentatives
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

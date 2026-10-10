@@ -11,6 +11,7 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { MafsGraphFonctionsReference } from "./MafsGraphFonctionsReference";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceFonctionReference;
@@ -237,9 +238,7 @@ export function EtapeFonctionsReferenceExercice({
         </p>
       )}
 
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       <button
         type="button"
         className="btn btn-primary"

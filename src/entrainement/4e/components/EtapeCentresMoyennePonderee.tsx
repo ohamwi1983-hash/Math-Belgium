@@ -3,21 +3,12 @@ import type { ExerciceMoyennePondereeClasses } from "../core/moyennePonderee.typ
 import type { ReponseCentres } from "../moteur/verificationMoyennePonderee";
 import { evaluerCentres } from "../moteur/verificationMoyennePonderee";
 import { NIVEAU_AIDE_MAX_CENTRES } from "../moteur/sessionMoyennePonderee";
-import {
-  INDEX_LIGNE_EXEMPLE,
-  LABEL_EFFECTIF_NI,
-  LABEL_VALEUR_XI,
-  PLACEHOLDER_CENTRE,
-  consigneCentres,
-  formatClasseTexte,
-  libelleBoutonAide,
-  texteAideCentresNiveau1,
-  texteAideCentresNiveau2,
-} from "../ui/formatMoyennePonderee";
+import { INDEX_LIGNE_EXEMPLE, LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_CENTRE, consigneCentres, formatClasseTexte, texteAideCentresNiveau1, texteAideCentresNiveau2 } from "../ui/formatMoyennePonderee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMoyennePonderee } from "./EnonceMoyennePonderee";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMoyennePondereeClasses;
@@ -110,9 +101,7 @@ export function EtapeCentresMoyennePonderee({ exercice, tentativesUtilisees, ten
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CENTRES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CENTRES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CENTRES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeurs)}>
         Valider

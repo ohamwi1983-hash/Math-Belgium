@@ -4,21 +4,12 @@ import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDev
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  CONSIGNE_GENERALE_CENTRE_RAYON,
-  PLACEHOLDER_COORDONNEE,
-  PLACEHOLDER_RAYON,
-  TEXTE_AIDE_CENTRE_RAYON_NIVEAU1,
-  formatEquationDeveloppeeLatex,
-  formatEquationReduiteLatex,
-  formatEtatActuelCompletionLatex,
-  libelleBoutonAide,
-  segmentsConsigneCentreRayon,
-} from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, TEXTE_AIDE_CENTRE_RAYON_NIVEAU1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, formatEtatActuelCompletionLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
@@ -113,9 +104,7 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CENTRE_RAYON} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CENTRE_RAYON)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CENTRE_RAYON} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

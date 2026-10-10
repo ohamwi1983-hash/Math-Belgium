@@ -4,18 +4,7 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_EQUATION_B } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerEquationB } from "../moteur/verificationDistanceDroite";
-import {
-  COULEUR_B,
-  COULEUR_D,
-  COULEUR_P,
-  LABEL_CHAMP_EQUATION_B,
-  PLACEHOLDER_EQUATION,
-  calculerEtatActuelDistanceDroite,
-  formatAideEquationBNiveau2Latex,
-  libelleBoutonAide,
-  segmentsAideEquationBNiveau1,
-  segmentsConsigneEquationB,
-} from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, LABEL_CHAMP_EQUATION_B, PLACEHOLDER_EQUATION, calculerEtatActuelDistanceDroite, formatAideEquationBNiveau2Latex, segmentsAideEquationBNiveau1, segmentsConsigneEquationB } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -24,6 +13,7 @@ import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
@@ -99,9 +89,7 @@ export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAt
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_EQUATION_B} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_EQUATION_B)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION_B} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

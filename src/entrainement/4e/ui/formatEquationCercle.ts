@@ -12,7 +12,7 @@
  */
 import type { ExerciceEquationCercle, VarianteEquationCercle } from "../core/equationCercle.types";
 
-export { formatPointLatex, libelleBoutonAide } from "./formatEquationDroite";
+export { formatPointLatex } from "./formatEquationDroite";
 
 export const LIBELLE_VARIANTE: Record<VarianteEquationCercle, string> = {
   rayon_direct: "Rayon lu directement sur la grille",

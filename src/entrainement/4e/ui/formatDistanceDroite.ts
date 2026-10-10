@@ -30,19 +30,19 @@
  * directement en texte brut (aucun formatage du tout, pas seulement décimal) — corrigé pour
  * réutiliser `formatPointLatex`.
  *
- * `formatPointLatex`/`libelleBoutonAide` réutilisées directement depuis `formatEquationDroite.ts` —
- * jamais dupliquées (même style que `formatRelationsDroites.ts`/`formatLectureGraphiqueDroite.ts`/
+ * `formatPointLatex` réutilisée directement depuis `formatEquationDroite.ts` —
+ * jamais dupliquée (même style que `formatRelationsDroites.ts`/`formatLectureGraphiqueDroite.ts`/
  * `formatConstructionDroite.ts`).
  */
 import type { ExerciceDistanceDroite, ExerciceDistanceParalleles, VarianteDistanceDroite } from "../core/distanceDroite.types";
 import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
-import { formatEquationImpliciteLatex, formatPointLatex, libelleBoutonAide } from "./formatEquationDroite";
+import { formatEquationImpliciteLatex, formatPointLatex } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
 import type { FragmentConsigne } from "./formatRelationsDroites";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION } from "./formatRelationsDroites";
 
-export { formatPointLatex, libelleBoutonAide, PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION };
+export { formatPointLatex, PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION };
 export type { FragmentConsigne };
 
 function texte(valeur: string): FragmentConsigne {

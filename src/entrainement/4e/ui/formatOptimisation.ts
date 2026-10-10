@@ -410,11 +410,6 @@ export function libellePositionOptimum(exercice: ExerciceOptimisation): string {
 // Divers.
 // ============================================================================
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 export function libelleFamilleOptimisation(famille: FamilleOptimisation): string {
   return CATALOGUE_FAMILLES.find((f) => f.id === famille)?.label ?? famille;
 }

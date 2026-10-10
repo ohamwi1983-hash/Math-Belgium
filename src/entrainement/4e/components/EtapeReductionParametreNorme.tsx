@@ -2,17 +2,11 @@ import { useState } from "react";
 import type { ExerciceParametreNorme } from "../core/normeDistance.types";
 import { diagnostiquerReductionParametreNorme } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import {
-  FORMULE_GENERALE_NORME_PARAMETRE_LATEX,
-  PLACEHOLDER_EQUATION_PARAMETRE,
-  formatAideNormeSubstitueeParametreLatex,
-  formatTermesEnonceParametreLatex,
-  libelleBoutonAide,
-  segmentsConsigneParametre,
-} from "../ui/formatNormeDistance";
+import { FORMULE_GENERALE_NORME_PARAMETRE_LATEX, PLACEHOLDER_EQUATION_PARAMETRE, formatAideNormeSubstitueeParametreLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceParametreNorme;
@@ -77,9 +71,7 @@ export function EtapeReductionParametreNorme({ exercice, tentativesUtilisees, te
         </div>
       )}
       {max > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, max)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>

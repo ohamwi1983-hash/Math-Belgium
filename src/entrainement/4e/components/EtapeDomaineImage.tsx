@@ -10,6 +10,7 @@ import { calculerCourbeAxeSommet, calculerSketchAxeSommet, calculerSurlignageImf
 import { SketchAxeSommet } from "./SketchAxeSommet";
 import { Katex } from "./Katex";
 import { formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -67,9 +68,7 @@ export function EtapeDomaineImage({
           <Katex expression={apercu} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       <button
         type="button"
         className="btn btn-primary"

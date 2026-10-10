@@ -352,8 +352,3 @@ export function placeholderReduction(exercice: ExerciceCombinaisonVecteurs): str
 export function libelleVarianteCombinaisonVecteurs(variante: VarianteCombinaisonVecteurs): string {
   return CATALOGUE_VARIANTES.find((v) => v.id === variante)?.label ?? variante;
 }
-
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}

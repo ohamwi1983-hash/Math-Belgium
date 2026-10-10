@@ -3,17 +3,11 @@ import type { ExerciceIsocele } from "../core/normeDistance.types";
 import { evaluerConstructionIsocele } from "../moteur/verificationNormeDistance";
 import type { ReponseConstructionIsocele } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import {
-  CONSIGNE_GENERALE_ISOCELE,
-  PLACEHOLDER_COMPOSANTE,
-  formatAideVecteurABNiveau1Latex,
-  formatAideVecteurABNiveau2Latex,
-  formatTermesDonneesIsoceleLatex,
-  libelleBoutonAide,
-} from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_COMPOSANTE, formatAideVecteurABNiveau1Latex, formatAideVecteurABNiveau2Latex, formatTermesDonneesIsoceleLatex } from "../ui/formatNormeDistance";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceIsocele;
@@ -114,9 +108,7 @@ export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentat
         </div>
       )}
       {max > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, max)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>

@@ -1,17 +1,9 @@
 /**
  * Couche présentation — "Lecture graphique — équation d'une droite". Consignes/aides par variante,
  * dérivées uniquement des champs du contrat — jamais recalculées différemment côté vérification.
- *
- * `libelleBoutonAide` dupliquée (jamais importée) — même petite fonction pure répliquée dans 17+
- * fichiers `formatXxx.ts` du projet.
  */
 import type { ExerciceLectureGraphiqueDroite, VarianteLectureGraphiqueDroite } from "../core/lectureGraphiqueDroite.types";
 import { formatEquationImpliciteLatex, formatRepresentationParametriqueLatex } from "./formatEquationDroite";
-
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
 
 /** Reformulation `promptcorrectionsgen43gen45gen47.md`, C.1 — cohérence terminologique avec le
  * générateur 42 ("les équations paramétriques", jamais "point + vecteur directeur", que la

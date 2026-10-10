@@ -4,19 +4,7 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_DISTANCE_PQ } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerDistance } from "../moteur/verificationDistanceDroite";
-import {
-  COULEUR_B,
-  COULEUR_D,
-  COULEUR_P,
-  COULEUR_Q,
-  CONSIGNE_DISTANCE_PQ,
-  FORMULE_GENERALE_DISTANCE_PQ_LATEX,
-  LABEL_DISTANCE_PQ,
-  PLACEHOLDER_DISTANCE_PQ,
-  calculerEtatActuelDistanceDroite,
-  formatAideDistancePQNiveau2Latex,
-  libelleBoutonAide,
-} from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_DISTANCE_PQ, FORMULE_GENERALE_DISTANCE_PQ_LATEX, LABEL_DISTANCE_PQ, PLACEHOLDER_DISTANCE_PQ, calculerEtatActuelDistanceDroite, formatAideDistancePQNiveau2Latex } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -24,6 +12,7 @@ import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
@@ -104,9 +93,7 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_DISTANCE_PQ} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_DISTANCE_PQ)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DISTANCE_PQ} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

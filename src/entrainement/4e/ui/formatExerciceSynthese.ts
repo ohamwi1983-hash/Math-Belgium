@@ -37,11 +37,6 @@ export function libelleVarianteExerciceSynthese(variante: VarianteExerciceSynthe
   return LIBELLES_VARIANTE[variante];
 }
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 export const LABEL_XBAR = "\\bar{x}";
 export const LABEL_SIGMA = "\\sigma";
 

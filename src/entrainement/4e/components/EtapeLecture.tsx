@@ -3,23 +3,14 @@ import type { ExerciceBoiteMoustachesLecture } from "../core/boiteMoustaches.typ
 import type { ReponseLecture } from "../moteur/verificationBoiteMoustaches";
 import { diagnostiquerLecture } from "../moteur/verificationBoiteMoustaches";
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
-import {
-  LABEL_Q1,
-  LABEL_Q2,
-  LABEL_Q3,
-  LABEL_X_MAX,
-  LABEL_X_MIN,
-  libelleBoutonAide,
-  segmentsAideLectureNiveau1,
-  segmentsAideLectureNiveau2,
-  segmentsConsigneLecture,
-} from "../ui/formatBoiteMoustaches";
+import { LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN, segmentsAideLectureNiveau1, segmentsAideLectureNiveau2, segmentsConsigneLecture } from "../ui/formatBoiteMoustaches";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceBoiteMoustachesLecture;
@@ -87,9 +78,7 @@ export function EtapeLecture({ exercice, tentativesUtilisees, tentativesMax, niv
           </p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
         Valider

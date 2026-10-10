@@ -2,11 +2,12 @@ import { useState } from "react";
 import type { ExerciceBoiteMoustachesComparaison } from "../core/boiteMoustaches.types";
 import { verifierComparaisonDispersions } from "../moteur/verificationBoiteMoustaches";
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
-import { libelleBoutonAide, segmentsAideComparaisonDispersion, segmentsConsigneComparaisonDispersions } from "../ui/formatBoiteMoustaches";
+import { segmentsAideComparaisonDispersion, segmentsConsigneComparaisonDispersions } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceBoiteMoustachesComparaison;
@@ -66,9 +67,7 @@ export function EtapeComparaisonDispersions({ exercice, tentativesUtilisees, ten
           </p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
         Valider

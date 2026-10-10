@@ -1,20 +1,10 @@
 import { useState } from "react";
 import type { DirectionCandidate, ExerciceOmbreSoleilDirectionInconnue } from "../core/ombreSoleil.types";
 import { NIVEAU_AIDE_MAX_DIRECTION_INCONNUE } from "../moteur/sessionOmbreSoleil";
-import {
-  apercuDirection,
-  CONSIGNE_DIRECTION_INCONNUE,
-  libelleBoutonAide,
-  libelleCandidat,
-  ordreAffichageCandidats,
-  pointSommetPiquet,
-  segmentPiquet,
-  solidePourAffichage,
-  TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU1,
-  TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2,
-} from "../ui/formatOmbreSoleil";
+import { apercuDirection, CONSIGNE_DIRECTION_INCONNUE, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU1, TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2 } from "../ui/formatOmbreSoleil";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOmbreSoleilDirectionInconnue;
@@ -73,9 +63,7 @@ export function EtapeDirectionInconnue({ exercice, tentativesUtilisees, tentativ
           {niveauAide >= 2 && <p>{TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
         Valider

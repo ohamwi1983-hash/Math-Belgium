@@ -3,6 +3,7 @@ import { calculerAideCandidats, calculerAideProjections, calculerAideQuadrants }
 import { texteAideQuadrants } from "../ui/formatQuelAngle";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { CercleTrigBase } from "./CercleTrigBase";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceQuelAngle;
@@ -97,9 +98,7 @@ export function AideQuelAngle({ exercice, aideActivee, onActiverAide }: Props) {
           </CercleTrigBase>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
     </div>
   );
 }

@@ -3,20 +3,12 @@ import type { ExerciceHistogramme } from "../core/histogramme.types";
 import type { ReponseClassement } from "../moteur/verificationHistogramme";
 import { evaluerClassement } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_CLASSEMENT } from "../moteur/sessionHistogramme";
-import {
-  LABEL_CLASSE_XI,
-  LABEL_EFFECTIF_NI,
-  PLACEHOLDER_EFFECTIF_CLASSE,
-  consigneClassement,
-  formatClasseTexte,
-  libelleBoutonAide,
-  texteAideClassementNiveau1,
-  texteAideClassementNiveau2,
-} from "../ui/formatHistogramme";
+import { LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, PLACEHOLDER_EFFECTIF_CLASSE, consigneClassement, formatClasseTexte, texteAideClassementNiveau1, texteAideClassementNiveau2 } from "../ui/formatHistogramme";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceHistogramme } from "./EnonceHistogramme";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -123,9 +115,7 @@ export function EtapeClassementHistogramme({ exercice, tentativesUtilisees, tent
           {niveauAide >= 2 && <p>{texteAideClassementNiveau2(exercice, evaluation)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CLASSEMENT} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CLASSEMENT)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CLASSEMENT} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeurs)}>
         Valider

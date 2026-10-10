@@ -2,22 +2,13 @@ import { useState } from "react";
 import type { ExerciceEquationParabole } from "../core/equationParabole.types";
 import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionEquationParabole";
 import { diagnostiquerEquation } from "../moteur/verificationEquationParabole";
-import {
-  CONSIGNE_EQUATION,
-  CONSIGNE_GENERALE_EQUATION_PARABOLE,
-  PLACEHOLDER_EQUATION_HORIZONTAL,
-  PLACEHOLDER_EQUATION_VERTICAL,
-  formatAideEquationNiveau2Latex,
-  formatFoyerLatex,
-  formatSommetLatex,
-  libelleBoutonAide,
-  segmentsAideEquationNiveau1,
-} from "../ui/formatEquationParabole";
+import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_PARABOLE, PLACEHOLDER_EQUATION_HORIZONTAL, PLACEHOLDER_EQUATION_VERTICAL, formatAideEquationNiveau2Latex, formatFoyerLatex, formatSommetLatex, segmentsAideEquationNiveau1 } from "../ui/formatEquationParabole";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationParaboleGraph } from "./EquationParaboleGraph";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationParabole;
@@ -72,9 +63,7 @@ export function EtapeEquationEquationParabole({ exercice, tentativesUtilisees, t
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_EQUATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_EQUATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

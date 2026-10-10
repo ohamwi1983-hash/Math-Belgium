@@ -3,19 +3,12 @@ import type { ExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.ty
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { diagnostiquerComposantes, diagnostiquerX, diagnostiquerY } from "../moteur/verificationCombinaisonVecteurs";
 import { NIVEAU_AIDE_MAX_COMPOSANTES } from "../moteur/sessionCombinaisonVecteurs";
-import {
-  formatLabelXLatex,
-  formatLabelYLatex,
-  formatResultatLatex,
-  formatSommeAxesLatex,
-  formatSubstitutionLatex,
-  formatTermesDonneesLatex,
-  libelleBoutonAide,
-} from "../ui/formatCombinaisonVecteurs";
+import { formatLabelXLatex, formatLabelYLatex, formatResultatLatex, formatSommeAxesLatex, formatSubstitutionLatex, formatTermesDonneesLatex } from "../ui/formatCombinaisonVecteurs";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceCombinaisonVecteurs;
@@ -122,9 +115,7 @@ export function EtapeComposantesCombinaisonVecteurs({
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_COMPOSANTES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_COMPOSANTES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPOSANTES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ x, y })}>
         Valider

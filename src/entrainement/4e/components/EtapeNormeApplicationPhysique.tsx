@@ -6,7 +6,6 @@ import {
   segmentsAideNormeNiveau1,
   segmentsConsigneNorme,
 } from "../ui/formatApplicationPhysique";
-import { libelleBoutonAide } from "../ui/formatEquationDroite";
 import { diagnostiquerNorme } from "../moteur/verificationApplicationPhysique";
 import { NIVEAU_AIDE_MAX_NORME } from "../moteur/sessionApplicationPhysique";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
@@ -16,6 +15,7 @@ import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { RenduFragments } from "./RenduFragments";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
@@ -87,9 +87,7 @@ export function EtapeNormeApplicationPhysique({
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_NORME} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_NORME)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_NORME} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
         Valider

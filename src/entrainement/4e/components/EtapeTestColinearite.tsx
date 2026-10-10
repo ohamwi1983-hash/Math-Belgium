@@ -3,31 +3,12 @@ import type { ExerciceColinearPoints, ExerciceColinearVecteurs } from "../core/c
 import { diagnostiquerCritereTest } from "../moteur/verificationColinearite";
 import type { ReponseTest } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_TEST } from "../moteur/sessionColinearite";
-import {
-  LATEX_FORMULE_COLINEARITE_VECTORIELLE,
-  LATEX_VEC_U,
-  LATEX_VEC_V,
-  LIBELLES_OUI_NON,
-  PLACEHOLDER_CRITERE,
-  QUESTION_ALIGNEMENT_POINTS,
-  QUESTION_COLINEARITE_VECTEURS_APRES,
-  QUESTION_COLINEARITE_VECTEURS_AVANT,
-  QUESTION_COLINEARITE_VECTEURS_ENTRE,
-  RAPPEL_VECTORIEL_COLINEARITE_APRES,
-  RAPPEL_VECTORIEL_COLINEARITE_AVANT,
-  RAPPEL_VECTORIEL_COLINEARITE_ENTRE,
-  RAPPEL_VECTORIEL_COLINEARITE_FIN,
-  consigneGlobaleColinearite,
-  etatActuelTestPoints,
-  formatEnonceLatex,
-  formatTermesEnoncePointsLatex,
-  formuleSubstitueeTestLatex,
-  libelleBoutonAide,
-} from "../ui/formatColinearite";
+import { LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ALIGNEMENT_POINTS, QUESTION_COLINEARITE_VECTEURS_APRES, QUESTION_COLINEARITE_VECTEURS_AVANT, QUESTION_COLINEARITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, etatActuelTestPoints, formatEnonceLatex, formatTermesEnoncePointsLatex, formuleSubstitueeTestLatex } from "../ui/formatColinearite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceColinearVecteurs | ExerciceColinearPoints;
@@ -147,9 +128,7 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_TEST} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_TEST)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TEST} onActiverAide={onActiverAide} />
 
       <button
         type="button"

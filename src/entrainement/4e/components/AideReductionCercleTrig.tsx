@@ -1,6 +1,7 @@
 import type { AngleSurCercle } from "../core/cercleTrigonometrique.types";
 import { calculerTrajetCercleTrig } from "../ui/cercleTrigTrajet";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: AngleSurCercle;
@@ -28,9 +29,7 @@ export function AideReductionCercleTrig({ exercice, aideActivee, onActiverAide }
           ariaLabel={`Cercle trigonométrique montrant le trajet de l'angle ${exercice.angleDepart}° jusqu'à sa position réduite`}
         />
       )}
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
     </div>
   );
 }

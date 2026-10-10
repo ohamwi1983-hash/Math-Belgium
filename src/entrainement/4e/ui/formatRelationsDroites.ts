@@ -4,9 +4,9 @@
  * l'énoncé, consignes/textes d'aide par écran — dérivés uniquement des champs déjà présents sur le
  * contrat, jamais recalculés différemment côté vérification.
  *
- * `formatPointLatex`/`formatVecteurLatex`/`libelleBoutonAide` sont réutilisées directement depuis
+ * `formatPointLatex`/`formatVecteurLatex` sont réutilisées directement depuis
  * `formatEquationDroite.ts` (import + re-export, même style que "Construction graphique — tracer
- * une droite depuis son équation") — ces trois helpers sont purement stateless/présentationnels,
+ * une droite depuis son équation") — ces deux helpers sont purement stateless/présentationnels,
  * jamais dupliqués pour ce générateur. `FragmentConsigne`/`texte`/`latex` (consigne générale, point
  * 1 de `promptgen45modifications.md`) réutilisent le même patron que
  * `segmentsConsigneGeneraleEquationDroite` — type importé, helpers `texte`/`latex` dupliqués (non
@@ -15,18 +15,9 @@
  */
 import type { CritereRelation, ExerciceRelationsDroites, FormeSortieRelation } from "../core/relationsDroites.types";
 import type { Composantes } from "../core/vecteur.types";
-import {
-  type FragmentConsigne,
-  formatEquationExpliciteXLatex,
-  formatEquationExpliciteYLatex,
-  formatEquationImpliciteLatex,
-  formatPointLatex,
-  formatRepresentationParametriqueLatex,
-  formatVecteurLatex,
-  libelleBoutonAide,
-} from "./formatEquationDroite";
+import { type FragmentConsigne, formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatVecteurLatex } from "./formatEquationDroite";
 
-export { formatPointLatex, formatVecteurLatex, libelleBoutonAide };
+export { formatPointLatex, formatVecteurLatex };
 export type { FragmentConsigne };
 
 function texte(valeur: string): FragmentConsigne {

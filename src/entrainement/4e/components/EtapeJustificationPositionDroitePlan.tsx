@@ -1,17 +1,10 @@
 import { useState } from "react";
 import type { ExercicePositionDroitePlan, ReponseJustificationPositionDroitePlan } from "../core/positionDroitePlan.types";
 import { NIVEAU_AIDE_MAX_JUSTIFICATION } from "../moteur/sessionPositionDroitePlan";
-import {
-  LIBELLE_CLASSIFICATION,
-  consigneJustification,
-  libelleBoutonAide,
-  libelleCandidatSecante,
-  libelleDroite,
-  libellePlan,
-  texteAideJustification,
-} from "../ui/formatPositionDroitePlan";
+import { LIBELLE_CLASSIFICATION, consigneJustification, libelleCandidatSecante, libelleDroite, libellePlan, texteAideJustification } from "../ui/formatPositionDroitePlan";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExercicePositionDroitePlan;
@@ -123,9 +116,7 @@ export function EtapeJustificationPositionDroitePlan({ exercice, tentativesUtili
           <p>{texteAideJustification(exercice.classification)}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
         Valider

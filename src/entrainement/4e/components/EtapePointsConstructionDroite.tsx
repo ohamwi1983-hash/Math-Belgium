@@ -4,17 +4,10 @@ import { NIVEAU_AIDE_MAX_POINTS } from "../moteur/sessionConstructionDroite";
 import { diagnostiquerPoints } from "../moteur/verificationConstructionDroite";
 import type { ReponsePoints } from "../moteur/verificationConstructionDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  PLACEHOLDER_COORDONNEE,
-  consigneGeneraleTrace,
-  consignePoints,
-  formatAidePointsNiveau2Latex,
-  formatEnonceLatex,
-  libelleBoutonAide,
-  texteAidePointsNiveau1,
-} from "../ui/formatConstructionDroite";
+import { PLACEHOLDER_COORDONNEE, consigneGeneraleTrace, consignePoints, formatAidePointsNiveau2Latex, formatEnonceLatex, texteAidePointsNiveau1 } from "../ui/formatConstructionDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
@@ -100,9 +93,7 @@ export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, t
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_POINTS} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_POINTS)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POINTS} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

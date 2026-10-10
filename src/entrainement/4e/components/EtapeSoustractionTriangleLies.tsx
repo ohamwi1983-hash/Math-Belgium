@@ -3,18 +3,12 @@ import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerSoustraction } from "../moteur/verificationTriangleLies";
 import type { ReponseSoustractionTriangleLies } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_SOUSTRACTION } from "../moteur/sessionTriangleLies";
-import {
-  consigneSoustraction,
-  formatDistancesParcouruesTexte,
-  formatEtatActuelPontConfirme,
-  libelleBoutonAide,
-  texteAideSoustractionNiveau1,
-  texteAideSoustractionNiveau2,
-} from "../ui/formatTriangleLies";
+import { consigneSoustraction, formatDistancesParcouruesTexte, formatEtatActuelPontConfirme, texteAideSoustractionNiveau1, texteAideSoustractionNiveau2 } from "../ui/formatTriangleLies";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -81,9 +75,7 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
           {niveauAide >= 2 && <p>{texteAideSoustractionNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SOUSTRACTION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SOUSTRACTION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOUSTRACTION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
         Valider

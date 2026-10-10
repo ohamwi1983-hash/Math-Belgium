@@ -6,6 +6,7 @@ import { celluleEstErronee, cyclerValeurCellule, grilleEstComplete } from "../ui
 import { ordreLignesGrille } from "../generateurs/signesProduit/grille";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceSignesProduit;
@@ -143,9 +144,7 @@ export function EtapeGrilleSignes({
             impair donne un produit négatif.
           </p>
         )}
-        <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-          {aideActivee ? "Aide utilisée" : "Aide"}
-        </button>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       </div>
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
         Valider

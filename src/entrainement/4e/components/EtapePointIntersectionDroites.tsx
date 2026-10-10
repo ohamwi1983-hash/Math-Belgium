@@ -4,10 +4,11 @@ import { NIVEAU_AIDE_MAX_POINT } from "../moteur/sessionIntersectionDroites";
 import { diagnostiquerPoint, type ReponsePoint } from "../moteur/verificationIntersectionDroites";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import { CONSIGNE_GENERALE_INTERSECTION, formatAidePointNiveau2Latex, formatLignesEnonce, libelleBoutonAide, segmentsConsignePoint, texteAidePointNiveau1 } from "../ui/formatIntersectionDroites";
+import { CONSIGNE_GENERALE_INTERSECTION, formatAidePointNiveau2Latex, formatLignesEnonce, segmentsConsignePoint, texteAidePointNiveau1 } from "../ui/formatIntersectionDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
@@ -129,9 +130,7 @@ export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, t
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_POINT} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_POINT)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POINT} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

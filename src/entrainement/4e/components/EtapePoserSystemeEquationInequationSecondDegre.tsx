@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerSystemeHypothetique, diagnostiquerSystemeReel } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_POSER_SYSTEME } from "../moteur/sessionEquationInequationSecondDegre";
-import { consignePoserSysteme, libelleBoutonAide, texteAidePoserSystemeNiveau1, texteAidePoserSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { consignePoserSysteme, texteAidePoserSystemeNiveau1, texteAidePoserSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -64,9 +65,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_POSER_SYSTEME} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_POSER_SYSTEME)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSER_SYSTEME} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ reel, hypothetique })}>
         Valider

@@ -8,6 +8,7 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: Exercice;
@@ -165,9 +166,7 @@ export function EtapeChamp1({
       {onActiverAide && (
         <div>
           {aideActivee && <p className="prompt-text">{texteAideChamp1(exercice.categorie)}</p>}
-          <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-            {aideActivee ? "Aide utilisée" : "Aide"}
-          </button>
+          <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
         </div>
       )}
       <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>

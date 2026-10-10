@@ -3,19 +3,13 @@ import type { ExerciceMoyennePonderee } from "../core/moyennePonderee.types";
 import type { ReponseQuotient } from "../moteur/verificationMoyennePonderee";
 import { diagnostiquerQuotient } from "../moteur/verificationMoyennePonderee";
 import { NIVEAU_AIDE_MAX_QUOTIENT } from "../moteur/sessionMoyennePonderee";
-import {
-  LABEL_MOYENNE_BARRE,
-  PLACEHOLDER_QUOTIENT,
-  consigneQuotient,
-  formatEtatActuelSommesLatex,
-  libelleBoutonAide,
-  texteAideQuotientNiveau1,
-} from "../ui/formatMoyennePonderee";
+import { LABEL_MOYENNE_BARRE, PLACEHOLDER_QUOTIENT, consigneQuotient, formatEtatActuelSommesLatex, texteAideQuotientNiveau1 } from "../ui/formatMoyennePonderee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMoyennePonderee } from "./EnonceMoyennePonderee";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMoyennePonderee;
@@ -72,9 +66,7 @@ export function EtapeQuotientMoyennePonderee({ exercice, tentativesUtilisees, te
           <Katex expression={aide1.latex} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_QUOTIENT} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_QUOTIENT)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_QUOTIENT} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

@@ -23,7 +23,6 @@ import { formatSommeTermes } from "./formatEquation";
 import type { FragmentConsigne } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
 
-export { libelleBoutonAide } from "./formatEquationDroite";
 
 function texte(valeur: string): FragmentConsigne {
   return { type: "texte", valeur };

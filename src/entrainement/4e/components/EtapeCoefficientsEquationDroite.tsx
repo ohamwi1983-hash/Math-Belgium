@@ -9,19 +9,13 @@ import {
 } from "../moteur/verificationEquationDroite";
 import type { ReponseCoefficients } from "../moteur/typesEquationDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  LATEX_GABARIT_FORME,
-  consigneCoefficients,
-  formatAideCoefficientsNiveau2Latex,
-  formatEnonceLatex,
-  formatEtatActuelPointVecteurLatex,
-  libelleBoutonAide,
-} from "../ui/formatEquationDroite";
+import { LATEX_GABARIT_FORME, consigneCoefficients, formatAideCoefficientsNiveau2Latex, formatEnonceLatex, formatEtatActuelPointVecteurLatex } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationDroite;
@@ -150,9 +144,7 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_COEFFICIENTS} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_COEFFICIENTS)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COEFFICIENTS} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

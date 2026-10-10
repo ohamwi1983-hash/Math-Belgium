@@ -1,22 +1,12 @@
 import { useState } from "react";
 import type { ExerciceTriangleQuelconque, UniteLongueur } from "../core/triangleQuelconque.types";
 import { diagnostiquerDonneeManquante } from "../moteur/verificationTriangleQuelconque";
-import {
-  consigneDonneeManquante,
-  estCote,
-  labelChampDonneeManquante,
-  libelleBoutonAide,
-  NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE,
-  OPTIONS_UNITE_LONGUEUR,
-  optionsCroquisDonneeManquante,
-  placeholderDonneeManquante,
-  textesAideDonneeManquante,
-  valeursTriangleSketchDonneeManquante,
-} from "../ui/formatTriangleQuelconque";
+import { consigneDonneeManquante, estCote, labelChampDonneeManquante, NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE, OPTIONS_UNITE_LONGUEUR, optionsCroquisDonneeManquante, placeholderDonneeManquante, textesAideDonneeManquante, valeursTriangleSketchDonneeManquante } from "../ui/formatTriangleQuelconque";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleQuelconque;
@@ -94,14 +84,7 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
           ))}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-aide"
-        disabled={niveauAide >= NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE}
-        onClick={onActiverAide}
-      >
-        {libelleBoutonAide(niveauAide, NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur, uniteChoisie)}>
         Valider

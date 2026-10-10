@@ -3,24 +3,13 @@ import type { ExerciceMedianeDiscrete } from "../core/mediane.types";
 import type { ReponseQ3 } from "../moteur/verificationMediane";
 import { diagnostiquerQ3 } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_Q3 } from "../moteur/sessionMediane";
-import {
-  LABEL_EFFECTIF_CUMULE_VI,
-  LABEL_EFFECTIF_NI,
-  LABEL_Q3,
-  LABEL_VALEUR_XI,
-  PLACEHOLDER_Q3,
-  PLACEHOLDER_SEUIL,
-  consigneQ3,
-  libelleBoutonAide,
-  surlignageSeuilTable,
-  texteAideQ3Niveau1,
-  texteAideQ3Niveau2,
-} from "../ui/formatMediane";
+import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_Q3, LABEL_VALEUR_XI, PLACEHOLDER_Q3, PLACEHOLDER_SEUIL, consigneQ3, surlignageSeuilTable, texteAideQ3Niveau1, texteAideQ3Niveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMedianeDiscrete;
@@ -112,9 +101,7 @@ export function EtapeQ3Mediane({ exercice, tentativesUtilisees, tentativesMax, n
           {niveauAide >= 2 && <p>{texteAideQ3Niveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_Q3} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_Q3)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_Q3} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ seuil, q3 })}>
         Valider

@@ -40,12 +40,6 @@ export type ExerciceOmbreSoleilBoucle = ExerciceOmbreSoleilObstacle | ExerciceOm
  * d'obstacle (toujours le sol seul, comportement historique inchangé).
  */
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  if (niveau === 0) return "Aide";
-  return "Aide supplémentaire";
-}
-
 /** Fisher-Yates — copie mélangée, jamais l'ordre canonique de `exercice.directionsCandidates`
  * (voir l'en-tête du fichier). */
 export function ordreAffichageCandidats(candidats: readonly DirectionCandidate[]): DirectionCandidate[] {

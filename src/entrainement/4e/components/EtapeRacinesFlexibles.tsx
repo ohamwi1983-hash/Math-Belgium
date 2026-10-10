@@ -6,6 +6,7 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { BoutonAide } from "./BoutonAide";
 
 type Choix = "pasDe" | "auMoins";
 
@@ -225,9 +226,7 @@ export function EtapeRacinesFlexibles({
       {onActiverAide && (
         <div>
           {aideActivee && <p className="prompt-text">{texteAide}</p>}
-          <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-            {aideActivee ? "Aide utilisée" : "Aide"}
-          </button>
+          <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
         </div>
       )}
 

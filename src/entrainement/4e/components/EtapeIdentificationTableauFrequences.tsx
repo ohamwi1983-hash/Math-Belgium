@@ -3,21 +3,12 @@ import type { ExerciceTableauFrequences } from "../core/tableauFrequences.types"
 import type { LigneIdentificationSaisie, ReponseIdentification } from "../moteur/verificationTableauFrequences";
 import { evaluerIdentification } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_IDENTIFICATION } from "../moteur/sessionTableauFrequences";
-import {
-  LABEL_EFFECTIF_NI,
-  LABEL_VALEUR_XI,
-  PLACEHOLDER_EFFECTIF,
-  PLACEHOLDER_VALEUR,
-  consigneIdentification,
-  libelleBoutonAide,
-  ligneExemple,
-  texteAideIdentificationNiveau1,
-  texteAideIdentificationNiveau2,
-} from "../ui/formatTableauFrequences";
+import { LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_EFFECTIF, PLACEHOLDER_VALEUR, consigneIdentification, ligneExemple, texteAideIdentificationNiveau1, texteAideIdentificationNiveau2 } from "../ui/formatTableauFrequences";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceTableauFrequences } from "./EnonceTableauFrequences";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -170,9 +161,7 @@ export function EtapeIdentificationTableauFrequences({ exercice, tentativesUtili
           {niveauAide >= 2 && <p>{texteAideIdentificationNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_IDENTIFICATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_IDENTIFICATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_IDENTIFICATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(lignes)}>
         Valider

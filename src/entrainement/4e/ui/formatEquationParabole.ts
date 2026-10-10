@@ -16,7 +16,6 @@ import type { ExerciceEquationParabole, OrientationParabole } from "../core/equa
 import type { Point } from "../core/vecteur.types";
 import type { FragmentConsigne } from "./formatEquationDroite";
 
-export { libelleBoutonAide } from "./formatEquationDroite";
 
 function texte(valeur: string): FragmentConsigne {
   return { type: "texte", valeur };

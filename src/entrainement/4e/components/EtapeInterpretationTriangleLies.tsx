@@ -2,18 +2,11 @@ import { useState } from "react";
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { verifierInterpretation } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionTriangleLies";
-import {
-  consigneInterpretation,
-  formatEtatActuelAnglesConfirmes,
-  formatEtatActuelCibleConfirme,
-  formatEtatActuelPontConfirme,
-  formatEtatActuelSoustractionConfirme,
-  libelleBoutonAide,
-  texteAideInterpretationNiveau1,
-} from "../ui/formatTriangleLies";
+import { consigneInterpretation, formatEtatActuelAnglesConfirmes, formatEtatActuelCibleConfirme, formatEtatActuelPontConfirme, formatEtatActuelSoustractionConfirme, texteAideInterpretationNiveau1 } from "../ui/formatTriangleLies";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -64,9 +57,7 @@ export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees,
           <p>{texteAideInterpretationNiveau1()}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_INTERPRETATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_INTERPRETATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_INTERPRETATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
         Valider

@@ -3,18 +3,12 @@ import type { ExerciceOptimisationModelisation } from "../core/optimisation.type
 import { diagnostiquerDomaine } from "../moteur/verificationOptimisation";
 import type { ReponseDomaine } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_DOMAINE } from "../moteur/sessionOptimisation";
-import {
-  consigneDomaine,
-  formatFonctionDeveloppeeLatex,
-  libelleBoutonAide,
-  texteAideDomaineNiveau1,
-  texteAideDomaineNiveau2,
-  texteAideDomaineNiveau3,
-} from "../ui/formatOptimisation";
+import { consigneDomaine, formatFonctionDeveloppeeLatex, texteAideDomaineNiveau1, texteAideDomaineNiveau2, texteAideDomaineNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
@@ -78,9 +72,7 @@ export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentat
           {niveauAide >= 3 && <p>{texteAideDomaineNiveau3(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_DOMAINE} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_DOMAINE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DOMAINE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
         Valider

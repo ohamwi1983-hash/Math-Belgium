@@ -54,11 +54,6 @@ export const PLACEHOLDER_QUOTIENT = "ex : 6,6";
  * l'activation de l'aide correspondante (`promptgen32modifications.md`, points 2 et 3). */
 export const INDEX_LIGNE_EXEMPLE = 0;
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 /** Une aide composée de deux lignes — une phrase de rappel en texte brut, suivie d'un fragment
  * LaTeX (formule, ou formule substituée) rendu par-dessous en bloc — jamais un unique bloc `\text`
  * monolithique (même précaution que le reste du projet contre le débordement horizontal mobile). */

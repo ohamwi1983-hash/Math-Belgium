@@ -1,27 +1,10 @@
 import { useState } from "react";
 import type { DirectionCandidate } from "../core/ombreSoleil.types";
 import { NIVEAU_AIDE_MAX_LOOP } from "../moteur/sessionOmbreSoleil";
-import {
-  apercuDirection,
-  apercuPoint,
-  CONSIGNE_POINT,
-  directionCorrecte,
-  elementsExemple,
-  elementsResolus,
-  type ExerciceOmbreSoleilBoucle,
-  itemBoucleCourant,
-  libelleBoutonAide,
-  libelleCandidat,
-  ordreAffichageCandidats,
-  pointSommetPiquet,
-  segmentPiquet,
-  solidePourAffichage,
-  TEXTE_AIDE_DIRECTION_NIVEAU1,
-  texteAideNiveau2SurfaceTouchee,
-  texteProgressionBoucle,
-} from "../ui/formatOmbreSoleil";
+import { apercuDirection, apercuPoint, CONSIGNE_POINT, directionCorrecte, elementsExemple, elementsResolus, type ExerciceOmbreSoleilBoucle, itemBoucleCourant, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_DIRECTION_NIVEAU1, texteAideNiveau2SurfaceTouchee, texteProgressionBoucle } from "../ui/formatOmbreSoleil";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOmbreSoleilBoucle;
@@ -90,9 +73,7 @@ export function EtapePointOmbre({ exercice, resolus, tentativesUtilisees, tentat
           {niveauAide >= 2 && <p>{texteAideNiveau2SurfaceTouchee(item.verite)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
         Valider

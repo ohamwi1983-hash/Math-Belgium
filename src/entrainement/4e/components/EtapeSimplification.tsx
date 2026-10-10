@@ -8,6 +8,7 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { FractionHeader } from "./FractionHeader";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   /** Requis sauf si expressionAffichee est fourni (voir plus bas) — sert uniquement au FractionHeader par défaut. */
@@ -153,9 +154,7 @@ export function EtapeSimplification({
         {aideActivee && (
           <p className="prompt-text">Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
         )}
-        <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-          {aideActivee ? "Aide utilisée" : "Aide"}
-        </button>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       </div>
       <button
         type="button"

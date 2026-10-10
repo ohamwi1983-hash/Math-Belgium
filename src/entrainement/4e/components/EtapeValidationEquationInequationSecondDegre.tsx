@@ -3,18 +3,12 @@ import type { ExerciceEquationInequationSecondDegre } from "../core/equationIneq
 import type { ReponseIntervalle } from "../moteur/verificationEquationInequationSecondDegre";
 import { diagnostiquerValidationInequation, verifierValidationEquation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_VALIDATION } from "../moteur/sessionEquationInequationSecondDegre";
-import {
-  consigneValidation,
-  formatDonneesAvecResolutionLatex,
-  libelleBoutonAide,
-  texteAideValidationNiveau1,
-  texteAideValidationNiveau2,
-  texteAideValidationNiveau3,
-} from "../ui/formatEquationInequationSecondDegre";
+import { consigneValidation, formatDonneesAvecResolutionLatex, texteAideValidationNiveau1, texteAideValidationNiveau2, texteAideValidationNiveau3 } from "../ui/formatEquationInequationSecondDegre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -51,9 +45,7 @@ export function EtapeValidationEquationInequationSecondDegre({
           {niveauAide >= 3 && <p>{texteAideValidationNiveau3(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_VALIDATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_VALIDATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_VALIDATION} onActiverAide={onActiverAide} />
     </>
   );
 

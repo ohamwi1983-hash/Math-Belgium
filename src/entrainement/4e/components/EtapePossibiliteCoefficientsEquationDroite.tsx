@@ -4,19 +4,13 @@ import type { ReponsePossibiliteCoefficients } from "../moteur/typesEquationDroi
 import { diagnostiquerPossibiliteCoefficients } from "../moteur/verificationEquationDroite";
 import { NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS } from "../moteur/sessionEquationDroite";
 import type { StatutVerification } from "../moteur/statutVerification";
-import {
-  formatAideNiveau2PossibiliteCoefficientsLatex,
-  formatEnonceLatex,
-  formatEtatActuelPointVecteurLatex,
-  latexGabaritPossibiliteCoefficients,
-  libelleBoutonAide,
-  segmentsConsignePossibiliteCoefficients,
-} from "../ui/formatEquationDroite";
+import { formatAideNiveau2PossibiliteCoefficientsLatex, formatEnonceLatex, formatEtatActuelPointVecteurLatex, latexGabaritPossibiliteCoefficients, segmentsConsignePossibiliteCoefficients } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationDroite;
@@ -105,14 +99,7 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
           )}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-aide"
-        disabled={choix === null || niveauAide >= NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS}
-        onClick={onActiverAide}
-      >
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS} onActiverAide={onActiverAide} disabledSupplementaire={choix === null} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => choix !== null && onValider({ choix, texte })}>
         Valider

@@ -3,18 +3,12 @@ import type { ExerciceConstructionDroite } from "../core/constructionDroite.type
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_TRACE } from "../moteur/sessionConstructionDroite";
 import { pointCorrespondAUneCible } from "../moteur/verificationConstructionDroite";
-import {
-  CONSIGNE_TRACE,
-  consigneGeneraleTrace,
-  formatEnonceLatex,
-  formatEtatActuelPointsLatex,
-  libelleBoutonAide,
-  texteAideTraceNiveau1,
-} from "../ui/formatConstructionDroite";
+import { CONSIGNE_TRACE, consigneGeneraleTrace, formatEnonceLatex, formatEtatActuelPointsLatex, texteAideTraceNiveau1 } from "../ui/formatConstructionDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConstructionDroiteGraph } from "./ConstructionDroiteGraph";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
@@ -73,9 +67,7 @@ export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentati
           <p>{texteAideTraceNiveau1(cible1)}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_TRACE} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_TRACE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TRACE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" onClick={() => onValider({ p1, p2 })}>
         Valider

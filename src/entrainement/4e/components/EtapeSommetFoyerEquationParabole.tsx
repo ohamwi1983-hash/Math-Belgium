@@ -4,17 +4,11 @@ import { NIVEAU_AIDE_MAX_SOMMET_FOYER } from "../moteur/sessionEquationParabole"
 import { diagnostiquerSommetFoyer } from "../moteur/verificationEquationParabole";
 import type { ReponseSommetFoyer } from "../moteur/verificationEquationParabole";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  CONSIGNE_GENERALE_EQUATION_PARABOLE,
-  CONSIGNE_SOMMET_FOYER,
-  PLACEHOLDER_COORDONNEE,
-  TEXTE_AIDE_SOMMET_FOYER_NIVEAU1,
-  TEXTE_AIDE_SOMMET_FOYER_NIVEAU2,
-  libelleBoutonAide,
-} from "../ui/formatEquationParabole";
+import { CONSIGNE_GENERALE_EQUATION_PARABOLE, CONSIGNE_SOMMET_FOYER, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_SOMMET_FOYER_NIVEAU1, TEXTE_AIDE_SOMMET_FOYER_NIVEAU2 } from "../ui/formatEquationParabole";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationParaboleGraph } from "./EquationParaboleGraph";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationParabole;
@@ -112,9 +106,7 @@ export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees
           {niveauAide >= 2 && <p>{TEXTE_AIDE_SOMMET_FOYER_NIVEAU2}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SOMMET_FOYER} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SOMMET_FOYER)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMET_FOYER} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

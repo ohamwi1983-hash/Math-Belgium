@@ -4,19 +4,11 @@ import { diagnostiquerResolution } from "../moteur/verificationLieuxGeometriques
 import type { ReponseResolutionLieuxGeometriques } from "../moteur/verificationLieuxGeometriques";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import {
-  CONSIGNE_GENERALE_RESOLUTION,
-  LIBELLE_AUCUN,
-  LIBELLE_AU_MOINS_UN,
-  formatEtatActuelSystemeLatex,
-  formatQuadratiqueSubstitutionLatex,
-  libelleBoutonAide,
-  segmentsAideResolutionNiveau1,
-  segmentsEnonce,
-} from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_RESOLUTION, LIBELLE_AUCUN, LIBELLE_AU_MOINS_UN, formatEtatActuelSystemeLatex, formatQuadratiqueSubstitutionLatex, segmentsAideResolutionNiveau1, segmentsEnonce } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 type Choix = "aucun" | "auMoinsUn";
 
@@ -154,9 +146,7 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= 2} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, 2)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>
         Valider

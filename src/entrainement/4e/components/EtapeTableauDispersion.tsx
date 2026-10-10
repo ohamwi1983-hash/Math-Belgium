@@ -3,24 +3,13 @@ import type { ExerciceDispersion } from "../core/dispersion.types";
 import type { ReponseTableauDispersion } from "../moteur/verificationDispersion";
 import { diagnostiquerTableauDispersion } from "../moteur/verificationDispersion";
 import { NIVEAU_AIDE_MAX_TABLEAU } from "../moteur/sessionDispersion";
-import {
-  INDEX_LIGNE_EXEMPLE,
-  LABEL_EFFECTIF_NI,
-  LABEL_PRODUIT,
-  LABEL_VALEUR_XI,
-  PLACEHOLDER_PRODUIT,
-  PLACEHOLDER_SOMME_N,
-  PLACEHOLDER_SOMME_PRODUIT,
-  consigneTableau,
-  libelleBoutonAide,
-  texteAideTableauNiveau1,
-  texteAideTableauNiveau2,
-} from "../ui/formatDispersion";
+import { INDEX_LIGNE_EXEMPLE, LABEL_EFFECTIF_NI, LABEL_PRODUIT, LABEL_VALEUR_XI, PLACEHOLDER_PRODUIT, PLACEHOLDER_SOMME_N, PLACEHOLDER_SOMME_PRODUIT, consigneTableau, texteAideTableauNiveau1, texteAideTableauNiveau2 } from "../ui/formatDispersion";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceDispersion } from "./EnonceDispersion";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDispersion;
@@ -138,9 +127,7 @@ export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativ
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_TABLEAU} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_TABLEAU)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TABLEAU} onActiverAide={onActiverAide} />
 
       <button
         type="button"

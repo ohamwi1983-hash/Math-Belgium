@@ -5,10 +5,10 @@ import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
 import { calculerAideCercleAnglesAssocies, fonctionCible, texteLabelQuestion } from "../ui/cercleAnglesAssociesAide";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { PLACEHOLDER_VALEUR_FINALE, texteAide2, texteAide3Intro } from "../ui/formatAnglesAssocies";
-import { libelleBoutonAide } from "../ui/formatEquationDroite";
 import { diagnostiquerValeurFinale, niveauAideMax } from "../moteur/verificationAnglesAssocies";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceAnglesAssocies;
@@ -145,9 +145,7 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
           {niveauAide >= 3 && <p>{texteAide3Intro(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(nombre)}>
         Valider

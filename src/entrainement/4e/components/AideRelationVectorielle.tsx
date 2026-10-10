@@ -1,6 +1,7 @@
 import type { ExerciceRelationVectorielle } from "../core/relationVectorielle.types";
 import { valeursGrapheAide } from "../ui/formatRelationVectorielle";
 import { VecteurGraph } from "./VecteurGraph";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceRelationVectorielle;
@@ -21,9 +22,7 @@ export function AideRelationVectorielle({ exercice, aideActivee, onActiverAide }
   return (
     <div>
       {aideActivee && <VecteurGraph points={points} vecteurs={vecteurs} />}
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
     </div>
   );
 }

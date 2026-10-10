@@ -3,11 +3,12 @@ import type { ExerciceMedianeClasses } from "../core/mediane.types";
 import type { PointPolygone } from "../moteur/verificationMediane";
 import { evaluerPolygone } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_POLYGONE } from "../moteur/sessionMediane";
-import { CONSIGNE_POLYGONE, LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, formatClasseTexte, libelleBoutonAide, texteAidePolygoneNiveau1 } from "../ui/formatMediane";
+import { CONSIGNE_POLYGONE, LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, formatClasseTexte, texteAidePolygoneNiveau1 } from "../ui/formatMediane";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { PolygoneEffectifsGraph } from "./PolygoneEffectifsGraph";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -90,9 +91,7 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
           <p>{texteAidePolygoneNiveau1()}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_POLYGONE} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_POLYGONE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POLYGONE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" onClick={() => onValider(points)}>
         Valider

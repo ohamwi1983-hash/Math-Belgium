@@ -2,23 +2,10 @@ import { useState } from "react";
 import type { ExerciceColinearParametre } from "../core/colinearite.types";
 import { diagnostiquerReductionAvecX } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_REDUCTION } from "../moteur/sessionColinearite";
-import {
-  CONSIGNE_REDUCTION_AVEC_X,
-  LATEX_FORMULE_COLINEARITE_VECTORIELLE,
-  LATEX_VEC_U,
-  LATEX_VEC_V,
-  PLACEHOLDER_EQUATION_REDUITE,
-  RAPPEL_VECTORIEL_COLINEARITE_APRES,
-  RAPPEL_VECTORIEL_COLINEARITE_AVANT,
-  RAPPEL_VECTORIEL_COLINEARITE_ENTRE,
-  RAPPEL_VECTORIEL_COLINEARITE_FIN,
-  consigneGlobaleColinearite,
-  formatEnonceLatex,
-  formuleSubstitueeReductionLatex,
-  libelleBoutonAide,
-} from "../ui/formatColinearite";
+import { CONSIGNE_REDUCTION_AVEC_X, LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, formatEnonceLatex, formuleSubstitueeReductionLatex } from "../ui/formatColinearite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceColinearParametre;
@@ -84,9 +71,7 @@ export function EtapeReductionColinearite({ exercice, tentativesUtilisees, tenta
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_REDUCTION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_REDUCTION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REDUCTION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

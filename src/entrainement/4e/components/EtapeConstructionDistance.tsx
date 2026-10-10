@@ -3,17 +3,11 @@ import type { ExerciceDistance } from "../core/normeDistance.types";
 import { evaluerConstructionDistance } from "../moteur/verificationNormeDistance";
 import type { ReponseConstructionDistance } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import {
-  CONSIGNE_GENERALE_DISTANCE,
-  PLACEHOLDER_COMPOSANTE,
-  formatAideVecteurABNiveau1Latex,
-  formatAideVecteurABNiveau2Latex,
-  formatTermesDonneesDistanceLatex,
-  libelleBoutonAide,
-} from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_DISTANCE, PLACEHOLDER_COMPOSANTE, formatAideVecteurABNiveau1Latex, formatAideVecteurABNiveau2Latex, formatTermesDonneesDistanceLatex } from "../ui/formatNormeDistance";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDistance;
@@ -97,9 +91,7 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
         </div>
       )}
       {max > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, max)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>

@@ -5,6 +5,7 @@ import { parametresDepuisCurseurs, parametresDepuisExercice } from "../ui/mafsTr
 import { formatApercuEquation } from "../ui/formatTransformationsGraphiques";
 import { MafsGraphTransformation } from "./MafsGraphTransformation";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTransformationGraphique;
@@ -190,9 +191,7 @@ export function EtapeTransformationExercice({
         </p>
       )}
 
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       <button
         type="button"
         className="btn btn-primary"

@@ -2,7 +2,7 @@
  * Couche présentation — "Lieux géométriques : intersection", REFONTE COMPLÈTE
  * (`promptgen54refontecomplete.md`) sur 3 écrans (identification / équations / résolution).
  * Réutilise `formatPointLatex`/`formatSommeTermesGeneree`/`formatEquationExpliciteYLatex`/
- * `libelleBoutonAide`/`FragmentConsigne` (`ui/formatEquationDroite.ts`, module frère déjà partagé
+ * `FragmentConsigne` (`ui/formatEquationDroite.ts`, module frère déjà partagé
  * par le groupe "droites") — jamais dupliqués, même `texte`/`latex` locaux que le reste du chapitre
  * 6 (convention établie, ex. `formatEquationCercleDeveloppee.ts`).
  *
@@ -21,12 +21,12 @@
 import type { Lieu, LieuCercle, LieuDroite, LieuParabole, NombrePointsIntersection, PaireLieux, TypeLieu } from "../core/lieuxGeometriques.types";
 import type { ExerciceLieuxGeometriques } from "../core/lieuxGeometriques.types";
 import { axeRadicalDeuxCercles } from "../generateurs/lieuxGeometriques/geometrieConique";
-import { formatEquationExpliciteYLatex, formatPointLatex, formatSommeTermesGeneree, libelleBoutonAide } from "./formatEquationDroite";
+import { formatEquationExpliciteYLatex, formatPointLatex, formatSommeTermesGeneree } from "./formatEquationDroite";
 import type { FragmentConsigne } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
 
 export type { FragmentConsigne };
-export { formatPointLatex, libelleBoutonAide };
+export { formatPointLatex };
 
 function texte(valeur: string): FragmentConsigne {
   return { type: "texte", valeur };

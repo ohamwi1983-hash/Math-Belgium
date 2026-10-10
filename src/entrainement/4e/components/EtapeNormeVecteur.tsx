@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceNormeVecteur } from "../core/normeDistance.types";
 import { diagnostiquerNormeVecteur } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { FORMULE_GENERALE_NORME_LATEX, PLACEHOLDER_NORME, formatEnonceVecteurLatex, formatLabelNormeVecteurLatex, formuleSubstitueeNormeLatex, libelleBoutonAide, segmentsConsigneVecteur } from "../ui/formatNormeDistance";
+import { FORMULE_GENERALE_NORME_LATEX, PLACEHOLDER_NORME, formatEnonceVecteurLatex, formatLabelNormeVecteurLatex, formuleSubstitueeNormeLatex, segmentsConsigneVecteur } from "../ui/formatNormeDistance";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceNormeVecteur;
@@ -66,9 +67,7 @@ export function EtapeNormeVecteur({ exercice, tentativesUtilisees, tentativesMax
         </div>
       )}
       {max > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, max)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>

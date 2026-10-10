@@ -1,23 +1,10 @@
 import { useState } from "react";
 import type { DirectionCandidate, ExerciceOmbreSoleilSimple } from "../core/ombreSoleil.types";
 import { NIVEAU_AIDE_MAX_POINT_SIMPLE } from "../moteur/sessionOmbreSoleil";
-import {
-  apercuDirection,
-  apercuPoint,
-  CONSIGNE_POINT_SIMPLE,
-  directionCorrecte,
-  elementsExemple,
-  libelleBoutonAide,
-  libelleCandidat,
-  ordreAffichageCandidats,
-  pointSommetPiquet,
-  segmentPiquet,
-  solidePourAffichage,
-  TEXTE_AIDE_POINT_SIMPLE_NIVEAU1,
-  TEXTE_AIDE_POINT_SIMPLE_NIVEAU2,
-} from "../ui/formatOmbreSoleil";
+import { apercuDirection, apercuPoint, CONSIGNE_POINT_SIMPLE, directionCorrecte, elementsExemple, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_POINT_SIMPLE_NIVEAU1, TEXTE_AIDE_POINT_SIMPLE_NIVEAU2 } from "../ui/formatOmbreSoleil";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOmbreSoleilSimple;
@@ -77,9 +64,7 @@ export function EtapePointSimple({ exercice, tentativesUtilisees, tentativesMax,
           {niveauAide >= 2 && <p>{TEXTE_AIDE_POINT_SIMPLE_NIVEAU2}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
         Valider

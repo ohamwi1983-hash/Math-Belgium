@@ -2,19 +2,10 @@ import { useState } from "react";
 import type { ExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.types";
 import { diagnostiquerSimplification } from "../moteur/verificationCombinaisonVecteurs";
 import { NIVEAU_AIDE_MAX_SIMPLIFICATION } from "../moteur/sessionCombinaisonVecteurs";
-import {
-  formatConvertiLatex,
-  formatDistribueLatex,
-  formatResultatLatex,
-  formatTermesDonneesLatex,
-  formatTermesExpressionLatex,
-  idsConcernesRegroupementLatex,
-  libelleBoutonAide,
-  placeholderReduction,
-  vecteursPresentsLatex,
-} from "../ui/formatCombinaisonVecteurs";
+import { formatConvertiLatex, formatDistribueLatex, formatResultatLatex, formatTermesDonneesLatex, formatTermesExpressionLatex, idsConcernesRegroupementLatex, placeholderReduction, vecteursPresentsLatex } from "../ui/formatCombinaisonVecteurs";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceCombinaisonVecteurs;
@@ -113,9 +104,7 @@ export function EtapeSimplificationCombinaisonVecteurs({ exercice, tentativesUti
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SIMPLIFICATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SIMPLIFICATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SIMPLIFICATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

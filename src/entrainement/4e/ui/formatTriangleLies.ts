@@ -1,14 +1,8 @@
 /**
  * Couche présentation — formatage texte/LaTeX pour "Triangles liés (triangulation, côté ou angle
- * partagé)". `libelleBoutonAide` dupliquée (convention déjà établie sur ~22 générateurs, jamais
- * partagée — trop petite pour l'extraction).
+ * partagé)".
  */
 import type { ExerciceTriangleLies } from "../core/triangleLies.types";
-
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
 
 function formatNombre(valeur: number): string {
   return Number(valeur.toFixed(2)).toString();

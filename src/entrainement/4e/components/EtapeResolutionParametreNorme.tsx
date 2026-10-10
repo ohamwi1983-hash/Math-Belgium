@@ -1,19 +1,12 @@
 import { useState } from "react";
 import type { ExerciceParametreNorme } from "../core/normeDistance.types";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import {
-  PLACEHOLDER_SOLUTION_X,
-  TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE,
-  formatDiscriminantLatex,
-  formatEquationReduiteParametreNormeLatex,
-  formatTermesEnonceParametreLatex,
-  libelleBoutonAide,
-  segmentsConsigneParametre,
-} from "../ui/formatNormeDistance";
+import { PLACEHOLDER_SOLUTION_X, TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE, formatDiscriminantLatex, formatEquationReduiteParametreNormeLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 type Choix = "aucune" | "auMoins";
 
@@ -134,9 +127,7 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
         </div>
       )}
       {max > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, max)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>

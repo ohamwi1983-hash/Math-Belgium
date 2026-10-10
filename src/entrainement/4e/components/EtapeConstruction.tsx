@@ -2,18 +2,13 @@ import { useState } from "react";
 import type { CinqNombres, ExerciceBoiteMoustachesConstruction } from "../core/boiteMoustaches.types";
 import { evaluerConstruction } from "../moteur/verificationBoiteMoustaches";
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
-import {
-  formatTermesCinqNombresLatex,
-  libelleBoutonAide,
-  segmentsAideConstructionNiveau1,
-  segmentsAideConstructionNiveau2,
-  segmentsConsigneConstruction,
-} from "../ui/formatBoiteMoustaches";
+import { formatTermesCinqNombresLatex, segmentsAideConstructionNiveau1, segmentsAideConstructionNiveau2, segmentsConsigneConstruction } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceBoiteMoustachesConstruction;
@@ -101,9 +96,7 @@ export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax
           </p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" onClick={() => onValider(valeurs)}>
         Valider

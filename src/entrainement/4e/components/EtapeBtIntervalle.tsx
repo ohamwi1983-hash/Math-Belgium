@@ -3,17 +3,11 @@ import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtIntervalle } from "../moteur/verificationExerciceSynthese";
 import type { ReponseIntervalle } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  consigneBtIntervalle,
-  formatEnonceTexte,
-  formatEtatActuelXBarSigmaLatex,
-  libelleBoutonAide,
-  texteAideBtIntervalleNiveau1,
-  texteAideBtIntervalleNiveau2,
-} from "../ui/formatExerciceSynthese";
+import { consigneBtIntervalle, formatEnonceTexte, formatEtatActuelXBarSigmaLatex, texteAideBtIntervalleNiveau1, texteAideBtIntervalleNiveau2 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceSynthese;
@@ -95,9 +89,7 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
           <Katex expression={texteAideBtIntervalleNiveau2(exercice).latex} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ borneInf, borneSup })}>
         Valider

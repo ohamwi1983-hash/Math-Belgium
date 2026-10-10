@@ -48,11 +48,6 @@ export function ligneExemple(exercice: ExerciceTableauFrequences) {
   return exercice.lignes[0];
 }
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 // ============================================================================
 // Écran 1 — identification
 // ============================================================================

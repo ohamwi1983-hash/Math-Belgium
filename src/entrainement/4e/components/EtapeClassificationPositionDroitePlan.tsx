@@ -1,9 +1,10 @@
 import { useState } from "react";
 import type { ConclusionPositionDroitePlan, ExercicePositionDroitePlan } from "../core/positionDroitePlan.types";
 import { NIVEAU_AIDE_MAX_CLASSIFICATION } from "../moteur/sessionPositionDroitePlan";
-import { LIBELLE_CLASSIFICATION, TEXTE_AIDE_CLASSIFICATION_NIVEAU1, libelleBoutonAide, libelleDroite, libellePlan, texteAideClassificationNiveau2 } from "../ui/formatPositionDroitePlan";
+import { LIBELLE_CLASSIFICATION, TEXTE_AIDE_CLASSIFICATION_NIVEAU1, libelleDroite, libellePlan, texteAideClassificationNiveau2 } from "../ui/formatPositionDroitePlan";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExercicePositionDroitePlan;
@@ -55,9 +56,7 @@ export function EtapeClassificationPositionDroitePlan({ exercice, tentativesUtil
           {niveauAide >= 2 && <p>{texteAideClassificationNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
         Valider

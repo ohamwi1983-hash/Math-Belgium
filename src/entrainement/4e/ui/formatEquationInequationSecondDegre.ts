@@ -223,11 +223,6 @@ export function formatValidationAttendueTexte(exercice: ExerciceEquationInequati
 // Divers.
 // ============================================================================
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 export function libelleFamilleEquationInequationSecondDegre(famille: FamilleEquationInequationSecondDegre): string {
   return CATALOGUE_FAMILLES.find((f) => f.id === famille)?.label ?? famille;
 }

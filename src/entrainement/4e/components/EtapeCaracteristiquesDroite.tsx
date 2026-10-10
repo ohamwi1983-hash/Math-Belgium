@@ -4,23 +4,13 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionCaracteristiq
 import { cibleChampPrincipal, diagnostiquerCaracteristiques, diagnostiquerChamp } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseCaracteristiques, ReponseChamp } from "../moteur/verificationCaracteristiquesDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  PLACEHOLDER_ANGLE,
-  PLACEHOLDER_ORDONNEE,
-  PLACEHOLDER_PENTE,
-  QUESTION_ORDONNEE,
-  QUESTION_PENTE,
-  formatAideCaracteristiquesNiveau2Latex,
-  formatEnonceLatex,
-  formatEtatActuelPointVecteurLatex,
-  libelleBoutonAide,
-  segmentsAideCaracteristiquesNiveau1,
-} from "../ui/formatCaracteristiquesDroite";
+import { PLACEHOLDER_ANGLE, PLACEHOLDER_ORDONNEE, PLACEHOLDER_PENTE, QUESTION_ORDONNEE, QUESTION_PENTE, formatAideCaracteristiquesNiveau2Latex, formatEnonceLatex, formatEtatActuelPointVecteurLatex, segmentsAideCaracteristiquesNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneCaracteristiquesDroiteEcran2 } from "./ConsigneCaracteristiquesDroiteEcran2";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 type Choix = "existe" | "nExistePas";
 
@@ -176,9 +166,7 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CARACTERISTIQUES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CARACTERISTIQUES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES} onActiverAide={onActiverAide} />
 
       <button
         type="button"

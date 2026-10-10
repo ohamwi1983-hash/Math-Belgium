@@ -8,6 +8,7 @@ import { calculerCourbeAxeSommet, calculerSketchAxeSommet } from "../ui/sketchAx
 import { SketchAxeSommet } from "./SketchAxeSommet";
 import { diagnostiquerAxeSommet, parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -88,9 +89,7 @@ export function EtapeAxeSommet({
           <input id="ys" className={`text-input${erronee ? " is-erronee" : ""}`} value={yS} onChange={(e) => setYS(e.target.value)} />
         </div>
       </div>
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       <button
         type="button"
         className="btn btn-primary"

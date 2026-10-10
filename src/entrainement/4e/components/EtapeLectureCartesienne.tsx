@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceLectureGraphiqueDroite } from "../core/lectureGraphiqueDroite.types";
 import { NIVEAU_AIDE_MAX } from "../moteur/sessionLectureGraphiqueDroite";
 import { diagnostiquerCartesienne } from "../moteur/verificationLectureGraphiqueDroite";
-import { consigneGeneraleLecture, consigneLecture, libelleBoutonAide, texteAideNiveau1 } from "../ui/formatLectureGraphiqueDroite";
+import { consigneGeneraleLecture, consigneLecture, texteAideNiveau1 } from "../ui/formatLectureGraphiqueDroite";
 import { pointsAideExemple } from "../ui/lectureGraphiqueDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { LectureGraphiqueDroiteGraph } from "./LectureGraphiqueDroiteGraph";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDroite;
@@ -54,9 +55,7 @@ export function EtapeLectureCartesienne({ exercice, tentativesUtilisees, tentati
           {niveauAide >= 2 && <p>Deux points de la droite sont désormais surlignés en orange sur le graphe.</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={() => onValider(texte)}>
         Valider

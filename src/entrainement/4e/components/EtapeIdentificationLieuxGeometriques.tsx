@@ -4,18 +4,11 @@ import { diagnostiquerIdentification, diagnostiquerIdentificationLieu } from "..
 import type { ReponseIdentification, ReponseIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import {
-  CONSIGNE_GENERALE_IDENTIFICATION,
-  LIBELLE_TYPE_LIEU,
-  SOUS_TITRE_CHAMPS_IDENTIFICATION,
-  libelleBoutonAide,
-  segmentsAideIdentificationNiveau1,
-  segmentsAideIdentificationNiveau2,
-  segmentsEnonce,
-} from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_IDENTIFICATION, LIBELLE_TYPE_LIEU, SOUS_TITRE_CHAMPS_IDENTIFICATION, segmentsAideIdentificationNiveau1, segmentsAideIdentificationNiveau2, segmentsEnonce } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 const TYPES_LIEU: TypeLieu[] = ["droite", "cercle", "parabole"];
 
@@ -260,9 +253,7 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= 2} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, 2)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
 
       <button
         type="button"

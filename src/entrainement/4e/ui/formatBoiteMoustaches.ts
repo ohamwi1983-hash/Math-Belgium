@@ -43,11 +43,6 @@ export const LABEL_Q1 = "Q_1";
 export const LABEL_Q2 = "Q_2";
 export const LABEL_Q3 = "Q_3";
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 const LIBELLES_VARIANTE: Record<VarianteBoiteMoustaches, string> = {
   construction: "Construction",
   lecture: "Lecture",

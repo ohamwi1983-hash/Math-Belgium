@@ -3,6 +3,7 @@ import { calculerTrajetCercleTrig } from "../ui/cercleTrigTrajet";
 import { calculerAidePremierQuadrant } from "../ui/cerclePremierQuadrantAide";
 import { CENTRE_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: AngleAvecPremierQuadrant;
@@ -60,9 +61,7 @@ export function AideAnglePremierQuadrantCercleTrig({ exercice, aideActivee, onAc
           )}
         </CercleTrigTrajetBase>
       )}
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
     </div>
   );
 }

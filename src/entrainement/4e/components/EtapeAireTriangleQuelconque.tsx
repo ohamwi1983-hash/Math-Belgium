@@ -3,21 +3,12 @@ import type { ExerciceTriangleQuelconque, UniteLongueur } from "../core/triangle
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { diagnostiquerAire } from "../moteur/verificationTriangleQuelconque";
-import {
-  consigneAire,
-  labelChampAire,
-  libelleBoutonAide,
-  NOMBRE_NIVEAUX_AIDE_AIRE,
-  OPTIONS_UNITE_AIRE,
-  optionsCroquisAire,
-  placeholderAire,
-  textesAideAire,
-  valeursTriangleSketchAire,
-} from "../ui/formatTriangleQuelconque";
+import { consigneAire, labelChampAire, NOMBRE_NIVEAUX_AIDE_AIRE, OPTIONS_UNITE_AIRE, optionsCroquisAire, placeholderAire, textesAideAire, valeursTriangleSketchAire } from "../ui/formatTriangleQuelconque";
 import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch";
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleQuelconque;
@@ -91,9 +82,7 @@ export function EtapeAireTriangleQuelconque({
           ))}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NOMBRE_NIVEAUX_AIDE_AIRE} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NOMBRE_NIVEAUX_AIDE_AIRE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NOMBRE_NIVEAUX_AIDE_AIRE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur, unite as UniteLongueur)}>
         Valider

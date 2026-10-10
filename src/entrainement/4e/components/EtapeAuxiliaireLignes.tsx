@@ -1,21 +1,10 @@
 import { useState } from "react";
 import type { ExerciceSectionPlaneSolide } from "../core/sectionPlaneSolide.types";
 import { NIVEAU_AIDE_MAX_AUXILIAIRE } from "../moteur/sessionSectionPlaneSolide";
-import {
-  CONSIGNE_AUXILIAIRE_LIGNES,
-  TEXTE_AIDE_AUXILIAIRE_NIVEAU1,
-  apercuLignesChoisies,
-  candidatsLignesAuxiliaires,
-  facesAMoitieConnues,
-  libelleBoutonAide,
-  pointsExtraConnus,
-  segmentsExtraTraces,
-  texteAideAuxiliaireNiveau2,
-  texteProgressionPoints,
-  texteProgressionSegments,
-} from "../ui/formatSectionPlaneSolide";
+import { CONSIGNE_AUXILIAIRE_LIGNES, TEXTE_AIDE_AUXILIAIRE_NIVEAU1, apercuLignesChoisies, candidatsLignesAuxiliaires, facesAMoitieConnues, pointsExtraConnus, segmentsExtraTraces, texteAideAuxiliaireNiveau2, texteProgressionPoints, texteProgressionSegments } from "../ui/formatSectionPlaneSolide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceSectionPlaneSolide;
@@ -87,9 +76,7 @@ export function EtapeAuxiliaireLignes({ exercice, connus, segmentsTraces, tentat
           {niveauAide >= 2 && <p>{texteAideAuxiliaireNiveau2(exercice, facesAide)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={selection.length !== 2} onClick={() => selection.length === 2 && onValider(selection[0], selection[1])}>
         Valider

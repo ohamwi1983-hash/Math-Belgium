@@ -275,8 +275,3 @@ export function optionsCroquisAire(exercice: ExerciceTriangleQuelconque, niveau:
   const { cote1, cote2, angleCompris } = donneesFormuleAire(exercice);
   return { cotesSurlignes: [cote1, cote2], anglesSurlignes: [angleCompris] };
 }
-
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}

@@ -5,6 +5,7 @@ import { formatFonctionColoreeLatex, formatFonctionOrdreLatex } from "../ui/form
 import { diagnostiquerCoefficients } from "../moteur/verificationAnalyseFonction";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -86,9 +87,7 @@ export function EtapeCoefficients({
           />
         </div>
       </div>
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       <button
         type="button"
         className="btn btn-primary"

@@ -3,19 +3,12 @@ import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerAngles } from "../moteur/verificationTriangleLies";
 import type { ReponseAnglesTriangleLies } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_ANGLES } from "../moteur/sessionTriangleLies";
-import {
-  consigneAngles,
-  formatAnglesBrutsViseeTexte,
-  formatEtatActuelPontConfirme,
-  libelleBoutonAide,
-  texteAideAnglesNiveau1,
-  texteAideAnglesNiveau2,
-  texteAideAnglesNiveau3,
-} from "../ui/formatTriangleLies";
+import { consigneAngles, formatAnglesBrutsViseeTexte, formatEtatActuelPontConfirme, texteAideAnglesNiveau1, texteAideAnglesNiveau2, texteAideAnglesNiveau3 } from "../ui/formatTriangleLies";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -82,9 +75,7 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
           {niveauAide >= 3 && <p>{texteAideAnglesNiveau3(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_ANGLES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_ANGLES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ANGLES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
         Valider

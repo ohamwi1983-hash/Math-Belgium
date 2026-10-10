@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { verifierInterpretation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionEquationInequationSecondDegre";
-import { consigneInterpretation, formatDonneesFinalesLatex, libelleBoutonAide, texteAideInterpretationNiveau1 } from "../ui/formatEquationInequationSecondDegre";
+import { consigneInterpretation, formatDonneesFinalesLatex, texteAideInterpretationNiveau1 } from "../ui/formatEquationInequationSecondDegre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -46,9 +47,7 @@ export function EtapeInterpretationEquationInequationSecondDegre({ exercice, ten
           <p>{texteAideInterpretationNiveau1()}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_INTERPRETATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_INTERPRETATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_INTERPRETATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
         Valider

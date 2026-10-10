@@ -10,6 +10,7 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { calculerCroquisColore, calculerCroquisVrai } from "../ui/parabolaSketch";
 import { ParabolaSketch } from "./ParabolaSketch";
 import { formatTermesApercuSolution } from "../ui/apercuIntervalle";
+import { BoutonAide } from "./BoutonAide";
 
 type Forme = SolutionEnsemble["forme"];
 
@@ -154,9 +155,7 @@ export function EtapeInequation({
         </div>
       )}
 
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
 
       <button
         type="button"

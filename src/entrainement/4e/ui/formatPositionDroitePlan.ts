@@ -8,12 +8,6 @@ import { verifierReponseParallele, verifierReponseSecante } from "../moteur/veri
  * mathématiquement — `moteur/geometrieEspace.ts` — mais jamais nommés ainsi ici).
  */
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  if (niveau === 0) return "Aide";
-  return "Aide supplémentaire";
-}
-
 export const LIBELLE_CLASSIFICATION: Record<ConclusionPositionDroitePlan, string> = {
   incluse: "Incluse dans le plan",
   parallele: "Parallèle au plan",

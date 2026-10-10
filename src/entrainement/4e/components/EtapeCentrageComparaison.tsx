@@ -2,11 +2,12 @@ import { useState } from "react";
 import type { ExerciceComparaisonSeries, QuestionCentrage } from "../core/comparaisonSeries.types";
 import { verifierCentrage } from "../moteur/verificationComparaisonSeries";
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
-import { libelleBoutonAide, segmentsAideCentrageNiveau1, segmentsAideCentrageNiveau2, segmentsConsigneCentrage } from "../ui/formatComparaisonSeries";
+import { segmentsAideCentrageNiveau1, segmentsAideCentrageNiveau2, segmentsConsigneCentrage } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceComparaisonSeries;
@@ -64,9 +65,7 @@ export function EtapeCentrageComparaison({ exercice, question, tentativesUtilise
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
         Valider

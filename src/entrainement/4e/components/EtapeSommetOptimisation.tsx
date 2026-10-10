@@ -3,20 +3,12 @@ import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { diagnostiquerSommet } from "../moteur/verificationOptimisation";
 import type { ReponseSommet } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_SOMMET } from "../moteur/sessionOptimisation";
-import {
-  consigneSommet,
-  contexteLabelX,
-  contexteLabelY,
-  formatDonneesConfirmeesLatex,
-  libelleBoutonAide,
-  segmentsPhraseEnonce,
-  texteAideSommetNiveau1,
-  texteAideSommetNiveau2,
-} from "../ui/formatOptimisation";
+import { consigneSommet, contexteLabelX, contexteLabelY, formatDonneesConfirmeesLatex, segmentsPhraseEnonce, texteAideSommetNiveau1, texteAideSommetNiveau2 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
@@ -100,9 +92,7 @@ export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentati
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SOMMET} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SOMMET)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMET} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
         Valider

@@ -2,18 +2,10 @@ import { useState } from "react";
 import type { ExercicePythagore } from "../core/normeDistance.types";
 import type { ReponseTestPythagore } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import {
-  CONSIGNE_GENERALE_PYTHAGORE,
-  TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1,
-  formatEtatActuelLongueursPythagoreLatex,
-  formatRelationsPythagoreNiveau1Latex,
-  formatRelationsPythagoreNiveau2Latex,
-  formatTermesDonneesPythagoreLatex,
-  libelleBoutonAide,
-  libelleRectangleEn,
-} from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_PYTHAGORE, TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1, formatEtatActuelLongueursPythagoreLatex, formatRelationsPythagoreNiveau1Latex, formatRelationsPythagoreNiveau2Latex, formatTermesDonneesPythagoreLatex, libelleRectangleEn } from "../ui/formatNormeDistance";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExercicePythagore;
@@ -71,9 +63,7 @@ export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMa
         </div>
       )}
       {max > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, max)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(choix)}>

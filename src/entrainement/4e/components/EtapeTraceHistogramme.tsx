@@ -3,19 +3,12 @@ import type { ExerciceHistogramme } from "../core/histogramme.types";
 import type { ReponseTrace } from "../moteur/verificationHistogramme";
 import { evaluerTrace } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_TRACE } from "../moteur/sessionHistogramme";
-import {
-  CONSIGNE_TRACE,
-  LABEL_CLASSE_XI,
-  LABEL_EFFECTIF_NI,
-  LABEL_FREQUENCE_FI,
-  formatClasseTexte,
-  libelleBoutonAide,
-  texteAideTraceNiveau1,
-} from "../ui/formatHistogramme";
+import { CONSIGNE_TRACE, LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, formatClasseTexte, texteAideTraceNiveau1 } from "../ui/formatHistogramme";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceHistogramme } from "./EnonceHistogramme";
 import { HistogrammeGraph } from "./HistogrammeGraph";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -111,9 +104,7 @@ export function EtapeTraceHistogramme({ exercice, tentativesUtilisees, tentative
           <p>{texteAideTraceNiveau1(exercice, correction)}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_TRACE} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_TRACE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TRACE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" onClick={() => onValider(hauteurs)}>
         Valider

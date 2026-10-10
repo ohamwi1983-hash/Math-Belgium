@@ -5,23 +5,13 @@ import type { ReponseEquation } from "../moteur/typesRelationsDroites";
 import { diagnostiquerEquationCartesienne, diagnostiquerEquationParametrique } from "../moteur/verificationRelationsDroites";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  PLACEHOLDER_COMPOSANTE,
-  PLACEHOLDER_COORDONNEE,
-  PLACEHOLDER_EQUATION,
-  consigneEquation,
-  formatAideEquationNiveau2Latex,
-  formatDonneesRechercheeLatex,
-  formatEnonceLatex,
-  formatEtatActuelVecteurChercheLatex,
-  libelleBoutonAide,
-  segmentsAideEquationNiveau1,
-} from "../ui/formatRelationsDroites";
+import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION, consigneEquation, formatAideEquationNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, formatEtatActuelVecteurChercheLatex, segmentsAideEquationNiveau1 } from "../ui/formatRelationsDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
@@ -165,9 +155,7 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_EQUATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_EQUATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EQUATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

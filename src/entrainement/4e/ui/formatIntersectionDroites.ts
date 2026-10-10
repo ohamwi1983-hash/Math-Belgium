@@ -1,7 +1,7 @@
 /**
  * Couche présentation — "Intersection entre deux droites" (`src/generateurs/intersectionDroites/`,
- * `src/moteur/sessionIntersectionDroites.ts`). `formatPointLatex`/`formatVecteurLatex`/
- * `libelleBoutonAide` réutilisés directement depuis `formatEquationDroite.ts` (jamais dupliqués —
+ * `src/moteur/sessionIntersectionDroites.ts`). `formatPointLatex`/`formatVecteurLatex`
+ * réutilisés directement depuis `formatEquationDroite.ts` (jamais dupliqués —
  * même style que `formatRelationsDroites.ts`/`formatDistanceDroite.ts`).
  *
  * Restructuration `promptgen48modifications.md` : consigne générale ("Quelle est l'intersection de
@@ -21,19 +21,10 @@
  * composante par composante (un système à 2 équations/2 inconnues t et s, non résolu).
  */
 import type { ConclusionIntersectionDroites, ExerciceIntersectionDroites, LigneIntersection, VarianteIntersectionDroites } from "../core/intersectionDroites.types";
-import {
-  formatEquationExpliciteXLatex,
-  formatEquationExpliciteYLatex,
-  formatEquationImpliciteLatex,
-  formatPointLatex,
-  formatRepresentationParametriqueLatex,
-  formatSommeTermesGeneree,
-  formatVecteurLatex,
-  libelleBoutonAide,
-} from "./formatEquationDroite";
+import { formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatSommeTermesGeneree, formatVecteurLatex } from "./formatEquationDroite";
 import { formatFractionIrreductible } from "./formatFraction";
 
-export { formatPointLatex, formatVecteurLatex, libelleBoutonAide };
+export { formatPointLatex, formatVecteurLatex };
 
 export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
 

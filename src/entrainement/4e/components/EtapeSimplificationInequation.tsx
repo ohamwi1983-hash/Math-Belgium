@@ -5,6 +5,7 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { formatInequationLatex } from "../ui/formatInequation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceInequation;
@@ -66,9 +67,7 @@ export function EtapeSimplificationInequation({
             indique alors le nouveau symbole dans ta réponse.
           </p>
         )}
-        <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-          {aideActivee ? "Aide utilisée" : "Aide"}
-        </button>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       </div>
       <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
         Valider

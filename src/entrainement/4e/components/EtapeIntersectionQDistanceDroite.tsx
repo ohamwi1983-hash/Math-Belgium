@@ -6,20 +6,7 @@ import { diagnostiquerIntersection } from "../moteur/verificationDroite";
 import { NIVEAU_AIDE_MAX_INTERSECTION_Q } from "../moteur/sessionDistanceDroite";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import type { ReponseIntersection } from "../moteur/verificationDistanceDroite";
-import {
-  COULEUR_B,
-  COULEUR_D,
-  COULEUR_P,
-  COULEUR_Q,
-  CONSIGNE_INTERSECTION_Q,
-  LABEL_X_Q,
-  LABEL_Y_Q,
-  PLACEHOLDER_COORDONNEE_FRACTION,
-  TEXTE_AIDE_INTERSECTION_Q_NIVEAU1,
-  calculerEtatActuelDistanceDroite,
-  formatAideIntersectionQNiveau2Latex,
-  libelleBoutonAide,
-} from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_INTERSECTION_Q, LABEL_X_Q, LABEL_Y_Q, PLACEHOLDER_COORDONNEE_FRACTION, TEXTE_AIDE_INTERSECTION_Q_NIVEAU1, calculerEtatActuelDistanceDroite, formatAideIntersectionQNiveau2Latex } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
@@ -27,6 +14,7 @@ import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
@@ -123,9 +111,7 @@ export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, d
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_INTERSECTION_Q} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_INTERSECTION_Q)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_INTERSECTION_Q} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

@@ -20,9 +20,9 @@
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { formatSommeTermes } from "./formatEquation";
 import type { FragmentConsigne } from "./formatEquationDroite";
-import { LIBELLE_VARIANTE, formatFoyerLatex, formatSommetLatex, libelleBoutonAide } from "./formatEquationParabole";
+import { LIBELLE_VARIANTE, formatFoyerLatex, formatSommetLatex } from "./formatEquationParabole";
 
-export { LIBELLE_VARIANTE, formatFoyerLatex, formatSommetLatex, libelleBoutonAide };
+export { LIBELLE_VARIANTE, formatFoyerLatex, formatSommetLatex };
 export type { FragmentConsigne };
 
 function texte(valeur: string): FragmentConsigne {

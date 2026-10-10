@@ -4,7 +4,7 @@
  * par écran — dérivés uniquement des champs déjà présents sur le contrat, jamais recalculés
  * différemment côté vérification (`moteur/verificationCaracteristiquesDroite.ts`).
  *
- * `formatPointLatex`/`formatVecteurLatex`/`libelleBoutonAide` réutilisés directement depuis
+ * `formatPointLatex`/`formatVecteurLatex` réutilisés directement depuis
  * `formatEquationDroite.ts` (import + re-export, même style que "Relations entre droites"/
  * "Construction graphique — tracer une droite") — purement stateless/présentationnels, jamais
  * dupliqués pour ce générateur. `formatDroiteEntreeLatex` est en revanche DUPLIQUÉE depuis
@@ -12,18 +12,9 @@
  * qu'ailleurs dans le projet, ex. `ajusterAuRatio`) — contrats indépendants entre générateurs.
  */
 import type { CaracteristiqueDemandee, ExerciceCaracteristiquesDroite } from "../core/caracteristiquesDroite.types";
-import {
-  type FragmentConsigne,
-  formatEquationExpliciteXLatex,
-  formatEquationExpliciteYLatex,
-  formatEquationImpliciteLatex,
-  formatPointLatex,
-  formatRepresentationParametriqueLatex,
-  formatVecteurLatex,
-  libelleBoutonAide,
-} from "./formatEquationDroite";
+import { type FragmentConsigne, formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, formatVecteurLatex } from "./formatEquationDroite";
 
-export { formatPointLatex, formatVecteurLatex, libelleBoutonAide };
+export { formatPointLatex, formatVecteurLatex };
 export type { FragmentConsigne };
 
 function texte(valeur: string): FragmentConsigne {

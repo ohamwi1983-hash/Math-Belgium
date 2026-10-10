@@ -4,11 +4,12 @@ import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_CHOIX_POINT } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerChoixPoint } from "../moteur/verificationDistanceDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { COULEUR_D, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_CHOIX_POINT_NIVEAU1, consigneChoixPoint, libelleBoutonAide } from "../ui/formatDistanceDroite";
+import { COULEUR_D, PLACEHOLDER_COORDONNEE, TEXTE_AIDE_CHOIX_POINT_NIVEAU1, consigneChoixPoint } from "../ui/formatDistanceDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDistanceParalleles;
@@ -87,9 +88,7 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
         </div>
       )}
       {NIVEAU_AIDE_MAX_CHOIX_POINT > 0 && (
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CHOIX_POINT} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CHOIX_POINT)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CHOIX_POINT} onActiverAide={onActiverAide} />
       )}
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>

@@ -92,11 +92,6 @@ export const PLACEHOLDER_XMAX = "ex : 20";
 export const PLACEHOLDER_ETENDUE = "ex : 20";
 export const PLACEHOLDER_MODE = "ex : 4,5";
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 /** Borne supérieure exclue pour toute classe sauf la dernière, incluse pour la dernière — même
  * convention francophone à crochets inversés que "Regroupement en classes et histogramme". */
 export function estDerniereClasse(exercice: ExerciceMedianeClasses, index: number): boolean {

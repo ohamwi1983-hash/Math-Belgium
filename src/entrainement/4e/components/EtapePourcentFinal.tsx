@@ -2,18 +2,12 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre, ExerciceBienaymeTchebychevIntervalleVersPourcent } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerPourcent } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  formatEtatActuelCombineLatex,
-  kEtatActuel,
-  libelleBoutonAide,
-  precisionPourcentFinal,
-  texteAidePourcentNiveau1,
-  texteAidePourcentNiveau2,
-} from "../ui/formatBienaymeTchebychev";
+import { formatEtatActuelCombineLatex, kEtatActuel, precisionPourcentFinal, texteAidePourcentNiveau1, texteAidePourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 type Exercice = ExerciceBienaymeTchebychevIntervalleVersPourcent | ExerciceBienaymeTchebychevIntervalleVersNombre;
 
@@ -69,9 +63,7 @@ export function EtapePourcentFinal({ exercice, tentativesUtilisees, tentativesMa
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

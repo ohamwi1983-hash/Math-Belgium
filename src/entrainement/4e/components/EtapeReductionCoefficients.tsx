@@ -9,6 +9,7 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { formatPolynome } from "../ui/formatSimplification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   /** Un P2 (gen1/gen2/gen3/gen4/gen5/gen6) ou un P1 (gen3 "Simplifier", `{k,p}` — gen3 image 6/7
@@ -134,9 +135,7 @@ export function EtapeReductionCoefficients({
               : "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le polynôme par ce nombre."}
           </p>
         )}
-        <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-          {aideActivee ? "Aide utilisée" : "Aide"}
-        </button>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       </div>
       <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
         Valider

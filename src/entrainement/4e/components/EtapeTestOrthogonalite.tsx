@@ -3,27 +3,11 @@ import type { ExerciceOrthogonaliteTest } from "../core/orthogonalite.types";
 import type { ReponseTest } from "../moteur/verificationOrthogonalite";
 import { diagnostiquerCritereTest } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import {
-  LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE,
-  LATEX_VEC_U,
-  LATEX_VEC_V,
-  LIBELLES_OUI_NON,
-  PLACEHOLDER_CRITERE,
-  QUESTION_ORTHOGONALITE_VECTEURS_APRES,
-  QUESTION_ORTHOGONALITE_VECTEURS_AVANT,
-  QUESTION_ORTHOGONALITE_VECTEURS_ENTRE,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_APRES,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_FIN,
-  consigneGlobaleOrthogonalite,
-  formatEnonceLatex,
-  formuleSubstitueeTestLatex,
-  libelleBoutonAide,
-} from "../ui/formatOrthogonalite";
+import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ORTHOGONALITE_VECTEURS_APRES, QUESTION_ORTHOGONALITE_VECTEURS_AVANT, QUESTION_ORTHOGONALITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, consigneGlobaleOrthogonalite, formatEnonceLatex, formuleSubstitueeTestLatex } from "../ui/formatOrthogonalite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTest;
@@ -104,9 +88,7 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button
         type="button"

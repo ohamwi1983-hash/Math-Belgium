@@ -1,18 +1,11 @@
 import { useState } from "react";
 import type { ConclusionIntersectionDroites, ExerciceIntersectionDroites } from "../core/intersectionDroites.types";
 import { NIVEAU_AIDE_MAX_DIAGNOSTIC } from "../moteur/sessionIntersectionDroites";
-import {
-  CONSIGNE_GENERALE_INTERSECTION,
-  LIBELLE_CONCLUSION,
-  formatAideDiagnosticNiveau2Latex,
-  formatLignesEnonce,
-  libelleBoutonAide,
-  segmentsAideDiagnosticNiveau1,
-  segmentsConsigneDiagnostic,
-} from "../ui/formatIntersectionDroites";
+import { CONSIGNE_GENERALE_INTERSECTION, LIBELLE_CONCLUSION, formatAideDiagnosticNiveau2Latex, formatLignesEnonce, segmentsAideDiagnosticNiveau1, segmentsConsigneDiagnostic } from "../ui/formatIntersectionDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
@@ -72,9 +65,7 @@ export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilise
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
         Valider

@@ -25,6 +25,7 @@ import { TableauSignesQuotientDenominateurCarreRecap } from "./TableauSignesQuot
 import { TableauSignesQuotientFacteurCommunRecap } from "./TableauSignesQuotientFacteurCommunRecap";
 import { TableauSignesQuotientSansFacteurCommunRecap } from "./TableauSignesQuotientSansFacteurCommunRecap";
 import { TableauSignesQuotientCubiqueRecap } from "./TableauSignesQuotientCubiqueRecap";
+import { BoutonAide } from "./BoutonAide";
 
 type Forme = SolutionEnsembleProduit["forme"];
 
@@ -218,9 +219,7 @@ export function EtapeIntervalleQuotient({
 
       {forme === "intervalle" && <ListeMorceauxInput etat={liste} onChange={setListe} />}
 
-      <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-        {aideActivee ? "Aide utilisée" : "Aide"}
-      </button>
+      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
 
       <button
         type="button"

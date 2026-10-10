@@ -3,20 +3,12 @@ import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_RAYON } from "../moteur/sessionEquationCercle";
 import { diagnostiquerRayon } from "../moteur/verificationEquationCercle";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  CONSIGNE_GENERALE_EQUATION_CERCLE,
-  CONSIGNE_RAYON,
-  PLACEHOLDER_RAYON,
-  formatAideRayonNiveau2Latex,
-  formatEtatActuelCentreLatex,
-  libelleBoutonAide,
-  texteAideRayonNiveau1,
-  texteAideRayonNiveau2,
-} from "../ui/formatEquationCercle";
+import { CONSIGNE_GENERALE_EQUATION_CERCLE, CONSIGNE_RAYON, PLACEHOLDER_RAYON, formatAideRayonNiveau2Latex, formatEtatActuelCentreLatex, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationCercle;
@@ -84,9 +76,7 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_RAYON} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_RAYON)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_RAYON} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre, ExerciceBienaymeTchebychevIntervalleVersPourcent } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LABEL_K, PRECISION_K, libelleBoutonAide, texteAideKDepuisIntervalleNiveau1, texteAideKDepuisIntervalleNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { LABEL_K, PRECISION_K, texteAideKDepuisIntervalleNiveau1, texteAideKDepuisIntervalleNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 type Exercice = ExerciceBienaymeTchebychevIntervalleVersPourcent | ExerciceBienaymeTchebychevIntervalleVersNombre;
 
@@ -60,9 +61,7 @@ export function EtapeKDepuisIntervalle({ exercice, tentativesUtilisees, tentativ
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

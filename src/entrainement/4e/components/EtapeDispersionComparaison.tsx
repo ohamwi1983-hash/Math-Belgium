@@ -3,17 +3,12 @@ import type { ExerciceComparaisonSeries, QuestionDispersion } from "../core/comp
 import type { ArgumentDispersionOption, ReponseDispersion } from "../moteur/verificationComparaisonSeries";
 import { verifierDispersion } from "../moteur/verificationComparaisonSeries";
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
-import {
-  OPTIONS_ARGUMENT_DISPERSION,
-  libelleBoutonAide,
-  segmentsAideDispersionNiveau1,
-  segmentsAideDispersionNiveau2,
-  segmentsConsigneDispersion,
-} from "../ui/formatComparaisonSeries";
+import { OPTIONS_ARGUMENT_DISPERSION, segmentsAideDispersionNiveau1, segmentsAideDispersionNiveau2, segmentsConsigneDispersion } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceComparaisonSeries;
@@ -102,9 +97,7 @@ export function EtapeDispersionComparaison({ exercice, question, tentativesUtili
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button
         type="button"

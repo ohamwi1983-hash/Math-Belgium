@@ -2,18 +2,10 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangle, Sommet } from "../core/orthogonalite.types";
 import type { ReponseConclusionTriangle } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import {
-  LIBELLES_OUI_NON,
-  QUESTION_SOMMET_RECTANGLE,
-  QUESTION_TRIANGLE_RECTANGLE,
-  TEXTE_AIDE_CONCLUSION_TRIANGLE,
-  consigneGlobaleOrthogonalite,
-  etatActuelConclusionTriangle,
-  formatTermesEnonceTriangleLatex,
-  libelleBoutonAide,
-} from "../ui/formatOrthogonalite";
+import { LIBELLES_OUI_NON, QUESTION_SOMMET_RECTANGLE, QUESTION_TRIANGLE_RECTANGLE, TEXTE_AIDE_CONCLUSION_TRIANGLE, consigneGlobaleOrthogonalite, etatActuelConclusionTriangle, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
@@ -103,9 +95,7 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtili
           <p>{TEXTE_AIDE_CONCLUSION_TRIANGLE}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button
         type="button"

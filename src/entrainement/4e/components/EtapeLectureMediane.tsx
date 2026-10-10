@@ -3,24 +3,14 @@ import type { ExerciceMedianeClasses } from "../core/mediane.types";
 import type { ParametreLecture } from "../moteur/verificationMediane";
 import { diagnostiquerLecture } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_LECTURE_MEDIANE, NIVEAU_AIDE_MAX_LECTURE_Q1, NIVEAU_AIDE_MAX_LECTURE_Q3 } from "../moteur/sessionMediane";
-import {
-  PLACEHOLDER_LECTURE,
-  consigneLecture,
-  formatFormuleInterpolationLatex,
-  labelChampLecture,
-  libelleBoutonAide,
-  pointsEncadresLecture,
-  polygonePoints,
-  texteAideLectureNiveau1,
-  texteAideLectureNiveau2,
-  texteAideLectureNiveau3,
-} from "../ui/formatMediane";
+import { PLACEHOLDER_LECTURE, consigneLecture, formatFormuleInterpolationLatex, labelChampLecture, pointsEncadresLecture, polygonePoints, texteAideLectureNiveau1, texteAideLectureNiveau2, texteAideLectureNiveau3 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { LectureQuartileGraph } from "./LectureQuartileGraph";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -100,9 +90,7 @@ export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, 
           {niveauAide >= 4 && <Katex expression={formatFormuleInterpolationLatex(parametre)} block />}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

@@ -2,19 +2,11 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationCercleDeveloppee";
-import {
-  CONSIGNE_COMPLETION,
-  CONSIGNE_GENERALE_CENTRE_RAYON,
-  PLACEHOLDER_COMPLETION,
-  TEXTE_AIDE_COMPLETION_NIVEAU1,
-  formatAideCompletionNiveau2Latex,
-  formatEquationDeveloppeeLatex,
-  formatEtatActuelRegroupementLatex,
-  libelleBoutonAide,
-} from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, TEXTE_AIDE_COMPLETION_NIVEAU1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex, formatEtatActuelRegroupementLatex } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
@@ -72,9 +64,7 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUt
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_COMPLETION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_COMPLETION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPLETION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

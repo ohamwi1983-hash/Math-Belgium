@@ -40,11 +40,6 @@ export const PRECISION_2_DECIMALES = "arrondi à la 2e décimale";
  * en Couche A) — même principe que "Moyenne pondérée"/"Médiane". */
 export const INDEX_LIGNE_EXEMPLE = 0;
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 /** Consigne composée en 3 morceaux — texte brut avant / fragment LaTeX pur / texte brut après —
  * assemblée en JSX (`{avant}<Katex expression={latex}/>{apres}`), jamais passée entière à KaTeX
  * (même patron que "Moyenne pondérée"/"Point à partir d'une relation vectorielle"). */

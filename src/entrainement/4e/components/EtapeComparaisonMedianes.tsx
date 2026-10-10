@@ -2,11 +2,12 @@ import { useState } from "react";
 import type { ExerciceBoiteMoustachesComparaison } from "../core/boiteMoustaches.types";
 import { verifierComparaisonMedianes } from "../moteur/verificationBoiteMoustaches";
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
-import { libelleBoutonAide, segmentsAideComparaisonMediane, segmentsConsigneComparaisonMedianes } from "../ui/formatBoiteMoustaches";
+import { segmentsAideComparaisonMediane, segmentsConsigneComparaisonMedianes } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceBoiteMoustachesComparaison;
@@ -67,9 +68,7 @@ export function EtapeComparaisonMedianes({ exercice, tentativesUtilisees, tentat
           </p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
         Valider

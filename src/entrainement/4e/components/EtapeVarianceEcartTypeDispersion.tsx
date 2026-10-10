@@ -3,23 +3,13 @@ import type { ExerciceDispersion } from "../core/dispersion.types";
 import type { ReponseVarianceEcartType } from "../moteur/verificationDispersion";
 import { diagnostiquerVarianceEcartType } from "../moteur/verificationDispersion";
 import { NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE } from "../moteur/sessionDispersion";
-import {
-  LABEL_ECART_TYPE,
-  LABEL_VARIANCE,
-  PLACEHOLDER_ECART_TYPE,
-  PLACEHOLDER_VARIANCE,
-  consigneEcartType,
-  consigneVariance,
-  formatEtatActuelTableauLatex,
-  libelleBoutonAide,
-  texteAideVarianceEcartTypeNiveau1,
-  texteAideVarianceEcartTypeNiveau2,
-} from "../ui/formatDispersion";
+import { LABEL_ECART_TYPE, LABEL_VARIANCE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, formatEtatActuelTableauLatex, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceDispersion } from "./EnonceDispersion";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceDispersion;
@@ -110,14 +100,7 @@ export function EtapeVarianceEcartTypeDispersion({
           )}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-aide"
-        disabled={niveauAide >= NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE}
-        onClick={onActiverAide}
-      >
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ variance, ecartType })}>
         Valider

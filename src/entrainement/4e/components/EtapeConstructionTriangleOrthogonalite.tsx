@@ -3,16 +3,11 @@ import type { ExerciceOrthogonaliteTriangle } from "../core/orthogonalite.types"
 import { evaluerConstructionTriangle } from "../moteur/verificationOrthogonalite";
 import type { ReponseConstructionTriangle } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import {
-  PLACEHOLDER_COMPOSANTE,
-  consigneGlobaleOrthogonalite,
-  formatFormuleComposantesLatex,
-  formatTermesEnonceTriangleLatex,
-  libelleBoutonAide,
-} from "../ui/formatOrthogonalite";
+import { PLACEHOLDER_COMPOSANTE, consigneGlobaleOrthogonalite, formatFormuleComposantesLatex, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
@@ -114,9 +109,7 @@ export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUti
           <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

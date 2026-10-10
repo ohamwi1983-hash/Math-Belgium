@@ -3,21 +3,12 @@ import type { ExerciceHistogramme } from "../core/histogramme.types";
 import type { ReponseFrequencesHistogramme } from "../moteur/verificationHistogramme";
 import { evaluerFrequencesHistogramme } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionHistogramme";
-import {
-  CONSIGNE_FREQUENCES,
-  LABEL_CLASSE_XI,
-  LABEL_EFFECTIF_NI,
-  LABEL_FREQUENCE_FI,
-  PLACEHOLDER_FREQUENCE_CLASSE,
-  formatClasseTexte,
-  libelleBoutonAide,
-  texteAideFrequencesNiveau1,
-  texteAideFrequencesNiveau2,
-} from "../ui/formatHistogramme";
+import { CONSIGNE_FREQUENCES, LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, PLACEHOLDER_FREQUENCE_CLASSE, formatClasseTexte, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatHistogramme";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceHistogramme } from "./EnonceHistogramme";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceHistogramme;
@@ -102,9 +93,7 @@ export function EtapeFrequencesHistogramme({ exercice, tentativesUtilisees, tent
           {niveauAide >= 2 && <p>{texteAideFrequencesNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_FREQUENCES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_FREQUENCES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_FREQUENCES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeurs)}>
         Valider

@@ -2,23 +2,10 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteParametre } from "../core/orthogonalite.types";
 import { diagnostiquerReductionParametre } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import {
-  CONSIGNE_REDUCTION_PARAMETRE_ORTHOGONALITE,
-  LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE,
-  LATEX_VEC_U,
-  LATEX_VEC_V,
-  PLACEHOLDER_EQUATION_REDUITE,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_APRES,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE,
-  RAPPEL_VECTORIEL_ORTHOGONALITE_FIN,
-  consigneGlobaleOrthogonalite,
-  formatEnonceLatex,
-  formuleSubstitueeParametreLatex,
-  libelleBoutonAide,
-} from "../ui/formatOrthogonalite";
+import { CONSIGNE_REDUCTION_PARAMETRE_ORTHOGONALITE, LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, consigneGlobaleOrthogonalite, formatEnonceLatex, formuleSubstitueeParametreLatex } from "../ui/formatOrthogonalite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
@@ -84,9 +71,7 @@ export function EtapeReductionParametreOrthogonalite({ exercice, tentativesUtili
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= max} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, max)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

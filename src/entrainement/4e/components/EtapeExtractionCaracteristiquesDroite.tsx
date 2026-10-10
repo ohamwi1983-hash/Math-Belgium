@@ -4,18 +4,12 @@ import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionCaracteristiquesDro
 import { diagnostiquerExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  PLACEHOLDER_COMPOSANTE,
-  PLACEHOLDER_COORDONNEE,
-  formatAideExtractionNiveau2Latex,
-  formatEnonceLatex,
-  libelleBoutonAide,
-  segmentsAideExtractionNiveau1,
-} from "../ui/formatCaracteristiquesDroite";
+import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, formatAideExtractionNiveau2Latex, formatEnonceLatex, segmentsAideExtractionNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneExtractionCaracteristiquesDroite } from "./ConsigneExtractionCaracteristiquesDroite";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceCaracteristiquesDroite;
@@ -99,9 +93,7 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_EXTRACTION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_EXTRACTION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EXTRACTION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

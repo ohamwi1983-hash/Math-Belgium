@@ -3,19 +3,12 @@ import type { ExerciceOptimisationModelisation } from "../core/optimisation.type
 import type { ReponseContrainteEtGrandeur } from "../moteur/verificationOptimisation";
 import { diagnostiquerContrainteEtGrandeur } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR } from "../moteur/sessionOptimisation";
-import {
-  consigneContrainteEtGrandeur,
-  libelleBoutonAide,
-  segmentsPhraseEnonce,
-  texteAideContrainteNiveau1,
-  texteAideContrainteNiveau2,
-  texteAideGrandeurNiveau1,
-  texteAideGrandeurNiveau2,
-} from "../ui/formatOptimisation";
+import { consigneContrainteEtGrandeur, segmentsPhraseEnonce, texteAideContrainteNiveau1, texteAideContrainteNiveau2, texteAideGrandeurNiveau1, texteAideGrandeurNiveau2 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { CroquisOptimisation } from "./CroquisOptimisation";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
@@ -109,14 +102,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
           )}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-aide"
-        disabled={niveauAide >= NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR}
-        onClick={onActiverAide}
-      >
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
         Valider

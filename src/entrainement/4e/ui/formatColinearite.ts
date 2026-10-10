@@ -257,7 +257,3 @@ export const PLACEHOLDER_SOLUTION_X = "ex : -1";
 /** Libellé du bouton Aide progressive — même petite fonction pure dupliquée qu'ailleurs dans le
  * projet (ex. `formatCombinaisonVecteurs.ts`), jamais un couplage entre générateurs pour un si
  * petit utilitaire. */
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}

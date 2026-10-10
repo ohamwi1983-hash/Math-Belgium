@@ -4,19 +4,12 @@ import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionEquationDroite";
 import { diagnostiquerExtraction } from "../moteur/verificationEquationDroite";
 import type { ReponseExtraction } from "../moteur/verificationEquationDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  PLACEHOLDER_COMPOSANTE,
-  PLACEHOLDER_COORDONNEE,
-  consigneExtraction,
-  formatAideExtractionNiveau2Latex,
-  formatEnonceLatex,
-  libelleBoutonAide,
-  segmentsAideExtractionNiveau1,
-} from "../ui/formatEquationDroite";
+import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, consigneExtraction, formatAideExtractionNiveau2Latex, formatEnonceLatex, segmentsAideExtractionNiveau1 } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationDroite;
@@ -130,9 +123,7 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_EXTRACTION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_EXTRACTION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_EXTRACTION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

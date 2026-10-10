@@ -4,22 +4,11 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionEquationParab
 import { diagnostiquerDirectrice, diagnostiquerFoyer, diagnostiquerP, diagnostiquerSommet } from "../moteur/verificationEquationParaboleDeveloppee";
 import type { ReponseEcranCaracteristiques } from "../moteur/typesEquationParaboleDeveloppee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  CONSIGNE_CARACTERISTIQUES,
-  CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE,
-  PLACEHOLDER_COORDONNEE,
-  PLACEHOLDER_DIRECTRICE_HORIZONTAL,
-  PLACEHOLDER_DIRECTRICE_VERTICAL,
-  PLACEHOLDER_P,
-  formatAideCaracteristiquesNiveau1Latex,
-  formatAideCaracteristiquesNiveau2Latex,
-  formatCompletionLatex,
-  formatEquationDeveloppeeLatex,
-  libelleBoutonAide,
-} from "../ui/formatEquationParaboleDeveloppee";
+import { CONSIGNE_CARACTERISTIQUES, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_DIRECTRICE_HORIZONTAL, PLACEHOLDER_DIRECTRICE_VERTICAL, PLACEHOLDER_P, formatAideCaracteristiquesNiveau1Latex, formatAideCaracteristiquesNiveau2Latex, formatCompletionLatex, formatEquationDeveloppeeLatex } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
@@ -175,9 +164,7 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CARACTERISTIQUES} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CARACTERISTIQUES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

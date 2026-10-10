@@ -2,16 +2,11 @@ import { useState } from "react";
 import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtPourcent } from "../moteur/verificationExerciceSynthese";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  consigneBtPourcent,
-  formatEnonceTexte,
-  formatEtatActuelIntervalleBTLatex,
-  libelleBoutonAide,
-  texteAideBtPourcentNiveau1,
-} from "../ui/formatExerciceSynthese";
+import { consigneBtPourcent, formatEnonceTexte, formatEtatActuelIntervalleBTLatex, texteAideBtPourcentNiveau1 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceSynthese;
@@ -62,9 +57,7 @@ export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, 
           <Katex expression={texteAideBtPourcentNiveau1(exercice).latex} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

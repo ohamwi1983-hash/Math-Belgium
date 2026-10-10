@@ -3,11 +3,12 @@ import type { ExerciceTriangleLies } from "../core/triangleLies.types";
 import { diagnostiquerPont, diagnostiquerPontSommetPartage } from "../moteur/verificationTriangleLies";
 import type { ReponsePontSommetPartage } from "../moteur/verificationTriangleLies";
 import { NIVEAU_AIDE_MAX_PONT } from "../moteur/sessionTriangleLies";
-import { consignePont, formatDonneesPontTexte, libelleBoutonAide, texteAidePontNiveau1, texteAidePontNiveau2 } from "../ui/formatTriangleLies";
+import { consignePont, formatDonneesPontTexte, texteAidePontNiveau1, texteAidePontNiveau2 } from "../ui/formatTriangleLies";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
@@ -99,9 +100,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
             {niveauAide >= 2 && <p>{texteAidePontNiveau2(exercice)}</p>}
           </div>
         )}
-        <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_PONT} onClick={onActiverAide}>
-          {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_PONT)}
-        </button>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_PONT} onActiverAide={onActiverAide} />
 
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValiderSommetPartage(reponse)}>
           Valider
@@ -146,9 +145,7 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
           {niveauAide >= 2 && <p>{texteAidePontNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_PONT} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_PONT)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_PONT} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
         Valider

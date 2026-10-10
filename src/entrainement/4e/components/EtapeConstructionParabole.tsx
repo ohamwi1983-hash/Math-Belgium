@@ -13,9 +13,9 @@ import {
   messageRayonInvalide,
   rEstDejaUtilise,
 } from "../ui/formatConstructionParabole";
-import { libelleBoutonAide } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConstructionParaboleGraph } from "./ConstructionParaboleGraph";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceConstructionParabole;
@@ -108,9 +108,7 @@ export function EtapeConstructionParabole({
           {niveauAide >= 2 && <p>{TEXTE_AIDE_CONSTRUCTION_NIVEAU2}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CONSTRUCTION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CONSTRUCTION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={rDejaUtiliseActuellement} onClick={() => onValider({ r, ligneY })}>
         Valider

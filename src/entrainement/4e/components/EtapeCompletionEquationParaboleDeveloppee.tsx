@@ -2,20 +2,13 @@ import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationParaboleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationParaboleDeveloppee";
-import {
-  CONSIGNE_COMPLETION,
-  CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE,
-  formatEquationDeveloppeeLatex,
-  formatRegroupementLatex,
-  libelleBoutonAide,
-  segmentsAideCompletionNiveau1,
-  texteAideCompletionNiveau2,
-} from "../ui/formatEquationParaboleDeveloppee";
+import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, formatRegroupementLatex, segmentsAideCompletionNiveau1, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
@@ -76,9 +69,7 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_COMPLETION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_COMPLETION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_COMPLETION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

@@ -2,17 +2,12 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerEliminationSysteme } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_ELIMINER_SYSTEME } from "../moteur/sessionEquationInequationSecondDegre";
-import {
-  consigneEliminerSysteme,
-  formatSystemeConfirmeLatex,
-  libelleBoutonAide,
-  texteAideEliminerSystemeNiveau1,
-  texteAideEliminerSystemeNiveau2,
-} from "../ui/formatEquationInequationSecondDegre";
+import { consigneEliminerSysteme, formatSystemeConfirmeLatex, texteAideEliminerSystemeNiveau1, texteAideEliminerSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
@@ -58,9 +53,7 @@ export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, te
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_ELIMINER_SYSTEME} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_ELIMINER_SYSTEME)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ELIMINER_SYSTEME} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

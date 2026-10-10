@@ -52,11 +52,6 @@ export const LABEL_VALEUR_XI = "x_i";
 export const LABEL_EFFECTIF_NI = "n_i";
 export const LABEL_EFFECTIF_CUMULE_VI = "v_i";
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}
-
 const LIBELLES_VARIANTE: Record<VarianteComparaisonSeries, string> = {
   tableaux: "Tableaux x_i / n_i",
   recapitulatif: "Tableau récapitulatif",

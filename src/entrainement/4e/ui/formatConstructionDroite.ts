@@ -4,14 +4,13 @@
  * par écran — dérivées uniquement des champs déjà présents sur le contrat, jamais recalculées
  * différemment côté vérification (`moteur/verificationConstructionDroite.ts`).
  *
- * `formatPointLatex`/`libelleBoutonAide` réutilisées telles quelles depuis `formatEquationDroite.ts`
- * (module frère), jamais réécrites — même principe que `formatLectureGraphiqueDroite.ts`.
+ * `formatPointLatex` réutilisée telle quelle depuis `formatEquationDroite.ts`
+ * (module frère), jamais réécrite — même principe que `formatLectureGraphiqueDroite.ts`.
  */
 import type { ExerciceConstructionDroite } from "../core/constructionDroite.types";
 import type { Point } from "../core/vecteur.types";
-import { formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex, libelleBoutonAide } from "./formatEquationDroite";
+import { formatEquationExpliciteXLatex, formatEquationExpliciteYLatex, formatEquationImpliciteLatex, formatPointLatex, formatRepresentationParametriqueLatex } from "./formatEquationDroite";
 
-export { libelleBoutonAide };
 
 /** Rendu de l'équation réellement affichée à l'élève — dispatché sur `variante`, jamais recalculé
  * différemment de la Couche A qui a construit ce même champ. Signes/coefficients toujours

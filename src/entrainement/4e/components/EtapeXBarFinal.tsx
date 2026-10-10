@@ -2,21 +2,12 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersXBar, ExerciceBienaymeTchebychevNombreVersXBar } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerXBar } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import {
-  LABEL_XBAR,
-  PRECISION_UNITE,
-  type ValeurEtatActuel,
-  formatEtatActuelCombineLatex,
-  kEtatActuel,
-  libelleBoutonAide,
-  pourcentAttendu0EtatActuel,
-  texteAideXBarNiveau1,
-  texteAideXBarNiveau2,
-} from "../ui/formatBienaymeTchebychev";
+import { LABEL_XBAR, PRECISION_UNITE, type ValeurEtatActuel, formatEtatActuelCombineLatex, kEtatActuel, pourcentAttendu0EtatActuel, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 type Exercice = ExerciceBienaymeTchebychevIntervalleVersXBar | ExerciceBienaymeTchebychevNombreVersXBar;
 
@@ -76,9 +67,7 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= MAX} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, MAX)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

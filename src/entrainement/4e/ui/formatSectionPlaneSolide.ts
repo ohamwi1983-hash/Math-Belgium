@@ -12,12 +12,6 @@ import { cleLigneSegmentTrace, cleSegment } from "../moteur/verificationSectionP
  * "Incorrect — tentative N/M" suffit partout, comme "Position droite/plan".
  */
 
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  if (niveau === 0) return "Aide";
-  return "Aide supplémentaire";
-}
-
 // --- Étiquetage des points/faces découverts --------------------------------------------------------
 
 /** P, Q, R sont toujours les 3 premiers (`connus[0..2]`, ordre fixé par `idsDepart`) ; chaque point

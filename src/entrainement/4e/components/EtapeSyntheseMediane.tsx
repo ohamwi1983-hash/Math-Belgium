@@ -3,29 +3,12 @@ import type { ExerciceMedianeClasses } from "../core/mediane.types";
 import type { ReponseSynthese } from "../moteur/verificationMediane";
 import { diagnostiquerSynthese } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_SYNTHESE } from "../moteur/sessionMediane";
-import {
-  LABEL_EFFECTIF_CUMULE_VI,
-  LABEL_EFFECTIF_NI,
-  LABEL_X_MAX,
-  LABEL_X_MIN,
-  PLACEHOLDER_ETENDUE,
-  PLACEHOLDER_MODE,
-  PLACEHOLDER_XMAX,
-  PLACEHOLDER_XMIN,
-  TEXTE_AIDE_SYNTHESE_1_APRES,
-  TEXTE_AIDE_SYNTHESE_1_AVANT,
-  TEXTE_AIDE_SYNTHESE_1_ENTRE_1,
-  TEXTE_AIDE_SYNTHESE_1_ENTRE_2,
-  TEXTE_AIDE_SYNTHESE_1_ENTRE_3,
-  consigneSynthese,
-  formatClasseTexte,
-  libelleBoutonAide,
-  texteAideSyntheseNiveau2,
-} from "../ui/formatMediane";
+import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_X_MAX, LABEL_X_MIN, PLACEHOLDER_ETENDUE, PLACEHOLDER_MODE, PLACEHOLDER_XMAX, PLACEHOLDER_XMIN, TEXTE_AIDE_SYNTHESE_1_APRES, TEXTE_AIDE_SYNTHESE_1_AVANT, TEXTE_AIDE_SYNTHESE_1_ENTRE_1, TEXTE_AIDE_SYNTHESE_1_ENTRE_2, TEXTE_AIDE_SYNTHESE_1_ENTRE_3, consigneSynthese, formatClasseTexte, texteAideSyntheseNiveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceMedianeClasses;
@@ -170,9 +153,7 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
           {niveauAide >= 2 && <p>{texteAideSyntheseNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SYNTHESE} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SYNTHESE)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SYNTHESE} onActiverAide={onActiverAide} />
 
       <button
         type="button"

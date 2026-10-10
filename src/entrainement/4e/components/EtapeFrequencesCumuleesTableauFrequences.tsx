@@ -3,20 +3,12 @@ import type { ExerciceTableauFrequences } from "../core/tableauFrequences.types"
 import type { ReponseFrequencesCumulees } from "../moteur/verificationTableauFrequences";
 import { evaluerFrequencesCumulees } from "../moteur/verificationTableauFrequences";
 import { NIVEAU_AIDE_MAX_FREQUENCES_CUMULEES } from "../moteur/sessionTableauFrequences";
-import {
-  CONSIGNE_FREQUENCES_CUMULEES,
-  LABEL_FREQUENCE_CUMULEE_PHI_I,
-  LABEL_FREQUENCE_FI,
-  LABEL_VALEUR_XI,
-  PLACEHOLDER_FREQUENCE_CUMULEE,
-  frequencesCumuleesRevelees,
-  libelleBoutonAide,
-  texteAideFrequencesCumuleesNiveau1,
-} from "../ui/formatTableauFrequences";
+import { CONSIGNE_FREQUENCES_CUMULEES, LABEL_FREQUENCE_CUMULEE_PHI_I, LABEL_FREQUENCE_FI, LABEL_VALEUR_XI, PLACEHOLDER_FREQUENCE_CUMULEE, frequencesCumuleesRevelees, texteAideFrequencesCumuleesNiveau1 } from "../ui/formatTableauFrequences";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceTableauFrequences } from "./EnonceTableauFrequences";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTableauFrequences;
@@ -121,14 +113,7 @@ export function EtapeFrequencesCumuleesTableauFrequences({
           )}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-aide"
-        disabled={niveauAide >= NIVEAU_AIDE_MAX_FREQUENCES_CUMULEES}
-        onClick={onActiverAide}
-      >
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_FREQUENCES_CUMULEES)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_FREQUENCES_CUMULEES} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeurs)}>
         Valider

@@ -2,17 +2,10 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerRegroupement } from "../moteur/verificationEquationCercleDeveloppee";
-import {
-  CONSIGNE_GENERALE_CENTRE_RAYON,
-  CONSIGNE_REGROUPEMENT,
-  PLACEHOLDER_EQUATION,
-  TEXTE_AIDE_REGROUPEMENT_NIVEAU1,
-  formatAideRegroupementNiveau2Latex,
-  formatEquationDeveloppeeLatex,
-  libelleBoutonAide,
-} from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_GENERALE_CENTRE_RAYON, CONSIGNE_REGROUPEMENT, PLACEHOLDER_EQUATION, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatAideRegroupementNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
@@ -68,9 +61,7 @@ export function EtapeRegroupementEquationCercleDeveloppee({ exercice, tentatives
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_REGROUPEMENT} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_REGROUPEMENT)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REGROUPEMENT} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

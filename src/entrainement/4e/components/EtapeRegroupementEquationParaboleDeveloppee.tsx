@@ -2,18 +2,12 @@ import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_REGROUPEMENT } from "../moteur/sessionEquationParaboleDeveloppee";
 import { diagnostiquerRegroupement } from "../moteur/verificationEquationParaboleDeveloppee";
-import {
-  CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE,
-  TEXTE_AIDE_REGROUPEMENT_NIVEAU1,
-  formatEquationDeveloppeeLatex,
-  libelleBoutonAide,
-  segmentsConsigneRegroupement,
-  texteAideRegroupementNiveau2,
-} from "../ui/formatEquationParaboleDeveloppee";
+import { CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, TEXTE_AIDE_REGROUPEMENT_NIVEAU1, formatEquationDeveloppeeLatex, segmentsConsigneRegroupement, texteAideRegroupementNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
@@ -68,9 +62,7 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
           {niveauAide >= 2 && <p>{texteAideRegroupementNiveau2(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_REGROUPEMENT} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_REGROUPEMENT)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_REGROUPEMENT} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

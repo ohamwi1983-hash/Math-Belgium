@@ -5,6 +5,7 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { formatEnonceAffichage } from "../ui/formatEquation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: Exercice;
@@ -62,9 +63,7 @@ export function EtapeSimplificationCoefficients({
             Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'équation par ce nombre.
           </p>
         )}
-        <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-          {aideActivee ? "Aide utilisée" : "Aide"}
-        </button>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       </div>
       <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
         Valider

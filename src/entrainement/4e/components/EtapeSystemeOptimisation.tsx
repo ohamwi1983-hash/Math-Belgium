@@ -2,12 +2,13 @@ import { useState } from "react";
 import type { ExerciceOptimisationModelisation } from "../core/optimisation.types";
 import { diagnostiquerSysteme } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_SYSTEME } from "../moteur/sessionOptimisation";
-import { consigneSysteme, formatSystemeAccoladeLatex, libelleBoutonAide, segmentsPhraseEnonce, texteAideSystemeNiveau1, texteAideSystemeNiveau2, texteAideSystemeNiveau3 } from "../ui/formatOptimisation";
+import { consigneSysteme, formatSystemeAccoladeLatex, segmentsPhraseEnonce, texteAideSystemeNiveau1, texteAideSystemeNiveau2, texteAideSystemeNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
@@ -65,9 +66,7 @@ export function EtapeSystemeOptimisation({ exercice, tentativesUtilisees, tentat
           {niveauAide >= 3 && <p>{texteAideSystemeNiveau3(exercice)}</p>}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_SYSTEME} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_SYSTEME)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SYSTEME} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

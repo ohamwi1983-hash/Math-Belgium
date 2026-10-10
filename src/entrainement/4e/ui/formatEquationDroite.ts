@@ -415,8 +415,3 @@ export function formatAideNiveau2PossibiliteCoefficientsLatex(exercice: Exercice
 
 export const PLACEHOLDER_COORDONNEE = "ex : 3";
 export const PLACEHOLDER_COMPOSANTE = "ex : -2";
-
-export function libelleBoutonAide(niveau: number, max: number): string {
-  if (niveau >= max) return "Aide utilisée";
-  return niveau === 0 ? "Aide" : "Aide supplémentaire";
-}

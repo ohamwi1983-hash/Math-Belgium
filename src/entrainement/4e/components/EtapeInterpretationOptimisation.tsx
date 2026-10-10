@@ -2,10 +2,11 @@ import { useState } from "react";
 import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { verifierInterpretation } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionOptimisation";
-import { consigneInterpretation, formatDonneesFinalesLatex, libelleBoutonAide, texteAideInterpretationNiveau1 } from "../ui/formatOptimisation";
+import { consigneInterpretation, formatDonneesFinalesLatex, texteAideInterpretationNiveau1 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
@@ -47,9 +48,7 @@ export function EtapeInterpretationOptimisation({ exercice, tentativesUtilisees,
           <p>{texteAideInterpretationNiveau1()}</p>
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_INTERPRETATION} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_INTERPRETATION)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_INTERPRETATION} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
         Valider

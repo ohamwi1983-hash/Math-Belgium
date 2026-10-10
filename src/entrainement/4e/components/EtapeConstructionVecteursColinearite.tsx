@@ -3,16 +3,11 @@ import type { ExerciceColinearPoints } from "../core/colinearite.types";
 import { evaluerConstructionVecteurs } from "../moteur/verificationColinearite";
 import type { ReponseConstructionVecteurs } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS } from "../moteur/sessionColinearite";
-import {
-  PLACEHOLDER_COMPOSANTE,
-  consigneGlobaleColinearite,
-  formatFormuleComposantesLatex,
-  formatTermesEnoncePointsLatex,
-  libelleBoutonAide,
-} from "../ui/formatColinearite";
+import { PLACEHOLDER_COMPOSANTE, consigneGlobaleColinearite, formatFormuleComposantesLatex, formatTermesEnoncePointsLatex } from "../ui/formatColinearite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceColinearPoints;
@@ -141,9 +136,7 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
           <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION_VECTEURS} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
         Valider

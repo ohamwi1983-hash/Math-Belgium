@@ -3,11 +3,12 @@ import type { ExerciceComparaisonSeries, QuestionSeuil } from "../core/comparais
 import { diagnostiquerSeuil } from "../moteur/verificationComparaisonSeries";
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { libelleBoutonAide, segmentsAideSeuilNiveau1, segmentsAideSeuilNiveau2, segmentsConsigneSeuil } from "../ui/formatComparaisonSeries";
+import { segmentsAideSeuilNiveau1, segmentsAideSeuilNiveau2, segmentsConsigneSeuil } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceComparaisonSeries;
@@ -62,9 +63,7 @@ export function EtapeSeuilComparaison({ exercice, question, tentativesUtilisees,
           )}
         </div>
       )}
-      <button type="button" className="btn btn-aide" disabled={niveauAide >= maxAide} onClick={onActiverAide}>
-        {libelleBoutonAide(niveauAide, maxAide)}
-      </button>
+      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
         Valider

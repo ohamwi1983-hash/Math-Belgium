@@ -13,6 +13,7 @@ import {
 import { diagnostiquerTangente } from "../moteur/verificationUnSansLautre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
+import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceUnSansLautre;
@@ -62,9 +63,7 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
             <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
           </div>
         )}
-        <button type="button" className="btn btn-aide" disabled={aideActivee} onClick={onActiverAide}>
-          {aideActivee ? "Aide utilisée" : "Aide"}
-        </button>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
       </div>
 
       <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
