@@ -420,12 +420,20 @@
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
-.entrainement .btn:hover {
+/* `:not(:disabled)` — sans lui, un bouton désactivé (ex. "Aide utilisée" une fois le plafond
+ * atteint, une option déjà choisie...) peut recevoir ce style survolé/pressé à sa place (fond
+ * teinté, bordure colorée) au lieu de rester visuellement inerte : au toucher sur mobile,
+ * `:hover`/`:active` restent "collés" après le tap sur beaucoup de navigateurs, bien plus visible
+ * que sur desktop. Déjà corrigé une fois, mais seulement pour `.btn-primary` (voir
+ * `.btn-primary:disabled:hover` plus bas, maintenant redondant) — jamais généralisé ici, la seule
+ * vraie source du problème pour TOUS les boutons désactivés (`.btn-aide`, options déjà
+ * sélectionnées...), quel que soit le générateur ou le niveau. */
+.entrainement .btn:hover:not(:disabled) {
   border-color: var(--color-primary);
   background: var(--color-primary-bg);
 }
 
-.entrainement .btn:active {
+.entrainement .btn:active:not(:disabled) {
   transform: scale(0.98);
 }
 
@@ -455,11 +463,6 @@
   border-color: var(--color-border);
   color: var(--color-text-muted);
   cursor: not-allowed;
-}
-
-.entrainement .btn-primary:disabled:hover {
-  background: var(--color-border);
-  border-color: var(--color-border);
 }
 
 .entrainement .boutons-generation .btn-primary {
