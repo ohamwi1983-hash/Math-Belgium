@@ -4,6 +4,8 @@ import type { ReponseTangenteEnP } from "../moteur5e/sessionTangentes";
 import { consigneGenerale, formatTermesDonneesLatex, labelFPrimeP, labelTangenteEquiv, questionSpecifiqueEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatTangentes";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelTangente } from "./EtatActuelTangente";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -19,6 +21,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseTangenteEnP) => void;
   diagnostiquer?: (reponse: ReponseTangenteEnP) => { fPrimeP: StatutVerification; tangente: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "tangenteEnP" (variante C, "doubleTangence") — 2 champs : f'(p) (numérique, dérivée du
@@ -26,7 +32,7 @@ interface Props {
  * variante ne fournit jamais f'(x)) et l'équation de la tangente (symbolique, "y="). UNE SEULE
  * tentative combinée (1 bouton Valider) — même patron 2-champs que `EtapeDevelopperDerivee.tsx`
  * (5gen26). Calculatrice PRÉSENTE (substitution numérique dans un polynôme de degré 4). */
-export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [fPrimeP, setFPrimeP] = useState("");
   const [tangente, setTangente] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -83,15 +89,20 @@ export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax,
         />
       </div>
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("tangenteEnP")}</p>

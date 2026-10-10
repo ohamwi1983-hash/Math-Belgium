@@ -6,6 +6,8 @@ import { consigneBtPourcent, formatEnonceTexte, formatEtatActuelIntervalleBTLate
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const MAX = 1;
@@ -24,7 +30,7 @@ const MAX = 1;
  * pourcentage minimal garanti $1-1/k^2$, toujours exactement 75 pour $k=2$. L'intervalle CONFIRMÉ
  * à l'écran précédent est rappelé via `EtatActuelPanel`, jamais resaisi.
  */
-export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerBtPourcent(exercice, texte) : undefined;
@@ -57,16 +63,21 @@ export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, 
           <Katex expression={texteAideBtPourcentNiveau1(exercice).latex} block />
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

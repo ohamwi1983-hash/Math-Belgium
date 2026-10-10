@@ -4,6 +4,8 @@ import { consigneEcran, consigneJustification, texteAideNiveau1, texteAideNiveau
 import type { ReponseResoudre } from "../moteur5e/verificationVitessePosition";
 import { EnonceVitessePosition } from "./EnonceVitessePosition";
 import { EtatActuelVitessePosition } from "./EtatActuelVitessePosition";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -20,6 +22,10 @@ interface Props {
   /** Diagnostic PAR CHAMP (surlignage rouge individuel) — correct si la valeur saisie correspond
    * à L'UNE des 2 racines attendues, peu importe la position du champ. */
   diagnostiquerRacine?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "resoudre" — RÉSOUT L'ÉQUATION DU SECOND DEGRÉ e(t)=distanceCible : 2 champs numériques
@@ -38,6 +44,7 @@ export function EtapeResoudreVitessePosition({
   onActiverAide,
   onValider,
   diagnostiquerRacine,
+  validation,
 }: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
@@ -97,15 +104,20 @@ export function EtapeResoudreVitessePosition({
         ))}
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, null)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, null)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("resoudre")}</p>

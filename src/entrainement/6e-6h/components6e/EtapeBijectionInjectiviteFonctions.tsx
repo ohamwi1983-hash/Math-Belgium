@@ -6,6 +6,8 @@ import type { ReponseBijection } from "../moteur6e/verificationInjectiviteFoncti
 import { diagnostiquerBijection } from "../moteur6e/verificationInjectiviteFonctions";
 import { CONSIGNE_ECRAN_BIJECTION, CONSIGNE_GENERALE, TEXTE_AIDE_BIJECTION_NIVEAU1, formatFLatexAffichage, lignesEtatActuelApresImage } from "../ui6e/formatInjectiviteFonctions";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { DoubleComboboxIntervalle } from "./DoubleComboboxIntervalle";
 import { EtatActuelPanel } from "./EtatActuelPanel";
@@ -27,6 +29,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseBijection) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -38,7 +44,7 @@ interface Props {
  * sur TOUS les écrans, y compris les écrans à choix). Un seul palier d'aide sur cet écran (complément
  * ciblé — voir `moteur6e/sessionInjectiviteFonctions.ts::NIVEAU_AIDE_MAX`).
  */
-export function EtapeBijectionInjectiviteFonctions({ exercice, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeBijectionInjectiviteFonctions({ exercice, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState<EnsembleReelGuide | null>(null);
   const [y, setY] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<ReponseBijection | null>(null);
@@ -80,16 +86,21 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, intervalleConfirm
         erroneeY={statut !== null && !statut.yCorrect}
       />
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
 
-      {montrerErreurs && !statut?.global && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        {montrerErreurs && !statut?.global && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

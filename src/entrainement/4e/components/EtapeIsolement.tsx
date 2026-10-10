@@ -8,6 +8,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -56,6 +58,7 @@ interface Props {
    */
   texteAide?: string;
   onValider: (reponse: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 export function EtapeIsolement({
@@ -73,6 +76,7 @@ export function EtapeIsolement({
   onActiverAide,
   texteAide = "Rassemble tous les termes du même côté, pour obtenir 0 de l'autre côté.",
   onValider,
+  validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
   const expressionParDefaut = () =>
@@ -117,18 +121,23 @@ export function EtapeIsolement({
         )}
         <input id="isolement" className="text-input" value={reponse} onChange={(e) => setReponse(e.target.value)} />
       </div>
-      <div>
-        {aideActivee && <p className="prompt-text">{texteAide}</p>}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
-      <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(reponse))}
-        </p>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && <p className="prompt-text">{texteAide}</p>}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(reponse))}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { pointsAideExemple } from "../ui/lectureGraphiqueDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { LectureGraphiqueDroiteGraph } from "./LectureGraphiqueDroiteGraph";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseParametriqueLecture) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const PLACEHOLDER_TEXTE_X = "ex : x=2+t×3";
@@ -29,7 +35,7 @@ const PLACEHOLDER_TEXTE_Y = "ex : y=1-t×2";
  * colinéaire à la référence, jamais un couple exact imposé — même mécanisme que "Équation d'une
  * droite", réutilisé tel quel).
  */
-export function EtapeLectureParametrique({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeLectureParametrique({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
 
@@ -80,16 +86,21 @@ export function EtapeLectureParametrique({ exercice, tentativesUtilisees, tentat
           {niveauAide >= 2 && <p>Deux points de la droite sont désormais surlignés en orange sur le graphe.</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -18,13 +20,17 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseQ3) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
  * Écran "q3" (variante "discrete" uniquement, `promptgen33modifications.md`) — même structure que
  * l'écran "q1" (2 champs séparés : seuil 3n/4, Q3), calculée DIRECTEMENT sur le tableau complet.
  */
-export function EtapeQ3Mediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeQ3Mediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [seuil, setSeuil] = useState("");
   const [q3, setQ3] = useState("");
 
@@ -101,16 +107,21 @@ export function EtapeQ3Mediane({ exercice, tentativesUtilisees, tentativesMax, n
           {niveauAide >= 2 && <p>{texteAideQ3Niveau2(exercice)}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_Q3} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_Q3} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ seuil, q3 })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ seuil, q3 })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

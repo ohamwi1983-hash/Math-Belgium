@@ -7,6 +7,8 @@ import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_COMPOSANTE, formatAideVecteurABN
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionIsocele) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -25,7 +28,7 @@ interface Props {
  * substituée) — `promptgen26refontecomplete.md`, Partie D : graphe supprimé (chevauchement de
  * labels non résolvable simplement, n'apporte pas d'information essentielle).
  */
-export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -107,18 +110,23 @@ export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentat
           )}
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

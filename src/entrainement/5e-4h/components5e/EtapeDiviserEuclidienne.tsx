@@ -4,6 +4,8 @@ import type { ReponseDiviserEuclidienne } from "../moteur5e/sessionAsymptoteObli
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatAsymptoteOblique";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelAsymptoteOblique } from "./EtatActuelAsymptoteOblique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -19,11 +21,15 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseDiviserEuclidienne) => void;
   diagnostiquer?: (reponse: ReponseDiviserEuclidienne) => { quotient: StatutVerification; reste: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "diviserEuclidienne" (variante "divisionEuclidienne" uniquement) — 1 champ symbolique
  * (quotient Q(x)) + 1 champ numérique (reste R(x)), vérifiés INDÉPENDAMMENT. */
-export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [quotient, setQuotient] = useState("");
   const [reste, setReste] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -79,15 +85,20 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
         />
       </div>
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("diviserEuclidienne")}</p>

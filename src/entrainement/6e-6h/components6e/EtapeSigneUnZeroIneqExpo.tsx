@@ -3,6 +3,8 @@ import type { DirectionSigne } from "../core6e/inequationsExponentielles.types";
 import { Katex } from "../components/Katex";
 import type { ReponseSigneUnZero } from "../moteur6e/verificationInequationsExponentielles";
 import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsExponentielles";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -23,6 +25,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseSigneUnZero) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -30,7 +36,7 @@ interface Props {
  * un champ numérique (le zéro) + un choix binaire (le sens du changement de signe, lu de gauche à
  * droite). `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [zeroTexte, setZeroTexte] = useState("");
   const [sens, setSens] = useState<DirectionSigne | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -80,16 +86,21 @@ export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, etatActue
         </button>
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
 
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

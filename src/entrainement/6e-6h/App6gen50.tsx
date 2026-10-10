@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLoiBinomiale } from "./generateurs6e/loiBinomiale";
 import type { IdVarianteLoiBinomiale } from "./generateurs6e/loiBinomiale";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionLoiBinomiale, soumettreReponseEcran } from "./moteur6e/sessionLoiBinomiale";
-import type { EtatSessionLoiBinomiale, PhaseLoiBinomiale, ResultatExerciceLoiBinomiale } from "./moteur6e/typesLoiBinomiale";
+import type { EtatSessionLoiBinomiale } from "./moteur6e/typesLoiBinomiale";
 import { diagnostiquerEcran } from "./moteur6e/verificationLoiBinomiale";
 import { EtapeChampsLoiBinomiale } from "./components6e/EtapeChampsLoiBinomiale";
-import { ResultatPanelLoiBinomiale } from "./components6e/ResultatPanelLoiBinomiale";
-import { ResumeSessionLoiBinomiale } from "./components6e/ResumeSessionLoiBinomiale";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiBinomiale";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiBinomiale";
 
 /**
  * `6gen50` — Loi binomiale. Même patron que `App6gen48.tsx` : un dispatcher générique piloté par
@@ -25,39 +24,39 @@ function nouvelleSession(): EtatSessionLoiBinomiale {
   return demarrerSessionLoiBinomiale(REGLAGES_DEMO, genererExerciceLoiBinomiale);
 }
 
-type AideParPhase = Partial<Record<PhaseLoiBinomiale, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceLoiBinomiale;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionLoiBinomiale;
+  revele: boolean;
 }
-
 
 export function App6gen50() {
   const [etat, setEtat] = useState<EtatSessionLoiBinomiale>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionLoiBinomiale) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen43/6gen48 répliqué à l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionLoiBinomiale(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteLoiBinomiale)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -71,12 +70,28 @@ export function App6gen50() {
     (window as unknown as { __debug6gen50?: unknown }).__debug6gen50 = { exercice, phase };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -87,28 +102,23 @@ export function App6gen50() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsLoiBinomiale
-            // `${etat.generationId}-${phase}`, JAMAIS `phase` seul — voir `generationId`
-            // (`moteur6e/typesLoiBinomiale.ts`/`sessionLoiBinomiale.ts`) : la famille B (écran de
-            // calcul des termes) peut avoir un nombre de champs variable à phase de départ
-            // identique entre 2 exercices consécutifs — mirroir du bug trouvé/corrigé sur 6gen48.
-            key={`${etat.generationId}-${phase}`}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-
-        {dernierBilan && <ResultatPanelLoiBinomiale resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionLoiBinomiale resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsLoiBinomiale
+          // `${etat.generationId}-${phase}`, JAMAIS `phase` seul — voir `generationId`
+          // (`moteur6e/typesLoiBinomiale.ts`/`sessionLoiBinomiale.ts`) : la famille B (écran de
+          // calcul des termes) peut avoir un nombre de champs variable à phase de départ
+          // identique entre 2 exercices consécutifs — mirroir du bug trouvé/corrigé sur 6gen48.
+          key={`${etat.generationId}-${phase}`}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+        />
       </main>
     </div>
   );

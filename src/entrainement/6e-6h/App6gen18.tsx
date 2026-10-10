@@ -14,14 +14,13 @@ import {
   soumettreReponseCEcran2,
   soumettreReponseCEcran3,
 } from "./moteur6e/sessionDeterminerParametresLogarithme";
-import type { EtatSessionDeterminerParametresLogarithme, PhaseDeterminerParametresLogarithme, ResultatExerciceDeterminerParametresLogarithme } from "./moteur6e/typesDeterminerParametresLogarithme";
+import type { EtatSessionDeterminerParametresLogarithme } from "./moteur6e/typesDeterminerParametresLogarithme";
 import { diagnostiquerAEcran1, diagnostiquerAEcran2, diagnostiquerBEcran1, diagnostiquerBEcran2, diagnostiquerBEcran3, diagnostiquerCEcran1, diagnostiquerCEcran2, diagnostiquerCEcran3 } from "./moteur6e/verificationDeterminerParametresLogarithme";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { EtapeChampDeterminerParametres } from "./components6e/EtapeChampDeterminerParametres";
 import { EtapeDeuxChampsDeterminerParametres } from "./components6e/EtapeDeuxChampsDeterminerParametres";
-import { ResultatPanelDeterminerParametresLogarithme } from "./components6e/ResultatPanelDeterminerParametresLogarithme";
-import { ResumeSessionDeterminerParametresLogarithme } from "./components6e/ResumeSessionDeterminerParametresLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { Katex } from "./components/Katex";
 import {
   aideNiveau1A,
   aideNiveau1B,
@@ -41,6 +40,7 @@ import {
   etatActuelA,
   etatActuelB,
   etatActuelC,
+  formatReponseAttenduePhaseLatex,
   labelsEcranA,
   labelsEcranB,
   placeholderEcranC,
@@ -54,44 +54,59 @@ function nouvelleSession(): EtatSessionDeterminerParametresLogarithme {
   return demarrerSessionDeterminerParametresLogarithme(REGLAGES_DEMO, genererExerciceDeterminerParametresLogarithme);
 }
 
-type AideParPhase = Partial<Record<PhaseDeterminerParametresLogarithme, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceDeterminerParametresLogarithme;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDeterminerParametresLogarithme;
+  revele: boolean;
 }
-
 
 export function App6gen18() {
   const [etat, setEtat] = useState<EtatSessionDeterminerParametresLogarithme>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionDeterminerParametresLogarithme) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici — remis à zéro par `avancerPhase` DANS le même appel qui clôt l'écran, voir
-    // `moteur6e/sessionDeterminerParametresLogarithme.ts` et `docs/historique-6e.md`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionDeterminerParametresLogarithme(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   const aideCommun = {
     tentativesUtilisees,
@@ -99,6 +114,7 @@ export function App6gen18() {
     niveauAide,
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   // Calculatrice scientifique — visible uniquement sur les écrans où un calcul de ln(k1) à la main
@@ -114,7 +130,7 @@ export function App6gen18() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && exercice.famille === "A" && (
+        {exercice.famille === "A" && (
           <>
             {phase === "aEcran1" && (
               <EtapeDeuxChampsDeterminerParametres
@@ -155,7 +171,7 @@ export function App6gen18() {
           </>
         )}
 
-        {enCoursDeSession && exercice.famille === "B" && (
+        {exercice.famille === "B" && (
           <>
             {phase === "bEcran1" && (
               <EtapeDeuxChampsDeterminerParametres
@@ -211,7 +227,7 @@ export function App6gen18() {
           </>
         )}
 
-        {enCoursDeSession && exercice.famille === "C" && (
+        {exercice.famille === "C" && (
           <>
             {phase === "cEcran1" && (
               <EtapeChampDeterminerParametres
@@ -261,12 +277,7 @@ export function App6gen18() {
           </>
         )}
 
-        {enCoursDeSession && calculatriceVisible && <CalculatriceScientifique />}
-
-        {dernierBilan && (
-          <ResultatPanelDeterminerParametresLogarithme resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />
-        )}
-        {etat.terminee && !dernierBilan && <ResumeSessionDeterminerParametresLogarithme resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        {calculatriceVisible && <CalculatriceScientifique />}
       </main>
     </div>
   );

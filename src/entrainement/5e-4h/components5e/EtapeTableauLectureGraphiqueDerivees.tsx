@@ -3,6 +3,7 @@ import type { ReponseTableauEtudeLocale } from "../moteur5e/verificationLectureG
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../moteur5e/verificationLectureGraphiqueDerivees";
 import { consigneEcran, consigneGenerale, formatEnteteColonnesTableauFPrime, formatEnteteColonnesTableauFSeconde, questionFinale, texteAideNiveau1 } from "../ui5e/formatLectureGraphiqueDerivees";
 import { QuestionFinale } from "../components/QuestionFinale";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelLectureGraphiqueDerivees } from "./EtatActuelLectureGraphiqueDerivees";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
@@ -17,6 +18,7 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTableauEtudeLocale) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écrans "tableauFPrime"/"tableauFSeconde" — réutilise TEL QUEL `TableauEtudeLocaleBuilder`
@@ -26,7 +28,7 @@ interface Props {
  * voir `ui5e/formatLectureGraphiqueDerivees.ts::texteAideNiveau1`) — le mécanisme de cellule
  * active du tableau, générique/partagé avec 5gen29, n'expose aucun callback de focus exploitable
  * pour un surlignage visuel du graphique sans le modifier. */
-export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = mode === "fprime" ? formatEnteteColonnesTableauFPrime(exercice, attendu.colonnes) : formatEnteteColonnesTableauFSeconde(exercice, attendu.colonnes);
@@ -47,6 +49,7 @@ export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativ
         tentativesMax={tentativesMax}
         onValider={onValider}
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
+        validation={validation}
       />
       {niveauAide >= 1 && (
         <div className="aide-5e">

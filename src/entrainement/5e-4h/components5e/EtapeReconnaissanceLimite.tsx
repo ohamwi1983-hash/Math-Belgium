@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceLimite } from "../core5e/limites.types";
 import { LIBELLE_FAMILLE_LIMITE, OPTIONS_RECONNAISSANCE_INDETERMINEE, consigneGenerale, consignePhase, formatBlocDonneesEgalLatex, formatBlocDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -12,6 +14,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (choix: string, valeurTexte?: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const ID_INDETERMINEE = "indeterminee";
@@ -24,7 +30,7 @@ const ID_INDETERMINEE = "indeterminee";
  * état local). "Nombre réel ℝ" fait apparaître un champ de réponse DIRECTEMENT sous LUI (avant "L'infini
  * ∞"), sur ce même écran — classification et valeur numérique en un seul geste, aucun écran
  * supplémentaire pour cette famille. */
-export function EtapeReconnaissanceLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeReconnaissanceLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [principal, setPrincipal] = useState<string | null>(null);
   const [sousChoix, setSousChoix] = useState<string | null>(null);
   const [valeur, setValeur] = useState("");
@@ -98,15 +104,20 @@ export function EtapeReconnaissanceLimite({ exercice, tentativesUtilisees, tenta
         )}
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "reconnaissance")}</p>

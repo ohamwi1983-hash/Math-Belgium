@@ -3,6 +3,8 @@ import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.type
 import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
 import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
@@ -19,6 +21,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseCasSpecial) => void;
   diagnostiquer?: (reponse: ReponseCasSpecial) => { x: StatutVerification; y: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -29,7 +35,7 @@ interface Props {
  * même convention 4e que les coordonnées d'un point — `EtapeCoordonneesRelationVectorielle.tsx`),
  * jamais empilés verticalement comme le rendait `EtapeChampsEtudeComplete` générique.
  */
-export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -77,15 +83,20 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
         </div>
       </div>
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "casSpecial")}</p>

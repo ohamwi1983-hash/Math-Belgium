@@ -3,6 +3,8 @@ import type { ExerciceSuiteClassique } from "../core5e/suitesClassiques.types";
 import type { PhaseSuiteClassique } from "../moteur5e/typesSuiteClassique";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, optionsQCM, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteClassique } from "./EtatActuelSuiteClassique";
 
@@ -15,10 +17,14 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (choixId: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran de choix multiple (QCM) — réutilisé par 6 des 26 phases de 5gen17. */
-export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const options = optionsQCM(exercice, phase);
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -46,15 +52,20 @@ export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentat
           </button>
         ))}
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={choixId === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={choixId === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, phase)} block />

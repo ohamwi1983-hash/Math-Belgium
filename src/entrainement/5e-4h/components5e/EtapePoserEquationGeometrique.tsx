@@ -5,6 +5,8 @@ import type { ReponseEquation } from "../moteur5e/sessionSuiteGeometrique";
 import { consigneGenerale, consignePhase, consignePoserEquationAlgebriqueValeurLatex, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteGeometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -24,13 +26,17 @@ interface Props {
   /** Statut à 3 valeurs calculé côté PRÉSENTATION uniquement — optionnel, un appelant qui ne le
    * fournit pas garde le message générique historique. */
   diagnostiquer?: (reponse: ReponseEquation) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "poserEquationAlgebrique" (familles "algebriqueTermeGeneral"/"algebriqueSommeSn") ou
  * "poserEquationRangN" (famille "algebriqueRangN") — REFONTE `prompt5gen15refontefamillesbonus.md`,
  * miroir direct de `EtapePoserEquation.tsx` (5gen14) : UN SEUL champ texte libre où l'élève tape
  * l'équation COMPLÈTE, "=" inclus (ex. `5x-47=-x+16-x+19` ou `12*2^(n-1)=768`). */
-export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -72,15 +78,20 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
           placeholder={placeholder}
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)} block />

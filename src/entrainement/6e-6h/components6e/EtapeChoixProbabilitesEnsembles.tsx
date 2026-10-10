@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { AideAvecLatex, OptionChoix } from "../ui6e/formatProbabilitesEnsembles";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -20,6 +22,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (choixId: string) => void;
   diagnostiquer: (choixId: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -31,7 +37,7 @@ interface Props {
  * `.btn-primary` (réservé à "Valider", convention CLAUDE.md). Même structure d'écran (consigne
  * générale → bloc données → état actuel → bloc de travail) que `EtapeChampsProbabilitesEnsembles`.
  * `App6gen30.tsx` doit le rendre avec `key={phase}` (remet le choix à zéro à chaque écran). */
-export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && choixId !== null ? diagnostiquer(choixId) : null;
@@ -68,15 +74,20 @@ export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, blocDonnees,
           </button>
         ))}
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={choixId === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={choixId === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

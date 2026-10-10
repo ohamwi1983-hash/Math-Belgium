@@ -8,6 +8,8 @@ import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSais
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -20,11 +22,12 @@ interface Props {
   onValider: (valeur: number) => void;
   /** `sommetPartage` uniquement — angle au sommet commun + les 2 côtés qui en partent. */
   onValiderSommetPartage: (reponse: ReponsePontSommetPartage) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 1, commun aux 3 configurations — résoudre le triangle "pont". `cotePartage`/`anglePartage`
  * n'ont qu'un seul côté transféré à trouver ; `sommetPartage` demande 3 valeurs (angle + 2 côtés). */
-export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, onValiderSommetPartage }: Props) {
+export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, onValiderSommetPartage, validation }: Props) {
   const [texte, setTexte] = useState("");
   const [texteAngle, setTexteAngle] = useState("");
   const [texteCote1, setTexteCote1] = useState("");
@@ -100,16 +103,21 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
             {niveauAide >= 2 && <p>{texteAidePontNiveau2(exercice)}</p>}
           </div>
         )}
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_PONT} onActiverAide={onActiverAide} />
+        {!validation && (
+          <>
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_PONT} onActiverAide={onActiverAide} />
 
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValiderSommetPartage(reponse)}>
-          Valider
-        </button>
-        {apresEchec && (
-          <p className="alert-error" role="alert">
-            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-          </p>
+            <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValiderSommetPartage(reponse)}>
+              Valider
+            </button>
+            {apresEchec && (
+              <p className="alert-error" role="alert">
+                {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+              </p>
+            )}
+          </>
         )}
+        {validation && <ValidationEcran {...validation} />}
       </div>
     );
   }
@@ -145,16 +153,21 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
           {niveauAide >= 2 && <p>{texteAidePontNiveau2(exercice)}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_PONT} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_PONT} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
+            Valider
+          </button>
+          {apresEchec && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

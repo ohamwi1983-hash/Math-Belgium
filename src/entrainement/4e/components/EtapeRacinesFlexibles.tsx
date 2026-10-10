@@ -6,6 +6,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Choix = "pasDe" | "auMoins";
@@ -68,6 +70,7 @@ interface Props {
    */
   texteAide?: string;
   onValider: (racines: [number, number]) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -102,6 +105,7 @@ export function EtapeRacinesFlexibles({
   onActiverAide,
   texteAide = "Une fois l'expression factorisée, chaque facteur égalé à 0 donne une racine.",
   onValider,
+  validation,
 }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
@@ -223,26 +227,31 @@ export function EtapeRacinesFlexibles({
         </div>
       )}
 
-      {onActiverAide && (
-        <div>
-          {aideActivee && <p className="prompt-text">{texteAide}</p>}
-          <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        </div>
-      )}
+      {!validation && (
+        <>
+          {onActiverAide && (
+            <div>
+              {aideActivee && <p className="prompt-text">{texteAide}</p>}
+              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+            </div>
+          )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={reponse === null}
+            onClick={() => reponse !== null && onValider(reponse)}
+          >
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

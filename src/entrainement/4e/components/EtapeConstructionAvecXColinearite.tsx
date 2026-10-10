@@ -6,6 +6,8 @@ import { NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X } from "../moteur/sessionColinearit
 import { PLACEHOLDER_COMPOSANTE_SYMBOLIQUE, consigneGlobaleColinearite, formatFormuleComposantesLatex, formatTermesEnoncePointsParametreLatex } from "../ui/formatColinearite";
 import { Katex } from "./Katex";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionAvecX) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Un seul champ de saisie LIBRE par composante — accepte une expression algébrique de x (ex.
@@ -70,7 +76,7 @@ function ChampSymbolique({
  * `promptgen24modificationscompletes.md` : bloc de données (points A/B/C) passé en "bloc fitter"
  * (`formatTermesEnoncePointsParametreLatex`, un fragment KaTeX par point).
  */
-export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -138,20 +144,25 @@ export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisee
           <Katex expression={formatFormuleComposantesLatex(exercice.labelA, exercice.labelB)} block />
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION_AVEC_X} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(
-            tentativesUtilisees,
-            tentativesMax,
-            evaluation && Object.values(evaluation).includes("parse_error") ? "parse_error" : undefined,
-          )}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(
+              tentativesUtilisees,
+              tentativesMax,
+              evaluation && Object.values(evaluation).includes("parse_error") ? "parse_error" : undefined,
+            )}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

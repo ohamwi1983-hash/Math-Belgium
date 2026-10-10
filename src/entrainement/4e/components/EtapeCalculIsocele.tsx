@@ -7,6 +7,8 @@ import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_LONGUEUR, formatAideNormeABNivea
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseCalculIsocele) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -24,7 +27,7 @@ interface Props {
  * irréductible acceptés), labels en notation norme ($\|\vec{AB}\|=$, remplace l'ancien "AB=").
  * Aide à 2 niveaux, limitée à $\vec{AB}$ — `promptgen26refontecomplete.md`, Partie D.
  */
-export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [ab, setAb] = useState("");
   const [ac, setAc] = useState("");
   const [bc, setBc] = useState("");
@@ -101,18 +104,23 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
           )}
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

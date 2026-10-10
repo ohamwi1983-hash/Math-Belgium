@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { Katex } from "../components/Katex";
 import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsExponentielles";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 
@@ -23,6 +25,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: EnsembleReelGuide) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -33,7 +39,7 @@ interface Props {
  * composant partagé `EnsembleReelGuideBuilder` que 6gen1/6gen3/6gen7. `App6gen10.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeIntervalleIneqExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeIntervalleIneqExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -61,16 +67,21 @@ export function EtapeIntervalleIneqExpo({ consigneEcran, enonceLatex, etatActuel
 
       <EnsembleReelGuideBuilder onChange={setReponse} label="S =" />
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={valider}>
+          Valider
+        </button>
 
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

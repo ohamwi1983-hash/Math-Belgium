@@ -8,6 +8,8 @@ import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSais
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
 import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,11 +19,15 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseAnglesTriangleLies) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 2, `anglePartage` uniquement — l'angle utile (différence des 2 visées) et l'angle déduit
  * de l'hypothèse annexe, les 2 angles qui ferment le triangle cible. */
-export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [utile, setUtile] = useState("");
   const [hypothese, setHypothese] = useState("");
   const complet = utile.trim() !== "" && hypothese.trim() !== "";
@@ -75,16 +81,21 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
           {niveauAide >= 3 && <p>{texteAideAnglesNiveau3(exercice)}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ANGLES} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ANGLES} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+          Valider
+        </button>
+        {apresEchec && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

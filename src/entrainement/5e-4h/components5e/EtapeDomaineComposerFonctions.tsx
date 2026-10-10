@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { EnsembleReelGuide } from "../core5e/domaineDefinition.types";
 import { Katex } from "../components/Katex";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
 
@@ -29,6 +30,7 @@ interface Props {
    * — non vide pour "domFRondG" (f∘g déjà confirmé) et "domGRondF" (f∘g, dom(f∘g), g∘f déjà confirmés). */
   termesEtatActuel?: string[];
   onValider: (reponse: EnsembleReelGuide) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
@@ -44,7 +46,7 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
 
 /** Écran guidé, réutilisé pour "domFRondG" ET "domGRondF" — même builder que 5gen1
  * (`EnsembleReelGuideBuilder`), seuls consigne/aides diffèrent selon l'appelant. */
-export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu, attendu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider }: Props) {
+export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu, attendu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
   return (
     <div>
@@ -58,8 +60,9 @@ export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu,
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         attendu={attendu}
         apresEchec={montrerErreurs}
+        validation={validation}
       />
-      {montrerErreurs && (
+      {!validation && montrerErreurs && (
         <p className="alert-error" role="alert">
           Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
         </p>

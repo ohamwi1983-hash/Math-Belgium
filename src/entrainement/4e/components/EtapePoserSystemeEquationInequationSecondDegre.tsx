@@ -6,6 +6,8 @@ import { consignePoserSysteme, texteAidePoserSystemeNiveau1, texteAidePoserSyste
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,11 +17,15 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: { reel: string; hypothetique: string }) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 0a (`voieSysteme` uniquement) — poser les 2 équations du système (situation réelle
  * `x·y=M`, situation hypothétique `(x+a)(y-b)=M`). */
-export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [reel, setReel] = useState("");
   const [hypothetique, setHypothetique] = useState("");
   const complet = reel.trim() !== "" && hypothetique.trim() !== "";
@@ -65,16 +71,21 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSER_SYSTEME} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSER_SYSTEME} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ reel, hypothetique })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutReel === "parse_error" || statutHypothetique === "parse_error" ? "parse_error" : undefined)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ reel, hypothetique })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutReel === "parse_error" || statutHypothetique === "parse_error" ? "parse_error" : undefined)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

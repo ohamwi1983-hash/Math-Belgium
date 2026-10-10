@@ -10,6 +10,8 @@ import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -19,6 +21,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseLecture) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const CHAMPS: { cle: keyof ReponseLecture; label: string }[] = [
@@ -31,7 +37,7 @@ const CHAMPS: { cle: keyof ReponseLecture; label: string }[] = [
 
 /** Écran "lecture" — boîte à moustaches déjà tracée (statique, aucune interaction), 5 champs libres
  * indépendants. Toujours terminal. */
-export function EtapeLecture({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeLecture({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<ReponseLecture>({ min: "", q1: "", mediane: "", q3: "", max: "" });
   const maxAide = niveauAideMaxPourPhase("lecture");
 
@@ -78,16 +84,21 @@ export function EtapeLecture({ exercice, tentativesUtilisees, tentativesMax, niv
           </p>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -3,6 +3,8 @@ import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceArcfonctionsDifferentes } from "../core6e/equationsCyclometriques.types";
 import { MAX_DEN, CONSIGNE_GENERALE, formatEquationOriginaleLatex, texteAideConditionNiveau1, texteAideConditionNiveau2 } from "../ui6e/formatEquationsCyclometriques";
 import { formatEnsembleReelLatex } from "../ui6e/formatEnsembleReel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EtatActuelPanel } from "./EtatActuelPanel";
@@ -16,6 +18,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: EnsembleReelGuide) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "condition" — NOUVEAU, intercalaire entre "ce" et "equation", variante 4 UNIQUEMENT
@@ -24,7 +30,7 @@ interface Props {
  * conditionParasite`) — DISTINCTE de la CE de domaine posée à l'écran précédent (`exercice.ce`,
  * rappelée en bloc "état actuel"), et c'est ELLE qui permettra de rejeter les racines parasites à
  * l'écran final. Réutilise `EnsembleReelGuideBuilder` TEL QUEL, exactement comme l'écran "ce". */
-export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [condition, setCondition] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -45,15 +51,20 @@ export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtil
         Établis cette condition supplémentaire sous forme de x∈[intervalle].
       </p>
       <EnsembleReelGuideBuilder onChange={setCondition} label="x\in" erronee={montrerErreurs} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={condition === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={condition === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideConditionNiveau1(exercice)}</p>

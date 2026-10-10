@@ -4,6 +4,8 @@ import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerF1EvaluationB, diagnostiquerF2EvaluationB, type ReponseEvaluationB } from "../moteur5e/verificationProblemesContexte";
 import { TEXTE_AIDE_EVALUATION_B_1, consigneEvaluationB, formatTermesEtatActuelB } from "../ui5e/formatProblemesContexte";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -20,6 +22,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseEvaluationB) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function EtatActuelB({ exercice, aRetenu, bRetenu }: { exercice: ExerciceScenarioB; aRetenu: number; bRetenu: number }) {
@@ -33,7 +39,7 @@ function EtatActuelB({ exercice, aRetenu, bRetenu }: { exercice: ExerciceScenari
   );
 }
 
-export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [f1, setF1] = useState("");
   const [f2, setF2] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -61,15 +67,20 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
           <input type="text" className={`text-input${f2Erronee ? " is-erronee" : ""}`} value={f2} onChange={(e) => setF2(e.target.value.replace(/[^0-9.,-]/g, ""))} />
         </div>
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_EVALUATION_B_1}</p>

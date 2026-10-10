@@ -11,6 +11,8 @@ import {
   texteAideNiveau2,
 } from "../ui5e/formatSuiteGeometrique";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -31,6 +33,10 @@ interface Props {
    * cet écran porte sa propre cible (ou son propre ensemble de cibles interchangeables pour
    * "termesConsecutifsMoyenneRiche"), jamais une seule vérification globale. */
   diagnostiquerChamp?: (index: number, valeur: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function labelsPourPhase(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGeometrique): string[] {
@@ -52,6 +58,7 @@ export function EtapeTermesMultiplesSuiteGeometrique({
   onValider,
   diagnostiquer,
   diagnostiquerChamp,
+  validation,
 }: Props) {
   const labels = labelsPourPhase(exercice, phase);
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
@@ -91,15 +98,20 @@ export function EtapeTermesMultiplesSuiteGeometrique({
           </div>
         );
       })}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, phase)} block />

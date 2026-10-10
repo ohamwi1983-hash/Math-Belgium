@@ -8,6 +8,8 @@ import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSais
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseSynthese) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -27,7 +33,7 @@ interface Props {
  * "Mode et classe modale") et un champ numérique "Mode" — vérifié INDÉPENDAMMENT du champ "Classe
  * modale" (jamais dérivé de sa saisie, voir `verificationMediane.ts`).
  */
-export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [xMin, setXMin] = useState("");
   const [xMax, setXMax] = useState("");
   const [etendue, setEtendue] = useState("");
@@ -153,21 +159,26 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
           {niveauAide >= 2 && <p>{texteAideSyntheseNiveau2(exercice)}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SYNTHESE} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SYNTHESE} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ xMin, xMax, etendue, classeModale: classeModale as number, mode })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ xMin, xMax, etendue, classeModale: classeModale as number, mode })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

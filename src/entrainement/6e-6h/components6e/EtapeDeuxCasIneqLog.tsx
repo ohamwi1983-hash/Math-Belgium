@@ -4,6 +4,8 @@ import type { ReponseCasBaseLog } from "../core6e/inequationsLogarithmiques.type
 import { Katex } from "../components/Katex";
 import type { ReponseFConclure } from "../moteur6e/verificationInequationsLogarithmiques";
 import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsLogarithmiques";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 
@@ -27,6 +29,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseFConclure) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 interface EtatCas {
@@ -51,7 +57,7 @@ function versReponse(etat: EtatCas): ReponseCasBaseLog | null {
  * d'intervalle révélé dans un conteneur `.contenu-conditionnel` uniquement après le choix
  * "Un intervalle". `App6gen15.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [casSuperieur, setCasSuperieur] = useState<EtatCas>(CAS_VIDE);
   const [casInferieur, setCasInferieur] = useState<EtatCas>(CAS_VIDE);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -114,16 +120,21 @@ export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, etatActuel, ai
       {renderCas("Cas a>1", casSuperieur, setCasSuperieur)}
       {renderCas("Cas 0<a<1", casInferieur, setCasInferieur)}
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
 
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

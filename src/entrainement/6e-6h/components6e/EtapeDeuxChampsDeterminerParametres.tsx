@@ -5,6 +5,8 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { AideAvecLatex } from "../ui6e/formatDeterminerParametresLogarithme";
 import type { ReponseDeuxChamps } from "../moteur6e/verificationDeterminerParametresLogarithme";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -25,6 +27,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseDeuxChamps) => void;
   diagnostiquer: (reponse: ReponseDeuxChamps) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -51,6 +57,7 @@ export function EtapeDeuxChampsDeterminerParametres({
   onActiverAide,
   onValider,
   diagnostiquer,
+  validation,
 }: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
@@ -94,15 +101,20 @@ export function EtapeDeuxChampsDeterminerParametres({
           <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={b} placeholder={placeholderB} onChange={(e) => setB(e.target.value)} />
         </div>
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={a.trim() === "" || b.trim() === ""} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={a.trim() === "" || b.trim() === ""} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

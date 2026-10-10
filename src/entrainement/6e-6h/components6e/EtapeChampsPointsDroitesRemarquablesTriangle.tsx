@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { AideAvecLatex, DefinitionEcran } from "../ui6e/formatPointsDroitesRemarquablesTriangle";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -20,6 +22,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer: (valeurs: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle les champs,
+   * remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/
+   * invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const MAX_LIGNES_LISTE = 4;
@@ -40,7 +46,7 @@ const MAX_LIGNES_LISTE = 4;
  * historique de 6gen43, donc `.field-inline` (qui force `white-space:nowrap` et déborde sur mobile)
  * est banni ici sans exception, y compris pour les champs courts.
  */
-export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   return (
     <div>
       <p className="prompt-text">{consigneGenerale}</p>
@@ -73,6 +79,7 @@ export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale,
           diagnostiquer={diagnostiquer}
           aideNiveau1={aideNiveau1}
           aideNiveau2={aideNiveau2}
+          validation={validation}
         />
       ) : (
         <BlocListe
@@ -87,6 +94,7 @@ export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale,
           diagnostiquer={diagnostiquer}
           aideNiveau1={aideNiveau1}
           aideNiveau2={aideNiveau2}
+          validation={validation}
         />
       )}
     </div>
@@ -103,6 +111,7 @@ interface BlocCommunProps {
   diagnostiquer: (valeurs: string[]) => StatutVerification;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
+  validation?: ValidationEtapeProps | null;
 }
 
 function BlocAide({ niveauAide, niveauAideMax, onActiverAide, aideNiveau1, aideNiveau2 }: Pick<BlocCommunProps, "niveauAide" | "niveauAideMax" | "onActiverAide" | "aideNiveau1" | "aideNiveau2">) {
@@ -125,7 +134,7 @@ function BlocAide({ niveauAide, niveauAideMax, onActiverAide, aideNiveau1, aideN
   );
 }
 
-function BlocChamps({ champs, tentativesUtilisees, tentativesMax, diagnostiquer, onValider, ...aide }: BlocCommunProps & { champs: import("../ui6e/formatPointsDroitesRemarquablesTriangle").ChampDef[] }) {
+function BlocChamps({ champs, tentativesUtilisees, tentativesMax, diagnostiquer, onValider, validation, ...aide }: BlocCommunProps & { champs: import("../ui6e/formatPointsDroitesRemarquablesTriangle").ChampDef[] }) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -193,15 +202,20 @@ function BlocChamps({ champs, tentativesUtilisees, tentativesMax, diagnostiquer,
           );
         })}
       </div>
-      <BlocAide {...aide} />
-      <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+          <BlocAide {...aide} />
+          <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
+            Valider
+          </button>
+          {montrerErreurs && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }
@@ -210,7 +224,7 @@ function ligneVide(forme: "valeur" | "point"): string[] {
   return forme === "point" ? ["", ""] : [""];
 }
 
-function BlocListe({ forme, label, tentativesUtilisees, tentativesMax, diagnostiquer, onValider, ...aide }: BlocCommunProps & { forme: "valeur" | "point"; label: string }) {
+function BlocListe({ forme, label, tentativesUtilisees, tentativesMax, diagnostiquer, onValider, validation, ...aide }: BlocCommunProps & { forme: "valeur" | "point"; label: string }) {
   const [lignes, setLignes] = useState<string[][]>(() => [ligneVide(forme)]);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -267,15 +281,20 @@ function BlocListe({ forme, label, tentativesUtilisees, tentativesMax, diagnosti
           </button>
         )}
       </div>
-      <BlocAide {...aide} />
-      <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+          <BlocAide {...aide} />
+          <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
+            Valider
+          </button>
+          {montrerErreurs && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

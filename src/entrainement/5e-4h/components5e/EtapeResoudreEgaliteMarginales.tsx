@@ -4,6 +4,8 @@ import type { ReponseEgaliteMarginales } from "../moteur5e/verificationContexteE
 import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -18,6 +20,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseEgaliteMarginales) => void;
   diagnostiquerRacine: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "resoudreEgaliteMarginales" — 2 champs numériques (les 2 racines de Cm(x)=Rm(x), ordre
@@ -26,7 +32,7 @@ interface Props {
  * calculées, voir `verificationContexteEconomique.ts::ReponseEgaliteMarginales`). Le rappel du
  * domaine économique (x>0) est affiché en clair — c'est le RAISONNEMENT qui doit être explicite,
  * jamais un indice sur la valeur. */
-export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine }: Props) {
+export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine, validation}: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
   const [choix, setChoix] = useState<"positive" | "negative" | null>(null);
@@ -77,15 +83,20 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
       </div>
 
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("resoudreEgaliteMarginales")}</p>

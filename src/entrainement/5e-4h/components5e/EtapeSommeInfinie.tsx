@@ -4,6 +4,8 @@ import type { PhaseSuiteGeometrique } from "../moteur5e/typesSuiteGeometrique";
 import type { ReponseSommeInfinie } from "../moteur5e/verificationSuiteGeometrique";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteGeometrique";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -20,12 +22,16 @@ interface Props {
   onValider: (reponse: ReponseSommeInfinie) => void;
   /** Statut à 3 valeurs (A.1) calculé côté PRÉSENTATION uniquement — optionnel. */
   diagnostiquer?: (reponse: ReponseSommeInfinie) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "sommeInfinie"/B1/B2 — choix Existe/N'existe pas PUIS, si "Existe", la valeur — piège
  * central : |q|<1 STRICTEMENT (q=1 ou q=-1 répondent tous deux "n'existe pas", contrairement à la
  * convergence de la suite elle-même). */
-export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [valeur, setValeur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -71,15 +77,20 @@ export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentat
         </div>
       )}
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={existe === null || !complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={existe === null || !complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteGeometrique)} block />

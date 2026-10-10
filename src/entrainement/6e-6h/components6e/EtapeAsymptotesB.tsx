@@ -3,6 +3,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import type { ReponseAsymptotes } from "../moteur6e/verificationEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE, consigneAsymptotesB } from "../ui6e/formatEtudeFonctionExponentielle";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -22,6 +24,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseAsymptotes) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 3/6, "asymptotes" — famille B UNIQUEMENT : l'asymptote verticale x=p est TOUJOURS
@@ -30,7 +36,7 @@ interface Props {
  * horizontale (texte libre, commune aux deux infinis). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. `etatActuel` rappelle le domaine ET les limites CONFIRMÉS aux 2 écrans
  * précédents (voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeAsymptotesB({ enonceLatex, p, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeAsymptotesB({ enonceLatex, p, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cote, setCote] = useState<"plus" | "moins" | null>(null);
   const [texteHorizontale, setTexteHorizontale] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -79,15 +85,20 @@ export function EtapeAsymptotesB({ enonceLatex, p, etatActuel, aideNiveau1, aide
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texteHorizontale} placeholder="ex : y=1" onChange={(e) => setTexteHorizontale(e.target.value)} />
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

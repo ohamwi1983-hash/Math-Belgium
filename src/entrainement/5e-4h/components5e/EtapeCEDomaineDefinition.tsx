@@ -5,6 +5,8 @@ import type { ReponseCE } from "../moteur5e/verificationDomaineDefinition";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, OPTIONS_SYMBOLE_CE, texteAideCE } from "../ui5e/formatDomaineDefinition";
 import type { OptionPolynomeLatex } from "../ui5e/formatDomaineDefinition";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface LigneSaisie {
@@ -80,6 +82,10 @@ interface Props {
    * des blocs) — jamais avant, contrairement au montage précédent d'`App5gen1.tsx`. */
   donnees: ReactNode;
   onValider: (reponse: ReponseCE) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -99,7 +105,7 @@ interface Props {
  * — même principe que `EtapeCE.tsx`, où "Pas de CE" ne fait que choisir l'option, l'élève doit
  * ensuite cliquer "Valider" comme pour toute autre réponse.
  */
-export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider }: Props) {
+export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation}: Props) {
   const slots: SlotCE[] = exercice.famille === "pasDeCE" ? [] : exercice.slots;
   const pasDeSlotReel = slots.length === 0;
   const options = optionsSlots(slots);
@@ -201,15 +207,20 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
           </button>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && textesAide.length > 0 && (
         <div className="aide-5e">
           <p>{textesAide[0]}</p>

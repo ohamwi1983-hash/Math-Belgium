@@ -9,6 +9,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMoyennePonderee } from "./EnonceMoyennePonderee";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -18,6 +20,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseSommes) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Valeur (variante "discrete") ou centre CONFIRMÉ (variante "classes") de chaque ligne, sous la
@@ -43,7 +49,7 @@ function lignes(exercice: ExerciceMoyennePonderee): { x: number; n: number }[] {
  * (`promptgen32corrections2.md`, point 1 — déroge à la convention transversale "entier à la
  * première apparition" pour cette seule paire d'en-têtes sur cet écran).
  */
-export function EtapeSommesMoyennePonderee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeSommesMoyennePonderee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const donnees = lignes(exercice);
   const [produits, setProduits] = useState<string[]>(() => new Array(donnees.length).fill("") as string[]);
   const [sommeXN, setSommeXN] = useState("");
@@ -143,16 +149,21 @@ export function EtapeSommesMoyennePonderee({ exercice, tentativesUtilisees, tent
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMES} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SOMMES} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ produits, sommeXN, sommeN })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ produits, sommeXN, sommeN })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

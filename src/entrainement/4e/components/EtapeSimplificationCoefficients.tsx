@@ -5,6 +5,8 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { formatEnonceAffichage } from "../ui/formatEquation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -35,6 +38,7 @@ export function EtapeSimplificationCoefficients({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
   const expression = formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel);
@@ -57,22 +61,27 @@ export function EtapeSimplificationCoefficients({
           onChange={(e) => setReponse(e.target.value)}
         />
       </div>
-      <div>
-        {aideActivee && (
-          <p className="prompt-text">
-            Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'équation par ce nombre.
-          </p>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
-      <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
-        </p>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <p className="prompt-text">
+                Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'équation par ce nombre.
+              </p>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

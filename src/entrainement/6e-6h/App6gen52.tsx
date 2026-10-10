@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceExtensionsBinomialeNormaleBayes } from "./generateurs6e/extensionsBinomialeNormaleBayes";
 import type { IdVarianteExtensionsBinomialeNormaleBayes } from "./generateurs6e/extensionsBinomialeNormaleBayes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionExtensionsBinomialeNormaleBayes, soumettreReponseEcran } from "./moteur6e/sessionExtensionsBinomialeNormaleBayes";
-import type { EtatSessionExtensionsBinomialeNormaleBayes, PhaseExtensionsBinomialeNormaleBayes, ResultatExerciceExtensionsBinomialeNormaleBayes } from "./moteur6e/typesExtensionsBinomialeNormaleBayes";
+import type { EtatSessionExtensionsBinomialeNormaleBayes } from "./moteur6e/typesExtensionsBinomialeNormaleBayes";
 import { diagnostiquerEcran } from "./moteur6e/verificationExtensionsBinomialeNormaleBayes";
 import { EtapeChampsExtensionsBinomialeNormaleBayes } from "./components6e/EtapeChampsExtensionsBinomialeNormaleBayes";
-import { ResultatPanelExtensionsBinomialeNormaleBayes } from "./components6e/ResultatPanelExtensionsBinomialeNormaleBayes";
-import { ResumeSessionExtensionsBinomialeNormaleBayes } from "./components6e/ResumeSessionExtensionsBinomialeNormaleBayes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, calculerReferenceExtensionsBinomialeNormaleBayes, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatExtensionsBinomialeNormaleBayes";
+import { Katex } from "./components/Katex";
+import { blocDonnees, calculerReferenceExtensionsBinomialeNormaleBayes, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatExtensionsBinomialeNormaleBayes";
 
 /**
  * `6gen52` — Extensions binomiale, normale et Bayes (problèmes). GÉNÉRATEUR DE CLÔTURE du chapitre
@@ -26,39 +25,39 @@ function nouvelleSession(): EtatSessionExtensionsBinomialeNormaleBayes {
   return demarrerSessionExtensionsBinomialeNormaleBayes(REGLAGES_DEMO, genererExerciceExtensionsBinomialeNormaleBayes, calculerReferenceExtensionsBinomialeNormaleBayes);
 }
 
-type AideParPhase = Partial<Record<PhaseExtensionsBinomialeNormaleBayes, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceExtensionsBinomialeNormaleBayes;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionExtensionsBinomialeNormaleBayes;
+  revele: boolean;
 }
-
 
 export function App6gen52() {
   const [etat, setEtat] = useState<EtatSessionExtensionsBinomialeNormaleBayes>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionExtensionsBinomialeNormaleBayes) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen43/6gen51 répliqué à l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionExtensionsBinomialeNormaleBayes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteExtensionsBinomialeNormaleBayes), calculerReferenceExtensionsBinomialeNormaleBayes));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -72,12 +71,28 @@ export function App6gen52() {
     (window as unknown as { __debug6gen52?: unknown }).__debug6gen52 = { exercice, phase, reference: calculerReferenceExtensionsBinomialeNormaleBayes(exercice, phase) };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -88,27 +103,22 @@ export function App6gen52() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsExtensionsBinomialeNormaleBayes
-            // `${generationId}-${phase}`, PAS `phase` seul — famille B a un nombre de champs
-            // variable (`termesACalculer.length`) à écran de départ constant (voir
-            // `typesExtensionsBinomialeNormaleBayes.ts`, `generationId`).
-            key={`${etat.generationId}-${phase}`}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs, calculerReferenceExtensionsBinomialeNormaleBayes(exercice, phase))}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-
-        {dernierBilan && <ResultatPanelExtensionsBinomialeNormaleBayes resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionExtensionsBinomialeNormaleBayes resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsExtensionsBinomialeNormaleBayes
+          // `${generationId}-${phase}`, PAS `phase` seul — famille B a un nombre de champs
+          // variable (`termesACalculer.length`) à écran de départ constant (voir
+          // `typesExtensionsBinomialeNormaleBayes.ts`, `generationId`).
+          key={`${etat.generationId}-${phase}`}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs, calculerReferenceExtensionsBinomialeNormaleBayes(exercice, phase))}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+        />
       </main>
     </div>
   );

@@ -4,6 +4,8 @@ import { Katex } from "../components/Katex";
 import type { TypeConcaviteLog } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseConcaviteLog } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, consigneConcavite } from "../ui6e/formatEtudeFonctionLogarithme";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -30,6 +32,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConcaviteLog) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "concavité" — généralise `6gen11` (au plus 1 point d'inflexion) à 0..N points, pattern
@@ -37,7 +43,7 @@ interface Props {
  * la famille B, qui a TOUJOURS un point d'inflexion mais parfois DEUX (voir
  * `generateurs6e/etudeFonctionLogarithme/familles/B.ts`). Commun aux 4 familles A-D.
  * `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<TypeConcaviteLog | null>(null);
   const [positions, setPositions] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -97,15 +103,20 @@ export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNi
           </button>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

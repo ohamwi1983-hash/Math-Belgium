@@ -5,6 +5,8 @@ import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
 import { LIBELLES_OUI_NON, QUESTION_SOMMET_RECTANGLE, QUESTION_TRIANGLE_RECTANGLE, TEXTE_AIDE_CONCLUSION_TRIANGLE, consigneGlobaleOrthogonalite, etatActuelConclusionTriangle, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -14,6 +16,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConclusionTriangle) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const SOMMETS: Sommet[] = ["A", "B", "C"];
@@ -39,7 +45,7 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangle, sommet: Sommet): s
  * seul bloc violet visible sur cet écran n'affichait que les coordonnées de départ (le bloc de
  * données), jamais un récapitulatif des critères déjà calculés.
  */
-export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
   const [sommet, setSommet] = useState<Sommet | null>(null);
   const max = NIVEAU_AIDE_MAX.conclusionTriangle;
@@ -95,21 +101,26 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtili
           <p>{TEXTE_AIDE_CONCLUSION_TRIANGLE}</p>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => complet && onValider({ estRectangle: estRectangle as boolean, sommet })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => complet && onValider({ estRectangle: estRectangle as boolean, sommet })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

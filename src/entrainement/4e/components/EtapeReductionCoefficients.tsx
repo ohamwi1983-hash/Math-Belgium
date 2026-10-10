@@ -9,6 +9,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { formatPolynome } from "../ui/formatSimplification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -57,6 +59,7 @@ interface Props {
    * réponse de la forme "k(...)" plutôt qu'un polynôme divisé par k.
    */
   variante?: "reduction" | "miseEnEvidence";
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -87,6 +90,7 @@ export function EtapeReductionCoefficients({
   etatActuel,
   variante = "reduction",
   prefixeExpression,
+  validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
   const nomCapitalise = nom.charAt(0).toUpperCase() + nom.slice(1);
@@ -127,24 +131,29 @@ export function EtapeReductionCoefficients({
           onChange={(e) => setReponse(e.target.value)}
         />
       </div>
-      <div>
-        {aideActivee && (
-          <p className="prompt-text">
-            {variante === "miseEnEvidence"
-              ? "Cherche le plus grand diviseur commun aux trois coefficients, puis mets-le en évidence devant une parenthèse — ne divise jamais le polynôme par ce nombre, il doit rester visible en facteur."
-              : "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le polynôme par ce nombre."}
-          </p>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
-      <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
-        </p>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <p className="prompt-text">
+                {variante === "miseEnEvidence"
+                  ? "Cherche le plus grand diviseur commun aux trois coefficients, puis mets-le en évidence devant une parenthèse — ne divise jamais le polynôme par ce nombre, il doit rester visible en facteur."
+                  : "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le polynôme par ce nombre."}
+              </p>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

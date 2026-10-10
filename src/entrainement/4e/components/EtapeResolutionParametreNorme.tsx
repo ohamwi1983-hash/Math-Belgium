@@ -6,6 +6,8 @@ import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSais
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Choix = "aucune" | "auMoins";
@@ -17,6 +19,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (valeurs: number[]) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -29,7 +32,7 @@ interface Props {
  * solutions réelles). Aide à 2 niveaux : rappel de la méthode (discriminant), puis la valeur du
  * discriminant déjà calculée (racines non extraites).
  */
-export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const max = NIVEAU_AIDE_MAX.resolutionParametreNorme;
@@ -126,18 +129,23 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
           )}
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -3,6 +3,8 @@ import type { ExerciceEtudeLocale } from "../core5e/etudeLocale.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -26,6 +28,10 @@ interface Props {
   /** Diagnostic PAR CHAMP — correct si la valeur saisie correspond à N'IMPORTE LAQUELLE des cibles
    * attendues (ensemble, ordre indifférent). */
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran générique "N champs numériques FIGÉS, vérifiés comme un ENSEMBLE" — réutilisé par
@@ -48,6 +54,7 @@ export function EtapeChampsNumeriquesEtudeLocale({
   onActiverAide,
   onValider,
   diagnostiquer,
+  validation,
 }: Props) {
   const nb = labels.length;
   const [valeurs, setValeurs] = useState<string[]>(() => new Array(nb).fill(""));
@@ -97,15 +104,20 @@ export function EtapeChampsNumeriquesEtudeLocale({
         </div>
       ))}
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1EtudeLocale(phase)}</p>

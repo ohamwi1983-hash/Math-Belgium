@@ -15,6 +15,8 @@ import {
 } from "../ui/formatConstructionParabole";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConstructionParaboleGraph } from "./ConstructionParaboleGraph";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -28,6 +30,10 @@ interface Props {
   rDejaUtilises: number[];
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionParabole) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const R_INITIAL = 1;
@@ -62,6 +68,7 @@ export function EtapeConstructionParabole({
   rDejaUtilises,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [r, setR] = useState(R_INITIAL);
   const [ligneY, setLigneY] = useState(LIGNE_Y_INITIALE);
@@ -108,16 +115,21 @@ export function EtapeConstructionParabole({
           {niveauAide >= 2 && <p>{TEXTE_AIDE_CONSTRUCTION_NIVEAU2}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONSTRUCTION} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={rDejaUtiliseActuellement} onClick={() => onValider({ r, ligneY })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={rDejaUtiliseActuellement} onClick={() => onValider({ r, ligneY })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

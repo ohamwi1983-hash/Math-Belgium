@@ -14,6 +14,8 @@ import {
 import { diagnostiquerValeurSignee } from "../moteur/verificationUnSansLautre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -23,11 +25,12 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Deuxième étape — le bloc contexte reprend l'énoncé ET le résultat confirmé de l'écran 1 (le
  * carré cible, toujours dérivé directement de l'exercice — jamais la saisie de l'élève). */
-export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider }: Props) {
+export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -58,23 +61,28 @@ export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, t
         />
       </div>
 
-      <div>
-        {aideActivee && (
-          <p className="prompt-text">
-            θ appartient au quadrant {libelleQuadrantUnSansLautre(exercice.quadrant)}, donc <Katex expression={formatSigneCibleLatex(exercice)} />.
-          </p>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <p className="prompt-text">
+                θ appartient au quadrant {libelleQuadrantUnSansLautre(exercice.quadrant)}, donc <Katex expression={formatSigneCibleLatex(exercice)} />.
+              </p>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

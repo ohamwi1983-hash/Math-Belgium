@@ -4,6 +4,8 @@ import { diagnostiquerIntersectionSimpleA } from "../moteur5e/verificationProble
 import { TEXTE_AIDE_INTERSECTION_SIMPLE_A_1, consigneIntersectionSimpleA, formatTermesEtatActuelAReduit } from "../ui5e/formatProblemesContexte";
 import type { ExerciceScenarioAReduit } from "../ui5e/scenarioAGraphReduit";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAReduit }) {
@@ -28,7 +34,7 @@ function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAReduit }) {
   );
 }
 
-export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerIntersectionSimpleA(exercice, Number(valeur.replace(",", "."))) !== "correct";
@@ -52,15 +58,20 @@ export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisee
           onChange={(e) => setValeur(e.target.value.replace(/[^0-9.,-]/g, ""))}
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_INTERSECTION_SIMPLE_A_1}</p>

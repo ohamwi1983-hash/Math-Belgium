@@ -7,6 +7,8 @@ import { CONSIGNE_GENERALE_DISTANCE, PLACEHOLDER_COMPOSANTE, formatAideVecteurAB
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseConstructionDistance) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -24,7 +27,7 @@ interface Props {
  * une seule tentative. Aide à 2 niveaux (formule générale non substituée, puis substituée) —
  * `promptgen26refontecomplete.md`, Partie F : graphe supprimé (chevauchement de labels).
  */
-export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const max = NIVEAU_AIDE_MAX.constructionDistance;
@@ -90,18 +93,23 @@ export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tenta
           )}
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -3,6 +3,8 @@ import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
 import { verifierDomaine } from "../moteur6e/verificationInjectiviteFonctions";
 import { CONSIGNE_ECRAN_DOMAINE, CONSIGNE_GENERALE, aideDomaineNiveau2, formatFLatexAffichage, texteAideDomaineNiveau1 } from "../ui6e/formatInjectiviteFonctions";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { Katex } from "../components/Katex";
@@ -15,12 +17,16 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: EnsembleReelGuide) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 1 — domaine de définition, un seul `EnsembleReelGuideBuilder` réutilisé tel quel.
  * `App6gen1.tsx` doit le rendre avec `key={phase}` (l'état local du builder ne doit jamais
  * survivre à un changement d'écran). */
-export function EtapeDomaineInjectiviteFonctions({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeDomaineInjectiviteFonctions({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [domaine, setDomaine] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0 && derniereReponse !== null;
@@ -44,16 +50,21 @@ export function EtapeDomaineInjectiviteFonctions({ exercice, tentativesUtilisees
 
       <EnsembleReelGuideBuilder onChange={setDomaine} label="domf =" erronee={montrerErreurs && !correct} />
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={domaine === null} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={domaine === null} onClick={valider}>
+          Valider
+        </button>
 
-      {montrerErreurs && !correct && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        {montrerErreurs && !correct && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

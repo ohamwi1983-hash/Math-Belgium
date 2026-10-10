@@ -3,6 +3,8 @@ import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.type
 import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
 import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -18,12 +20,16 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseAV) => void;
   diagnostiquer?: (textes: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "av" — gate "Pas de AV"/"Au moins une AV" (`.options-grid` + `.btn.toggle-active`, même
  * patron que `EtapeCEDomaineDefinition.tsx`) puis, si "Au moins une AV", liste add-as-needed des
  * équations (une valeur numérique par ligne, jamais les points vides — simplifiés). */
-export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [auMoinsUneAV, setAuMoinsUneAV] = useState<boolean | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -89,15 +95,20 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
           </button>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "av")}</p>

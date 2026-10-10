@@ -5,6 +5,8 @@ import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { formatInequationLatex } from "../ui/formatInequation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -38,6 +41,7 @@ export function EtapeSimplificationInequation({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
 
@@ -59,24 +63,29 @@ export function EtapeSimplificationInequation({
           onChange={(e) => setReponse(e.target.value)}
         />
       </div>
-      <div>
-        {aideActivee && (
-          <p className="prompt-text">
-            Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'inéquation par ce
-            nombre (positif ou négatif). Si tu choisis un diviseur négatif, le sens de l'inégalité s'inverse —
-            indique alors le nouveau symbole dans ta réponse.
-          </p>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
-      <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
-        </p>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <p className="prompt-text">
+                Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'inéquation par ce
+                nombre (positif ou négatif). Si tu choisis un diviseur négatif, le sens de l'inégalité s'inverse —
+                indique alors le nouveau symbole dans ta réponse.
+              </p>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer(reponse))}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

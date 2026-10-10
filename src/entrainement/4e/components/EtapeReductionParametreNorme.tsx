@@ -6,6 +6,8 @@ import { FORMULE_GENERALE_NORME_PARAMETRE_LATEX, PLACEHOLDER_EQUATION_PARAMETRE,
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -25,7 +28,7 @@ interface Props {
  * $x_{\vec v}$/$y_{\vec v}$ (niveau 1), puis substituée avec les valeurs réelles, non résolue
  * (niveau 2).
  */
-export function EtapeReductionParametreNorme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeReductionParametreNorme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX.reductionParametreNorme;
   const complet = texte.trim() !== "";
@@ -70,18 +73,23 @@ export function EtapeReductionParametreNorme({ exercice, tentativesUtilisees, te
           )}
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

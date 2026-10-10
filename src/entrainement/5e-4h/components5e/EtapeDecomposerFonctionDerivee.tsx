@@ -12,6 +12,8 @@ import {
 } from "../ui5e/formatFonctionDerivee";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelFonctionDerivee } from "./EtatActuelFonctionDerivee";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -28,6 +30,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: { champ1: string; champ2: string }) => void;
   diagnostiquer?: (reponse: { champ1: string; champ2: string }) => { champ1: StatutVerification; champ2: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "decomposer" — 2 champs texte libres, labellisés dynamiquement selon `typeRetenu`
@@ -35,7 +41,7 @@ interface Props {
  * 1-tentative-combinée que `EtapeDevelopperDerivee.tsx` (5gen26). Le champ1/champ2 générique est
  * mappé côté `App5gen27.tsx` vers `ReponseDecomposerUV`/`ReponseDecomposerComposee` selon
  * `typeRetenu`. */
-export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [champ1, setChamp1] = useState("");
   const [champ2, setChamp2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -96,15 +102,20 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
           placeholder={placeholder2}
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("decomposer", typeRetenu)}</p>

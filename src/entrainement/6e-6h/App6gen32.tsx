@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIndependanceBayes } from "./generateurs6e/independanceBayes";
 import type { IdVarianteIndependanceBayes } from "./generateurs6e/independanceBayes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIndependanceBayes, soumettreReponseEcran } from "./moteur6e/sessionIndependanceBayes";
-import type { EtatSessionIndependanceBayes, PhaseIndependanceBayes, ResultatExerciceIndependanceBayes } from "./moteur6e/typesIndependanceBayes";
+import type { EtatSessionIndependanceBayes } from "./moteur6e/typesIndependanceBayes";
 import { diagnostiquerEcran } from "./moteur6e/verificationIndependanceBayes";
+import { Katex } from "./components/Katex";
 import { EtapeChampsIndependanceBayes } from "./components6e/EtapeChampsIndependanceBayes";
-import { ResultatPanelIndependanceBayes } from "./components6e/ResultatPanelIndependanceBayes";
-import { ResumeSessionIndependanceBayes } from "./components6e/ResumeSessionIndependanceBayes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, tableauDonnees, tableauEtatActuel } from "./ui6e/formatIndependanceBayes";
+import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, tableauDonnees, tableauEtatActuel } from "./ui6e/formatIndependanceBayes";
 
 /**
  * `6gen32` — Indépendance, conditionnement et Bayes (chapitre 8, "Probabilités", 3e générateur du
@@ -26,39 +25,35 @@ function nouvelleSession(): EtatSessionIndependanceBayes {
   return demarrerSessionIndependanceBayes(REGLAGES_DEMO, genererExerciceIndependanceBayes);
 }
 
-type AideParPhase = Partial<Record<PhaseIndependanceBayes, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceIndependanceBayes;
-  aideParPhase: AideParPhase;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionIndependanceBayes;
+  revele: boolean;
 }
-
 
 export function App6gen32() {
   const [etat, setEtat] = useState<EtatSessionIndependanceBayes>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionIndependanceBayes) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron `6gen18`/`6gen21`/`6gen23`/`6gen30`
-    // répliqué à l'identique (voir `moteur6e/sessionIndependanceBayes.ts`, `soumettreReponseEcran`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionIndependanceBayes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIndependanceBayes)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -79,6 +74,21 @@ export function App6gen32() {
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
   };
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
@@ -89,6 +99,7 @@ export function App6gen32() {
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
     ...aideCommun,
+    validation,
   };
 
   return (
@@ -99,10 +110,7 @@ export function App6gen32() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && <EtapeChampsIndependanceBayes key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />}
-
-        {dernierBilan && <ResultatPanelIndependanceBayes resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionIndependanceBayes resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsIndependanceBayes key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />
       </main>
     </div>
   );

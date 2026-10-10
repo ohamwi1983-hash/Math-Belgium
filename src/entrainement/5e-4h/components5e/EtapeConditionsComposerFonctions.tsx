@@ -5,6 +5,8 @@ import type { ReponseCondition } from "../moteur5e/verificationComposerFonctions
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { TOLERANCE_SEUIL } from "../moteur5e/verificationComposerFonctions";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
 
@@ -35,6 +37,10 @@ interface Props {
   latexAideNiveau2: string | null;
   termesEtatActuel?: string[];
   onValider: (reponse: ReponseCondition[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
@@ -55,7 +61,7 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
  * de 5gen1 (`EtapeCEDomaineDefinition.tsx`), réutilisant les mêmes classes CSS
  * (`.ce-ligne-champs`/`.ce-slot-latex`/`.ce-select`).
  */
-export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider }: Props) {
+export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<Ligne[]>(() => dir.conditions.map(() => ({ comparateur: null, seuil: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -111,15 +117,20 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
           />
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1}</p>

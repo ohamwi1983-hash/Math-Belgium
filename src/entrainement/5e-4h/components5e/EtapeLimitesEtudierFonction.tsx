@@ -5,6 +5,8 @@ import { diagnostiquerSlotLimite, listeSlotsLimites } from "../moteur5e/verifica
 import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatLabelSlotLimite, formatTermesDonneesLatex, questionFinaleEtudierFonction, texteAideNiveau1EtudierFonction, texteAideNiveau2EtudierFonction } from "../ui5e/formatEtudierFonction";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelEtudierFonction } from "./EtatActuelEtudierFonction";
 
@@ -17,6 +19,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponses: ValeurReponseSlotLimite[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function slotEstDeTypeSigne(slot: SlotLimiteEtudierFonction): boolean {
@@ -30,7 +36,7 @@ function slotEstDeTypeSigne(slot: SlotLimiteEtudierFonction): boolean {
  * `diagnostiquerQuotient` (5gen20/5gen21, réutilisés tels quels côté moteur). Calculatrice ABSENTE
  * (les 4 familles sont purement algébriques, comportement aux bornes déductible sans calcul décimal
  * à la main). */
-export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const slots = listeSlotsLimites(exercice);
   const n = slots.length;
   const [valeurs, setValeurs] = useState<ValeurReponseSlotLimite[]>(() => Array(n).fill(null));
@@ -97,15 +103,20 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
           </div>
         );
       })}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1EtudierFonction("limites")}</p>

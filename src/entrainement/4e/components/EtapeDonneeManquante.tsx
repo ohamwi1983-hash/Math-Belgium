@@ -6,6 +6,8 @@ import { calculerTriangleQuelconqueSketch } from "../ui/triangleQuelconqueSketch
 import { TriangleQuelconqueSketch } from "./TriangleQuelconqueSketch";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,6 +17,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (valeur: number, unite: UniteLongueur | null) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 1 — retrouver la donnée manquante (côté ou angle, selon la configuration) via la loi
@@ -25,7 +31,7 @@ interface Props {
  * uniquement quand la donnée manquante est un côté (`estCote`, jamais pour un angle en degrés, qui
  * n'a pas d'unité) ; aucune valeur présélectionnée (`""`, même convention "pas de biais par défaut"
  * que les crochets d'intervalle du reste du projet — l'élève doit choisir activement). */
-export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [unite, setUnite] = useState<UniteLongueur | "">("");
 
@@ -84,16 +90,21 @@ export function EtapeDonneeManquante({ exercice, tentativesUtilisees, tentatives
           ))}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NOMBRE_NIVEAUX_AIDE_DONNEE_MANQUANTE} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur, uniteChoisie)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur, uniteChoisie)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

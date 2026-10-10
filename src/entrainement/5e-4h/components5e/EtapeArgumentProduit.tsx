@@ -7,6 +7,8 @@ import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, texteAideAr
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -21,6 +23,10 @@ interface Props {
   onValider: (reponse: ReponseDeuxFacteursArgument) => void;
   /** Statut à 3 valeurs, calculé côté PRÉSENTATION uniquement — voir `EtapeArgumentEquationTrig`. */
   diagnostiquer?: (reponse: ReponseDeuxFacteursArgument) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Bloc "état actuel" — rappelle prefacteur (si présent) + les 2 équations séparées déjà
@@ -116,7 +122,7 @@ function BlocFacteurArgument({
  * ENSEMBLE sur un seul écran, chacun avec son propre add-as-needed + gate "Aucune solution"/"Au
  * moins une série d'angles" (E.1, applique D.1 par facteur — un facteur peut être sin décimal
  * pendant que l'autre est cos exact). */
-export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choix1, setChoix1] = useState<boolean | null>(exercice.facteur1.fonction === "tan" ? false : null);
   const [lignes1, setLignes1] = useState<string[]>([""]);
   const [choix2, setChoix2] = useState<boolean | null>(exercice.facteur2.fonction === "tan" ? false : null);
@@ -157,15 +163,20 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
       <BlocFacteurArgument facteur={exercice.facteur1} numero={1} choix={choix1} setChoix={setChoix1} lignes={lignes1} setLignes={setLignes1} erronee={facteur1Erronee} />
       <BlocFacteurArgument facteur={exercice.facteur2} numero={2} choix={choix2} setChoix={setChoix2} lignes={lignes2} setLignes={setLignes2} erronee={facteur2Erronee} />
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>Facteur 1 — {texteAideArgumentNiveau1(exercice.facteur1.fonction)}</p>

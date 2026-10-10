@@ -3,6 +3,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import type { ReponseDeuxChamps } from "../moteur6e/verificationDomaineDeriveeExponentielles";
 import { CONSIGNE_GENERALE } from "../ui6e/formatDomaineDeriveeExponentielles";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -24,6 +26,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseDeuxChamps) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran GÉNÉRIQUE à 2 champs texte libre (`6gen7`) — réutilisé par les écrans "cFacteurs"
@@ -32,7 +38,7 @@ interface Props {
  * reste toujours `null` ici — "cFacteurs"/"dND" sont le 2e écran, immédiatement après le domaine (une
  * tâche indépendante, jamais rappelée) — la prop est acceptée pour uniformité avec les 2 autres
  * écrans génériques du même générateur. */
-export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, labelA, labelB, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, labelA, labelB, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -70,15 +76,20 @@ export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etat
           <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value)} />
         </div>
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={a.trim() === "" || b.trim() === ""} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={a.trim() === "" || b.trim() === ""} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

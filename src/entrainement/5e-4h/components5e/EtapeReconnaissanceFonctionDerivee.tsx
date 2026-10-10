@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceFonctionDerivee, TypeDerivee } from "../core5e/fonctionDerivee.types";
 import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, OPTIONS_RECONNAISSANCE, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatFonctionDerivee";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -12,13 +14,17 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (choix: TypeDerivee) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "reconnaissance" — 4 boutons en grille 2 colonnes (`.options-grid`), choix booléen pur
  * (aucun champ libre, aucun statut à 3 valeurs nécessaire ici — même esprit que
  * `EtapeChoixSigne.tsx`, 5gen20). Correction câblée directement sur `exercice.typesAcceptes`
  * (jamais une seule valeur figée : l'item ambigu accepte 2 réponses). */
-export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<TypeDerivee | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
@@ -57,15 +63,20 @@ export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilise
           );
         })}
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("reconnaissance", null)}</p>

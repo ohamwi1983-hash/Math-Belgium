@@ -3,6 +3,8 @@ import type { ExerciceConvergenceSuite } from "../core5e/convergenceSuites.types
 import type { PhaseConvergenceSuite } from "../moteur5e/typesConvergenceSuites";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, formatTermesEtatActuelConvergence, optionsClassification, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatConvergenceSuites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -46,6 +48,10 @@ interface Props {
    * n'existe que pour "classifierQuelconque" quand l'option choisie exige une valeur numérique
    * ("Converge vers une autre valeur"), jamais pour les 2 écrans purement catégoriels. */
   diagnostiquerValeur?: (valeur: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran de classification catégorielle — réutilisé par les 3 écrans "classification" de 5gen16
@@ -62,6 +68,7 @@ export function EtapeClassificationConvergence({
   onValider,
   diagnostiquer,
   diagnostiquerValeur,
+  validation,
 }: Props) {
   const options = optionsClassification(exercice, phase as PhaseConvergenceSuite);
   const [choixId, setChoixId] = useState<string | null>(null);
@@ -109,15 +116,20 @@ export function EtapeClassificationConvergence({
         </div>
       )}
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, phase as PhaseConvergenceSuite)} block />

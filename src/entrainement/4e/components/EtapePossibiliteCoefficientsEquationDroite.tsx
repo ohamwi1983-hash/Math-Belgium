@@ -10,6 +10,8 @@ import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -19,6 +21,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponsePossibiliteCoefficients) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Placeholder du champ texte — adapté au choix ET à la forme testée (`exercice.formeCible`,
@@ -38,7 +44,7 @@ function placeholderEquation(exercice: ExerciceEquationDroite, choix: "possible"
  * `diagnostiquerPossibiliteCoefficients`, qui accepte n'importe quelle représentation valide de la
  * droite (`diagnostiquerEquationDroiteLibre`) quel que soit le choix, jamais un format imposé.
  */
-export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<"possible" | "impossible" | null>(null);
   const [texte, setTexte] = useState("");
 
@@ -99,16 +105,21 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentative
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS} onActiverAide={onActiverAide} disabledSupplementaire={choix === null} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS} onActiverAide={onActiverAide} disabledSupplementaire={choix === null} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => choix !== null && onValider({ choix, texte })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => choix !== null && onValider({ choix, texte })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

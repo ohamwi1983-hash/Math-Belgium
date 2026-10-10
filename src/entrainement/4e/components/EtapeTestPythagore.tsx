@@ -5,6 +5,8 @@ import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
 import { CONSIGNE_GENERALE_PYTHAGORE, TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1, formatEtatActuelLongueursPythagoreLatex, formatRelationsPythagoreNiveau1Latex, formatRelationsPythagoreNiveau2Latex, formatTermesDonneesPythagoreLatex, libelleRectangleEn } from "../ui/formatNormeDistance";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -14,6 +16,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTestPythagore) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 const SOMMETS: ("A" | "B" | "C")[] = ["A", "B", "C"];
@@ -26,7 +29,7 @@ const SOMMETS: ("A" | "B" | "C")[] = ["A", "B", "C"];
  * actuel" : les 3 normes confirmées à l'écran précédent. Aide à 2 niveaux : la relation de Pythagore
  * pour chaque sommet (niveau 1), puis substituée avec un "?" à la place du signe "=" (niveau 2).
  */
-export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<"A" | "B" | "C" | null>(null);
   const complet = choix !== null;
   const max = NIVEAU_AIDE_MAX.testPythagore;
@@ -62,18 +65,23 @@ export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMa
           )}
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(choix)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(choix)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

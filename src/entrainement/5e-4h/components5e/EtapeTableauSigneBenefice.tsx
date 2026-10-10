@@ -4,6 +4,8 @@ import type { ReponseTableauSigneBenefice } from "../moteur5e/verificationContex
 import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 
@@ -15,12 +17,16 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTableauSigneBenefice) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "tableauSigneBenefice" — tableau de signes SIMPLE (une seule racine à traiter, x_opt déjà
  * confirmé à l'écran précédent) : 2 zones seulement, jamais le tableau étendu de 5gen29 (racines
  * multiples/CE) — voir la tâche, "composant simple à concevoir". */
-export function EtapeTableauSigneBenefice({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeTableauSigneBenefice({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [zoneAvant, setZoneAvant] = useState<1 | -1 | null>(null);
   const [zoneApres, setZoneApres] = useState<1 | -1 | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -65,15 +71,20 @@ export function EtapeTableauSigneBenefice({ exercice, tentativesUtilisees, tenta
         ))}
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("tableauSigneBenefice")}</p>

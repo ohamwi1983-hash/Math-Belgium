@@ -7,6 +7,8 @@ import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSais
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const PHASE_PAR_SOMMET = { A: "testSommetA", B: "testSommetB", C: "testSommetC" } as const;
@@ -64,7 +70,7 @@ function Piege({ sommet }: { sommet: Sommet }) {
  * dans son contenu (seulement son rendu interne passé de `\qquad` à `\begin{gathered}`, voir
  * `ui/formatOrthogonalite.ts`).
  */
-export function EtapeTestSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeTestSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX[PHASE_PAR_SOMMET[sommet]];
   const valeur = Number(texte.replace(",", "."));
@@ -114,16 +120,21 @@ export function EtapeTestSommetOrthogonalite({ exercice, sommet, tentativesUtili
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

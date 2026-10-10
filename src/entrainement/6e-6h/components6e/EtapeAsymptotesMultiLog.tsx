@@ -4,6 +4,8 @@ import { Katex } from "../components/Katex";
 import type { ReponseAsymptoteDirection } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import type { DirectionLabel } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -74,6 +76,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseAsymptoteDirection[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "asymptotes" — arité VARIABLE (1 direction pour B, 2 pour A/C/D) — UN SEUL composant
@@ -81,7 +87,7 @@ interface Props {
  * `forcerPresence`, où l'existence est déjà acquise), vérifiée par ÉQUIVALENCE NUMÉRIQUE de
  * l'équation soumise (même décision de conception que `6gen11`). `App6gen21.tsx` doit le rendre
  * avec `key={indexExercice}`. */
-export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, forcerPresence, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, forcerPresence, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etats, setEtats] = useState<ReponseAsymptoteDirection[]>(() => labels.map((_, i) => ({ existe: forcerPresence[i], texte: "" })));
   const [touches, setTouches] = useState<boolean[]>(() => labels.map(() => false));
   const montrerErreurs = tentativesUtilisees > 0;
@@ -120,15 +126,20 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel
       {labels.map((l, i) => (
         <GroupeAsymptote key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} forcerPresence={forcerPresence[i]} onChange={(e) => majEtat(i, e)} />
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

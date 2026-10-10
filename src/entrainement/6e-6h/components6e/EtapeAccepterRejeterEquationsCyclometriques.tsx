@@ -10,6 +10,8 @@ import {
   texteAideAcceptRejetNiveau2,
 } from "../ui6e/formatEquationsCyclometriques";
 import { formatEnsembleReelLatex } from "../ui6e/formatEnsembleReel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "../components/Katex";
@@ -22,13 +24,17 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (decisions: boolean[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 4 — accepter ou rejeter CHAQUE candidat listé à l'écran précédent (`exercice.candidats`,
  * déjà trié par x croissant — exactement ce qui est affiché ici, dans le même ordre). 2 boutons par
  * ligne en grille 2 colonnes (`.options-grid-compact`), `null` tant qu'aucun choix n'a été fait pour
  * cette ligne — jamais présélectionné. */
-export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [decisions, setDecisions] = useState<(boolean | null)[]>(() => exercice.candidats.map(() => null));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = decisions.every((d) => d !== null);
@@ -79,15 +85,20 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
           </div>
         ))}
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideAcceptRejetNiveau1(exercice)}</p>

@@ -4,6 +4,8 @@ import type { ReponseFactoriser } from "../moteur5e/sessionLimites";
 import { consigneGenerale, consignePhase, formatBlocDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimites";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelLimite } from "./EtatActuelLimite";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -20,6 +22,10 @@ interface Props {
   /** Statut à 3 valeurs (numérateur, dénominateur) calculé côté PRÉSENTATION uniquement — optionnel,
    * un appelant qui ne le fournit pas garde le message générique historique. */
   diagnostiquer?: (reponse: ReponseFactoriser) => { numerateur: StatutVerification; denominateur: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "factoriser" (famille "formeIndeterminee" uniquement) — UN champ libre par expression
@@ -28,7 +34,7 @@ interface Props {
  * add-as-needed (mécanique abandonnée). `ReponseFactoriser.numerateur/denominateur` restent des
  * `string[]` côté moteur (`diagnostiquerFacteurs` inchangée) — ce composant leur passe simplement un
  * tableau à 1 élément. */
-export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [numerateur, setNumerateur] = useState("");
   const [denominateur, setDenominateur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -81,15 +87,20 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
         />
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "factoriser")}</p>

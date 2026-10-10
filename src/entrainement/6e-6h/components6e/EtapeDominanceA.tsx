@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { CategorieCroissance } from "../core6e/limitesLogarithmiques.types";
 import type { ReponseDominanceA } from "../moteur6e/verificationLimitesLogarithmiques";
 import { CONSIGNE_GENERALE, formatCategorieLabel } from "../ui6e/formatLimitesLogarithmiques";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -23,6 +25,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseDominanceA) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function GroupeCategorie({ label, valeur, erreur, onChange }: { label: string; valeur: CategorieCroissance | null; erreur: boolean; onChange: (v: CategorieCroissance) => void }) {
@@ -45,7 +51,7 @@ function GroupeCategorie({ label, valeur, erreur, onChange }: { label: string; v
  * combinées derrière UN SEUL bouton "Valider" (spec : "Champ : description du terme dominant de
  * chaque côté"). Même patron que `EtapeFacteursC.tsx` (6gen6). `App6gen17.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [numerateur, setNumerateur] = useState<CategorieCroissance | null>(null);
   const [denominateur, setDenominateur] = useState<CategorieCroissance | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -64,15 +70,20 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeCategorie label="Numérateur — terme dominant" valeur={numerateur} erreur={montrerErreurs} onChange={setNumerateur} />
       <GroupeCategorie label="Dénominateur — terme dominant" valeur={denominateur} erreur={montrerErreurs} onChange={setDenominateur} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={numerateur === null || denominateur === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={numerateur === null || denominateur === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

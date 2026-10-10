@@ -8,6 +8,8 @@ import type { DiagnosticEcranUniqueGraphiquesCyclometriques, ReponseEcranUniqueG
 import { diagnostiquerEcranUnique } from "../moteur6e/verificationGraphiquesCyclometriques";
 import type { AideAvecLatex } from "../ui6e/formatGraphiquesCyclometriques";
 import { CONSIGNE_GENERALE, LIBELLE_PARITE, calculerViewBoxGraphique, formatExpressionLatex } from "../ui6e/formatGraphiquesCyclometriques";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { GrapheOptionCyclo } from "./GrapheOptionCyclo";
@@ -97,6 +99,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseEcranUniqueGraphiquesCyclometriques) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -109,7 +115,7 @@ interface Props {
  * à 7 sous-réponses). Chaque sous-réponse est diagnostiquée INDÉPENDAMMENT (`diagnostiquerEcranUnique`)
  * pour le surlignage rouge — jamais une tentative fausse sur un champ confondue avec une autre.
  */
-export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lettre, setLettre] = useState<number | null>(null);
   const [ordonnee, setOrdonnee] = useState<EtatExtremum>(EXTREMUM_VIDE);
   const [domf, setDomf] = useState<EnsembleReelGuide | null>(null);
@@ -257,16 +263,21 @@ export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2
         </div>
       )}
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
 
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
 
       {niveauAide >= 1 && (
         <div className="aide-5e">

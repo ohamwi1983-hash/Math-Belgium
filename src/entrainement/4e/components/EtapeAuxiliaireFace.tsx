@@ -4,6 +4,8 @@ import { NIVEAU_AIDE_MAX_AUXILIAIRE } from "../moteur/sessionSectionPlaneSolide"
 import { CONSIGNE_AUXILIAIRE_FACE, TEXTE_AIDE_AUXILIAIRE_NIVEAU1, apercuLignesChoisies, facesAMoitieConnues, libelleFace, pointsExtraConnus, segmentsExtraTraces, texteAideAuxiliaireNiveau2, texteProgressionPoints, texteProgressionSegments } from "../ui/formatSectionPlaneSolide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -16,6 +18,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (face: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -35,6 +41,7 @@ export function EtapeAuxiliaireFace({
   niveauAide,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [faceChoisie, setFaceChoisie] = useState<number | null>(null);
   const max = NIVEAU_AIDE_MAX_AUXILIAIRE;
@@ -74,16 +81,21 @@ export function EtapeAuxiliaireFace({
           {niveauAide >= 2 && <p>{texteAideAuxiliaireNiveau2(exercice, facesAide)}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={faceChoisie === null} onClick={() => faceChoisie !== null && onValider(faceChoisie)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={faceChoisie === null} onClick={() => faceChoisie !== null && onValider(faceChoisie)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

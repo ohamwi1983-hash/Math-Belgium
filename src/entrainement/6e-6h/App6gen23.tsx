@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCalculPrimitives } from "./generateurs6e/calculPrimitives";
 import type { IdVarianteCalculPrimitives } from "./generateurs6e/calculPrimitives";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCalculPrimitives, soumettreReponseEcran } from "./moteur6e/sessionCalculPrimitives";
-import type { EtatSessionCalculPrimitives, PhaseCalculPrimitives, ResultatExerciceCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
+import type { EtatSessionCalculPrimitives } from "./moteur6e/typesCalculPrimitives";
 import { diagnostiquerEcran } from "./moteur6e/verificationCalculPrimitives";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
-import { ResultatPanelCalculPrimitives } from "./components6e/ResultatPanelCalculPrimitives";
-import { ResumeSessionCalculPrimitives } from "./components6e/ResumeSessionCalculPrimitives";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCalculPrimitives";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCalculPrimitives";
 
 /**
  * `6gen23` — Calcul de primitives (chapitre 4, "Intégrales et primitives"). Contrairement aux
@@ -28,39 +27,39 @@ function nouvelleSession(): EtatSessionCalculPrimitives {
   return demarrerSessionCalculPrimitives(REGLAGES_DEMO, genererExerciceCalculPrimitives);
 }
 
-type AideParPhase = Partial<Record<PhaseCalculPrimitives, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceCalculPrimitives;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionCalculPrimitives;
+  revele: boolean;
 }
-
 
 export function App6gen23() {
   const [etat, setEtat] = useState<EtatSessionCalculPrimitives>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionCalculPrimitives) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron `6gen18`/`6gen21` répliqué à
-    // l'identique (voir `moteur6e/sessionCalculPrimitives.ts`, fonction `soumettreReponseEcran`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionCalculPrimitives(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteCalculPrimitives)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -75,12 +74,28 @@ export function App6gen23() {
     (window as unknown as { __debug6gen23?: unknown }).__debug6gen23 = { exercice, phase };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
     niveauAideMax: NIVEAU_AIDE_MAX,
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -91,24 +106,19 @@ export function App6gen23() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsCalculPrimitives
-            key={phase}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-
-        {dernierBilan && <ResultatPanelCalculPrimitives resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionCalculPrimitives resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsCalculPrimitives
+          key={phase}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+        />
       </main>
     </div>
   );

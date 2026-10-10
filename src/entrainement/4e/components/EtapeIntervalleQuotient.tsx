@@ -25,6 +25,8 @@ import { TableauSignesQuotientDenominateurCarreRecap } from "./TableauSignesQuot
 import { TableauSignesQuotientFacteurCommunRecap } from "./TableauSignesQuotientFacteurCommunRecap";
 import { TableauSignesQuotientSansFacteurCommunRecap } from "./TableauSignesQuotientSansFacteurCommunRecap";
 import { TableauSignesQuotientCubiqueRecap } from "./TableauSignesQuotientCubiqueRecap";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Forme = SolutionEnsembleProduit["forme"];
@@ -47,6 +49,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: SolutionEnsembleProduit) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -67,6 +73,7 @@ export function EtapeIntervalleQuotient({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [forme, setForme] = useState<Forme | null>(null);
   const [valeurPoint, setValeurPoint] = useState("");
@@ -219,21 +226,26 @@ export function EtapeIntervalleQuotient({
 
       {forme === "intervalle" && <ListeMorceauxInput etat={liste} onChange={setListe} />}
 
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

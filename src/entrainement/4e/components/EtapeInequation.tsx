@@ -10,6 +10,8 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { calculerCroquisColore, calculerCroquisVrai } from "../ui/parabolaSketch";
 import { ParabolaSketch } from "./ParabolaSketch";
 import { formatTermesApercuSolution } from "../ui/apercuIntervalle";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Forme = SolutionEnsemble["forme"];
@@ -31,6 +33,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: SolutionEnsemble) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -60,6 +66,7 @@ export function EtapeInequation({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [forme, setForme] = useState<Forme | null>(null);
   const [valeurPoint, setValeurPoint] = useState("");
@@ -155,21 +162,26 @@ export function EtapeInequation({
         </div>
       )}
 
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

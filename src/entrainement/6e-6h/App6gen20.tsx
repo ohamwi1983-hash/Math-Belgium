@@ -2,18 +2,20 @@ import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiqueDeriveeLogarithme } from "./generateurs6e/graphiqueDeriveeLogarithme/index";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionGraphiqueDeriveeLogarithme, soumettreReponseDerivee, soumettreReponseSelection } from "./moteur6e/sessionGraphiqueDeriveeLogarithme";
-import type { EtatSessionGraphiqueDeriveeLogarithme, PhaseGraphiqueDeriveeLogarithme, ResultatExerciceGraphiqueDeriveeLogarithme } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
+import type { EtatSessionGraphiqueDeriveeLogarithme } from "./moteur6e/typesGraphiqueDeriveeLogarithme";
+import { Katex } from "./components/Katex";
 import { EtapeChampGraphiqueDeriveeLogarithme } from "./components6e/EtapeChampGraphiqueDeriveeLogarithme";
 import { EtapeSelectionGraphiqueDeriveeLogarithme } from "./components6e/EtapeSelectionGraphiqueDeriveeLogarithme";
-import { ResultatPanelGraphiqueDeriveeLogarithme } from "./components6e/ResultatPanelGraphiqueDeriveeLogarithme";
-import { ResumeSessionGraphiqueDeriveeLogarithme } from "./components6e/ResumeSessionGraphiqueDeriveeLogarithme";
+import { GrapheOptionDeriveeLogarithme } from "./components6e/GrapheOptionDeriveeLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import {
   aideDeriveeNiveau1,
   aideDeriveeNiveau2,
   aideSelectionNiveau1,
   aideSelectionNiveau2,
+  calculerViewBoxGraphique,
   consigneEcranDerivee,
+  formatDeriveeCorrecteLatex,
   formatFonctionLatex,
   placeholderDerivee,
 } from "./ui6e/formatGraphiqueDeriveeLogarithme";
@@ -24,39 +26,35 @@ function nouvelleSession(): EtatSessionGraphiqueDeriveeLogarithme {
   return demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, genererExerciceGraphiqueDeriveeLogarithme);
 }
 
-type AideParPhase = Partial<Record<PhaseGraphiqueDeriveeLogarithme, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceGraphiqueDeriveeLogarithme;
-  aideParPhase: AideParPhase;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionGraphiqueDeriveeLogarithme;
+  revele: boolean;
 }
-
 
 export function App6gen20() {
   const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeLogarithme>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici — remis à zéro par `avancerPhase` DANS le même appel qui clôt l'écran, voir
-    // `moteur6e/sessionGraphiqueDeriveeLogarithme.ts` et `docs/historique-6e.md`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -66,6 +64,20 @@ export function App6gen20() {
   // reprises sur ce chantier — voir CLAUDE.md).
   const cle = `${etat.indexExercice}-${etat.phase}`;
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "derivee" ? (
+            <Katex expression={formatDeriveeCorrecteLatex(exercice)} />
+          ) : (
+            <GrapheOptionDeriveeLogarithme exercice={exercice} index={exercice.indexCorrect} viewBox={calculerViewBoxGraphique(exercice)} largeur={150} hauteur={150} />
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -74,44 +86,38 @@ export function App6gen20() {
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <>
-            {etat.phase === "derivee" && (
-              <EtapeChampGraphiqueDeriveeLogarithme
-                key={cle}
-                consigneEcran={consigneEcranDerivee()}
-                fonctionLatex={formatFonctionLatex(exercice)}
-                placeholder={placeholderDerivee(exercice)}
-                aideNiveau1={aideDeriveeNiveau1(exercice)}
-                aideNiveau2={aideDeriveeNiveau2(exercice)}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={etat.niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
-              />
-            )}
-            {etat.phase === "selection" && (
-              <EtapeSelectionGraphiqueDeriveeLogarithme
-                key={cle}
-                exercice={exercice}
-                aideNiveau1={aideSelectionNiveau1(exercice)}
-                aideNiveau2={aideSelectionNiveau2(exercice)}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={etat.niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(index) => terminerEtape(soumettreReponseSelection(etat, index))}
-              />
-            )}
-          </>
+        {etat.phase === "derivee" && (
+          <EtapeChampGraphiqueDeriveeLogarithme
+            key={cle}
+            consigneEcran={consigneEcranDerivee()}
+            fonctionLatex={formatFonctionLatex(exercice)}
+            placeholder={placeholderDerivee(exercice)}
+            aideNiveau1={aideDeriveeNiveau1(exercice)}
+            aideNiveau2={aideDeriveeNiveau2(exercice)}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
+            validation={validation}
+          />
         )}
-        {dernierBilan && (
-          <ResultatPanelGraphiqueDeriveeLogarithme resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />
+        {etat.phase === "selection" && (
+          <EtapeSelectionGraphiqueDeriveeLogarithme
+            key={cle}
+            exercice={exercice}
+            aideNiveau1={aideSelectionNiveau1(exercice)}
+            aideNiveau2={aideSelectionNiveau2(exercice)}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(index) => terminerEtape(soumettreReponseSelection(etat, index))}
+            validation={validation}
+          />
         )}
-        {etat.terminee && !dernierBilan && <ResumeSessionGraphiqueDeriveeLogarithme resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

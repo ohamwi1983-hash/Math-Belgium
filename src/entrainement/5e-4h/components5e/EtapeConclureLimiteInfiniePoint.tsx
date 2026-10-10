@@ -3,6 +3,8 @@ import type { ExerciceLimite } from "../core5e/limites.types";
 import type { ReponseConclureLimite } from "../moteur5e/sessionLimites";
 import { consigneGenerale, consignePhase, formatBlocDonneesLatex } from "../ui5e/formatLimites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EtatActuelLimite } from "./EtatActuelLimite";
 
 const OPTIONS_CONCLURE: { id: string; label: string }[] = [
@@ -20,13 +22,14 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (choix: ReponseConclureLimite) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "conclureLimite" (Branche B, famille "limiteInfiniePoint" uniquement) — VRAI combobox natif
  * à 3 options (−∞/+∞/∄, jamais des boutons), à partir des 2 limites unilatérales déjà trouvées à
  * l'écran précédent. AUCUNE aide sur cet écran (spécifié explicitement — jamais de `BoutonAide` ici,
  * contrairement à tous les autres écrans de la plateforme qui en ont systématiquement un). */
-export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees, tentativesMax, onValider, validation }: Props) {
   const [choixId, setChoixId] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = choixId !== "";
@@ -39,7 +42,7 @@ export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees,
       </div>
       <EtatActuelLimite exercice={exercice} phase="conclureLimite" />
       <p className="prompt-text">{consignePhase(exercice, "conclureLimite")}</p>
-      <select className="ce-select" aria-label="Conclusion de la limite" value={choixId} onChange={(e) => setChoixId(e.target.value)}>
+      <select className="ce-select" aria-label="Conclusion de la limite" value={choixId} onChange={(e) => setChoixId(e.target.value)} disabled={!!validation}>
         <option value="" disabled>
           Choisis…
         </option>
@@ -49,14 +52,19 @@ export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees,
           </option>
         ))}
       </select>
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(idVersChoix(choixId))}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(idVersChoix(choixId))}>
+            Valider
+          </button>
+          {montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

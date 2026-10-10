@@ -8,6 +8,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -59,6 +61,7 @@ interface Props {
   aideActivee?: boolean;
   onActiverAide?: () => void;
   onValider: (reponse: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -99,6 +102,7 @@ export function EtapeChamp1({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
 
@@ -163,20 +167,25 @@ export function EtapeChamp1({
           placeholder={placeholder}
         />
       </div>
-      {onActiverAide && (
-        <div>
-          {aideActivee && <p className="prompt-text">{texteAideChamp1(exercice.categorie)}</p>}
-          <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-        </div>
+      {!validation && (
+        <>
+          {onActiverAide && (
+            <div>
+              {aideActivee && <p className="prompt-text">{texteAideChamp1(exercice.categorie)}</p>}
+              <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+            </div>
+          )}
+          <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
-      <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
-      )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

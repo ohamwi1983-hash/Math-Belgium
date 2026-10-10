@@ -3,6 +3,8 @@ import type { ExerciceSuiteClassique } from "../core5e/suitesClassiques.types";
 import type { PhaseSuiteClassique } from "../moteur5e/typesSuiteClassique";
 import { consigneGenerale, consignePhase, formatTermesDonneesLatex, labelsListe, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteClassique } from "./EtatActuelSuiteClassique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -21,11 +23,15 @@ interface Props {
   diagnostiquer?: (textes: string[]) => StatutVerification;
   /** Statut à 3 valeurs d'UN SEUL champ (A.2 — highlight rouge indépendant par champ). */
   diagnostiquerChamp?: (index: number, texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran à PLUSIEURS champs numériques FIXES (jamais add-as-needed) — réutilisé par 10 des 26
  * phases de 5gen17 (2 à 10 champs selon la phase, `labelsListe` détermine le nombre et la casse). */
-export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp }: Props) {
+export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
   const { labels, enLatex } = labelsListe(phase);
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -63,15 +69,20 @@ export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees
           <input type="text" className={`text-input${champErronee(i) ? " is-erronee" : ""}`} value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, phase)} block />

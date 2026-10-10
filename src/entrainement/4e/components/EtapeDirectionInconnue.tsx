@@ -4,6 +4,8 @@ import { NIVEAU_AIDE_MAX_DIRECTION_INCONNUE } from "../moteur/sessionOmbreSoleil
 import { apercuDirection, CONSIGNE_DIRECTION_INCONNUE, libelleCandidat, ordreAffichageCandidats, pointSommetPiquet, segmentPiquet, solidePourAffichage, TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU1, TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2 } from "../ui/formatOmbreSoleil";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Solide3DSketch } from "./Solide3DSketch";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -13,6 +15,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (id: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -21,7 +27,7 @@ interface Props {
  * connue déjà affichée, jamais la deviner. Aucune aide ne trace la solution — texte seul, insistant
  * explicitement sur le piège propre à cette variante (deviner plutôt que déduire rigoureusement).
  */
-export function EtapeDirectionInconnue({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeDirectionInconnue({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [candidats] = useState<DirectionCandidate[]>(() => ordreAffichageCandidats(exercice.directionsCandidates));
   const [choix, setChoix] = useState<DirectionCandidate | null>(null);
   const max = NIVEAU_AIDE_MAX_DIRECTION_INCONNUE;
@@ -63,16 +69,21 @@ export function EtapeDirectionInconnue({ exercice, tentativesUtilisees, tentativ
           {niveauAide >= 2 && <p>{TEXTE_AIDE_DIRECTION_INCONNUE_NIVEAU2}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix.id)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

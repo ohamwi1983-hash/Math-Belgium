@@ -8,6 +8,8 @@ import { PLACEHOLDER_VALEUR_FINALE, texteAide2, texteAide3Intro } from "../ui/fo
 import { diagnostiquerValeurFinale, niveauAideMax } from "../moteur/verificationAnglesAssocies";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const X_TANGENTE = CENTRE_CERCLE_TRIG.x + RAYON_CERCLE_TRIG;
@@ -49,7 +55,7 @@ const X_TANGENTE = CENTRE_CERCLE_TRIG.x + RAYON_CERCLE_TRIG;
  *   que l'aide 2 pour l'angle COMPLÉMENTAIRE (`alpha`), en vert — plus une phrase nommant les deux
  *   valeurs, sans formule générique.
  */
-export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const nombre = Number(texte.trim().replace(",", "."));
@@ -145,16 +151,21 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
           {niveauAide >= 3 && <p>{texteAide3Intro(exercice)}</p>}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(nombre)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(nombre)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

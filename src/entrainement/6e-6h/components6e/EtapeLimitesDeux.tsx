@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { ReponseLimites } from "../moteur6e/verificationEtudeFonctionExponentielle";
 import type { DirectionLabel } from "../ui6e/formatEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionExponentielle";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -58,13 +60,17 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseLimites) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 2/6, "limites" — familles A/C/D (2 directions, `+∞`/`−∞`). Voir `EtapeLimitesQuatre.tsx`
  * pour la famille B (4 directions, l'écran le plus dense). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. `etatActuel` rappelle le domaine CONFIRMÉ à l'écran précédent (voir
  * `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [plusInfini, setPlusInfini] = useState<EtatLocal>({ statut: null, texte: "" });
   const [moinsInfini, setMoinsInfini] = useState<EtatLocal>({ statut: null, texte: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -97,15 +103,20 @@ export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, etatActue
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeLimite label={labels[0].latex} etat={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       <GroupeLimite label={labels[1].latex} etat={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet(plusInfini) || !complet(moinsInfini)} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet(plusInfini) || !complet(moinsInfini)} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

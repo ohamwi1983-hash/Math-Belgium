@@ -5,6 +5,7 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { Katex } from "../components/Katex";
 import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatTermesDonneesLatex, questionFinaleEtudierFonction, texteAideNiveau1EtudierFonction, texteAideNiveau2EtudierFonction } from "../ui5e/formatEtudierFonction";
 import { domaineAttendu } from "../moteur5e/verificationEtudierFonction";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -15,12 +16,13 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: EnsembleReelGuide) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "domaine" — uniquement présent si le domaine est restreint (voir
  * `moteur5e/typesEtudierFonction.ts`). Réutilise DIRECTEMENT `EnsembleReelGuideBuilder`, exactement
  * comme 5gen29 (`EtapeDomaineEtudeLocale.tsx`). Calculatrice ABSENTE (question structurelle). */
-export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
@@ -39,8 +41,9 @@ export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, ten
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         attendu={domaineAttendu(exercice)}
         apresEchec={montrerErreurs}
+        validation={validation}
       />
-      {montrerErreurs && (
+      {!validation && montrerErreurs && (
         <p className="alert-error" role="alert">
           Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
         </p>

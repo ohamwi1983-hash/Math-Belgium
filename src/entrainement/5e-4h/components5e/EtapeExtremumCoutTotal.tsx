@@ -4,6 +4,8 @@ import type { ReponseExtremum } from "../moteur5e/verificationContexteEconomique
 import { consigneEcran, consigneGenerale, formatTermesDonneesLatex, PRECISION_EXTREMUM, questionFinale, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatContexteEconomique";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -22,6 +24,10 @@ interface Props {
    * la nature (max/min), qui restent corrigés globalement pour ne jamais fuir la répartition
    * attendue avant validation. */
   diagnostiquerPosition: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "extremum" (famille A) — sous-cas tiré INDÉPENDAMMENT du degré : en degré 2, TOUJOURS
@@ -32,7 +38,7 @@ interface Props {
  * (a≠0) a TOUJOURS 0 ou 2 points critiques réels, jamais 1 (hors racine double, exclue à la
  * génération) : ce nombre est un fait MATHÉMATIQUE, jamais dérivé de `exercice.extrema.length`
  * (qui fuirait la bonne réponse si l'élève se trompe de choix). */
-export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerPosition }: Props) {
+export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerPosition, validation}: Props) {
   const proposeChoixExistence = exercice.coutTotal.degre === 3;
   const [existeChoisi, setExisteChoisi] = useState<boolean | null>(proposeChoixExistence ? null : true);
   useEffect(() => {
@@ -126,15 +132,20 @@ export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativ
       )}
 
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("extremum")}</p>

@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { ReponseLimites } from "../moteur6e/verificationEtudeFonctionExponentielle";
 import type { DirectionLabel } from "../ui6e/formatEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionExponentielle";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import type { EtatLimiteLocal } from "./EtapeLimitesDeux";
 import { GroupeLimite } from "./EtapeLimitesDeux";
@@ -25,6 +27,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseLimites) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const VIDE: EtatLimiteLocal = { statut: null, texte: "" };
@@ -37,7 +43,7 @@ const VIDE: EtatLimiteLocal = { statut: null, texte: "" };
  * indépendante — l'écran le plus dense du générateur, spec explicite. `App6gen11.tsx` doit le
  * rendre avec `key={indexExercice}`.
  */
-export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [pointPlus, setPointPlus] = useState<EtatLimiteLocal>(VIDE);
   const [pointMoins, setPointMoins] = useState<EtatLimiteLocal>(VIDE);
   const [plusInfini, setPlusInfini] = useState<EtatLimiteLocal>(VIDE);
@@ -79,15 +85,20 @@ export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, etatAct
       <GroupeLimite label={labels[1].latex} etat={pointMoins} erreur={montrerErreurs} onChange={setPointMoins} />
       <GroupeLimite label={labels[2].latex} etat={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       <GroupeLimite label={labels[3].latex} etat={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

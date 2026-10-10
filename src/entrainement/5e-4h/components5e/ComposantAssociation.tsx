@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 
@@ -31,6 +33,10 @@ interface Props {
    * pas ici" (5gen25, famille A avancée). Absente par défaut, comportement historique inchangé
    * pour toute réutilisation future de ce composant sans cette option. */
   libelleOptionSupplementaire?: string;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -60,6 +66,7 @@ export function ComposantAssociation({
   texteAideNiveau1,
   texteAideNiveau2,
   libelleOptionSupplementaire,
+  validation,
 }: Props) {
   const [choix, setChoix] = useState<ChoixLigne[]>(() => Array(nombreItems).fill(null));
   const montrerErreurs = tentativesUtilisees > 0;
@@ -112,15 +119,20 @@ export function ComposantAssociation({
           </select>
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1}</p>

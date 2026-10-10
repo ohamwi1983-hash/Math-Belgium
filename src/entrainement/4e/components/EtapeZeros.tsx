@@ -9,6 +9,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Choix = "aucun" | "auMoinsUn";
@@ -29,6 +31,7 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: ReponseZeros) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -51,6 +54,7 @@ export function EtapeZeros({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
@@ -172,32 +176,37 @@ export function EtapeZeros({
         </div>
       )}
 
-      <div>
-        {aideActivee && (
-          <p className="prompt-text">Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution.</p>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <p className="prompt-text">Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution.</p>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(
-            tentativesUtilisees,
-            tentativesMax,
-            choix === "auMoinsUn" && valeurs.some((v) => diagnostiquerExpressionNumerique(v) === "parse_error")
-              ? "parse_error"
-              : undefined,
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={reponse === null}
+            onClick={() => reponse !== null && onValider(reponse)}
+          >
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(
+                tentativesUtilisees,
+                tentativesMax,
+                choix === "auMoinsUn" && valeurs.some((v) => diagnostiquerExpressionNumerique(v) === "parse_error")
+                  ? "parse_error"
+                  : undefined,
+              )}
+            </p>
           )}
-        </p>
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

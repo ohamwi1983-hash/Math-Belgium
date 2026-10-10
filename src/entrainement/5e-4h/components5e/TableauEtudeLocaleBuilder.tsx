@@ -4,6 +4,8 @@ import type { ColonneTableauEtudeLocale, ValeurLigne2Tableau, ValeurSigneTableau
 import type { ReponseTableauEtudeLocale, TableauEtudeLocaleAttendu } from "../moteur5e/verificationEtudeLocale";
 import { libelleLigne2Tableau, libelleSigneTableau } from "../ui5e/formatEtudeLocale";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 /**
  * Tableau de signes ÉTENDU (5gen29) — construit ENTIÈREMENT depuis zéro pour ce générateur, jamais
@@ -49,9 +51,13 @@ interface Props {
   /** Contenu rendu juste AVANT le bouton "Valider" — ex. le bouton "Aide", toujours au-dessus de
    * "Valider" (convention transversale). Absent par défaut. */
   contenuAvantValider?: ReactNode;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — remplace "Valider"
+   * par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/invalidation avant de passer à
+   * l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
-export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, attendu, tentativesUtilisees, tentativesMax, onValider, contenuAvantValider }: Props) {
+export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, attendu, tentativesUtilisees, tentativesMax, onValider, contenuAvantValider, validation }: Props) {
   const n = colonnes.length;
   const [signes, setSignes] = useState<(ValeurSigneTableau | null)[]>(() => Array(n).fill(null));
   const [ligne2, setLigne2] = useState<(ValeurLigne2Tableau | null)[]>(() => Array(n).fill(null));
@@ -139,15 +145,20 @@ export function TableauEtudeLocaleBuilder({ colonnes, enteteColonnes, mode, atte
           </tbody>
         </table>
       </div>
-      {contenuAvantValider}
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+          {contenuAvantValider}
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+            Valider
+          </button>
+          {montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

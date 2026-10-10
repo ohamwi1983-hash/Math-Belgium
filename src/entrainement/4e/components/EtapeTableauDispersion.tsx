@@ -9,6 +9,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceDispersion } from "./EnonceDispersion";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -18,6 +20,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTableauDispersion) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -26,7 +32,7 @@ interface Props {
  * tentative (tout ou rien), même mécanique exacte que l'écran "Sommes" de "Moyenne pondérée"
  * (`EtapeSommesMoyennePonderee.tsx`).
  */
-export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [produits, setProduits] = useState<string[]>(() => new Array(exercice.lignes.length).fill("") as string[]);
   const [sommeN, setSommeN] = useState("");
   const [sommeProduits, setSommeProduits] = useState("");
@@ -127,21 +133,26 @@ export function EtapeTableauDispersion({ exercice, tentativesUtilisees, tentativ
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TABLEAU} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TABLEAU} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ produits, sommeN, sommeProduits })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ produits, sommeN, sommeProduits })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

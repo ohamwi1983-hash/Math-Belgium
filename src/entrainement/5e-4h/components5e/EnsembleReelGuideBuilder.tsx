@@ -6,6 +6,8 @@ import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { verifierEnsembleReelGuide } from "../moteur5e/verificationDomaineDefinition";
 import { Katex } from "../components/Katex";
 import { ListeMorceauxFractionInput } from "../components/ListeMorceauxFractionInput";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import type { EtatListeMorceauxFraction } from "../ui/listeMorceauxFraction";
 import { construireListeFraction, etatListeFractionInitiale } from "../ui/listeMorceauxFraction";
 import type { EtatMorceauFraction } from "../ui/morceauFraction";
@@ -95,9 +97,14 @@ interface Props {
   /** Vrai dès qu'au moins une tentative a échoué sur cet écran — même convention `apresEchec` que
    * le reste de la plateforme. Optionnel, comme `attendu`. */
   apresEchec?: boolean;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le formulaire,
+   * remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/
+   * invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
-export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled = false, contenuAvantValider, attendu, apresEchec = false }: Props) {
+export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled: disabledProp = false, contenuAvantValider, attendu, apresEchec = false, validation }: Props) {
+  const disabled = disabledProp || !!validation;
   const [forme, setForme] = useState<FormeEnsemble | null>(null);
   const [points, setPoints] = useState<string[]>([""]);
   const [morceaux, setMorceaux] = useState<EtatListeMorceauxFraction>(etatListeFractionInitiale());
@@ -193,10 +200,15 @@ export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled = f
         </div>
       )}
 
-      {contenuAvantValider}
-      <button type="button" className="btn btn-primary" disabled={disabled || forme === null || !complet} onClick={valider}>
-        Valider
-      </button>
+      {!validation && (
+        <>
+          {contenuAvantValider}
+          <button type="button" className="btn btn-primary" disabled={disabled || forme === null || !complet} onClick={valider}>
+            Valider
+          </button>
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

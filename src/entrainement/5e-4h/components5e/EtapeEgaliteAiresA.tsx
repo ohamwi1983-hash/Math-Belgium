@@ -4,6 +4,8 @@ import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.typ
 import { CONSIGNE_EGALITE_AIRES_A, TEXTE_AIDE_EGALITE_AIRES_A_1, formatTermesEtatActuelA, latexAideEgaliteAiresA2 } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerEgaliteAiresA } from "../moteur5e/verificationProblemesContexte";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAConteneur }) {
@@ -30,7 +36,7 @@ function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAConteneur }) {
   );
 }
 
-export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerEgaliteAiresA(exercice, Number(valeur.replace(",", "."))) !== "correct";
@@ -54,15 +60,20 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
           onChange={(e) => setValeur(e.target.value.replace(/[^0-9.,-]/g, ""))}
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={valeur.trim() === ""} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_EGALITE_AIRES_A_1}</p>

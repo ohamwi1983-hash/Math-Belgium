@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { StatutLimiteQualitatif } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseComportementInfiniE } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, consigneComportementInfiniE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -45,6 +47,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseComportementInfiniE) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 2/2 (DERNIER écran), famille E uniquement — "comportement aux deux infinis". Structure
@@ -52,7 +58,7 @@ interface Props {
  * catégoriel à 2 statuts par direction ({@link StatutLimiteQualitatif}) — aucune vérification
  * d'expression/intervalle nécessaire (comparaison catégorielle pure). `App6gen21.tsx` doit le
  * rendre avec `key={indexExercice}`. */
-export function EtapeComportementInfiniE({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeComportementInfiniE({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [moinsInfini, setMoinsInfini] = useState<StatutLimiteQualitatif | null>(null);
   const [plusInfini, setPlusInfini] = useState<StatutLimiteQualitatif | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -79,15 +85,20 @@ export function EtapeComportementInfiniE({ enonceLatex, etatActuel, aideNiveau1,
       <p className="prompt-text">{consigneComportementInfiniE()}</p>
       <GroupeDirection label="x \to -\infty" valeur={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
       <GroupeDirection label="x \to +\infty" valeur={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

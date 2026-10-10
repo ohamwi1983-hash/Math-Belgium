@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceSuitesCombinees } from "../core5e/suitesClassiques.types";
 import { LABELS_SUITE_ARITHMETIQUE_COMBINEE, LABELS_SUITE_GEOMETRIQUE_COMBINEE, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1 } from "../ui5e/formatSuiteClassique";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteClassique } from "./EtatActuelSuiteClassique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -19,11 +21,15 @@ interface Props {
   diagnostiquer?: (reponse: { arithmetique: string[]; geometrique: string[] }) => StatutVerification;
   /** Statut à 3 valeurs d'UN SEUL champ (A.2 — highlight rouge indépendant par champ). */
   diagnostiquerChamp?: (groupe: "arithmetique" | "geometrique", index: number, texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran bespoke à 2 GROUPES de 3 champs (suite arithmétique 6,y,z puis suite géométrique y,x,z) —
  * seul écran de 5gen17 qui ne rentre pas dans le patron "liste plate" générique. */
-export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp }: Props) {
+export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
   const [arithmetique, setArithmetique] = useState<string[]>(["6", "", ""]);
   const [geometrique, setGeometrique] = useState<string[]>(["", "", ""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -85,15 +91,20 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
         </div>
       ))}
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, "suitesFinalesCombinees")} block />

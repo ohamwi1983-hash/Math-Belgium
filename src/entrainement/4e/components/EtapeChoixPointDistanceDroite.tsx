@@ -9,6 +9,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: Point) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -27,7 +30,7 @@ interface Props {
  * que "Construction graphique — tracer une droite depuis son équation" (écran "points"). Rien
  * n'est encore confirmé à ce stade (pas de bloc "état actuel").
  */
-export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -87,18 +90,23 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
           <p>{TEXTE_AIDE_CHOIX_POINT_NIVEAU1}</p>
         </div>
       )}
-      {NIVEAU_AIDE_MAX_CHOIX_POINT > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CHOIX_POINT} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {NIVEAU_AIDE_MAX_CHOIX_POINT > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CHOIX_POINT} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(construireReponse())}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

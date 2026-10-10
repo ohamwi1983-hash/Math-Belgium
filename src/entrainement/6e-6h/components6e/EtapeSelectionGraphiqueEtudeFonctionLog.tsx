@@ -2,6 +2,7 @@ import { Katex } from "../components/Katex";
 import type { ExerciceEtudeLogNonE } from "../core6e/etudeFonctionLogarithme.types";
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, etatActuel, formatFonctionLatex } from "../ui6e/formatEtudeFonctionLogarithme";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionEtudeFonctionLog } from "./GrapheOptionEtudeFonctionLog";
 
@@ -15,13 +16,14 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (indexChoisi: number) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran final "graphique" (familles A-D uniquement, famille E n'en a pas, `6gen21`) — en-tête
  * propre à ce générateur ; le corps du QCM (4 graphiques lettrés A→D empilés, non cliquables, + 4
  * boutons de choix texte séparés + Valider) est délégué à `EtapeSelectionGraphiqueQCM`, partagé
  * avec 6gen5/6gen8/6gen11/6gen20. */
-export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBox(exercice);
 
   return (
@@ -50,6 +52,7 @@ export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1,
         niveauAideMax={niveauAideMax}
         onActiverAide={onActiverAide}
         onValider={onValider}
+        validation={validation}
       />
     </div>
   );

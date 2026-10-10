@@ -5,6 +5,8 @@ import type { ReponseQuestionComposeeGraphique } from "../moteur5e/verificationC
 import { CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE, consigneQuestion, labelChampResultat, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatComposeeGraphique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -23,6 +25,10 @@ interface Props {
    * une tentative échouée — optionnel, un appelant qui ne le fournit pas garde le message générique
    * historique. */
   diagnostiquer?: (reponse: ReponseQuestionComposeeGraphique) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -34,7 +40,7 @@ interface Props {
  * aucun clavier restreint imposé (E.4) — jamais un filtrage de caractères, la validation se fait
  * entièrement à la soumission (`diagnostiquer`).
  */
-export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   // `null` tant que l'élève n'a pas encore cliqué — aucun choix pré-sélectionné au début de chaque
   // question (retour utilisateur direct : "Existe" restait sélectionné par défaut).
   const [resultatExiste, setResultatExiste] = useState<boolean | null>(null);
@@ -88,15 +94,20 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
           </div>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(question)}</p>

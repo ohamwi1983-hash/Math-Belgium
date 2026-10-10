@@ -3,14 +3,13 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVolumesRevolution } from "./generateurs6e/volumesRevolution";
 import type { IdVarianteVolumesRevolution } from "./generateurs6e/volumesRevolution";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionVolumesRevolution, soumettreReponseEcran } from "./moteur6e/sessionVolumesRevolution";
-import type { EtatSessionVolumesRevolution, PhaseVolumesRevolution, ResultatExerciceVolumesRevolution } from "./moteur6e/typesVolumesRevolution";
+import type { EtatSessionVolumesRevolution, PhaseVolumesRevolution } from "./moteur6e/typesVolumesRevolution";
 import { diagnostiquerEcran } from "./moteur6e/verificationVolumesRevolution";
 import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
 import { EtapeRacinesCalculAires } from "./components6e/EtapeRacinesCalculAires";
-import { ResultatPanelVolumesRevolution } from "./components6e/ResultatPanelVolumesRevolution";
-import { ResumeSessionVolumesRevolution } from "./components6e/ResumeSessionVolumesRevolution";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatVolumesRevolution";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatVolumesRevolution";
 
 /**
  * `6gen27` — Volumes de révolution (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -30,42 +29,41 @@ function nouvelleSession(): EtatSessionVolumesRevolution {
   return demarrerSessionVolumesRevolution(REGLAGES_DEMO, genererExerciceVolumesRevolution);
 }
 
-type AideParPhase = Partial<Record<PhaseVolumesRevolution, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceVolumesRevolution;
-  aideParPhase: AideParPhase;
-}
-
-
 const ECRANS_RACINES: PhaseVolumesRevolution[] = ["bEcran1", "cEcran1"];
+
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionVolumesRevolution;
+  revele: boolean;
+}
 
 export function App6gen27() {
   const [etat, setEtat] = useState<EtatSessionVolumesRevolution>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionVolumesRevolution) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen26 répliqué à l'identique (voir
-    // `moteur6e/sessionVolumesRevolution.ts`, fonction `soumettreReponseEcran`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionVolumesRevolution(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteVolumesRevolution)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -79,12 +77,28 @@ export function App6gen27() {
     (window as unknown as { __debug6gen27?: unknown }).__debug6gen27 = { exercice, phase };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -95,7 +109,7 @@ export function App6gen27() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && ECRANS_RACINES.includes(phase) && (
+        {ECRANS_RACINES.includes(phase) && (
           <EtapeRacinesCalculAires
             key={phase}
             {...aideCommun}
@@ -112,7 +126,7 @@ export function App6gen27() {
           />
         )}
 
-        {enCoursDeSession && !ECRANS_RACINES.includes(phase) && (
+        {!ECRANS_RACINES.includes(phase) && (
           <EtapeChampsCalculAires
             key={phase}
             {...aideCommun}
@@ -127,9 +141,6 @@ export function App6gen27() {
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
           />
         )}
-
-        {dernierBilan && <ResultatPanelVolumesRevolution resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionVolumesRevolution resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

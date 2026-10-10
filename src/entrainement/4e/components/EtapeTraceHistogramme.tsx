@@ -8,6 +8,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceHistogramme } from "./EnonceHistogramme";
 import { HistogrammeGraph } from "./HistogrammeGraph";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTrace) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -39,7 +45,7 @@ interface Props {
  * ("Classement" pour $x_i$/$n_i$ ; "Fréquences" pour $f_i$, variante "frequence" uniquement) —
  * mesuré à 375px sans aucun débordement.
  */
-export function EtapeTraceHistogramme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeTraceHistogramme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [hauteurs, setHauteurs] = useState<number[]>(() => new Array(exercice.classes.length).fill(0) as number[]);
   const [rappelOuvert, setRappelOuvert] = useState(false);
 
@@ -104,16 +110,21 @@ export function EtapeTraceHistogramme({ exercice, tentativesUtilisees, tentative
           <p>{texteAideTraceNiveau1(exercice, correction)}</p>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TRACE} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_TRACE} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" onClick={() => onValider(hauteurs)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+        <button type="button" className="btn btn-primary" onClick={() => onValider(hauteurs)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

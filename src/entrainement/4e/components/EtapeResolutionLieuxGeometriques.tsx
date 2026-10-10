@@ -8,6 +8,8 @@ import { CONSIGNE_GENERALE_RESOLUTION, LIBELLE_AUCUN, LIBELLE_AU_MOINS_UN, forma
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Choix = "aucun" | "auMoinsUn";
@@ -22,13 +24,17 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseResolutionLieuxGeometriques) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 3 — Résolution. Choix catégoriel "Aucun"/"Au moins un" puis, si "Au moins un", les points
  * d'intersection en saisie add-as-needed (couvre 1 ou 2 points sans distinction préalable imposée
  * par l'interface) — même patron "Pas de.../Au moins un(e)..." que `EtapeRacinesFlexibles.tsx`,
  * adapté à des PAIRES x/y plutôt qu'une liste de valeurs isolées. */
-export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [points, setPoints] = useState<{ x: string; y: string }[]>([{ x: "", y: "" }]);
   const apresEchec = tentativesUtilisees > 0;
@@ -146,16 +152,21 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={reponse === null} onClick={() => reponse !== null && onValider(reponse)}>
+          Valider
+        </button>
+        {apresEchec && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

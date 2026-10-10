@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Katex } from "../components/Katex";
 import type { ReponseFacteursC, ReponseLimite } from "../moteur6e/verificationLimitesExponentielles";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesExponentielles";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -25,6 +27,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseFacteursC) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function GroupeBoutons({ label, valeur, erreur, onChange }: { label: string; valeur: OptionCategorielle | null; erreur: boolean; onChange: (v: OptionCategorielle) => void }) {
@@ -45,7 +51,7 @@ function GroupeBoutons({ label, valeur, erreur, onChange }: { label: string; val
 /** Écran "cFacteurs" (`6gen6`, famille C) — 2 sous-réponses catégorielles indépendantes (limite de
  * chaque facteur), combinées derrière UN SEUL bouton "Valider" (spec : "Champ : 2 valeurs").
  * `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeFacteursC({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeFacteursC({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [facteur1, setFacteur1] = useState<OptionCategorielle | null>(null);
   const [facteur2, setFacteur2] = useState<OptionCategorielle | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -75,15 +81,20 @@ export function EtapeFacteursC({ consigneEcran, enonceLatex, etatActuel, aideNiv
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeBoutons label="x^r →" valeur={facteur1} erreur={montrerErreurs} onChange={setFacteur1} />
       <GroupeBoutons label="e^(-x^s) →" valeur={facteur2} erreur={montrerErreurs} onChange={setFacteur2} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={facteur1 === null || facteur2 === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={facteur1 === null || facteur2 === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

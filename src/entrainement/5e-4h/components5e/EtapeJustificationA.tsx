@@ -4,6 +4,8 @@ import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.typ
 import { diagnostiquerJustificationA, type ReponseJustificationA } from "../moteur5e/verificationProblemesContexte";
 import { TEXTE_AIDE_JUSTIFICATION_A_1, consigneJustificationA, formatTermesEtatActuelA, texteCorrectionJustificationA } from "../ui5e/formatProblemesContexte";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 function EtatActuelA({ exercice, xOptimalRetenu }: { exercice: ExerciceScenarioAConteneur; xOptimalRetenu: number }) {
@@ -29,13 +31,17 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseJustificationA) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Champ h vérifié par tolérance (mécanisme habituel, retry) — le champ "justification" en texte
  * libre a été retiré entièrement (D.1, `promptcorrectionsround2.md`) : la correction de référence
  * s'affiche dès la première soumission, indépendamment du résultat sur h, et fait désormais office
  * d'explication (l'élève n'en rédige plus). */
-export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [h, setH] = useState("");
   const [aSoumis, setASoumis] = useState(false);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -57,15 +63,20 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
         <label className="field-label field-label-minuscule">h ≈</label>
         <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(e.target.value.replace(/[^0-9.,-]/g, ""))} />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {aSoumis && (
         <div className="aide-5e">
           <p>{texteCorrectionJustificationA(exercice, xOptimalRetenu)}</p>

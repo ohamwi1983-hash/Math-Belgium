@@ -4,6 +4,8 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { labelAjoutDecompositionD, labelListeDecompositionD, placeholderDecompositionD } from "../ui6e/formatDenombrementCombinatoirePur";
 import { SEPARATEUR_LISTES_D } from "../moteur6e/verificationDenombrementCombinatoirePur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -27,6 +29,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer: (valeurs: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const MAX_LIGNES = 8;
@@ -71,7 +77,7 @@ function ListeUneSomme({ sommeCible, lignes, onModifier, onAjouter, onRetirer, m
  * générique (`soumettreReponseEcran(etat, valeurs: string[])`, format uniforme quel que soit
  * l'écran). `App6gen46.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeDecompositionsDenombrementCombinatoirePur({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeListeDecompositionsDenombrementCombinatoirePur({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignesS1, setLignesS1] = useState<string[]>([""]);
   const [lignesS2, setLignesS2] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -126,15 +132,20 @@ export function EtapeListeDecompositionsDenombrementCombinatoirePur({ consigneGe
           onRetirer={(i) => setLignesS2((arr) => arr.filter((_, j) => j !== i))}
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

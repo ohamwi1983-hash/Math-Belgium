@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTiragesArbres } from "./generateurs6e/tiragesArbres";
 import type { IdVarianteTiragesArbres } from "./generateurs6e/tiragesArbres";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTiragesArbres, soumettreReponseEcran } from "./moteur6e/sessionTiragesArbres";
-import type { EtatSessionTiragesArbres, PhaseTiragesArbres, ResultatExerciceTiragesArbres } from "./moteur6e/typesTiragesArbres";
+import type { EtatSessionTiragesArbres } from "./moteur6e/typesTiragesArbres";
 import { diagnostiquerEcran } from "./moteur6e/verificationTiragesArbres";
+import { Katex } from "./components/Katex";
 import { EtapeChampsTiragesArbres } from "./components6e/EtapeChampsTiragesArbres";
-import { ResultatPanelTiragesArbres } from "./components6e/ResultatPanelTiragesArbres";
-import { ResumeSessionTiragesArbres } from "./components6e/ResumeSessionTiragesArbres";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel } from "./ui6e/formatTiragesArbres";
+import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex } from "./ui6e/formatTiragesArbres";
 
 /**
  * `6gen31` — Tirages, arbres et dénombrement (chapitre 8, "Probabilités", DEUXIÈME générateur de ce
@@ -28,39 +27,35 @@ function nouvelleSession(): EtatSessionTiragesArbres {
   return demarrerSessionTiragesArbres(REGLAGES_DEMO, genererExerciceTiragesArbres);
 }
 
-type AideParPhase = Partial<Record<PhaseTiragesArbres, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceTiragesArbres;
-  aideParPhase: AideParPhase;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTiragesArbres;
+  revele: boolean;
 }
-
 
 export function App6gen31() {
   const [etat, setEtat] = useState<EtatSessionTiragesArbres>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionTiragesArbres) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron `6gen30` répliqué à l'identique (voir
-    // `moteur6e/sessionTiragesArbres.ts`, fonction `soumettreReponseEcran`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionTiragesArbres(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTiragesArbres)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -81,6 +76,21 @@ export function App6gen31() {
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
   };
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
@@ -89,6 +99,7 @@ export function App6gen31() {
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
     ...aideCommun,
+    validation,
   };
 
   return (
@@ -99,12 +110,7 @@ export function App6gen31() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsTiragesArbres key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />
-        )}
-
-        {dernierBilan && <ResultatPanelTiragesArbres resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionTiragesArbres resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsTiragesArbres key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />
       </main>
     </div>
   );

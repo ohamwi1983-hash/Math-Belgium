@@ -3,16 +3,15 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTransformationsPlan } from "./generateurs6e/transformationsPlan";
 import type { IdVarianteTransformationsPlan } from "./generateurs6e/transformationsPlan";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTransformationsPlan, soumettreReponseEcran } from "./moteur6e/sessionTransformationsPlan";
-import type { EtatSessionTransformationsPlan, PhaseTransformationsPlan, ResultatExerciceTransformationsPlan } from "./moteur6e/typesTransformationsPlan";
+import type { EtatSessionTransformationsPlan } from "./moteur6e/typesTransformationsPlan";
 import { diagnostiquerEcran } from "./moteur6e/verificationTransformationsPlan";
+import { Katex } from "./components/Katex";
 import { EtapeChampsTransformationsPlan } from "./components6e/EtapeChampsTransformationsPlan";
 import { EtapeChoixFormuleTransformationsPlan } from "./components6e/EtapeChoixFormuleTransformationsPlan";
 import { EtapeImagesTransformationsPlan } from "./components6e/EtapeImagesTransformationsPlan";
 import { EtapeTypeParametresTransformationsPlan } from "./components6e/EtapeTypeParametresTransformationsPlan";
-import { ResultatPanelTransformationsPlan } from "./components6e/ResultatPanelTransformationsPlan";
-import { ResumeSessionTransformationsPlan } from "./components6e/ResumeSessionTransformationsPlan";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, optionsFormuleA, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTransformationsPlan";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, optionsFormuleA, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTransformationsPlan";
 
 /**
  * `6gen40` — Transformations du plan via les nombres complexes (chapitre 7, "Nombres complexes",
@@ -30,39 +29,35 @@ function nouvelleSession(): EtatSessionTransformationsPlan {
   return demarrerSessionTransformationsPlan(REGLAGES_DEMO, genererExerciceTransformationsPlan);
 }
 
-type AideParPhase = Partial<Record<PhaseTransformationsPlan, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceTransformationsPlan;
-  aideParPhase: AideParPhase;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTransformationsPlan;
+  revele: boolean;
 }
-
 
 export function App6gen40() {
   const [etat, setEtat] = useState<EtatSessionTransformationsPlan>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionTransformationsPlan) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen34/6gen37 répliqué à l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionTransformationsPlan(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTransformationsPlan)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -80,9 +75,24 @@ export function App6gen40() {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
   };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   const estEcranChoixFormule = exercice.famille === "A" && phase === "aEcran1";
   const estEcranTypeParametres = exercice.famille === "B" && phase === "bEcran2";
@@ -96,7 +106,7 @@ export function App6gen40() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && estEcranChoixFormule && exercice.famille === "A" && (
+        {estEcranChoixFormule && exercice.famille === "A" && (
           <EtapeChoixFormuleTransformationsPlan
             key={phase}
             {...aideCommun}
@@ -108,10 +118,11 @@ export function App6gen40() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))}
+            validation={validation}
           />
         )}
 
-        {enCoursDeSession && estEcranTypeParametres && (
+        {estEcranTypeParametres && (
           <EtapeTypeParametresTransformationsPlan
             key={phase}
             {...aideCommun}
@@ -123,10 +134,11 @@ export function App6gen40() {
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            validation={validation}
           />
         )}
 
-        {enCoursDeSession && estEcranImages && exercice.famille === "C" && (
+        {estEcranImages && exercice.famille === "C" && (
           <EtapeImagesTransformationsPlan
             key={phase}
             {...aideCommun}
@@ -138,10 +150,11 @@ export function App6gen40() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            validation={validation}
           />
         )}
 
-        {enCoursDeSession && !estEcranChoixFormule && !estEcranTypeParametres && !estEcranImages && (
+        {!estEcranChoixFormule && !estEcranTypeParametres && !estEcranImages && (
           <EtapeChampsTransformationsPlan
             key={phase}
             {...aideCommun}
@@ -154,11 +167,9 @@ export function App6gen40() {
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            validation={validation}
           />
         )}
-
-        {dernierBilan && <ResultatPanelTransformationsPlan resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionTransformationsPlan resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

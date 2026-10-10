@@ -13,6 +13,8 @@ import {
 import { diagnostiquerTangente } from "../moteur/verificationUnSansLautre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -22,11 +24,12 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Troisième et dernière étape — le bloc contexte reprend l'énoncé ET les deux résultats
  * confirmés précédents (carré, puis valeur signée). */
-export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider }: Props) {
+export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -57,23 +60,28 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
         />
       </div>
 
-      <div>
-        {aideActivee && (
-          <div className="equation-box">
-            <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <div className="equation-box">
+                <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
+              </div>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

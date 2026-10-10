@@ -6,6 +6,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -26,13 +28,17 @@ interface Props {
   /** Statut à 3 valeurs (correct/not_equivalent/parse_error), même motif que 5gen2 (A.1) — voir
    * `EtapeChampSimpleModelisation.tsx` pour la documentation complète. */
   diagnostiquer?: (reponse: ReponseBornes) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran à 2 champs (borne inf/sup) — réutilisé par "resoudreUInequation" (bornes en u) et
  * "isolerTInequation" (bornes en t). Sur "resoudreUInequation" uniquement, l'aide niveau 2 illustre
  * l'arc solution directement sur le cercle trigonométrique (mode "arc ombré", nouveau pour 5gen13) —
  * même convention que 5gen10/5gen11 ("aide 2 place le point/la valeur réelle à titre d'exemple"). */
-export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   if (exercice.phase2 === null || exercice.phase2.type !== "inequation") throw new Error("EtapeBornes : phase2 hors type 'inequation'");
   const question = exercice.phase2;
   const [inf, setInf] = useState("");
@@ -77,15 +83,20 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
           </div>
         </div>
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, phase)}</p>

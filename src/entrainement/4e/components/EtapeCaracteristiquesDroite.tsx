@@ -10,6 +10,8 @@ import { ConsigneCaracteristiquesDroiteEcran2 } from "./ConsigneCaracteristiques
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Choix = "existe" | "nExistePas";
@@ -21,6 +23,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseCaracteristiques) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function champDepuisSaisie(choix: Choix | null, valeur: string, toggleDisponible: boolean): ReponseChamp | null {
@@ -48,7 +54,7 @@ function champDepuisSaisie(choix: Choix | null, valeur: string, toggleDisponible
  * `QUESTION_PENTE`/`QUESTION_ORDONNEE`) — corrige une ambiguïté sur 4 boutons empilés sans en-tête
  * (`promptgen46modifications.md`, point 3).
  */
-export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const estAngle = exercice.caracteristiqueDemandee !== "pente";
 
   const [choixPrincipal, setChoixPrincipal] = useState<Choix | null>(null);
@@ -166,21 +172,26 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CARACTERISTIQUES} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => complet && onValider({ champPrincipal: reponsePrincipale as ReponseChamp, ordonnee: reponseOrdonnee as ReponseChamp })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutCombine)}
-        </p>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => complet && onValider({ champPrincipal: reponsePrincipale as ReponseChamp, ordonnee: reponseOrdonnee as ReponseChamp })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutCombine)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

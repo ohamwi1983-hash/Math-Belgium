@@ -8,6 +8,8 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { FractionHeader } from "./FractionHeader";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -43,6 +45,7 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (numerateur: string, denominateur: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -68,6 +71,7 @@ export function EtapeSimplification({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [numerateur, setNumerateur] = useState("");
   const [denominateur, setDenominateur] = useState("");
@@ -150,25 +154,30 @@ export function EtapeSimplification({
           onChange={(e) => setDenominateur(e.target.value)}
         />
       </div>
-      <div>
-        {aideActivee && (
-          <p className="prompt-text">Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={numerateur.trim() === "" || denominateur.trim() === ""}
-        onClick={() => onValider(numerateur, denominateur)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(numerateur, denominateur))}
-        </p>
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <p className="prompt-text">Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={numerateur.trim() === "" || denominateur.trim() === ""}
+            onClick={() => onValider(numerateur, denominateur)}
+          >
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(numerateur, denominateur))}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

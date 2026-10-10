@@ -10,6 +10,8 @@ import { calculerCourbeAxeSommet, calculerSketchAxeSommet, calculerSurlignageImf
 import { SketchAxeSommet } from "./SketchAxeSommet";
 import { Katex } from "./Katex";
 import { formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -20,6 +22,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: Morceau) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -40,6 +46,7 @@ export function EtapeDomaineImage({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [morceau, setMorceau] = useState(etatMorceauFractionInitial());
   const reponse = construireMorceauFraction(morceau);
@@ -68,20 +75,25 @@ export function EtapeDomaineImage({
           <Katex expression={apercu} block />
         </div>
       )}
-      <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

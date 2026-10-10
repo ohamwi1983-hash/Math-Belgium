@@ -5,6 +5,8 @@ import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/forma
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -21,6 +23,10 @@ interface Props {
   /** Statut à 3 valeurs (correct/not_equivalent/parse_error), même motif que 5gen2 (A.1) — voir
    * `EtapeChampSimpleModelisation.tsx` pour la documentation complète. */
   diagnostiquer?: (reponse: ReponseArgumentResoudre) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "argumentResoudre" (Phase 2, type "resoudre") — isoler sin(u)=m puis résoudre pour
@@ -29,7 +35,7 @@ interface Props {
  * `EtapeArgumentEquationTrig.tsx`, jamais un simple toggle visible en même temps que le champ).
  * Variable libre "k" — uniforme sur toutes les techniques partageant cette phase
  * (`prompt5gen13ftDonnee3variantes.md`, "donnée" n'utilise plus "n"). */
-export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixAucunAngle, setChoixAucunAngle] = useState<boolean | null>(null);
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -98,15 +104,20 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
           </button>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "argumentResoudre")}</p>

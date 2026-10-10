@@ -8,6 +8,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
   onActiverAide: () => void;
   onValiderEquation: (reponses: boolean[]) => void;
   onValiderInequation: (reponse: ReponseIntervalle) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 6 — écran-pivot, structure DIFFÉRENTE selon la variante : classification racine par
@@ -30,6 +33,7 @@ export function EtapeValidationEquationInequationSecondDegre({
   onActiverAide,
   onValiderEquation,
   onValiderInequation,
+  validation,
 }: Props) {
   const apresEchec = tentativesUtilisees > 0;
   const aide = (
@@ -60,6 +64,7 @@ export function EtapeValidationEquationInequationSecondDegre({
         tentativesMax={tentativesMax}
         aide={aide}
         onValider={onValiderEquation}
+        validation={validation}
       />
     );
   }
@@ -72,6 +77,7 @@ export function EtapeValidationEquationInequationSecondDegre({
       tentativesMax={tentativesMax}
       aide={aide}
       onValider={onValiderInequation}
+      validation={validation}
     />
   );
 }
@@ -84,9 +90,10 @@ interface PropsEquation {
   tentativesMax: number;
   aide: React.ReactNode;
   onValider: (reponses: boolean[]) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
-function EcranValidationEquation({ exercice, candidates, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider }: PropsEquation) {
+function EcranValidationEquation({ exercice, candidates, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsEquation) {
   const [reponses, setReponses] = useState<(boolean | null)[]>(candidates.map(() => null));
   const complet = reponses.every((r) => r !== null);
   const erronee = apresEchec && complet && !verifierValidationEquation(exercice, reponses as boolean[]);
@@ -134,16 +141,21 @@ function EcranValidationEquation({ exercice, candidates, apresEchec, tentativesU
         );
       })}
 
-      {aide}
+      {!validation && (
+        <>
+          {aide}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponses as boolean[])}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponses as boolean[])}>
+            Valider
+          </button>
+          {apresEchec && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }
@@ -155,9 +167,10 @@ interface PropsInequation {
   tentativesMax: number;
   aide: React.ReactNode;
   onValider: (reponse: ReponseIntervalle) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
-function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider }: PropsInequation) {
+function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsInequation) {
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
   const complet = inf.trim() !== "" && sup.trim() !== "";
@@ -202,16 +215,21 @@ function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, 
         </div>
       </div>
 
-      {aide}
+      {!validation && (
+        <>
+          {aide}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+            Valider
+          </button>
+          {apresEchec && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { CroquisOptimisation } from "./CroquisOptimisation";
 import { EnonceOptimisation } from "./EnonceOptimisation";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseContrainteEtGrandeur) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -34,6 +40,7 @@ export function EtapeContrainteEtGrandeurOptimisation({
   niveauAide,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [texteEquation, setTexteEquation] = useState("");
   const [texteGrandeur, setTexteGrandeur] = useState("");
@@ -102,16 +109,21 @@ export function EtapeContrainteEtGrandeurOptimisation({
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+          Valider
+        </button>
+        {apresEchec && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

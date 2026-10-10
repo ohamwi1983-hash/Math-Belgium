@@ -8,6 +8,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMediane } from "./EnonceMediane";
 import { PolygoneEffectifsGraph } from "./PolygoneEffectifsGraph";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (points: PointPolygone[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Positions de départ des points mobiles — répartis uniformément sur le domaine x, tous à y=0
@@ -39,7 +45,7 @@ function positionsDepart(exercice: ExerciceMedianeClasses): PointPolygone[] {
  * validation — même principe que l'écran "construction" de "Boîte à moustaches". Toujours actif
  * ("Valider" jamais désactivé, les points ont toujours une position par défaut).
  */
-export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [points, setPoints] = useState<PointPolygone[]>(() => positionsDepart(exercice));
   const pointFixe: PointPolygone = { x: exercice.classes[0].borneInf, y: 0 };
 
@@ -91,16 +97,21 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
           <p>{texteAidePolygoneNiveau1()}</p>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POLYGONE} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_POLYGONE} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" onClick={() => onValider(points)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+        <button type="button" className="btn btn-primary" onClick={() => onValider(points)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

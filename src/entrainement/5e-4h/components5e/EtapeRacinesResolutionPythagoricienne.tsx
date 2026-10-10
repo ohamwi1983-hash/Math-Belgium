@@ -5,6 +5,8 @@ import { CONSIGNE_RACINES_RESOLUTION, TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1, for
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -19,6 +21,10 @@ interface Props {
   onValider: (reponse: ReponseRacinesPythagoricienne) => void;
   /** Statut à 3 valeurs, calculé côté PRÉSENTATION uniquement — voir `EtapeArgumentEquationTrig`. */
   diagnostiquer?: (reponse: ReponseRacinesPythagoricienne) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Bloc "état actuel" — rappelle la conversion pythagoricienne ET les racines t déjà confirmées
@@ -48,7 +54,7 @@ function formatT(t: number): string {
 /** Écran 3 (famille "pythagoricienne") — pour CHAQUE racine, l'élève décide de la rejeter (|t|>1,
  * aucune solution réelle) ou de résoudre trig(x)=t (add-as-needed, `a=1,b=0` toujours — spec
  * explicite). Structure DOUBLÉE (une par racine), même principe que `EtapeArgumentProduit`. */
-export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [rejeter1, setRejeter1] = useState(false);
   const [lignes1, setLignes1] = useState<string[]>([""]);
   const [rejeter2, setRejeter2] = useState(false);
@@ -141,15 +147,20 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
         </div>
       )}
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1}</p>

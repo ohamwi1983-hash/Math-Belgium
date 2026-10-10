@@ -4,6 +4,8 @@ import type { ConditionD } from "../core6e/formeTrigonometrique.types";
 import { OPTIONS_CONDITION_D } from "../moteur6e/verificationFormeTrigonometrique";
 import type { AideAvecLatex } from "../ui6e/formatFormeTrigonometrique";
 import { LIBELLE_CONDITION } from "../ui6e/formatFormeTrigonometrique";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -19,6 +21,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (condition: ConditionD) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -29,7 +35,7 @@ interface Props {
  * verificationFormeTrigonometrique.ts`) fixe l'ordre des boutons — synchronisé avec
  * `diagnostiquerDEcran2`, qui compare directement l'identifiant choisi à `exercice.condition`.
  */
-export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<ConditionD | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -65,15 +71,20 @@ export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blo
           </button>
         ))}
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

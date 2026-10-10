@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceSuiteRecurrenteAffine } from "../core5e/suiteRecurrenteAffine.types";
 import { consigneGenerale, consigneTermesSuccessifs, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteRecurrenteAffine } from "./EtatActuelSuiteRecurrenteAffine";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -17,13 +19,17 @@ interface Props {
   onValider: (textes: string[]) => void;
   /** Statut à 3 valeurs — voir `EtapePoserRecurrence.tsx`, même motif (A.1). */
   diagnostiquer?: (textes: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran bonus (spec : "optionnel") — construit u2/u3/u4 pour observer empiriquement la
  * convergence (ou la divergence) vers/loin du régime permanent. Simplification assumée : 3 champs
  * FIXES plutôt que l'add-as-needed suggéré par la spec — même mécanique de compétence (appliquer
  * la récurrence pas à pas), format déjà établi ailleurs sur la plateforme (ex. 5gen17 `dixTermes`). */
-export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState(["", "", ""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -53,15 +59,20 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
           <input type="text" className="text-input" value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <Katex expression={texteAideNiveau1(exercice, "termesSuccessifs")} block />

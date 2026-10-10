@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceLimite } from "../core5e/limites.types";
 import { consigneGenerale, consignePhase, formatBlocDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelLimite } from "./EtatActuelLimite";
 
@@ -26,11 +28,15 @@ interface Props {
    * elles-mêmes, juste leur statut vs la saisie (même esprit que `diagnostiquer` ailleurs sur la
    * plateforme, qui ne fuit jamais la réponse dans les props). */
   diagnostiquer?: (choix: (1 | -1)[]) => boolean[];
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran à choix de signe — 1 groupe de 2 boutons (`.options-grid-compact`), réutilisé par
  * "evaluerLimiteFinale" quand la limite est infinie (famille "limiteInfini"). */
-export function EtapeChoixSigne({ exercice, phase, champs, options, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeChoixSigne({ exercice, phase, champs, options, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choix, setChoix] = useState<(1 | -1 | null)[]>(champs.map(() => null));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = choix.every((c) => c !== null);
@@ -71,15 +77,20 @@ export function EtapeChoixSigne({ exercice, phase, champs, options, tentativesUt
           </div>
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, phase)}</p>

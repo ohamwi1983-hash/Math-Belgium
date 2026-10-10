@@ -8,6 +8,8 @@ import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -22,6 +24,10 @@ interface Props {
    * qu'"Exercice de synthèse" (chapitre 5) puisse réutiliser ce composant tel quel sur sa variante
    * `classes`, où médiane/Q1/Q3 sont arrondis à 1 décimale — voir `BoiteMoustachesGraph.tsx`. */
   pas?: number;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Position de départ des 5 marqueurs — répartis uniformément sur la plage, jamais superposés au
@@ -44,7 +50,7 @@ function positionsDepart(bornePlage: { min: number; max: number }): CinqNombres 
  * donc aucun statut à 3 valeurs ici (même principe que l'écran "trace" de "Regroupement en classes
  * et histogramme"). Toujours terminal.
  */
-export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, pas }: Props) {
+export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, pas, validation}: Props) {
   const [valeurs, setValeurs] = useState<CinqNombres>(() => positionsDepart(exercice.bornePlage));
   const maxAide = niveauAideMaxPourPhase("construction");
 
@@ -96,16 +102,21 @@ export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax
           </p>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={maxAide} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" onClick={() => onValider(valeurs)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+        <button type="button" className="btn btn-primary" onClick={() => onValider(valeurs)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
 import { CONSIGNE_GENERALE_ISOCELE, OPTIONS_NATURE_TRIANGLE, SOMMETS_ISOCELE, TEXTE_AIDE_ISOCELE_SCALENE, composerClassificationIsocele, formatEtatActuelLongueursIsoceleLatex, formatTermesDonneesIsoceleLatex, type NatureTriangle } from "../ui/formatNormeDistance";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -14,6 +16,7 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseClassificationIsocele) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -23,7 +26,7 @@ interface Props {
  * "Isocèle", le sommet (A/B/C) — l'option "Équilatéral" a été retirée entièrement (piège
  * volontairement abandonné). Aide à 1 niveau : définition des 2 natures.
  */
-export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [nature, setNature] = useState<NatureTriangle | null>(null);
   const [sommet, setSommet] = useState<"A" | "B" | "C" | null>(null);
   const max = NIVEAU_AIDE_MAX.conclusionIsocele;
@@ -73,18 +76,23 @@ export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativ
           <p>{TEXTE_AIDE_ISOCELE_SCALENE}</p>
         </div>
       )}
-      {max > 0 && (
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
-      )}
+      {!validation && (
+        <>
+          {max > 0 && (
+            <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+          )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => reponse !== null && onValider(reponse)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => reponse !== null && onValider(reponse)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

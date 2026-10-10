@@ -3,14 +3,13 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercles } from "./generateurs6e/cercles";
 import type { IdVarianteCercles } from "./generateurs6e/cercles";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionCercles, soumettreReponseEcran } from "./moteur6e/sessionCercles";
-import type { EtatSessionCercles, PhaseCercles, ResultatExerciceCercles } from "./moteur6e/typesCercles";
+import type { EtatSessionCercles } from "./moteur6e/typesCercles";
 import { diagnostiquerEcran } from "./moteur6e/verificationCercles";
 import { EtapeChampsCercles } from "./components6e/EtapeChampsCercles";
 import { EtapeListeCentresCercles } from "./components6e/EtapeListeCentresCercles";
-import { ResultatPanelCercles } from "./components6e/ResultatPanelCercles";
-import { ResumeSessionCercles } from "./components6e/ResumeSessionCercles";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCercles";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCercles";
 
 /**
  * `6gen55` — Cercles. Générateur D'OUVERTURE du chapitre "Lieux géométriques" (voir
@@ -20,11 +19,11 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * (`EtapeListeCentresCercles`, liste add-as-needed des 2 centres) plutôt que le composant générique
  * `champs: ChampDef[]` (incompatible avec une liste de taille variable).
  *
- * **Pas de `QuestionFinale`** — même choix que tous les générateurs 6e existants (aucun des 54
- * générateurs `App6gen*.tsx` précédents ne l'utilise, `grep -rl QuestionFinale src/App6gen*.tsx` →
- * 0 résultat avant ce fichier) : ce composant appartient au patron narratif du chantier 4e, jamais
- * adopté par le 6e (dispatcher générique par écrans courts, `consigneEcran` change à chaque phase
- * et joue déjà ce rôle).
+ * Validation INLINE même écran (rollout UX approuvé) — `enAttente`/`terminerEtape`/`ValidationEcran`,
+ * mirroir exact `App6gen13.tsx`/`App6gen12.tsx` : plus de `ResultatPanelCercles`/
+ * `ResumeSessionCercles` séparés, la réponse attendue de l'écran qui vient de se clore
+ * (`formatReponseAttenduePhaseLatex(exercice, etat.phase)`) s'affiche À LA PLACE du bouton "Valider",
+ * jamais sur un écran distinct.
  */
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -33,39 +32,41 @@ function nouvelleSession(): EtatSessionCercles {
   return demarrerSessionCercles(REGLAGES_DEMO, genererExerciceCercles);
 }
 
-type AideParPhase = Partial<Record<PhaseCercles, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceCercles;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionCercles;
+  revele: boolean;
 }
-
 
 export function App6gen55() {
   const [etat, setEtat] = useState<EtatSessionCercles>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionCercles) {
     // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
     // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen43/6gen46 répliqué à l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionCercles(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteCercles)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -79,12 +80,28 @@ export function App6gen55() {
     (window as unknown as { __debug6gen55?: unknown }).__debug6gen55 = { exercice, phase };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   const estEcranListeCentresB = exercice.famille === "B" && phase === "bEcran3";
@@ -97,7 +114,7 @@ export function App6gen55() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && estEcranListeCentresB && (
+        {estEcranListeCentresB && (
           <EtapeListeCentresCercles
             key={phase}
             {...aideCommun}
@@ -111,7 +128,7 @@ export function App6gen55() {
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
           />
         )}
-        {enCoursDeSession && !estEcranListeCentresB && (
+        {!estEcranListeCentresB && (
           <EtapeChampsCercles
             key={phase}
             {...aideCommun}
@@ -126,9 +143,6 @@ export function App6gen55() {
             onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
           />
         )}
-
-        {dernierBilan && <ResultatPanelCercles resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionCercles resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

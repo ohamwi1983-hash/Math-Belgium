@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { SigneLimiteHyperbolique } from "../core6e/hyperboliques.types";
 import type { ReponseLimitesD } from "../moteur6e/verificationHyperboliques";
 import type { AideAvecLatex } from "../ui6e/formatHyperboliques";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -18,6 +20,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseLimitesD) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const OPTIONS: { id: SigneLimiteHyperbolique; latex: string }[] = [
@@ -34,7 +40,7 @@ const OPTIONS: { id: SigneLimiteHyperbolique; latex: string }[] = [
  * 6gen6, qui réutilise en interne le même jeu de boutons 2 fois). `App6gen19.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [plusInfini, setPlusInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const [moinsInfini, setMoinsInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -94,15 +100,20 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
         ))}
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

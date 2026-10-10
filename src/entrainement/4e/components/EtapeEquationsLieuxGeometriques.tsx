@@ -8,6 +8,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -17,6 +19,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseEquations) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 interface BlocEquationLieuProps {
@@ -54,7 +60,7 @@ function BlocEquationLieu({ lieu, id, texte, onChange, statut }: BlocEquationLie
 
 /** Écran 2 — Équations. 2 blocs DISTINCTS, un par lieu, vérifiés par équivalence algébrique en
  * réutilisant les moteurs déjà en place pour chaque type de lieu. */
-export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteLieu1, setTexteLieu1] = useState("");
   const [texteLieu2, setTexteLieu2] = useState("");
   const apresEchec = tentativesUtilisees > 0;
@@ -97,16 +103,21 @@ export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees,
           )}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={2} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ texteLieu1, texteLieu2 })}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ texteLieu1, texteLieu2 })}>
+          Valider
+        </button>
+        {apresEchec && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

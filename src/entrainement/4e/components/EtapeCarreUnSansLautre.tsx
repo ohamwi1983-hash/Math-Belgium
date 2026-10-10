@@ -5,6 +5,8 @@ import { formatCarreLatex, formatIntervalleLatex, formatValeurConnueLatex, PLACE
 import { diagnostiquerCarre } from "../moteur/verificationUnSansLautre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -14,11 +16,12 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Première étape (toujours la même, jamais d'écran "énoncé" séparé) : le bloc énoncé (valeur
  * donnée + intervalle sur θ) est affiché ici et persiste, complété, sur les 2 écrans suivants. */
-export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider }: Props) {
+export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -48,27 +51,32 @@ export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativ
         />
       </div>
 
-      <div>
-        {aideActivee && (
-          <div className="equation-box">
-            <Katex expression="\cos^2\theta + \sin^2\theta = 1" block />
-            <Katex
-              expression={`${formatCarreLatex(exercice.fonctionCible)} = 1 - ${formatCarreLatex(exercice.fonctionConnue)}`}
-              block
-            />
+      {!validation && (
+        <>
+          <div>
+            {aideActivee && (
+              <div className="equation-box">
+                <Katex expression="\cos^2\theta + \sin^2\theta = 1" block />
+                <Katex
+                  expression={`${formatCarreLatex(exercice.fonctionCible)} = 1 - ${formatCarreLatex(exercice.fonctionConnue)}`}
+                  block
+                />
+              </div>
+            )}
+            <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
-        )}
-        <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
-      </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+            Valider
+          </button>
+          {tentativesUtilisees > 0 && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometriq
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -23,6 +25,10 @@ interface Props {
    * score, qui reste piloté par le booléen historique déclenché via `onValider`. Optionnel : un
    * appelant qui ne le fournit pas garde le message générique historique. */
   diagnostiquer?: (reponse: ReponseArgument) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 1 — résoudre pour l'argument u=ax+b. Add-as-needed (1 ligne pour tan/cas spécial, 2 pour
@@ -30,7 +36,7 @@ interface Props {
  * uniquement, jamais tan — D.1, même patron que `EtapeCEDomaineDefinition.tsx`). Calculatrice
  * scientifique affichée UNIQUEMENT en régime "decimal" (D.1 — jamais pour une valeur d'angle
  * particulier, régime "exact"). */
-export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const gateActif = exercice.fonction !== "tan";
   const [choixAucuneSolution, setChoixAucuneSolution] = useState<boolean | null>(gateActif ? null : false);
   const [lignes, setLignes] = useState<string[]>([""]);
@@ -104,15 +110,20 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
           </button>
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideArgumentNiveau1(exercice.fonction)}</p>

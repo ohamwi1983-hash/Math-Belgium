@@ -3,6 +3,8 @@ import type { ExerciceLimite } from "../core5e/limites.types";
 import type { ReponseLimitesGaucheDroite } from "../moteur5e/sessionLimites";
 import { consigneGenerale, formatBlocDonneesLatex, formatLabelLimiteDroiteLatex, formatLabelLimiteGaucheLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelLimite } from "./EtatActuelLimite";
 
@@ -21,6 +23,10 @@ interface Props {
   onValider: (reponse: ReponseLimitesGaucheDroite) => void;
   /** Correction PAR CÔTÉ, calculée côté PRÉSENTATION uniquement. */
   diagnostiquer?: (reponse: ReponseLimitesGaucheDroite) => { gauche: boolean; droite: boolean };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "limitesGaucheDroite" (Branche B, famille "limiteInfiniePoint" uniquement) — 2 questions
@@ -28,7 +34,7 @@ interface Props {
  * EXPOSANT, `x\to a^-`/`x\to a^+` — `formatLabelLimiteGaucheLatex`/`formatLabelLimiteDroiteLatex`),
  * réponse par VRAI combobox natif (`<select>.ce-select`, jamais des boutons). Aide à 2 niveaux :
  * niveau 1 = méthode (signes numérateur/dénominateur), niveau 2 = exemple DIFFÉRENT de l'exercice. */
-export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [gauche, setGauche] = useState<1 | -1 | null>(null);
   const [droite, setDroite] = useState<1 | -1 | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -87,15 +93,20 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
         {comboboxSigne("limite-droite", droite, setDroite, correction !== null && !correction.droite)}
       </div>
 
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "limitesGaucheDroite")}</p>

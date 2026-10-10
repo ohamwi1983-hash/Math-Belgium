@@ -3,6 +3,8 @@ import type { ExerciceLimitesContexte, OptionInterpretation } from "../core5e/li
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
 import { consigneGenerale, consignePhase, formatContexteTexte, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EtatActuelLimitesContexte } from "./EtatActuelLimitesContexte";
@@ -19,12 +21,16 @@ interface Props {
   onActiverAide: () => void;
   onValider: (indexChoisi: number | null) => void;
   verifier: (indexChoisi: number | null) => boolean;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran QCM "interprétation"/"AV sens"/"croissance-régression" — motif du précédent 4e
  * (`EtapeInterpretationOptimisation.tsx`) : `optionsInterpretation`, phrases pré-écrites (une seule
  * correcte, ordre mélangé à la génération), jamais de saisie libre en français. */
-export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, verifier }: Props) {
+export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, verifier, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifier(choix);
@@ -55,15 +61,20 @@ export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUt
       </div>
 
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, null)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => onValider(choix)}>
+          Valider
+        </button>
+        {apresEchec && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, null)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, phase)}</p>

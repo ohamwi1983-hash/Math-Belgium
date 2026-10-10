@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceComparaisonSuites } from "../core5e/comparaisonSuites.types";
 import { consigneConclusion, consigneGenerale, labelTraduction, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatComparaisonSuites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelComparaisonSuites } from "./EtatActuelComparaisonSuites";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -20,6 +22,10 @@ interface Props {
   /** Statuts à 3 valeurs PAR CHAMP (A.2 — highlight rouge indépendant). */
   diagnostiquerNSeuil?: (texte: string) => StatutVerification;
   diagnostiquerTraduction?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "conclusion" — 2 champs : l'indice n trouvé, ET sa traduction dans l'unité du contexte
@@ -35,6 +41,7 @@ export function EtapeConclusionComparaisonSuites({
   diagnostiquer,
   diagnostiquerNSeuil,
   diagnostiquerTraduction,
+  validation,
 }: Props) {
   const [nSeuil, setNSeuil] = useState("");
   const [traduction, setTraduction] = useState("");
@@ -69,15 +76,20 @@ export function EtapeConclusionComparaisonSuites({
         <label className="field-label">{labelTraduction(exercice)}</label>
         <input type="text" className={`text-input${traductionErronee ? " is-erronee" : ""}`} value={traduction} onChange={(e) => setTraduction(e.target.value)} />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "conclusion")}</p>

@@ -5,6 +5,8 @@ import type { ReponseEquation } from "../moteur5e/sessionSuiteArithmetique";
 import { PHASES_AIDE1_LATEX, consigneGenerale, consignePhase, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteArithmetique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteArithmetique } from "./EtatActuelSuiteArithmetique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -24,6 +26,10 @@ interface Props {
   /** Statut à 3 valeurs calculé côté PRÉSENTATION uniquement (voir `EtapeChampSimpleSuiteArithmetique.tsx`) —
    * optionnel, un appelant qui ne le fournit pas garde le message générique historique. */
   diagnostiquer?: (reponse: ReponseEquation) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "poserEquationAlgebrique" (familles "algebriqueTermeGeneral"/"algebriqueSommeSn") ou
@@ -32,7 +38,7 @@ interface Props {
  * champs gauche/droite séparés par un '=' visuel" — `diagnostiquerEquationComplete`/
  * `diagnostiquerEquationCompleteEnN`, `moteur5e/verificationSuiteArithmetique.ts`, splittent le
  * texte sur "=" avant de déléguer à la vérification par différences finies existante). */
-export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -69,15 +75,20 @@ export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tenta
           placeholder={placeholder}
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           {PHASES_AIDE1_LATEX.has(phase as PhaseSuiteArithmetique) ? (

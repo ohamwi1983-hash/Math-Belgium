@@ -4,6 +4,7 @@ import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../moteur5e/verifi
 import { CONSIGNE_GENERALE_ETUDIER_FONCTION, consigneEcranEtudierFonction, formatEnteteColonnesTableauEtudierFonction, formatTermesDonneesLatex, questionFinaleEtudierFonction, texteAideNiveau1EtudierFonction, texteAideNiveau2EtudierFonction } from "../ui5e/formatEtudierFonction";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelEtudierFonction } from "./EtatActuelEtudierFonction";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
@@ -17,6 +18,7 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTableauEtudierFonction) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écrans "tableauFPrime"/"tableauFSeconde" — réutilise TEL QUEL `TableauEtudeLocaleBuilder`
@@ -24,7 +26,7 @@ interface Props {
  * dépendance à `ExerciceEtudeLocale`), racines/exclusions déjà connues à la génération (pré-placées
  * en en-tête, jamais résolues par l'élève dans CE générateur — voir tête de fichier de
  * `typesEtudierFonction.ts`). Calculatrice ABSENTE (question structurelle). */
-export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = formatEnteteColonnesTableauEtudierFonction(exercice, attendu.colonnes, mode);
@@ -49,6 +51,7 @@ export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilise
         tentativesMax={tentativesMax}
         onValider={onValider}
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
+        validation={validation}
       />
       {niveauAide >= 1 && (
         <div className="aide-5e">

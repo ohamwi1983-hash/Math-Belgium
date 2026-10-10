@@ -6,6 +6,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { labelAjoutCentreB, labelListeCentresB, labelRayonB, placeholderCentreB } from "../ui6e/formatCercles";
 import type { AideAvecLatex } from "../ui6e/formatCercles";
 import { SEPARATEUR_CENTRES_B } from "../moteur6e/verificationCercles";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -22,6 +24,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer: (valeurs: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const MAX_LIGNES = 5;
@@ -38,7 +44,7 @@ const MAX_LIGNES = 5;
  * (`soumettreReponseEcran(etat, valeurs: string[])`). `App6gen55.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeListeCentresCercles({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeListeCentresCercles({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [centres, setCentres] = useState<string[]>([""]);
   const [rayon, setRayon] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -106,15 +112,20 @@ export function EtapeListeCentresCercles({ consigneGenerale, blocDonnees, etatAc
           <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={rayon} placeholder="ex : 4" onChange={(e) => setRayon(e.target.value)} />
         </div>
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!toutRempli} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

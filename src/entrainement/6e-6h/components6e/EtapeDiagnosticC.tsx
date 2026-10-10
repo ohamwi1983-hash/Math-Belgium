@@ -4,6 +4,8 @@ import { Katex } from "../components/Katex";
 import type { ReponseDiagnosticC, ReponseLimiteLog } from "../moteur6e/verificationLimitesLogarithmiques";
 import type { ConfigPartieDiagnostic } from "../ui6e/formatLimitesLogarithmiques";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesLogarithmiques";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -27,6 +29,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseDiagnosticC) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 interface EtatPartie {
@@ -82,7 +88,7 @@ function reponseDepuisEtat(etat: EtatPartie): ReponseLimiteLog | null {
  * indépendantes combinées derrière UN SEUL bouton "Valider" (spec : "Champ : valeurs/statuts de
  * chaque partie"). Même patron que `EtapeFacteursC.tsx` (6gen6), étendu pour supporter une option
  * "Valeur finie" par partie. `App6gen17.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etat1, setEtat1] = useState<EtatPartie>({ statut: null, texte: "" });
   const [etat2, setEtat2] = useState<EtatPartie>({ statut: null, texte: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -105,15 +111,20 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
       <p className="prompt-text">{consigneEcran}</p>
       <GroupePartie config={partie1} etat={etat1} erreur={montrerErreurs} onChange={setEtat1} />
       <GroupePartie config={partie2} etat={etat2} erreur={montrerErreurs} onChange={setEtat2} />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!pretAValider} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!pretAValider} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

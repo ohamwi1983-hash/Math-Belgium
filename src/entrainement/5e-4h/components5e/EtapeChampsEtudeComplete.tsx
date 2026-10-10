@@ -4,6 +4,8 @@ import type { PhaseEtudeComplete } from "../moteur5e/typesEtudeComplete";
 import { CONSIGNE_GENERALE_CONSTRUCTION_INVERSE, CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, formatProprietesConstructionInverseTexte, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
 import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
@@ -27,13 +29,17 @@ interface Props {
   onActiverAide: () => void;
   onValider: (valeurs: string[]) => void;
   diagnostiquer?: (valeurs: string[]) => StatutVerification[];
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran générique à N champs texte libres (1 ou 2) — réutilisé par les écrans "point vide"
  * (1 champ), "AH"/"AO" (1 champ), "casSpecial" (2 champs), "constructionInverse" (1 champ).
  * Calculatrice TOUJOURS présente (contextes réalistes, arithmétique non triviale), sauf sur l'écran
  * "domaine"/"classification" (purement symbolique, gérés par `EtapeListeNombresEtudeComplete`). */
-export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(labels.map(() => ""));
   const [dernierStatuts, setDernierStatuts] = useState<StatutVerification[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -84,15 +90,20 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
         </div>
       ))}
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut ?? dernierStatuts?.find((s) => s !== "correct") ?? "not_equivalent")}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, pireStatut ?? dernierStatuts?.find((s) => s !== "correct") ?? "not_equivalent")}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, phase)}</p>

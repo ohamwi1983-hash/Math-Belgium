@@ -3,14 +3,13 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import type { IdVarianteTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionTrianglesComplexes, soumettreReponseEcran } from "./moteur6e/sessionTrianglesComplexes";
-import type { EtatSessionTrianglesComplexes, PhaseTrianglesComplexes, ResultatExerciceTrianglesComplexes } from "./moteur6e/typesTrianglesComplexes";
+import type { EtatSessionTrianglesComplexes } from "./moteur6e/typesTrianglesComplexes";
 import { diagnostiquerEcran } from "./moteur6e/verificationTrianglesComplexes";
+import { Katex } from "./components/Katex";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { EtapeTrianglesComplexes } from "./components6e/EtapeTrianglesComplexes";
-import { ResultatPanelTrianglesComplexes } from "./components6e/ResultatPanelTrianglesComplexes";
-import { ResumeSessionTrianglesComplexes } from "./components6e/ResumeSessionTrianglesComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTrianglesComplexes";
+import { blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTrianglesComplexes";
 
 /**
  * `6gen41` — Propriétés géométriques de triangles via les nombres complexes (chapitre 7, "Nombres
@@ -29,39 +28,35 @@ function nouvelleSession(): EtatSessionTrianglesComplexes {
   return demarrerSessionTrianglesComplexes(REGLAGES_DEMO, genererExerciceTrianglesComplexes);
 }
 
-type AideParPhase = Partial<Record<PhaseTrianglesComplexes, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceTrianglesComplexes;
-  aideParPhase: AideParPhase;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTrianglesComplexes;
+  revele: boolean;
 }
-
 
 export function App6gen41() {
   const [etat, setEtat] = useState<EtatSessionTrianglesComplexes>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionTrianglesComplexes) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen34/6gen37 répliqué à l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionTrianglesComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTrianglesComplexes)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -87,9 +82,24 @@ export function App6gen41() {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
   };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -99,26 +109,22 @@ export function App6gen41() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeTrianglesComplexes
-            key={phase}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            choix={choixEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-        {enCoursDeSession && calculatriceVisible && <CalculatriceScientifique modeInitial="DEG" />}
-
-        {dernierBilan && <ResultatPanelTrianglesComplexes resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionTrianglesComplexes resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeTrianglesComplexes
+          key={phase}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          choix={choixEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+          validation={validation}
+        />
+        {calculatriceVisible && <CalculatriceScientifique modeInitial="DEG" />}
       </main>
     </div>
   );

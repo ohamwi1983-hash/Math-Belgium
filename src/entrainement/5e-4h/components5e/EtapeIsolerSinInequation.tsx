@@ -3,6 +3,8 @@ import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinuso
 import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { Katex } from "../components/Katex";
 import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -21,12 +23,13 @@ interface Props {
    * (cas spécial catégoriel ET cas général en texte libre) — `diagnostiquerIsolerSinInequation`
    * gère les deux formes de réponse indifféremment. */
   diagnostiquer?: (texte: string) => StatutVerification;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "isolerSinInequation" (Phase 2, type "inequation") — DEUX présentations disjointes selon
  * `question.casSpecial` : cas spécial (|m|>1, boutons "Toujours vraie"/"Toujours fausse") ou cas
  * général (champ texte libre "sin(...)◇m"). */
-export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   if (exercice.phase2 === null || exercice.phase2.type !== "inequation") throw new Error("EtapeIsolerSinInequation : phase2 hors type 'inequation'");
   const question = exercice.phase2;
   const [texte, setTexte] = useState("");
@@ -59,19 +62,23 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
               Toujours fausse
             </button>
           </div>
-          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={choixCasSpecial === null}
-            onClick={() => {
-              if (choixCasSpecial === null) return;
-              if (diagnostiquer) setDernierStatut(diagnostiquer(choixCasSpecial));
-              onValider(choixCasSpecial);
-            }}
-          >
-            Valider
-          </button>
+          {!validation && (
+            <>
+              <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={choixCasSpecial === null}
+                onClick={() => {
+                  if (choixCasSpecial === null) return;
+                  if (diagnostiquer) setDernierStatut(diagnostiquer(choixCasSpecial));
+                  onValider(choixCasSpecial);
+                }}
+              >
+                Valider
+              </button>
+            </>
+          )}
         </>
       ) : (
         <>
@@ -84,26 +91,31 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
               placeholder="ex : sin(u)>=0.42"
             />
           </div>
-          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={texte.trim() === ""}
-            onClick={() => {
-              if (texte.trim() === "") return;
-              if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
-              onValider(texte);
-            }}
-          >
-            Valider
-          </button>
+          {!validation && (
+            <>
+              <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={texte.trim() === ""}
+                onClick={() => {
+                  if (texte.trim() === "") return;
+                  if (diagnostiquer) setDernierStatut(diagnostiquer(texte));
+                  onValider(texte);
+                }}
+              >
+                Valider
+              </button>
+            </>
+          )}
         </>
       )}
-      {montrerErreurs && (
+      {!validation && montrerErreurs && (
         <p className="alert-error" role="alert">
           {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
         </p>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "isolerSinInequation")}</p>

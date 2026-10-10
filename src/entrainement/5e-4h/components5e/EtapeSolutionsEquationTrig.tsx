@@ -5,6 +5,8 @@ import { formatTermesEtatActuelDirecte } from "../ui5e/formatEquationTrigonometr
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -19,6 +21,10 @@ interface Props {
   onValider: (textes: string[]) => void;
   /** Statut à 3 valeurs, calculé côté PRÉSENTATION uniquement — voir `EtapeArgumentEquationTrig`. */
   diagnostiquer?: (textes: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Bloc "état actuel" — rappelle l'argument u ET les branches x déjà isolées aux 2 écrans
@@ -38,7 +44,7 @@ function EtatActuelDirecte({ exercice, phase }: { exercice: ExerciceEquationTrig
 /** Écran 3 (absent si `exercice.aucuneSolution`) — lister les solutions distinctes dans [0;2π[.
  * Add-as-needed, cercle trigonométrique VIDE tant que l'aide 2 n'est pas activée (jamais donner la
  * réponse en avance) — l'aide 2 y place alors le PREMIER point à titre d'exemple seulement. */
-export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -90,15 +96,20 @@ export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tent
       <button type="button" className="btn" onClick={ajouterLigne}>
         + Ajouter une solution
       </button>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU1}</p>

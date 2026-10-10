@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDenombrementFondamental } from "./generateurs6e/denombrementFondamental";
 import type { IdVarianteDenombrementFondamental } from "./generateurs6e/denombrementFondamental";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionDenombrementFondamental, soumettreReponseEcran } from "./moteur6e/sessionDenombrementFondamental";
-import type { EtatSessionDenombrementFondamental, PhaseDenombrementFondamental, ResultatExerciceDenombrementFondamental } from "./moteur6e/typesDenombrementFondamental";
+import type { EtatSessionDenombrementFondamental } from "./moteur6e/typesDenombrementFondamental";
 import { diagnostiquerEcran } from "./moteur6e/verificationDenombrementFondamental";
 import { EtapeChampsDenombrementFondamental } from "./components6e/EtapeChampsDenombrementFondamental";
-import { ResultatPanelDenombrementFondamental } from "./components6e/ResultatPanelDenombrementFondamental";
-import { ResumeSessionDenombrementFondamental } from "./components6e/ResumeSessionDenombrementFondamental";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatDenombrementFondamental";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatDenombrementFondamental";
 
 /**
  * `6gen43` — Dénombrement fondamental et arrangements. GÉNÉRATEUR D'OUVERTURE du chapitre "Analyse
@@ -28,40 +27,39 @@ function nouvelleSession(): EtatSessionDenombrementFondamental {
   return demarrerSessionDenombrementFondamental(REGLAGES_DEMO, genererExerciceDenombrementFondamental);
 }
 
-type AideParPhase = Partial<Record<PhaseDenombrementFondamental, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceDenombrementFondamental;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDenombrementFondamental;
+  revele: boolean;
 }
-
 
 export function App6gen43() {
   const [etat, setEtat] = useState<EtatSessionDenombrementFondamental>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionDenombrementFondamental) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen23/6gen26/6gen37 répliqué à
-    // l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionDenombrementFondamental(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteDenombrementFondamental)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -75,12 +73,28 @@ export function App6gen43() {
     (window as unknown as { __debug6gen43?: unknown }).__debug6gen43 = { exercice, phase };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -91,24 +105,19 @@ export function App6gen43() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsDenombrementFondamental
-            key={phase}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-
-        {dernierBilan && <ResultatPanelDenombrementFondamental resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionDenombrementFondamental resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsDenombrementFondamental
+          key={phase}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+        />
       </main>
     </div>
   );

@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesOptiquesConiques } from "./generateurs6e/proprietesOptiquesConiques";
 import type { IdVarianteProprietesOptiquesConiques } from "./generateurs6e/proprietesOptiquesConiques";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesOptiquesConiques, soumettreReponseEcran } from "./moteur6e/sessionProprietesOptiquesConiques";
-import type { EtatSessionProprietesOptiquesConiques, PhaseProprietesOptiquesConiques, ResultatExerciceProprietesOptiquesConiques } from "./moteur6e/typesProprietesOptiquesConiques";
+import type { EtatSessionProprietesOptiquesConiques } from "./moteur6e/typesProprietesOptiquesConiques";
 import { diagnostiquerEcran } from "./moteur6e/verificationProprietesOptiquesConiques";
 import { EtapeChampsProprietesOptiquesConiques } from "./components6e/EtapeChampsProprietesOptiquesConiques";
-import { ResultatPanelProprietesOptiquesConiques } from "./components6e/ResultatPanelProprietesOptiquesConiques";
-import { ResumeSessionProprietesOptiquesConiques } from "./components6e/ResumeSessionProprietesOptiquesConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProprietesOptiquesConiques";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProprietesOptiquesConiques";
 
 /**
  * `6gen63` — Propriétés optiques des coniques. Chapitre "Les coniques", 6e FWB (6h) — générateur DE
@@ -19,8 +18,9 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * (`EtapeChampsProprietesOptiquesConiques`) gère tous les champs texte/choix, piloté entièrement par
  * `champs: ChampDef[]`.
  *
- * **Pas de `QuestionFinale`** — même convention que `6gen58`/`6gen59`/`6gen61`/`6gen62` : le rôle de
- * rappel persistant est déjà rempli par `blocDonnees`, réaffiché identique sur chaque écran.
+ * Validation INLINE même écran (rollout UX approuvé) — `enAttente`/`terminerEtape`/`ValidationEcran`,
+ * mirroir exact `App6gen13.tsx`/`App6gen12.tsx` : plus de `ResultatPanelProprietesOptiquesConiques`/
+ * `ResumeSessionProprietesOptiquesConiques` séparés.
  */
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -29,39 +29,41 @@ function nouvelleSession(): EtatSessionProprietesOptiquesConiques {
   return demarrerSessionProprietesOptiquesConiques(REGLAGES_DEMO, genererExerciceProprietesOptiquesConiques);
 }
 
-type AideParPhase = Partial<Record<PhaseProprietesOptiquesConiques, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceProprietesOptiquesConiques;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionProprietesOptiquesConiques;
+  revele: boolean;
 }
-
 
 export function App6gen63() {
   const [etat, setEtat] = useState<EtatSessionProprietesOptiquesConiques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionProprietesOptiquesConiques) {
     // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
     // ici) — piège "revele stale" documenté CLAUDE.md.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionProprietesOptiquesConiques(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteProprietesOptiquesConiques)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -72,15 +74,31 @@ export function App6gen63() {
   // `App6gen62.tsx`.
   const modeDevActif = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
   if (modeDevActif) {
-    (window as unknown as { __debug6gen63?: unknown }).__debug6gen63 = { exercice, phase, champs: enCoursDeSession ? champsEcran(exercice, phase) : null };
+    (window as unknown as { __debug6gen63?: unknown }).__debug6gen63 = { exercice, phase, champs: champsEcran(exercice, phase) };
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -91,24 +109,19 @@ export function App6gen63() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsProprietesOptiquesConiques
-            key={phase}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-
-        {dernierBilan && <ResultatPanelProprietesOptiquesConiques resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionProprietesOptiquesConiques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsProprietesOptiquesConiques
+          key={phase}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+        />
       </main>
     </div>
   );

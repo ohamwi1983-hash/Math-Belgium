@@ -4,6 +4,8 @@ import type { ReponseDevelopper } from "../moteur5e/sessionDefinitionDerivee";
 import { consigneGenerale, formatTermesDonneesLatex, labelFA, labelFAH, questionSpecifiqueEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatDefinitionDerivee";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelDefinitionDerivee } from "./EtatActuelDefinitionDerivee";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -18,13 +20,17 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseDevelopper) => void;
   diagnostiquer?: (reponse: ReponseDevelopper) => { fA: StatutVerification; fAH: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "developper" — 2 champs (f(a) numérique, f(a+h) symbolique en h), vérifiés
  * INDÉPENDAMMENT pour l'affichage mais notés comme UNE SEULE tentative combinée (1 bouton
  * Valider) — même patron que `EtapeDiviserEuclidienne.tsx` (5gen21). Jamais de calculatrice :
  * générateur purement symbolique/exact. */
-export function EtapeDevelopperDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeDevelopperDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [fA, setFA] = useState("");
   const [fAH, setFAH] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -81,15 +87,20 @@ export function EtapeDevelopperDerivee({ exercice, tentativesUtilisees, tentativ
           placeholder="ex : 3*h+4"
         />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "developper")}</p>

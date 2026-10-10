@@ -6,6 +6,8 @@ import { labelAsymptoteLatex } from "../ui5e/formatLectureGraphiqueLimites";
 import { zoneDepuisIdAsymptote } from "../ui5e/lectureGraphiqueDeriveesCourbe";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -20,6 +22,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (textes: string[]) => void;
   diagnostiquer?: (textes: string[]) => StatutVerification[];
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "asymptotes" — adapte le PATRON de `EtapeEquationsAsymptotes.tsx` (5gen22 : mêmes slots
@@ -28,7 +34,7 @@ interface Props {
  * graphe 5gen22 — la donnée affichée doit rester la MÊME sur tous les écrans de ce générateur.
  * Jamais un composant importé tel quel : `EtapeEquationsAsymptotes` est câblé en dur sur l'ancien
  * graphe et sur `ExerciceLectureGraphiqueLimites`, incompatible avec ce besoin. */
-export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const slots = listeAsymptotes(exercice.asymptotique);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   useEffect(() => {
@@ -77,15 +83,20 @@ export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUt
           />
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -3,13 +3,12 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIdentificationConiques } from "./generateurs6e/identificationConiques";
 import type { IdVarianteIdentificationConiques } from "./generateurs6e/identificationConiques";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIdentificationConiques, soumettreReponseEcran } from "./moteur6e/sessionIdentificationConiques";
-import type { EtatSessionIdentificationConiques, PhaseIdentificationConiques, ResultatExerciceIdentificationConiques } from "./moteur6e/typesIdentificationConiques";
+import type { EtatSessionIdentificationConiques } from "./moteur6e/typesIdentificationConiques";
 import { diagnostiquerEcran } from "./moteur6e/verificationIdentificationConiques";
 import { EtapeChampsIdentificationConiques } from "./components6e/EtapeChampsIdentificationConiques";
-import { ResultatPanelIdentificationConiques } from "./components6e/ResultatPanelIdentificationConiques";
-import { ResumeSessionIdentificationConiques } from "./components6e/ResumeSessionIdentificationConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIdentificationConiques";
+import { Katex } from "./components/Katex";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIdentificationConiques";
 
 /**
  * `6gen58` — Identification d'une conique et de ses éléments caractéristiques. GÉNÉRATEUR
@@ -20,11 +19,9 @@ import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, 
  * fois les champs texte libre (y compris les réponses algébriques gardées structurellement) et les
  * écrans de choix, piloté entièrement par `champs: ChampDef[]`.
  *
- * **Pas de `QuestionFinale`** — convention RÉELLE déjà établie pour ce chantier (voir en-tête
- * `App6gen53.tsx`/`App6gen49.tsx` : 0 générateur 6e ne l'utilise) : ce composant appartient au
- * patron narratif "1 seul problème long" du chantier 4e, jamais adopté par le chantier 6e
- * (dispatcher générique par écrans courts, `consigneEcran` change à chaque phase — le rôle de
- * rappel persistant est déjà rempli par `blocDonnees`, réaffiché identique sur chaque écran).
+ * Validation INLINE même écran (rollout UX approuvé) — `enAttente`/`terminerEtape`/`ValidationEcran`,
+ * mirroir exact `App6gen13.tsx`/`App6gen12.tsx` : plus de `ResultatPanelIdentificationConiques`/
+ * `ResumeSessionIdentificationConiques` séparés.
  */
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -33,40 +30,42 @@ function nouvelleSession(): EtatSessionIdentificationConiques {
   return demarrerSessionIdentificationConiques(REGLAGES_DEMO, genererExerciceIdentificationConiques);
 }
 
-type AideParPhase = Partial<Record<PhaseIdentificationConiques, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceIdentificationConiques;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionIdentificationConiques;
+  revele: boolean;
 }
-
 
 export function App6gen58() {
   const [etat, setEtat] = useState<EtatSessionIdentificationConiques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionIdentificationConiques) {
     // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
     // ici) — piège "revele stale" documenté CLAUDE.md, patron 6gen23/6gen26/6gen43 répliqué à
     // l'identique.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionIdentificationConiques(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIdentificationConiques)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
@@ -80,15 +79,31 @@ export function App6gen58() {
     // `champs` inclus (en plus de `exercice`/`phase`) — permet à un script Playwright de
     // reconstruire les boutons de choix par leur VALEUR technique (`option.valeur`), jamais par le
     // texte du bouton (fragile, dépend du libellé français affiché).
-    (window as unknown as { __debug6gen58?: unknown }).__debug6gen58 = { exercice, phase, champs: enCoursDeSession ? champsEcran(exercice, phase) : null };
+    (window as unknown as { __debug6gen58?: unknown }).__debug6gen58 = { exercice, phase, champs: champsEcran(exercice, phase) };
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   const aideCommun = {
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,
-    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, enCoursDeSession ? niveauAideMaxEcran(exercice, phase) : 0),
+    niveauAideMax: Math.min(NIVEAU_AIDE_MAX, niveauAideMaxEcran(exercice, phase)),
     onActiverAide: () => setEtat(activerAideSuivante(etat)),
+    validation,
   };
 
   return (
@@ -99,24 +114,19 @@ export function App6gen58() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <EtapeChampsIdentificationConiques
-            key={phase}
-            {...aideCommun}
-            consigneGenerale={consigneGenerale(exercice)}
-            blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
-            consigneEcran={consigneEcran(exercice, phase)}
-            champs={champsEcran(exercice, phase)}
-            aideNiveau1={formatAideNiveau1(exercice, phase)}
-            aideNiveau2={formatAideNiveau2(exercice, phase)}
-            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
-          />
-        )}
-
-        {dernierBilan && <ResultatPanelIdentificationConiques resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionIdentificationConiques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+        <EtapeChampsIdentificationConiques
+          key={phase}
+          {...aideCommun}
+          consigneGenerale={consigneGenerale(exercice)}
+          blocDonnees={blocDonnees(exercice)}
+          etatActuel={etatActuel(exercice, phase)}
+          consigneEcran={consigneEcran(exercice, phase)}
+          champs={champsEcran(exercice, phase)}
+          aideNiveau1={formatAideNiveau1(exercice, phase)}
+          aideNiveau2={formatAideNiveau2(exercice, phase)}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+        />
       </main>
     </div>
   );

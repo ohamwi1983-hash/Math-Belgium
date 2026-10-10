@@ -5,6 +5,8 @@ import { consigneEcran, consigneGenerale, formatNombreLatex, formatTermesDonnees
 import type { EcranContexteEconomique } from "../moteur5e/typesContexteEconomique";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -24,6 +26,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseIterationDichotomie) => void;
   diagnostiquerMilieu: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran d'itération de dichotomie (bonus) — RÉPÉTÉ 4 fois (`iteration0`..`iteration3`), un seul
@@ -43,6 +49,7 @@ export function EtapeIterationDichotomie({
   onActiverAide,
   onValider,
   diagnostiquerMilieu,
+  validation,
 }: Props) {
   const [milieu, setMilieu] = useState("");
   const [signe, setSigne] = useState<1 | -1 | null>(null);
@@ -108,15 +115,20 @@ export function EtapeIterationDichotomie({
       </div>
 
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(ecran)}</p>

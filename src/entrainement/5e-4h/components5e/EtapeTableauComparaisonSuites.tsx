@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceComparaisonSuites } from "../core5e/comparaisonSuites.types";
 import { consigneGenerale, consigneTableau, labelU, labelV, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatComparaisonSuites";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -22,12 +24,16 @@ interface Props {
   diagnostiquer?: (textes: string[]) => StatutVerification;
   /** Statut à 3 valeurs d'UNE cellule (A.2 — highlight rouge indépendant par champ). */
   diagnostiquerCellule?: (index: number, texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "tableau" — un vrai `<table>` à 3 lignes (n=nSeuil-1, nSeuil, nSeuil+1) × 2 colonnes
  * (u_n, v_n) — 6 champs numériques au total, jamais une liste plate (la disposition en tableau est
  * pédagogiquement centrale ici : elle montre visuellement le "cran" de bascule). */
-export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerCellule }: Props) {
+export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerCellule, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(["", "", "", "", "", ""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -76,15 +82,20 @@ export function EtapeTableauComparaisonSuites({ exercice, tentativesUtilisees, t
           </tbody>
         </table>
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "tableau")}</p>

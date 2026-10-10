@@ -4,6 +4,7 @@ import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../moteur5e/verifi
 import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatEnteteColonnesTableau, formatTermesDonneesLatex, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
@@ -17,12 +18,13 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseTableauEtudeLocale) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écrans "tableauFPrime"/"tableauFSeconde" — tableau de signes étendu (`TableauEtudeLocaleBuilder`),
  * racines/exclusions déjà pré-placées en en-tête (résolues à l'écran précédent). Calculatrice
  * ABSENTE (question purement structurelle/qualitative). */
-export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = formatEnteteColonnesTableau(exercice, attendu.colonnes, mode);
@@ -47,6 +49,7 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
         tentativesMax={tentativesMax}
         onValider={onValider}
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
+        validation={validation}
       />
       {niveauAide >= 1 && (
         <div className="aide-5e">

@@ -3,6 +3,8 @@ import type { ExerciceExtremaBornes } from "../core5e/extremaBornes.types";
 import type { EcranExtremaBornes } from "../moteur5e/typesExtremaBornes";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EnonceExtremaBornes } from "./EnonceExtremaBornes";
@@ -23,6 +25,10 @@ interface Props {
   /** Diagnostic PAR CHAMP — correct si la valeur saisie correspond à N'IMPORTE LAQUELLE des cibles
    * attendues (ensemble, ordre indifférent). */
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran générique "N champs numériques, vérifiés comme un ENSEMBLE" — réutilisé par
@@ -32,7 +38,7 @@ interface Props {
  * resynchronisation dès le départ (voir CLAUDE.md : piège de troncature d'état déjà rencontré 2
  * fois cette semaine sur ce patron de composant à N champs). Calculatrice PRÉSENTE (valeur décimale
  * calculée à la main, même si toujours entière ici par construction — convention transversale). */
-export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const nb = labels.length;
   const [valeurs, setValeurs] = useState<string[]>(() => new Array(nb).fill(""));
   useEffect(() => {
@@ -72,15 +78,20 @@ export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, pl
         </div>
       ))}
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1ExtremaBornes(phase)}</p>

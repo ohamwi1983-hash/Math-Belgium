@@ -7,6 +7,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 type Exercice = ExerciceBienaymeTchebychevPourcentVersIntervalle | ExerciceBienaymeTchebychevNombreVersIntervalle;
@@ -18,6 +20,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (borneInf: string, borneSup: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const MAX = 1;
@@ -38,7 +44,7 @@ function statutPrioritaire(statut: { borneInf: string; borneSup: string } | unde
  * séparément (isole une erreur de signe sur une seule borne). Les bornes attendues sont toujours
  * ÉLARGIES vers l'extérieur (piège), déjà capturé par `borneInfAttendue`/`borneSupAttendue` (Couche
  * A), jamais par ce composant. */
-export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [borneInf, setBorneInf] = useState("");
   const [borneSup, setBorneSup] = useState("");
   const complet = borneInf.trim() !== "" && borneSup.trim() !== "";
@@ -87,16 +93,21 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
           <Katex expression={texteAideIntervalleFinalNiveau1().latex} block />
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={MAX} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(borneInf, borneSup)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutPrioritaire(statut))}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(borneInf, borneSup)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutPrioritaire(statut))}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

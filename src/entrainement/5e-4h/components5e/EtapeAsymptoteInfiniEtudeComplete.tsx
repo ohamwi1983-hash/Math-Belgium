@@ -3,6 +3,8 @@ import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.type
 import { CONSIGNE_GENERALE_ETUDE_COMPLETE, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatEtudeComplete";
 import { Katex } from "../components/Katex";
 import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
@@ -17,6 +19,10 @@ interface Props {
   onActiverAide: () => void;
   onValider: (reponse: ReponseAsymptoteInfini) => void;
   diagnostiquer?: (reponse: ReponseAsymptoteInfini) => { moins: boolean; plus: boolean };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 type Choix = "aucune" | "horizontale" | "oblique";
@@ -83,7 +89,7 @@ function BlocDirection({
 
 /** Écran "asymptoteInfini" — 2 blocs indépendants "vers −∞"/"vers +∞", TOUJOURS vérifiés contre la
  * même cible (voir `moteur5e/sessionEtudeComplete.ts`). */
-export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [moins, setMoins] = useState<EtatBloc>({ choix: null, valeur: "" });
   const [plus, setPlus] = useState<EtatBloc>({ choix: null, valeur: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -107,15 +113,20 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
       <BlocDirection titre="Vers −∞" etat={moins} setEtat={setMoins} erronee={correction !== null && !correction.moins} />
       <BlocDirection titre="Vers +∞" etat={plus} setEtat={setPlus} erronee={correction !== null && !correction.plus} />
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, "asymptoteInfini")}</p>

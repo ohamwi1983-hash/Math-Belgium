@@ -3,6 +3,8 @@ import type { ExerciceTangenteHorizontale } from "../core5e/tangentes.types";
 import { consigneGenerale, formatTermesDonneesLatex, labelPointCoordonnees, questionSpecifiqueEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatTangentes";
 import type { PointSaisi } from "../moteur5e/verificationTangentes";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelTangente } from "./EtatActuelTangente";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
@@ -20,6 +22,10 @@ interface Props {
   /** Diagnostic PAR CHAMP (x et y indépendamment) — correct si la composante saisie correspond à
    * N'IMPORTE LEQUEL des points de tangence attendus (ensemble, ordre indifférent). */
   diagnostiquer?: (point: PointSaisi) => { x: StatutVerification; y: StatutVerification };
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "coordonnees" (variante B, "horizontale") — pattern ADD-AS-NEEDED de points COMPLETS,
@@ -28,7 +34,7 @@ interface Props {
  * `prompt5gen28variantesabc.md`. Labels dynamiques "Point :" (1 point) / "Point 1 :","Point 2 :"...
  * (plusieurs). Vérifiée comme un ENSEMBLE, ordre indifférent (`verifierCoordonneesHorizontale`).
  * Calculatrice PRÉSENTE (calcul de l'ordonnée f(x)). */
-export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [points, setPoints] = useState<PointSaisi[]>([{ x: "", y: "" }]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -115,15 +121,20 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
         + Ajouter un point
       </button>
       <CalculatriceScientifique />
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("coordonnees")}</p>

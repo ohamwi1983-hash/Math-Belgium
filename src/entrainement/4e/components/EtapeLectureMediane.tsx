@@ -10,6 +10,8 @@ import { EnonceMediane } from "./EnonceMediane";
 import { LectureQuartileGraph } from "./LectureQuartileGraph";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
@@ -20,6 +22,10 @@ interface Props {
   niveauAide: number;
   onActiverAide: () => void;
   onValider: (texte: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const NIVEAU_AIDE_MAX: Record<ParametreLecture, number> = {
@@ -49,7 +55,7 @@ const NIVEAU_AIDE_MAX: Record<ParametreLecture, number> = {
  * précédent). `pointsEncadresLecture` (`ui/formatMediane.ts`) est la SEULE source de vérité pour ces
  * 2 points, consommée à la fois par le texte de l'aide 3 et par le surlignage du graphe.
  */
-export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider }: Props) {
+export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX[parametre];
 
@@ -90,16 +96,21 @@ export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, 
           {niveauAide >= 4 && <Katex expression={formatFormuleInterpolationLatex(parametre)} block />}
         </div>
       )}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={max} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut === "parse_error" ? "parse_error" : undefined)}
-        </p>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut === "parse_error" ? "parse_error" : undefined)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

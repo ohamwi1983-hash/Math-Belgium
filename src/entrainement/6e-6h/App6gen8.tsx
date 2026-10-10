@@ -12,23 +12,21 @@ import {
   soumettreReponseDerivee,
   soumettreReponseSelection,
 } from "./moteur6e/sessionGraphiquesDeriveeExponentielles";
-import type {
-  EtatSessionGraphiqueDeriveeExponentielle,
-  PhaseGraphiqueDeriveeExponentielle,
-  ResultatExerciceGraphiqueDeriveeExponentielle,
-} from "./moteur6e/typesGraphiquesDeriveeExponentielles";
+import type { EtatSessionGraphiqueDeriveeExponentielle } from "./moteur6e/typesGraphiquesDeriveeExponentielles";
+import { Katex } from "./components/Katex";
 import { EtapeDeriveeGraphExpo } from "./components6e/EtapeDeriveeGraphExpo";
 import { EtapeSelectionGraphiqueDeriveeExpo } from "./components6e/EtapeSelectionGraphiqueDeriveeExpo";
-import { ResultatPanelGraphiqueDeriveeExponentielle } from "./components6e/ResultatPanelGraphiqueDeriveeExponentielle";
-import { ResumeSessionGraphiqueDeriveeExponentielle } from "./components6e/ResumeSessionGraphiqueDeriveeExponentielle";
+import { GrapheOptionDeriveeExpo } from "./components6e/GrapheOptionDeriveeExpo";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import {
   aideDeriveeNiveau1,
   aideDeriveeNiveau2,
   aideSelectionNiveau1,
   aideSelectionNiveau2,
+  calculerViewBoxGraphique,
   consigneEcranDerivee,
   etatActuel,
+  formatDeriveeCorrecteLatex,
   formatFonctionLatex,
   placeholderDerivee,
   rappelDomaineDerivee,
@@ -40,40 +38,37 @@ function nouvelleSession(): EtatSessionGraphiqueDeriveeExponentielle {
   return demarrerSessionGraphiqueDeriveeExponentielle(REGLAGES_DEMO, genererExerciceGraphiqueDeriveeExponentielle);
 }
 
-type AideParPhase = Partial<Record<PhaseGraphiqueDeriveeExponentielle, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceGraphiqueDeriveeExponentielle;
-  aideParPhase: AideParPhase;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionGraphiqueDeriveeExponentielle;
+  revele: boolean;
 }
 
 export function App6gen8() {
   const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeExponentielle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeExponentielle) {
-    // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
-    // ici — remis à zéro par `avancerPhase` DANS le même appel qui clôt l'écran, voir
-    // `moteur6e/sessionGraphiquesDeriveeExponentielles.ts` et `docs/historique-6e.md`).
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereTransitionRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(
       demarrerSessionGraphiqueDeriveeExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
     );
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -89,6 +84,20 @@ export function App6gen8() {
     (window as unknown as { __debug6gen8?: unknown }).__debug6gen8 = { exercice, phase: etat.phase };
   }
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "derivee" ? (
+            formatDeriveeCorrecteLatex(exercice) && <Katex expression={formatDeriveeCorrecteLatex(exercice) as string} />
+          ) : (
+            <GrapheOptionDeriveeExpo exercice={exercice} index={exercice.indexCorrect} viewBox={calculerViewBoxGraphique(exercice)} largeur={150} hauteur={150} />
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -98,54 +107,41 @@ export function App6gen8() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {etat.phase === "derivee" && (
-                <EtapeDeriveeGraphExpo
-                  key={cle}
-                  consigneEcran={consigneEcranDerivee()}
-                  fonctionLatex={formatFonctionLatex(exercice)}
-                  etatActuel={etatActuel(exercice, etat.phase)}
-                  rappelDomaine={rappelDomaineDerivee(exercice)}
-                  placeholder={placeholderDerivee(exercice)}
-                  aideNiveau1={aideDeriveeNiveau1(exercice)}
-                  aideNiveau2={aideDeriveeNiveau2(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
-                />
-              )}
-              {etat.phase === "selection" && (
-                <EtapeSelectionGraphiqueDeriveeExpo
-                  key={cle}
-                  exercice={exercice}
-                  etatActuel={etatActuel(exercice, etat.phase)}
-                  aideNiveau1={aideSelectionNiveau1(exercice)}
-                  aideNiveau2={aideSelectionNiveau2(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(index) => terminerEtape(soumettreReponseSelection(etat, index))}
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelGraphiqueDeriveeExponentielle
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {etat.phase === "derivee" && (
+            <EtapeDeriveeGraphExpo
+              key={cle}
+              consigneEcran={consigneEcranDerivee()}
+              fonctionLatex={formatFonctionLatex(exercice)}
+              etatActuel={etatActuel(exercice, etat.phase)}
+              rappelDomaine={rappelDomaineDerivee(exercice)}
+              placeholder={placeholderDerivee(exercice)}
+              aideNiveau1={aideDeriveeNiveau1(exercice)}
+              aideNiveau2={aideDeriveeNiveau2(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionGraphiqueDeriveeExponentielle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          {etat.phase === "selection" && (
+            <EtapeSelectionGraphiqueDeriveeExpo
+              key={cle}
+              exercice={exercice}
+              etatActuel={etatActuel(exercice, etat.phase)}
+              aideNiveau1={aideSelectionNiveau1(exercice)}
+              aideNiveau2={aideSelectionNiveau2(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(index) => terminerEtape(soumettreReponseSelection(etat, index))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

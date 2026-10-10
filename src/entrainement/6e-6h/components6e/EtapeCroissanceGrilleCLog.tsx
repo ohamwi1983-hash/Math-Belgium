@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { SigneCroissance } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseCroissanceGrilleC } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -25,6 +27,10 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseCroissanceGrilleC) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "croissance", forme "grilleC" — famille C uniquement : tableau de signe de f' à 4 cases
@@ -32,7 +38,7 @@ interface Props {
  * ℝ\{-k,k}), délimitées par -k, 0, k, plus la position du maximum local (toujours 0, mais vérifiée
  * comme les autres, jamais présupposée côté écran). `App6gen21.tsx` doit le rendre avec
  * `key={indexExercice}`. */
-export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActuel, k, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActuel, k, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [signes, setSignes] = useState<(SigneCroissance | null)[]>([null, null, null, null]);
   const [positionMax, setPositionMax] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -90,15 +96,20 @@ export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActu
         <label className="field-label field-label-minuscule">Position du maximum local (x=...)</label>
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={positionMax} placeholder="ex : 0" onChange={(e) => setPositionMax(e.target.value)} />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>

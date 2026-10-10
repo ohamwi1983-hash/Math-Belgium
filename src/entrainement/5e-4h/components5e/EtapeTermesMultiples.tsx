@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceCoherenceSuiteArithmetique, ExercicePrincipalSuiteArithmetique, ExerciceSuiteArithmetique } from "../core5e/suitesArithmetiques.types";
 import { PHASES_AIDE1_LATEX, consigneGenerale, consignePhase, formatTermesDonneesLatex, labelsCalculerTermesAlgebrique, labelsTermesProches, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteArithmetique";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelSuiteArithmetique } from "./EtatActuelSuiteArithmetique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -23,6 +25,10 @@ interface Props {
   /** Statut à 3 valeurs calculé côté PRÉSENTATION uniquement (voir `EtapeChampSimpleSuiteArithmetique.tsx`) —
    * optionnel, un appelant qui ne le fournit pas garde le message générique historique. */
   diagnostiquer?: (textes: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function labelsPourPhase(exercice: ExerciceSuiteArithmetique, phase: PhaseTermesMultiples): string[] {
@@ -53,7 +59,7 @@ function ciblesPourPhase(exercice: ExerciceSuiteArithmetique, phase: PhaseTermes
 /** Écran à PLUSIEURS champs numériques FIXES (jamais add-as-needed — le nombre de termes demandés
  * est toujours connu à l'avance) — réutilisé par "termesProches" (4 indices déjà donnés dans le
  * bloc de données) et "termesConsecutifsMoyenne" (3 termes, labels génériques "1er/2e/3e"). */
-export function EtapeTermesMultiples({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer }: Props) {
+export function EtapeTermesMultiples({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const labels = labelsPourPhase(exercice, phase);
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -96,15 +102,20 @@ export function EtapeTermesMultiples({ exercice, phase, tentativesUtilisees, ten
           />
         </div>
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           {PHASES_AIDE1_LATEX.has(phase) ? <Katex expression={texteAideNiveau1(exercice, phase)} block /> : <p>{texteAideNiveau1(exercice, phase)}</p>}

@@ -3,6 +3,8 @@ import { Katex } from "../components/Katex";
 import type { ReponseLimite } from "../moteur6e/verificationLimitesExponentielles";
 import type { DirectionLabel } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
@@ -60,13 +62,17 @@ interface Props {
   niveauAideMax: number;
   onActiverAide: () => void;
   onValider: (reponse: ReponseLimite[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "limites" — arité VARIABLE (2 directions pour A/B/D, 6 pour C, voir
  * `ui6e/formatEtudeFonctionLogarithme.ts::directionLabelsLimites`) — UN SEUL composant générique,
  * jamais un par arité (contrairement à `6gen11` qui avait `EtapeLimitesDeux`/`EtapeLimitesQuatre`
  * séparés). `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider }: Props) {
+export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etats, setEtats] = useState<EtatLocal[]>(() => labels.map(() => ({ statut: null, texte: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -102,15 +108,20 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, l
       {labels.map((l, i) => (
         <GroupeLimite key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} onChange={(e) => majEtat(i, e)} />
       ))}
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!tousComplets} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>
