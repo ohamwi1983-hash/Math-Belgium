@@ -36,7 +36,6 @@ export function AppConstructionVectorielle() {
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
 
   return (
     <div className="app-shell">
@@ -44,18 +43,6 @@ export function AppConstructionVectorielle() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Construction graphique de vecteurs</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-step">
-                Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-              </span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
-            </div>
-          </div>
-        )}
       </header>
 
       <main className="card">

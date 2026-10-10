@@ -44,7 +44,6 @@ export function AppLectureGraphiqueDroite() {
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
@@ -59,18 +58,6 @@ export function AppLectureGraphiqueDroite() {
         <h1 className="app-title">Lecture graphique — équation d'une droite</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-step">
-                Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-              </span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
-            </div>
-          </div>
-        )}
       </header>
 
       <main className="card">

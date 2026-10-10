@@ -36,7 +36,6 @@ export function AppTransformationsGraphiques() {
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
 
   return (
     <div className="app-shell">
@@ -47,18 +46,6 @@ export function AppTransformationsGraphiques() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-step">
-                Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-              </span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
-            </div>
-          </div>
-        )}
 
         <div className="card-body">
           {dernierBilan ? (

@@ -214,13 +214,7 @@ export function AppSignesProduit() {
         {enCoursDeSession && (
           <div className="card-progress">
             <div className="card-progress-row">
-              <span className="card-progress-step">
-                Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-              </span>
               <span className="card-progress-phase">{libellePhase(etat)}</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
             </div>
           </div>
         )}
