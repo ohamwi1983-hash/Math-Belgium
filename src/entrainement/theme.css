@@ -710,6 +710,49 @@
   border-color: var(--color-primary-hover);
 }
 
+/* `.morceau-row` (ex. "[ borne  -∞ ; +∞  borne ]" d'un intervalle — EnsembleReelGuideBuilder,
+ * MorceauFractionInput, MorceauIntervalleInput, communs à 4e/5e/6e) : ligne compacte tenant sur une
+ * seule ligne, jamais une pièce par ligne. Sans ces 3 règles, `.text-input` (width:100% par défaut
+ * ailleurs) et les boutons pleine-largeur empilaient crochet/borne/-∞/;/+∞/borne/crochet les uns
+ * sous les autres — sept lignes pour un seul intervalle, illisible comme une suite de boutons de
+ * réglage plutôt qu'un intervalle. La règle `@media (max-width: 480px)` juste en dessous affine
+ * encore la taille tactile mais suppose déjà ce `display:flex` de base. */
+.entrainement .morceau-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.entrainement .morceau-row .bracket-btn {
+  /* min-width, pas width : sous 480px, la règle ci-dessous réduit encore min-width à 30px — une
+   * largeur figée ici l'en empêcherait (width l'emporte toujours sur min-width). */
+  flex: none;
+  min-width: 40px;
+  padding: 10px 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.entrainement .morceau-row .btn:not(.bracket-btn) {
+  flex: none;
+  padding: 10px 12px;
+}
+
+.entrainement .morceau-row .text-input.morceau-input {
+  width: auto;
+  flex: 1 1 60px;
+  min-width: 48px;
+  text-align: center;
+}
+
+.entrainement .morceau-separateur {
+  flex: none;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  padding: 0 2px;
+}
+
 @media (max-width: 480px) {
   .entrainement .morceau-row .bracket-btn,
   .entrainement .morceau-row .btn:not(.bracket-btn) {
