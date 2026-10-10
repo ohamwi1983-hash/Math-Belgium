@@ -29,8 +29,14 @@
   --color-warning: var(--attn);
   --color-warning-bg: var(--attn-soft);
   --shadow-card: none;
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
+  /* --radius-md/--radius-lg ne reprennent PAS --radius (3px, pensé pour les pages de cours,
+   * éditorial/quasi droit) : sur un écran d'exercice tactile, ces coins presque droits combinés à
+   * des espacements serrés (.options-grid...) donnaient une grille de boutons collés les uns aux
+   * autres, peu engageante. Valeurs propres à .entrainement, plus rondes, cohérentes avec le
+   * bouton principal en pilule (piste "Ardoise") — sans toucher --radius, donc sans effet sur le
+   * reste du site. */
+  --radius-md: 10px;
+  --radius-lg: 14px;
   font: 16px/1.5 var(--sans);
   color: var(--ink);
 }
@@ -312,7 +318,7 @@
 .entrainement .options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .entrainement .contenu-conditionnel {
@@ -343,7 +349,7 @@
   color: var(--color-text);
   font-size: 14px;
   font-weight: 500;
-  padding: 14px 16px;
+  padding: 14px 18px;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
@@ -728,12 +734,15 @@
 
 .entrainement .liste-morceaux {
   margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .entrainement .liste-morceaux-ligne {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .entrainement .liste-morceaux-ligne .morceau-row {
@@ -744,6 +753,9 @@
   flex-shrink: 0;
 }
 
+/* Fond teinté (comme .alert-error) plutôt qu'un bouton neutre avec juste le texte en rouge : se lit
+ * comme une action de suppression au premier coup d'œil, pas comme un bouton ordinaire parmi
+ * d'autres. */
 .entrainement .liste-morceaux-retirer {
   flex: none;
   display: inline-flex;
@@ -753,7 +765,10 @@
   min-height: 44px;
   min-width: 44px;
   font-weight: 700;
+  font-size: 16px;
   color: var(--color-error);
+  background: var(--color-error-bg);
+  border-color: var(--color-error-bg);
 }
 
 .entrainement .liste-morceaux-ajouter {
