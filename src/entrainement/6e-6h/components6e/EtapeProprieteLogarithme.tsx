@@ -3,11 +3,19 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
+}
+
+interface Validation {
+  revele: boolean;
+  reponseAttendueLatex: string[];
+  labelSuivant: string;
+  onSuivant: () => void;
 }
 
 interface Props {
@@ -32,6 +40,10 @@ interface Props {
   /** Statut à 3 valeurs de la DERNIÈRE tentative (optionnel) — distingue un message "syntaxe non
    * reconnue" d'un simple "incorrect" (convention CLAUDE.md). */
   diagnostiquer?: (texte: string) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le champ,
+   * remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/
+   * invalidation avant de passer à l'écran suivant"). */
+  validation?: Validation | null;
 }
 
 /**
@@ -57,6 +69,7 @@ export function EtapeProprieteLogarithme({
   onActiverAide,
   onValider,
   diagnostiquer,
+  validation,
 }: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -92,16 +105,41 @@ export function EtapeProprieteLogarithme({
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
-        <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
+        <input
+          type="text"
+          className={`text-input ${montrerErreurs ? "is-erronee" : ""}`}
+          value={texte}
+          placeholder={placeholder}
+          onChange={(e) => setTexte(e.target.value)}
+          disabled={!!validation}
+        />
       </div>
-      <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+          <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+          <button type="button" className="btn btn-primary" disabled={texte.trim() === ""} onClick={valider}>
+            Valider
+          </button>
+          {montrerErreurs && (
+            <p className="alert-error" role="alert">
+              {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+            </p>
+          )}
+        </>
+      )}
+      {validation && (
+        <ValidationEcran
+          revele={validation.revele}
+          reponseAttendue={
+            <span className="equation-box-termes">
+              {validation.reponseAttendueLatex.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </span>
+          }
+          labelSuivant={validation.labelSuivant}
+          onSuivant={validation.onSuivant}
+        />
       )}
       {niveauAide >= 1 && (
         <div className="aide-5e">

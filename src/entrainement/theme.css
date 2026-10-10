@@ -480,6 +480,48 @@
   font-weight: 500;
 }
 
+.entrainement .alert-success {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.entrainement .validation-ecran {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.entrainement .validation-ecran .alert-error,
+.entrainement .validation-ecran .alert-success {
+  margin-top: 0;
+}
+
+.entrainement .validation-reponse-attendue {
+  text-align: center;
+  padding: 2px 4px;
+  overflow-x: auto;
+}
+
+.entrainement .validation-reponse-attendue .katex {
+  font-size: 1.1em;
+  color: var(--color-text-muted);
+}
+
+.entrainement .validation-reponse-attendue-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
 .entrainement .recap-list {
   list-style: none;
   padding: 0;
