@@ -204,10 +204,10 @@ export function EnsembleReelGuideBuilder({ onChange, label, disabled = false, er
           ℝ (tout)
         </button>
         <button type="button" className={`btn ${forme === "prive_points" ? "toggle-active" : ""}`} disabled={disabled} onClick={() => choisirForme("prive_points")}>
-          ℝ privé de point(s)
+          ℝ (sauf)
         </button>
         <button type="button" className={`btn ${forme === "intervalles" ? "toggle-active" : ""}`} disabled={disabled} onClick={() => choisirForme("intervalles")}>
-          Union d'intervalle(s)
+          Intervalle(s)
         </button>
       </div>
 

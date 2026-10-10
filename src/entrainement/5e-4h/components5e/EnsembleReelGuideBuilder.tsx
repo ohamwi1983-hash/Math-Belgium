@@ -149,10 +149,10 @@ export function EnsembleReelGuideBuilder({ onValider, prefixApercu, disabled = f
           ℝ (tout)
         </button>
         <button type="button" className={forme === "prive_points" ? "btn toggle-active" : "btn"} disabled={disabled} onClick={() => choisirForme("prive_points")}>
-          ℝ privé de point(s)
+          ℝ (sauf)
         </button>
         <button type="button" className={forme === "intervalles" ? "btn toggle-active" : "btn"} disabled={disabled} onClick={() => choisirForme("intervalles")}>
-          Union d'intervalle(s)
+          Intervalle(s)
         </button>
       </div>
 
