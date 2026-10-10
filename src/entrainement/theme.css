@@ -315,6 +315,28 @@
   margin: 0 0 14px;
 }
 
+/* Premier `.prompt-text` d'un écran (consigne générale, ex. "Résous l'inéquation...") : un peu plus
+ * de respiration sous le filet d'accent de `.card` — sinon le texte démarre à peine sous une ligne
+ * pleine couleur, lu comme "écrasé" dessus malgré le padding de `.card-body`. */
+.entrainement .prompt-text:first-child {
+  margin-top: 4px;
+}
+
+/* Dernier `.prompt-text` d'un écran (sélecteur `:has()`, déjà utilisé plus haut dans ce fichier) :
+ * c'est la consigne SPÉCIFIQUE à CET écran — ce sur quoi l'élève doit agir maintenant — jamais la
+ * même consigne générale qui l'a précédée ni une alerte d'erreur/aide (un `<p>` de classe
+ * différente, donc hors de portée de `~ .prompt-text`). Sans distinction, les deux consignes ont
+ * exactement le même poids visuel : l'élève ne sait pas laquelle est "la question". Mise en avant
+ * par une taille/poids plus marqués et un filet d'accent à gauche, même langage que le filet du haut
+ * de `.card` (piste "Ardoise"), plutôt qu'un encadré complet qui réintroduirait une boîte. */
+.entrainement .prompt-text:not(:has(~ .prompt-text)) {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  padding-left: 12px;
+  border-left: 3px solid var(--color-primary);
+}
+
 .entrainement .options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -340,6 +362,49 @@
 
 .entrainement .apercu-expression-latex-perime {
   opacity: 0.45;
+}
+
+/* `.apercu-box`/`.apercu-box-termes` (prévisualisation en direct de l'ensemble en construction,
+ * EnsembleReelGuideBuilder) ET `.etat-actuel-box`/`.etat-actuel-box-termes` (rappel des faits déjà
+ * confirmés aux écrans précédents, ~175 écrans) : même bug que `.equation-box-donnees` avant son
+ * correctif (voir plus haut) — classes utilisées dans le JSX mais jamais dotées de leur propre
+ * règle CSS, donc réduites au flux normal du navigateur (bloc, aligné à gauche, collé à l'élément
+ * suivant). Rendu plus discret que `.equation-box` à dessein (texte plus petit, teinté) : ce sont
+ * des éléments SECONDAIRES (aperçu en cours de saisie, rappel) — jamais aussi mis en avant que
+ * l'énoncé principal ou la consigne active ci-dessus. */
+.entrainement .apercu-box,
+.entrainement .etat-actuel-box {
+  text-align: center;
+  padding: 2px 4px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.entrainement .apercu-box .katex,
+.entrainement .etat-actuel-box .katex {
+  font-size: 1.1em;
+  color: var(--color-text-muted);
+}
+
+/* Fragments d'UNE même expression en cours de construction (ex. "]-∞;-3] ∪" puis "[2;+∞[") : flux
+ * horizontal avec retour à la ligne, comme `.equation-box-termes` — jamais empilés verticalement,
+ * ça casserait la lecture "S = ... ∪ ...". */
+.entrainement .apercu-box-termes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* Faits DISTINCTS déjà établis (ex. "CE : x ∈ ...", "Combiné : ...", chacun un `\text{Label :}`
+ * complet) : une ligne par fait, comme `.equation-box-donnees` — jamais le flex-wrap horizontal
+ * ci-dessus, pensé pour des fragments d'une même expression. */
+.entrainement .etat-actuel-box-termes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
 .entrainement .btn {
