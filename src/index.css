@@ -540,29 +540,33 @@ a.lecture-sheet-item { text-decoration: none; }
 .chapter-sidebar { display: none; }
 
 @media (min-width: 760px) {
+  /* Grille, pas flex : `position: sticky` sur un enfant de conteneur flex a un lourd historique de
+     bugs multi-navigateurs (le sticky "décroche" au scroll dans certaines combinaisons flex +
+     overflow/max-height sur l'enfant, exactement notre cas) — une grille à colonnes fixes est la
+     manière robuste, documentée, d'obtenir une colonne collante à côté du contenu, sans dépendre
+     du calcul de hauteur des items flex. */
   .chapter-layout {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 760px);
     gap: 28px;
     max-width: 1040px;
     margin: 0 auto;
     padding: 0 24px;
   }
   .chapter-layout .page.chapter-main {
-    max-width: 760px;
+    max-width: none;
     margin: 0;
     padding: 56px 0 96px;
-    flex: 1 1 560px;
     min-width: 0;
   }
   .chapter-sidebar {
     display: flex;
     flex-direction: column;
-    flex: none;
     width: 240px;
     margin-top: 56px;
     position: sticky;
     top: 24px;
+    align-self: start;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
     background: var(--surface);
