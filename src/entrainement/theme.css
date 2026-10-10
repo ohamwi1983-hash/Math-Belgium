@@ -182,6 +182,20 @@
   gap: 4px;
 }
 
+/* Bug trouvé lors d'un audit design (voir `.claude/rules/content-history.md`) : utilisée dans
+ * ~136 écrans (5e/6e), cette classe n'avait jamais reçu sa propre règle — plusieurs fragments
+ * KaTeX (ex. f(x), f'(x), f''(x) « données ») s'empilaient donc en flux normal, collés les uns
+ * aux autres sans le moindre espace ni retour à la ligne (`f(x)=2x^3+...+4f'(x)=6x^2+...`,
+ * illisible, parfois carrément coupé en deux au milieu d'une formule). Une formule par ligne,
+ * centrée — jamais le flex-wrap horizontal de `.equation-box-termes` ci-dessus (pensé pour de
+ * petits fragments d'un même calcul, pas pour plusieurs fonctions distinctes). */
+.entrainement .equation-box-donnees {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
 .entrainement .etat-actuel-panel:has(~ .etat-actuel-panel) .equation-box {
   background: none;
   padding: 0;
