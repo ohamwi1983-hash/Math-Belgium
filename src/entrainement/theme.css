@@ -204,15 +204,15 @@
   gap: 10px;
 }
 
-/* La carte reste à 560px sur téléphone (déjà la bonne taille là), mais prend ensuite TOUTE la
- * largeur disponible — plus de plafond en px — dès que l'écran a la place de la porter, au lieu de
- * rester minuscule au milieu d'un grand écran. `.app-shell` passe sa marge latérale fixe (20px) à
- * une marge fluide (`clamp`) : elle grandit avec l'écran (jamais un simple pourcentage, qui serait
- * ridicule sur un très grand écran) sans jamais dépasser un plafond raisonnable. L'espace gagné
- * profite en premier lieu aux équations (tout l'intérêt d'avoir aussi aplati `.equation-box` plus
- * haut : plus la carte s'élargit, plus elle en profite directement, sans second plafond intérieur).
- * Marges internes et taille de police de l'équation réaugmentées par palier, une fois que la carte
- * a la place de les porter confortablement. */
+/* La carte reste à 560px sur téléphone (déjà la bonne taille là), mais s'élargit ensuite dès que
+ * l'écran a la place de la porter — pas jusqu'à occuper tout l'écran (ridicule sur un grand
+ * moniteur, et inutile : ni une équation ni un tableau de signes n'ont besoin de cette largeur),
+ * seulement jusqu'à une largeur "suffisante" pour qu'une équation tienne toujours sur une seule
+ * ligne et qu'un tableau de signes (`.grille-signes`, colonnes `min-width` dans ce fichier) tienne
+ * en entier sans défilement horizontal. `.app-shell` passe sa marge latérale fixe (20px) à une
+ * marge fluide (`clamp`) pour que la transition soit douce. Marges internes et taille de police de
+ * l'équation réaugmentées par palier, une fois que la carte a la place de les porter
+ * confortablement. */
 @media (min-width: 640px) {
   .entrainement .app-shell {
     padding-left: clamp(20px, 4vw, 96px);
@@ -220,7 +220,7 @@
   }
   .entrainement .app-header,
   .entrainement .card {
-    max-width: none;
+    max-width: 820px;
   }
   .entrainement .card-body {
     padding: 28px;
@@ -234,6 +234,10 @@
   .entrainement .app-shell {
     padding-left: clamp(32px, 6vw, 140px);
     padding-right: clamp(32px, 6vw, 140px);
+  }
+  .entrainement .app-header,
+  .entrainement .card {
+    max-width: 960px;
   }
   .entrainement .card-body {
     padding: 32px;
