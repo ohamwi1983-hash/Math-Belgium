@@ -6,7 +6,7 @@ export function HomePage() {
   return (
     <>
       <SiteHeader />
-      <div className="page">
+      <div className="page page-wide">
         <header className="chapter-head">
           <p className="eyebrow">FWB — mathématiques</p>
           <h1 className="chapter-title">Chapitres de cours</h1>

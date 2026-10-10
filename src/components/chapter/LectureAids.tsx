@@ -179,6 +179,95 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   ]
   const ongletCourant = onglets.some((o) => o.id === ongletActif) ? ongletActif : 'contenu'
 
+  /** Liste d'un onglet (Contenu/Exercices/Vidéos) — partagée entre le tiroir mobile et le
+   * sommaire permanent desktop/tablette (`.chapter-sidebar`, voir `ChapterPage`) : même données,
+   * seule la fermeture du tiroir (`fermerApres`) diffère, puisque le sommaire fixe n'a rien à
+   * fermer. */
+  function rendreListeOnglet(prefixeClasse: 'lecture-sheet' | 'lecture-sidebar', fermerApres: boolean) {
+    const onNaviguer = fermerApres ? () => setTiroirOuvert(false) : undefined
+    return (
+      <>
+        {ongletCourant === 'contenu' &&
+          sections.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              className={`${prefixeClasse}-item${i === indexCourant ? ' current' : ''}`}
+              onClick={() => allerASection(s)}
+            >
+              <span className="n">{s.number}</span>
+              <span>{s.title}</span>
+            </button>
+          ))}
+
+        {ongletCourant === 'exercices' &&
+          generateurs.map((g, i) => {
+            const href = generatorLink(g.chantier, g.generatorId)
+            const migre = estGenerateurMigre(g.chantier, g.generatorId)
+            const contenu = (
+              <>
+                <span className="lecture-sheet-exercice-id">{g.generatorId}</span>
+                <span className="lecture-sheet-exercice-texte">
+                  <span>{g.title}</span>
+                  <span className="lecture-sheet-exercice-section">{g.sectionTitle}</span>
+                </span>
+                {!migre && (
+                  <span className="arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                )}
+              </>
+            )
+            return migre ? (
+              <Link key={g.generatorId + i} className={`${prefixeClasse}-item lecture-sheet-item-exercice`} to={href} onClick={onNaviguer}>
+                {contenu}
+              </Link>
+            ) : (
+              <a
+                key={g.generatorId + i}
+                className={`${prefixeClasse}-item lecture-sheet-item-exercice`}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onNaviguer}
+              >
+                {contenu}
+              </a>
+            )
+          })}
+
+        {ongletCourant === 'videos' &&
+          videos.map((v, i) => (
+            <button key={v.youtubeId + i} type="button" className={`${prefixeClasse}-item lecture-sheet-item-video`} onClick={() => allerAVideo(v)}>
+              <span className="lecture-sheet-video-icon" aria-hidden="true">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </span>
+              <span>{v.title}</span>
+            </button>
+          ))}
+      </>
+    )
+  }
+
+  const ongletsNav = onglets.length > 1 && (
+    <div className="lecture-sheet-tabs" role="tablist">
+      {onglets.map((o) => (
+        <button
+          key={o.id}
+          type="button"
+          role="tab"
+          aria-selected={ongletCourant === o.id}
+          className={`lecture-sheet-tab${ongletCourant === o.id ? ' active' : ''}`}
+          onClick={() => setOngletActif(o.id)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+
   return (
     <>
       <div className="lecture-progress no-export" aria-hidden="true">
@@ -229,90 +318,24 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
       >
         <div className="lecture-sheet-body">
           <p className="lecture-sheet-title">Ce chapitre</p>
-
-          {onglets.length > 1 && (
-            <div className="lecture-sheet-tabs" role="tablist">
-              {onglets.map((o) => (
-                <button
-                  key={o.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={ongletCourant === o.id}
-                  className={`lecture-sheet-tab${ongletCourant === o.id ? ' active' : ''}`}
-                  onClick={() => setOngletActif(o.id)}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {ongletCourant === 'contenu' &&
-            sections.map((s, i) => (
-              <button
-                key={s.id}
-                type="button"
-                className={`lecture-sheet-item${i === indexCourant ? ' current' : ''}`}
-                onClick={() => allerASection(s)}
-              >
-                <span className="n">{s.number}</span>
-                <span>{s.title}</span>
-              </button>
-            ))}
-
-          {ongletCourant === 'exercices' &&
-            generateurs.map((g, i) => {
-              const href = generatorLink(g.chantier, g.generatorId)
-              const migre = estGenerateurMigre(g.chantier, g.generatorId)
-              const contenu = (
-                <>
-                  <span className="lecture-sheet-exercice-id">{g.generatorId}</span>
-                  <span className="lecture-sheet-exercice-texte">
-                    <span>{g.title}</span>
-                    <span className="lecture-sheet-exercice-section">{g.sectionTitle}</span>
-                  </span>
-                  {!migre && (
-                    <span className="arrow" aria-hidden="true">
-                      ↗
-                    </span>
-                  )}
-                </>
-              )
-              return migre ? (
-                <Link key={g.generatorId + i} className="lecture-sheet-item lecture-sheet-item-exercice" to={href} onClick={() => setTiroirOuvert(false)}>
-                  {contenu}
-                </Link>
-              ) : (
-                <a
-                  key={g.generatorId + i}
-                  className="lecture-sheet-item lecture-sheet-item-exercice"
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setTiroirOuvert(false)}
-                >
-                  {contenu}
-                </a>
-              )
-            })}
-
-          {ongletCourant === 'videos' &&
-            videos.map((v, i) => (
-              <button key={v.youtubeId + i} type="button" className="lecture-sheet-item lecture-sheet-item-video" onClick={() => allerAVideo(v)}>
-                <span className="lecture-sheet-video-icon" aria-hidden="true">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </span>
-                <span>{v.title}</span>
-              </button>
-            ))}
-
+          {ongletsNav}
+          {rendreListeOnglet('lecture-sheet', true)}
           <button type="button" className="lecture-sheet-close" onClick={() => setTiroirOuvert(false)}>
             Fermer
           </button>
         </div>
       </div>
+
+      {/* Sommaire permanent, à côté du texte — tablette/PC uniquement (voir `.chapter-layout` dans
+          index.css, qui bascule entre ce sommaire fixe et le tiroir ci-dessus selon la largeur
+          d'écran). Rendu dans l'arbre React en permanence, affichage géré en CSS pur : même
+          principe que le tiroir/les boutons flottants ci-dessus, jamais un second montage/démontage
+          conditionnel en JS qui dupliquerait la logique de bascule. */}
+      <aside className="chapter-sidebar no-export">
+        <p className="lecture-sheet-title">Ce chapitre</p>
+        {ongletsNav}
+        <div className="lecture-sidebar-list">{rendreListeOnglet('lecture-sidebar', false)}</div>
+      </aside>
     </>
   )
 }

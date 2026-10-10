@@ -158,6 +158,12 @@ img, svg { max-width: 100%; }
   padding: 56px 24px 96px;
 }
 
+/* Variante large pour la page d'accueil (liste de chapitres, `HomePage.tsx`) : la liste devient
+ * une grille de cartes (`.chapter-list` ci-dessous) sur tablette/PC, pas de la prose à largeur de
+ * lecture — donc pas de raison de la limiter à 760px comme `.page` seul (qui reste la bonne
+ * largeur pour le TEXTE d'un chapitre, voir `.chapter-main` plus bas). */
+.page.page-wide { max-width: 1120px; }
+
 /* Variante large pour les pages-outils (réglages feuille d'exercices/évaluation) : contenu dense
  * en tableau plutôt que prose à largeur de lecture confortable, donc pas de limite à 760px.
  * `--page-gutter` est réutilisé par `.admin-eval-*` ci-dessous pour que les blocs puissent
@@ -236,6 +242,16 @@ img, svg { max-width: 100%; }
   margin: 0 0 18px;
 }
 .chapter-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+/* Grille sur tablette/PC : la colonne unique ci-dessus reste le comportement par défaut (correct
+   au téléphone), mais vide inutilement le reste de l'écran dès qu'il y a de la largeur en plus —
+   la liste se répartit alors sur 2 colonnes (tablette) puis 3 (PC), `.chapter-card` grandissant en
+   hauteur (`align-items: stretch` par défaut d'une grille) pour rester aligné rangée par rangée. */
+@media (min-width: 640px) {
+  .chapter-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+@media (min-width: 960px) {
+  .chapter-list { grid-template-columns: repeat(3, 1fr); }
+}
 .chapter-card {
   display: block;
   padding: 16px 18px;
@@ -510,6 +526,81 @@ a.lecture-sheet-item { text-decoration: none; }
   background: none;
   border: none;
   cursor: pointer;
+}
+
+/* ---------- sommaire permanent (tablette/PC) ----------
+   `.chapter-sidebar` (rendue par `LectureAids`, voir ce fichier) reprend les mêmes onglets/listes
+   que le tiroir mobile ci-dessus (`rendreListeOnglet`, même source de données), mais à poste fixe
+   à côté du texte plutôt que caché derrière le bouton flottant « Sections » — un tiroir qui glisse
+   depuis le bas de l'écran est un réflexe mobile, qui ne correspond à aucune habitude sur grand
+   écran. Masquée par défaut (mobile, où le tiroir reste adapté) ; devient un flex sibling de
+   `.chapter-main` au-delà du seuil ci-dessous, qui bascule aussi `.chapter-layout` en vrai layout
+   à deux colonnes et retire le tiroir/bouton/en-tête collant devenus redondants. Comparée et
+   validée avec l'utilisateur via un artefact avant implémentation. */
+.chapter-sidebar { display: none; }
+
+@media (min-width: 760px) {
+  .chapter-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .chapter-layout .page.chapter-main {
+    max-width: 760px;
+    margin: 0;
+    padding: 56px 0 96px;
+    flex: 1 1 560px;
+    min-width: 0;
+  }
+  .chapter-sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    width: 240px;
+    margin-top: 56px;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .chapter-sidebar .lecture-sheet-title { margin: 0 0 12px; }
+  .chapter-sidebar .lecture-sheet-tabs { margin: 0 0 10px; }
+  .lecture-sidebar-list { display: flex; flex-direction: column; }
+  .lecture-sidebar-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 7px 6px;
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 0.85rem;
+  }
+  .lecture-sidebar-item:hover { background: var(--surface-2); }
+  .lecture-sidebar-item.current { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+  .lecture-sidebar-item .n { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-faint); width: 1.4em; flex: none; }
+  .lecture-sidebar-item.current .n { color: var(--accent-ink); }
+
+  /* Devenus redondants avec le sommaire permanent ci-dessus : le tiroir/bouton déclencheur (réflexe
+     mobile) et l'en-tête collant (la section courante est déjà visible dans la liste du sommaire). */
+  .lecture-fab-toc,
+  .lecture-sheet,
+  .lecture-sticky-head {
+    display: none;
+  }
 }
 
 /* ---------- sections (repliables) ---------- */
