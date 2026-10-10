@@ -19,7 +19,9 @@ export const probabilites: ChapterContent = {
       title: 'Probabilités et ensembles',
       kicker: '0 ≤ P(A) ≤ 1 — équiprobabilité : favorables / possibles',
       blocks: [
-        { kind: 'video', title: 'Les probabilités' },
+        { kind: 'video', title: 'Probabilités et ensembles (1/3) — expérience aléatoire, événement, fréquence', youtubeId: 'N1kfU7qjA4o' },
+        { kind: 'video', title: 'Probabilités et ensembles (2/3) — Venn, union, tableau à double entrée', youtubeId: 'pZ-1sVqPrVM' },
+        { kind: 'video', title: 'Probabilités et ensembles (3/3) — probabilité conditionnelle et indépendance', youtubeId: '6xOx49Y-Clk' },
         {
           kind: 'intuition',
           label: 'Pour visualiser une expérience aléatoire',
@@ -323,6 +325,7 @@ export const probabilites: ChapterContent = {
       title: 'Tirages, arbres et dénombrement',
       kicker: 'chemin → produit ; événement (plusieurs chemins) → somme',
       blocks: [
+        { kind: 'video', title: 'Tirages, arbres et dénombrement — arbres pondérés, permutations, dérangements', youtubeId: 'XHiFlN4Onjc' },
         {
           kind: 'definition',
           label: 'Définition — arbre pondéré',
@@ -506,6 +509,7 @@ export const probabilites: ChapterContent = {
       title: 'Indépendance, conditionnement et Bayes',
       kicker: 'P(A|B) = P(B|A)×P(A) / P(B)',
       blocks: [
+        { kind: 'video', title: 'Indépendance, conditionnement et Bayes — probabilités totales et théorème de Bayes', youtubeId: 'msDT2q5uV7M' },
         {
           kind: 'definition',
           label: 'Définition — partition et loi des probabilités totales',
@@ -763,6 +767,7 @@ export const probabilites: ChapterContent = {
       title: 'Probabilités : problèmes',
       kicker: 'compter les chemins à k succès dans l’arbre, × pᵏ(1−p)ⁿ⁻ᵏ',
       blocks: [
+        { kind: 'video', title: 'Probabilités : problèmes — épreuves répétées et synthèse du chapitre', youtubeId: '8nv_851l7IY' },
         {
           kind: 'definition',
           label: 'Épreuves répétées et indépendantes : toujours un arbre',
