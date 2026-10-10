@@ -4,6 +4,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePropriete
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesLogarithme, soumettreReponseEcran1, soumettreReponseEcran2 } from "./moteur6e/sessionProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme } from "./moteur6e/typesProprietesLogarithme";
 import { diagnostiquerEcran1, diagnostiquerEcran2 } from "./moteur6e/verificationProprietesLogarithme";
+import { Katex } from "./components/Katex";
 import { EtapeProprieteLogarithme } from "./components6e/EtapeProprieteLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatProprietesLogarithme";
@@ -56,7 +57,13 @@ export function App6gen13() {
   const validation = enAttente
     ? {
         revele: enAttente.revele,
-        reponseAttendueLatex: formatReponseAttenduePhaseLatex(exercice, phase),
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
         labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
         onSuivant: passerEcranSuivant,
       }

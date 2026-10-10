@@ -4,18 +4,12 @@ import { Katex } from "../components/Katex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface AideAvecLatex {
   texte: string;
   latex: string | null;
-}
-
-interface Validation {
-  revele: boolean;
-  reponseAttendueLatex: string[];
-  labelSuivant: string;
-  onSuivant: () => void;
 }
 
 interface Props {
@@ -43,7 +37,7 @@ interface Props {
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le champ,
    * remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/
    * invalidation avant de passer à l'écran suivant"). */
-  validation?: Validation | null;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -127,20 +121,7 @@ export function EtapeProprieteLogarithme({
           )}
         </>
       )}
-      {validation && (
-        <ValidationEcran
-          revele={validation.revele}
-          reponseAttendue={
-            <span className="equation-box-termes">
-              {validation.reponseAttendueLatex.map((frag, i) => (
-                <Katex key={i} expression={frag} />
-              ))}
-            </span>
-          }
-          labelSuivant={validation.labelSuivant}
-          onSuivant={validation.onSuivant}
-        />
-      )}
+      {validation && <ValidationEcran {...validation} />}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{aideNiveau1.texte}</p>
