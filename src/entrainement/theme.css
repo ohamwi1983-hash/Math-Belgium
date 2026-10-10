@@ -56,7 +56,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 20px 64px;
+  /* Marge latérale réduite au minimum (pas 0 : un bouton/texte qui touche littéralement le bord de
+   * l'écran reste inconfortable au doigt) — la carte occupe donc quasi toute la largeur de l'écran
+   * sur téléphone, là où chaque pixel gagné compte le plus pour une équation. */
+  padding: 48px 10px 64px;
 }
 
 .entrainement .app-header {
