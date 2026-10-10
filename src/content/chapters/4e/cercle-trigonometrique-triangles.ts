@@ -18,6 +18,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
   intro: {
     title: 'Avant de commencer : pourquoi un cercle ?',
     blocks: [
+      { kind: 'video', title: 'Avant de commencer : pourquoi un cercle ?', youtubeId: 'BEENBO9yI2s' },
       {
         kind: 'para',
         text:
@@ -65,6 +66,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Le cercle trigonométrique : placer et lire un angle',
       kicker: "trouve le quadrant, le signe, et l'angle du premier quadrant",
       blocks: [
+        { kind: 'video', title: 'Placer et lire un angle : quadrants, signes, angle du premier quadrant, tangente', youtubeId: '15kSJpPlfhs' },
         {
           kind: 'para',
           text:
@@ -194,6 +196,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'L\'identité fondamentale : retrouver sin ou cos',
       kicker: 'cos²θ + sin²θ = 1, un Pythagore caché',
       blocks: [
+        { kind: 'video', title: 'Identité fondamentale cos²θ + sin²θ = 1 — retrouver sin ou cos', youtubeId: 'OvQSK4L46dE' },
         {
           kind: 'para',
           text:
@@ -290,6 +293,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Les valeurs remarquables',
       kicker: 'les 5 valeurs à connaître par cœur, puis comment les étendre par symétrie',
       blocks: [
+        { kind: 'video', title: 'Valeurs remarquables de sin, cos, tan — 0°, 30°, 45°, 60°, 90° et leur extension', youtubeId: 'dQbD98E-ooQ' },
         {
           kind: 'para',
           text:
@@ -433,6 +437,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Les angles associés',
       kicker: '4 symétries autour de θ, pour ne jamais recalculer une valeur',
       blocks: [
+        { kind: 'video', title: 'Angles associés — 90°−θ, 180°−θ, 180°+θ, −θ', youtubeId: '0UBfwtqxi6k' },
         {
           kind: 'para',
           text:
@@ -512,6 +517,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Résoudre une équation trigonométrique',
       kicker: 'sin α = k / cos α = k / tan α = k, sur [0° ; 360°[',
       blocks: [
+        { kind: 'video', title: 'Équations trigonométriques sin α = k, cos α = k, tan α = k sur [0° ; 360°[', youtubeId: 'B5XVyZQS2i8' },
         {
           kind: 'para',
           text:
@@ -606,6 +612,8 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Le triangle quelconque : lois des sinus et des cosinus',
       kicker: 'a/sinA = b/sinB = c/sinC — et a² = b² + c² − 2bc·cosA',
       blocks: [
+        { kind: 'video', title: 'Triangle quelconque — lois des sinus et des cosinus (1/2) : énoncés, cas ambigu, démonstration des sinus', youtubeId: 'G66-HKd81Zs' },
+        { kind: 'video', title: 'Triangle quelconque — lois des sinus et des cosinus (2/2) : démonstrations, piège d\'Al-Kashi, exemple SAS', youtubeId: '8pkdfnzQPD4' },
         {
           kind: 'para',
           text:
@@ -829,6 +837,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Triangles liés : la triangulation',
       kicker: 'résous un triangle « pont » pour transférer un élément vers le triangle « cible »',
       blocks: [
+        { kind: 'video', title: 'Triangulation — mesurer une hauteur inaccessible avec deux triangles liés', youtubeId: 'fGwjUxVHL5s' },
         {
           kind: 'para',
           text:
@@ -915,6 +924,7 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
       title: 'Révision — quiz vrai/faux',
       kicker: '140 affirmations en 7 thèmes, tout le chapitre',
       blocks: [
+        { kind: 'video', title: 'Cercle trigonométrique et triangles quelconques — synthèse et points à vérifier', youtubeId: 'YjmwkQmAxsc' },
         {
           kind: 'para',
           text:
