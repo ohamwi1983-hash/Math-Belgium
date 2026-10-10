@@ -16,6 +16,7 @@ export const calculVectoriel: ChapterContent = {
   intro: {
     title: "Avant de commencer : qu'est-ce qu'un vecteur ?",
     blocks: [
+      { kind: 'video', title: 'Introduction : qu\'est-ce qu\'un vecteur ? Notations, norme, vecteurs opposés', youtubeId: 'S-kVKlPyPoc' },
       {
         kind: 'intuition',
         label: 'Un nombre ne suffit pas toujours',
@@ -152,6 +153,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Multiplier un vecteur par un réel : colinéarité et alignement',
       kicker: 'k > 1 allonge, 0 < k < 1 raccourcit, k < 0 inverse le sens — colinéaires : même direction',
       blocks: [
+        { kind: 'video', title: 'Multiplier un vecteur par un réel, colinéarité, additionner deux vecteurs', youtubeId: '0Z_OAR2MA1E' },
         {
           kind: 'para',
           text:
@@ -312,6 +314,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Soustraire un vecteur',
       kicker: 'retrancher un vecteur, c\'est ajouter son opposé',
       blocks: [
+        { kind: 'video', title: 'Soustraire un vecteur, relation de Chasles, décomposer un vecteur', youtubeId: '5Bb0aZwuzK4' },
         {
           kind: 'para',
           text:
@@ -469,6 +472,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Caractériser un vecteur dans un repère : les composantes',
       kicker: 'AB(x_B−x_A ; y_B−y_A)',
       blocks: [
+        { kind: 'video', title: 'Composantes, addition, multiplication par un réel, norme et distance', youtubeId: '7edwkWKGw0Y' },
         {
           kind: 'para',
           text:
@@ -666,6 +670,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Vecteurs, translation et milieu',
       kicker: 'B = A + u — milieu M = ((x_A+x_B)/2 ; (y_A+y_B)/2)',
       blocks: [
+        { kind: 'video', title: 'Translation, milieu, colinéarité et alignement par le calcul', youtubeId: '8N9j50tNawQ' },
         {
           kind: 'para',
           text:
@@ -845,6 +850,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Orthogonalité et Pythagore généralisé',
       kicker: 'x_u·x_v + y_u·y_v = 0',
       blocks: [
+        { kind: 'video', title: 'Orthogonalité, Pythagore généralisé et vecteur directeur d\'une droite', youtubeId: 'ihkFhTzx3zI' },
         {
           kind: 'para',
           text:
@@ -1025,6 +1031,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Comparer des vecteurs : longueur, direction, sens',
       kicker: '3 propriétés indépendantes — chacune peut coïncider ou non',
       blocks: [
+        { kind: 'video', title: 'Comparer des vecteurs et résultante de deux forces', youtubeId: 'x1WjMH6shXc' },
         {
           kind: 'para',
           text:
@@ -1187,6 +1194,7 @@ export const calculVectoriel: ChapterContent = {
       title: 'Révision — quiz vrai/faux',
       kicker: '180 affirmations en 9 thèmes',
       blocks: [
+        { kind: 'video', title: 'Révision : la synthèse du chapitre', youtubeId: 'raOgCbx0OOI' },
         {
           kind: 'para',
           text:
