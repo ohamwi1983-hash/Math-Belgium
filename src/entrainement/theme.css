@@ -2343,3 +2343,144 @@
 .entrainement .calculatrice-touche-large {
   flex: 1.6;
 }
+
+/* Onglet graphique (`CalculatriceScientifique.tsx`, 6e-6h uniquement — jamais répliqué sur les
+ * copies 4e/5e-4h) : entête à 2 rangées (`-groupe`/`-rangee`, classes propres à ce besoin, JAMAIS
+ * substituées à `.calculatrice-entete` ci-dessus — ce dernier reste en l'état pour 4e/5e-4h, dont
+ * l'entête n'a toujours qu'une seule rangée) et liste de fonctions au-dessus du graphe Mafs. */
+
+.entrainement .calculatrice-entete-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.entrainement .calculatrice-entete-rangee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.entrainement .calculatrice-mode-tabs {
+  display: flex;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.entrainement .calculatrice-mode-tab {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 600 12px var(--mono);
+  cursor: pointer;
+}
+
+.entrainement .calculatrice-mode-tab-actif {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.entrainement .calculatrice-panneau-graphique {
+  width: min(440px, 100%);
+}
+
+.entrainement .calculatrice-fonctions-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.entrainement .calculatrice-fonction-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.entrainement .calculatrice-fonction-pastille {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.entrainement .calculatrice-fonction-label {
+  flex: none;
+  font: 13px var(--mono);
+  color: var(--color-text-muted);
+}
+
+.entrainement .calculatrice-fonction-champ {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: 13px var(--mono);
+}
+
+.entrainement .calculatrice-fonction-champ:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.entrainement .calculatrice-fonction-champ-erreur {
+  border-color: var(--color-error);
+}
+
+.entrainement .calculatrice-fonction-oeil,
+.entrainement .calculatrice-fonction-supprimer {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--ink-faint);
+}
+
+.entrainement .calculatrice-fonction-oeil:hover,
+.entrainement .calculatrice-fonction-supprimer:hover {
+  background: var(--line-soft);
+}
+
+.entrainement .calculatrice-fonction-supprimer {
+  color: var(--color-error);
+}
+
+.entrainement .calculatrice-fonction-ajouter {
+  padding: 7px 10px;
+  border: 1px dashed var(--line-soft);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 13px var(--sans);
+  cursor: pointer;
+  text-align: left;
+}
+
+.entrainement .calculatrice-fonction-ajouter:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.entrainement .calculatrice-graphe {
+  margin: 0 14px 14px;
+}

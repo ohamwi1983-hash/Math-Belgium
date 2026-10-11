@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from "react";
+import { Mafs, Plot } from "mafs";
+import "mafs/core.css";
 import type { ModeAngle } from "./calculatriceScientifique";
 import { evaluerExpressionCalculatrice, formatExpressionAffichage, formatNombreCalculatrice } from "./calculatriceScientifique";
+import type { FonctionGraphiqueEtat } from "./graphiqueCalculatrice";
+import { PALETTE_FONCTIONS, compilerFonctionGraphique } from "./graphiqueCalculatrice";
+import { DomaineTraceX, GrilleAdaptative } from "../components/mafsGraphPartage";
+import { useLargeurConteneur } from "../components/useLargeurConteneur";
+import { EPAISSEUR_TRAIT_ACCENTUE, RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN } from "../ui/mafsTransformation";
+import { formatIndicateurPasGrille } from "../ui/indicateurPasGrille";
+
+/** Onglet actif du panneau — "scientifique" par défaut pour ne rien changer au comportement des 10
+ * écrans qui montent déjà `<CalculatriceScientifique/>` (voir CLAUDE.md, "Calculatrice graphique
+ * (6e)") : l'onglet "graphique" est une extension PURE, jamais le mode d'ouverture par défaut. */
+type ModePanneau = "scientifique" | "graphique";
 
 interface Touche {
   libelle: string;
@@ -106,6 +119,12 @@ export function CalculatriceScientifique({ modeInitial = "RAD" }: Props = {}) {
   const [mode, setMode] = useState<ModeAngle>(modeInitial);
   const [memoire, setMemoire] = useState(0);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [modePanneau, setModePanneau] = useState<ModePanneau>("scientifique");
+  // Une ligne vide au premier affichage de l'onglet "graphique" plutôt qu'une liste vide — même
+  // principe qu'une calculatrice graphique physique, qui propose toujours "Y1=" prêt à remplir.
+  const [fonctions, setFonctions] = useState<FonctionGraphiqueEtat[]>(() => [
+    { id: 1, expression: "", couleur: PALETTE_FONCTIONS[0], visible: true },
+  ]);
 
   return (
     <>
@@ -124,6 +143,10 @@ export function CalculatriceScientifique({ modeInitial = "RAD" }: Props = {}) {
           setMemoire={setMemoire}
           erreur={erreur}
           setErreur={setErreur}
+          modePanneau={modePanneau}
+          setModePanneau={setModePanneau}
+          fonctions={fonctions}
+          setFonctions={setFonctions}
           onFermer={() => setOuverte(false)}
         />
       )}
@@ -142,10 +165,30 @@ interface PropsModale {
   setMemoire: (v: number | ((m: number) => number)) => void;
   erreur: string | null;
   setErreur: (v: string | null) => void;
+  modePanneau: ModePanneau;
+  setModePanneau: (v: ModePanneau) => void;
+  fonctions: FonctionGraphiqueEtat[];
+  setFonctions: (v: FonctionGraphiqueEtat[] | ((f: FonctionGraphiqueEtat[]) => FonctionGraphiqueEtat[])) => void;
   onFermer: () => void;
 }
 
-function CalculatriceModale({ expression, setExpression, curseur, setCurseur, mode, setMode, memoire, setMemoire, erreur, setErreur, onFermer }: PropsModale) {
+function CalculatriceModale({
+  expression,
+  setExpression,
+  curseur,
+  setCurseur,
+  mode,
+  setMode,
+  memoire,
+  setMemoire,
+  erreur,
+  setErreur,
+  modePanneau,
+  setModePanneau,
+  fonctions,
+  setFonctions,
+  onFermer,
+}: PropsModale) {
   const refExpression = useRef<HTMLInputElement>(null);
 
   // Garde le curseur NATIF de l'<input> synchronisé avec `curseur` après chaque insertion/
@@ -263,68 +306,194 @@ function CalculatriceModale({ expression, setExpression, curseur, setCurseur, mo
 
   return (
     <div className="calculatrice-overlay" onClick={onFermer}>
-      <div className="calculatrice-panneau" onClick={(e) => e.stopPropagation()}>
-        <div className="calculatrice-entete">
-          <div className="calculatrice-memoire-boutons">
-            <button type="button" className="calculatrice-touche" onClick={() => setMemoire(0)}>
-              MC
-            </button>
-            <button type="button" className="calculatrice-touche" onClick={rappelerMemoire}>
-              MR
-            </button>
-            <button type="button" className="calculatrice-touche" onClick={() => ajouterMemoire(1)}>
-              M+
-            </button>
-            <button type="button" className="calculatrice-touche" onClick={() => ajouterMemoire(-1)}>
-              M−
+      <div
+        className={`calculatrice-panneau ${modePanneau === "graphique" ? "calculatrice-panneau-graphique" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="calculatrice-entete-groupe">
+          <div className="calculatrice-entete-rangee">
+            <div className="calculatrice-mode-tabs">
+              <button
+                type="button"
+                className={`calculatrice-mode-tab ${modePanneau === "scientifique" ? "calculatrice-mode-tab-actif" : ""}`}
+                onClick={() => setModePanneau("scientifique")}
+              >
+                123
+              </button>
+              <button
+                type="button"
+                className={`calculatrice-mode-tab ${modePanneau === "graphique" ? "calculatrice-mode-tab-actif" : ""}`}
+                onClick={() => setModePanneau("graphique")}
+              >
+                f(x)
+              </button>
+            </div>
+            <button type="button" className="calculatrice-fermer" onClick={onFermer} aria-label="Fermer la calculatrice">
+              ×
             </button>
           </div>
-          <button
-            type="button"
-            className={`calculatrice-toggle-mode ${mode === "DEG" ? "calculatrice-toggle-mode-actif" : ""}`}
-            onClick={() => setMode((m) => (m === "DEG" ? "RAD" : "DEG"))}
-          >
-            {mode}
-          </button>
-          <button type="button" className="calculatrice-fermer" onClick={onFermer} aria-label="Fermer la calculatrice">
-            ×
-          </button>
-        </div>
-
-        <div className="calculatrice-affichage">
-          <input
-            ref={refExpression}
-            type="text"
-            inputMode="none"
-            readOnly
-            className="calculatrice-expression"
-            value={formatExpressionAffichage(expression)}
-            placeholder="0"
-            aria-label="Expression en cours"
-            onClick={synchroniserCurseurDepuisInput}
-            onKeyUp={synchroniserCurseurDepuisInput}
-            onSelect={synchroniserCurseurDepuisInput}
-          />
-          {erreur && <div className="calculatrice-erreur">{erreur}</div>}
-        </div>
-
-        <div className="calculatrice-pave">
-          {LIGNES_TOUCHES.map((ligne, indexLigne) => (
-            <div className="calculatrice-ligne" key={indexLigne}>
-              {ligne.map((touche) => (
-                <button
-                  type="button"
-                  key={touche.libelle}
-                  className={`calculatrice-touche ${touche.classe ?? ""}`}
-                  onClick={() => onTouche(touche)}
-                >
-                  {touche.libelle}
+          {modePanneau === "scientifique" && (
+            <div className="calculatrice-entete-rangee">
+              <div className="calculatrice-memoire-boutons">
+                <button type="button" className="calculatrice-touche" onClick={() => setMemoire(0)}>
+                  MC
                 </button>
+                <button type="button" className="calculatrice-touche" onClick={rappelerMemoire}>
+                  MR
+                </button>
+                <button type="button" className="calculatrice-touche" onClick={() => ajouterMemoire(1)}>
+                  M+
+                </button>
+                <button type="button" className="calculatrice-touche" onClick={() => ajouterMemoire(-1)}>
+                  M−
+                </button>
+              </div>
+              <button
+                type="button"
+                className={`calculatrice-toggle-mode ${mode === "DEG" ? "calculatrice-toggle-mode-actif" : ""}`}
+                onClick={() => setMode((m) => (m === "DEG" ? "RAD" : "DEG"))}
+              >
+                {mode}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {modePanneau === "scientifique" ? (
+          <>
+            <div className="calculatrice-affichage">
+              <input
+                ref={refExpression}
+                type="text"
+                inputMode="none"
+                readOnly
+                className="calculatrice-expression"
+                value={formatExpressionAffichage(expression)}
+                placeholder="0"
+                aria-label="Expression en cours"
+                onClick={synchroniserCurseurDepuisInput}
+                onKeyUp={synchroniserCurseurDepuisInput}
+                onSelect={synchroniserCurseurDepuisInput}
+              />
+              {erreur && <div className="calculatrice-erreur">{erreur}</div>}
+            </div>
+
+            <div className="calculatrice-pave">
+              {LIGNES_TOUCHES.map((ligne, indexLigne) => (
+                <div className="calculatrice-ligne" key={indexLigne}>
+                  {ligne.map((touche) => (
+                    <button
+                      type="button"
+                      key={touche.libelle}
+                      className={`calculatrice-touche ${touche.classe ?? ""}`}
+                      onClick={() => onTouche(touche)}
+                    >
+                      {touche.libelle}
+                    </button>
+                  ))}
+                </div>
               ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <PanneauGraphique fonctions={fonctions} setFonctions={setFonctions} />
+        )}
       </div>
     </div>
+  );
+}
+
+let prochainIdFonction = 2; // id=1 déjà pris par la ligne initiale (état créé dans CalculatriceScientifique)
+
+const LABELS_FONCTIONS = ["y₁", "y₂", "y₃", "y₄", "y₅"];
+
+interface PropsPanneauGraphique {
+  fonctions: FonctionGraphiqueEtat[];
+  setFonctions: (v: FonctionGraphiqueEtat[] | ((f: FonctionGraphiqueEtat[]) => FonctionGraphiqueEtat[])) => void;
+}
+
+/**
+ * Onglet "f(x)" (6e-6h uniquement, voir `graphiqueCalculatrice.ts`) — jusqu'à
+ * `PALETTE_FONCTIONS.length` fonctions libres tracées simultanément. Réutilise tel quel
+ * l'infrastructure Mafs déjà partagée par tous les graphes d'exercices du chantier
+ * (`GrilleAdaptative`/`DomaineTraceX`/`Plot.OfX`, voir `GrapheOptionEtudeFonction.tsx` pour le même
+ * assemblage sur UNE seule courbe) — seule la source de la courbe change ici (une expression libre
+ * tapée par l'élève, compilée par `compilerFonctionGraphique`, plutôt qu'un exercice généré).
+ */
+function PanneauGraphique({ fonctions, setFonctions }: PropsPanneauGraphique) {
+  const [refGraphe, largeurMesuree] = useLargeurConteneur<HTMLDivElement>();
+  const largeur = Math.min(420, Math.max(240, largeurMesuree || 320));
+  const hauteur = largeur / RATIO_GRAPHE;
+  const [pas, setPas] = useState<{ x: number; y: number } | null>(null);
+
+  function modifierFonction(id: number, champs: Partial<FonctionGraphiqueEtat>) {
+    setFonctions((fs) => fs.map((f) => (f.id === id ? { ...f, ...champs } : f)));
+  }
+
+  function ajouterFonction() {
+    setFonctions((fs) => {
+      if (fs.length >= PALETTE_FONCTIONS.length) return fs;
+      const fonction: FonctionGraphiqueEtat = { id: prochainIdFonction++, expression: "", couleur: PALETTE_FONCTIONS[fs.length], visible: true };
+      return [...fs, fonction];
+    });
+  }
+
+  function supprimerFonction(id: number) {
+    setFonctions((fs) => fs.filter((f) => f.id !== id));
+  }
+
+  const compilees = fonctions.map((fonction) => ({ fonction, resultat: compilerFonctionGraphique(fonction.expression) }));
+
+  return (
+    <>
+      <div className="calculatrice-fonctions-liste">
+        {compilees.map(({ fonction, resultat }, index) => (
+          <div className="calculatrice-fonction-ligne" key={fonction.id}>
+            <span className="calculatrice-fonction-pastille" style={{ background: fonction.couleur }} />
+            <span className="calculatrice-fonction-label">{LABELS_FONCTIONS[index] ?? "y"} =</span>
+            <input
+              type="text"
+              className={`calculatrice-fonction-champ ${resultat.erreur ? "calculatrice-fonction-champ-erreur" : ""}`}
+              value={fonction.expression}
+              placeholder="ex. sin(x)"
+              aria-label={`Expression de ${LABELS_FONCTIONS[index] ?? "y"}`}
+              onChange={(e) => modifierFonction(fonction.id, { expression: e.target.value })}
+            />
+            <button
+              type="button"
+              className="calculatrice-fonction-oeil"
+              aria-label={fonction.visible ? "Masquer la courbe" : "Afficher la courbe"}
+              onClick={() => modifierFonction(fonction.id, { visible: !fonction.visible })}
+            >
+              {fonction.visible ? "◉" : "○"}
+            </button>
+            <button type="button" className="calculatrice-fonction-supprimer" aria-label="Supprimer la fonction" onClick={() => supprimerFonction(fonction.id)}>
+              ✕
+            </button>
+          </div>
+        ))}
+        {fonctions.length < PALETTE_FONCTIONS.length && (
+          <button type="button" className="calculatrice-fonction-ajouter" onClick={ajouterFonction}>
+            + Ajouter une fonction
+          </button>
+        )}
+      </div>
+
+      <div className="mafs-graph calculatrice-graphe" ref={refGraphe}>
+        <Mafs width={largeur} height={hauteur} viewBox={{ x: [-9, 9], y: [-6, 6], padding: 0 }} pan={true} zoom={{ min: ZOOM_MIN, max: ZOOM_MAX }} preserveAspectRatio={false}>
+          <GrilleAdaptative largeur={largeur} hauteur={hauteur} onPasChange={(x, y) => setPas({ x, y })} />
+          <DomaineTraceX largeur={largeur}>
+            {(domaine) =>
+              compilees.map(({ fonction, resultat }) =>
+                resultat.evaluer && fonction.visible ? (
+                  <Plot.OfX key={fonction.id} y={resultat.evaluer} domain={domaine} color={fonction.couleur} weight={EPAISSEUR_TRAIT_ACCENTUE} />
+                ) : null,
+              )
+            }
+          </DomaineTraceX>
+        </Mafs>
+        {pas && <p className="mafs-graph-pas">{formatIndicateurPasGrille(pas.x, pas.y)}</p>}
+      </div>
+    </>
   );
 }
