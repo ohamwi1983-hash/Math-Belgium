@@ -20,7 +20,9 @@ export const analyseCombinatoire: ChapterContent = {
       title: 'Dénombrement fondamental et arrangements',
       kicker: 'A(n,k) = choisir ET ordonner ; C(n,k) = choisir seulement',
       blocks: [
-        { kind: 'video', title: 'Analyse combinatoire' },
+        { kind: 'video', title: 'Dénombrement fondamental et arrangements (1/3) — principe multiplicatif, A(n,k) et C(n,k)', youtubeId: 'NvocfnB8t2c' },
+        { kind: 'video', title: 'Dénombrement fondamental et arrangements (2/3) — démonstration, chiffres distincts, répétitions, diagonales', youtubeId: '17zeoRHG2fM' },
+        { kind: 'video', title: 'Dénombrement fondamental et arrangements (3/3) — permutations circulaires, symétrie, combinaisons avec répétitions', youtubeId: '4fc2G-gI66A' },
         {
           kind: 'definition',
           label: 'Définition — principe multiplicatif et factorielle',
@@ -454,6 +456,8 @@ export const analyseCombinatoire: ChapterContent = {
       title: 'Dénombrement combiné et sélections contraintes',
       kicker: 'ET indépendant → multiplier ; OU exclusif → additionner',
       blocks: [
+        { kind: 'video', title: 'Dénombrement combiné et sélections contraintes (1/2) — multinomiale, anagrammes, rôles distingués', youtubeId: 'zUXzGhnlZgE' },
+        { kind: 'video', title: 'Dénombrement combiné et sélections contraintes (2/2) — ET / OU, dominos, dés, exclusion', youtubeId: 'TB-ZNUQoI6o' },
         {
           kind: 'definition',
           label: 'Définition — répartition multinomiale',
@@ -750,6 +754,7 @@ export const analyseCombinatoire: ChapterContent = {
       title: 'Binôme de Newton',
       kicker: "(a+b)ⁿ = ∑ C(n,k)×aⁿ⁻ᵏ×bᵏ — l'exposant de a décroît, celui de b croît",
       blocks: [
+        { kind: 'video', title: 'Binôme de Newton — formule, triangle de Pascal, terme précis, approximation', youtubeId: 'ZcnSsK93GQg' },
         {
           kind: 'definition',
           label: 'Définition — formule du binôme de Newton',
@@ -1053,6 +1058,7 @@ export const analyseCombinatoire: ChapterContent = {
       title: 'Dénombrement combinatoire pur : problèmes',
       kicker: 'identifier chaque étape, puis MULTIPLIER les étapes indépendantes',
       blocks: [
+        { kind: 'video', title: 'Dénombrement combinatoire pur : problèmes — mains de poker, sommes de trois dés, réemplois', youtubeId: 'OZA48JH9GUM' },
         {
           kind: 'para',
           text:
@@ -1251,6 +1257,7 @@ export const analyseCombinatoire: ChapterContent = {
       title: 'Probabilité hypergéométrique (tirage sans remise)',
       kicker: 'P(k) = C(K,k)×C(N−K,n−k) / C(N,n) — tirage SANS remise',
       blocks: [
+        { kind: 'video', title: 'Probabilité hypergéométrique (tirage sans remise)', youtubeId: 'Kd667QJndTc' },
         {
           kind: 'definition',
           label: 'Définition — loi hypergéométrique',
@@ -1485,6 +1492,7 @@ export const analyseCombinatoire: ChapterContent = {
       title: 'Probabilité binomiale et séquence exacte',
       kicker: 'P(X=k) = C(n,k)×pᵏ×(1−p)ⁿ⁻ᵏ',
       blocks: [
+        { kind: 'video', title: 'Probabilité binomiale et séquence exacte', youtubeId: '1sdKwvmrzlE' },
         {
           kind: 'definition',
           label: 'Définition — loi binomiale',
@@ -1638,6 +1646,7 @@ export const analyseCombinatoire: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 48. Probabilité binomiale et séquence exacte »',
         },
+        { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'CZGQSI3TBZ4' },
       ],
     },
   ],
