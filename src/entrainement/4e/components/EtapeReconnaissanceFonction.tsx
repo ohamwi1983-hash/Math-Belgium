@@ -2,12 +2,18 @@ import { useState } from "react";
 import type { ExerciceFonctionReference, FamilleReference } from "../core/fonctionsReference.types";
 import { OPTIONS_FAMILLE } from "../ui/famillesReferenceLabels";
 import { MafsGraphFonctionsReference } from "./MafsGraphFonctionsReference";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFonctionReference;
   tentativesUtilisees: number;
   tentativesMax: number;
   onChoisir: (choix: FamilleReference) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -16,7 +22,7 @@ interface Props {
  * "exercice") : seule la reconnaissance de la forme est en jeu, notée avec le mécanisme habituel de
  * tentatives/pénalité (même principe que EtapeReconnaissance.tsx, exercice 1).
  */
-export function EtapeReconnaissanceFonction({ exercice, tentativesUtilisees, tentativesMax, onChoisir }: Props) {
+export function EtapeReconnaissanceFonction({ exercice, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
   const [choix, setChoix] = useState<FamilleReference | null>(null);
   const erronee = tentativesUtilisees > 0;
 
@@ -36,14 +42,19 @@ export function EtapeReconnaissanceFonction({ exercice, tentativesUtilisees, ten
           </button>
         ))}
       </div>
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

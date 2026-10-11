@@ -6,12 +6,18 @@ import { FIGURES } from "../generateurs/reductionVectorielle/figures";
 import { formatTermesLatex, libelleFigure } from "../ui/formatReductionVectorielle";
 import { diagnostiquerReduction } from "../moteur/verificationReductionVectorielle";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceReductionVectorielle;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (texte: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Unique écran de l'exercice : la figure (bloc fixe, coordonnées toujours identiques pour une
@@ -19,7 +25,7 @@ interface Props {
  * jamais consommé par la vérification), l'expression à réduire mise en évidence (terme par terme,
  * `.equation-box-termes`, pour rester lisible sur mobile même à 7 termes), puis un champ libre pour
  * la réponse (2 lettres désignant le vecteur réduit, ex. "MA"). */
-export function EtapeReductionVectorielle({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeReductionVectorielle({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerReduction(exercice, texte) : undefined;
@@ -52,14 +58,19 @@ export function EtapeReductionVectorielle({ exercice, tentativesUtilisees, tenta
       </div>
       {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && statut !== "parse_error" && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && statut !== "parse_error" && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

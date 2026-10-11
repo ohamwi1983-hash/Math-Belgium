@@ -8,6 +8,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceProduitFacteurs;
@@ -22,6 +24,10 @@ interface Props {
   onValider: (reponse: ReponseDeuxFacteursLignes) => void;
   /** Statut à 3 valeurs, calculé côté PRÉSENTATION uniquement — voir `EtapeArgumentEquationTrig`. */
   diagnostiquer?: (reponse: ReponseDeuxFacteursLignes) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Bloc "état actuel" — rappelle prefacteur (si présent) + les facteurs séparés + l'argument
@@ -51,7 +57,7 @@ function EtatActuelProduit({
  * n'en a aucune — bug de softlock trouvé par vérification Playwright de bout en bout : ce cas
  * n'a AUCUNE réponse possible, `diagnostiquerIsolerX` exigeant 0 ligne, jamais 1). D.2 (E.1) :
  * AUCUNE aide sur cet écran (`niveauAideMaxEquationTrig` plafonne cette phase à 0). */
-export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer }: Props) {
+export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const facteur1NecessiteLignes = exercice.facteur1.branchesU.length > 0;
   const facteur2NecessiteLignes = exercice.facteur2.branchesU.length > 0;
   const [lignes1, setLignes1] = useState<string[]>(() => Array.from({ length: exercice.facteur1.branchesU.length }, () => ""));
@@ -146,14 +152,19 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
         <p className="prompt-text">Ce facteur n'a aucune solution — rien à isoler.</p>
       )}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

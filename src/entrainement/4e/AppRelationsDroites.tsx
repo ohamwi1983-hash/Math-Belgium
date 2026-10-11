@@ -1,16 +1,20 @@
 import { useState } from "react";
-import type { ExerciceRelationsDroites } from "./core/relationsDroites.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationsDroites } from "./generateurs/relationsDroites";
 import type { VarianteRelationsDroites } from "./core/relationsDroites.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { activerAideSuivante, demarrerSessionRelationsDroites, soumettreReponseConstruction, soumettreReponseEquation, soumettreReponseExtraction } from "./moteur/sessionRelationsDroites";
-import type { EtatSessionRelationsDroites, PhaseRelationsDroites, ResultatExerciceRelationsDroites } from "./moteur/typesRelationsDroites";
+import type { EtatSessionRelationsDroites, PhaseRelationsDroites } from "./moteur/typesRelationsDroites";
 import { EtapeConstructionRelationsDroites } from "./components/EtapeConstructionRelationsDroites";
 import { EtapeEquationRelationsDroites } from "./components/EtapeEquationRelationsDroites";
 import { EtapeExtractionRelationsDroites } from "./components/EtapeExtractionRelationsDroites";
-import { ResultatPanelRelationsDroites } from "./components/ResultatPanelRelationsDroites";
-import { ResumeSessionRelationsDroites } from "./components/ResumeSessionRelationsDroites";
+import { Katex } from "./components/Katex";
+import {
+  formatAideConstructionNiveau2Latex,
+  formatAideEquationNiveau2Latex,
+  formatEtatActuelVecteurChercheLatex,
+  formatEtatActuelVecteurReferenceLatex,
+} from "./ui/formatRelationsDroites";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -24,35 +28,74 @@ function nouvelleSession(): EtatSessionRelationsDroites {
   return demarrerSessionRelationsDroites(REGLAGES_DEMO, genererExerciceRelationsDroites);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceRelationsDroites;
-  exercice: ExerciceRelationsDroites;
-}
-
 const LIBELLE_PHASE: Record<PhaseRelationsDroites, string> = {
   extraction: "Extraction du vecteur directeur",
   construction: "Construction du vecteur cherché",
   equation: "Équation de la droite cherchée",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionRelationsDroites;
+  revele: boolean;
+}
+
 export function AppRelationsDroites() {
   const [etat, setEtat] = useState<EtatSessionRelationsDroites>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceRelationsDroites, nouvelEtat: EtatSessionRelationsDroites) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionRelationsDroites) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "extraction"
+          ? nouvelEtat.extractionRevele
+          : etat.phase === "construction"
+            ? nouvelEtat.constructionRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.equationRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-  const exercice = etat.exerciceCourant;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionRelationsDroites(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteRelationsDroites)));
   }
+
+  const exercice = etat.exerciceCourant;
+
+  const reponseAttendue =
+    etat.phase === "extraction" ? (
+      <Katex expression={formatEtatActuelVecteurReferenceLatex(exercice)} />
+    ) : etat.phase === "construction" ? (
+      <Katex expression={formatAideConstructionNiveau2Latex(exercice)} />
+    ) : (
+      <>
+        Point + vecteur attendus : <Katex expression={formatEtatActuelVecteurChercheLatex(exercice)} />
+        <br />
+        Équation attendue : <Katex expression={formatAideEquationNiveau2Latex(exercice)} />
+      </>
+    );
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -61,35 +104,24 @@ export function AppRelationsDroites() {
         <h1 className="app-title">Relations entre droites</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelRelationsDroites
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionRelationsDroites resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "extraction" ? (
+        {etat.phase === "extraction" ? (
           <EtapeExtractionRelationsDroites
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideExtraction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseExtraction(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseExtraction(etat, reponse))}
+            validation={validation}
           />
         ) : etat.phase === "construction" ? (
           <EtapeConstructionRelationsDroites
@@ -98,7 +130,8 @@ export function AppRelationsDroites() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideConstruction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseConstruction(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeEquationRelationsDroites
@@ -107,10 +140,8 @@ export function AppRelationsDroites() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideEquation}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseEquation(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseEquation(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

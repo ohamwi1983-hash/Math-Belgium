@@ -1,14 +1,11 @@
 import { useState } from "react";
-import type { ExerciceReductionVectorielle } from "./core/reductionVectorielle.types";
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionReductionVectorielle, soumettreReponseReduction } from "./moteur/sessionReductionVectorielle";
-import type { EtatSessionReductionVectorielle, ResultatExerciceReductionVectorielle } from "./moteur/typesReductionVectorielle";
+import type { EtatSessionReductionVectorielle } from "./moteur/typesReductionVectorielle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceReductionVectorielle } from "./generateurs/reductionVectorielle";
 import type { FigureReduction } from "./core/reductionVectorielle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeReductionVectorielle } from "./components/EtapeReductionVectorielle";
-import { ResultatPanelReductionVectorielle } from "./components/ResultatPanelReductionVectorielle";
-import { ResumeSessionReductionVectorielle } from "./components/ResumeSessionReductionVectorielle";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -22,27 +19,56 @@ function nouvelleSession(): EtatSessionReductionVectorielle {
   return demarrerSessionReductionVectorielle(REGLAGES_DEMO, genererExerciceReductionVectorielle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceReductionVectorielle;
-  exercice: ExerciceReductionVectorielle;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionReductionVectorielle;
+  revele: boolean;
 }
 
+/** Pas de `Phase` : un seul écran par exercice. Mono-écran : la transition n'est jamais qu'une
+ * clôture d'exercice (`terminee` passe à `true`, `nombreExercices` vaut 1). */
 export function AppReductionVectorielle() {
   const [etat, setEtat] = useState<EtatSessionReductionVectorielle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceReductionVectorielle, nouvelEtat: EtatSessionReductionVectorielle) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionReductionVectorielle) {
+    const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
+      setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.reductionRevele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionReductionVectorielle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FigureReduction)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <>
+            Réponse attendue : {exercice.pointDepart}
+            {exercice.pointArrivee}
+          </>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -55,27 +81,13 @@ export function AppReductionVectorielle() {
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelReductionVectorielle
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionReductionVectorielle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : (
           <EtapeReductionVectorielle
-            exercice={etat.exerciceCourant}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(texte) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseReduction(etat, texte));
-            }}
+            onValider={(texte) => terminerEtape(soumettreReponseReduction(etat, texte))}
+            validation={validation}
           />
-        )}
         </div>
       </main>
     </div>

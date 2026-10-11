@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { Categorie, Exercice } from "./core/generateur.types";
-import type { ExerciceSimplification, PolynomeLineaire, TypeFraction } from "./core/simplification.types";
+import type { Exercice } from "./core/generateur.types";
+import type { PolynomeLineaire } from "./core/simplification.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideDenomChamp1,
@@ -30,7 +30,7 @@ import {
   soumettreReponseNumReductionP1,
   soumettreReponseSimplification,
 } from "./moteur/sessionSimplification";
-import type { EtatSessionSimplification, PhaseSimplification, ResultatExerciceSimplification } from "./moteur/typesSimplification";
+import type { EtatSessionSimplification, PhaseSimplification } from "./moteur/typesSimplification";
 import { diagnostiquerChampPrincipal, diagnostiquerFactorisationCasGeneral } from "./moteur/verification";
 import { diagnostiquerMiseEnEvidenceFraction, diagnostiquerMiseEnEvidenceP1, diagnostiquerSimplification } from "./moteur/verificationSimplification";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSimplification } from "./generateurs/simplification";
@@ -43,11 +43,13 @@ import { EtapeReductionCoefficients } from "./components/EtapeReductionCoefficie
 import { EtapeSimplification } from "./components/EtapeSimplification";
 import { FractionHeader } from "./components/FractionHeader";
 import { EtatActuelPanel } from "./components/EtatActuelPanel";
-import { ResultatPanelSimplification } from "./components/ResultatPanelSimplification";
-import { ResumeSessionSimplification } from "./components/ResumeSessionSimplification";
 import { calculerRecapitulatifSimplification } from "./ui/recapitulatifSimplification";
 import { calculerEtatActuelSimplification } from "./ui/etatActuelSimplification";
-import { formatEquationDenominateur, formatEquationNumerateur, formatFractionPourCE } from "./ui/formatSimplification";
+import { formatEquationDenominateur, formatEquationNumerateur, formatFractionPourCE, formatFractionSimplifiee } from "./ui/formatSimplification";
+import { estSolutionUnique, formatFormeFactoriseeDepuisRacines, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
+import { libelleCategorie } from "./ui/categorieLabels";
+import { Katex } from "./components/Katex";
+import type { TypeFraction } from "./core/simplification.types";
 
 /**
  * Questions/libellés de factorisation, adaptés au dénominateur ou au numérateur
@@ -68,6 +70,12 @@ const QUESTION_CE = "Quelle est la condition d'existence ?";
  */
 const CONSIGNE_GENERALE = "Simplifier la fraction suivante :";
 
+/** Réponse attendue au champ principal (champ1) d'un P2 — même convention que ResultatPanel.tsx
+ * (exercice 1) : "Δ = ..." pour cas_general, la forme factorisée confirmée (avec "= 0") sinon. */
+function formatChampPrincipalAttendu(poly: Exercice): string {
+  return poly.categorie === "cas_general" ? `\\Delta = ${poly.solution.delta}` : `${poly.solution.formeFactorisee} = 0`;
+}
+
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
   tentativesMax: 3,
@@ -78,11 +86,6 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionSimplification {
   return demarrerSessionSimplification(REGLAGES_DEMO, genererExerciceSimplification);
-}
-
-interface Bilan {
-  resultat: ResultatExerciceSimplification;
-  exercice: ExerciceSimplification;
 }
 
 const LIBELLE_PHASE: Record<PhaseSimplification, string> = {
@@ -102,125 +105,160 @@ const LIBELLE_PHASE: Record<PhaseSimplification, string> = {
   simplification: "Simplification",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). Séquence de 14 phases FIXES, chacune au plus une fois par exercice
+ * (jamais de répétition comme "Tableau de signes à plusieurs facteurs") : un simple changement de
+ * `phase` (ou de `terminee` pour la toute dernière) suffit donc à détecter la clôture d'un écran. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSimplification;
+  revele: boolean;
+}
+
 export function AppSimplification() {
   const [etat, setEtat] = useState<EtatSessionSimplification>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function validerDenomReduction(reponse: string) {
-    setEtat(soumettreReponseDenomReduction(etat, reponse));
-  }
-
-  function activerAideEtapeDenomReduction() {
-    setEtat(activerAideDenomReduction(etat));
-  }
-
-  function validerDenomReductionP1(reponse: string) {
-    setEtat(soumettreReponseDenomReductionP1(etat, reponse));
-  }
-
-  function activerAideEtapeDenomReductionP1() {
-    setEtat(activerAideDenomReductionP1(etat));
-  }
-
-  function validerNumReduction(reponse: string) {
-    setEtat(soumettreReponseNumReduction(etat, reponse));
-  }
-
-  function activerAideEtapeNumReduction() {
-    setEtat(activerAideNumReduction(etat));
-  }
-
-  function validerNumReductionP1(reponse: string) {
-    setEtat(soumettreReponseNumReductionP1(etat, reponse));
-  }
-
-  function activerAideEtapeNumReductionP1() {
-    setEtat(activerAideNumReductionP1(etat));
-  }
-
-  function choisirDenomCategorie(choix: Categorie) {
-    setEtat(soumettreChoixDenomCategorie(etat, choix));
-  }
-
-  function validerDenomChamp1(reponse: string) {
-    setEtat(soumettreReponseDenomChamp1(etat, reponse));
-  }
-
-  function validerDenomChamp2(racines: [number, number]) {
-    setEtat(soumettreReponseDenomChamp2(etat, racines));
-  }
-
-  function validerDenomFactorisation(reponse: string) {
-    setEtat(soumettreReponseDenomFactorisation(etat, reponse));
-  }
-
-  function validerCEDirecte(reponse: string) {
-    setEtat(soumettreReponseCEDirecte(etat, reponse));
-  }
-
-  function choisirNumCategorie(choix: Categorie) {
-    setEtat(soumettreChoixNumCategorie(etat, choix));
-  }
-
-  function validerNumChamp1(reponse: string) {
-    setEtat(soumettreReponseNumChamp1(etat, reponse));
-  }
-
-  function validerNumChamp2(racines: [number, number]) {
-    setEtat(soumettreReponseNumChamp2(etat, racines));
-  }
-
-  function validerNumFactorisation(reponse: string) {
-    setEtat(soumettreReponseNumFactorisation(etat, reponse));
-  }
-
-  function validerSimplification(numerateur: string, denominateur: string) {
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseSimplification(etat, numerateur, denominateur);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionSimplification) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (!transitionDEcran) {
+      setEtat(nouvelEtat);
+      return;
     }
-    setEtat(nouvelEtat);
+
+    const revele = (() => {
+      switch (etat.phase) {
+        case "denomReduction":
+          return nouvelEtat.scoreDenomReductionExercice === 0;
+        case "denomReductionP1":
+          return nouvelEtat.scoreDenomReductionP1Exercice === 0;
+        case "denomReconnaissance":
+          return nouvelEtat.denomCategorieRevelee;
+        case "denomChamp1":
+          return nouvelEtat.scoreDenomChamp1Exercice === 0;
+        case "denomChamp2":
+          return nouvelEtat.scoreDenomChamp2Exercice === 0;
+        case "denomFactorisation":
+          return nouvelEtat.scoreDenomFactorisationExercice === 0;
+        case "ceDirecte":
+          return nouvelEtat.scoreCEDirecteExercice === 0;
+        case "numReduction":
+          return nouvelEtat.scoreNumReductionExercice === 0;
+        case "numReductionP1":
+          return nouvelEtat.scoreNumReductionP1Exercice === 0;
+        case "numReconnaissance":
+          return nouvelEtat.numCategorieRevelee;
+        case "numChamp1":
+          return nouvelEtat.scoreNumChamp1Exercice === 0;
+        case "numChamp2":
+          return nouvelEtat.scoreNumChamp2Exercice === 0;
+        case "numFactorisation":
+          return nouvelEtat.scoreNumFactorisationExercice === 0;
+        case "simplification":
+          return nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.scoreSimplification === 0;
+      }
+    })();
+
+    setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
-  function activerAideEtapeDenomChamp1() {
-    setEtat(activerAideDenomChamp1(etat));
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
   }
 
-  function activerAideEtapeDenomChamp2() {
-    setEtat(activerAideDenomChamp2(etat));
+  function forcerVariante(varianteId: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionSimplification(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as TypeFraction)));
   }
 
-  function activerAideEtapeDenomFactorisation() {
-    setEtat(activerAideDenomFactorisation(etat));
-  }
-
-  function activerAideEtapeNumChamp1() {
-    setEtat(activerAideNumChamp1(etat));
-  }
-
-  function activerAideEtapeNumChamp2() {
-    setEtat(activerAideNumChamp2(etat));
-  }
-
-  function activerAideEtapeNumFactorisation() {
-    setEtat(activerAideNumFactorisation(etat));
-  }
-
-  function activerAideEtapeSimplification() {
-    setEtat(activerAideSimplification(etat));
-  }
-
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const recapitulatif = calculerRecapitulatifSimplification(etat);
   const etatActuel = calculerEtatActuelSimplification(etat);
   const { tentativesUtilisees } = etat.etapeCourante;
   const { tentativesMax } = etat.reglages;
+  const exercice = etat.exerciceCourant;
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
-    setEtat(demarrerSessionSimplification(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as TypeFraction)));
-  }
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
+          switch (etat.phase) {
+            case "denomReconnaissance":
+              return <>Méthode attendue (dénominateur) : {libelleCategorie((exercice.denominateur as Exercice).categorie)}</>;
+            case "denomChamp1":
+              return (
+                <>
+                  Réponse attendue (dénominateur) : <Katex expression={formatChampPrincipalAttendu(exercice.denominateur as Exercice)} />
+                </>
+              );
+            case "denomChamp2":
+              return (
+                <>
+                  {estSolutionUnique(exercice.denominateur as Exercice) ? "CE attendue" : "CE attendues"} :{" "}
+                  <span className="equation-box-termes">
+                    {formatTermesZerosAttendusLatex(exercice.denominateur as Exercice).map((terme, i) => (
+                      <Katex key={i} expression={terme} />
+                    ))}
+                  </span>
+                </>
+              );
+            case "denomFactorisation":
+              return (
+                <>
+                  Forme factorisée attendue (dénominateur) :{" "}
+                  <Katex
+                    expression={`${formatFormeFactoriseeDepuisRacines((exercice.denominateur as Exercice).enonce, (exercice.denominateur as Exercice).solution.racines)} = 0`}
+                  />
+                </>
+              );
+            case "ceDirecte":
+              return <>CE attendue : {exercice.racineCommune}</>;
+            case "numReconnaissance":
+              return <>Méthode attendue (numérateur) : {libelleCategorie((exercice.numerateur as Exercice).categorie)}</>;
+            case "numChamp1":
+              return (
+                <>
+                  Réponse attendue (numérateur) : <Katex expression={formatChampPrincipalAttendu(exercice.numerateur as Exercice)} />
+                </>
+              );
+            case "numChamp2":
+              return (
+                <>
+                  {estSolutionUnique(exercice.numerateur as Exercice) ? "Racine attendue (numérateur)" : "Racines attendues (numérateur)"} :{" "}
+                  <span className="equation-box-termes">
+                    {formatTermesZerosAttendusLatex(exercice.numerateur as Exercice).map((terme, i) => (
+                      <Katex key={i} expression={terme} />
+                    ))}
+                  </span>
+                </>
+              );
+            case "numFactorisation":
+              return (
+                <>
+                  Forme factorisée attendue (numérateur) :{" "}
+                  <Katex
+                    expression={`${formatFormeFactoriseeDepuisRacines((exercice.numerateur as Exercice).enonce, (exercice.numerateur as Exercice).solution.racines)} = 0`}
+                  />
+                </>
+              );
+            case "simplification":
+              return (
+                <>
+                  Réponse attendue : <Katex expression={formatFractionSimplifiee(exercice)} />
+                </>
+              );
+            default:
+              // denomReduction/denomReductionP1/numReduction/numReductionP1 : jamais de réponse
+              // révélée pour ces 4 étapes (voir ResultatPanelSimplification.tsx d'origine).
+              return undefined;
+          }
+        })(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -228,103 +266,95 @@ export function AppSimplification() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Simplifier une fraction rationnelle</h1>
         <p className="app-subtitle">Fractions rationnelles avec conditions d'existence</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {enCoursDeSession && <p className="prompt-text">{CONSIGNE_GENERALE}</p>}
-          {dernierBilan ? (
-            <ResultatPanelSimplification
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionSimplification resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "denomReduction" ? (
+          <p className="prompt-text">{CONSIGNE_GENERALE}</p>
+          {etat.phase === "denomReduction" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
-                exercice={etat.exerciceCourant.denominateur as Exercice}
+                exercice={exercice.denominateur as Exercice}
                 nom="dénominateur"
                 variante="miseEnEvidence"
                 prefixeExpression="D(x)"
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(etat.exerciceCourant.denominateur as Exercice, v)}
+                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomReductionUtilisee}
-                onActiverAide={activerAideEtapeDenomReduction}
-                onValider={validerDenomReduction}
+                onActiverAide={() => setEtat(activerAideDenomReduction(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomReduction(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "denomReductionP1" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
-                exercice={etat.exerciceCourant.denominateur as PolynomeLineaire}
+                exercice={exercice.denominateur as PolynomeLineaire}
                 nom="dénominateur"
                 variante="miseEnEvidence"
                 prefixeExpression="D(x)"
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(etat.exerciceCourant.denominateur as PolynomeLineaire, v)}
+                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(exercice.denominateur as PolynomeLineaire, v)}
                 aideActivee={etat.aideDenomReductionP1Utilisee}
-                onActiverAide={activerAideEtapeDenomReductionP1}
-                onValider={validerDenomReductionP1}
+                onActiverAide={() => setEtat(activerAideDenomReductionP1(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomReductionP1(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "denomReconnaissance" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReconnaissance
-                exercice={etat.exerciceCourant.denominateur as Exercice}
+                exercice={exercice.denominateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationDenominateur(etat.exerciceCourant.denominateur as Exercice)}
+                expressionAffichee={formatEquationDenominateur(exercice.denominateur as Exercice)}
                 question={QUESTION_FACTORISATION_DENOMINATEUR}
-                onChoisir={choisirDenomCategorie}
+                onChoisir={(choix) => terminerEtape(soumettreChoixDenomCategorie(etat, choix))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "denomChamp1" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
-                exercice={etat.exerciceCourant.denominateur as Exercice}
+                exercice={exercice.denominateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationDenominateur(etat.exerciceCourant.denominateur as Exercice)}
+                expressionAffichee={formatEquationDenominateur(exercice.denominateur as Exercice)}
                 labelFactorisation={LABEL_FACTORISATION_DENOMINATEUR}
-                diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.denominateur as Exercice, v)}
+                diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomChamp1Utilisee}
-                onActiverAide={activerAideEtapeDenomChamp1}
-                onValider={validerDenomChamp1}
+                onActiverAide={() => setEtat(activerAideDenomChamp1(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomChamp1(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "denomChamp2" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeRacinesFlexibles
-                exercice={etat.exerciceCourant.denominateur as Exercice}
+                exercice={exercice.denominateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
@@ -333,154 +363,164 @@ export function AppSimplification() {
                 libelleAuMoins="Au moins une CE"
                 placeholderPrefixe="CE"
                 prefixeChamp="x \neq"
-                expressionAffichee={formatFractionPourCE(etat.exerciceCourant)}
+                expressionAffichee={formatFractionPourCE(exercice)}
                 question={QUESTION_CE}
                 texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
                 aideActivee={etat.aideDenomChamp2Utilisee}
-                onActiverAide={activerAideEtapeDenomChamp2}
-                onValider={validerDenomChamp2}
+                onActiverAide={() => setEtat(activerAideDenomChamp2(etat))}
+                onValider={(racines) => terminerEtape(soumettreReponseDenomChamp2(etat, racines))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "denomFactorisation" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
-                exercice={etat.exerciceCourant.denominateur as Exercice}
+                exercice={exercice.denominateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationDenominateur(etat.exerciceCourant.denominateur as Exercice)}
+                expressionAffichee={formatEquationDenominateur(exercice.denominateur as Exercice)}
                 labelFactorisation="Forme factorisée"
                 etapeFactorisationForcee
-                diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(etat.exerciceCourant.denominateur as Exercice, v)}
+                diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomFactorisationUtilisee}
-                onActiverAide={activerAideEtapeDenomFactorisation}
-                onValider={validerDenomFactorisation}
+                onActiverAide={() => setEtat(activerAideDenomFactorisation(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomFactorisation(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "ceDirecte" ? (
             <EtapeCEDirecte
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={validerCEDirecte}
+              onValider={(reponse) => terminerEtape(soumettreReponseCEDirecte(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "numReduction" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
-                exercice={etat.exerciceCourant.numerateur as Exercice}
+                exercice={exercice.numerateur as Exercice}
                 nom="numérateur"
                 variante="miseEnEvidence"
                 prefixeExpression="N(x)"
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(etat.exerciceCourant.numerateur as Exercice, v)}
+                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumReductionUtilisee}
-                onActiverAide={activerAideEtapeNumReduction}
-                onValider={validerNumReduction}
+                onActiverAide={() => setEtat(activerAideNumReduction(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumReduction(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "numReconnaissance" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReconnaissance
-                exercice={etat.exerciceCourant.numerateur as Exercice}
+                exercice={exercice.numerateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationNumerateur(etat.exerciceCourant.numerateur as Exercice)}
+                expressionAffichee={formatEquationNumerateur(exercice.numerateur as Exercice)}
                 question={QUESTION_FACTORISATION_NUMERATEUR}
-                onChoisir={choisirNumCategorie}
+                onChoisir={(choix) => terminerEtape(soumettreChoixNumCategorie(etat, choix))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "numChamp1" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
-                exercice={etat.exerciceCourant.numerateur as Exercice}
+                exercice={exercice.numerateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationNumerateur(etat.exerciceCourant.numerateur as Exercice)}
+                expressionAffichee={formatEquationNumerateur(exercice.numerateur as Exercice)}
                 labelFactorisation={LABEL_FACTORISATION_NUMERATEUR}
-                diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.numerateur as Exercice, v)}
+                diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumChamp1Utilisee}
-                onActiverAide={activerAideEtapeNumChamp1}
-                onValider={validerNumChamp1}
+                onActiverAide={() => setEtat(activerAideNumChamp1(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumChamp1(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "numChamp2" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeRacinesFlexibles
-                exercice={etat.exerciceCourant.numerateur as Exercice}
+                exercice={exercice.numerateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationNumerateur(etat.exerciceCourant.numerateur as Exercice)}
+                expressionAffichee={formatEquationNumerateur(exercice.numerateur as Exercice)}
                 prefixeChamp="x ="
                 aideActivee={etat.aideNumChamp2Utilisee}
-                onActiverAide={activerAideEtapeNumChamp2}
-                onValider={validerNumChamp2}
+                onActiverAide={() => setEtat(activerAideNumChamp2(etat))}
+                onValider={(racines) => terminerEtape(soumettreReponseNumChamp2(etat, racines))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "numFactorisation" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
-                exercice={etat.exerciceCourant.numerateur as Exercice}
+                exercice={exercice.numerateur as Exercice}
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                expressionAffichee={formatEquationNumerateur(etat.exerciceCourant.numerateur as Exercice)}
+                expressionAffichee={formatEquationNumerateur(exercice.numerateur as Exercice)}
                 labelFactorisation="Forme factorisée"
                 etapeFactorisationForcee
-                diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(etat.exerciceCourant.numerateur as Exercice, v)}
+                diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumFactorisationUtilisee}
-                onActiverAide={activerAideEtapeNumFactorisation}
-                onValider={validerNumFactorisation}
+                onActiverAide={() => setEtat(activerAideNumFactorisation(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumFactorisation(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : etat.phase === "numReductionP1" ? (
             <>
-              <FractionHeader exercice={etat.exerciceCourant} />
+              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
-                exercice={etat.exerciceCourant.numerateur as PolynomeLineaire}
+                exercice={exercice.numerateur as PolynomeLineaire}
                 nom="numérateur"
                 variante="miseEnEvidence"
                 prefixeExpression="N(x)"
                 tentativesUtilisees={tentativesUtilisees}
                 tentativesMax={tentativesMax}
                 recapitulatif={recapitulatif}
-                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(etat.exerciceCourant.numerateur as PolynomeLineaire, v)}
+                diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(exercice.numerateur as PolynomeLineaire, v)}
                 aideActivee={etat.aideNumReductionP1Utilisee}
-                onActiverAide={activerAideEtapeNumReductionP1}
-                onValider={validerNumReductionP1}
+                onActiverAide={() => setEtat(activerAideNumReductionP1(etat))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumReductionP1(etat, reponse))}
+                validation={validation}
               />
             </>
           ) : (
             <EtapeSimplification
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel}
-              diagnostiquer={(n, d) => diagnostiquerSimplification(etat.exerciceCourant, n, d)}
+              diagnostiquer={(n, d) => diagnostiquerSimplification(exercice, n, d)}
               aideActivee={etat.aideSimplificationUtilisee}
-              onActiverAide={activerAideEtapeSimplification}
-              onValider={validerSimplification}
+              onActiverAide={() => setEtat(activerAideSimplification(etat))}
+              onValider={(numerateur, denominateur) => terminerEtape(soumettreReponseSimplification(etat, numerateur, denominateur))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

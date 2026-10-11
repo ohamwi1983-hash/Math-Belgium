@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceDispersion } from "./core/dispersion.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -7,13 +6,13 @@ import {
   soumettreReponseTableau,
   soumettreReponseVarianceEcartType,
 } from "./moteur/sessionDispersion";
-import type { EtatSessionDispersion, PhaseDispersion, ResultatExerciceDispersion } from "./moteur/typesDispersion";
+import type { EtatSessionDispersion, PhaseDispersion } from "./moteur/typesDispersion";
 import { genererExerciceDispersion } from "./generateurs/dispersion";
 import { CalculatriceScientifique } from "./components/CalculatriceScientifique";
 import { EtapeTableauDispersion } from "./components/EtapeTableauDispersion";
 import { EtapeVarianceEcartTypeDispersion } from "./components/EtapeVarianceEcartTypeDispersion";
-import { ResultatPanelDispersion } from "./components/ResultatPanelDispersion";
-import { ResumeSessionDispersion } from "./components/ResumeSessionDispersion";
+import { SegmentsInline } from "./components/SegmentsInline";
+import { formatEcartTypeAttendueTexte, formatTableauAttenduTexte, formatVarianceAttendueTexte } from "./ui/formatDispersion";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -27,29 +26,56 @@ function nouvelleSession(): EtatSessionDispersion {
   return demarrerSessionDispersion(REGLAGES_DEMO, genererExerciceDispersion);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceDispersion;
-  exercice: ExerciceDispersion;
-}
-
 const LIBELLE_PHASE: Record<PhaseDispersion, string> = {
   tableau: "Tableau et sommes intermédiaires",
   varianceEcartType: "Variance et écart-type",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDispersion;
+  revele: boolean;
+}
+
 export function AppDispersion() {
   const [etat, setEtat] = useState<EtatSessionDispersion>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceDispersion, nouvelEtat: EtatSessionDispersion) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionDispersion) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele = etat.phase === "tableau" ? nouvelEtat.tableauRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.varianceEcartTypeRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "tableau" ? (
+            <SegmentsInline segments={formatTableauAttenduTexte(exercice)} />
+          ) : (
+            <>
+              Variance attendue : {formatVarianceAttendueTexte(exercice)}, écart-type attendu : {formatEcartTypeAttendueTexte(exercice)}
+            </>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -60,34 +86,23 @@ export function AppDispersion() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {enCoursDeSession && etat.phase === "varianceEcartType" && <CalculatriceScientifique />}
-          {dernierBilan ? (
-            <ResultatPanelDispersion
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionDispersion resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "tableau" ? (
+          {etat.phase === "varianceEcartType" && <CalculatriceScientifique />}
+          {etat.phase === "tableau" ? (
             <EtapeTableauDispersion
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideTableau}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseTableau(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseTableau(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeVarianceEcartTypeDispersion
@@ -96,10 +111,8 @@ export function AppDispersion() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideVarianceEcartType}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseVarianceEcartType(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseVarianceEcartType(etat, reponse))}
+              validation={validation}
             />
           )}{" "}
         </div>

@@ -7,19 +7,25 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { courbeEtape2 } from "../ui/mafsFormeCanoniqueFonctionsReference";
 import { MafsGraphFormeCanoniqueFonctionsReference } from "./MafsGraphFormeCanoniqueFonctionsReference";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueFonctionReference;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseThFR) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const COULEUR_BLEU = "#1971c2";
 
 /** Étape 3 (section 2 de la spec) : le graphe affiche la trace confirmée de l'étape 2 en bleu
  * (légendée avec son expression réelle), curseur TH, champ "fonction intermédiaire". */
-export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [th, setTh] = useState(0);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
 
@@ -69,19 +75,24 @@ export function EtapeThFR({ exercice, tentativesUtilisees, tentativesMax, onVali
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ th, fonctionIntermediaire })}
-      >
-        Valider
-      </button>
-      {montrerErreur && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquerThFR(exercice, { th, fonctionIntermediaire }))}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ th, fonctionIntermediaire })}
+        >
+          Valider
+        </button>
+        {montrerErreur && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquerThFR(exercice, { th, fonctionIntermediaire }))}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

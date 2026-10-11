@@ -20,9 +20,9 @@ import {
 import type { ExerciceDefinitionDerivee } from "./core5e/definitionDerivee.types";
 import { EtapeChampLibreDerivee } from "./components5e/EtapeChampLibreDerivee";
 import { EtapeDevelopperDerivee } from "./components5e/EtapeDevelopperDerivee";
-import { ResultatPanelDefinitionDerivee } from "./components5e/ResultatPanelDefinitionDerivee";
-import { ResumeSessionDefinitionDerivee } from "./components5e/ResumeSessionDefinitionDerivee";
-import { labelLimite, labelQuotient } from "./ui5e/formatDefinitionDerivee";
+import { formatReponseAttendueEcranLatex, labelLimite, labelQuotient } from "./ui5e/formatDefinitionDerivee";
+import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -30,33 +30,59 @@ function nouvelleSession(): EtatSessionDefinitionDerivee {
   return demarrerSessionDefinitionDerivee(REGLAGES_DEMO, genererExerciceDefinitionDerivee);
 }
 
-interface Bilan {
-  resultat: EtatSessionDefinitionDerivee["resultats"][number];
-  aideParPhase: Partial<Record<string, { niveauAide: number; revele: boolean }>>;
+function reponseAttendueDefinitionDerivee(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee) {
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttendueEcranLatex(exercice, ecran).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDefinitionDerivee;
+  revele: boolean;
 }
 
 export function App5gen26() {
   const [etat, setEtat] = useState<EtatSessionDefinitionDerivee>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<string, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionDefinitionDerivee) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionDefinitionDerivee(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation: ValidationEtapeProps | null = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueDefinitionDerivee(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -64,39 +90,20 @@ export function App5gen26() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Calculer f'(a) par la définition</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setAideParPhase({});
-          setEtat(demarrerSessionDefinitionDerivee(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-              setEtat={setEtat}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelDefinitionDerivee
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionDefinitionDerivee resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            setEtat={setEtat}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -112,9 +119,10 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionDefinitionDerivee) => void;
   setEtat: (etat: EtatSessionDefinitionDerivee) => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxDefinitionDerivee();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
   const a = exercice.a;
@@ -132,6 +140,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse))}
           diagnostiquer={(r) => ({ fA: diagnostiquerValeurFA(r.fA, exercice, a), fAH: diagnostiquerDeveloppementH(r.fAH, exercice, a) })}
+          validation={validation}
         />
       );
 
@@ -150,6 +159,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseQuotient(etat, texte))}
           diagnostiquer={(t) => diagnostiquerQuotientH(t, exercice, a)}
+          validation={validation}
         />
       );
 
@@ -168,6 +178,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseLimite(etat, texte))}
           diagnostiquer={(t) => diagnostiquerLimiteDerivee(t, exercice, a)}
+          validation={validation}
         />
       );
   }

@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { ExerciceInequation, ReponseRacines } from "../core/inequation.types";
 import { Katex } from "./Katex";
 import { formatEquationAssocieeLatex, formatInequationLatex } from "../ui/formatInequation";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "auMoinsUne" | "pasDeSolutions";
 
@@ -12,6 +14,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseRacines) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -27,7 +33,7 @@ interface Props {
  * onValider, exactement comme verifierRacines l'attend déjà — aucun changement côté moteur.
  * Pas de RecapitulatifPanel : toujours la première étape, il serait vide.
  */
-export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -115,19 +121,24 @@ export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onV
         </div>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

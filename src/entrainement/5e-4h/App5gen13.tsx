@@ -53,11 +53,7 @@ import {
   soumettreReponseSolutionsResoudre,
   soumettreReponseSysteme,
 } from "./moteur5e/sessionModelisationSinusoide";
-import type {
-  EtatSessionModelisationSinusoide,
-  PhaseModelisationSinusoide,
-  ResultatExerciceModelisationSinusoide,
-} from "./moteur5e/typesModelisationSinusoide";
+import type { EtatSessionModelisationSinusoide, PhaseModelisationSinusoide } from "./moteur5e/typesModelisationSinusoide";
 import type { ReponseBornes, ReponseResolution, ReponseSysteme } from "./moteur5e/sessionModelisationSinusoide";
 import {
   diagnostiquerArgumentResoudre,
@@ -88,8 +84,8 @@ import { EtapeListerIntervalles } from "./components5e/EtapeListerIntervalles";
 import { EtapeResolution } from "./components5e/EtapeResolution";
 import { EtapeSysteme } from "./components5e/EtapeSysteme";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelModelisationSinusoide } from "./components5e/ResultatPanelModelisationSinusoide";
-import { ResumeSessionModelisationSinusoide } from "./components5e/ResumeSessionModelisationSinusoide";
+import { formatTermesReponseAttendueModelisationSinusoide } from "./ui5e/formatModelisationSinusoide";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -221,31 +217,36 @@ function nouvelleSession(): EtatSessionModelisationSinusoide {
   return demarrerSessionModelisationSinusoide(REGLAGES_DEMO, genererExerciceModelisationSinusoide);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceModelisationSinusoide;
-  aideParPhase: Partial<Record<PhaseModelisationSinusoide, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionModelisationSinusoide;
+  revele: boolean;
 }
 
 export function App5gen13() {
   const [etat, setEtat] = useState<EtatSessionModelisationSinusoide>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseModelisationSinusoide, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionModelisationSinusoide) {
-    // A.1 : `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesModelisationSinusoide.ts`.
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    const [technique, phase2Choix] = id.split("|") as [TechniquePhase1, Phase2ChoixDev];
+    setEnAttente(null);
+    setEtat(demarrerSessionModelisationSinusoide(REGLAGES_DEMO, () => construireAvecTechniqueEtPhase2(technique, phase2Choix)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -274,24 +275,31 @@ export function App5gen13() {
   const calculatriceEcranSupplementaire =
     ((technique === "b3" || technique === "donnee") && PHASES_CALC_B3.has(phase)) || (technique === "b2" && PHASES_CALC_B2.has(phase));
 
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatTermesReponseAttendueModelisationSinusoide(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Modéliser une fonction sinusoïdale en contexte</h1>
       </header>
-      <SelecteurVarianteDev
-        options={OPTIONS_TECHNIQUE_PHASE2}
-        onGenerer={(id) => {
-          const [technique, phase2Choix] = id.split("|") as [TechniquePhase1, Phase2ChoixDev];
-          setDernierBilan(null);
-          setEtat(demarrerSessionModelisationSinusoide(REGLAGES_DEMO, () => construireAvecTechniqueEtPhase2(technique, phase2Choix)));
-        }}
-      />
+      <SelecteurVarianteDev options={OPTIONS_TECHNIQUE_PHASE2} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleModelisation
                   key={cleEcran}
@@ -323,6 +331,7 @@ export function App5gen13() {
                     }
                   }}
                   diagnostiquer={(texte) => diagnostiquerChampSimplePhase(exercice, phase, texte)}
+                  validation={validation}
                 />
               )}
 
@@ -337,6 +346,7 @@ export function App5gen13() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreReponseSysteme(etat, reponse))}
                   diagnostiquer={(reponse) => diagnostiquerSystemePhase(exercice, reponse)}
+                  validation={validation}
                 />
               )}
               {phase === "systeme" && <CalculatriceScientifique />}
@@ -351,6 +361,7 @@ export function App5gen13() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse))}
                   diagnostiquer={(reponse) => diagnostiquerResolutionPhase(exercice, reponse)}
+                  validation={validation}
                 />
               )}
               {phase === "resolution" && <CalculatriceScientifique />}
@@ -366,6 +377,7 @@ export function App5gen13() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreReponseArgumentResoudre(etat, reponse))}
                   diagnostiquer={(reponse) => diagnostiquerArgumentResoudrePhase(exercice, reponse)}
+                  validation={validation}
                 />
               )}
               {phase === "argumentResoudre" && <CalculatriceScientifique />}
@@ -395,6 +407,7 @@ export function App5gen13() {
                   diagnostiquer={(lignes) =>
                     diagnostiquerLignesPhase(exercice, phase as "isolerTResoudre" | "solutionsResoudre" | "solutionsExtremum", lignes)
                   }
+                  validation={validation}
                 />
               )}
 
@@ -409,6 +422,7 @@ export function App5gen13() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseIsolerSinInequation(etat, texte))}
                   diagnostiquer={(texte) => diagnostiquerIsolerSinInequationPhase(exercice, texte)}
+                  validation={validation}
                 />
               )}
 
@@ -430,6 +444,7 @@ export function App5gen13() {
                     )
                   }
                   diagnostiquer={(reponse) => diagnostiquerBornesPhase(exercice, phase as "resoudreUInequation" | "isolerTInequation", reponse)}
+                  validation={validation}
                 />
               )}
               {phase === "resoudreUInequation" && <CalculatriceScientifique />}
@@ -445,22 +460,11 @@ export function App5gen13() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(paires) => terminerEtape(soumettreReponseListerIntervalles(etat, paires))}
                   diagnostiquer={(paires) => diagnostiquerListerIntervallesPhase(exercice, paires)}
+                  validation={validation}
                 />
               )}
               {calculatriceEcranSupplementaire && <CalculatriceScientifique />}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelModelisationSinusoide
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionModelisationSinusoide resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

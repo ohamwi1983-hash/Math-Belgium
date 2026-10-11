@@ -1,15 +1,14 @@
 import { useState } from "react";
-import type { ExerciceCaracteristiquesDroite } from "./core/caracteristiquesDroite.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCaracteristiquesDroite } from "./generateurs/caracteristiquesDroite";
 import type { VarianteCaracteristiquesDroite } from "./core/caracteristiquesDroite.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { activerAideSuivante, demarrerSessionCaracteristiquesDroite, soumettreReponseCaracteristiques, soumettreReponseExtraction } from "./moteur/sessionCaracteristiquesDroite";
-import type { EtatSessionCaracteristiquesDroite, PhaseCaracteristiquesDroite, ResultatExerciceCaracteristiquesDroite } from "./moteur/typesCaracteristiquesDroite";
+import type { EtatSessionCaracteristiquesDroite, PhaseCaracteristiquesDroite } from "./moteur/typesCaracteristiquesDroite";
 import { EtapeCaracteristiquesDroite } from "./components/EtapeCaracteristiquesDroite";
 import { EtapeExtractionCaracteristiquesDroite } from "./components/EtapeExtractionCaracteristiquesDroite";
-import { ResultatPanelCaracteristiquesDroite } from "./components/ResultatPanelCaracteristiquesDroite";
-import { ResumeSessionCaracteristiquesDroite } from "./components/ResumeSessionCaracteristiquesDroite";
+import { Katex } from "./components/Katex";
+import { formatCaracteristiquesAttenduesLatex, formatEtatActuelPointVecteurLatex } from "./ui/formatCaracteristiquesDroite";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -23,34 +22,60 @@ function nouvelleSession(): EtatSessionCaracteristiquesDroite {
   return demarrerSessionCaracteristiquesDroite(REGLAGES_DEMO, genererExerciceCaracteristiquesDroite);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceCaracteristiquesDroite;
-  exercice: ExerciceCaracteristiquesDroite;
-}
-
 const LIBELLE_PHASE: Record<PhaseCaracteristiquesDroite, string> = {
   extraction: "Extraction du point et du vecteur directeur",
   caracteristiques: "Pente ou angle, et ordonnée à l'origine",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionCaracteristiquesDroite;
+  revele: boolean;
+}
+
 export function AppCaracteristiquesDroite() {
   const [etat, setEtat] = useState<EtatSessionCaracteristiquesDroite>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceCaracteristiquesDroite, nouvelEtat: EtatSessionCaracteristiquesDroite) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesDroite) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "extraction" ? nouvelEtat.extractionRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.caracteristiquesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionCaracteristiquesDroite(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteCaracteristiquesDroite)));
+  }
+
   const exercice = etat.exerciceCourant;
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
-    setEtat(demarrerSessionCaracteristiquesDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteCaracteristiquesDroite)));
-  }
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "extraction" ? (
+          <Katex expression={formatEtatActuelPointVecteurLatex(exercice)} />
+        ) : (
+          <Katex expression={formatCaracteristiquesAttenduesLatex(exercice)} />
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -58,36 +83,25 @@ export function AppCaracteristiquesDroite() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques d'une droite</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelCaracteristiquesDroite
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionCaracteristiquesDroite resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "extraction" ? (
+        {etat.phase === "extraction" ? (
           <EtapeExtractionCaracteristiquesDroite
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideExtraction}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseExtraction(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseExtraction(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeCaracteristiquesDroite
@@ -96,10 +110,8 @@ export function AppCaracteristiquesDroite() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCaracteristiques}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseCaracteristiques(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseCaracteristiques(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

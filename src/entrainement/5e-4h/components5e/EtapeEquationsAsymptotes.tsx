@@ -7,6 +7,8 @@ import { EtatActuelLectureGraphiqueLimites } from "./EtatActuelLectureGraphiqueL
 import { LectureGraphiqueLimitesGraph } from "./LectureGraphiqueLimitesGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
@@ -14,12 +16,16 @@ interface Props {
   tentativesMax: number;
   onValider: (textes: string[]) => void;
   diagnostiquer?: (textes: string[]) => StatutVerification[];
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran "nommerAsymptotes" — une équation par asymptote RÉELLEMENT présente (jamais un champ pour
  * un type absent du tirage) : x=... par AV, y=... par AH (1 ou 2 champs selon égalité en ±∞), y=...
  * par AO (expression symbolique ax+b). Pas d'aide : pure lecture graphique. */
-export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer }: Props) {
+export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const slots = listeAsymptotes(exercice);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -60,14 +66,19 @@ export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentat
           />
         </div>
       ))}
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

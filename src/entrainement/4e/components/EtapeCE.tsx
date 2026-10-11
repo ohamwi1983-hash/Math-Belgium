@@ -3,6 +3,8 @@ import type { ExerciceCaracteristiquesAlgebriques, ReponseCE, SymboleCE } from "
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
 import { formatEquationNiveau1Latex } from "../ui/formatCaracteristiquesAlgebriques";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "aucune" | "auMoinsUne";
 
@@ -22,6 +24,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseCE) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -32,7 +38,7 @@ interface Props {
  * `parserNombreOuFraction` — les CE de ce générateur sont souvent des rationnels non entiers, ex.
  * `-1/3`).
  */
-export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [lignes, setLignes] = useState<LigneCE[]>([ligneVide()]);
 
@@ -130,19 +136,24 @@ export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, onValide
         </div>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

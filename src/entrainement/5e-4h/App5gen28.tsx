@@ -3,7 +3,7 @@ import type { ReglagesSession5e } from "./core5e/session5e.types";
 import type { ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne } from "./core5e/tangentes.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangente } from "./generateurs5e/tangentes/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
-import { labelTangenteEquiv } from "./ui5e/formatTangentes";
+import { formatReponseAttenduePhaseLatex, labelTangenteEquiv } from "./ui5e/formatTangentes";
 import {
   activerAideSuivante,
   demarrerSessionTangentes,
@@ -33,8 +33,8 @@ import { EtapeChampUniqueTangente } from "./components5e/EtapeChampUniqueTangent
 import { EtapeRacinesTangente } from "./components5e/EtapeRacinesTangente";
 import { EtapeCoordonneesTangente } from "./components5e/EtapeCoordonneesTangente";
 import { EtapeTangenteEnP } from "./components5e/EtapeTangenteEnP";
-import { ResultatPanelTangentes } from "./components5e/ResultatPanelTangentes";
-import { ResumeSessionTangentes } from "./components5e/ResumeSessionTangentes";
+import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -42,32 +42,58 @@ function nouvelleSession(): EtatSessionTangente {
   return demarrerSessionTangentes(REGLAGES_DEMO, genererExerciceTangente);
 }
 
-interface Bilan {
-  resultat: EtatSessionTangente["resultats"][number];
-  aideParPhase: Partial<Record<string, { niveauAide: number; revele: boolean }>>;
+function reponseAttendueTangentes(exercice: EtatSessionTangente["exerciceCourant"], phase: EcranTangente) {
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTangente;
+  revele: boolean;
 }
 
 export function App5gen28() {
   const [etat, setEtat] = useState<EtatSessionTangente>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<string, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionTangente) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionTangentes(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+
+  const validation: ValidationEtapeProps | null = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueTangentes(exercice, etat.phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -75,39 +101,20 @@ export function App5gen28() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Tangentes</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_VARIANTES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setAideParPhase({});
-          setEtat(demarrerSessionTangentes(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={etat.phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-              setEtat={setEtat}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelTangentes
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionTangentes resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={etat.phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            setEtat={setEtat}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -123,9 +130,10 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionTangente) => void;
   setEtat: (etat: EtatSessionTangente) => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxTangentes();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -143,6 +151,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseSubstituer(etat, reponse))}
           diagnostiquer={(r) => ({ fA: diagnostiquerFAPointDonne(r.fA, ex), fPrimeA: diagnostiquerFPrimeAPointDonne(r.fPrimeA, ex) })}
+          validation={validation}
         />
       );
     }
@@ -164,6 +173,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseTangentePointDonne(etat, texte))}
           diagnostiquer={(t) => diagnostiquerEquationTangentePointDonne(t, ex)}
+          validation={validation}
         />
       );
     }
@@ -181,6 +191,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseResoudre(etat, reponses))}
           diagnostiquer={(t) => diagnostiquerRacineChamp(t, ex)}
+          validation={validation}
         />
       );
     }
@@ -198,6 +209,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseCoordonnees(etat, reponses))}
           diagnostiquer={(point) => diagnostiquerCoordonneeChamp(point, ex)}
+          validation={validation}
         />
       );
     }
@@ -215,6 +227,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseTangenteEnP(etat, reponse))}
           diagnostiquer={(r) => ({ fPrimeP: diagnostiquerFPrimeP(r.fPrimeP, ex), tangente: diagnostiquerEquationTangenteP(r.tangente, ex) })}
+          validation={validation}
         />
       );
     }
@@ -236,6 +249,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseTrouverQ(etat, texte))}
           diagnostiquer={(t) => diagnostiquerQ(t, ex)}
+          validation={validation}
         />
       );
     }
@@ -257,6 +271,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseVerifierPente(etat, texte))}
           diagnostiquer={(t) => diagnostiquerFPrimeQ(t, ex)}
+          validation={validation}
         />
       );
     }

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceSectionPlaneSolide } from "./core/sectionPlaneSolide.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -9,7 +8,7 @@ import {
   soumettreReponseAuxiliaireLignes,
   soumettreReponseSegmentDirect,
 } from "./moteur/sessionSectionPlaneSolide";
-import type { EtatSessionSectionPlaneSolide, PhaseSectionPlaneSolide, ResultatExerciceSectionPlaneSolide } from "./moteur/typesSectionPlaneSolide";
+import type { EtatSessionSectionPlaneSolide, PhaseSectionPlaneSolide } from "./moteur/typesSectionPlaneSolide";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSectionPlaneSolide } from "./generateurs/sectionPlaneSolide";
 import type { NomSolide3D } from "./core/geometrieEspace.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -17,8 +16,6 @@ import { EtapeAuxiliaireFace } from "./components/EtapeAuxiliaireFace";
 import { EtapeAuxiliaireLignes } from "./components/EtapeAuxiliaireLignes";
 import { EtapeConclusionSectionPlaneSolide } from "./components/EtapeConclusionSectionPlaneSolide";
 import { EtapeSegmentDirect } from "./components/EtapeSegmentDirect";
-import { ResultatPanelSectionPlaneSolide } from "./components/ResultatPanelSectionPlaneSolide";
-import { ResumeSessionSectionPlaneSolide } from "./components/ResumeSessionSectionPlaneSolide";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,11 +27,6 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionSectionPlaneSolide {
   return demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, genererExerciceSectionPlaneSolide);
-}
-
-interface Bilan {
-  resultat: ResultatExerciceSectionPlaneSolide;
-  exercice: ExerciceSectionPlaneSolide;
 }
 
 /** Libellé de la phase COURANTE (fixe, 4 valeurs) — jamais un indicateur "écran X/N" par exercice,
@@ -49,23 +41,62 @@ const LIBELLE_PHASE: Record<PhaseSectionPlaneSolide, string> = {
   conclusion: "Conclusion",
 };
 
+/** État tenu en attente dès qu'un écran NOTÉ se termine (bonne réponse, ou tentatives épuisées) —
+ * l'état de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). Ne couvre QUE segmentDirect/auxiliaireLignes/auxiliaireFace : le
+ * nombre d'écrans par exercice est variable (jamais une séquence de phases fixe, voir
+ * `typesSectionPlaneSolide.ts`), donc la clôture d'un écran noté est détectée via la croissance de
+ * `scoresAccumules` (un push par action notée), jamais via un simple changement de `phase` (qui peut
+ * rester identique d'un écran noté au suivant, ex. deux "segmentDirect" consécutifs). L'écran
+ * "conclusion" reste un cas à part, sans note ni réponse à valider — voir `EtapeConclusionSectionPlaneSolide`
+ * plus bas, qui continue à transitionner directement, sans ce mécanisme. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSectionPlaneSolide;
+  revele: boolean;
+}
+
 export function AppSectionPlaneSolide() {
   const [etat, setEtat] = useState<EtatSessionSectionPlaneSolide>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceSectionPlaneSolide, nouvelEtat: EtatSessionSectionPlaneSolide) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionSectionPlaneSolide) {
+    const transitionDEcran = nouvelEtat.scoresAccumules.length > etat.scoresAccumules.length;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.revelesAccumules[nouvelEtat.revelesAccumules.length - 1]! });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+  /** Écran de conclusion — AUCUNE pause/validation (exception documentée, voir header) : simple
+   * écran "Continuer" narratif, sans réponse ni bouton Valider, transitionne toujours directement. */
+  function continuerConclusion() {
+    const nouvelEtat = soumettreConclusion(etat);
+    setEtat(nouvelEtat.terminee ? nouvelleSession() : nouvelEtat);
+  }
+
+  function forcerVariante(varianteId: string) {
+    setEnAttente(null);
     setEtat(demarrerSessionSectionPlaneSolide(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as NomSolide3D)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        // Jamais de "réponse attendue" révélée ici (spec) — la vérité terrain n'est jamais montrée
+        // sous forme numérique, seulement via le croquis final de l'écran de conclusion.
+        reponseAttendue: undefined,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -73,27 +104,17 @@ export function AppSectionPlaneSolide() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Section plane d'un solide</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie dans l'espace</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelSectionPlaneSolide
-            resultat={dernierBilan.resultat}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionSectionPlaneSolide resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "segmentDirect" ? (
+        {etat.phase === "segmentDirect" ? (
           <EtapeSegmentDirect
             exercice={etat.exerciceCourant}
             connus={etat.connus}
@@ -102,7 +123,8 @@ export function AppSectionPlaneSolide() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(face) => setEtat(soumettreReponseSegmentDirect(etat, face))}
+            onValider={(face) => terminerEtape(soumettreReponseSegmentDirect(etat, face))}
+            validation={validation}
           />
         ) : etat.phase === "auxiliaireLignes" ? (
           <EtapeAuxiliaireLignes
@@ -113,7 +135,8 @@ export function AppSectionPlaneSolide() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(ligne1, ligne2) => setEtat(soumettreReponseAuxiliaireLignes(etat, ligne1, ligne2))}
+            onValider={(ligne1, ligne2) => terminerEtape(soumettreReponseAuxiliaireLignes(etat, ligne1, ligne2))}
+            validation={validation}
           />
         ) : etat.phase === "auxiliaireFace" && etat.ligneAuxiliaireChoisie ? (
           <EtapeAuxiliaireFace
@@ -125,17 +148,15 @@ export function AppSectionPlaneSolide() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(face) => setEtat(soumettreReponseAuxiliaireFace(etat, face))}
+            onValider={(face) => terminerEtape(soumettreReponseAuxiliaireFace(etat, face))}
+            validation={validation}
           />
         ) : (
           <EtapeConclusionSectionPlaneSolide
             exercice={etat.exerciceCourant}
             connus={etat.connus}
             segmentsTraces={etat.segmentsTraces}
-            onContinuer={() => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreConclusion(etat));
-            }}
+            onContinuer={continuerConclusion}
           />
         )}
         </div>

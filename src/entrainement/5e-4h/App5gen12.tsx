@@ -9,12 +9,12 @@ import {
   niveauAideMaxGeometrieCercle,
   soumettreReponse,
 } from "./moteur5e/sessionGeometrieCercle";
-import type { EtatSessionGeometrieCercle, PhaseGeometrieCercle, ResultatExerciceGeometrieCercle } from "./moteur5e/typesGeometrieCercle";
+import type { EtatSessionGeometrieCercle, PhaseGeometrieCercle } from "./moteur5e/typesGeometrieCercle";
 import { diagnostiquerChamp } from "./moteur5e/verificationGeometrieCercle";
+import { formatValeurPhaseLatex } from "./ui5e/formatGeometrieCercle";
 import { EtapeChampGeometrieCercle } from "./components5e/EtapeChampGeometrieCercle";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelGeometrieCercle } from "./components5e/ResultatPanelGeometrieCercle";
-import { ResumeSessionGeometrieCercle } from "./components5e/ResumeSessionGeometrieCercle";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -47,34 +47,47 @@ function nouvelleSession(): EtatSessionGeometrieCercle {
   return demarrerSessionGeometrieCercle(REGLAGES_DEMO, genererExerciceGeometrieCercle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceGeometrieCercle;
-  aideParPhase: Partial<Record<PhaseGeometrieCercle, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionGeometrieCercle;
+  revele: boolean;
 }
 
 export function App5gen12() {
   const [etat, setEtat] = useState<EtatSessionGeometrieCercle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseGeometrieCercle, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionGeometrieCercle) {
-    // A.1 : `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesGeometrieCercle.ts` (même correctif que 5gen10, commit `122064a`).
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionGeometrieCercle(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioGeometrieCercle)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: <Katex expression={formatValeurPhaseLatex(exercice, etat.phase)} />,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -82,43 +95,23 @@ export function App5gen12() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes de géométrie du cercle</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_SCENARIOS}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionGeometrieCercle(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioGeometrieCercle)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              <EtapeChampGeometrieCercle
-                key={etat.phase}
-                exercice={exercice}
-                phase={etat.phase}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={etat.niveauAide}
-                niveauAideMax={niveauAideMaxGeometrieCercle(etat.phase)}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponse(etat, texte))}
-                diagnostiquer={(texte) => diagnostiquerChamp(exercice, etat.phase, texte)}
-              />
-              {PHASES_CALCULATRICE.has(etat.phase) && <CalculatriceScientifique />}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelGeometrieCercle
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionGeometrieCercle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EtapeChampGeometrieCercle
+            key={etat.phase}
+            exercice={exercice}
+            phase={etat.phase}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={niveauAideMaxGeometrieCercle(etat.phase)}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(texte) => terminerEtape(soumettreReponse(etat, texte))}
+            diagnostiquer={(texte) => diagnostiquerChamp(exercice, etat.phase, texte)}
+            validation={validation}
+          />
+          {PHASES_CALCULATRICE.has(etat.phase) && <CalculatriceScientifique />}
         </div>
       </main>
     </div>

@@ -5,12 +5,18 @@ import { PLACEHOLDER_SOLUTION_X, consigneGlobaleColinearite, formatEnonceLatex, 
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceColinearParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (valeur: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -30,7 +36,7 @@ interface Props {
  * structurel de son propre rendu (structure miroir de `EtapeResolutionParametreOrthogonalite.tsx`,
  * générateur 25).
  */
-export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const valeur = Number(texte.replace(",", "."));
@@ -63,14 +69,19 @@ export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tent
         />
       </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

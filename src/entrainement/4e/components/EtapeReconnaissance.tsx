@@ -6,6 +6,8 @@ import { OPTIONS_CATEGORIE } from "../ui/categorieLabels";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: Exercice;
@@ -38,6 +40,10 @@ interface Props {
    */
   options?: { valeur: Categorie; libelle: string }[];
   onChoisir: (choix: Categorie) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 export function EtapeReconnaissance({
@@ -53,6 +59,7 @@ export function EtapeReconnaissance({
   enonceFixe,
   options,
   onChoisir,
+  validation,
 }: Props) {
   const [choix, setChoix] = useState<Categorie | null>(null);
   const erronee = tentativesUtilisees > 0;
@@ -105,14 +112,19 @@ export function EtapeReconnaissance({
           </button>
         ))}
       </div>
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

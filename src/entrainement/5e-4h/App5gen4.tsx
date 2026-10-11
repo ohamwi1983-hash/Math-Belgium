@@ -13,13 +13,11 @@ import {
   niveauAideMaxQuestion,
   soumettreReponseQuestion,
 } from "./moteur5e/sessionComposeeGraphique";
-import type { EtatSessionComposeeGraphique, ResultatExerciceComposeeGraphique } from "./moteur5e/typesComposeeGraphique";
+import type { EtatSessionComposeeGraphique } from "./moteur5e/typesComposeeGraphique";
 import { diagnostiquerReponseQuestion } from "./moteur5e/verificationComposeeGraphique";
 import { PaireGraphesComposeeGraphique } from "./components5e/PaireGraphesComposeeGraphique";
 import { EtapeQuestionComposeeGraphique } from "./components5e/EtapeQuestionComposeeGraphique";
-import { ResultatPanelComposeeGraphique } from "./components5e/ResultatPanelComposeeGraphique";
-import { ResumeSessionComposeeGraphique } from "./components5e/ResumeSessionComposeeGraphique";
-import { nomInterne } from "./ui5e/formatComposeeGraphique";
+import { labelChampResultat, nomInterne } from "./ui5e/formatComposeeGraphique";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -27,44 +25,64 @@ function nouvelleSession(): EtatSessionComposeeGraphique {
   return demarrerSessionComposeeGraphique(REGLAGES_DEMO, genererExerciceComposeeGraphique);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceComposeeGraphique;
-  /** Niveau d'aide utilisé PAR QUESTION — capturé côté présentation (`etat.niveauAide` juste avant
-   * chaque soumission qui clôture une question), puisque `ResultatQuestionComposeeGraphique` ne le
-   * porte pas lui-même. Même index que `resultat.resultatsQuestions`, consommé par `statutRecap`
-   * dans `ResultatPanelComposeeGraphique` (même convention que 5gen1/5gen2). */
-  niveauAidesQuestions: number[];
+function formatResultatAttendu(resultatAttendu: number | null): string {
+  return resultatAttendu === null ? "n'existe pas" : String(resultatAttendu);
+}
+
+/** État tenu en attente dès qu'une question se termine (bonne réponse, ou tentatives épuisées) —
+ * l'état de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionComposeeGraphique;
+  revele: boolean;
 }
 
 export function App5gen4() {
   const [etat, setEtat] = useState<EtatSessionComposeeGraphique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [niveauAidesQuestions, setNiveauAidesQuestions] = useState<number[]>([]);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionComposeeGraphique) {
-    // Une question est résolue soit quand on passe à la question suivante du même exercice, soit
-    // quand on clôture le dernier exercice (indexQuestion est alors réinitialisé à 0 par
-    // `etatInitialExercice`/`cloturerExerciceOuSuivant`) — dans les deux cas, capturer le niveau
-    // d'aide qui était actif juste avant CETTE soumission.
-    const questionResolue = nouvelEtat.indexQuestion !== etat.indexQuestion || nouvelEtat.resultats.length > etat.resultats.length;
-    const aidesMaJour = questionResolue ? [...niveauAidesQuestions, etat.niveauAide] : niveauAidesQuestions;
-
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], niveauAidesQuestions: aidesMaJour });
-      setNiveauAidesQuestions([]);
-    } else {
-      setNiveauAidesQuestions(aidesMaJour);
+    const transitionDEcran = nouvelEtat.indexQuestion !== etat.indexQuestion || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const resultatsQuestionsATerme = nouvelEtat.terminee
+        ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].resultatsQuestions
+        : nouvelEtat.resultatsQuestionsExercice;
+      const revele = resultatsQuestionsATerme[resultatsQuestionsATerme.length - 1].revele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionComposeeGraphique(REGLAGES_DEMO, () => construireAvecRestreinte(id as "f" | "g")));
+  }
+
   const exercice = etat.exerciceCourant;
   const question = exercice.questions[etat.indexQuestion];
-  const niveauAideMax = enCoursDeSession ? niveauAideMaxQuestion(question) : 0;
+  const niveauAideMax = niveauAideMaxQuestion(question);
   // Aide niveau 2 (E.7) : révèle le point (a;bAttendu) sur le graphe de la fonction INTERNE.
-  const pointRevele =
-    enCoursDeSession && etat.niveauAide >= 2 ? { fonction: nomInterne(question.composition), point: { x: question.a, y: question.bAttendu } } : null;
+  const pointRevele = etat.niveauAide >= 2 ? { fonction: nomInterne(question.composition), point: { x: question.a, y: question.bAttendu } } : null;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span>
+            {labelChampResultat(question)} {formatResultatAttendu(question.resultatAttendu)}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -72,45 +90,25 @@ export function App5gen4() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Composée de fonctions — lecture graphique</h1>
       </header>
-      <SelecteurVarianteDev
-        options={OPTIONS_RESTREINTE}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionComposeeGraphique(REGLAGES_DEMO, () => construireAvecRestreinte(id as "f" | "g")));
-        }}
-      />
+      <SelecteurVarianteDev options={OPTIONS_RESTREINTE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              <p className="prompt-text">
-                Question {etat.indexQuestion + 1}/{exercice.questions.length}
-              </p>
-              <EtapeQuestionComposeeGraphique
-                key={etat.indexQuestion}
-                question={question}
-                donnees={<PaireGraphesComposeeGraphique exercice={exercice} pointRevele={pointRevele} />}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                niveauAide={etat.niveauAide}
-                niveauAideMax={niveauAideMax}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseQuestion(etat, reponse))}
-                diagnostiquer={(reponse) => diagnostiquerReponseQuestion(question, reponse)}
-              />
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelComposeeGraphique
-              resultat={dernierBilan.resultat}
-              niveauAidesQuestions={dernierBilan.niveauAidesQuestions}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionComposeeGraphique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <p className="prompt-text">
+            Question {etat.indexQuestion + 1}/{exercice.questions.length}
+          </p>
+          <EtapeQuestionComposeeGraphique
+            key={etat.indexQuestion}
+            question={question}
+            donnees={<PaireGraphesComposeeGraphique exercice={exercice} pointRevele={pointRevele} />}
+            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+            tentativesMax={etat.reglages.tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={niveauAideMax}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(reponse) => terminerEtape(soumettreReponseQuestion(etat, reponse))}
+            diagnostiquer={(reponse) => diagnostiquerReponseQuestion(question, reponse)}
+            validation={validation}
+          />
         </div>
       </main>
     </div>

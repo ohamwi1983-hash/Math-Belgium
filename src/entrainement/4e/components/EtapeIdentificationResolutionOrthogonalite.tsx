@@ -14,12 +14,18 @@ import {
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseIdentificationResolution) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const SOMMETS: Sommet[] = ["A", "B", "C"];
@@ -54,7 +60,7 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangleParametre, sommet: S
  * (`formatTermesEnonceTriangleParametreLatex`) — le bloc des 3 équations réduites reste inchangé
  * (déjà un `<div>` par sommet, aucun risque de coupure).
  */
-export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
   const [sommet, setSommet] = useState<Sommet | null>(null);
   const [texteX, setTexteX] = useState("");
@@ -135,19 +141,24 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
         </>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => complet && onValider({ estRectangle: estRectangle as boolean, sommet, x: valeurX })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => complet && onValider({ estRectangle: estRectangle as boolean, sommet, x: valeurX })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

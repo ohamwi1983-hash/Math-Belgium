@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceMediane } from "./core/mediane.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -14,7 +13,7 @@ import {
   soumettreReponseQ3,
   soumettreReponseSynthese,
 } from "./moteur/sessionMediane";
-import type { EtatSessionMediane, PhaseMediane, ResultatExerciceMediane } from "./moteur/typesMediane";
+import type { EtatSessionMediane, PhaseMediane } from "./moteur/typesMediane";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMediane } from "./generateurs/mediane";
 import type { VarianteMediane } from "./core/mediane.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -25,8 +24,18 @@ import { EtapeMinMaxModeMediane } from "./components/EtapeMinMaxModeMediane";
 import { EtapePolygoneMediane } from "./components/EtapePolygoneMediane";
 import { EtapeLectureMediane } from "./components/EtapeLectureMediane";
 import { EtapeSyntheseMediane } from "./components/EtapeSyntheseMediane";
-import { ResultatPanelMediane } from "./components/ResultatPanelMediane";
-import { ResumeSessionMediane } from "./components/ResumeSessionMediane";
+import { Katex } from "./components/Katex";
+import {
+  LABEL_X_MAX,
+  LABEL_X_MIN,
+  formatLectureAttendueTexte,
+  formatMedianeAttendueTexte,
+  formatMinMaxModeAttendueTexte,
+  formatPolygoneAttenduTexte,
+  formatQ1AttendueTexte,
+  formatQ3AttendueTexte,
+  formatSyntheseAttendueTexte,
+} from "./ui/formatMediane";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -38,11 +47,6 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionMediane {
   return demarrerSessionMediane(REGLAGES_DEMO, genererExerciceMediane);
-}
-
-interface Bilan {
-  resultat: ResultatExerciceMediane;
-  exercice: ExerciceMediane;
 }
 
 const LIBELLE_PHASE: Record<PhaseMediane, string> = {
@@ -57,24 +61,93 @@ const LIBELLE_PHASE: Record<PhaseMediane, string> = {
   synthese: "Synthèse",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionMediane;
+  revele: boolean;
+}
+
 export function AppMediane() {
   const [etat, setEtat] = useState<EtatSessionMediane>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceMediane, nouvelEtat: EtatSessionMediane) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionMediane) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const dernierResultat = () => nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
+      const revele =
+        etat.phase === "mediane"
+          ? nouvelEtat.medianeRevele
+          : etat.phase === "q1"
+            ? nouvelEtat.q1Revele
+            : etat.phase === "q3"
+              ? nouvelEtat.q3Revele
+              : etat.phase === "polygone"
+                ? nouvelEtat.polygoneRevele
+                : etat.phase === "lectureMediane"
+                  ? nouvelEtat.lectureMedianeRevele
+                  : etat.phase === "lectureQ1"
+                    ? nouvelEtat.lectureQ1Revele
+                    : etat.phase === "lectureQ3"
+                      ? nouvelEtat.lectureQ3Revele
+                      : etat.phase === "minMaxMode"
+                        ? dernierResultat().minMaxModeRevele
+                        : dernierResultat().syntheseRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionMediane(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteMediane)));
   }
+
+  const reponseAttendue =
+    phase === "mediane" && exercice.variante === "discrete" ? (
+      <>Réponse attendue : {formatMedianeAttendueTexte(exercice)}</>
+    ) : phase === "q1" && exercice.variante === "discrete" ? (
+      <>Q1 attendu : {formatQ1AttendueTexte(exercice)}</>
+    ) : phase === "q3" && exercice.variante === "discrete" ? (
+      <>Q3 attendu : {formatQ3AttendueTexte(exercice)}</>
+    ) : phase === "minMaxMode" && exercice.variante === "discrete" ? (
+      <>Min/max/mode(s) attendus : {formatMinMaxModeAttendueTexte(exercice)}</>
+    ) : phase === "polygone" && exercice.variante === "classes" ? (
+      <>Polygone attendu : {formatPolygoneAttenduTexte(exercice)}</>
+    ) : phase === "lectureQ1" && exercice.variante === "classes" ? (
+      <>Q1 attendu (lecture) : {formatLectureAttendueTexte(exercice, "q1")}</>
+    ) : phase === "lectureMediane" && exercice.variante === "classes" ? (
+      <>Médiane attendue (lecture) : {formatLectureAttendueTexte(exercice, "mediane")}</>
+    ) : phase === "lectureQ3" && exercice.variante === "classes" ? (
+      <>Q3 attendu (lecture) : {formatLectureAttendueTexte(exercice, "q3")}</>
+    ) : exercice.variante === "classes" ? (
+      <>
+        Synthèse attendue : <Katex expression={LABEL_X_MIN} /> = {exercice.xMin}, <Katex expression={LABEL_X_MAX} /> = {exercice.xMax},{" "}
+        {formatSyntheseAttendueTexte(exercice)}
+      </>
+    ) : null;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -86,72 +159,67 @@ export function AppMediane() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelMediane
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionMediane resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "mediane" && exercice.variante === "discrete" ? (
+          {phase === "mediane" && exercice.variante === "discrete" ? (
             <EtapeMedianeDiscrete
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideMediane}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseMediane(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseMediane(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "q1" && exercice.variante === "discrete" ? (
+          ) : phase === "q1" && exercice.variante === "discrete" ? (
             <EtapeQ1Mediane
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideQ1}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseQ1(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseQ1(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "q3" && exercice.variante === "discrete" ? (
+          ) : phase === "q3" && exercice.variante === "discrete" ? (
             <EtapeQ3Mediane
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideQ3}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseQ3(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseQ3(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "minMaxMode" && exercice.variante === "discrete" ? (
+          ) : phase === "minMaxMode" && exercice.variante === "discrete" ? (
             <EtapeMinMaxModeMediane
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideMinMaxMode}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseMinMaxMode(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseMinMaxMode(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "polygone" && exercice.variante === "classes" ? (
+          ) : phase === "polygone" && exercice.variante === "classes" ? (
             <EtapePolygoneMediane
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAidePolygone}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(points) => setEtat(soumettreReponsePolygone(etat, points))}
+              onValider={(points) => terminerEtape(soumettreReponsePolygone(etat, points))}
+              validation={validation}
             />
           ) : /* Les 3 branches ci-dessous rendent le MÊME type de composant (`EtapeLectureMediane`) à
           la même position de l'arbre React — sans `key` distincte, React réutiliserait l'instance
@@ -159,7 +227,7 @@ export function AppMediane() {
           position de la barre, zoom du graphe) d'un quartile au suivant. `key={parametre}` force un
           remontage complet à chaque transition (`promptgen33ajustements.md`, point 2 — même
           principe déjà établi par `EtapeTestSommetOrthogonalite`, keyée par sommet A/B/C). */
-          etat.phase === "lectureMediane" && exercice.variante === "classes" ? (
+          phase === "lectureMediane" && exercice.variante === "classes" ? (
             <EtapeLectureMediane
               key="mediane"
               exercice={exercice}
@@ -168,9 +236,10 @@ export function AppMediane() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideLectureMediane}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseLectureMediane(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseLectureMediane(etat, texte))}
+              validation={validation}
             />
-          ) : etat.phase === "lectureQ1" && exercice.variante === "classes" ? (
+          ) : phase === "lectureQ1" && exercice.variante === "classes" ? (
             <EtapeLectureMediane
               key="q1"
               exercice={exercice}
@@ -179,9 +248,10 @@ export function AppMediane() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideLectureQ1}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseLectureQ1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseLectureQ1(etat, texte))}
+              validation={validation}
             />
-          ) : etat.phase === "lectureQ3" && exercice.variante === "classes" ? (
+          ) : phase === "lectureQ3" && exercice.variante === "classes" ? (
             <EtapeLectureMediane
               key="q3"
               exercice={exercice}
@@ -190,19 +260,19 @@ export function AppMediane() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideLectureQ3}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseLectureQ3(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseLectureQ3(etat, texte))}
+              validation={validation}
             />
-          ) : etat.phase === "synthese" && exercice.variante === "classes" ? (
+          ) : phase === "synthese" && exercice.variante === "classes" ? (
             <EtapeSyntheseMediane
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSynthese}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseSynthese(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseSynthese(etat, reponse))}
+              validation={validation}
             />
           ) : null}{" "}
         </div>

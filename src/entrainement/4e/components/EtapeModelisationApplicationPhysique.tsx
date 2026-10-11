@@ -3,12 +3,18 @@ import type { ExerciceApplicationPhysique, VarianteApplicationPhysique } from ".
 import { formatEnonceApplicationPhysique, segmentsConsigneConfiguration } from "../ui/formatApplicationPhysique";
 import { RenduFragments } from "./RenduFragments";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
   tentativesUtilisees: number;
   tentativesMax: number;
   onChoisir: (choix: VarianteApplicationPhysique) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const OPTIONS: { valeur: VarianteApplicationPhysique; libelle: string }[] = [
@@ -19,7 +25,7 @@ const OPTIONS: { valeur: VarianteApplicationPhysique; libelle: string }[] = [
 /** Première étape, toujours la même : contexte narratif + schéma, affichés ici et persistants sur
  * les 3 écrans suivants (jamais d'écran "énoncé" séparé sans question, même leçon déjà établie
  * ailleurs dans le projet — voir CLAUDE.md). */
-export function EtapeModelisationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, onChoisir }: Props) {
+export function EtapeModelisationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
   const [choix, setChoix] = useState<VarianteApplicationPhysique | null>(null);
   const erronee = tentativesUtilisees > 0;
 
@@ -43,14 +49,19 @@ export function EtapeModelisationApplicationPhysique({ exercice, tentativesUtili
           </button>
         ))}
       </div>
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onChoisir(choix)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -44,7 +44,7 @@ import {
   soumettreReponseTroisMethodes,
   soumettreReponseU64,
 } from "./moteur5e/sessionSuiteClassique";
-import type { EtatSessionSuiteClassique, PhaseSuiteClassique, ResultatExerciceSuiteClassique } from "./moteur5e/typesSuiteClassique";
+import type { EtatSessionSuiteClassique, PhaseSuiteClassique } from "./moteur5e/typesSuiteClassique";
 import {
   diagnostiquerAiresB,
   diagnostiquerAiresZigzag,
@@ -75,8 +75,8 @@ import { EtapeListeChampsClassique } from "./components5e/EtapeListeChampsClassi
 import { EtapeQCMClassique } from "./components5e/EtapeQCMClassique";
 import { EtapeSuitesFinalesCombinees } from "./components5e/EtapeSuitesFinalesCombinees";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelSuiteClassique } from "./components5e/ResultatPanelSuiteClassique";
-import { ResumeSessionSuiteClassique } from "./components5e/ResumeSessionSuiteClassique";
+import { formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, texteReponseAttendueQCM } from "./ui5e/formatSuiteClassique";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -142,9 +142,47 @@ function nouvelleSession(): EtatSessionSuiteClassique {
   return demarrerSessionSuiteClassique(REGLAGES_DEMO, genererExerciceSuiteClassique);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceSuiteClassique;
-  aideParPhase: Partial<Record<PhaseSuiteClassique, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteClassique;
+  revele: boolean;
+}
+
+function reponseAttenduePourPhase(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique) {
+  if (phase === "suitesFinalesCombinees" && exercice.scenario === "suitesCombinees") {
+    const { arithmetique, geometrique } = formatTermesSuitesFinalesLatex(exercice);
+    return (
+      <>
+        <div className="equation-box-termes">
+          <em>Arithmétique :</em>
+          {arithmetique.map((t, i) => (
+            <Katex key={`a${i}`} expression={t} />
+          ))}
+        </div>
+        <div className="equation-box-termes">
+          <em>Géométrique :</em>
+          {geometrique.map((t, i) => (
+            <Katex key={`g${i}`} expression={t} />
+          ))}
+        </div>
+      </>
+    );
+  }
+  const termes = formatTermesReponseAttendueLatex(exercice, phase);
+  if (termes !== null) {
+    return (
+      <span className="equation-box-termes">
+        {termes.map((t, i) => (
+          <Katex key={i} expression={t} />
+        ))}
+      </span>
+    );
+  }
+  const labelQCM = texteReponseAttendueQCM(exercice, phase);
+  return labelQCM === null ? null : (
+    <span>
+      <Katex expression={labelQCM} />
+    </span>
+  );
 }
 
 function soumettreChampSimple(etat: EtatSessionSuiteClassique, texte: string): EtatSessionSuiteClassique {
@@ -281,29 +319,42 @@ function diagnostiquerListe(exercice: ExerciceSuiteClassique, phase: PhaseSuiteC
 
 export function App5gen17() {
   const [etat, setEtat] = useState<EtatSessionSuiteClassique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseSuiteClassique, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionSuiteClassique) {
-    // `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesSuiteClassique.ts`.
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionSuiteClassique(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioSuiteClassique)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePourPhase(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -311,17 +362,10 @@ export function App5gen17() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes classiques sur les suites</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_SCENARIOS}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionSuiteClassique(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioSuiteClassique)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleClassique
                   key={cleEcran}
@@ -334,6 +378,7 @@ export function App5gen17() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreChampSimple(etat, texte))}
                   diagnostiquer={(texte) => diagnostiquerChampSimple(exercice, phase, texte)}
+                  validation={validation}
                 />
               )}
               {PHASES_CALCULATRICE_CHAMP_SIMPLE.has(phase) && <CalculatriceScientifique />}
@@ -351,6 +396,7 @@ export function App5gen17() {
                   onValider={(textes) => terminerEtape(soumettreListe(etat, textes))}
                   diagnostiquer={(textes) => diagnostiquerListe(exercice, phase, textes)}
                   diagnostiquerChamp={(index, texte) => diagnostiquerChampListe(texte, index, exercice, phase)}
+                  validation={validation}
                 />
               )}
               {PHASES_CALCULATRICE_LISTE.has(phase) && <CalculatriceScientifique />}
@@ -366,6 +412,7 @@ export function App5gen17() {
                   niveauAideMax={niveauAideMaxSuiteClassique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(choixId) => terminerEtape(soumettreQCM(etat, choixId))}
+                  validation={validation}
                 />
               )}
 
@@ -381,21 +428,10 @@ export function App5gen17() {
                   onValider={(reponse) => terminerEtape(soumettreReponseSuitesFinalesCombinees(etat, reponse))}
                   diagnostiquer={(reponse) => diagnostiquerSuitesFinalesCombinees(reponse, exercice)}
                   diagnostiquerChamp={(groupe, index, texte) => diagnostiquerChampSuitesFinalesCombinees(groupe, index, texte, exercice)}
+                  validation={validation}
                 />
               )}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelSuiteClassique
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionSuiteClassique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

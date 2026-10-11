@@ -21,15 +21,14 @@ import {
   soumettreReponseFConclure,
   soumettreReponseFSimplifier,
 } from "./moteur6e/sessionInequationsLogarithmiques";
-import type { EtatSessionInequationLogarithmique, PhaseInequationLogarithmique, ResultatExerciceInequationLogarithmique } from "./moteur6e/typesInequationsLogarithmiques";
+import type { EtatSessionInequationLogarithmique } from "./moteur6e/typesInequationsLogarithmiques";
 import { EtapeChampSimpleIneqLog } from "./components6e/EtapeChampSimpleIneqLog";
 import { EtapeChoixDeuxIneqLog } from "./components6e/EtapeChoixDeuxIneqLog";
 import { EtapeDeuxCasIneqLog } from "./components6e/EtapeDeuxCasIneqLog";
 import { EtapeIntervalleIneqLog } from "./components6e/EtapeIntervalleIneqLog";
-import { ResultatPanelInequationLogarithmique } from "./components6e/ResultatPanelInequationLogarithmique";
-import { ResumeSessionInequationLogarithmique } from "./components6e/ResumeSessionInequationLogarithmique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1, aideNiveau2, consigneEcran, etatActuel, formatEnonceLatex } from "./ui6e/formatInequationsLogarithmiques";
+import { Katex } from "./components/Katex";
+import { aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, etatActuel, formatEnonceLatex } from "./ui6e/formatInequationsLogarithmiques";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -37,40 +36,39 @@ function nouvelleSession(): EtatSessionInequationLogarithmique {
   return demarrerSessionInequationLogarithmique(REGLAGES_DEMO, genererExerciceInequationLogarithmique);
 }
 
-type AideParPhase = Partial<Record<PhaseInequationLogarithmique, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceInequationLogarithmique;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionInequationLogarithmique;
+  revele: boolean;
 }
-
 
 export function App6gen15() {
   const [etat, setEtat] = useState<EtatSessionInequationLogarithmique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionInequationLogarithmique) {
-    // `niveauAide` capturé AVANT la transition de phase suivante (qui le remet à zéro) — voir
-    // CLAUDE.md, pattern `terminerEtape`/`aideParPhase`. `revele` lu sur `nouvelEtat.derniereRevelee`
-    // (jamais `etat.etapeCourante.revelee`, qui reste TOUJOURS `false` à cet instant).
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionInequationLogarithmique(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const enonceLatex = formatEnonceLatex(exercice);
@@ -83,6 +81,16 @@ export function App6gen15() {
   const etatAct = etatActuel(phase, exercice);
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
+  const contenuRecap = contenuRecapPhase(exercice, phase);
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: contenuRecap.latex !== null ? <Katex expression={contenuRecap.latex} /> : contenuRecap.texte,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -91,9 +99,7 @@ export function App6gen15() {
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <>
-            {phase === "aCE" && (
+        {phase === "aCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
                 consigneEcran={consigne}
@@ -107,6 +113,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseACE(etat, reponse))}
+                validation={validation}
               />
             )}
             {phase === "aResoudre" && (
@@ -123,6 +130,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseAResoudre(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -140,6 +148,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseBCE(etat, reponse))}
+                validation={validation}
               />
             )}
             {phase === "bResoudre" && (
@@ -156,6 +165,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseBResoudre(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -173,6 +183,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseCCE(etat, reponse))}
+                validation={validation}
               />
             )}
             {phase === "cCombiner" && (
@@ -190,6 +201,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(texte) => terminerEtape(soumettreReponseCCombiner(etat, texte))}
+                validation={validation}
               />
             )}
             {phase === "cComparer" && (
@@ -206,6 +218,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseCComparer(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -223,6 +236,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseDCE(etat, reponse))}
+                validation={validation}
               />
             )}
             {phase === "dReecrire" && (
@@ -240,6 +254,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(texte) => terminerEtape(soumettreReponseDReecrire(etat, texte))}
+                validation={validation}
               />
             )}
             {phase === "dResoudreY" && (
@@ -256,6 +271,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseDResoudreY(etat, reponse))}
+                validation={validation}
               />
             )}
             {phase === "dConvertirX" && (
@@ -272,6 +288,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseDConvertirX(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -290,6 +307,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(id) => terminerEtape(soumettreReponseEReconnaitre(etat, id === "vide"))}
+                validation={validation}
               />
             )}
 
@@ -307,6 +325,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseFCE(etat, reponse))}
+                validation={validation}
               />
             )}
             {phase === "fSimplifier" && (
@@ -324,6 +343,7 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(texte) => terminerEtape(soumettreReponseFSimplifier(etat, texte))}
+                validation={validation}
               />
             )}
             {phase === "fConclure" && (
@@ -340,14 +360,9 @@ export function App6gen15() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseFConclure(etat, reponse))}
+                validation={validation}
               />
             )}
-          </>
-        )}
-        {dernierBilan && (
-          <ResultatPanelInequationLogarithmique resultat={dernierBilan.resultat} aideParPhase={dernierBilan.aideParPhase} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />
-        )}
-        {etat.terminee && !dernierBilan && <ResumeSessionInequationLogarithmique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

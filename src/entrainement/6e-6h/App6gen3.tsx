@@ -12,24 +12,19 @@ import {
   soumettreReponseEquation,
   soumettreReponseSolutions,
 } from "./moteur6e/sessionEquationsCyclometriques";
-import type {
-  AideInfoEcran,
-  EtatSessionEquationsCyclometriques,
-  PhaseEquationsCyclometriques,
-  ResultatExerciceEquationsCyclometriques,
-} from "./moteur6e/typesEquationsCyclometriques";
+import type { EtatSessionEquationsCyclometriques } from "./moteur6e/typesEquationsCyclometriques";
 import type { EtatActuelLigne } from "./components6e/EtapeChampEquationCyclo";
 import { EtapeAccepterRejeterEquationsCyclometriques } from "./components6e/EtapeAccepterRejeterEquationsCyclometriques";
 import { EtapeCEEquationsCyclometriques } from "./components6e/EtapeCEEquationsCyclometriques";
 import { EtapeChampEquationCyclo } from "./components6e/EtapeChampEquationCyclo";
 import { EtapeConditionEquationsCyclometriques } from "./components6e/EtapeConditionEquationsCyclometriques";
 import { EtapeListeSolutionsCyclo } from "./components6e/EtapeListeSolutionsCyclo";
-import { ResultatPanelEquationsCyclometriques } from "./components6e/ResultatPanelEquationsCyclometriques";
-import { ResumeSessionEquationsCyclometriques } from "./components6e/ResumeSessionEquationsCyclometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { Katex } from "./components/Katex";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import {
   MAX_DEN,
+  formatCandidatLatex,
   formatEquationNonCycloLatex,
   formatEquationOriginaleLatex,
   texteAideEquationNiveau1,
@@ -72,40 +67,56 @@ function etatActuelAvantSolutions(exercice: EtatSessionEquationsCyclometriques["
   return lignes;
 }
 
-type AideParPhase = Partial<Record<PhaseEquationsCyclometriques, AideInfoEcran>>;
+function ListeSolutions({ solutions }: { solutions: number[] }) {
+  if (solutions.length === 0) return <>Aucune solution</>;
+  return (
+    <>
+      {solutions.map((s, i) => (
+        <span key={i}>
+          {i > 0 && ", "}
+          <Katex expression={formatCandidatLatex(s)} />
+        </span>
+      ))}
+    </>
+  );
+}
 
-interface Bilan {
-  resultat: ResultatExerciceEquationsCyclometriques;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEquationsCyclometriques;
+  revele: boolean;
 }
 
 export function App6gen3() {
   const [etat, setEtat] = useState<EtatSessionEquationsCyclometriques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   /** `nouvelEtat.derniereCloture` porte l'aide/révélation de l'écran qui vient PRÉCISÉMENT de se
    * fermer, capturée côté moteur (jamais reconstruite depuis un `etat` React déjà obsolète — voir
    * `typesEquationsCyclometriques.ts`). */
   function terminerEtape(nouvelEtat: EtatSessionEquationsCyclometriques) {
-    const cloture = nouvelEtat.derniereCloture;
-    const miseAJour = cloture ? { ...aideParPhase, [cloture.phase]: cloture.info } : aideParPhase;
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereCloture!.info.revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionEquationsCyclometriques(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteDev)));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
 
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
@@ -122,6 +133,32 @@ export function App6gen3() {
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
 
+  const reponseAttenduePhase = () => {
+    switch (etat.phase) {
+      case "ce":
+        return <Katex expression={formatEnsembleReelLatex(exercice.ce, MAX_DEN)} />;
+      case "condition":
+        return exercice.variante === "arcfonctionsDifferentes" ? (
+          <Katex expression={formatEnsembleReelLatex(exercice.conditionParasite, MAX_DEN)} />
+        ) : null;
+      case "equation":
+        return <Katex expression={formatEquationNonCycloLatex(exercice)} />;
+      case "solutions":
+        return <ListeSolutions solutions={exercice.candidats.map((c) => c.x)} />;
+      case "acceptRejet":
+        return <ListeSolutions solutions={exercice.candidats.filter((c) => c.accepteAttendu).map((c) => c.x)} />;
+    }
+  };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -131,97 +168,87 @@ export function App6gen3() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {etat.phase === "ce" && (
-                <EtapeCEEquationsCyclometriques
-                  key={etat.phase}
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse))}
-                />
-              )}
-
-              {etat.phase === "condition" && exercice.variante === "arcfonctionsDifferentes" && (
-                <EtapeConditionEquationsCyclometriques
-                  key={etat.phase}
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseCondition(etat, reponse))}
-                />
-              )}
-
-              {etat.phase === "equation" && (
-                <EtapeChampEquationCyclo
-                  key={etat.phase}
-                  consigneEcran="Écris l'équation obtenue après avoir éliminé toutes les arcfonctions."
-                  equationLatex={formatEquationOriginaleLatex(exercice)}
-                  etatActuel={etatActuelAvantEquation(exercice)}
-                  aideNiveau1={{ texte: texteAideEquationNiveau1(exercice), latex: null }}
-                  aideNiveau2={texteAideEquationNiveau2(exercice)}
-                  placeholder="ex : 2x-1=1/2"
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseEquation(etat, texte))}
-                />
-              )}
-
-              {etat.phase === "solutions" && (
-                <EtapeListeSolutionsCyclo
-                  key={etat.phase}
-                  consigneEcran="Cette équation a-t-elle des solutions ? Si oui, liste-les TOUTES (sans encore tenir compte de la CE)."
-                  equationLatex={formatEquationOriginaleLatex(exercice)}
-                  etatActuel={etatActuelAvantSolutions(exercice)}
-                  aideNiveau1={{ texte: texteAideSolutionsNiveau1(exercice), latex: null }}
-                  aideNiveau2={texteAideSolutionsNiveau2(exercice)}
-                  placeholder="ex : 2, -2..."
-                  labelAjout="+ Ajouter une solution"
-                  labelAucune="Pas de solution"
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes))}
-                />
-              )}
-
-              {etat.phase === "acceptRejet" && (
-                <EtapeAccepterRejeterEquationsCyclometriques
-                  key={etat.phase}
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(decisions) => terminerEtape(soumettreReponseAcceptRejet(etat, decisions))}
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelEquationsCyclometriques
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {etat.phase === "ce" && (
+            <EtapeCEEquationsCyclometriques
+              key={etat.phase}
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse))}
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionEquationsCyclometriques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+
+          {etat.phase === "condition" && exercice.variante === "arcfonctionsDifferentes" && (
+            <EtapeConditionEquationsCyclometriques
+              key={etat.phase}
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCondition(etat, reponse))}
+              validation={validation}
+            />
+          )}
+
+          {etat.phase === "equation" && (
+            <EtapeChampEquationCyclo
+              key={etat.phase}
+              consigneEcran="Écris l'équation obtenue après avoir éliminé toutes les arcfonctions."
+              equationLatex={formatEquationOriginaleLatex(exercice)}
+              etatActuel={etatActuelAvantEquation(exercice)}
+              aideNiveau1={{ texte: texteAideEquationNiveau1(exercice), latex: null }}
+              aideNiveau2={texteAideEquationNiveau2(exercice)}
+              placeholder="ex : 2x-1=1/2"
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseEquation(etat, texte))}
+              validation={validation}
+            />
+          )}
+
+          {etat.phase === "solutions" && (
+            <EtapeListeSolutionsCyclo
+              key={etat.phase}
+              consigneEcran="Cette équation a-t-elle des solutions ? Si oui, liste-les TOUTES (sans encore tenir compte de la CE)."
+              equationLatex={formatEquationOriginaleLatex(exercice)}
+              etatActuel={etatActuelAvantSolutions(exercice)}
+              aideNiveau1={{ texte: texteAideSolutionsNiveau1(exercice), latex: null }}
+              aideNiveau2={texteAideSolutionsNiveau2(exercice)}
+              placeholder="ex : 2, -2..."
+              labelAjout="+ Ajouter une solution"
+              labelAucune="Pas de solution"
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes))}
+              validation={validation}
+            />
+          )}
+
+          {etat.phase === "acceptRejet" && (
+            <EtapeAccepterRejeterEquationsCyclometriques
+              key={etat.phase}
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(decisions) => terminerEtape(soumettreReponseAcceptRejet(etat, decisions))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

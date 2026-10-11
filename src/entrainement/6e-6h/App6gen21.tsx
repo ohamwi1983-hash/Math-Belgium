@@ -22,9 +22,8 @@ import { EtapeCroissanceStandardLog } from "./components6e/EtapeCroissanceStanda
 import { EtapeDomaineEtudeFonctionLog } from "./components6e/EtapeDomaineEtudeFonctionLog";
 import { EtapeLimitesMultiLog } from "./components6e/EtapeLimitesMultiLog";
 import { EtapeSelectionGraphiqueEtudeFonctionLog } from "./components6e/EtapeSelectionGraphiqueEtudeFonctionLog";
-import { ResultatPanelEtudeFonctionLogarithme } from "./components6e/ResultatPanelEtudeFonctionLogarithme";
-import { ResumeSessionEtudeFonctionLogarithme } from "./components6e/ResumeSessionEtudeFonctionLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { Katex } from "./components/Katex";
 import {
   aideAsymptotesNiveau1,
   aideAsymptotesNiveau2,
@@ -44,6 +43,7 @@ import {
   consigneCroissance,
   consigneDomaine,
   consigneLimites,
+  contenuRecapPhase,
   directionLabelsAsymptotes,
   directionLabelsLimites,
   etatActuel,
@@ -66,23 +66,46 @@ function forcerPresenceAsymptotes(famille: "A" | "B" | "C" | "D"): boolean[] {
   return [false, false];
 }
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEtudeFonctionLogarithme;
+  revele: boolean;
+}
+
 export function App6gen21() {
   const [etat, setEtat] = useState<EtatSessionEtudeFonctionLogarithme>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<EtatSessionEtudeFonctionLogarithme["resultats"][number] | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionEtudeFonctionLogarithme) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
+      // détail vit soit dans `detailsPartiels` (écran intermédiaire), soit dans le `resultats` qui
+      // vient d'être poussé (dernier écran de l'exercice), même principe que `App6gen16.tsx`.
+      const exerciceVientDeFinir = nouvelEtat.resultats.length > etat.resultats.length;
+      const detail = exerciceVientDeFinir
+        ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
+        : nouvelEtat.detailsPartiels[etat.phase];
+      setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -100,6 +123,16 @@ export function App6gen21() {
     (window as unknown as { __debug6gen21?: unknown }).__debug6gen21 = { exercice, phase: etat.phase };
   }, [exercice, etat.phase]);
 
+  const contenuRecap = contenuRecapPhase(exercice, etat.phase);
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: contenuRecap.latex !== null ? <Katex expression={contenuRecap.latex} /> : contenuRecap.texte,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -108,9 +141,7 @@ export function App6gen21() {
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <>
-            {etat.phase === "domaine" && (
+        {etat.phase === "domaine" && (
               <EtapeDomaineEtudeFonctionLog
                 key={cle}
                 enonceLatex={enonceLatex}
@@ -123,6 +154,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -141,6 +173,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseLimites(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -160,6 +193,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseAsymptotes(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -178,6 +212,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseCroissance(etat, { type: "grilleC", reponse }))}
+                validation={validation}
               />
             )}
             {etat.phase === "croissance" && (exercice.famille === "A" || exercice.famille === "B" || exercice.famille === "D") && (
@@ -194,6 +229,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseCroissance(etat, { type: "standard", reponse }))}
+                validation={validation}
               />
             )}
 
@@ -210,6 +246,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseConcavite(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -225,6 +262,7 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index))}
+                validation={validation}
               />
             )}
 
@@ -241,12 +279,9 @@ export function App6gen21() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
                 onValider={(reponse) => terminerEtape(soumettreReponseComportementInfini(etat, reponse))}
+                validation={validation}
               />
             )}
-          </>
-        )}
-        {dernierBilan && <ResultatPanelEtudeFonctionLogarithme resultat={dernierBilan} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionEtudeFonctionLogarithme resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

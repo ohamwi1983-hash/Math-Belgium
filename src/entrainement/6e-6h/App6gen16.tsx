@@ -19,7 +19,7 @@ import {
   soumettreReponseGIdentifier,
   soumettreReponseGIsoler,
 } from "./moteur6e/sessionDomaineDeriveeLogarithme";
-import type { EtatSessionDomaineDeriveeLogarithme, PhaseDomaineDeriveeLogarithme, ResultatExerciceDomaineDeriveeLogarithme } from "./moteur6e/typesDomaineDeriveeLogarithme";
+import type { EtatSessionDomaineDeriveeLogarithme, PhaseDomaineDeriveeLogarithme } from "./moteur6e/typesDomaineDeriveeLogarithme";
 import type { ReponseDeuxChamps } from "./moteur6e/verificationDomaineDeriveeLogarithme";
 import {
   diagnostiquerADerivee,
@@ -38,9 +38,9 @@ import {
 import { EtapeChampDomaineDeriveeLog } from "./components6e/EtapeChampDomaineDeriveeLog";
 import { EtapeDeuxChampsDomaineDeriveeLog } from "./components6e/EtapeDeuxChampsDomaineDeriveeLog";
 import { EtapeDomaineDomaineDeriveeLog } from "./components6e/EtapeDomaineDomaineDeriveeLog";
-import { ResultatPanelDomaineDeriveeLogarithme } from "./components6e/ResultatPanelDomaineDeriveeLogarithme";
-import { ResumeSessionDomaineDeriveeLogarithme } from "./components6e/ResumeSessionDomaineDeriveeLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { Katex } from "./components/Katex";
+import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, labelsDeuxChamps } from "./ui6e/formatDomaineDeriveeLogarithme";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -48,11 +48,6 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3,
 function nouvelleSession(): EtatSessionDomaineDeriveeLogarithme {
   return demarrerSessionDomaineDeriveeLogarithme(REGLAGES_DEMO, genererExerciceDomaineDeriveeLogarithme);
 }
-
-interface Bilan {
-  resultat: ResultatExerciceDomaineDeriveeLogarithme;
-}
-
 
 const PHASES_DOMAINE = new Set<PhaseDomaineDeriveeLogarithme>(["aDomaine", "bDomaine", "cDomaine", "dDomaine", "eDomaine", "fDomaine"]);
 const PHASES_DEUX_CHAMPS = new Set<PhaseDomaineDeriveeLogarithme>(["cFacteurs", "dND"]);
@@ -70,23 +65,46 @@ const PLACEHOLDERS: Partial<Record<PhaseDomaineDeriveeLogarithme, string>> = {
   gIsoler: "ex : x^x*(ln(x)+1)",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDomaineDeriveeLogarithme;
+  revele: boolean;
+}
+
 export function App6gen16() {
   const [etat, setEtat] = useState<EtatSessionDomaineDeriveeLogarithme>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionDomaineDeriveeLogarithme) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1] });
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
+      // détail vit soit dans `detailsPartiels` (écran intermédiaire), soit dans le `resultats` qui
+      // vient d'être poussé (dernier écran de l'exercice), même principe que `App6gen7.tsx`.
+      const exerciceVientDeFinir = nouvelEtat.resultats.length > etat.resultats.length;
+      const detail = exerciceVientDeFinir
+        ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
+        : nouvelEtat.detailsPartiels[etat.phase];
+      setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionDomaineDeriveeLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const consigneG = consigneGenerale(exercice);
@@ -146,6 +164,34 @@ export function App6gen16() {
     return terminerEtape(soumettreReponseGIsoler(etat, texte));
   }
 
+  // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
+  // `ResultatPanelDomaineDeriveeLogarithme.tsx` — jamais une cible recalculée séparément.
+  const reponseAttenduePhase = () => {
+    if (PHASES_DOMAINE.has(phase) && exercice.famille !== "G") return <Katex expression={formatEnsembleReelLatex(exercice.domaine)} />;
+    if (phase === "aDerivee" || phase === "bDerivee" || phase === "fDerivee") {
+      return "Dérivée calculée directement, vérifiée par équivalence numérique avec f'(x).";
+    }
+    if (phase === "cFacteurs") return "u'(x) et v'(x), vérifiées séparément par équivalence numérique.";
+    if (phase === "cAssemblage") return "f'(x) assemblée, vérifiée par équivalence numérique.";
+    if (phase === "dND") return "N'(x) et D'(x), vérifiées séparément par équivalence numérique.";
+    if (phase === "dAssemblage") return "f'(x) assemblée via (N'D−ND')/D², vérifiée par équivalence numérique.";
+    if (phase === "eSimplifier") return "Forme simplifiée via les propriétés du log, jamais une recopie brute de l'énoncé.";
+    if (phase === "eDerivee") return "Dérivée de la forme simplifiée, vérifiée par équivalence numérique avec f'(x).";
+    if (phase === "gIdentifier") return "u(x) et v(x) identifiés (simplification préalable si nécessaire).";
+    if (phase === "gFPrimeSurF") return "f'/f = v'·ln(u) + v·u'/u, par dérivation logarithmique implicite.";
+    if (phase === "gIsoler") return "f' isolée en multipliant par f=u^v.";
+    return null;
+  };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -154,69 +200,66 @@ export function App6gen16() {
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <>
-            {PHASES_DOMAINE.has(phase) && (
-              <EtapeDomaineDomaineDeriveeLog
-                key={phase}
-                consigneGenerale={consigneG}
-                blocDonnees={donnees}
-                consigneEcran={consigne}
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
-              />
-            )}
-
-            {PHASES_DEUX_CHAMPS.has(phase) && (
-              <EtapeDeuxChampsDomaineDeriveeLog
-                key={phase}
-                consigneGenerale={consigneG}
-                blocDonnees={donnees}
-                etatActuel={etatAct}
-                consigneEcran={consigne}
-                labelA={labels.a}
-                labelB={labels.b}
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(reponse) => terminerEtape(phase === "cFacteurs" ? soumettreReponseCFacteurs(etat, reponse) : soumettreReponseDND(etat, reponse))}
-                diagnostiquer={diagnostiquerDeuxChamps}
-              />
-            )}
-
-            {!PHASES_DOMAINE.has(phase) && !PHASES_DEUX_CHAMPS.has(phase) && (
-              <EtapeChampDomaineDeriveeLog
-                key={phase}
-                consigneGenerale={consigneG}
-                blocDonnees={donnees}
-                etatActuel={etatAct}
-                consigneEcran={consigne}
-                placeholder={PLACEHOLDERS[phase] ?? "ex : ln(x)+1"}
-                aideNiveau1={aide1}
-                aideNiveau2={aide2}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={onValiderChampUnique}
-                diagnostiquer={diagnostiquerChampUnique}
-              />
-            )}
-          </>
+        {PHASES_DOMAINE.has(phase) && (
+          <EtapeDomaineDomaineDeriveeLog
+            key={phase}
+            consigneGenerale={consigneG}
+            blocDonnees={donnees}
+            consigneEcran={consigne}
+            aideNiveau1={aide1}
+            aideNiveau2={aide2}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+            validation={validation}
+          />
         )}
-        {dernierBilan && <ResultatPanelDomaineDeriveeLogarithme resultat={dernierBilan.resultat} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionDomaineDeriveeLogarithme resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
+
+        {PHASES_DEUX_CHAMPS.has(phase) && (
+          <EtapeDeuxChampsDomaineDeriveeLog
+            key={phase}
+            consigneGenerale={consigneG}
+            blocDonnees={donnees}
+            etatActuel={etatAct}
+            consigneEcran={consigne}
+            labelA={labels.a}
+            labelB={labels.b}
+            aideNiveau1={aide1}
+            aideNiveau2={aide2}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(reponse) => terminerEtape(phase === "cFacteurs" ? soumettreReponseCFacteurs(etat, reponse) : soumettreReponseDND(etat, reponse))}
+            diagnostiquer={diagnostiquerDeuxChamps}
+            validation={validation}
+          />
+        )}
+
+        {!PHASES_DOMAINE.has(phase) && !PHASES_DEUX_CHAMPS.has(phase) && (
+          <EtapeChampDomaineDeriveeLog
+            key={phase}
+            consigneGenerale={consigneG}
+            blocDonnees={donnees}
+            etatActuel={etatAct}
+            consigneEcran={consigne}
+            placeholder={PLACEHOLDERS[phase] ?? "ex : ln(x)+1"}
+            aideNiveau1={aide1}
+            aideNiveau2={aide2}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={onValiderChampUnique}
+            diagnostiquer={diagnostiquerChampUnique}
+            validation={validation}
+          />
+        )}
       </main>
     </div>
   );

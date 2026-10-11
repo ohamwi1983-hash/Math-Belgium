@@ -5,12 +5,18 @@ import { PLACEHOLDER_SOLUTION_X, consigneGlobaleOrthogonalite, formatEnonceLatex
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (valeur: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -27,7 +33,7 @@ interface Props {
  * validée à l'écran précédent) devient conceptuellement le bloc "état actuel", aucun changement
  * structurel de son propre rendu.
  */
-export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const valeur = Number(texte.replace(",", "."));
   const complet = texte.trim() !== "";
@@ -59,14 +65,19 @@ export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtil
         />
       </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

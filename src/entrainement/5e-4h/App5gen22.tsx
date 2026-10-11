@@ -8,17 +8,14 @@ import {
   soumettreReponseNommerAsymptotes,
 } from "./moteur5e/sessionLectureGraphiqueLimites";
 import { listeAsymptotes, listeComportements } from "./moteur5e/typesLectureGraphiqueLimites";
-import type {
-  EtatSessionLectureGraphiqueLimites,
-  PhaseLectureGraphiqueLimites,
-  ResultatExerciceLectureGraphiqueLimites,
-} from "./moteur5e/typesLectureGraphiqueLimites";
+import type { EtatSessionLectureGraphiqueLimites, PhaseLectureGraphiqueLimites } from "./moteur5e/typesLectureGraphiqueLimites";
 import { diagnostiquerCibleAsymptote, diagnostiquerCibleComportement } from "./moteur5e/verificationLectureGraphiqueLimites";
 import type { ExerciceLectureGraphiqueLimites } from "./core5e/lectureGraphiqueLimites.types";
 import { EtapeComportementsLimites } from "./components5e/EtapeComportementsLimites";
 import { EtapeEquationsAsymptotes } from "./components5e/EtapeEquationsAsymptotes";
-import { ResultatPanelLectureGraphiqueLimites } from "./components5e/ResultatPanelLectureGraphiqueLimites";
-import { ResumeSessionLectureGraphiqueLimites } from "./components5e/ResumeSessionLectureGraphiqueLimites";
+import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import { formatReponseAttenduePhaseLatex } from "./ui5e/formatLectureGraphiqueLimites";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -26,33 +23,54 @@ function nouvelleSession(): EtatSessionLectureGraphiqueLimites {
   return demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, genererExerciceLectureGraphiqueLimites);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceLectureGraphiqueLimites;
-  reveleParPhase: Partial<Record<PhaseLectureGraphiqueLimites, boolean>>;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionLectureGraphiqueLimites;
+  revele: boolean;
 }
 
 export function App5gen22() {
   const [etat, setEtat] = useState<EtatSessionLectureGraphiqueLimites>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [reveleParPhase, setReveleParPhase] = useState<Partial<Record<PhaseLectureGraphiqueLimites, boolean>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueLimites) {
-    const miseAJour = { ...reveleParPhase, [etat.phase]: nouvelEtat.derniereEtapeRevelee };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], reveleParPhase: miseAJour });
-      setReveleParPhase({});
-    } else {
-      setReveleParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} block={frag.includes("\\lim_{")} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -63,34 +81,22 @@ export function App5gen22() {
       <SelecteurVarianteDev
         options={CATALOGUE_FAMILLES}
         onGenerer={(id) => {
-          setDernierBilan(null);
+          setEnAttente(null);
           setEtat(demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
         }}
       />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelLectureGraphiqueLimites
-              resultat={dernierBilan.resultat}
-              reveleParPhase={dernierBilan.reveleParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionLectureGraphiqueLimites resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -105,9 +111,10 @@ interface EcranProps {
   tentativesMax: number;
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueLimites) => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, validation }: EcranProps) {
   switch (phase) {
     case "completerLimites": {
       const slots = listeComportements(exercice);
@@ -119,6 +126,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           tentativesMax={tentativesMax}
           onValider={(textes) => terminerEtape(soumettreReponseCompleterLimites(etat, textes))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleComportement(t, slots[i].cible))}
+          validation={validation}
         />
       );
     }
@@ -133,6 +141,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           tentativesMax={tentativesMax}
           onValider={(textes) => terminerEtape(soumettreReponseNommerAsymptotes(etat, textes))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleAsymptote(t, slots[i].cible))}
+          validation={validation}
         />
       );
     }

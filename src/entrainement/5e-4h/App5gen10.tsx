@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type {
   ExerciceEgaliteExpressions,
   ExerciceEquationTrig,
@@ -69,7 +70,6 @@ import {
 import type {
   EtatSessionEquationTrigonometrique,
   PhaseEquationTrigonometrique,
-  ResultatExerciceEquationTrigonometrique,
 } from "./moteur5e/typesEquationTrig";
 import { EtapeArgumentEquationTrig } from "./components5e/EtapeArgumentEquationTrig";
 import { EtapeArgumentProduit } from "./components5e/EtapeArgumentProduit";
@@ -87,8 +87,24 @@ import { EtapeSolutionsEgalite } from "./components5e/EtapeSolutionsEgalite";
 import { EtapeSolutionsEquationTrig } from "./components5e/EtapeSolutionsEquationTrig";
 import { EtapeSolutionsProduit } from "./components5e/EtapeSolutionsProduit";
 import { EtapeSolutionsPythagoricienne } from "./components5e/EtapeSolutionsPythagoricienne";
-import { ResultatPanelEquationTrig } from "./components5e/ResultatPanelEquationTrig";
-import { ResumeSessionEquationTrig } from "./components5e/ResumeSessionEquationTrig";
+import { Katex } from "./components/Katex";
+import {
+  OPTIONS_FAMILLE as OPTIONS_FAMILLE_RECAP,
+  TEXTE_ARGUMENT_AUCUNE_SOLUTION,
+  formatAidePrefacteurNiveau2Latex,
+  formatAideResoudreEgaliteNiveau2Latex,
+  formatAideSepararFacteursNiveau2Latex,
+  formatEquationConvertieEgaliteLatex,
+  formatPolynomeCibleLatex,
+  formatSolutionsTexte,
+  formatTermesArgumentDirecteLatex,
+  formatTermesArgumentProduitLatex,
+  formatTermesRacinesResolutionLatex,
+  formatTermesRacinesTLatex,
+  formatTermesXDirecteLatex,
+  formatTermesXProduitLatex,
+  regimeProduit,
+} from "./ui5e/formatEquationTrigonometrique";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -96,11 +112,13 @@ function nouvelleSession(): EtatSessionEquationTrigonometrique {
   return demarrerSessionEquationTrig(REGLAGES_DEMO, genererExerciceEquationTrigonometrique);
 }
 
-type AideParPhase = Partial<Record<PhaseEquationTrigonometrique, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceEquationTrigonometrique;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEquationTrigonometrique;
+  revele: boolean;
 }
 
 function commeDirecte(exercice: ExerciceEquationTrigonometrique): ExerciceEquationTrig {
@@ -120,30 +138,95 @@ function commeEgalite(exercice: ExerciceEquationTrigonometrique): ExerciceEgalit
   return exercice;
 }
 
+/** Repris tel quel de l'ancien `ResultatPanelEquationTrig.tsx` (`TermesInline`, non exporté) —
+ * plusieurs fragments LaTeX rendus INLINE séparés par une simple virgule, jamais un unique
+ * `\quad`-joined (débordement mobile, convention transversale du projet). */
+function TermesInline({ termes }: { termes: string[] }) {
+  if (termes.length === 0) return null;
+  return (
+    <>
+      {termes.map((t, i) => (
+        <span key={i}>
+          {i > 0 && ", "}
+          <Katex expression={t} />
+        </span>
+      ))}
+    </>
+  );
+}
+
+function labelFamilleRecap(famille: ExerciceEquationTrigonometrique["famille"]): string {
+  return OPTIONS_FAMILLE_RECAP.find((o) => o.id === famille)?.label ?? famille;
+}
+
+/** Reproduit exactement ce que `ResultatPanelEquationTrig.tsx` (`LignesRecap`) affichait pour UNE
+ * phase donnée, scopé à l'exercice/phase qui vient juste de se terminer (`etat.exerciceCourant`/
+ * `etat.phase`, jamais `enAttente.etatSuivant`). */
+function reponseAttenduePhase(exercice: ExerciceEquationTrigonometrique, phase: PhaseEquationTrigonometrique): ReactNode {
+  if (phase === "reconnaissance") return labelFamilleRecap(exercice.famille);
+
+  if (exercice.famille === "directe") {
+    const ex = commeDirecte(exercice);
+    if (phase === "argument") return ex.aucuneSolution ? TEXTE_ARGUMENT_AUCUNE_SOLUTION : <TermesInline termes={formatTermesArgumentDirecteLatex(ex)} />;
+    if (phase === "isolerX") return <TermesInline termes={formatTermesXDirecteLatex(ex)} />;
+    if (phase === "solutions") return formatSolutionsTexte(ex.solutions, ex.regime);
+  }
+  if (exercice.famille === "produit") {
+    const ex = commeProduit(exercice);
+    if (phase === "prefacteur") return <Katex expression={formatAidePrefacteurNiveau2Latex(ex)} />;
+    if (phase === "separerFacteurs") return <TermesInline termes={formatAideSepararFacteursNiveau2Latex(ex)} />;
+    if (phase === "argumentProduit") return <TermesInline termes={formatTermesArgumentProduitLatex(ex)} />;
+    if (phase === "isolerXProduit") return <TermesInline termes={formatTermesXProduitLatex(ex)} />;
+    if (phase === "solutionsProduit") return formatSolutionsTexte(ex.solutionsUnion, regimeProduit(ex));
+  }
+  if (exercice.famille === "pythagoricienne") {
+    const ex = commePythagoricienne(exercice);
+    if (phase === "conversionPythagoricienne") return <Katex expression={formatPolynomeCibleLatex(ex)} />;
+    if (phase === "racinesPythagoricienne") return <TermesInline termes={formatTermesRacinesTLatex(ex)} />;
+    if (phase === "racinesResolution") return <TermesInline termes={formatTermesRacinesResolutionLatex(ex)} />;
+    if (phase === "solutionsPythagoricienne") return formatSolutionsTexte(ex.solutionsUnion, "exact");
+  }
+  if (exercice.famille === "egalite") {
+    const ex = commeEgalite(exercice);
+    if (phase === "conversionEgalite") return <Katex expression={formatEquationConvertieEgaliteLatex(ex)} />;
+    if (phase === "resoudreEgalite") return <TermesInline termes={formatAideResoudreEgaliteNiveau2Latex(ex)} />;
+    if (phase === "solutionsEgalite") return formatSolutionsTexte(ex.solutions, "exact");
+  }
+  return null;
+}
+
 export function App5gen10() {
   const [etat, setEtat] = useState<EtatSessionEquationTrigonometrique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionEquationTrigonometrique) {
-    // C.3 : `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesEquationTrig.ts`.
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -154,235 +237,236 @@ export function App5gen10() {
       <SelecteurVarianteDev
         options={OPTIONS_FAMILLE}
         onGenerer={(id) => {
-          setDernierBilan(null);
+          setEnAttente(null);
           setEtat(demarrerSessionEquationTrig(REGLAGES_DEMO, GENERATEURS_FAMILLE[id]));
         }}
       />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {etat.phase === "reconnaissance" && (
-                <EtapeReconnaissanceEquationTrig
-                  key={cleEcran}
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix))}
-                />
-              )}
-
-              {etat.phase === "argument" && (
-                <EtapeArgumentEquationTrig
-                  key={cleEcran}
-                  exercice={commeDirecte(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseArgument(etat, reponse))}
-                  diagnostiquer={(reponse) => diagnostiquerArgument(commeDirecte(exercice), reponse)}
-                />
-              )}
-              {etat.phase === "isolerX" && (
-                <EtapeIsolerXEquationTrig
-                  key={cleEcran}
-                  exercice={commeDirecte(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(lignes) => terminerEtape(soumettreReponseIsolerX(etat, lignes))}
-                  diagnostiquer={(lignes) => diagnostiquerIsolerX(commeDirecte(exercice), lignes)}
-                />
-              )}
-              {etat.phase === "solutions" && (
-                <EtapeSolutionsEquationTrig
-                  key={cleEcran}
-                  exercice={commeDirecte(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes))}
-                  diagnostiquer={(textes) => diagnostiquerSolutions(commeDirecte(exercice), textes)}
-                />
-              )}
-
-              {etat.phase === "prefacteur" && (
-                <EtapePrefacteurProduit
-                  key={cleEcran}
-                  exercice={commeProduit(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponsePrefacteur(etat, texte))}
-                  diagnostiquer={(texte) => diagnostiquerFactorisationProduit(commeProduit(exercice), texte)}
-                />
-              )}
-              {etat.phase === "separerFacteurs" && (
-                <EtapeSepararFacteursProduit
-                  key={cleEcran}
-                  exercice={commeProduit(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(lignes) => terminerEtape(soumettreReponseSeparerFacteurs(etat, lignes))}
-                  diagnostiquer={(lignes) => diagnostiquerSeparerFacteurs(commeProduit(exercice), lignes)}
-                />
-              )}
-              {etat.phase === "argumentProduit" && (
-                <EtapeArgumentProduit
-                  key={cleEcran}
-                  exercice={commeProduit(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseArgumentProduit(etat, reponse))}
-                  diagnostiquer={(reponse) => diagnostiquerArgumentProduit(commeProduit(exercice), reponse)}
-                />
-              )}
-              {etat.phase === "isolerXProduit" && (
-                <EtapeIsolerXProduit
-                  key={cleEcran}
-                  exercice={commeProduit(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseIsolerXProduit(etat, reponse))}
-                  diagnostiquer={(reponse) => diagnostiquerIsolerXProduit(commeProduit(exercice), reponse)}
-                />
-              )}
-              {etat.phase === "solutionsProduit" && (
-                <EtapeSolutionsProduit
-                  key={cleEcran}
-                  exercice={commeProduit(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseSolutionsProduit(etat, textes))}
-                  diagnostiquer={(textes) => diagnostiquerSolutionsProduit(commeProduit(exercice), textes)}
-                />
-              )}
-
-              {etat.phase === "conversionPythagoricienne" && (
-                <EtapeConversionPythagoricienne
-                  key={cleEcran}
-                  exercice={commePythagoricienne(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseConversionPythagoricienne(etat, texte))}
-                  diagnostiquer={(texte) => diagnostiquerConversionPythagoricienne(commePythagoricienne(exercice), texte)}
-                />
-              )}
-              {etat.phase === "racinesPythagoricienne" && (
-                <EtapeRacinesPythagoricienne
-                  key={cleEcran}
-                  exercice={commePythagoricienne(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseRacinesPythagoricienne(etat, textes))}
-                  diagnostiquer={(textes) => diagnostiquerRacinesPythagoricienne(commePythagoricienne(exercice), textes)}
-                />
-              )}
-              {etat.phase === "racinesResolution" && (
-                <EtapeRacinesResolutionPythagoricienne
-                  key={cleEcran}
-                  exercice={commePythagoricienne(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseRacinesResolution(etat, reponse))}
-                  diagnostiquer={(reponse) => diagnostiquerRacinesResolution(commePythagoricienne(exercice), reponse)}
-                />
-              )}
-              {etat.phase === "solutionsPythagoricienne" && (
-                <EtapeSolutionsPythagoricienne
-                  key={cleEcran}
-                  exercice={commePythagoricienne(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseSolutionsPythagoricienne(etat, textes))}
-                  diagnostiquer={(textes) => diagnostiquerSolutionsPythagoricienne(commePythagoricienne(exercice), textes)}
-                />
-              )}
-
-              {etat.phase === "conversionEgalite" && (
-                <EtapeConversionEgalite
-                  key={cleEcran}
-                  exercice={commeEgalite(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseConversionEgalite(etat, texte))}
-                  diagnostiquer={(texte) => diagnostiquerConversionEgalite(commeEgalite(exercice), texte)}
-                />
-              )}
-              {etat.phase === "resoudreEgalite" && (
-                <EtapeResoudreEgalite
-                  key={cleEcran}
-                  exercice={commeEgalite(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(lignes) => terminerEtape(soumettreReponseResoudreEgalite(etat, lignes))}
-                  diagnostiquer={(lignes) => diagnostiquerResoudreEgalite(commeEgalite(exercice), lignes)}
-                />
-              )}
-              {etat.phase === "solutionsEgalite" && (
-                <EtapeSolutionsEgalite
-                  key={cleEcran}
-                  exercice={commeEgalite(exercice)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseSolutionsEgalite(etat, textes))}
-                  diagnostiquer={(textes) => diagnostiquerSolutionsEgalite(commeEgalite(exercice), textes)}
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelEquationTrig
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {etat.phase === "reconnaissance" && (
+            <EtapeReconnaissanceEquationTrig
+              key={cleEcran}
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix))}
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionEquationTrig resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+
+          {etat.phase === "argument" && (
+            <EtapeArgumentEquationTrig
+              key={cleEcran}
+              exercice={commeDirecte(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseArgument(etat, reponse))}
+              diagnostiquer={(reponse) => diagnostiquerArgument(commeDirecte(exercice), reponse)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "isolerX" && (
+            <EtapeIsolerXEquationTrig
+              key={cleEcran}
+              exercice={commeDirecte(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(lignes) => terminerEtape(soumettreReponseIsolerX(etat, lignes))}
+              diagnostiquer={(lignes) => diagnostiquerIsolerX(commeDirecte(exercice), lignes)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "solutions" && (
+            <EtapeSolutionsEquationTrig
+              key={cleEcran}
+              exercice={commeDirecte(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes))}
+              diagnostiquer={(textes) => diagnostiquerSolutions(commeDirecte(exercice), textes)}
+              validation={validation}
+            />
+          )}
+
+          {etat.phase === "prefacteur" && (
+            <EtapePrefacteurProduit
+              key={cleEcran}
+              exercice={commeProduit(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponsePrefacteur(etat, texte))}
+              diagnostiquer={(texte) => diagnostiquerFactorisationProduit(commeProduit(exercice), texte)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "separerFacteurs" && (
+            <EtapeSepararFacteursProduit
+              key={cleEcran}
+              exercice={commeProduit(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(lignes) => terminerEtape(soumettreReponseSeparerFacteurs(etat, lignes))}
+              diagnostiquer={(lignes) => diagnostiquerSeparerFacteurs(commeProduit(exercice), lignes)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "argumentProduit" && (
+            <EtapeArgumentProduit
+              key={cleEcran}
+              exercice={commeProduit(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseArgumentProduit(etat, reponse))}
+              diagnostiquer={(reponse) => diagnostiquerArgumentProduit(commeProduit(exercice), reponse)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "isolerXProduit" && (
+            <EtapeIsolerXProduit
+              key={cleEcran}
+              exercice={commeProduit(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolerXProduit(etat, reponse))}
+              diagnostiquer={(reponse) => diagnostiquerIsolerXProduit(commeProduit(exercice), reponse)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "solutionsProduit" && (
+            <EtapeSolutionsProduit
+              key={cleEcran}
+              exercice={commeProduit(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutionsProduit(etat, textes))}
+              diagnostiquer={(textes) => diagnostiquerSolutionsProduit(commeProduit(exercice), textes)}
+              validation={validation}
+            />
+          )}
+
+          {etat.phase === "conversionPythagoricienne" && (
+            <EtapeConversionPythagoricienne
+              key={cleEcran}
+              exercice={commePythagoricienne(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseConversionPythagoricienne(etat, texte))}
+              diagnostiquer={(texte) => diagnostiquerConversionPythagoricienne(commePythagoricienne(exercice), texte)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "racinesPythagoricienne" && (
+            <EtapeRacinesPythagoricienne
+              key={cleEcran}
+              exercice={commePythagoricienne(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(textes) => terminerEtape(soumettreReponseRacinesPythagoricienne(etat, textes))}
+              diagnostiquer={(textes) => diagnostiquerRacinesPythagoricienne(commePythagoricienne(exercice), textes)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "racinesResolution" && (
+            <EtapeRacinesResolutionPythagoricienne
+              key={cleEcran}
+              exercice={commePythagoricienne(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseRacinesResolution(etat, reponse))}
+              diagnostiquer={(reponse) => diagnostiquerRacinesResolution(commePythagoricienne(exercice), reponse)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "solutionsPythagoricienne" && (
+            <EtapeSolutionsPythagoricienne
+              key={cleEcran}
+              exercice={commePythagoricienne(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutionsPythagoricienne(etat, textes))}
+              diagnostiquer={(textes) => diagnostiquerSolutionsPythagoricienne(commePythagoricienne(exercice), textes)}
+              validation={validation}
+            />
+          )}
+
+          {etat.phase === "conversionEgalite" && (
+            <EtapeConversionEgalite
+              key={cleEcran}
+              exercice={commeEgalite(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseConversionEgalite(etat, texte))}
+              diagnostiquer={(texte) => diagnostiquerConversionEgalite(commeEgalite(exercice), texte)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "resoudreEgalite" && (
+            <EtapeResoudreEgalite
+              key={cleEcran}
+              exercice={commeEgalite(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(lignes) => terminerEtape(soumettreReponseResoudreEgalite(etat, lignes))}
+              diagnostiquer={(lignes) => diagnostiquerResoudreEgalite(commeEgalite(exercice), lignes)}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "solutionsEgalite" && (
+            <EtapeSolutionsEgalite
+              key={cleEcran}
+              exercice={commeEgalite(exercice)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutionsEgalite(etat, textes))}
+              diagnostiquer={(textes) => diagnostiquerSolutionsEgalite(commeEgalite(exercice), textes)}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

@@ -6,6 +6,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { DOMAINE_LATEX, formatEnonceLatex } from "../ui/formatQuelAngle";
 import { AideQuelAngle } from "./AideQuelAngle";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "aucune" | "auMoinsUne";
 
@@ -16,6 +18,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: ReponseQuelAngle) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -31,7 +37,7 @@ interface Props {
  * numérique (ex. un simple "-") reste soumissible : c'est précisément ce cas que le statut à 3
  * valeurs (`parse_error`) doit détecter, jamais bloqué en amont par le bouton lui-même.
  */
-export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider }: Props) {
+export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -115,19 +121,24 @@ export function EtapeQuelAngle({ exercice, tentativesUtilisees, tentativesMax, a
 
       <AideQuelAngle exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

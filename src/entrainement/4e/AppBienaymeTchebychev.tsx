@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceBienaymeTchebychev } from "./core/bienaymeTchebychev.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -25,7 +24,7 @@ import {
   soumettreReponseV8Pourcent0,
   soumettreReponseV8XBar,
 } from "./moteur/sessionBienaymeTchebychev";
-import type { EtatSessionBienaymeTchebychev, PhaseBienaymeTchebychev, ResultatExerciceBienaymeTchebychev } from "./moteur/typesBienaymeTchebychev";
+import type { EtatSessionBienaymeTchebychev, PhaseBienaymeTchebychev } from "./moteur/typesBienaymeTchebychev";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBienaymeTchebychev } from "./generateurs/bienaymeTchebychev";
 import type { VarianteBienaymeTchebychev } from "./core/bienaymeTchebychev.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -38,8 +37,15 @@ import { EtapeNombreFinal } from "./components/EtapeNombreFinal";
 import { EtapePourcentDepuisNombre } from "./components/EtapePourcentDepuisNombre";
 import { EtapeSigmaFinal } from "./components/EtapeSigmaFinal";
 import { EtapeXBarFinal } from "./components/EtapeXBarFinal";
-import { ResultatPanelBienaymeTchebychev } from "./components/ResultatPanelBienaymeTchebychev";
-import { ResumeSessionBienaymeTchebychev } from "./components/ResumeSessionBienaymeTchebychev";
+import {
+  formatIntervalleAttenduTexte,
+  formatKAttenduTexte,
+  formatNombreAttenduTexte,
+  formatPourcentAttenduTexte,
+  formatPourcentDepuisNombreAttenduTexte,
+  formatSigmaAttenduTexte,
+  formatXBarAttenduTexte,
+} from "./ui/formatBienaymeTchebychev";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -53,9 +59,97 @@ function nouvelleSession(): EtatSessionBienaymeTchebychev {
   return demarrerSessionBienaymeTchebychev(REGLAGES_DEMO, genererExerciceBienaymeTchebychev);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceBienaymeTchebychev;
-  exercice: ExerciceBienaymeTchebychev;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionBienaymeTchebychev;
+  revele: boolean;
+}
+
+/**
+ * `revele` de l'écran qui vient de se clore (`etat.phase`, AVANT application de `nouvelEtat`) :
+ * présent dans `scoresAccumules` sauf pour la DERNIÈRE phase de la séquence de la variante, dont la
+ * clôture vide/remplace `scoresAccumules` (nouvel exercice, ou session terminée) — repris alors
+ * depuis le `resultat` qui vient d'être poussé dans `resultats`.
+ */
+function reveleEcranClos(
+  etat: EtatSessionBienaymeTchebychev,
+  nouvelEtat: EtatSessionBienaymeTchebychev,
+): boolean {
+  const entree = nouvelEtat.scoresAccumules[etat.phase];
+  if (entree) return entree.revele;
+  const dernier = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
+  switch (etat.phase) {
+    case "v1Pourcent":
+      return dernier.v1PourcentRevele;
+    case "v2Intervalle":
+      return dernier.v2IntervalleRevele;
+    case "v3Nombre":
+      return dernier.v3NombreRevele;
+    case "v4Intervalle":
+      return dernier.v4IntervalleRevele;
+    case "v5Sigma":
+      return dernier.v5SigmaRevele;
+    case "v6XBar":
+      return dernier.v6XBarRevele;
+    case "v7Sigma":
+      return dernier.v7SigmaRevele;
+    case "v8XBar":
+      return dernier.v8XBarRevele;
+    default:
+      throw new Error(`reveleEcranClos : phase finale inattendue ${etat.phase}`);
+  }
+}
+
+/**
+ * Réponse attendue de l'écran qui vient de se clore (`etat.phase`) — réplique exactement les 20
+ * blocs `answer-reveal` de `ResultatPanelBienaymeTchebychev` (un par couple variante/phase), au
+ * lieu de les sélectionner par score nul : la narrowing sur `exercice.variante` reste nécessaire
+ * pour les signatures `formatXxxAttenduTexte` qui attendent la forme spécifique à la variante.
+ */
+function construireReponseAttendue(
+  etat: EtatSessionBienaymeTchebychev,
+  exercice: EtatSessionBienaymeTchebychev["exerciceCourant"],
+) {
+  if (exercice.variante === "intervalleVersPourcent") {
+    if (etat.phase === "v1K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v1Pourcent") return <>% minimal attendu : {formatPourcentAttenduTexte(exercice)}</>;
+  }
+  if (exercice.variante === "pourcentVersIntervalle") {
+    if (etat.phase === "v2K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v2Intervalle") return <>Intervalle attendu : {formatIntervalleAttenduTexte(exercice)}</>;
+  }
+  if (exercice.variante === "intervalleVersNombre") {
+    if (etat.phase === "v3K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v3Pourcent") return <>% minimal attendu : {formatPourcentAttenduTexte(exercice)}</>;
+    if (etat.phase === "v3Nombre") return <>Nombre minimal attendu : {formatNombreAttenduTexte(exercice.nMinAttendu)}</>;
+  }
+  if (exercice.variante === "nombreVersIntervalle") {
+    if (etat.phase === "v4Pourcent0") return <>% minimal attendu : {formatPourcentDepuisNombreAttenduTexte(exercice)}</>;
+    if (etat.phase === "v4K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v4Intervalle") return <>Intervalle attendu : {formatIntervalleAttenduTexte(exercice)}</>;
+  }
+  if (exercice.variante === "intervalleVersSigma") {
+    if (etat.phase === "v5K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v5Sigma") return <>σ attendu : {formatSigmaAttenduTexte(exercice)}</>;
+  }
+  if (exercice.variante === "intervalleVersXBar") {
+    if (etat.phase === "v6K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v6XBar") return <>x̄ attendu : {formatXBarAttenduTexte(exercice)}</>;
+  }
+  if (exercice.variante === "nombreVersSigma") {
+    if (etat.phase === "v7Pourcent0") return <>% minimal attendu : {formatPourcentDepuisNombreAttenduTexte(exercice)}</>;
+    if (etat.phase === "v7K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v7Sigma") return <>σ attendu : {formatSigmaAttenduTexte(exercice)}</>;
+  }
+  if (exercice.variante === "nombreVersXBar") {
+    if (etat.phase === "v8Pourcent0") return <>% minimal attendu : {formatPourcentDepuisNombreAttenduTexte(exercice)}</>;
+    if (etat.phase === "v8K") return <>k attendu : {formatKAttenduTexte(exercice)}</>;
+    if (etat.phase === "v8XBar") return <>x̄ attendu : {formatXBarAttenduTexte(exercice)}</>;
+  }
+  return undefined;
 }
 
 const LIBELLE_PHASE: Record<PhaseBienaymeTchebychev, string> = {
@@ -83,22 +177,38 @@ const LIBELLE_PHASE: Record<PhaseBienaymeTchebychev, string> = {
 
 export function AppBienaymeTchebychev() {
   const [etat, setEtat] = useState<EtatSessionBienaymeTchebychev>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceBienaymeTchebychev, nouvelEtat: EtatSessionBienaymeTchebychev) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionBienaymeTchebychev) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: reveleEcranClos(etat, nouvelEtat) });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionBienaymeTchebychev(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteBienaymeTchebychev)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : construireReponseAttendue(etat, exercice),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -107,37 +217,25 @@ export function AppBienaymeTchebychev() {
         <h1 className="app-title">Inégalité de Bienaymé-Tchebychev</h1>
         <p className="app-subtitle">Chapitre 5 — Statistiques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
+          </div>
+        </div>
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-          </div>
-        )}
-
         <div className="card-body">
-          {enCoursDeSession && <CalculatriceScientifique />}
-          {dernierBilan ? (
-            <ResultatPanelBienaymeTchebychev
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionBienaymeTchebychev resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "v1K" && exercice.variante === "intervalleVersPourcent" ? (
+          <CalculatriceScientifique />
+          {etat.phase === "v1K" && exercice.variante === "intervalleVersPourcent" ? (
             <EtapeKDepuisIntervalle
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV1K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV1K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v1Pourcent" && exercice.variante === "intervalleVersPourcent" ? (
             <EtapePourcentFinal
@@ -146,10 +244,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV1Pourcent(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseV1Pourcent(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v2K" && exercice.variante === "pourcentVersIntervalle" ? (
             <EtapeKDepuisPourcent
@@ -158,7 +254,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV2K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV2K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v2Intervalle" && exercice.variante === "pourcentVersIntervalle" ? (
             <EtapeIntervalleFinal
@@ -167,10 +264,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(borneInf, borneSup) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV2Intervalle(etat, { borneInf, borneSup }));
-              }}
+              onValider={(borneInf, borneSup) => terminerEtape(soumettreReponseV2Intervalle(etat, { borneInf, borneSup }))}
+              validation={validation}
             />
           ) : etat.phase === "v3K" && exercice.variante === "intervalleVersNombre" ? (
             <EtapeKDepuisIntervalle
@@ -179,7 +274,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV3K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV3K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v3Pourcent" && exercice.variante === "intervalleVersNombre" ? (
             <EtapePourcentFinal
@@ -188,24 +284,24 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV3Pourcent(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV3Pourcent(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v3Nombre" && exercice.variante === "intervalleVersNombre" ? (
             <EtapeNombreFinal
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV3Nombre(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseV3Nombre(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v4Pourcent0" && exercice.variante === "nombreVersIntervalle" ? (
             <EtapePourcentDepuisNombre
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => setEtat(soumettreReponseV4Pourcent0(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV4Pourcent0(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v4K" && exercice.variante === "nombreVersIntervalle" ? (
             <EtapeKDepuisPourcent
@@ -214,7 +310,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV4K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV4K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v4Intervalle" && exercice.variante === "nombreVersIntervalle" ? (
             <EtapeIntervalleFinal
@@ -223,10 +320,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(borneInf, borneSup) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV4Intervalle(etat, { borneInf, borneSup }));
-              }}
+              onValider={(borneInf, borneSup) => terminerEtape(soumettreReponseV4Intervalle(etat, { borneInf, borneSup }))}
+              validation={validation}
             />
           ) : etat.phase === "v5K" && exercice.variante === "intervalleVersSigma" ? (
             <EtapeKDepuisPourcent
@@ -235,7 +330,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV5K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV5K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v5Sigma" && exercice.variante === "intervalleVersSigma" ? (
             <EtapeSigmaFinal
@@ -244,10 +340,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV5Sigma(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseV5Sigma(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v6K" && exercice.variante === "intervalleVersXBar" ? (
             <EtapeKDepuisPourcent
@@ -256,7 +350,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV6K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV6K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v6XBar" && exercice.variante === "intervalleVersXBar" ? (
             <EtapeXBarFinal
@@ -265,17 +360,16 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV6XBar(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseV6XBar(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v7Pourcent0" && exercice.variante === "nombreVersSigma" ? (
             <EtapePourcentDepuisNombre
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => setEtat(soumettreReponseV7Pourcent0(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV7Pourcent0(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v7K" && exercice.variante === "nombreVersSigma" ? (
             <EtapeKDepuisPourcent
@@ -284,7 +378,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV7K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV7K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v7Sigma" && exercice.variante === "nombreVersSigma" ? (
             <EtapeSigmaFinal
@@ -293,17 +388,16 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV7Sigma(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseV7Sigma(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v8Pourcent0" && exercice.variante === "nombreVersXBar" ? (
             <EtapePourcentDepuisNombre
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(texte) => setEtat(soumettreReponseV8Pourcent0(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV8Pourcent0(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v8K" && exercice.variante === "nombreVersXBar" ? (
             <EtapeKDepuisPourcent
@@ -312,7 +406,8 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseV8K(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseV8K(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "v8XBar" && exercice.variante === "nombreVersXBar" ? (
             <EtapeXBarFinal
@@ -321,12 +416,10 @@ export function AppBienaymeTchebychev() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseV8XBar(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseV8XBar(etat, texte))}
+              validation={validation}
             />
-          ) : null}{" "}
+          ) : null}
         </div>
       </main>
     </div>

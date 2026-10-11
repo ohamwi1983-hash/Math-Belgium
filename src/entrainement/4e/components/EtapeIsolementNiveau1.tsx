@@ -11,12 +11,18 @@ import {
 } from "../ui/formatCaracteristiquesAlgebriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -43,7 +49,7 @@ interface Props {
  * (`formatEquationRechercheZerosLatex`, `prompt-corrections-niveau2-vague2.md`, point 1) — cet
  * écran appartient à la séquence "zéros", jamais à un écran portant sur `f` elle-même.
  */
-export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const developpementDirect = exercice.niveau === "niveau2" && (exercice.famille === "carre" || exercice.famille === "cube");
@@ -74,14 +80,19 @@ export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentative
           aria-label="Équation isolée"
         />
       </div>
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -20,7 +20,7 @@ import {
   soumettreReponsePointVideSimplification,
   soumettreReponseTypeLimite,
 } from "./moteur5e/sessionEtudeComplete";
-import type { EtatSessionEtudeComplete, PhaseEtudeComplete, ResultatExerciceEtudeComplete } from "./moteur5e/typesEtudeComplete";
+import type { EtatSessionEtudeComplete, PhaseEtudeComplete } from "./moteur5e/typesEtudeComplete";
 import {
   diagnostiquerCasSpecial,
   diagnostiquerEnsembleEquationsAV,
@@ -36,11 +36,14 @@ import {
 import type { CibleValeurOuInfini } from "./moteur5e/verificationEtudeComplete";
 import type { ExerciceEtudeComplete } from "./core5e/etudeComplete.types";
 import {
+  estPhaseTexteSimple,
   formatLabelCoefBLatex,
   formatLabelCoefDirecteurLatex,
   formatLabelLimiteDroiteLatex,
   formatLabelLimiteFLatex,
   formatLabelLimiteGaucheLatex,
+  formatReponseAttendueTexte,
+  formatReponseAttenduePhaseLatex,
 } from "./ui5e/formatEtudeComplete";
 import { EtapeAVEtudeComplete } from "./components5e/EtapeAVEtudeComplete";
 import { EtapeAsymptoteInfiniEtudeComplete } from "./components5e/EtapeAsymptoteInfiniEtudeComplete";
@@ -49,8 +52,8 @@ import { EtapeChampsEtudeComplete } from "./components5e/EtapeChampsEtudeComplet
 import { EtapeConclusionPointVideEtudeComplete } from "./components5e/EtapeConclusionPointVideEtudeComplete";
 import { EtapeListeNombresEtudeComplete } from "./components5e/EtapeListeNombresEtudeComplete";
 import { EtapeTypeLimiteEtudeComplete } from "./components5e/EtapeTypeLimiteEtudeComplete";
-import { ResultatPanelEtudeComplete } from "./components5e/ResultatPanelEtudeComplete";
-import { ResumeSessionEtudeComplete } from "./components5e/ResumeSessionEtudeComplete";
+import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -58,33 +61,65 @@ function nouvelleSession(): EtatSessionEtudeComplete {
   return demarrerSessionEtudeComplete(REGLAGES_DEMO, genererExerciceEtudeComplete);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceEtudeComplete;
-  aideParPhase: Partial<Record<PhaseEtudeComplete, { niveauAide: number; revele: boolean }>>;
+/** Réponse réellement attendue de la phase qui vient de se clore — même dispatch que l'ancien
+ * `ResultatPanelEtudeComplete.tsx` (supprimé, remplacé par la validation inline) : texte simple
+ * pour les écrans "texte simple", LaTeX sinon (uniquement en mode "etude" — la variante
+ * "constructionInverse" n'a pas de réponse LaTeX représentable). */
+function reponseAttendueEtudeComplete(exercice: ExerciceEtudeComplete, phase: PhaseEtudeComplete) {
+  if (estPhaseTexteSimple(exercice, phase)) return <span>{formatReponseAttendueTexte(exercice, phase)}</span>;
+  if (exercice.mode !== "etude") return undefined;
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEtudeComplete;
+  revele: boolean;
 }
 
 export function App5gen24() {
   const [etat, setEtat] = useState<EtatSessionEtudeComplete>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseEtudeComplete, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionEtudeComplete) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionEtudeComplete(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation: ValidationEtapeProps | null = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueEtudeComplete(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -92,38 +127,20 @@ export function App5gen24() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude complète</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionEtudeComplete(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-              setEtat={setEtat}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelEtudeComplete
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionEtudeComplete resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            setEtat={setEtat}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -139,12 +156,13 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionEtudeComplete) => void;
   setEtat: (etat: EtatSessionEtudeComplete) => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxEtudeComplete();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
-  const propsCommunes = { tentativesUtilisees, tentativesMax, niveauAide: etat.niveauAide, niveauAideMax, onActiverAide };
+  const propsCommunes = { tentativesUtilisees, tentativesMax, niveauAide: etat.niveauAide, niveauAideMax, onActiverAide, validation };
 
   if (exercice.mode === "constructionInverse") {
     if (phase === "constructionInverse") {

@@ -9,11 +9,9 @@ import {
   soumettreReponseConstruction,
   soumettreReponseTrace,
 } from "./moteur/sessionConstructionParabole";
-import type { EtatSessionConstructionParabole, ResultatExerciceConstructionParabole } from "./moteur/typesConstructionParabole";
+import type { EtatSessionConstructionParabole } from "./moteur/typesConstructionParabole";
 import { EtapeConstructionParabole } from "./components/EtapeConstructionParabole";
 import { EtapeTraceParabole } from "./components/EtapeTraceParabole";
-import { ResultatPanelConstructionParabole } from "./components/ResultatPanelConstructionParabole";
-import { ResumeSessionConstructionParabole } from "./components/ResumeSessionConstructionParabole";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -27,28 +25,64 @@ function nouvelleSession(): EtatSessionConstructionParabole {
   return demarrerSessionConstructionParabole(REGLAGES_DEMO, genererExerciceConstructionParabole);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceConstructionParabole;
-}
-
 function libellePhase(etat: EtatSessionConstructionParabole): string {
   if (etat.phase === "trace") return "Tracé final";
   return `Itération ${etat.iterationCourante + 1} / ${NOMBRE_ITERATIONS_CONSTRUCTION_PARABOLE}`;
 }
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). Chaque itération de "construction" est son propre écran (même sans
+ * changement de `phase`) : la transition se détecte aussi sur `iterationCourante`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionConstructionParabole;
+  revele: boolean;
+}
+
 export function AppConstructionParabole() {
   const [etat, setEtat] = useState<EtatSessionConstructionParabole>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionConstructionParabole) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]! });
+    const transitionDEcran =
+      nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee || nouvelEtat.iterationCourante !== etat.iterationCourante;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "construction"
+          ? nouvelEtat.iterationsCompletes[nouvelEtat.iterationsCompletes.length - 1]!.constructionRevele
+          : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.traceRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec
+          ? undefined
+          : etat.phase === "construction" ? (
+              <>
+                Sur une itération ratée : le rayon choisi ne respectait pas la contrainte (strictement supérieur à la moitié de la distance entre le
+                foyer et la directrice), ou la droite construite n'était pas exactement à cette même distance, du côté du foyer.
+              </>
+            ) : (
+              <>Les 6 points doivent être sélectionnés dans l'ordre, du côté gauche vers le côté droit.</>
+            ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -56,27 +90,16 @@ export function AppConstructionParabole() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Construction de la parabole au compas et à l'équerre</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{libellePhase(etat)}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{libellePhase(etat)}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelConstructionParabole
-            resultat={dernierBilan.resultat}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionConstructionParabole resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "construction" ? (
+        {etat.phase === "construction" ? (
           <EtapeConstructionParabole
             key={etat.iterationCourante}
             exercice={exercice}
@@ -86,7 +109,8 @@ export function AppConstructionParabole() {
             niveauAide={etat.niveauAideConstruction}
             rDejaUtilises={etat.iterationsCompletes.map((iteration) => iteration.r)}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseConstruction(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeTraceParabole
@@ -95,6 +119,7 @@ export function AppConstructionParabole() {
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onValider={(selectionnes) => terminerEtape(soumettreReponseTrace(etat, selectionnes))}
+            validation={validation}
           />
         )}
         </div>

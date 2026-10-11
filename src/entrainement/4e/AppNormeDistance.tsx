@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceNormeDistance } from "./core/normeDistance.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -32,8 +31,15 @@ import { EtapeResolutionParametreNorme } from "./components/EtapeResolutionParam
 import { EtapeConstructionPythagore } from "./components/EtapeConstructionPythagore";
 import { EtapeCalculPythagore } from "./components/EtapeCalculPythagore";
 import { EtapeTestPythagore } from "./components/EtapeTestPythagore";
-import { ResultatPanelNormeDistance } from "./components/ResultatPanelNormeDistance";
-import { ResumeSessionNormeDistance } from "./components/ResumeSessionNormeDistance";
+import { Katex } from "./components/Katex";
+import { sommetAttenduPythagore } from "./moteur/verificationNormeDistance";
+import {
+  formatEquationReduiteParametreNormeLatex,
+  formatLongueurIrreductibleLatex,
+  formatSolutionsAttenduesTexte,
+  formatVecteurLatex,
+  libelleRectangleEn,
+} from "./ui/formatNormeDistance";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -45,11 +51,6 @@ const REGLAGES_DEMO: ReglagesSession = {
 
 function nouvelleSession(): EtatSessionNormeDistance {
   return demarrerSessionNormeDistance(REGLAGES_DEMO, genererExerciceNormeDistance);
-}
-
-interface Bilan {
-  resultat: ResultatExerciceNormeDistance;
-  exercice: ExerciceNormeDistance;
 }
 
 const LIBELLE_PHASE: Record<PhaseNormeDistance, string> = {
@@ -66,24 +67,131 @@ const LIBELLE_PHASE: Record<PhaseNormeDistance, string> = {
   testPythagore: "Rectangle en...",
 };
 
+/** Révélation de l'écran `phase` lue sur le résultat déjà clos de l'exercice (le dernier de la
+ * séquence de sa variante — voir `scoresAccumules`/`SEQUENCES`, `typesNormeDistance.ts`). */
+function reveleDepuisResultat(resultat: ResultatExerciceNormeDistance, phase: PhaseNormeDistance): boolean {
+  switch (phase) {
+    case "normeVecteur":
+      return resultat.normeVecteurRevele;
+    case "constructionDistance":
+      return resultat.constructionDistanceRevele;
+    case "calculDistance":
+      return resultat.calculDistanceRevele;
+    case "constructionIsocele":
+      return resultat.constructionIsoceleRevele;
+    case "calculIsocele":
+      return resultat.calculIsoceleRevele;
+    case "conclusionIsocele":
+      return resultat.conclusionIsoceleRevele;
+    case "reductionParametreNorme":
+      return resultat.reductionParametreNormeRevele;
+    case "resolutionParametreNorme":
+      return resultat.resolutionParametreNormeRevele;
+    case "constructionPythagore":
+      return resultat.constructionPythagoreRevele;
+    case "calculPythagore":
+      return resultat.calculPythagoreRevele;
+    case "testPythagore":
+      return resultat.testPythagoreRevele;
+  }
+}
+
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionNormeDistance;
+  revele: boolean;
+}
+
 export function AppNormeDistance() {
   const [etat, setEtat] = useState<EtatSessionNormeDistance>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceNormeDistance, nouvelEtat: EtatSessionNormeDistance) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionNormeDistance) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        nouvelEtat.resultats.length > etat.resultats.length
+          ? reveleDepuisResultat(nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, etat.phase)
+          : nouvelEtat.scoresAccumules[etat.phase]!.revele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionNormeDistance(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteNormeDistance)));
   }
+
+  const reponseAttendue =
+    phase === "normeVecteur" && exercice.variante === "vecteur" ? (
+      <>Norme attendue : {exercice.norme}</>
+    ) : phase === "constructionDistance" && exercice.variante === "distance" ? (
+      <Katex expression={formatVecteurLatex(`${exercice.labelA}${exercice.labelB}`, exercice.vecteurAB)} />
+    ) : phase === "calculDistance" && exercice.variante === "distance" ? (
+      <>Distance attendue : {exercice.distance}</>
+    ) : phase === "constructionIsocele" && exercice.variante === "isocele" ? (
+      <Katex
+        expression={`\\begin{gathered} ${formatVecteurLatex(`${exercice.labelA}${exercice.labelB}`, exercice.vecteurAB)} \\\\ ${formatVecteurLatex(`${exercice.labelA}${exercice.labelC}`, exercice.vecteurAC)} \\\\ ${formatVecteurLatex(`${exercice.labelB}${exercice.labelC}`, exercice.vecteurBC)} \\end{gathered}`}
+      />
+    ) : phase === "calculIsocele" && exercice.variante === "isocele" ? (
+      <>
+        {exercice.labelA}
+        {exercice.labelB} = {exercice.longueurAB} — {exercice.labelA}
+        {exercice.labelC} = {exercice.longueurAC} — {exercice.labelB}
+        {exercice.labelC} = {exercice.longueurBC}
+      </>
+    ) : phase === "conclusionIsocele" && exercice.variante === "isocele" ? (
+      <>
+        Conclusion attendue :{" "}
+        {exercice.classification === "scalene"
+          ? "Scalène"
+          : `Isocèle en ${exercice.classification === "isoceleA" ? exercice.labelA : exercice.classification === "isoceleB" ? exercice.labelB : exercice.labelC}`}
+      </>
+    ) : phase === "reductionParametreNorme" && exercice.variante === "parametre" ? (
+      <>
+        Équation attendue : <Katex expression={formatEquationReduiteParametreNormeLatex(exercice)} />
+      </>
+    ) : phase === "resolutionParametreNorme" && exercice.variante === "parametre" ? (
+      <>Solution(s) attendue(s) : {formatSolutionsAttenduesTexte(exercice)}</>
+    ) : phase === "constructionPythagore" && exercice.variante === "pythagore" ? (
+      <Katex
+        expression={`\\begin{gathered} ${formatVecteurLatex(`${exercice.labelA}${exercice.labelB}`, exercice.vecteurAB)} \\\\ ${formatVecteurLatex(`${exercice.labelA}${exercice.labelC}`, exercice.vecteurAC)} \\\\ ${formatVecteurLatex(`${exercice.labelB}${exercice.labelC}`, exercice.vecteurBC)} \\end{gathered}`}
+      />
+    ) : phase === "calculPythagore" && exercice.variante === "pythagore" ? (
+      <Katex
+        expression={`\\begin{gathered} \\|\\vec{${exercice.labelA}${exercice.labelB}}\\|=${formatLongueurIrreductibleLatex(exercice.carreAB)} \\\\ \\|\\vec{${exercice.labelA}${exercice.labelC}}\\|=${formatLongueurIrreductibleLatex(exercice.carreAC)} \\\\ \\|\\vec{${exercice.labelB}${exercice.labelC}}\\|=${formatLongueurIrreductibleLatex(exercice.carreBC)} \\end{gathered}`}
+      />
+    ) : phase === "testPythagore" && exercice.variante === "pythagore" ? (
+      <>
+        Conclusion attendue :{" "}
+        {sommetAttenduPythagore(exercice) === null
+          ? "aucun sommet rectangle"
+          : libelleRectangleEn(sommetAttenduPythagore(exercice) as "A" | "B" | "C", exercice)}
+      </>
+    ) : null;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -92,141 +200,136 @@ export function AppNormeDistance() {
         <h1 className="app-title">Norme d'un vecteur et distance entre 2 points</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {enCoursDeSession && etat.phase === "calculPythagore" && <CalculatriceScientifique />}
-        {dernierBilan ? (
-          <ResultatPanelNormeDistance
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionNormeDistance resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "normeVecteur" && exercice.variante === "vecteur" ? (
+        {phase === "calculPythagore" && !enAttente && <CalculatriceScientifique />}
+        {phase === "normeVecteur" && exercice.variante === "vecteur" ? (
           <EtapeNormeVecteur
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseNormeVecteur(etat, texte));
-            }}
+            onValider={(texte) => terminerEtape(soumettreReponseNormeVecteur(etat, texte))}
+            validation={validation}
           />
-        ) : etat.phase === "constructionDistance" && exercice.variante === "distance" ? (
+        ) : phase === "constructionDistance" && exercice.variante === "distance" ? (
           <EtapeConstructionDistance
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseConstructionDistance(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstructionDistance(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "calculDistance" && exercice.variante === "distance" ? (
+        ) : phase === "calculDistance" && exercice.variante === "distance" ? (
           <EtapeCalculDistance
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseCalculDistance(etat, texte));
-            }}
+            onValider={(texte) => terminerEtape(soumettreReponseCalculDistance(etat, texte))}
+            validation={validation}
           />
-        ) : etat.phase === "constructionIsocele" && exercice.variante === "isocele" ? (
+        ) : phase === "constructionIsocele" && exercice.variante === "isocele" ? (
           <EtapeConstructionIsocele
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseConstructionIsocele(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstructionIsocele(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "calculIsocele" && exercice.variante === "isocele" ? (
+        ) : phase === "calculIsocele" && exercice.variante === "isocele" ? (
           <EtapeCalculIsocele
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseCalculIsocele(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseCalculIsocele(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "conclusionIsocele" && exercice.variante === "isocele" ? (
+        ) : phase === "conclusionIsocele" && exercice.variante === "isocele" ? (
           <EtapeConclusionIsocele
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseConclusionIsocele(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseConclusionIsocele(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "reductionParametreNorme" && exercice.variante === "parametre" ? (
+        ) : phase === "reductionParametreNorme" && exercice.variante === "parametre" ? (
           <EtapeReductionParametreNorme
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => setEtat(soumettreReponseReductionParametreNorme(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseReductionParametreNorme(etat, texte))}
+            validation={validation}
           />
-        ) : etat.phase === "resolutionParametreNorme" && exercice.variante === "parametre" ? (
+        ) : phase === "resolutionParametreNorme" && exercice.variante === "parametre" ? (
           <EtapeResolutionParametreNorme
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(valeurs) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseResolutionParametreNorme(etat, valeurs));
-            }}
+            onValider={(valeurs) => terminerEtape(soumettreReponseResolutionParametreNorme(etat, valeurs))}
+            validation={validation}
           />
-        ) : etat.phase === "constructionPythagore" && exercice.variante === "pythagore" ? (
+        ) : phase === "constructionPythagore" && exercice.variante === "pythagore" ? (
           <EtapeConstructionPythagore
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseConstructionPythagore(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstructionPythagore(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "calculPythagore" && exercice.variante === "pythagore" ? (
+        ) : phase === "calculPythagore" && exercice.variante === "pythagore" ? (
           <EtapeCalculPythagore
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseCalculPythagore(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseCalculPythagore(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "testPythagore" && exercice.variante === "pythagore" ? (
+        ) : phase === "testPythagore" && exercice.variante === "pythagore" ? (
           <EtapeTestPythagore
+            key={phase}
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseTestPythagore(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseTestPythagore(etat, reponse))}
+            validation={validation}
           />
         ) : null}
         </div>

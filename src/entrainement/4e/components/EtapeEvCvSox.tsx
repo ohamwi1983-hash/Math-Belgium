@@ -7,12 +7,18 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MafsGraphFormeCanoniqueTransformations } from "./MafsGraphFormeCanoniqueTransformations";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueTransformation;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseEvCvSox) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const COULEUR_ORANGE = "#f08c00";
@@ -24,7 +30,7 @@ const COULEUR_ORANGE = "#f08c00";
  * vers a(x-xS)². Curseurs EV, CV, SOX inchangés, vérification par rapport EV/CV déjà en place,
  * complétée par la fonction intermédiaire de cette étape (structurelle + algébrique).
  */
-export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [ev, setEv] = useState(1);
   const [cv, setCv] = useState(1);
   const [sox, setSox] = useState(false);
@@ -100,21 +106,26 @@ export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onV
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ ev, cv, sox, fonctionIntermediaire })}
-      >
-        Valider
-      </button>
-      {statut !== undefined && (
-        <p className="alert-error" role="alert">
-          {statut === "parse_error"
-            ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
-            : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ ev, cv, sox, fonctionIntermediaire })}
+        >
+          Valider
+        </button>
+        {statut !== undefined && (
+          <p className="alert-error" role="alert">
+            {statut === "parse_error"
+              ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
+              : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -10,6 +10,8 @@ import {
 } from "../ui/formatCaracteristiquesAlgebriques";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceNiveau2RacineCarree | ExerciceNiveau2ValeurAbsolue;
@@ -18,6 +20,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: boolean) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** La racine/branche concernée par la question, à l'index courant — `racine_carree` : une des
@@ -48,7 +54,7 @@ function solutionEtCondition(exercice: ExerciceNiveau2RacineCarree | ExerciceNiv
  * navigateur avant correctif, même principe que `formatFractionSigneeLatex`/`ResultatPanel.tsx`, qui
  * mélangent déjà texte brut et fragment `<Katex>` séparé plutôt qu'un unique appel monolithique).
  */
-export function EtapeValidationSolution({ exercice, etatActuel, index, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeValidationSolution({ exercice, etatActuel, index, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const { racineLatex, conditionLatex } = solutionEtCondition(exercice, index);
   const [choix, setChoix] = useState<boolean | null>(null);
   const erronee = tentativesUtilisees > 0;
@@ -81,14 +87,19 @@ export function EtapeValidationSolution({ exercice, etatActuel, index, tentative
           Non
         </button>
       </div>
-      <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={choix === null} onClick={() => choix !== null && onValider(choix)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

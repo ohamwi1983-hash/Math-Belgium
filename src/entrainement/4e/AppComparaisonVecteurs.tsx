@@ -2,13 +2,12 @@ import { useState } from "react";
 import type { ExerciceComparaisonVecteurs, ProprieteComparaison } from "./core/comparaisonVecteurs.types";
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionComparaisonVecteurs, soumettreReponseEgalite, soumettreReponseSelection } from "./moteur/sessionComparaisonVecteurs";
-import type { EtatSessionComparaisonVecteurs, PhaseComparaisonVecteurs, ResultatExerciceComparaisonVecteurs } from "./moteur/typesComparaisonVecteurs";
+import type { EtatSessionComparaisonVecteurs, PhaseComparaisonVecteurs } from "./moteur/typesComparaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonVecteurs } from "./generateurs/comparaisonVecteurs";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSelectionComparaison } from "./components/EtapeSelectionComparaison";
 import { EtapeEgaliteComparaison } from "./components/EtapeEgaliteComparaison";
-import { ResultatPanelComparaisonVecteurs } from "./components/ResultatPanelComparaisonVecteurs";
-import { ResumeSessionComparaisonVecteurs } from "./components/ResumeSessionComparaisonVecteurs";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -22,9 +21,29 @@ function nouvelleSession(): EtatSessionComparaisonVecteurs {
   return demarrerSessionComparaisonVecteurs(REGLAGES_DEMO, genererExerciceComparaisonVecteurs);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceComparaisonVecteurs;
-  exercice: ExerciceComparaisonVecteurs;
+/** Coefficient jamais explicite s'il vaut `1`/`-1` — même convention que le reste de la
+ * plateforme (ex. `formatRelationVectorielle.ts::formatCoefficientTraduction`). */
+function formatCoefficientLatex(coef: number): string {
+  if (coef === 1) return "";
+  if (coef === -1) return "-";
+  return String(coef);
+}
+
+function formatVecteursAttendusLatex(labels: string[]): string {
+  return labels.map((label) => `\\vec{${label}}`).join(", ");
+}
+
+function formatEgaliteAttendueLatex(exercice: ExerciceComparaisonVecteurs): string {
+  return `\\vec{${exercice.cibleEgalite}} = ${formatCoefficientLatex(exercice.coefficientEgalite)}\\vec{${exercice.labelReference}}`;
+}
+
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionComparaisonVecteurs;
+  revele: boolean;
 }
 
 const LIBELLE_PHASE: Record<PhaseComparaisonVecteurs, string> = {
@@ -34,21 +53,50 @@ const LIBELLE_PHASE: Record<PhaseComparaisonVecteurs, string> = {
 
 export function AppComparaisonVecteurs() {
   const [etat, setEtat] = useState<EtatSessionComparaisonVecteurs>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceComparaisonVecteurs, nouvelEtat: EtatSessionComparaisonVecteurs) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionComparaisonVecteurs) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "selection" ? nouvelEtat.selectionRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.egaliteRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionComparaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as ProprieteComparaison)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec
+          ? undefined
+          : etat.phase === "selection" ? (
+              <>
+                Vecteurs attendus : <Katex expression={formatVecteursAttendusLatex(exercice.labelsCorrects)} />
+              </>
+            ) : (
+              <>
+                Égalité attendue : <Katex expression={formatEgaliteAttendueLatex(exercice)} />
+              </>
+            ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -57,43 +105,30 @@ export function AppComparaisonVecteurs() {
         <h1 className="app-title">Comparaison visuelle de vecteurs sur figure</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelComparaisonVecteurs
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionComparaisonVecteurs resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "selection" ? (
+        {etat.phase === "selection" ? (
           <EtapeSelectionComparaison
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(labels) => setEtat(soumettreReponseSelection(etat, labels))}
+            onValider={(labels) => terminerEtape(soumettreReponseSelection(etat, labels))}
+            validation={validation}
           />
         ) : (
           <EtapeEgaliteComparaison
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(texte) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseEgalite(etat, texte));
-            }}
+            onValider={(texte) => terminerEtape(soumettreReponseEgalite(etat, texte))}
+            validation={validation}
           />
         )}
         </div>

@@ -3,6 +3,8 @@ import type { ExerciceConstructionParabole } from "../core/constructionParabole.
 import type { Point } from "../core/vecteur.types";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { TraceParaboleGraph } from "./TraceParaboleGraph";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceConstructionParabole;
@@ -10,6 +12,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (selectionnes: Point[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 export const CONSIGNE_TRACE =
@@ -25,7 +31,7 @@ export const CONSIGNE_TRACE =
  * `TraceParaboleGraph.tsx` : deux itérations ayant choisi le même `r` produisent des points cibles
  * strictement identiques, qu'un suivi par valeur rendrait indistinguables et donc bloquants.
  */
-export function EtapeTraceParabole({ exercice, cibles, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeTraceParabole({ exercice, cibles, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [selectionnesIndices, setSelectionnesIndices] = useState<number[]>([]);
 
   // Une tentative ratée remet la sélection à zéro — un ordre incorrect ne peut pas être "corrigé"
@@ -59,19 +65,24 @@ export function EtapeTraceParabole({ exercice, cibles, tentativesUtilisees, tent
         Recommencer
       </button>
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider(selectionnesIndices.map((i) => cibles[i]!))}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider(selectionnesIndices.map((i) => cibles[i]!))}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

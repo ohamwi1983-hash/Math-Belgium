@@ -6,12 +6,18 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MafsGraphFormeCanoniqueTransformations } from "./MafsGraphFormeCanoniqueTransformations";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueTransformation;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseTh) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -23,7 +29,7 @@ interface Props {
  * reste affichée en grand au-dessus du graphe, ici et à toutes les étapes suivantes (remplace le
  * rappel textuel xS/yS de l'ancienne version).
  */
-export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [th, setTh] = useState(0);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
 
@@ -70,19 +76,24 @@ export function EtapeTh({ exercice, tentativesUtilisees, tentativesMax, onValide
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ th, fonctionIntermediaire })}
-      >
-        Valider
-      </button>
-      {statut !== undefined && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ th, fonctionIntermediaire })}
+        >
+          Valider
+        </button>
+        {statut !== undefined && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

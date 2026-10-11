@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimitesContexte } from "./generateurs5e/limitesContexte";
-import { labelsChampsLatex } from "./ui5e/formatLimitesContexte";
+import { estPhaseQCM, formatReponseAttendueTexte, formatReponseAttenduePhaseLatex, labelsChampsLatex } from "./ui5e/formatLimitesContexte";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -19,7 +19,7 @@ import {
   soumettreReponseLimiteC,
   soumettreReponseVASens,
 } from "./moteur5e/sessionLimitesContexte";
-import type { EtatSessionLimitesContexte, PhaseLimitesContexte, ResultatExerciceLimitesContexte } from "./moteur5e/typesLimitesContexte";
+import type { EtatSessionLimitesContexte, PhaseLimitesContexte } from "./moteur5e/typesLimitesContexte";
 import {
   diagnostiquerConstructionC,
   diagnostiquerEvaluerSeuil,
@@ -32,8 +32,8 @@ import type { ExerciceLimitesContexte } from "./core5e/limitesContexte.types";
 import { EtapeChampsLimitesContexte } from "./components5e/EtapeChampsLimitesContexte";
 import { EtapeEvaluerSeuilPopulation } from "./components5e/EtapeEvaluerSeuilPopulation";
 import { EtapeQCMLimitesContexte } from "./components5e/EtapeQCMLimitesContexte";
-import { ResultatPanelLimitesContexte } from "./components5e/ResultatPanelLimitesContexte";
-import { ResumeSessionLimitesContexte } from "./components5e/ResumeSessionLimitesContexte";
+import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -41,33 +41,62 @@ function nouvelleSession(): EtatSessionLimitesContexte {
   return demarrerSessionLimitesContexte(REGLAGES_DEMO, genererExerciceLimitesContexte);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceLimitesContexte;
-  aideParPhase: Partial<Record<PhaseLimitesContexte, { niveauAide: number; revele: boolean }>>;
+/** Réponse réellement attendue de la phase qui vient de se clore — même distinction QCM/LaTeX que
+ * l'ancien `ResultatPanelLimitesContexte.tsx` (supprimé, remplacé par la validation inline). */
+function reponseAttendueLimitesContexte(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte) {
+  if (estPhaseQCM(phase)) return <span>{formatReponseAttendueTexte(exercice, phase)}</span>;
+  return (
+    <span className="equation-box-termes">
+      {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+        <Katex key={i} expression={frag} block={frag.includes("\\lim_{")} />
+      ))}
+    </span>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionLimitesContexte;
+  revele: boolean;
 }
 
 export function App5gen23() {
   const [etat, setEtat] = useState<EtatSessionLimitesContexte>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseLimitesContexte, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionLimitesContexte) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionLimitesContexte(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation: ValidationEtapeProps | null = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueLimitesContexte(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -75,38 +104,20 @@ export function App5gen23() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites et asymptotes en contexte</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionLimitesContexte(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-              setEtat={setEtat}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelLimitesContexte
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionLimitesContexte resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            setEtat={setEtat}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -122,12 +133,13 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionLimitesContexte) => void;
   setEtat: (etat: EtatSessionLimitesContexte) => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxLimitesContexte();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
-  const propsCommunes = { tentativesUtilisees, tentativesMax, niveauAide: etat.niveauAide, niveauAideMax, onActiverAide };
+  const propsCommunes = { tentativesUtilisees, tentativesMax, niveauAide: etat.niveauAide, niveauAideMax, onActiverAide, validation };
 
   if (exercice.famille === "prixRevient") {
     if (phase === "asymptoteHorizontale") {

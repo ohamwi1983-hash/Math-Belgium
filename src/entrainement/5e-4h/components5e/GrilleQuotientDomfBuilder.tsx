@@ -5,6 +5,8 @@ import type { ValeurCelluleQuotient } from "../core/inequationRationnelle.types"
 import { celluleEstErronee, cyclerValeurCellule } from "../ui/cycleValeurCellule";
 import { celluleQuotientEstErronee, cyclerValeurCelluleQuotient, grilleQuotientEstComplete } from "../ui/cycleValeurCelluleQuotient";
 import { Katex } from "../components/Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 /**
  * Écran "resolution" de la famille "fractionSousRacine" — tableau de signes N(x)/D(x) ≥ 0 à
@@ -17,9 +19,13 @@ interface Props {
   exercice: ExerciceFractionSousRacine;
   tentativesUtilisees: number;
   onValider: (reponse: { ligneNumerateur: ValeurCellule[]; ligneDenominateur: ValeurCellule[]; ligneQuotient: ValeurCelluleQuotient[] }) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — remplace "Valider"
+   * par le bloc `ValidationEcran` (convention CLAUDE.md, "validation/invalidation avant de passer à
+   * l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
-export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onValider }: Props) {
+export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onValider, validation }: Props) {
   const nbColonnes = 2 * exercice.racines.length + 1;
   const [ligneN, setLigneN] = useState<(ValeurCellule | null)[]>(() => Array(nbColonnes).fill(null));
   const [ligneD, setLigneD] = useState<(ValeurCellule | null)[]>(() => Array(nbColonnes).fill(null));
@@ -120,14 +126,19 @@ export function GrilleQuotientDomfBuilder({ exercice, tentativesUtilisees, onVal
           </tbody>
         </table>
       </div>
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — réessaie.
-        </p>
+      {!validation && (
+        <>
+          <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+            Valider
+          </button>
+          {montrerErreurs && (
+            <p className="alert-error" role="alert">
+              Incorrect — réessaie.
+            </p>
+          )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

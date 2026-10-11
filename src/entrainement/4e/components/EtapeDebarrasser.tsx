@@ -5,6 +5,8 @@ import { formatEquationRechercheZerosLatex, instructionDebarrasser } from "../ui
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
@@ -12,6 +14,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -22,7 +28,7 @@ interface Props {
  * `etatActuel` rappelle l'équation isolée confirmée à l'étape précédente (voir
  * `calculerEtatActuelCaracteristiquesAlgebriques`).
  */
-export function EtapeDebarrasser({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeDebarrasser({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut =
@@ -44,14 +50,19 @@ export function EtapeDebarrasser({ exercice, etatActuel, tentativesUtilisees, te
           aria-label="Équation simplifiée"
         />
       </div>
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

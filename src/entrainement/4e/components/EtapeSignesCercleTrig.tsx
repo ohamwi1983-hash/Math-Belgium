@@ -7,6 +7,8 @@ import { formatEnonceCercleTrigLatex } from "../ui/formatCercleTrigonometrique";
 import type { EtatCelluleSigne, EtatCelluleTan } from "../ui/cycleSigneCercleTrigonometrique";
 import { celluleSigneErronee, cyclerSigneSinCos, cyclerSigneTan } from "../ui/cycleSigneCercleTrigonometrique";
 import { AideSignesCercleTrig } from "./AideSignesCercleTrig";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 /** Couleurs de la construction géométrique de l'aide "Signes" (section 8) — mêmes hex que les
  * projections/points du croquis (`App.css`, `.cercle-trig-projection-*`/`.cercle-trig-point-*`). */
@@ -22,6 +24,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: ReponseSignes) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function libelle(valeur: EtatCelluleSigne | EtatCelluleTan): string {
@@ -53,6 +59,7 @@ export function EtapeSignesCercleTrig({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [sin, setSin] = useState<EtatCelluleSigne>("?");
   const [cos, setCos] = useState<EtatCelluleSigne>("?");
@@ -112,14 +119,19 @@ export function EtapeSignesCercleTrig({
 
       <AideSignesCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider({ sin, cos, tan })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider({ sin, cos, tan })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

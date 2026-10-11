@@ -4,12 +4,18 @@ import type { ReponseIdentification } from "../moteur/verificationOptimisation";
 import { diagnostiquerIdentification } from "../moteur/verificationOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceOptimisation } from "./EnonceOptimisation";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseIdentification) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -20,7 +26,7 @@ interface Props {
  * écran entièrement sinon, jamais rendu vide. Pas d'aide sur cet écran (vérification par sélection,
  * même convention que "interpretation") — voir `NIVEAU_AIDE_MAX_IDENTIFICATION=0`.
  */
-export function EtapeIdentificationOptimisation({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeIdentificationOptimisation({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const identification = exercice.identificationXY;
   const [indexX, setIndexX] = useState<number | null>(null);
   const [indexY, setIndexY] = useState<number | null>(null);
@@ -81,14 +87,19 @@ export function EtapeIdentificationOptimisation({ exercice, tentativesUtilisees,
         </select>
       </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
-        Valider
-      </button>
-      {apresEchec && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(reponse)}>
+          Valider
+        </button>
+        {apresEchec && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statutGlobal)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

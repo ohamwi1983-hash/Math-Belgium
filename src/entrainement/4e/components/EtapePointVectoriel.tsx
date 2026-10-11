@@ -12,12 +12,18 @@ import {
 import { diagnostiquerCoordonnees, diagnostiquerX, diagnostiquerY } from "../moteur/verificationPointVectoriel";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExercicePointVectoriel;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: { x: number; y: number }) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -25,7 +31,7 @@ interface Props {
  * graphe — jamais le point cherché, voir `valeursGraphePointVectoriel`), consigne, puis les 2
  * champs numériques (x,y) soumis ensemble en un seul essai.
  */
-export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
 
@@ -82,14 +88,19 @@ export function EtapePointVectoriel({ exercice, tentativesUtilisees, tentativesM
       </div>
       {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ x, y })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && statut !== "parse_error" && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ x, y })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && statut !== "parse_error" && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

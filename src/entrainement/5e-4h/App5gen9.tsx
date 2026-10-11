@@ -7,13 +7,10 @@ import {
   demarrerSessionParametresSinusoideGraphique,
   soumettreReponseParametresSinusoideGraphique,
 } from "./moteur5e/sessionParametresSinusoideGraphique";
-import type {
-  EtatSessionParametresSinusoideGraphique,
-  ResultatExerciceParametresSinusoideGraphique,
-} from "./moteur5e/typesParametresSinusoideGraphique";
+import type { EtatSessionParametresSinusoideGraphique } from "./moteur5e/typesParametresSinusoideGraphique";
 import { EtapeParametreSinusoideGraphique } from "./components5e/EtapeParametreSinusoideGraphique";
-import { ResultatPanelParametresSinusoideGraphique } from "./components5e/ResultatPanelParametresSinusoideGraphique";
-import { ResumeSessionParametresSinusoideGraphique } from "./components5e/ResumeSessionParametresSinusoideGraphique";
+import { formatChampParametreGraphiqueLatex } from "./ui5e/formatParametresSinusoideGraphique";
+import { Katex } from "./components/Katex";
 import type { PhaseParametresSinusoideGraphique } from "./moteur5e/typesParametresSinusoideGraphique";
 import type { ExerciceParametresSinusoideGraphique } from "./core5e/parametresSinusoideGraphique.types";
 import type { StatutVerification } from "./moteur/statutVerification";
@@ -55,33 +52,44 @@ function diagnostiquerReponsePourPhase(
   }
 }
 
-type AideParPhase = Partial<Record<PhaseParametresSinusoideGraphique, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceParametresSinusoideGraphique;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
+ * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionParametresSinusoideGraphique;
+  revele: boolean;
 }
 
 export function App5gen9() {
   const [etat, setEtat] = useState<EtatSessionParametresSinusoideGraphique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionParametresSinusoideGraphique) {
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: <Katex expression={formatChampParametreGraphiqueLatex(exercice, etat.phase)} />,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -91,33 +99,19 @@ export function App5gen9() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              <EtapeParametreSinusoideGraphique
-                key={etat.phase}
-                exercice={exercice}
-                phase={etat.phase}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={etat.niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX_SINUSOIDE_GRAPHIQUE}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoideGraphique(etat, texte))}
-                diagnostiquer={(texte) => diagnostiquerReponsePourPhase(exercice, etat.phase, texte)}
-              />
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelParametresSinusoideGraphique
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionParametresSinusoideGraphique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EtapeParametreSinusoideGraphique
+            key={etat.phase}
+            exercice={exercice}
+            phase={etat.phase}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX_SINUSOIDE_GRAPHIQUE}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoideGraphique(etat, texte))}
+            diagnostiquer={(texte) => diagnostiquerReponsePourPhase(exercice, etat.phase, texte)}
+            validation={validation}
+          />
         </div>
       </main>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { QuantiteArcSecteur } from "./core5e/arcsSecteurs.types";
+import type { ReactNode } from "react";
+import type { ExerciceArcSecteur, QuantiteArcSecteur } from "./core5e/arcsSecteurs.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { genererExerciceArcSecteur, genererExerciceConversion, genererExerciceDeuxVersTrois } from "./generateurs5e/arcsSecteurs";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -14,12 +15,12 @@ import {
   demarrerSessionArcSecteur,
   soumettreReponseArcSecteur,
 } from "./moteur5e/sessionArcsSecteurs";
-import type { EtatSessionArcSecteur, PhaseArcSecteur, ResultatExerciceArcSecteur } from "./moteur5e/typesArcsSecteurs";
+import type { EtatSessionArcSecteur, PhaseArcSecteur } from "./moteur5e/typesArcsSecteurs";
 import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteurs";
 import { EtapeConversionArcSecteur } from "./components5e/EtapeConversionArcSecteur";
 import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur";
-import { ResultatPanelArcSecteur } from "./components5e/ResultatPanelArcSecteur";
-import { ResumeSessionArcSecteur } from "./components5e/ResumeSessionArcSecteur";
+import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex } from "./ui5e/formatArcsSecteurs";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -27,31 +28,70 @@ function nouvelleSession(): EtatSessionArcSecteur {
   return demarrerSessionArcSecteur(REGLAGES_DEMO, genererExerciceArcSecteur);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceArcSecteur;
-  aideParPhase: Partial<Record<PhaseArcSecteur, number>>;
+/** Révèle le champ `revele` de la phase qui vient de se terminer (`phase` = `etat.phase`, AVANT la
+ * mise à jour). Non terminal (mode "deuxVersTrois", encore des quantités à traiter) : lu
+ * directement sur `nouvelEtat.revelesPartiels` (mis à jour par le moteur). Terminal (dernière
+ * quantité du mode "deuxVersTrois", ou unique écran du mode "conversion") :
+ * `cloturerExerciceOuSuivant` ne pose ce champ que DANS le `resultats` ajouté. */
+function releveDeLaPhase(phase: PhaseArcSecteur, nouvelEtat: EtatSessionArcSecteur): boolean {
+  if (nouvelEtat.terminee) {
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    return resultat.mode === "conversion" ? resultat.revele : (resultat.reveles[phase as QuantiteArcSecteur] ?? false);
+  }
+  return nouvelEtat.revelesPartiels[phase as QuantiteArcSecteur] ?? false;
+}
+
+/** Réponse attendue de la phase qui vient de se terminer — réplique exactement la `LigneRecap`
+ * correspondante de l'ancien `ResultatPanelArcSecteur.tsx`. Dérivée PUREMENT de `exercice` (aucune
+ * valeur RETENUE par continuité dans ce générateur, contrairement à 5gen5). */
+function reponseAttenduePhase(exercice: ExerciceArcSecteur, phase: PhaseArcSecteur): ReactNode {
+  if (exercice.mode === "conversion") return <Katex expression={formatValeurCibleConversionLatex(exercice)} />;
+  return <Katex expression={formatValeurQuantiteLatex(phase as QuantiteArcSecteur, exercice)} />;
+}
+
+/** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
+ * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionArcSecteur;
+  revele: boolean;
 }
 
 export function App5gen6() {
   const [etat, setEtat] = useState<EtatSessionArcSecteur>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseArcSecteur, number>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionArcSecteur) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: etat.niveauAide };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: releveDeLaPhase(etat.phase, nouvelEtat) });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionArcSecteur(REGLAGES_DEMO, id === "conversion" ? genererExerciceConversion : genererExerciceDeuxVersTrois));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -59,56 +99,37 @@ export function App5gen6() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Arcs et secteurs</h1>
       </header>
-      <SelecteurVarianteDev
-        options={OPTIONS_MODE}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionArcSecteur(REGLAGES_DEMO, id === "conversion" ? genererExerciceConversion : genererExerciceDeuxVersTrois));
-        }}
-      />
+      <SelecteurVarianteDev options={OPTIONS_MODE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {exercice.mode === "deuxVersTrois" && (
-                <EtapeQuantiteArcSecteur
-                  key={etat.phase}
-                  exercice={exercice}
-                  phase={etat.phase as QuantiteArcSecteur}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX_ARC_SECTEUR}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte))}
-                  diagnostiquer={(texte) => diagnostiquerValeurArcSecteur(texte, exercice.valeurs[etat.phase as QuantiteArcSecteur])}
-                />
-              )}
-              {exercice.mode === "conversion" && (
-                <EtapeConversionArcSecteur
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX_ARC_SECTEUR}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte))}
-                  diagnostiquer={(texte) => diagnostiquerValeurArcSecteur(texte, exercice.valeurCible)}
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelArcSecteur
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {exercice.mode === "deuxVersTrois" && (
+            <EtapeQuantiteArcSecteur
+              key={etat.phase}
+              exercice={exercice}
+              phase={etat.phase as QuantiteArcSecteur}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX_ARC_SECTEUR}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte))}
+              diagnostiquer={(texte) => diagnostiquerValeurArcSecteur(texte, exercice.valeurs[etat.phase as QuantiteArcSecteur])}
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionArcSecteur resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          {exercice.mode === "conversion" && (
+            <EtapeConversionArcSecteur
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX_ARC_SECTEUR}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte))}
+              diagnostiquer={(texte) => diagnostiquerValeurArcSecteur(texte, exercice.valeurCible)}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

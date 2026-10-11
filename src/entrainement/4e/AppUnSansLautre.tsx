@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceUnSansLautre } from "./core/unSansLautre.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAide,
@@ -8,15 +7,15 @@ import {
   soumettreReponseTangente,
   soumettreReponseValeurSignee,
 } from "./moteur/sessionUnSansLautre";
-import type { EtatSessionUnSansLautre, PhaseUnSansLautre, ResultatExerciceUnSansLautre } from "./moteur/typesUnSansLautre";
+import type { EtatSessionUnSansLautre, PhaseUnSansLautre } from "./moteur/typesUnSansLautre";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceUnSansLautre } from "./generateurs/unSansLautre";
 import type { FonctionConnue } from "./core/unSansLautre.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeCarreUnSansLautre } from "./components/EtapeCarreUnSansLautre";
 import { EtapeValeurSigneeUnSansLautre } from "./components/EtapeValeurSigneeUnSansLautre";
 import { EtapeTangenteUnSansLautre } from "./components/EtapeTangenteUnSansLautre";
-import { ResultatPanelUnSansLautre } from "./components/ResultatPanelUnSansLautre";
-import { ResumeSessionUnSansLautre } from "./components/ResumeSessionUnSansLautre";
+import { Katex } from "./components/Katex";
+import { formatCarreCibleLatex, formatValeurCibleSimplifieeLatex, formatValeurTangenteSimplifieeLatex } from "./ui/formatUnSansLautre";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,34 +29,70 @@ function nouvelleSession(): EtatSessionUnSansLautre {
   return demarrerSessionUnSansLautre(REGLAGES_DEMO, genererExerciceUnSansLautre);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceUnSansLautre;
-  exercice: ExerciceUnSansLautre;
-}
-
 const LIBELLE_PHASE: Record<PhaseUnSansLautre, string> = {
   carre: "Carré",
   valeurSignee: "Valeur signée",
   tangente: "Tangente",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionUnSansLautre;
+  revele: boolean;
+}
+
 export function AppUnSansLautre() {
   const [etat, setEtat] = useState<EtatSessionUnSansLautre>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceUnSansLautre, nouvelEtat: EtatSessionUnSansLautre) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionUnSansLautre) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "carre"
+          ? nouvelEtat.carreRevele
+          : etat.phase === "valeurSignee"
+            ? nouvelEtat.valeurSigneeRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.tangenteRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionUnSansLautre(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as FonctionConnue)));
   }
+
+  const exercice = etat.exerciceCourant;
+
+  const reponseAttendue =
+    etat.phase === "carre" ? (
+      <Katex expression={formatCarreCibleLatex(exercice)} />
+    ) : etat.phase === "valeurSignee" ? (
+      <Katex expression={formatValeurCibleSimplifieeLatex(exercice)} />
+    ) : (
+      <Katex expression={formatValeurTangenteSimplifieeLatex(exercice)} />
+    );
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -66,59 +101,46 @@ export function AppUnSansLautre() {
         <h1 className="app-title">Retrouver sin ou cos à partir de l'autre</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
+          </div>
+        </div>
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-          </div>
-        )}
-
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelUnSansLautre
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionUnSansLautre resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "carre" ? (
+          {etat.phase === "carre" ? (
             <EtapeCarreUnSansLautre
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideCarreUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(texte) => setEtat(soumettreReponseCarre(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseCarre(etat, texte))}
+              validation={validation}
             />
           ) : etat.phase === "valeurSignee" ? (
             <EtapeValeurSigneeUnSansLautre
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideValeurSigneeUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(texte) => setEtat(soumettreReponseValeurSignee(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseValeurSignee(etat, texte))}
+              validation={validation}
             />
           ) : (
             <EtapeTangenteUnSansLautre
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideTangenteUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(texte) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponseTangente(etat, texte));
-              }}
+              onValider={(texte) => terminerEtape(soumettreReponseTangente(etat, texte))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

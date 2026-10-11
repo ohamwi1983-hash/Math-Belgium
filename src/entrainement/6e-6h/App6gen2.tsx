@@ -7,10 +7,9 @@ import {
   demarrerSessionFonctionsCyclometriques,
   soumettreReponseFonctionsCyclometriques,
 } from "./moteur6e/sessionFonctionsCyclometriques";
-import type { EtatSessionFonctionsCyclometriques, ResultatExerciceFonctionsCyclometriques } from "./moteur6e/typesFonctionsCyclometriques";
+import type { EtatSessionFonctionsCyclometriques } from "./moteur6e/typesFonctionsCyclometriques";
+import { Katex } from "./components/Katex";
 import { EtapeFonctionsCyclometriques } from "./components6e/EtapeFonctionsCyclometriques";
-import { ResultatPanelFonctionsCyclometriques } from "./components6e/ResultatPanelFonctionsCyclometriques";
-import { ResumeSessionFonctionsCyclometriques } from "./components6e/ResumeSessionFonctionsCyclometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -19,41 +18,58 @@ function nouvelleSession(): EtatSessionFonctionsCyclometriques {
   return demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, genererExerciceFonctionsCyclometriques);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceFonctionsCyclometriques;
-  /** Niveau d'aide RÉELLEMENT utilisé sur l'unique écran — capturé côté présentation au moment
-   * exact où l'écran se ferme (avant que la Couche B ne remette `niveauAide` à 0 pour l'exercice
-   * suivant), même patron que les autres `App6genX.tsx`. */
-  niveauAide: number;
+/** État tenu en attente dès que l'écran unique se termine (bonne réponse, ou tentatives
+ * épuisées) — l'état de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le
+ * bouton de `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/
+ * invalidation avant de passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionFonctionsCyclometriques;
+  revele: boolean;
 }
 
 /**
  * `6gen2` (REFONTE TOTALE) — écran UNIQUE quelle que soit la variante tirée (voir
  * `moteur6e/typesFonctionsCyclometriques.ts`) : pas de branchement par phase ici, contrairement à
- * la quasi-totalité des autres `App6genX.tsx` de ce chantier.
+ * la quasi-totalité des autres `App6genX.tsx` de ce chantier. L'écran unique se termine dès que
+ * `resultats` grandit (= aucune machinerie de phase à surveiller).
  */
 export function App6gen2() {
   const [etat, setEtat] = useState<EtatSessionFonctionsCyclometriques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionFonctionsCyclometriques) {
     if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], niveauAide: etat.niveauAide });
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.resultats[nouvelEtat.resultats.length - 1].revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(
       demarrerSessionFonctionsCyclometriques(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])),
     );
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: exercice.existe ? <Katex expression={exercice.valeurLatex as string} /> : "N'existe pas",
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -64,29 +80,17 @@ export function App6gen2() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EtapeFonctionsCyclometriques
-              key={etat.indexExercice}
-              exercice={exercice}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              niveauAide={etat.niveauAide}
-              niveauAideMax={NIVEAU_AIDE_MAX}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseFonctionsCyclometriques(etat, reponse))}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelFonctionsCyclometriques
-              resultat={dernierBilan.resultat}
-              niveauAide={dernierBilan.niveauAide}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionFonctionsCyclometriques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EtapeFonctionsCyclometriques
+            key={etat.indexExercice}
+            exercice={exercice}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(reponse) => terminerEtape(soumettreReponseFonctionsCyclometriques(etat, reponse))}
+            validation={validation}
+          />
         </div>
       </main>
     </div>

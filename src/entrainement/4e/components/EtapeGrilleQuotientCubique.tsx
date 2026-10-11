@@ -13,6 +13,8 @@ import { celluleEstErronee, cyclerValeurCellule } from "../ui/cycleValeurCellule
 import { celluleQuotientEstErronee, cyclerValeurCelluleQuotient, grilleQuotientEstComplete } from "../ui/cycleValeurCelluleQuotient";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceInequationRationnelleCubique;
@@ -20,6 +22,10 @@ interface Props {
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   onValider: (reponse: GrilleQuotientCubique) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -28,7 +34,7 @@ interface Props {
  * racines du facteur quadratique restant, triées) au lieu de 2, avec toujours 1 seule ligne D
  * (P1_D, un vrai PolynomeLineaire — formatLigneDenominateurLabel réutilisée telle quelle).
  */
-export function EtapeGrilleQuotientCubique({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider }: Props) {
+export function EtapeGrilleQuotientCubique({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
   const [racineQ1, racineQ2] = [...exercice.numerateur.solution.racines].sort((a, b) => a - b);
@@ -151,14 +157,19 @@ export function EtapeGrilleQuotientCubique({ exercice, tentativesUtilisees, tent
         </table>
       </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

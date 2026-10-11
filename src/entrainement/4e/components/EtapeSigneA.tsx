@@ -6,6 +6,8 @@ import { calculerCroquisAvecRacinesVraies } from "../ui/parabolaSketch";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { ParabolaSketch } from "./ParabolaSketch";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceInequation;
@@ -13,6 +15,10 @@ interface Props {
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   onValider: (reponse: SigneA) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -22,7 +28,7 @@ interface Props {
  * correcte ou non — voir calculerCroquisAvecRacinesVraies) avec le signe choisi ici (état local,
  * pas encore soumis).
  */
-export function EtapeSigneA({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider }: Props) {
+export function EtapeSigneA({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const [signe, setSigne] = useState<SigneA | null>(null);
   const croquis = signe ? calculerCroquisAvecRacinesVraies(exercice, signe) : null;
 
@@ -48,19 +54,24 @@ export function EtapeSigneA({ exercice, tentativesUtilisees, tentativesMax, reca
         </div>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={signe === null}
-        onClick={() => signe !== null && onValider(signe)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={signe === null}
+          onClick={() => signe !== null && onValider(signe)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

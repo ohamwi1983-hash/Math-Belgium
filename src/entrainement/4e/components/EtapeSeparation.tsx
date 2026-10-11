@@ -5,6 +5,8 @@ import { formatEquationRechercheZerosLatex } from "../ui/formatCaracteristiquesA
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
@@ -12,6 +14,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseSeparation) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -25,7 +31,7 @@ interface Props {
  * rappelle l'équation isolée confirmée à l'étape précédente — voir
  * `calculerEtatActuelCaracteristiquesAlgebriques`.
  */
-export function EtapeSeparation({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeSeparation({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [equation1, setEquation1] = useState("");
   const [equation2, setEquation2] = useState("");
   const complet = equation1.trim() !== "" && equation2.trim() !== "";
@@ -59,19 +65,24 @@ export function EtapeSeparation({ exercice, etatActuel, tentativesUtilisees, ten
           aria-label="Seconde équation"
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ equation1, equation2 })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ equation1, equation2 })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

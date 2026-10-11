@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceHistogramme } from "./core/histogramme.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -8,15 +7,14 @@ import {
   soumettreReponseFrequences,
   soumettreReponseTrace,
 } from "./moteur/sessionHistogramme";
-import type { EtatSessionHistogramme, PhaseHistogramme, ResultatExerciceHistogramme } from "./moteur/typesHistogramme";
+import type { EtatSessionHistogramme, PhaseHistogramme } from "./moteur/typesHistogramme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHistogramme } from "./generateurs/histogramme";
 import type { VarianteHistogramme } from "./core/histogramme.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeClassementHistogramme } from "./components/EtapeClassementHistogramme";
 import { EtapeFrequencesHistogramme } from "./components/EtapeFrequencesHistogramme";
 import { EtapeTraceHistogramme } from "./components/EtapeTraceHistogramme";
-import { ResultatPanelHistogramme } from "./components/ResultatPanelHistogramme";
-import { ResumeSessionHistogramme } from "./components/ResumeSessionHistogramme";
+import { formatClassementAttenduTexte, formatFrequencesAttenduesTexte, formatTraceAttendueTexte } from "./ui/formatHistogramme";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,34 +28,72 @@ function nouvelleSession(): EtatSessionHistogramme {
   return demarrerSessionHistogramme(REGLAGES_DEMO, genererExerciceHistogramme);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceHistogramme;
-  exercice: ExerciceHistogramme;
-}
-
 const LIBELLE_PHASE: Record<PhaseHistogramme, string> = {
   classement: "Classement",
   frequences: "Fréquences",
   trace: "Tracer l'histogramme",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionHistogramme;
+  revele: boolean;
+}
+
 export function AppHistogramme() {
   const [etat, setEtat] = useState<EtatSessionHistogramme>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceHistogramme, nouvelEtat: EtatSessionHistogramme) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionHistogramme) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // "trace" est toujours la phase terminale (variante "effectif" : classement → trace ;
+      // variante "frequence" : classement → frequences → trace) — seule sa clôture ne reporte plus
+      // un champ racine `xxxRevele` à jour, donc on lit `revele` sur le `resultats` tout juste
+      // construit dans ce cas ; "classement"/"frequences" gardent leur champ racine.
+      const revele =
+        etat.phase === "classement"
+          ? nouvelEtat.classementRevele
+          : etat.phase === "frequences"
+            ? nouvelEtat.frequencesRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.traceRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionHistogramme(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteHistogramme)));
   }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <div className="answer-reveal">
+            {phase === "classement" && <>Effectifs attendus : {formatClassementAttenduTexte(exercice)}</>}
+            {phase === "frequences" && <>Fréquences attendues : {formatFrequencesAttenduesTexte(exercice)}</>}
+            {phase === "trace" && <>Hauteurs attendues : {formatTraceAttendueTexte(exercice)}</>}
+          </div>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -69,56 +105,47 @@ export function AppHistogramme() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelHistogramme
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionHistogramme resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "classement" ? (
+          {phase === "classement" ? (
             <EtapeClassementHistogramme
-              exercice={etat.exerciceCourant}
+              key={phase}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideClassement}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseClassement(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseClassement(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "frequences" ? (
+          ) : phase === "frequences" ? (
             <EtapeFrequencesHistogramme
-              exercice={etat.exerciceCourant}
+              key={phase}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideFrequences}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseFrequences(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseFrequences(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeTraceHistogramme
-              exercice={etat.exerciceCourant}
+              key={phase}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideTrace}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponseTrace(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseTrace(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

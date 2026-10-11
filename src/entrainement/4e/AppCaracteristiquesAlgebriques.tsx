@@ -1,4 +1,6 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
+import type { Morceau } from "./core/inequation.types";
 import type { ReglagesFamillesFonctionReference } from "./core/fonctionsReference.types";
 import type {
   ExerciceCaracteristiquesAlgebriques,
@@ -27,8 +29,17 @@ import {
   soumettreReponseValidite,
   soumettreReponseZeros,
 } from "./moteur/sessionCaracteristiquesAlgebriques";
-import { necessiteRegroupe, necessiteValidite } from "./moteur/verificationCaracteristiquesAlgebriques";
-import type { EtatSessionCaracteristiquesAlgebriques, ResultatExerciceCaracteristiquesAlgebriques } from "./moteur/typesCaracteristiquesAlgebriques";
+import {
+  brancheEstValide,
+  ceAttendues,
+  domaineAttendu,
+  necessiteRegroupe,
+  necessiteValidite,
+  racineRespecteCondition,
+  racinesAValiderRacineCarree,
+  zerosAttendus,
+} from "./moteur/verificationCaracteristiquesAlgebriques";
+import type { EtatSessionCaracteristiquesAlgebriques } from "./moteur/typesCaracteristiquesAlgebriques";
 import {
   CATALOGUE_VARIANTES,
   construireNiveau1AvecFamille,
@@ -50,8 +61,21 @@ import { EtapeRegroupe } from "./components/EtapeRegroupe";
 import { EtapeResolutionBranches } from "./components/EtapeResolutionBranches";
 import { EtapeValidationSolution } from "./components/EtapeValidationSolution";
 import { EtapeZerosAlgebrique } from "./components/EtapeZerosAlgebrique";
-import { ResultatPanelCaracteristiquesAlgebriques } from "./components/ResultatPanelCaracteristiquesAlgebriques";
-import { ResumeSessionCaracteristiquesAlgebriques } from "./components/ResumeSessionCaracteristiquesAlgebriques";
+import { Katex } from "./components/Katex";
+import {
+  formatCEAttenduesLatex,
+  formatConditionLatex,
+  formatEquationDebarrasseeLatex,
+  formatEquationDeveloppeeLatex,
+  formatEquationIsoleeLatex,
+  formatEquationsSepareesLatex,
+  formatFractionLatex,
+  formatOrdonneeExacteLatex,
+  formatTermesZerosAttendusLatex,
+} from "./ui/formatCaracteristiquesAlgebriques";
+import { formatFractionIrreductible } from "./ui/formatFraction";
+import { formatDomaineLatex } from "./ui/apercuDomaine";
+import type { EtatMorceauFraction } from "./ui/morceauFraction";
 
 const NOMBRE_EXERCICES_ALEATOIRE = 5;
 
@@ -77,11 +101,6 @@ function demarrer(
   return demarrerSessionCaracteristiquesAlgebriques(reglagesSession, creerGenerateurCaracteristiquesAlgebriques(reglagesFamilles, niveau));
 }
 
-interface Bilan {
-  resultat: ResultatExerciceCaracteristiquesAlgebriques;
-  exercice: ExerciceCaracteristiquesAlgebriques;
-}
-
 const LIBELLE_PHASE: Record<PhaseCaracteristiquesAlgebriques, string> = {
   ordonnee: "Ordonnée à l'origine",
   ce: "Conditions d'existence",
@@ -96,11 +115,217 @@ const LIBELLE_PHASE: Record<PhaseCaracteristiquesAlgebriques, string> = {
   zeros: "Zéros",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionCaracteristiquesAlgebriques;
+  revele: boolean;
+}
+
+/** Repris tel quel de l'ancien `ResultatPanelCaracteristiquesAlgebriques.tsx` (non exportés) — petites
+ * fonctions pures dupliquées plutôt qu'importées, même principe de duplication assumée qu'ailleurs
+ * sur le projet. */
+function morceauVersEtatFraction(m: Morceau): EtatMorceauFraction {
+  return {
+    crochetGauche: m.crochetGauche,
+    borneGaucheMode: m.borneGauche === "-inf" ? "-inf" : "nombre",
+    borneGaucheValeur: typeof m.borneGauche === "number" ? formatFractionIrreductible(m.borneGauche) : "",
+    crochetDroit: m.crochetDroit,
+    borneDroiteMode: m.borneDroite === "+inf" ? "+inf" : "nombre",
+    borneDroiteValeur: typeof m.borneDroite === "number" ? formatFractionIrreductible(m.borneDroite) : "",
+  };
+}
+
+function formatDomaineAttenduLatex(exercice: ExerciceCaracteristiquesAlgebriques): string {
+  const domaine = domaineAttendu(exercice);
+  const points = domaine.points.map((p) => formatFractionIrreductible(p));
+  const intervalles = domaine.intervalles.map(morceauVersEtatFraction);
+  return formatDomaineLatex(domaine.forme, points, intervalles) ?? "";
+}
+
+/** Zéros à afficher lors de la révélation — `racine_carree` (niveau 2) fait exception : `zeros` y
+ * grade les racines CANDIDATES (non filtrées, l'écran "zéros" précédant "validation" pour cette
+ * famille). */
+function zerosAAfficherPourRevelation(exercice: ExerciceCaracteristiquesAlgebriques): number[] {
+  if (exercice.niveau === "niveau2" && exercice.famille === "racine_carree") {
+    return racinesAValiderRacineCarree(exercice);
+  }
+  return zerosAttendus(exercice);
+}
+
+/** Nombre de solutions/branches à valider — même formule que `nombreSolutionsAValider`
+ * (`sessionCaracteristiquesAlgebriques.ts`, non exportée), dupliquée ici. */
+function totalValidationSolution(exercice: ExerciceCaracteristiquesAlgebriques): number {
+  if (exercice.niveau !== "niveau2") return 0;
+  if (exercice.famille === "racine_carree") return racinesAValiderRacineCarree(exercice).length;
+  if (exercice.famille === "valeur_absolue") return 2;
+  return 0;
+}
+
+/** Réponse Oui/Non attendue à l'étape "validation d'une solution", à l'index donné — même logique
+ * que `soumettreReponseValidationSolution`, dupliquée ici. */
+function attenduValidationSolution(exercice: ExerciceCaracteristiquesAlgebriques, index: number): boolean {
+  if (exercice.niveau !== "niveau2") return false;
+  if (exercice.famille === "racine_carree") return racineRespecteCondition(exercice, racinesAValiderRacineCarree(exercice)[index]);
+  if (exercice.famille === "valeur_absolue") return brancheEstValide(exercice, index as 0 | 1);
+  return false;
+}
+
+/** Reproduit exactement ce que `ResultatPanelCaracteristiquesAlgebriques.tsx` affichait pour UNE
+ * phase donnée, scopé à l'exercice/phase qui vient juste de se terminer (`etat.exerciceCourant`/
+ * `etat.phase`, jamais l'état suivant). */
+function reponseAttenduePhase(etat: EtatSessionCaracteristiquesAlgebriques): ReactNode {
+  const exercice = etat.exerciceCourant;
+  switch (etat.phase) {
+    case "ordonnee": {
+      const attendu = formatOrdonneeExacteLatex(exercice);
+      return (
+        <>
+          f(0) attendu : {attendu === null ? "n'existe pas" : <Katex expression={attendu} />}
+        </>
+      );
+    }
+    case "ce": {
+      const attendu = formatCEAttenduesLatex(ceAttendues(exercice));
+      return (
+        <>
+          CE attendues : {attendu === null ? "aucune" : <Katex expression={attendu} />}
+        </>
+      );
+    }
+    case "domaine":
+      return (
+        <>
+          Domaine attendu : <Katex expression={formatDomaineAttenduLatex(exercice)} />
+        </>
+      );
+    case "isolement":
+      return (
+        <>
+          Équation isolée attendue : <Katex expression={formatEquationIsoleeLatex(exercice)} />
+        </>
+      );
+    case "separation": {
+      if (exercice.niveau !== "niveau1") return null;
+      return (
+        <>
+          <p>Deux équations attendues :</p>
+          <Katex expression={formatEquationsSepareesLatex(exercice)} block />
+        </>
+      );
+    }
+    case "debarrasser": {
+      if (exercice.niveau !== "niveau1") return null;
+      return (
+        <>
+          Équation attendue : <Katex expression={formatEquationDebarrasseeLatex(exercice)} />
+        </>
+      );
+    }
+    case "validite": {
+      if (!necessiteValidite(exercice)) return null;
+      return (
+        <>
+          Condition attendue : <Katex expression={formatConditionLatex(exercice.conditionValidite)} />
+        </>
+      );
+    }
+    case "regroupe":
+      return (
+        <>
+          Équation attendue : <Katex expression={formatEquationDeveloppeeLatex(exercice)} />
+        </>
+      );
+    case "resolutionBranches": {
+      if (!(exercice.niveau === "niveau2" && exercice.famille === "valeur_absolue")) return null;
+      return (
+        <>
+          Racines attendues :{" "}
+          <span className="equation-box-termes">
+            <Katex expression={formatFractionLatex(exercice.racineBranche1)} />
+            <Katex expression={`\\text{ et } ${formatFractionLatex(exercice.racineBranche2)}`} />
+          </span>
+        </>
+      );
+    }
+    case "validationSolution": {
+      if (exercice.niveau !== "niveau2") return null;
+      const index = etat.scoresValidationSolutionExercice.length;
+      const total = totalValidationSolution(exercice);
+      return (
+        <>
+          Validation attendue{total > 1 ? ` (solution ${index + 1})` : ""} : {attenduValidationSolution(exercice, index) ? "Oui" : "Non"}
+        </>
+      );
+    }
+    case "zeros": {
+      const termes = formatTermesZerosAttendusLatex(zerosAAfficherPourRevelation(exercice));
+      return (
+        <>
+          Zéros attendus :{" "}
+          {termes === null ? (
+            "aucun"
+          ) : (
+            <span className="equation-box-termes">
+              {termes.map((terme, i) => (
+                <Katex key={i} expression={terme} />
+              ))}
+            </span>
+          )}
+        </>
+      );
+    }
+  }
+}
+
+/** Signal `revele` de la phase qui vient JUSTE de se terminer (`etatAvant.phase`, avant la
+ * transition). Chaque phase (hormis "validationSolution") expose un booléen `xxxRevele` dédié sur
+ * `nouvelEtat` — "zeros" fait exception : `nouvelEtat.zerosRevele` tant que la transition mène à
+ * "validationSolution" (racine_carree, clôture différée), `nouvelEtat.resultats[dernier].zerosRevele`
+ * sinon (l'exercice vient de se clôturer). "validationSolution" n'a PAS de booléen dédié dans le
+ * contrat (seulement un score agrégé, `scoresValidationSolutionExercice`) — mais
+ * `soumettreEtapeTentatives` garantit score===0 <=> révélation (voir `etapeTentatives.ts` : le seul
+ * chemin vers un score de 0 est l'échec après épuisement des tentatives), donc dérivable sans
+ * ambiguïté ici — même technique que l'ancien `ResultatPanelCaracteristiquesAlgebriques.tsx`
+ * (`scoresValidationSolution.map((score) => score === 0)`). */
+function releveRevelePhase(etatAvant: EtatSessionCaracteristiquesAlgebriques, nouvelEtat: EtatSessionCaracteristiquesAlgebriques): boolean {
+  switch (etatAvant.phase) {
+    case "ordonnee":
+      return nouvelEtat.ordonneeRevele;
+    case "ce":
+      return nouvelEtat.ceRevele;
+    case "domaine":
+      return nouvelEtat.domaineRevele;
+    case "isolement":
+      return nouvelEtat.isolementRevele;
+    case "separation":
+      return nouvelEtat.separationRevele;
+    case "debarrasser":
+      return nouvelEtat.debarrasserRevele;
+    case "validite":
+      return nouvelEtat.validiteRevele;
+    case "regroupe":
+      return nouvelEtat.regroupeRevele;
+    case "resolutionBranches":
+      return nouvelEtat.resolutionBranchesRevele;
+    case "validationSolution": {
+      const scores = nouvelEtat.scoresValidationSolutionExercice;
+      return scores[scores.length - 1] === 0;
+    }
+    case "zeros": {
+      if (nouvelEtat.phase === "validationSolution") return nouvelEtat.zerosRevele;
+      return nouvelEtat.resultats[nouvelEtat.resultats.length - 1].zerosRevele;
+    }
+  }
+}
+
 export function AppCaracteristiquesAlgebriques() {
   const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(null);
   const [niveau, setNiveau] = useState<NiveauCaracteristiquesAlgebriques>("niveau1");
   const [etat, setEtat] = useState<EtatSessionCaracteristiquesAlgebriques | null>(null);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function commencerSession(reglages: ReglagesFamillesFonctionReference, niveauChoisi: NiveauCaracteristiquesAlgebriques) {
     setReglagesFamilles(reglages);
@@ -108,65 +333,40 @@ export function AppCaracteristiquesAlgebriques() {
     setEtat(demarrer(reglages, niveauChoisi));
   }
 
-  function recommencer() {
-    if (reglagesFamilles) setEtat(demarrer(reglagesFamilles, niveau));
-  }
-
   function onGenererDev(familleId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE };
     const construireAvecNiveauCourant = niveau === "niveau1" ? construireNiveau1AvecFamille : construireNiveau2AvecFamille;
     setEtat(demarrerSessionCaracteristiquesAlgebriques(reglagesSession, () => construireAvecNiveauCourant(familleId as FamilleReference)));
   }
 
-  function validerOrdonnee(reponse: ReponseExistence) {
-    if (etat) setEtat(soumettreReponseOrdonnee(etat, reponse));
-  }
-
-  function validerCE(reponse: ReponseCE) {
-    if (etat) setEtat(soumettreReponseCE(etat, reponse));
-  }
-
-  function validerDomaine(reponse: ReponseDomaine) {
-    if (etat) setEtat(soumettreReponseDomaine(etat, reponse));
-  }
-
-  function validerIsolement(reponse: string) {
-    if (etat) setEtat(soumettreReponseIsolement(etat, reponse));
-  }
-
-  function validerSeparation(reponse: ReponseSeparation) {
-    if (etat) setEtat(soumettreReponseSeparation(etat, reponse));
-  }
-
-  function validerDebarrasser(reponse: string) {
-    if (etat) setEtat(soumettreReponseDebarrasser(etat, reponse));
-  }
-
-  function validerValidite(reponse: ReponseCondition) {
-    if (etat) setEtat(soumettreReponseValidite(etat, reponse));
-  }
-
-  function validerRegroupe(reponse: string) {
-    if (etat) setEtat(soumettreReponseRegroupe(etat, reponse));
-  }
-
-  function validerResolutionBranches(reponse: ReponseResolutionBranches) {
-    if (etat) setEtat(soumettreReponseResolutionBranches(etat, reponse));
-  }
-
-  function validerValidationSolution(reponse: boolean) {
-    if (etat) setEtat(soumettreReponseValidationSolution(etat, reponse));
-  }
-
-  function validerZeros(reponse: ReponseZerosCaracteristiques) {
+  function terminerEtape(nouvelEtat: EtatSessionCaracteristiquesAlgebriques) {
     if (!etat) return;
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseZeros(etat, reponse);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+    // "validationSolution" se répète (jusqu'à 2 fois) SANS jamais changer `phase` entre deux
+    // répétitions — seule `scoresValidationSolutionExercice` grandit. Chaque répétition ferme
+    // néanmoins un véritable écran (droit à `validation`, voir `EtapeValidationSolution.tsx`), donc
+    // détectée en plus du changement de phase/fin de session.
+    const validationSolutionAvancee = nouvelEtat.scoresValidationSolutionExercice.length > etat.scoresValidationSolutionExercice.length;
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee || validationSolutionAvancee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
+      return;
     }
     setEtat(nouvelEtat);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      // Session ENTIÈREMENT terminée (les N exercices configurés) — redémarre avec les mêmes
+      // réglages (même principe que l'ancien bouton "Recommencer" de
+      // `ResumeSessionCaracteristiquesAlgebriques`) ; `reglagesFamilles` est toujours non nul ici
+      // sauf session forcée par le panneau dev, où l'on retourne à l'écran de réglages.
+      setEtat(reglagesFamilles ? demarrer(reglagesFamilles, niveau) : null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
+    setEnAttente(null);
   }
 
   if (!etat) {
@@ -187,7 +387,14 @@ export function AppCaracteristiquesAlgebriques() {
     );
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(etat),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -199,57 +406,49 @@ export function AppCaracteristiquesAlgebriques() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-step">
-                Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-              </span>
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-step">
+              Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
+            </span>
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
+          </div>
+        </div>
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelCaracteristiquesAlgebriques
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionCaracteristiquesAlgebriques resultats={etat.resultats} onRecommencer={recommencer} />
-          ) : etat.phase === "ordonnee" ? (
+          {etat.phase === "ordonnee" ? (
             <EtapeOrdonneeAlgebrique
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerOrdonnee}
+              onValider={(reponse: ReponseExistence) => terminerEtape(soumettreReponseOrdonnee(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "ce" ? (
             <EtapeCE
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerCE}
+              onValider={(reponse: ReponseCE) => terminerEtape(soumettreReponseCE(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "domaine" ? (
             <EtapeDomaineNiveau1
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerDomaine}
+              onValider={(reponse: ReponseDomaine) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "isolement" ? (
             <EtapeIsolementNiveau1
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerIsolement}
+              onValider={(reponse: string) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "separation" ? (
             <EtapeSeparation
@@ -257,7 +456,8 @@ export function AppCaracteristiquesAlgebriques() {
               etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerSeparation}
+              onValider={(reponse: ReponseSeparation) => terminerEtape(soumettreReponseSeparation(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "debarrasser" ? (
             <EtapeDebarrasser
@@ -265,7 +465,8 @@ export function AppCaracteristiquesAlgebriques() {
               etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerDebarrasser}
+              onValider={(reponse: string) => terminerEtape(soumettreReponseDebarrasser(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "validite" && necessiteValidite(etat.exerciceCourant) ? (
             <EtapeConditionValidite
@@ -273,7 +474,8 @@ export function AppCaracteristiquesAlgebriques() {
               etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerValidite}
+              onValider={(reponse: ReponseCondition) => terminerEtape(soumettreReponseValidite(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "regroupe" && necessiteRegroupe(etat.exerciceCourant) ? (
             <EtapeRegroupe
@@ -281,7 +483,8 @@ export function AppCaracteristiquesAlgebriques() {
               etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerRegroupe}
+              onValider={(reponse: string) => terminerEtape(soumettreReponseRegroupe(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "resolutionBranches" &&
             etat.exerciceCourant.niveau === "niveau2" &&
@@ -291,7 +494,8 @@ export function AppCaracteristiquesAlgebriques() {
               etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerResolutionBranches}
+              onValider={(reponse: ReponseResolutionBranches) => terminerEtape(soumettreReponseResolutionBranches(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "validationSolution" && necessiteValidite(etat.exerciceCourant) ? (
             <EtapeValidationSolution
@@ -301,7 +505,8 @@ export function AppCaracteristiquesAlgebriques() {
               index={etat.scoresValidationSolutionExercice.length}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerValidationSolution}
+              onValider={(reponse: boolean) => terminerEtape(soumettreReponseValidationSolution(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeZerosAlgebrique
@@ -309,7 +514,8 @@ export function AppCaracteristiquesAlgebriques() {
               etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerZeros}
+              onValider={(reponse: ReponseZerosCaracteristiques) => terminerEtape(soumettreReponseZeros(etat, reponse))}
+              validation={validation}
             />
           )}
         </div>

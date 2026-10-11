@@ -8,6 +8,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { AideRelationVectorielle } from "./AideRelationVectorielle";
 import { Katex } from "./Katex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceRelationGeneraleRV;
@@ -17,6 +19,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (x: number, y: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Écran 2 (dernier) de la variante `relationGenerale` — même mécanique de champs séparés/marquage
@@ -32,6 +38,7 @@ export function EtapeCoordonneesRelationVectorielle({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
@@ -81,14 +88,19 @@ export function EtapeCoordonneesRelationVectorielle({
 
       <AideRelationVectorielle exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(x, y)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(x, y)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

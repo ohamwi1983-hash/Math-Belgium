@@ -12,15 +12,15 @@ import {
   soumettreReponseClassifierQuelconque,
   soumettreReponseDiviserQuelconque,
 } from "./moteur5e/sessionConvergenceSuites";
-import type { EtatSessionConvergenceSuite, PhaseConvergenceSuite, ResultatExerciceConvergenceSuite } from "./moteur5e/typesConvergenceSuites";
+import type { EtatSessionConvergenceSuite, PhaseConvergenceSuite } from "./moteur5e/typesConvergenceSuites";
 import { diagnostiquerClassifierQuelconque, diagnostiquerDiviserQuelconque } from "./moteur5e/verificationConvergenceSuites";
 import { diagnostiquerNombre } from "./moteur5e/verificationSuiteArithmetique";
-import type { ClassificationQuelconque } from "./core5e/convergenceSuites.types";
+import type { ClassificationQuelconque, ExerciceConvergenceSuite } from "./core5e/convergenceSuites.types";
+import { formatExpressionDiviseeLatex, libelleClassificationAttendue, texteAideNiveau2 } from "./ui5e/formatConvergenceSuites";
 import { EtapeClassificationConvergence } from "./components5e/EtapeClassificationConvergence";
 import { EtapeDiviserQuelconque } from "./components5e/EtapeDiviserQuelconque";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelConvergenceSuites } from "./components5e/ResultatPanelConvergenceSuites";
-import { ResumeSessionConvergenceSuites } from "./components5e/ResumeSessionConvergenceSuites";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -28,33 +28,67 @@ function nouvelleSession(): EtatSessionConvergenceSuite {
   return demarrerSessionConvergenceSuite(REGLAGES_DEMO, genererExerciceConvergenceSuite);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceConvergenceSuite;
-  aideParPhase: Partial<Record<PhaseConvergenceSuite, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionConvergenceSuite;
+  revele: boolean;
+}
+
+function reponseAttenduePourPhase(exercice: ExerciceConvergenceSuite, phase: PhaseConvergenceSuite) {
+  if (phase === "diviserQuelconque" && exercice.variante === "quelconque") return <Katex expression={formatExpressionDiviseeLatex(exercice)} />;
+  if (phase === "classifierQuelconque") {
+    return (
+      <>
+        {libelleClassificationAttendue(exercice, "classifierQuelconque")}
+        {exercice.variante === "quelconque" && exercice.classification === "limiteValeur" && (
+          <>
+            {" — "}
+            <Katex expression={texteAideNiveau2(exercice, "classifierQuelconque")} />
+          </>
+        )}
+      </>
+    );
+  }
+  return libelleClassificationAttendue(exercice, phase);
 }
 
 export function App5gen16() {
   const [etat, setEtat] = useState<EtatSessionConvergenceSuite>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseConvergenceSuite, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionConvergenceSuite) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionConvergenceSuite(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteConvergenceSuite)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePourPhase(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -62,17 +96,10 @@ export function App5gen16() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Convergence et divergence des suites</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_VARIANTES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionConvergenceSuite(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteConvergenceSuite)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {phase === "classificationArithmetique" && (
                 <EtapeClassificationConvergence
                   key={cleEcran}
@@ -84,6 +111,7 @@ export function App5gen16() {
                   niveauAideMax={niveauAideMaxConvergenceSuite(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreReponseClassificationArithmetique(etat, reponse.classification as never))}
+                  validation={validation}
                 />
               )}
 
@@ -98,6 +126,7 @@ export function App5gen16() {
                   niveauAideMax={niveauAideMaxConvergenceSuite(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreReponseClassificationGeometrique(etat, reponse.classification as never))}
+                  validation={validation}
                 />
               )}
 
@@ -112,6 +141,7 @@ export function App5gen16() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseDiviserQuelconque(etat, texte))}
                   diagnostiquer={(texte) => (exercice.variante === "quelconque" ? diagnostiquerDiviserQuelconque(texte, exercice) : "parse_error")}
+                  validation={validation}
                 />
               )}
 
@@ -143,22 +173,11 @@ export function App5gen16() {
                       ? diagnostiquerNombre(valeur, exercice.limiteValeur as number)
                       : "parse_error"
                   }
+                  validation={validation}
                 />
               )}
               {phase === "classifierQuelconque" && <CalculatriceScientifique />}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelConvergenceSuites
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionConvergenceSuites resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

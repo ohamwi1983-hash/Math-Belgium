@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceEquationCercleDeveloppee } from "./core/equationCercleDeveloppee.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee } from "./generateurs/equationCercleDeveloppee";
 import type { VarianteEquationCercleDeveloppee } from "./core/equationCercleDeveloppee.types";
@@ -12,12 +11,12 @@ import {
   soumettreReponseCompletion,
   soumettreReponseRegroupement,
 } from "./moteur/sessionEquationCercleDeveloppee";
-import type { EtatSessionEquationCercleDeveloppee, PhaseEquationCercleDeveloppee, ResultatExerciceEquationCercleDeveloppee } from "./moteur/typesEquationCercleDeveloppee";
+import type { EtatSessionEquationCercleDeveloppee, PhaseEquationCercleDeveloppee } from "./moteur/typesEquationCercleDeveloppee";
 import { EtapeCentreRayonEquationCercleDeveloppee } from "./components/EtapeCentreRayonEquationCercleDeveloppee";
 import { EtapeCompletionEquationCercleDeveloppee } from "./components/EtapeCompletionEquationCercleDeveloppee";
 import { EtapeRegroupementEquationCercleDeveloppee } from "./components/EtapeRegroupementEquationCercleDeveloppee";
-import { ResultatPanelEquationCercleDeveloppee } from "./components/ResultatPanelEquationCercleDeveloppee";
-import { ResumeSessionEquationCercleDeveloppee } from "./components/ResumeSessionEquationCercleDeveloppee";
+import { Katex } from "./components/Katex";
+import { formatCentreAttenduLatex, formatCompletionLatex, formatRayonAttenduLatex, formatRegroupementLatex } from "./ui/formatEquationCercleDeveloppee";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -31,35 +30,70 @@ function nouvelleSession(): EtatSessionEquationCercleDeveloppee {
   return demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, genererExerciceEquationCercleDeveloppee);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceEquationCercleDeveloppee;
-  exercice: ExerciceEquationCercleDeveloppee;
-}
-
 const LIBELLE_PHASE: Record<PhaseEquationCercleDeveloppee, string> = {
   regroupement: "Regroupement et factorisation",
   completion: "Complétion du carré",
   centreRayon: "Centre et rayon",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEquationCercleDeveloppee;
+  revele: boolean;
+}
+
 export function AppEquationCercleDeveloppee() {
   const [etat, setEtat] = useState<EtatSessionEquationCercleDeveloppee>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceEquationCercleDeveloppee, nouvelEtat: EtatSessionEquationCercleDeveloppee) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionEquationCercleDeveloppee) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "regroupement"
+          ? nouvelEtat.regroupementRevele
+          : etat.phase === "completion"
+            ? nouvelEtat.completionRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.centreRayonRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationCercleDeveloppee)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "regroupement" ? (
+            <>Regroupement attendu : <Katex expression={formatRegroupementLatex(exercice)} /></>
+          ) : etat.phase === "completion" ? (
+            <>Complétion attendue : <Katex expression={formatCompletionLatex(exercice)} /></>
+          ) : (
+            <>
+              Centre attendu : <Katex expression={formatCentreAttenduLatex(exercice)} /> — Rayon attendu :{" "}
+              <Katex expression={`R = ${formatRayonAttenduLatex(exercice)}`} />
+            </>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -68,36 +102,25 @@ export function AppEquationCercleDeveloppee() {
         <h1 className="app-title">Centre et rayon d'un cercle depuis l'équation développée</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {enCoursDeSession && etat.phase === "centreRayon" && exercice.variante === "irrationnel" && <CalculatriceScientifique />}
-        {dernierBilan ? (
-          <ResultatPanelEquationCercleDeveloppee
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionEquationCercleDeveloppee resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "regroupement" ? (
+        {etat.phase === "centreRayon" && exercice.variante === "irrationnel" && <CalculatriceScientifique />}
+        {etat.phase === "regroupement" ? (
           <EtapeRegroupementEquationCercleDeveloppee
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideRegroupement}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseRegroupement(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseRegroupement(etat, reponse))}
+            validation={validation}
           />
         ) : etat.phase === "completion" ? (
           <EtapeCompletionEquationCercleDeveloppee
@@ -106,7 +129,8 @@ export function AppEquationCercleDeveloppee() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCompletion}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseCompletion(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseCompletion(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeCentreRayonEquationCercleDeveloppee
@@ -115,10 +139,8 @@ export function AppEquationCercleDeveloppee() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentreRayon}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseCentreRayon(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseCentreRayon(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

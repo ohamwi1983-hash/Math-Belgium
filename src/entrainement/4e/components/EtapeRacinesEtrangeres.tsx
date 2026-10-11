@@ -3,6 +3,8 @@ import type { ExerciceEquationRationnelle } from "../core/equationRationnelle.ty
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { racinesDistinctes } from "../moteur/verificationEquationRationnelle";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceEquationRationnelle;
@@ -10,6 +12,10 @@ interface Props {
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   onValider: (reponses: boolean[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -28,6 +34,7 @@ export function EtapeRacinesEtrangeres({
   tentativesMax,
   recapitulatif,
   onValider,
+  validation,
 }: Props) {
   const racines = racinesDistinctes(exercice.equationIsolee.solution.racines);
   const [reponses, setReponses] = useState<Array<boolean | null>>(() => racines.map(() => null));
@@ -66,19 +73,24 @@ export function EtapeRacinesEtrangeres({
           </div>
         </div>
       ))}
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!toutesRepondues}
-        onClick={() => toutesRepondues && onValider(reponses as boolean[])}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!toutesRepondues}
+          onClick={() => toutesRepondues && onValider(reponses as boolean[])}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

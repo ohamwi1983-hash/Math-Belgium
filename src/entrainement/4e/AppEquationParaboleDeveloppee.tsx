@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceEquationParaboleDeveloppee } from "./core/equationParaboleDeveloppee.types";
 import type { OrientationParabole } from "./core/equationParabole.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationParaboleDeveloppee } from "./generateurs/equationParaboleDeveloppee";
@@ -11,12 +10,12 @@ import {
   soumettreReponseCompletion,
   soumettreReponseRegroupement,
 } from "./moteur/sessionEquationParaboleDeveloppee";
-import type { EtatSessionEquationParaboleDeveloppee, PhaseEquationParaboleDeveloppee, ResultatExerciceEquationParaboleDeveloppee } from "./moteur/typesEquationParaboleDeveloppee";
+import type { EtatSessionEquationParaboleDeveloppee, PhaseEquationParaboleDeveloppee } from "./moteur/typesEquationParaboleDeveloppee";
 import { EtapeCaracteristiquesEquationParaboleDeveloppee } from "./components/EtapeCaracteristiquesEquationParaboleDeveloppee";
 import { EtapeCompletionEquationParaboleDeveloppee } from "./components/EtapeCompletionEquationParaboleDeveloppee";
 import { EtapeRegroupementEquationParaboleDeveloppee } from "./components/EtapeRegroupementEquationParaboleDeveloppee";
-import { ResultatPanelEquationParaboleDeveloppee } from "./components/ResultatPanelEquationParaboleDeveloppee";
-import { ResumeSessionEquationParaboleDeveloppee } from "./components/ResumeSessionEquationParaboleDeveloppee";
+import { Katex } from "./components/Katex";
+import { formatCompletionLatex, formatDirectriceLatex, formatFoyerLatex, formatRegroupementLatex, formatSommetLatex } from "./ui/formatEquationParaboleDeveloppee";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,35 +29,82 @@ function nouvelleSession(): EtatSessionEquationParaboleDeveloppee {
   return demarrerSessionEquationParaboleDeveloppee(REGLAGES_DEMO, genererExerciceEquationParaboleDeveloppee);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceEquationParaboleDeveloppee;
-  exercice: ExerciceEquationParaboleDeveloppee;
-}
-
 const LIBELLE_PHASE: Record<PhaseEquationParaboleDeveloppee, string> = {
   regroupement: "Orientation et factorisation",
   completion: "Complétion du carré",
   caracteristiques: "Caractéristiques finales",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEquationParaboleDeveloppee;
+  revele: boolean;
+}
+
 export function AppEquationParaboleDeveloppee() {
   const [etat, setEtat] = useState<EtatSessionEquationParaboleDeveloppee>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceEquationParaboleDeveloppee, nouvelEtat: EtatSessionEquationParaboleDeveloppee) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionEquationParaboleDeveloppee) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "regroupement"
+          ? nouvelEtat.regroupementRevele
+          : etat.phase === "completion"
+            ? nouvelEtat.completionRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.caracteristiquesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-  const exercice = etat.exerciceCourant;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionEquationParaboleDeveloppee(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as OrientationParabole)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {phase === "regroupement" && (
+              <>
+                Regroupement attendu : <Katex expression={formatRegroupementLatex(exercice)} />
+              </>
+            )}
+            {phase === "completion" && (
+              <>
+                Complétion attendue : <Katex expression={formatCompletionLatex(exercice)} />
+              </>
+            )}
+            {phase === "caracteristiques" && (
+              <>
+                Sommet attendu : <Katex expression={formatSommetLatex(exercice.sommet)} /> — Foyer attendu :{" "}
+                <Katex expression={formatFoyerLatex(exercice.foyer)} /> — p attendu : <Katex expression={`p = ${exercice.p}`} /> — Directrice attendue :{" "}
+                <Katex expression={formatDirectriceLatex(exercice)} />
+              </>
+            )}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -67,58 +113,49 @@ export function AppEquationParaboleDeveloppee() {
         <h1 className="app-title">Sommet, foyer, p et directrice d'une parabole depuis l'équation développée</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelEquationParaboleDeveloppee
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionEquationParaboleDeveloppee resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "regroupement" ? (
-          <EtapeRegroupementEquationParaboleDeveloppee
-            exercice={exercice}
-            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideRegroupement}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseRegroupement(etat, reponse))}
-          />
-        ) : etat.phase === "completion" ? (
-          <EtapeCompletionEquationParaboleDeveloppee
-            exercice={exercice}
-            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideCompletion}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseCompletion(etat, reponse))}
-          />
-        ) : (
-          <EtapeCaracteristiquesEquationParaboleDeveloppee
-            exercice={exercice}
-            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideCaracteristiques}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseCaracteristiques(etat, reponse));
-            }}
-          />
-        )}
+          {phase === "regroupement" ? (
+            <EtapeRegroupementEquationParaboleDeveloppee
+              key={phase}
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideRegroupement}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseRegroupement(etat, reponse))}
+              validation={validation}
+            />
+          ) : phase === "completion" ? (
+            <EtapeCompletionEquationParaboleDeveloppee
+              key={phase}
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideCompletion}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCompletion(etat, reponse))}
+              validation={validation}
+            />
+          ) : (
+            <EtapeCaracteristiquesEquationParaboleDeveloppee
+              key={phase}
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideCaracteristiques}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCaracteristiques(etat, reponse))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

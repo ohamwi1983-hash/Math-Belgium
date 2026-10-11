@@ -6,6 +6,8 @@ import { Katex } from "./Katex";
 import { formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
 import { calculerAllureSketch } from "../ui/allureSketch";
 import { AllureSketch } from "./AllureSketch";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceAnalyseFonction;
@@ -13,10 +15,14 @@ interface Props {
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   onValider: (reponse: ChoixAllure) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Étape 2 : signe de a et signe de a·b, croquis (Oy seul) mis à jour en direct. */
-export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider }: Props) {
+export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const [signeA, setSigneA] = useState<SigneAllure | null>(null);
   const [signeAB, setSigneAB] = useState<SigneProduitAB | null>(null);
 
@@ -52,19 +58,24 @@ export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, reca
 
       <AllureSketch croquis={croquis} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={signeA === null || signeAB === null}
-        onClick={() => signeA !== null && signeAB !== null && onValider({ signeA, signeAB })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={signeA === null || signeAB === null}
+          onClick={() => signeA !== null && signeAB !== null && onValider({ signeA, signeAB })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

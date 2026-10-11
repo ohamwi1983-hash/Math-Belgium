@@ -1,16 +1,16 @@
 import { useState } from "react";
-import type { ExerciceRelationVectorielle } from "./core/relationVectorielle.types";
+import type { ExerciceRelationGeneraleRV } from "./core/relationVectorielle.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionRelationVectorielle, soumettreReponseCoordonnees, soumettreReponseTraduction } from "./moteur/sessionRelationVectorielle";
-import type { EtatSessionRelationVectorielle, PhaseRelationVectorielle, ResultatExerciceRelationVectorielle } from "./moteur/typesRelationVectorielle";
+import type { EtatSessionRelationVectorielle, PhaseRelationVectorielle } from "./moteur/typesRelationVectorielle";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationVectorielle } from "./generateurs/relationVectorielle";
 import type { VarianteRelationVectorielle } from "./core/relationVectorielle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeTranslationVectorielle } from "./components/EtapeTranslationVectorielle";
 import { EtapeTraductionRelationVectorielle } from "./components/EtapeTraductionRelationVectorielle";
 import { EtapeCoordonneesRelationVectorielle } from "./components/EtapeCoordonneesRelationVectorielle";
-import { ResultatPanelRelationVectorielle } from "./components/ResultatPanelRelationVectorielle";
-import { ResumeSessionRelationVectorielle } from "./components/ResumeSessionRelationVectorielle";
+import { formatTraductionAttendueLatex } from "./ui/formatRelationVectorielle";
+import { Katex } from "./components/Katex";
 import { calculerRecapitulatifRelationVectorielle } from "./ui/recapitulatifRelationVectorielle";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -25,15 +25,19 @@ function nouvelleSession(): EtatSessionRelationVectorielle {
   return demarrerSessionRelationVectorielle(REGLAGES_DEMO, genererExerciceRelationVectorielle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceRelationVectorielle;
-  exercice: ExerciceRelationVectorielle;
-}
-
 const LIBELLE_PHASE: Record<PhaseRelationVectorielle, string> = {
   traduction: "Traduction en coordonnées",
   coordonnees: "Coordonnées",
 };
+
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionRelationVectorielle;
+  revele: boolean;
+}
 
 /**
  * "Point à partir d'une relation vectorielle" — version GUIDÉE (position 20, remplace "Problèmes
@@ -44,22 +48,47 @@ const LIBELLE_PHASE: Record<PhaseRelationVectorielle, string> = {
  */
 export function AppRelationVectorielle() {
   const [etat, setEtat] = useState<EtatSessionRelationVectorielle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceRelationVectorielle, nouvelEtat: EtatSessionRelationVectorielle) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionRelationVectorielle) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "traduction" ? nouvelEtat.traductionRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.coordonneesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-  const recapitulatif = calculerRecapitulatifRelationVectorielle(etat);
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+  function forcerVariante(varianteId: string) {
+    setEnAttente(null);
     setEtat(demarrerSessionRelationVectorielle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteRelationVectorielle)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifRelationVectorielle(etat);
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "traduction" ? (
+          <Katex expression={formatTraductionAttendueLatex(exercice as ExerciceRelationGeneraleRV)} />
+        ) : (
+          <>
+            {exercice.pointCherche} attendu : ({exercice.reponse.x} ; {exercice.reponse.y})
+          </>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -67,61 +96,46 @@ export function AppRelationVectorielle() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Point à partir d'une relation vectorielle</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel (version guidée)</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelRelationVectorielle
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionRelationVectorielle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.exerciceCourant.variante === "translation" ? (
+        {exercice.variante === "translation" ? (
           <EtapeTranslationVectorielle
-            exercice={etat.exerciceCourant}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             aideActivee={etat.aideUtilisee}
             onActiverAide={() => setEtat(activerAide(etat))}
-            onValider={(x, y) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseCoordonnees(etat, x, y));
-            }}
+            onValider={(x, y) => terminerEtape(soumettreReponseCoordonnees(etat, x, y))}
+            validation={validation}
           />
         ) : etat.phase === "traduction" ? (
           <EtapeTraductionRelationVectorielle
-            exercice={etat.exerciceCourant}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             aideActivee={etat.aideUtilisee}
             onActiverAide={() => setEtat(activerAide(etat))}
-            onValider={(texte) => setEtat(soumettreReponseTraduction(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseTraduction(etat, texte))}
+            validation={validation}
           />
         ) : (
           <EtapeCoordonneesRelationVectorielle
-            exercice={etat.exerciceCourant}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             recapitulatif={recapitulatif}
             aideActivee={etat.aideUtilisee}
             onActiverAide={() => setEtat(activerAide(etat))}
-            onValider={(x, y) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseCoordonnees(etat, x, y));
-            }}
+            onValider={(x, y) => terminerEtape(soumettreReponseCoordonnees(etat, x, y))}
+            validation={validation}
           />
         )}
         </div>

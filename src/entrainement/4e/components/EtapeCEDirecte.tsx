@@ -4,6 +4,8 @@ import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { FractionHeader } from "./FractionHeader";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "pasDe" | "auMoins";
 
@@ -41,6 +43,10 @@ interface Props {
   /** Remplace le libellé par défaut du bouton "au moins une valeur" ("Au moins une CE") — même principe que libellePasDe. */
   libelleAuMoins?: string;
   onValider: (reponse: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -64,6 +70,7 @@ export function EtapeCEDirecte({
   libellePasDe = "Pas de CE",
   libelleAuMoins = "Au moins une CE",
   onValider,
+  validation,
 }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [reponse, setReponse] = useState("");
@@ -117,19 +124,24 @@ export function EtapeCEDirecte({
         </div>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!peutValider}
-        onClick={() => valeurSoumise !== null && onValider(valeurSoumise)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!peutValider}
+          onClick={() => valeurSoumise !== null && onValider(valeurSoumise)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import { formatEnonceCercleTrigLatex } from "../ui/formatCercleTrigonometrique";
 import { CercleQuadrantSelecteur } from "./CercleQuadrantSelecteur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCercleTrigonometrique;
@@ -12,6 +14,10 @@ interface Props {
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
   onValider: (quadrant: Quadrant) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -30,6 +36,7 @@ export function EtapeQuadrantCercleTrig({
   tentativesMax,
   recapitulatif,
   onValider,
+  validation,
 }: Props) {
   const [selection, setSelection] = useState<Quadrant | null>(null);
 
@@ -43,19 +50,24 @@ export function EtapeQuadrantCercleTrig({
 
       <CercleQuadrantSelecteur selection={selection} onSelectionner={setSelection} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={selection === null}
-        onClick={() => selection !== null && onValider(selection)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={selection === null}
+          onClick={() => selection !== null && onValider(selection)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

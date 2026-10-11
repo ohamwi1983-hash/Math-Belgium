@@ -16,11 +16,7 @@ import {
   soumettreReponseRegimePermanent,
   soumettreReponseTermesSuccessifs,
 } from "./moteur5e/sessionSuiteRecurrenteAffine";
-import type {
-  EtatSessionSuiteRecurrenteAffine,
-  PhaseSuiteRecurrenteAffine,
-  ResultatExerciceSuiteRecurrenteAffine,
-} from "./moteur5e/typesSuiteRecurrenteAffine";
+import type { EtatSessionSuiteRecurrenteAffine } from "./moteur5e/typesSuiteRecurrenteAffine";
 import {
   diagnostiquerPoserRecurrence,
   diagnostiquerRegimePermanent,
@@ -30,8 +26,8 @@ import { EtapePoserRecurrence } from "./components5e/EtapePoserRecurrence";
 import { EtapeRegimePermanent } from "./components5e/EtapeRegimePermanent";
 import { EtapeTermesSuccessifs } from "./components5e/EtapeTermesSuccessifs";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelSuiteRecurrenteAffine } from "./components5e/ResultatPanelSuiteRecurrenteAffine";
-import { ResumeSessionSuiteRecurrenteAffine } from "./components5e/ResumeSessionSuiteRecurrenteAffine";
+import { formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteRecurrenteAffine";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -39,35 +35,54 @@ function nouvelleSession(): EtatSessionSuiteRecurrenteAffine {
   return demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, genererExerciceSuiteRecurrenteAffine);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceSuiteRecurrenteAffine;
-  aideParPhase: Partial<Record<PhaseSuiteRecurrenteAffine, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteRecurrenteAffine;
+  revele: boolean;
 }
 
 export function App5gen19() {
   const [etat, setEtat] = useState<EtatSessionSuiteRecurrenteAffine>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseSuiteRecurrenteAffine, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionSuiteRecurrenteAffine) {
-    // A.1 : `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesSuiteRecurrenteAffine.ts`.
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, () => construireAvecRegime(id as RegimeSuiteRecurrenteAffine)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, etat.phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -75,17 +90,10 @@ export function App5gen19() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suite récurrente affine et régime permanent</h1>
       </header>
-      <SelecteurVarianteDev
-        options={OPTIONS_REGIME}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, () => construireAvecRegime(id as RegimeSuiteRecurrenteAffine)));
-        }}
-      />
+      <SelecteurVarianteDev options={OPTIONS_REGIME} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {etat.phase === "poserRecurrence" && (
                 <EtapePoserRecurrence
                   key={cleEcran}
@@ -97,6 +105,7 @@ export function App5gen19() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponsePoserRecurrence(etat, texte))}
                   diagnostiquer={(texte) => diagnostiquerPoserRecurrence(texte, exercice)}
+                  validation={validation}
                 />
               )}
 
@@ -111,6 +120,7 @@ export function App5gen19() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreReponseRegimePermanent(etat, reponse))}
                   diagnostiquer={(reponse) => diagnostiquerRegimePermanent(reponse, exercice)}
+                  validation={validation}
                 />
               )}
               {etat.phase === "regimePermanent" && <CalculatriceScientifique />}
@@ -126,22 +136,11 @@ export function App5gen19() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(textes) => terminerEtape(soumettreReponseTermesSuccessifs(etat, textes))}
                   diagnostiquer={(textes) => diagnostiquerTermesSuccessifs(textes, exercice)}
+                  validation={validation}
                 />
               )}
               {etat.phase === "termesSuccessifs" && <CalculatriceScientifique />}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelSuiteRecurrenteAffine
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionSuiteRecurrenteAffine resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

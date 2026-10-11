@@ -14,7 +14,7 @@ import {
   soumettreReponseDLimites,
   soumettreReponseDReecriture,
 } from "./moteur6e/sessionHyperboliques";
-import type { EtatSessionHyperboliques, PhaseHyperboliques, ResultatExerciceHyperboliques } from "./moteur6e/typesHyperboliques";
+import type { EtatSessionHyperboliques, PhaseHyperboliques } from "./moteur6e/typesHyperboliques";
 import {
   diagnostiquerBIsoler,
   diagnostiquerCDerivee,
@@ -26,8 +26,6 @@ import { EtapeChampHyperboliques } from "./components6e/EtapeChampHyperboliques"
 import { EtapeLimitesHyperboliquesD } from "./components6e/EtapeLimitesHyperboliquesD";
 import { EtapeListeValeursHyperboliques } from "./components6e/EtapeListeValeursHyperboliques";
 import { EtapeStatutPariteHyperboliques } from "./components6e/EtapeStatutPariteHyperboliques";
-import { ResultatPanelHyperboliques } from "./components6e/ResultatPanelHyperboliques";
-import { ResumeSessionHyperboliques } from "./components6e/ResumeSessionHyperboliques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel } from "./ui6e/formatHyperboliques";
 
@@ -37,11 +35,6 @@ function nouvelleSession(): EtatSessionHyperboliques {
   return demarrerSessionHyperboliques(REGLAGES_DEMO, genererExerciceHyperboliques);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceHyperboliques;
-}
-
-
 const PLACEHOLDERS: Partial<Record<PhaseHyperboliques, string>> = {
   bIsoler: "ex : sqrt(1+3^2)",
   cDerivee: "ex : 3*(2*ch(3*x)-sh(3*x))",
@@ -50,23 +43,46 @@ const PLACEHOLDERS: Partial<Record<PhaseHyperboliques, string>> = {
   dReecriture: "ex : ((2+3)*exp(x)+(3-2)*exp(-x))/2",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionHyperboliques;
+  revele: boolean;
+}
+
 export function App6gen19() {
   const [etat, setEtat] = useState<EtatSessionHyperboliques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionHyperboliques) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1] });
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
+      // détail vit soit dans `detailsPartiels` (écran intermédiaire), soit dans le `resultats` qui
+      // vient d'être poussé (dernier écran de l'exercice), même principe que `App6gen7.tsx`.
+      const exerciceVientDeFinir = nouvelEtat.resultats.length > etat.resultats.length;
+      const detail = exerciceVientDeFinir
+        ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
+        : nouvelEtat.detailsPartiels[etat.phase];
+      setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionHyperboliques(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const donnees = blocDonnees(exercice);
@@ -103,6 +119,29 @@ export function App6gen19() {
     return terminerEtape(soumettreReponseDReecriture(etat, texte));
   }
 
+  // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
+  // `ResultatPanelHyperboliques.tsx` — jamais une cible recalculée séparément.
+  const reponseAttenduePhase = () => {
+    if (phase === "aParite") return "Parité déterminée en comparant f(−x) à f(x) et à −f(x).";
+    if (phase === "bIsoler") return "Inconnue isolée à partir de l'identité ch²(x0)−sh²(x0)=1.";
+    if (phase === "bValeurs") return "Calculée(s) à partir de l'expression confirmée à l'étape précédente.";
+    if (phase === "cDerivee") return "f'(x) calculée via sh'=ch et ch'=sh, avec la chaîne pour l'argument kx.";
+    if (phase === "cDeriveeSeconde") return "f''(x) calculée à partir de f'(x) confirmée à l'étape précédente.";
+    if (phase === "cRelation") return "Coefficient k² identifié à partir de f''(x) confirmée à l'étape précédente.";
+    if (phase === "dReecriture") return "f(x) réécrite en termes de eˣ et e⁻ˣ.";
+    if (phase === "dLimites") return "Signe de chaque limite déduit de la forme confirmée à l'étape précédente.";
+    return null;
+  };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -111,9 +150,7 @@ export function App6gen19() {
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
       <main className="card">
-        {enCoursDeSession && (
-          <>
-            {phase === "aParite" && (
+        {phase === "aParite" && (
               <EtapeStatutPariteHyperboliques
                 key={phase}
                 consigneGenerale={CONSIGNE_GENERALE}
@@ -127,6 +164,7 @@ export function App6gen19() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
                 onValider={(choix) => terminerEtape(soumettreReponseAParite(etat, choix))}
+                validation={validation}
               />
             )}
 
@@ -147,6 +185,7 @@ export function App6gen19() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
                 onValider={(textes) => terminerEtape(soumettreReponseBValeurs(etat, textes))}
+                validation={validation}
               />
             )}
 
@@ -165,6 +204,7 @@ export function App6gen19() {
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
                 onValider={(reponse) => terminerEtape(soumettreReponseDLimites(etat, reponse))}
+                validation={validation}
               />
             )}
 
@@ -185,12 +225,9 @@ export function App6gen19() {
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
                 onValider={onValiderChampUnique}
                 diagnostiquer={diagnostiquerChampUnique}
+                validation={validation}
               />
             )}
-          </>
-        )}
-        {dernierBilan && <ResultatPanelHyperboliques resultat={dernierBilan.resultat} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />}
-        {etat.terminee && !dernierBilan && <ResumeSessionHyperboliques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}
       </main>
     </div>
   );

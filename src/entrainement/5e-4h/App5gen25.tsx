@@ -10,7 +10,8 @@ import {
 } from "./moteur5e/sessionAssociation";
 import type { EtatSessionAssociation } from "./moteur5e/typesAssociation";
 import { diagnostiquerLignes } from "./moteur5e/verificationAssociation";
-import { nombreElementsAssociation } from "./core5e/association.types";
+import type { ExerciceAssociation } from "./core5e/association.types";
+import { lettreCorrecte, nombreElementsAssociation, reponseCorrecteAssociation } from "./core5e/association.types";
 import {
   CONSIGNE_GENERALE_ASSOCIATION,
   consigneAssociation,
@@ -20,38 +21,98 @@ import {
 import { ComposantAssociation } from "./components5e/ComposantAssociation";
 import { PolynomeAssociationGraph } from "./components5e/PolynomeAssociationGraph";
 import { FonctionRicheAssociationGraph } from "./components5e/FonctionRicheAssociationGraph";
-import { ResultatPanelAssociation } from "./components5e/ResultatPanelAssociation";
-import { ResumeSessionAssociation } from "./components5e/ResumeSessionAssociation";
 import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
+
+const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 function nouvelleSession(): EtatSessionAssociation {
   return demarrerSessionAssociation(REGLAGES_DEMO, genererExerciceAssociation);
 }
 
-interface Bilan {
-  resultat: EtatSessionAssociation["resultats"][number];
+/** Réponse réellement attendue de l'exercice qui vient de se clore — même dispatch par élément
+ * numéroté que l'ancien `ResultatPanelAssociation.tsx` (supprimé, remplacé par la validation
+ * inline) : l'exercice tient sur un seul écran, donc une seule validation couvre TOUS les
+ * éléments numérotés d'un coup (jamais une validation par ligne, même principe que le récapitulatif
+ * qu'elle remplace). */
+function reponseAttendueAssociation(exercice: ExerciceAssociation) {
+  const n = nombreElementsAssociation(exercice);
+  const singulier = exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined;
+
+  function contenuLigne(numero: number) {
+    const lettre = lettreCorrecte(exercice.ordreLettres, numero);
+    if (exercice.famille === "grapheDerivee") return <PolynomeAssociationGraph coeffs={exercice.fonctions[exercice.ordreLettres[lettre]]} />;
+    if (exercice.famille === "grapheVerbal") return <span>{exercice.enonces[lettre]}</span>;
+    if (exercice.famille === "grapheDeriveeAvancee") {
+      if (singulier?.[numero]) return null;
+      return <FonctionRicheAssociationGraph fonction={exercice.fonctions[exercice.ordreLettres[lettre]]} derivee />;
+    }
+    return <Katex expression={exercice.gLatex[lettre]} />;
+  }
+
+  function labelLigne(numero: number): string {
+    const reponse = reponseCorrecteAssociation(exercice.ordreLettres, singulier, numero);
+    return reponse === "aucune" ? `Élément ${numero + 1} → f' n'existe pas ici` : `Élément ${numero + 1} → ${LETTRES[reponse]}`;
+  }
+
+  return (
+    <div>
+      {Array.from({ length: n }, (_, numero) => (
+        <div key={numero}>
+          <p>{labelLigne(numero)}</p>
+          {contenuLigne(numero)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionAssociation;
+  revele: boolean;
 }
 
 export function App5gen25() {
   const [etat, setEtat] = useState<EtatSessionAssociation>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionAssociation) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1] });
+    const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionAssociation(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAideMax = niveauAideMaxAssociation();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
   const cleEcran = `${etat.indexExercice}-${exercice.famille}`;
+
+  const validation: ValidationEtapeProps | null = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueAssociation(exercice),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   function renderItem(index: number) {
     if (exercice.famille === "grapheDerivee") return <PolynomeAssociationGraph coeffs={exercice.fonctions[index]} />;
@@ -79,43 +140,30 @@ export function App5gen25() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Association graphique/mots ↔ signe de f'/f''</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionAssociation(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <ComposantAssociation
-              key={cleEcran}
-              nombreItems={nombreElementsAssociation(exercice)}
-              renderItem={renderItem}
-              renderCandidat={renderCandidat}
-              consigneGenerale={CONSIGNE_GENERALE_ASSOCIATION}
-              consigne={consigneAssociation(exercice)}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              niveauAide={etat.niveauAide}
-              niveauAideMax={niveauAideMax}
-              onActiverAide={onActiverAide}
-              onValider={(choix) => terminerEtape(soumettreReponseAssociation(etat, choix))}
-              diagnostiquer={(choix) =>
-                diagnostiquerLignes(exercice.ordreLettres, choix, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined)
-              }
-              texteAideNiveau1={texteAideNiveau1Association(exercice)}
-              texteAideNiveau2={texteAideNiveau2Association(exercice)}
-              libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f' n'existe pas ici" : undefined}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelAssociation resultat={dernierBilan.resultat} dernier={etat.terminee} onContinuer={() => setDernierBilan(null)} />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionAssociation resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <ComposantAssociation
+            key={cleEcran}
+            nombreItems={nombreElementsAssociation(exercice)}
+            renderItem={renderItem}
+            renderCandidat={renderCandidat}
+            consigneGenerale={CONSIGNE_GENERALE_ASSOCIATION}
+            consigne={consigneAssociation(exercice)}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={niveauAideMax}
+            onActiverAide={onActiverAide}
+            onValider={(choix) => terminerEtape(soumettreReponseAssociation(etat, choix))}
+            diagnostiquer={(choix) =>
+              diagnostiquerLignes(exercice.ordreLettres, choix, exercice.famille === "grapheDeriveeAvancee" ? exercice.singulier : undefined)
+            }
+            texteAideNiveau1={texteAideNiveau1Association(exercice)}
+            texteAideNiveau2={texteAideNiveau2Association(exercice)}
+            libelleOptionSupplementaire={exercice.famille === "grapheDeriveeAvancee" ? "f' n'existe pas ici" : undefined}
+            validation={validation}
+          />
         </div>
       </main>
     </div>

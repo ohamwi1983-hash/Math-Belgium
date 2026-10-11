@@ -18,7 +18,7 @@ import {
   soumettreReponseIsolement,
   soumettreReponseSimplification,
 } from "./moteur";
-import type { EtatSession, ReponseZeros, ResultatExercice } from "./moteur";
+import type { EtatSession, ReponseZeros } from "./moteur";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceSecondDegre, type VarianteSecondDegreId } from "./generateurs/secondDegre";
 import { EtapeSimplificationCoefficients } from "./components/EtapeSimplificationCoefficients";
 import { EtapeIsolement } from "./components/EtapeIsolement";
@@ -26,11 +26,10 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeReconnaissance } from "./components/EtapeReconnaissance";
 import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeZeros } from "./components/EtapeZeros";
-import { ResultatPanel } from "./components/ResultatPanel";
-import { ResumeSession } from "./components/ResumeSession";
+import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
 import { calculerEtatActuel } from "./ui/etatActuel";
-import { formatEnonceAffichage } from "./ui/formatEquation";
+import { formatEnonceAffichage, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -44,11 +43,6 @@ function nouvelleSession(): EtatSession {
   return demarrerSession(REGLAGES_DEMO, genererExerciceSecondDegre);
 }
 
-interface Bilan {
-  resultat: ResultatExercice;
-  exercice: Exercice;
-}
-
 const LIBELLE_PHASE: Record<EtatSession["phase"], string> = {
   simplification: "Simplification",
   isolement: "Isolement",
@@ -60,10 +54,8 @@ const LIBELLE_PHASE: Record<EtatSession["phase"], string> = {
 
 /**
  * Consigne générale — rappelle l'objectif complet de l'exercice, affichée identique sur tous les
- * écrans de travail (jamais sur les écrans de résultat/résumé), redondante avec les consignes
- * spécifiques à chaque étape mais utile pour ne jamais perdre de vue l'objectif final (prompt du
- * 27/09) — même principe que ConsigneGeneraleEquationDroite/ConsigneGeneraleRelationsDroites (6e),
- * ici un texte fixe puisqu'il ne dépend d'aucune donnée de l'exercice.
+ * écrans de travail, redondante avec les consignes spécifiques à chaque étape mais utile pour ne
+ * jamais perdre de vue l'objectif final (prompt du 27/09).
  */
 const CONSIGNE_GENERALE = "Résous l'équation suivante en utilisant la méthode la plus rapide.";
 
@@ -72,10 +64,8 @@ const CONSIGNE_GENERALE = "Résous l'équation suivante en utilisant la méthode
  * (formeAffichage "produit_egale_constante") pour une catégorie qui a besoin de a,b,c explicites
  * (cas_general : Δ ; produit_remarquable : carré parfait c=(b/2)²) — dans ce seul cas, l'isolement
  * lui-même ne fait que regrouper ("Regroupe tous les termes du même côté."), et une étape
- * "developper" séparée suit (gen1 "regroupe avant de développer", prompt du 27/09 — voir
- * moteur/session.ts::necessiteDeveloppement, même condition). Pour isolee_constante/isolee_carre
- * (rien à développer, regrouper y produit déjà directement ax²+bx+c=0), l'isolement demande
- * directement cette forme générale, en un seul écran.
+ * "developper" séparée suit (gen1 "regroupe avant de développer"). Pour isolee_constante/isolee_carre
+ * (rien à développer), l'isolement demande directement cette forme générale, en un seul écran.
  */
 function demandeFormeGeneraleDirecte(exercice: Exercice): boolean {
   const c = exercice.categorie;
@@ -83,65 +73,54 @@ function demandeFormeGeneraleDirecte(exercice: Exercice): boolean {
   return exercice.formeAffichage !== "produit_egale_constante";
 }
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). Ce générateur (le plus ancien de la plateforme) ne garde pas de champ
+ * `xxxRevele` explicite par écran pour simplification/developper/champ1 — seuls `isolementRevele`
+ * et `categorieRevelee` existent côté session (`moteur/types.ts`) ; pour les 3 autres, `revele` se
+ * déduit du score de clôture de l'écran étant exactement 0, exactement la même condition que
+ * l'ancien `ResultatPanel.tsx` utilisait pour décider d'afficher la réponse révélée. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSession;
+  revele: boolean;
+}
+
 export function AppMethodeRapide() {
   const [etat, setEtat] = useState<EtatSession>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function validerSimplification(reponse: string) {
-    setEtat(soumettreReponseSimplification(etat, reponse));
-  }
-
-  function validerIsolement(reponse: string) {
-    setEtat(soumettreReponseIsolement(etat, reponse));
-  }
-
-  function choisirCategorie(choix: Categorie) {
-    setEtat(soumettreChoixCategorie(etat, choix));
-  }
-
-  function validerChamp1(reponse: string) {
-    setEtat(soumettreReponseChamp1(etat, reponse));
-  }
-
-  function activerAideEtapeSimplification() {
-    setEtat(activerAideSimplification(etat));
-  }
-
-  function activerAideEtapeIsolement() {
-    setEtat(activerAideIsolement(etat));
-  }
-
-  function validerDevelopper(reponse: string) {
-    setEtat(soumettreReponseDevelopper(etat, reponse));
-  }
-
-  function activerAideEtapeDevelopper() {
-    setEtat(activerAideDevelopper(etat));
-  }
-
-  function activerAideEtapeChamp1() {
-    setEtat(activerAideChamp1(etat));
-  }
-
-  function activerAideEtapeZeros() {
-    setEtat(activerAideZeros(etat));
-  }
-
-  function validerZeros(reponse: ReponseZeros) {
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseChamp2(etat, reponse);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSession) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "simplification"
+          ? nouvelEtat.scoreSimplificationExercice === 0
+          : etat.phase === "isolement"
+            ? nouvelEtat.isolementRevele
+            : etat.phase === "developper"
+              ? nouvelEtat.scoreDevelopperExercice === 0
+              : etat.phase === "reconnaissance"
+                ? nouvelEtat.categorieRevelee
+                : etat.phase === "champ1"
+                  ? nouvelEtat.scoreChampPrincipalExercice === 0
+                  : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.scoreZeros === 0;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const recapitulatif = calculerRecapitulatif(etat);
   const etatActuel = calculerEtatActuel(etat);
   // Bloc "énoncé" fixe : toujours l'exercice tel que généré, jamais la forme réduite par la
-  // simplification (etat.exerciceCourant) — voir EtatSession.exerciceOriginal et le bug
-  // utilisateur du 26/09 (état actuel montrant la mauvaise équation).
+  // simplification (etat.exerciceCourant) — voir EtatSession.exerciceOriginal.
   const enonceFixe = formatEnonceAffichage(
     etat.exerciceOriginal.enonce,
     etat.exerciceOriginal.formeAffichage,
@@ -150,9 +129,32 @@ export function AppMethodeRapide() {
   );
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSession(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSecondDegreId)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const reponseAttendue =
+    phase === "champ1" ? (
+      <Katex expression={exercice.categorie === "cas_general" ? `\\Delta = ${exercice.solution.delta}` : `${exercice.solution.formeFactorisee} = 0`} />
+    ) : phase === "champ2" ? (
+      <span className="equation-box-termes">
+        {formatTermesZerosAttendusLatex(exercice).map((terme, i) => (
+          <Katex key={i} expression={terme} />
+        ))}
+      </span>
+    ) : null;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -164,103 +166,99 @@ export function AppMethodeRapide() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanel
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSession resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : (
-          <>
-            <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-            {etat.phase === "simplification" ? (
-              <EtapeSimplificationCoefficients
-                exercice={etat.exerciceCourant}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                diagnostiquer={(v) => diagnostiquerSimplification(etat.exerciceCourant, v)}
-                aideActivee={etat.aideSimplificationUtilisee}
-                onActiverAide={activerAideEtapeSimplification}
-                onValider={validerSimplification}
-              />
-            ) : etat.phase === "isolement" ? (
-              <EtapeIsolement
-                exercice={etat.exerciceCourant}
-                enonceFixe={enonceFixe}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                recapitulatif={recapitulatif}
-                etatActuel={etatActuel}
-                question={demandeFormeGeneraleDirecte(etat.exerciceCourant) ? undefined : "Regroupe tous les termes du même côté."}
-                label={demandeFormeGeneraleDirecte(etat.exerciceCourant) ? undefined : null}
-                diagnostiquer={(v) => diagnostiquerIsolement(etat.exerciceCourant, v)}
-                aideActivee={etat.aideIsolementUtilisee}
-                onActiverAide={activerAideEtapeIsolement}
-                onValider={validerIsolement}
-              />
-            ) : etat.phase === "developper" ? (
-              <EtapeIsolement
-                exercice={etat.exerciceCourant}
-                enonceFixe={enonceFixe}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                recapitulatif={recapitulatif}
-                etatActuel={etatActuel}
-                diagnostiquer={(v) => diagnostiquerIsolement(etat.exerciceCourant, v)}
-                aideActivee={etat.aideDevelopperUtilisee}
-                onActiverAide={activerAideEtapeDevelopper}
-                onValider={validerDevelopper}
-              />
-            ) : etat.phase === "reconnaissance" ? (
-              <EtapeReconnaissance
-                exercice={etat.exerciceCourant}
-                enonceFixe={enonceFixe}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                recapitulatif={recapitulatif}
-                etatActuel={etatActuel}
-                onChoisir={choisirCategorie}
-              />
-            ) : etat.phase === "champ1" ? (
-              <EtapeChamp1
-                exercice={etat.exerciceCourant}
-                enonceFixe={enonceFixe}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                recapitulatif={recapitulatif}
-                etatActuel={etatActuel}
-                diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant, v)}
-                aideActivee={etat.aideChamp1Utilisee}
-                onActiverAide={activerAideEtapeChamp1}
-                onValider={validerChamp1}
-              />
-            ) : (
-              <EtapeZeros
-                exercice={etat.exerciceCourant}
-                enonceFixe={enonceFixe}
-                tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-                tentativesMax={etat.reglages.tentativesMax}
-                recapitulatif={recapitulatif}
-                etatActuel={etatActuel}
-                aideActivee={etat.aideZerosUtilisee}
-                onActiverAide={activerAideEtapeZeros}
-                onValider={validerZeros}
-              />
-            )}
-          </>
-        )}
+          <p className="prompt-text">{CONSIGNE_GENERALE}</p>
+          {phase === "simplification" ? (
+            <EtapeSimplificationCoefficients
+              key={phase}
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
+              aideActivee={etat.aideSimplificationUtilisee}
+              onActiverAide={() => setEtat(activerAideSimplification(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse))}
+              validation={validation}
+            />
+          ) : phase === "isolement" ? (
+            <EtapeIsolement
+              key={phase}
+              exercice={exercice}
+              enonceFixe={enonceFixe}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              recapitulatif={recapitulatif}
+              etatActuel={etatActuel}
+              question={demandeFormeGeneraleDirecte(exercice) ? undefined : "Regroupe tous les termes du même côté."}
+              label={demandeFormeGeneraleDirecte(exercice) ? undefined : null}
+              diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
+              aideActivee={etat.aideIsolementUtilisee}
+              onActiverAide={() => setEtat(activerAideIsolement(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
+              validation={validation}
+            />
+          ) : phase === "developper" ? (
+            <EtapeIsolement
+              key={phase}
+              exercice={exercice}
+              enonceFixe={enonceFixe}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              recapitulatif={recapitulatif}
+              etatActuel={etatActuel}
+              diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
+              aideActivee={etat.aideDevelopperUtilisee}
+              onActiverAide={() => setEtat(activerAideDevelopper(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse))}
+              validation={validation}
+            />
+          ) : phase === "reconnaissance" ? (
+            <EtapeReconnaissance
+              key={phase}
+              exercice={exercice}
+              enonceFixe={enonceFixe}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              recapitulatif={recapitulatif}
+              etatActuel={etatActuel}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix))}
+              validation={validation}
+            />
+          ) : phase === "champ1" ? (
+            <EtapeChamp1
+              key={phase}
+              exercice={exercice}
+              enonceFixe={enonceFixe}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              recapitulatif={recapitulatif}
+              etatActuel={etatActuel}
+              diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice, v)}
+              aideActivee={etat.aideChamp1Utilisee}
+              onActiverAide={() => setEtat(activerAideChamp1(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse))}
+              validation={validation}
+            />
+          ) : (
+            <EtapeZeros
+              key={phase}
+              exercice={exercice}
+              enonceFixe={enonceFixe}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              recapitulatif={recapitulatif}
+              etatActuel={etatActuel}
+              aideActivee={etat.aideZerosUtilisee}
+              onActiverAide={() => setEtat(activerAideZeros(etat))}
+              onValider={(reponse: ReponseZeros) => terminerEtape(soumettreReponseChamp2(etat, reponse))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

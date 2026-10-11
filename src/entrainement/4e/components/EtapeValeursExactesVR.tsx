@@ -13,6 +13,8 @@ import {
   formatCelluleTanLatex,
 } from "../ui/cycleValeurTrigonometrique";
 import { AideSignesCercleTrig } from "./AideSignesCercleTrig";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 /** Mêmes couleurs que l'aide "Signes" du générateur 14 (`App.css`,
  * `.cercle-trig-projection-*`/`.cercle-trig-point-*`) — coloration des en-têtes du tableau une fois
@@ -29,6 +31,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: ReponseValeursExactes) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -48,6 +54,7 @@ export function EtapeValeursExactesVR({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [sin, setSin] = useState<CelluleSinCos>("?");
   const [cos, setCos] = useState<CelluleSinCos>("?");
@@ -111,19 +118,24 @@ export function EtapeValeursExactesVR({
 
       <AideSignesCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => complet && onValider({ sin, cos, tan })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => complet && onValider({ sin, cos, tan })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

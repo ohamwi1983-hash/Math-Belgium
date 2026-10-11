@@ -43,7 +43,9 @@ import {
   diagnostiquerRecetteMarginale,
   diagnostiquerRecetteTotale,
 } from "./moteur5e/verificationContexteEconomique";
-import { PRECISION_ECART_POURCENT, precisionRacineApprochee } from "./ui5e/formatContexteEconomique";
+import { formatReponseAttenduePhaseLatex, PRECISION_ECART_POURCENT, precisionRacineApprochee } from "./ui5e/formatContexteEconomique";
+import { Katex } from "./components/Katex";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { EtapeChampsLibresCE } from "./components5e/EtapeChampsLibresCE";
 import { EtapeChampsNumeriquesCE } from "./components5e/EtapeChampsNumeriquesCE";
 import { EtapeExtremumCoutTotal } from "./components5e/EtapeExtremumCoutTotal";
@@ -51,8 +53,6 @@ import { EtapeResoudreEgaliteMarginales } from "./components5e/EtapeResoudreEgal
 import { EtapeTableauSigneBenefice } from "./components5e/EtapeTableauSigneBenefice";
 import { EtapeConfirmationCoherence } from "./components5e/EtapeConfirmationCoherence";
 import { EtapeIterationDichotomie } from "./components5e/EtapeIterationDichotomie";
-import { ResultatPanelContexteEconomique } from "./components5e/ResultatPanelContexteEconomique";
-import { ResumeSessionContexteEconomique } from "./components5e/ResumeSessionContexteEconomique";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -60,32 +60,56 @@ function nouvelleSession(): EtatSessionContexteEconomique {
   return demarrerSessionContexteEconomique(REGLAGES_DEMO, genererExerciceContexteEconomique);
 }
 
-interface Bilan {
-  resultat: EtatSessionContexteEconomique["resultats"][number];
-  aideParPhase: Partial<Record<string, { niveauAide: number; revele: boolean }>>;
+/** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
+ * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionContexteEconomique;
+  revele: boolean;
 }
 
 export function App5gen33() {
   const [etat, setEtat] = useState<EtatSessionContexteEconomique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<string, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionContexteEconomique) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionContexteEconomique(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatReponseAttenduePhaseLatex(exercice, etat.phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -93,39 +117,20 @@ export function App5gen33() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Contexte économique</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_VARIANTES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setAideParPhase({});
-          setEtat(demarrerSessionContexteEconomique(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={etat.phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-              setEtat={setEtat}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelContexteEconomique
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionContexteEconomique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={etat.phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            setEtat={setEtat}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -141,9 +146,10 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionContexteEconomique) => void;
   setEtat: (etat: EtatSessionContexteEconomique) => void;
+  validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxContexteEconomique();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -165,6 +171,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseCoutMarginalDiscret(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerCoutMarginalDiscret(r[0], exercice)]}
+            validation={validation}
           />
         );
       case "deriveeSymbolique":
@@ -182,6 +189,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseDeriveeSymbolique(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerDeriveeSymboliqueA(r[0], exercice)]}
+            validation={validation}
           />
         );
       case "deriveeValeur":
@@ -200,6 +208,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseDeriveeValeur(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerDeriveeValeur(r[0], exercice)]}
+            validation={validation}
           />
         );
       case "comparaisonEcart":
@@ -218,6 +227,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseComparaisonEcart(etat, { ecartAbsolu: r[0], ecartPourcent: r[1] }))}
             diagnostiquer={(r) => [diagnostiquerEcartAbsolu(r[0], exercice), diagnostiquerEcartPourcent(r[1], exercice)]}
+            validation={validation}
           />
         );
       case "extremum":
@@ -232,6 +242,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseExtremum(etat, r))}
             diagnostiquerPosition={(t) => diagnostiquerPositionExtremumParmiCibles(t, exercice)}
+            validation={validation}
           />
         );
       default:
@@ -256,6 +267,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseRecetteTotale(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerRecetteTotale(r[0], exercice)]}
+            validation={validation}
           />
         );
       case "marginales":
@@ -273,6 +285,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseMarginales(etat, { coutMarginal: r[0], recetteMarginale: r[1] }))}
             diagnostiquer={(r) => [diagnostiquerCoutMarginalB(r[0], exercice), diagnostiquerRecetteMarginale(r[1], exercice)]}
+            validation={validation}
           />
         );
       case "resoudreEgaliteMarginales":
@@ -287,6 +300,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseEgaliteMarginales(etat, r))}
             diagnostiquerRacine={(t) => diagnostiquerRacineMarginale(t, exercice)}
+            validation={validation}
           />
         );
       case "beneficeFormule":
@@ -304,6 +318,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseBeneficeFormule(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerBeneficeFormule(r[0], exercice)]}
+            validation={validation}
           />
         );
       case "beneficeDerivee":
@@ -321,6 +336,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseBeneficeDerivee(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerBeneficeDerivee(r[0], exercice)]}
+            validation={validation}
           />
         );
       case "tableauSigneBenefice":
@@ -334,6 +350,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseTableauSigneBenefice(etat, r))}
+            validation={validation}
           />
         );
       case "confirmationCoherence":
@@ -347,6 +364,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseConfirmationCoherence(etat, r))}
+            validation={validation}
           />
         );
       case "beneficeMaximum":
@@ -365,6 +383,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseBeneficeMaximum(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerBeneficeMaximum(r[0], exercice)]}
+            validation={validation}
           />
         );
       default:
@@ -389,6 +408,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(r) => terminerEtape(soumettreReponsePoserEquationReduite(etat, r[0]))}
           diagnostiquer={(r) => [diagnostiquerEquationReduite(r[0], exercice)]}
+          validation={validation}
         />
       );
     case "iteration0":
@@ -410,6 +430,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(r) => terminerEtape(soumettreReponseIteration(etat, r))}
           diagnostiquerMilieu={(t) => diagnostiquerMilieuIteration(t, it.milieu)}
+          validation={validation}
         />
       );
     }
@@ -429,6 +450,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(r) => terminerEtape(soumettreReponseRacineApprochee(etat, r[0]))}
           diagnostiquer={(r) => [diagnostiquerRacineApprochee(r[0], exercice)]}
+          validation={validation}
         />
       );
     default:

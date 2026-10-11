@@ -9,10 +9,10 @@ import {
   demarrerSessionParametresSinusoide,
   soumettreReponseParametresSinusoide,
 } from "./moteur5e/sessionParametresSinusoide";
-import type { EtatSessionParametresSinusoide, ResultatExerciceParametresSinusoide } from "./moteur5e/typesParametresSinusoide";
+import type { EtatSessionParametresSinusoide } from "./moteur5e/typesParametresSinusoide";
 import { EtapeParametreSinusoide } from "./components5e/EtapeParametreSinusoide";
-import { ResultatPanelParametresSinusoide } from "./components5e/ResultatPanelParametresSinusoide";
-import { ResumeSessionParametresSinusoide } from "./components5e/ResumeSessionParametresSinusoide";
+import { formatChampParametreLatex } from "./ui5e/formatParametresSinusoide";
+import { Katex } from "./components/Katex";
 import type { PhaseParametresSinusoide } from "./moteur5e/typesParametresSinusoide";
 import {
   cibleAmplitude,
@@ -47,33 +47,49 @@ function cibleActuellePourDiagnostic(exercice: ExerciceParametresSinusoide, phas
   }
 }
 
-type AideParPhase = Partial<Record<PhaseParametresSinusoide, { niveauAide: number; revele: boolean }>>;
-
-interface Bilan {
-  resultat: ResultatExerciceParametresSinusoide;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
+ * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionParametresSinusoide;
+  revele: boolean;
 }
 
 export function App5gen8() {
   const [etat, setEtat] = useState<EtatSessionParametresSinusoide>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionParametresSinusoide) {
-    const miseAJour: AideParPhase = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionParametresSinusoide(REGLAGES_DEMO, () => construireAvecFormeId(id as FormeAffichageSinusoide)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: <Katex expression={formatChampParametreLatex(exercice, etat.phase)} />,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -81,42 +97,22 @@ export function App5gen8() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Paramètres d'une fonction sinusoïdale</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FORMES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionParametresSinusoide(REGLAGES_DEMO, () => construireAvecFormeId(id as FormeAffichageSinusoide)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FORMES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              <EtapeParametreSinusoide
-                key={etat.phase}
-                exercice={exercice}
-                phase={etat.phase}
-                tentativesUtilisees={tentativesUtilisees}
-                tentativesMax={tentativesMax}
-                niveauAide={etat.niveauAide}
-                niveauAideMax={NIVEAU_AIDE_MAX_SINUSOIDE}
-                onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoide(etat, texte))}
-                diagnostiquer={(texte) => diagnostiquerValeurSinusoide(texte, cibleActuellePourDiagnostic(exercice, etat.phase))}
-              />
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelParametresSinusoide
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionParametresSinusoide resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          <EtapeParametreSinusoide
+            key={etat.phase}
+            exercice={exercice}
+            phase={etat.phase}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            niveauAide={etat.niveauAide}
+            niveauAideMax={NIVEAU_AIDE_MAX_SINUSOIDE}
+            onActiverAide={() => setEtat(activerAideSuivante(etat))}
+            onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoide(etat, texte))}
+            diagnostiquer={(texte) => diagnostiquerValeurSinusoide(texte, cibleActuellePourDiagnostic(exercice, etat.phase))}
+            validation={validation}
+          />
         </div>
       </main>
     </div>

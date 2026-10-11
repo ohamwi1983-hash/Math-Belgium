@@ -10,7 +10,7 @@ import {
   soumettreReponseConclusion,
   soumettreReponseTableau,
 } from "./moteur5e/sessionComparaisonSuites";
-import type { EtatSessionComparaisonSuites, PhaseComparaisonSuites, ResultatExerciceComparaisonSuites } from "./moteur5e/typesComparaisonSuites";
+import type { EtatSessionComparaisonSuites } from "./moteur5e/typesComparaisonSuites";
 import {
   diagnostiquerCelluleTableau,
   diagnostiquerConclusion,
@@ -21,8 +21,9 @@ import {
 import { EtapeConclusionComparaisonSuites } from "./components5e/EtapeConclusionComparaisonSuites";
 import { EtapeTableauComparaisonSuites } from "./components5e/EtapeTableauComparaisonSuites";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelComparaisonSuites } from "./components5e/ResultatPanelComparaisonSuites";
-import { ResumeSessionComparaisonSuites } from "./components5e/ResumeSessionComparaisonSuites";
+import { formatConclusionNLatex, formatTraductionAttendueTexte } from "./ui5e/formatComparaisonSuites";
+import { Katex } from "./components/Katex";
+import { TableComparaisonRecap } from "./components5e/TableComparaisonRecap";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -30,35 +31,55 @@ function nouvelleSession(): EtatSessionComparaisonSuites {
   return demarrerSessionComparaisonSuites(REGLAGES_DEMO, genererExerciceComparaisonSuites);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceComparaisonSuites;
-  aideParPhase: Partial<Record<PhaseComparaisonSuites, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionComparaisonSuites;
+  revele: boolean;
 }
 
 export function App5gen18() {
   const [etat, setEtat] = useState<EtatSessionComparaisonSuites>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseComparaisonSuites, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionComparaisonSuites) {
-    // `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesComparaisonSuites.ts`.
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionComparaisonSuites(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleComparaisonSuites)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "tableau" ? (
+            <TableComparaisonRecap exercice={exercice} />
+          ) : (
+            <>
+              <Katex expression={formatConclusionNLatex(exercice)} /> — {formatTraductionAttendueTexte(exercice)}
+            </>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -66,17 +87,10 @@ export function App5gen18() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Comparaison numérique de deux suites</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionComparaisonSuites(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleComparaisonSuites)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {etat.phase === "tableau" && (
                 <EtapeTableauComparaisonSuites
                   key={cleEcran}
@@ -89,6 +103,7 @@ export function App5gen18() {
                   onValider={(textes) => terminerEtape(soumettreReponseTableau(etat, textes))}
                   diagnostiquer={(textes) => diagnostiquerTableau(textes, exercice)}
                   diagnostiquerCellule={(index, texte) => diagnostiquerCelluleTableau(texte, index, exercice)}
+                  validation={validation}
                 />
               )}
               {etat.phase === "tableau" && <CalculatriceScientifique />}
@@ -106,21 +121,10 @@ export function App5gen18() {
                   diagnostiquer={(reponse) => diagnostiquerConclusion(reponse, exercice)}
                   diagnostiquerNSeuil={(texte) => diagnostiquerNSeuil(texte, exercice)}
                   diagnostiquerTraduction={(texte) => diagnostiquerTraduction(texte, exercice)}
+                  validation={validation}
                 />
               )}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelComparaisonSuites
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionComparaisonSuites resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

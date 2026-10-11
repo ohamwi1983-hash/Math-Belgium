@@ -1,15 +1,13 @@
 import { useState } from "react";
-import type { ExerciceIntersectionDroites } from "./core/intersectionDroites.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionIntersectionDroites, soumettreReponseDiagnostic, soumettreReponsePoint } from "./moteur/sessionIntersectionDroites";
-import type { EtatSessionIntersectionDroites, PhaseIntersectionDroites, ResultatExerciceIntersectionDroites } from "./moteur/typesIntersectionDroites";
+import type { EtatSessionIntersectionDroites, PhaseIntersectionDroites } from "./moteur/typesIntersectionDroites";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersectionDroites } from "./generateurs/intersectionDroites";
 import type { VarianteIntersectionDroites } from "./core/intersectionDroites.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeDiagnosticIntersectionDroites } from "./components/EtapeDiagnosticIntersectionDroites";
 import { EtapePointIntersectionDroites } from "./components/EtapePointIntersectionDroites";
-import { ResultatPanelIntersectionDroites } from "./components/ResultatPanelIntersectionDroites";
-import { ResumeSessionIntersectionDroites } from "./components/ResumeSessionIntersectionDroites";
+import { texteConclusionAttendue, texteReponsePointAttendue } from "./ui/formatIntersectionDroites";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -23,33 +21,69 @@ function nouvelleSession(): EtatSessionIntersectionDroites {
   return demarrerSessionIntersectionDroites(REGLAGES_DEMO, genererExerciceIntersectionDroites);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceIntersectionDroites;
-  exercice: ExerciceIntersectionDroites;
-}
-
 const LIBELLE_PHASE: Record<PhaseIntersectionDroites, string> = {
   diagnostic: "Diagnostic",
   point: "Point d'intersection",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionIntersectionDroites;
+  revele: boolean;
+}
+
 export function AppIntersectionDroites() {
   const [etat, setEtat] = useState<EtatSessionIntersectionDroites>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceIntersectionDroites, nouvelEtat: EtatSessionIntersectionDroites) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionIntersectionDroites) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // "diagnostic" clôture directement l'exercice quand la conclusion n'est pas "secantes" (pas
+      // de second écran "point") — dans ce cas comme dans celui de "point" (toujours terminal),
+      // `nouvelEtat` ne porte plus de champ `xxxRevele` à jour au niveau racine (reposé par
+      // `cloturerExerciceOuSuivant`), donc on lit `revele` sur le `resultats` tout juste construit ;
+      // seule la vraie transition interne diagnostic → point garde le champ racine `diagnosticRevele`.
+      const revele = nouvelEtat.terminee
+        ? etat.phase === "diagnostic"
+          ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.diagnosticRevele
+          : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.pointRevele
+        : nouvelEtat.diagnosticRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionIntersectionDroites(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteIntersectionDroites)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <div className="answer-reveal">
+            {phase === "diagnostic" ? texteConclusionAttendue(exercice) : <>Réponse attendue : {texteReponsePointAttendue(exercice)}.</>}
+          </div>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -58,52 +92,38 @@ export function AppIntersectionDroites() {
         <h1 className="app-title">Intersection entre deux droites</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelIntersectionDroites
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionIntersectionDroites resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "diagnostic" ? (
-          <EtapeDiagnosticIntersectionDroites
-            exercice={etat.exerciceCourant}
-            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAideDiagnostic}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseDiagnostic(etat, reponse));
-            }}
-          />
-        ) : (
-          <EtapePointIntersectionDroites
-            exercice={etat.exerciceCourant}
-            tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-            tentativesMax={etat.reglages.tentativesMax}
-            niveauAide={etat.niveauAidePoint}
-            onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponsePoint(etat, reponse));
-            }}
-          />
-        )}
+          {phase === "diagnostic" ? (
+            <EtapeDiagnosticIntersectionDroites
+              key={phase}
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideDiagnostic}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDiagnostic(etat, reponse))}
+              validation={validation}
+            />
+          ) : (
+            <EtapePointIntersectionDroites
+              key={phase}
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAidePoint}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponsePoint(etat, reponse))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

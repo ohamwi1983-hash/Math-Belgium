@@ -7,12 +7,18 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
 import { MafsGraphFormeCanoniqueTransformations } from "./MafsGraphFormeCanoniqueTransformations";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueTransformation;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseTv) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const COULEUR_ORANGE = "#f08c00";
@@ -26,7 +32,7 @@ const COULEUR_VERT = "#2f9e44";
  * graphe : translation seule (écran 2, orange) et translation+étirement/compression/symétrie (écran
  * 3, vert), chacune légendée avec son expression réelle en forme canonique.
  */
-export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [tv, setTv] = useState(0);
   const [fonctionIntermediaire, setFonctionIntermediaire] = useState("");
 
@@ -81,19 +87,24 @@ export function EtapeTv({ exercice, tentativesUtilisees, tentativesMax, onValide
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ tv, fonctionIntermediaire })}
-      >
-        Valider
-      </button>
-      {statut !== undefined && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ tv, fonctionIntermediaire })}
+        >
+          Valider
+        </button>
+        {statut !== undefined && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

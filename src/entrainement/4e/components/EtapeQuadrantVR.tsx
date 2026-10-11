@@ -7,6 +7,8 @@ import { Katex } from "./Katex";
 import { formatEnonceCercleTrigLatex } from "../ui/formatValeursRemarquables";
 import { AideReductionCercleTrig } from "./AideReductionCercleTrig";
 import { CercleQuadrantSelecteur } from "./CercleQuadrantSelecteur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceValeursRemarquables;
@@ -16,6 +18,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (quadrant: Quadrant) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -26,7 +32,7 @@ interface Props {
  * `AideReductionCercleTrig` du générateur 14 ("le cercle avec le rayon de l'angle"), grâce à sa prop
  * désormais typée structurellement (`AngleSurCercle`) — `exercice` la satisfait déjà tel quel.
  */
-export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, aideActivee, onActiverAide, onValider }: Props) {
+export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, aideActivee, onActiverAide, onValider, validation}: Props) {
   const [selection, setSelection] = useState<Quadrant | null>(null);
 
   return (
@@ -40,19 +46,24 @@ export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, 
       <CercleQuadrantSelecteur selection={selection} onSelectionner={setSelection} />
 
       <AideReductionCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={selection === null}
-        onClick={() => selection !== null && onValider(selection)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={selection === null}
+          onClick={() => selection !== null && onValider(selection)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

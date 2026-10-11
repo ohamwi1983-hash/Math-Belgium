@@ -1,17 +1,19 @@
 import { useState } from "react";
-import type { ExerciceFonctionReference, ReglagesFamillesFonctionReference } from "./core/fonctionsReference.types";
+import type { ReactNode } from "react";
+import type { ReglagesFamillesFonctionReference } from "./core/fonctionsReference.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionFonctionReference, soumettreChoixFamille, soumettreReponse } from "./moteur/sessionFonctionsReference";
-import type { EtatSessionFonctionReference, ResultatExerciceFonctionReference } from "./moteur/typesFonctionsReference";
+import type { EtatSessionFonctionReference } from "./moteur/typesFonctionsReference";
 import { CATALOGUE_VARIANTES, construireAvecFamille, creerGenerateurFonctionReference } from "./generateurs/fonctionsReference";
 import type { FamilleReference } from "./core/fonctionsReference.types";
 import { calculerRecapitulatifFonctionReference } from "./ui/recapitulatifFonctionsReference";
+import { formatEquationFonctionReferenceLatex } from "./ui/formatFonctionsReference";
+import { libelleFamille } from "./ui/famillesReferenceLabels";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeReglagesFonctionsReference } from "./components/EtapeReglagesFonctionsReference";
 import { EtapeReconnaissanceFonction } from "./components/EtapeReconnaissanceFonction";
 import { EtapeFonctionsReferenceExercice } from "./components/EtapeFonctionsReferenceExercice";
-import { ResultatPanelFonctionsReference } from "./components/ResultatPanelFonctionsReference";
-import { ResumeSessionFonctionsReference } from "./components/ResumeSessionFonctionsReference";
+import { Katex } from "./components/Katex";
 
 const NOMBRE_EXERCICES_ALEATOIRE = 5;
 
@@ -37,40 +39,93 @@ function demarrer(reglagesFamilles: ReglagesFamillesFonctionReference): EtatSess
   return demarrerSessionFonctionReference(reglagesSession, creerGenerateurFonctionReference(reglagesFamilles));
 }
 
-interface Bilan {
-  resultat: ResultatExerciceFonctionReference;
-  exercice: ExerciceFonctionReference;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionFonctionReference;
+  revele: boolean;
+}
+
+/** Reproduit exactement ce que `ResultatPanelFonctionsReference.tsx` affichait pour UNE phase
+ * donnée, scopé à l'exercice/phase qui vient juste de se terminer (`etatAvant.exerciceCourant`/
+ * `etatAvant.phase`, jamais l'état suivant) — "exercice" clôture TOUJOURS l'exercice (2 notes
+ * indépendantes, équation/curseurs), donc son `xxxRevele` ne se lit que sur le dernier
+ * `resultats[...]` de `nouvelEtat` (jamais sur `nouvelEtat.etapeEquation`/`etapeCurseurs`,
+ * remis à zéro dès que l'exercice suivant démarre). */
+function reponseAttenduePhase(etatAvant: EtatSessionFonctionReference, nouvelEtat: EtatSessionFonctionReference): ReactNode {
+  const exercice = etatAvant.exerciceCourant;
+  if (etatAvant.phase === "reconnaissance") {
+    return <>Famille attendue : {libelleFamille(exercice.famille)}</>;
+  }
+
+  const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+  return (
+    <>
+      {resultat.equationRevele && (
+        <div>
+          Fonction attendue : <Katex expression={formatEquationFonctionReferenceLatex(exercice)} />
+        </div>
+      )}
+      {resultat.curseursRevele && (
+        <p>
+          Curseurs attendus : TH = {exercice.th} ; TV = {exercice.tv} ; CH = {exercice.ch} ; EH = {exercice.eh} ; EV = {exercice.ev} ; CV ={" "}
+          {exercice.cv} ; SOX = {exercice.sox ? "Oui" : "Non"} ; SOY = {exercice.soy ? "Oui" : "Non"}
+        </p>
+      )}
+    </>
+  );
+}
+
+/** Signal `revele` de la phase qui vient JUSTE de se terminer (`etatAvant.phase`, avant la
+ * transition) — "reconnaissance" l'expose directement sur `nouvelEtat.etapeReconnaissance.revelee`
+ * (jamais clôturante) ; "exercice" clôture TOUJOURS l'exercice (2 notes indépendantes), donc lu sur
+ * le dernier `resultats[...]` de `nouvelEtat`. */
+function releveRevelePhase(etatAvant: EtatSessionFonctionReference, nouvelEtat: EtatSessionFonctionReference): boolean {
+  if (etatAvant.phase === "reconnaissance") return nouvelEtat.etapeReconnaissance.revelee;
+  const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+  return resultat.equationRevele || resultat.curseursRevele;
 }
 
 export function AppFonctionsReference() {
   const [reglagesFamilles, setReglagesFamilles] = useState<ReglagesFamillesFonctionReference | null>(null);
   const [etat, setEtat] = useState<EtatSessionFonctionReference | null>(null);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function commencerSession(reglages: ReglagesFamillesFonctionReference) {
     setReglagesFamilles(reglages);
     setEtat(demarrer(reglages));
   }
 
-  function recommencer() {
-    if (reglagesFamilles) setEtat(demarrer(reglagesFamilles));
-  }
-
   function onGenererDev(familleId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE };
     setEtat(demarrerSessionFonctionReference(reglagesSession, () => construireAvecFamille(familleId as FamilleReference)));
   }
 
-  function terminerEtape(
-    etatCourant: EtatSessionFonctionReference,
-    exerciceTermine: ExerciceFonctionReference,
-    nouvelEtat: EtatSessionFonctionReference,
-  ) {
-    if (nouvelEtat.resultats.length > etatCourant.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionFonctionReference) {
+    if (!etat) return;
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
+      return;
     }
     setEtat(nouvelEtat);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    if (enAttente.etatSuivant.terminee) {
+      // Session ENTIÈREMENT terminée (les N exercices configurés) — redémarre avec les mêmes
+      // réglages (même principe que l'ancien bouton "Recommencer" de
+      // `ResumeSessionFonctionsReference`) ; `reglagesFamilles` est toujours non nul ici sauf
+      // session forcée par le panneau dev, où l'on retourne à l'écran de réglages.
+      setEtat(reglagesFamilles ? demarrer(reglagesFamilles) : null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
+    setEnAttente(null);
   }
 
   if (!etat) {
@@ -91,7 +146,14 @@ export function AppFonctionsReference() {
     );
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(etat, enAttente.etatSuivant),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -103,35 +165,24 @@ export function AppFonctionsReference() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-step">
-                Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-              </span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-step">
+              Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
+            </span>
           </div>
-        )}
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
+          </div>
+        </div>
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelFonctionsReference
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionFonctionsReference resultats={etat.resultats} onRecommencer={recommencer} />
-          ) : etat.phase === "reconnaissance" ? (
+          {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFonction
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeReconnaissance.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onChoisir={(choix) => setEtat(soumettreChoixFamille(etat, choix))}
+              onChoisir={(choix) => terminerEtape(soumettreChoixFamille(etat, choix))}
+              validation={validation}
             />
           ) : (
             <EtapeFonctionsReferenceExercice
@@ -144,10 +195,8 @@ export function AppFonctionsReference() {
               curseursFermee={etat.etapeCurseurs.terminee}
               aideActivee={etat.aideUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(etat, exerciceTermine, soumettreReponse(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponse(etat, reponse))}
+              validation={validation}
             />
           )}
         </div>

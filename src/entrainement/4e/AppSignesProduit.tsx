@@ -1,7 +1,6 @@
 import { useState } from "react";
-import type { Categorie, Enonce, Exercice } from "./core/generateur.types";
-import type { SigneA } from "./core/inequation.types";
-import type { ExerciceSignesProduit, FacteurQuadratiqueIrreductible, Grille, SolutionEnsembleProduit } from "./core/signesProduit.types";
+import type { Enonce, Exercice } from "./core/generateur.types";
+import type { ExerciceSignesProduit, FacteurQuadratiqueIrreductible, FacteurSignesProduit, SolutionEnsembleProduit } from "./core/signesProduit.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideFactorisationChamp1,
@@ -23,7 +22,7 @@ import {
 } from "./moteur/sessionSignesProduit";
 import { diagnostiquerChampPrincipal, diagnostiquerFactorisationCasGeneral } from "./moteur/verification";
 import { diagnostiquerReductionCoefficients } from "./moteur/verificationSimplification";
-import type { EtatSessionSignesProduit, PhaseSignesProduit, ResultatExerciceSignesProduit } from "./moteur/typesSignesProduit";
+import type { EtatSessionSignesProduit, PhaseSignesProduit } from "./moteur/typesSignesProduit";
 import {
   CATALOGUE_VARIANTES,
   construireAvecVarianteId,
@@ -39,12 +38,13 @@ import { EtapeRacineLineaire } from "./components/EtapeRacineLineaire";
 import { EtapeSigneIrreductible } from "./components/EtapeSigneIrreductible";
 import { EtapeGrilleSignes } from "./components/EtapeGrilleSignes";
 import { EtapeIntervalleProduit } from "./components/EtapeIntervalleProduit";
-import { ResultatPanelSignesProduit } from "./components/ResultatPanelSignesProduit";
-import { ResumeSessionSignesProduit } from "./components/ResumeSessionSignesProduit";
 import { calculerRecapitulatifSignesProduit } from "./ui/recapitulatifSignesProduit";
 import { calculerEtatActuelSignesProduit } from "./ui/etatActuelSignesProduit";
 import { formatTermesEnonceSignesProduitLatex } from "./ui/formatSignesProduit";
 import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE } from "./ui/categorieLabels";
+import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
+import { formatFormeFactoriseeDepuisRacines } from "./ui/formatEquation";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -69,6 +69,11 @@ function facteursIrreductibles(exercice: ExerciceSignesProduit): FacteurQuadrati
   return exercice.facteurs.filter((f): f is FacteurQuadratiqueIrreductible => f.type === "quadratique_irreductible");
 }
 
+/** Les facteurs linéaires de l'exercice courant, dans l'ordre de exercice.facteurs. */
+function facteursLineaires(exercice: ExerciceSignesProduit): Extract<FacteurSignesProduit, { type: "lineaire" }>[] {
+  return exercice.facteurs.filter((f): f is Extract<FacteurSignesProduit, { type: "lineaire" }> => f.type === "lineaire");
+}
+
 /**
  * Un `Exercice` factice pour l'écran "methodeFacteur" d'un facteur réellement irréductible — ce
  * composant partagé exige un `exercice: Exercice` (utilisé par sa branche d'affichage PAR DÉFAUT),
@@ -83,11 +88,6 @@ function exerciceFactice(enonce: Enonce): Exercice {
     solution: { racines: [NaN, NaN], racinesExactes: true },
     formeAffichage: "canonique",
   };
-}
-
-interface Bilan {
-  resultat: ResultatExerciceSignesProduit;
-  exercice: ExerciceSignesProduit;
 }
 
 const LIBELLE_PHASE_FIXE: Partial<Record<PhaseSignesProduit, string>> = {
@@ -119,87 +119,137 @@ function libellePhase(etat: EtatSessionSignesProduit): string {
   return `Méthode${nbQuadratiques > 1 ? ` (facteur ${etat.scoresMethodeExercice.length + 1})` : ""}`;
 }
 
+/** État tenu en attente dès qu'une SOUS-ÉTAPE notée se termine (bonne réponse, ou tentatives
+ * épuisées) — l'état de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le
+ * bouton de `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation
+ * avant de passer à l'écran suivant"). Les phases "racineLineaire"/"methodeFacteur"/
+ * "signeIrreductible" se répètent une fois par facteur (même nom de phase d'un facteur au suivant),
+ * donc la clôture ne peut JAMAIS être détectée via un simple changement de `phase` pour ces 3-là —
+ * elle est détectée via la croissance du tableau de scores concerné (voir `terminerEtape`). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSignesProduit;
+  revele: boolean;
+}
+
 export function AppSignesProduit() {
   const [etat, setEtat] = useState<EtatSessionSignesProduit>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function validerRacineLineaire(racine: number) {
-    setEtat(soumettreReponseRacineLineaire(etat, racine));
-  }
+  function terminerEtape(nouvelEtat: EtatSessionSignesProduit) {
+    const transitionDEcran = (() => {
+      switch (etat.phase) {
+        case "racineLineaire":
+          return nouvelEtat.scoresRacineLineaireExercice.length > etat.scoresRacineLineaireExercice.length;
+        case "methodeFacteur":
+          return nouvelEtat.scoresMethodeExercice.length > etat.scoresMethodeExercice.length;
+        case "signeIrreductible":
+          return nouvelEtat.scoresSigneIrreductibleExercice.length > etat.scoresSigneIrreductibleExercice.length;
+        case "intervalle":
+          return nouvelEtat.terminee !== etat.terminee || nouvelEtat.resultats.length > etat.resultats.length;
+        default:
+          // reductionFacteur/factorisationChamp1/factorisationChamp2/factorisationFactorisation/grille
+          // ne se répètent jamais pour un même exercice (au plus une occurrence chacune) — un simple
+          // changement de phase suffit à détecter leur clôture.
+          return nouvelEtat.phase !== etat.phase;
+      }
+    })();
 
-  function validerReductionFacteur(reponse: string) {
-    setEtat(soumettreReponseReductionFacteur(etat, reponse));
-  }
-
-  function activerAideEtapeReductionFacteur() {
-    setEtat(activerAideReductionFacteur(etat));
-  }
-
-  function validerMethodeFacteur(choix: Categorie) {
-    setEtat(soumettreChoixMethodeFacteur(etat, choix));
-  }
-
-  function validerFactorisationChamp1(reponse: string) {
-    setEtat(soumettreReponseFactorisationChamp1(etat, reponse));
-  }
-
-  function validerFactorisationChamp2(racines: [number, number]) {
-    setEtat(soumettreReponseFactorisationChamp2(etat, racines));
-  }
-
-  function validerFactorisationFactorisation(reponse: string) {
-    setEtat(soumettreReponseFactorisationFactorisation(etat, reponse));
-  }
-
-  function validerSigneIrreductible(reponse: SigneA) {
-    setEtat(soumettreReponseSigneIrreductible(etat, reponse));
-  }
-
-  function validerGrille(reponse: Grille) {
-    setEtat(soumettreReponseGrille(etat, reponse));
-  }
-
-  function activerAide() {
-    setEtat(activerAideGrilleSolution(etat));
-  }
-
-  function activerAideEtapeFactorisationChamp1() {
-    setEtat(activerAideFactorisationChamp1(etat));
-  }
-
-  function activerAideEtapeFactorisationChamp2() {
-    setEtat(activerAideFactorisationChamp2(etat));
-  }
-
-  function activerAideEtapeFactorisationFactorisation() {
-    setEtat(activerAideFactorisationFactorisation(etat));
-  }
-
-  function activerAideEtapeGrilleTableau() {
-    setEtat(activerAideGrilleTableau(etat));
-  }
-
-  function validerIntervalle(reponse: SolutionEnsembleProduit) {
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseIntervalle(etat, reponse);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+    if (!transitionDEcran) {
+      setEtat(nouvelEtat);
+      return;
     }
-    setEtat(nouvelEtat);
+
+    const revele = (() => {
+      switch (etat.phase) {
+        case "racineLineaire":
+          return nouvelEtat.scoresRacineLineaireExercice[nouvelEtat.scoresRacineLineaireExercice.length - 1] === 0;
+        case "reductionFacteur":
+          return nouvelEtat.scoreReductionFacteurExercice === 0;
+        case "methodeFacteur":
+          return nouvelEtat.methodeRevelees[nouvelEtat.methodeRevelees.length - 1]!;
+        case "factorisationChamp1":
+          return nouvelEtat.scoreFactorisationChamp1Exercice === 0;
+        case "factorisationChamp2":
+          return nouvelEtat.scoreFactorisationChamp2Exercice === 0;
+        case "factorisationFactorisation":
+          return nouvelEtat.scoreFactorisationFactorisationExercice === 0;
+        case "signeIrreductible":
+          return nouvelEtat.scoresSigneIrreductibleExercice[nouvelEtat.scoresSigneIrreductibleExercice.length - 1] === 0;
+        case "grille":
+          return nouvelEtat.grilleRevelee;
+        case "intervalle":
+          return nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.intervalleRevele;
+      }
+    })();
+
+    setEnAttente({ etatSuivant: nouvelEtat, revele });
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(varianteId: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionSignesProduit(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSignesProduitId)));
+  }
+
   const recapitulatif = calculerRecapitulatifSignesProduit(etat);
   const etatActuel = calculerEtatActuelSignesProduit(etat);
   const expressionEnonceTermes = formatTermesEnonceSignesProduitLatex(etat.exerciceCourant);
   const factorisable = facteurFactorisable(etat.exerciceCourant);
-  const irreductibleCourant = facteursIrreductibles(etat.exerciceCourant)[etat.scoresSigneIrreductibleExercice.length];
+  const irreductibles = facteursIrreductibles(etat.exerciceCourant);
+  const lineaires = facteursLineaires(etat.exerciceCourant);
+  const irreductibleCourant = irreductibles[etat.scoresSigneIrreductibleExercice.length];
   const facteurCourant = etat.exerciceCourant.facteurs[etat.indexFacteurExercice];
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
-    setEtat(demarrerSessionSignesProduit(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSignesProduitId)));
-  }
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
+          switch (etat.phase) {
+            case "racineLineaire": {
+              const index = etat.scoresRacineLineaireExercice.length;
+              return (
+                <>
+                  Racine attendue (facteur linéaire{lineaires.length > 1 ? ` ${index + 1}` : ""}) : {lineaires[index]?.polynome.p}
+                </>
+              );
+            }
+            case "factorisationChamp2":
+              return factorisable ? (
+                <>Racines attendues (facteur à factoriser) : {[...factorisable.solution.racines].sort((a, b) => a - b).join(" ; ")}</>
+              ) : undefined;
+            case "factorisationFactorisation":
+              return factorisable ? (
+                <>
+                  Forme factorisée attendue (facteur à factoriser) :{" "}
+                  <Katex expression={`${formatFormeFactoriseeDepuisRacines(factorisable.enonce, factorisable.solution.racines)} = 0`} />
+                </>
+              ) : undefined;
+            case "signeIrreductible": {
+              const index = etat.scoresSigneIrreductibleExercice.length;
+              return (
+                <>
+                  Signe attendu (facteur irréductible{irreductibles.length > 1 ? ` ${index + 1}` : ""}) :{" "}
+                  {irreductibles[index]?.signe === "+" ? "toujours positif" : "toujours négatif"}
+                </>
+              );
+            }
+            case "grille":
+              return <>Tableau attendu : signe du produit = {etat.exerciceCourant.grille.produit.join(" ")}</>;
+            case "intervalle":
+              return <>Réponse attendue : S = {formatSolutionEnsembleProduit(etat.exerciceCourant.solution)}</>;
+            default:
+              return undefined;
+          }
+        })(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -207,37 +257,26 @@ export function AppSignesProduit() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Tableau de signes à plusieurs facteurs</h1>
         <p className="app-subtitle">Produit de facteurs du 1er et du 2nd degré</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{libellePhase(etat)}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{libellePhase(etat)}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelSignesProduit
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionSignesProduit resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "racineLineaire" && facteurCourant?.type === "lineaire" ? (
+          {etat.phase === "racineLineaire" && facteurCourant?.type === "lineaire" ? (
             <EtapeRacineLineaire
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
               etatActuel={etatActuel as string}
-              onValider={validerRacineLineaire}
+              onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine))}
+              validation={validation}
             />
           ) : etat.phase === "reductionFacteur" && facteurCourant?.type === "quadratique_factorisable" ? (
             <EtapeReductionCoefficients
@@ -250,8 +289,9 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(facteurCourant.exercice, v)}
               aideActivee={etat.aideReductionFacteurUtilisee}
-              onActiverAide={activerAideEtapeReductionFacteur}
-              onValider={validerReductionFacteur}
+              onActiverAide={() => setEtat(activerAideReductionFacteur(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "methodeFacteur" && facteurCourant && facteurCourant.type !== "lineaire" ? (
             <EtapeReconnaissance
@@ -263,7 +303,8 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               options={OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE}
               question="Quelle est la méthode la plus rapide pour factoriser ce facteur ?"
-              onChoisir={validerMethodeFacteur}
+              onChoisir={(choix) => terminerEtape(soumettreChoixMethodeFacteur(etat, choix))}
+              validation={validation}
             />
           ) : etat.phase === "factorisationChamp1" && factorisable ? (
             <EtapeChamp1
@@ -275,8 +316,9 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(factorisable, v)}
               aideActivee={etat.aideFactorisationChamp1Utilisee}
-              onActiverAide={activerAideEtapeFactorisationChamp1}
-              onValider={validerFactorisationChamp1}
+              onActiverAide={() => setEtat(activerAideFactorisationChamp1(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationChamp1(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "factorisationChamp2" && factorisable ? (
             <EtapeRacinesFlexibles
@@ -292,8 +334,9 @@ export function AppSignesProduit() {
               expressionAfficheeTermes={expressionEnonceTermes}
               etatActuel={etatActuel}
               aideActivee={etat.aideFactorisationChamp2Utilisee}
-              onActiverAide={activerAideEtapeFactorisationChamp2}
-              onValider={validerFactorisationChamp2}
+              onActiverAide={() => setEtat(activerAideFactorisationChamp2(etat))}
+              onValider={(racines) => terminerEtape(soumettreReponseFactorisationChamp2(etat, racines))}
+              validation={validation}
             />
           ) : etat.phase === "factorisationFactorisation" && factorisable ? (
             <EtapeChamp1
@@ -307,8 +350,9 @@ export function AppSignesProduit() {
               etapeFactorisationForcee
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(factorisable, v)}
               aideActivee={etat.aideFactorisationFactorisationUtilisee}
-              onActiverAide={activerAideEtapeFactorisationFactorisation}
-              onValider={validerFactorisationFactorisation}
+              onActiverAide={() => setEtat(activerAideFactorisationFactorisation(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationFactorisation(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "signeIrreductible" && irreductibleCourant ? (
             <EtapeSigneIrreductible
@@ -318,7 +362,8 @@ export function AppSignesProduit() {
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
               etatActuel={etatActuel}
-              onValider={validerSigneIrreductible}
+              onValider={(reponse) => terminerEtape(soumettreReponseSigneIrreductible(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "grille" ? (
             <EtapeGrilleSignes
@@ -327,8 +372,9 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideGrilleTableauUtilisee}
-              onActiverAide={activerAideEtapeGrilleTableau}
-              onValider={validerGrille}
+              onActiverAide={() => setEtat(activerAideGrilleTableau(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseGrille(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeIntervalleProduit
@@ -337,10 +383,11 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideUtilisee}
-              onActiverAide={activerAide}
-              onValider={validerIntervalle}
+              onActiverAide={() => setEtat(activerAideGrilleSolution(etat))}
+              onValider={(reponse: SolutionEnsembleProduit) => terminerEtape(soumettreReponseIntervalle(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

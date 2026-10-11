@@ -1,5 +1,7 @@
 import { useState } from "react";
-import type { PhasePolygonesArcsSecteurs } from "./moteur5e/typesPolygonesArcsSecteurs";
+import type { ReactNode } from "react";
+import type { ExercicePolygonesArcsSecteurs } from "./core5e/polygonesArcsSecteurs.types";
+import type { EtatSessionPolygonesArcsSecteurs, PhasePolygonesArcsSecteurs } from "./moteur5e/typesPolygonesArcsSecteurs";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { construireAvecPresence, genererExercicePolygonesArcsSecteurs } from "./generateurs5e/polygonesArcsSecteurs";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -17,13 +19,19 @@ import {
   soumettreReponseCercleEntier,
   soumettreReponseEcranUnChamp,
 } from "./moteur5e/sessionPolygonesArcsSecteurs";
-import type { EtatSessionPolygonesArcsSecteurs, ResultatExercicePolygonesArcsSecteurs } from "./moteur5e/typesPolygonesArcsSecteurs";
 import { cibleEcranUnChamp, diagnostiquerCercleEntier } from "./moteur5e/verificationPolygonesArcsSecteurs";
 import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteurs";
 import { EtapeCercleEntier } from "./components5e/EtapeCercleEntier";
 import { EtapeEcranUnChampPolygone } from "./components5e/EtapeEcranUnChampPolygone";
-import { ResultatPanelPolygone } from "./components5e/ResultatPanelPolygone";
-import { ResumeSessionPolygone } from "./components5e/ResumeSessionPolygone";
+import {
+  formatAireTotaleAttendueLatex,
+  formatArcElementaireAttendueLatex,
+  formatArcMultiPasAttendueLatex,
+  formatCirconferenceAttendueLatex,
+  formatSecteurElementaireAttendueLatex,
+  formatSecteurMultiPasAttendueLatex,
+} from "./ui5e/formatPolygonesArcsSecteurs";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -31,32 +39,96 @@ function nouvelleSession(): EtatSessionPolygonesArcsSecteurs {
   return demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, genererExercicePolygonesArcsSecteurs);
 }
 
-interface Bilan {
-  resultat: ResultatExercicePolygonesArcsSecteurs;
-  aideParPhase: Partial<Record<PhasePolygonesArcsSecteurs, number>>;
+/** Révèle le champ `xxxRevele` de la phase qui vient de se terminer (`phase` = `etat.phase`, AVANT
+ * la mise à jour). Non terminal : lu directement sur `nouvelEtat` (posé par `transitionApresEcran`
+ * à la clôture de la phase). Terminal ("secteurElementaire" quand `secteurMultiPas` est absent, ou
+ * "secteurMultiPas") : `cloturerExerciceOuSuivant` ne pose ce champ que DANS le `resultats` ajouté. */
+function releveDeLaPhase(phase: PhasePolygonesArcsSecteurs, nouvelEtat: EtatSessionPolygonesArcsSecteurs): boolean {
+  if (nouvelEtat.terminee) {
+    const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+    if (phase === "secteurMultiPas") return resultat.secteurMultiPasRevele;
+    return resultat.secteurElementaireRevele;
+  }
+  switch (phase) {
+    case "cercleEntier":
+      return nouvelEtat.cercleEntierRevele;
+    case "arcElementaire":
+      return nouvelEtat.arcElementaireRevele;
+    case "arcMultiPas":
+      return nouvelEtat.arcMultiPasRevele;
+    case "secteurElementaire":
+      return nouvelEtat.secteurElementaireRevele;
+    default:
+      throw new Error("releveDeLaPhase : phase non-terminale inattendue");
+  }
+}
+
+/** Réponse attendue de la phase qui vient de se terminer — réplique exactement la `LigneRecap`
+ * correspondante de l'ancien `ResultatPanelPolygone.tsx`. Dérivée PUREMENT de `exercice`. */
+function reponseAttenduePhase(exercice: ExercicePolygonesArcsSecteurs, phase: PhasePolygonesArcsSecteurs): ReactNode {
+  switch (phase) {
+    case "cercleEntier":
+      return (
+        <>
+          <Katex expression={`\\text{Circonférence} = ${formatCirconferenceAttendueLatex(exercice)}`} />{" "}
+          <Katex expression={`\\text{Aire} = ${formatAireTotaleAttendueLatex(exercice)}`} />
+        </>
+      );
+    case "arcElementaire":
+      return <Katex expression={formatArcElementaireAttendueLatex(exercice)} />;
+    case "arcMultiPas":
+      return <Katex expression={formatArcMultiPasAttendueLatex(exercice) as string} />;
+    case "secteurElementaire":
+      return <Katex expression={formatSecteurElementaireAttendueLatex(exercice)} />;
+    case "secteurMultiPas":
+      return <Katex expression={formatSecteurMultiPasAttendueLatex(exercice) as string} />;
+  }
+}
+
+/** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
+ * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionPolygonesArcsSecteurs;
+  revele: boolean;
 }
 
 export function App5gen7() {
   const [etat, setEtat] = useState<EtatSessionPolygonesArcsSecteurs>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhasePolygonesArcsSecteurs, number>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionPolygonesArcsSecteurs) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: etat.niveauAide };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: releveDeLaPhase(etat.phase, nouvelEtat) });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, () => construireAvecPresence(id[0] === "1", id[1] === "1")));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-  const niveauAideMaxEcran = enCoursDeSession ? niveauAideMax(etat.phase) : 0;
+  const niveauAideMaxEcran = niveauAideMax(etat.phase);
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(exercice, etat.phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -64,60 +136,41 @@ export function App5gen7() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Polygones, arcs et secteurs</h1>
       </header>
-      <SelecteurVarianteDev
-        options={OPTIONS_PRESENCE}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, () => construireAvecPresence(id[0] === "1", id[1] === "1")));
-        }}
-      />
+      <SelecteurVarianteDev options={OPTIONS_PRESENCE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {etat.phase === "cercleEntier" ? (
-                <EtapeCercleEntier
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEcran}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(r) => terminerEtape(soumettreReponseCercleEntier(etat, r))}
-                  diagnostiquer={(r) => diagnostiquerCercleEntier(exercice, r)}
-                />
-              ) : (
-                <EtapeEcranUnChampPolygone
-                  key={etat.phase}
-                  exercice={exercice}
-                  phase={etat.phase as Exclude<PhasePolygonesArcsSecteurs, "cercleEntier">}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMaxEcran}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseEcranUnChamp(etat, texte))}
-                  diagnostiquer={(texte) =>
-                    diagnostiquerValeurArcSecteur(
-                      texte,
-                      cibleEcranUnChamp(exercice, etat.phase as Exclude<PhasePolygonesArcsSecteurs, "cercleEntier">),
-                    )
-                  }
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelPolygone
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {etat.phase === "cercleEntier" ? (
+            <EtapeCercleEntier
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEcran}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(r) => terminerEtape(soumettreReponseCercleEntier(etat, r))}
+              diagnostiquer={(r) => diagnostiquerCercleEntier(exercice, r)}
+              validation={validation}
+            />
+          ) : (
+            <EtapeEcranUnChampPolygone
+              key={etat.phase}
+              exercice={exercice}
+              phase={etat.phase as Exclude<PhasePolygonesArcsSecteurs, "cercleEntier">}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMaxEcran}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseEcranUnChamp(etat, texte))}
+              diagnostiquer={(texte) =>
+                diagnostiquerValeurArcSecteur(
+                  texte,
+                  cibleEcranUnChamp(exercice, etat.phase as Exclude<PhasePolygonesArcsSecteurs, "cercleEntier">),
+                )
+              }
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionPolygone resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

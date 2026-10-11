@@ -6,6 +6,8 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceEquationTrig;
@@ -17,6 +19,10 @@ interface Props {
   onValider: (lignes: string[]) => void;
   /** Statut à 3 valeurs, calculé côté PRÉSENTATION uniquement — voir `EtapeArgumentEquationTrig`. */
   diagnostiquer?: (lignes: string[]) => StatutVerification;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Bloc "état actuel" — rappelle l'argument déjà posé à l'écran précédent ("argument"), sous forme
@@ -37,7 +43,7 @@ function EtatActuelDirecte({ exercice, phase }: { exercice: ExerciceEquationTrig
  * nombre de branches déjà confirmées à l'écran 1 (connu avec certitude à ce stade). D.2 : AUCUNE
  * aide sur cet écran (`niveauAideMaxEquationTrig` plafonne cette phase à 0, voir
  * `moteur5e/sessionEquationTrig.ts`) — le bouton et le bloc d'aide sont donc entièrement absents. */
-export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer }: Props) {
+export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, exercice.branchesU.length) }, () => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -92,14 +98,19 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
       <button type="button" className="btn" onClick={ajouterLigne}>
         + Ajouter une série
       </button>
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, dernierStatut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

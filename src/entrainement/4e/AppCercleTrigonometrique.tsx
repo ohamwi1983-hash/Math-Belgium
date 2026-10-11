@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceCercleTrigonometrique } from "./core/cercleTrigonometrique.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAide,
@@ -9,11 +8,7 @@ import {
   soumettreReponseReduction,
   soumettreReponseSignes,
 } from "./moteur/sessionCercleTrigonometrique";
-import type {
-  EtatSessionCercleTrigonometrique,
-  PhaseCercleTrigonometrique,
-  ResultatExerciceCercleTrigonometrique,
-} from "./moteur/typesCercleTrigonometrique";
+import type { EtatSessionCercleTrigonometrique, PhaseCercleTrigonometrique } from "./moteur/typesCercleTrigonometrique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCercleTrigonometrique } from "./generateurs/cercleTrigonometrique";
 import type { VarianteCercleTrigId } from "./core/cercleTrigonometrique.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -21,8 +16,7 @@ import { EtapeReductionCercleTrig } from "./components/EtapeReductionCercleTrig"
 import { EtapeQuadrantCercleTrig } from "./components/EtapeQuadrantCercleTrig";
 import { EtapeAnglePremierQuadrantCercleTrig } from "./components/EtapeAnglePremierQuadrantCercleTrig";
 import { EtapeSignesCercleTrig } from "./components/EtapeSignesCercleTrig";
-import { ResultatPanelCercleTrigonometrique } from "./components/ResultatPanelCercleTrigonometrique";
-import { ResumeSessionCercleTrigonometrique } from "./components/ResumeSessionCercleTrigonometrique";
+import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
 import { calculerRecapitulatifCercleTrigonometrique } from "./ui/recapitulatifCercleTrigonometrique";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -37,9 +31,13 @@ function nouvelleSession(): EtatSessionCercleTrigonometrique {
   return demarrerSessionCercleTrigonometrique(REGLAGES_DEMO, genererExerciceCercleTrigonometrique);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceCercleTrigonometrique;
-  exercice: ExerciceCercleTrigonometrique;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionCercleTrigonometrique;
+  revele: boolean;
 }
 
 const LIBELLE_PHASE: Record<PhaseCercleTrigonometrique, string> = {
@@ -51,22 +49,61 @@ const LIBELLE_PHASE: Record<PhaseCercleTrigonometrique, string> = {
 
 export function AppCercleTrigonometrique() {
   const [etat, setEtat] = useState<EtatSessionCercleTrigonometrique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceCercleTrigonometrique, nouvelEtat: EtatSessionCercleTrigonometrique) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionCercleTrigonometrique) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "reduction"
+          ? nouvelEtat.reductionRevele
+          : etat.phase === "quadrant"
+            ? nouvelEtat.quadrantRevele
+            : etat.phase === "anglePremierQuadrant"
+              ? nouvelEtat.anglePremierQuadrantRevele
+              : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.signesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const recapitulatif = calculerRecapitulatifCercleTrigonometrique(etat);
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionCercleTrigonometrique(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteCercleTrigId)));
   }
+
+  const exercice = etat.exerciceCourant;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec
+          ? undefined
+          : etat.phase === "reduction" ? (
+              <>Angle réduit attendu : {exercice.angleReduit}°</>
+            ) : etat.phase === "quadrant" ? (
+              <>Quadrant attendu : {libelleQuadrant(exercice.quadrant)}</>
+            ) : etat.phase === "anglePremierQuadrant" ? (
+              <>Angle du premier quadrant attendu : {exercice.anglePremierQuadrant}°</>
+            ) : (
+              <>
+                Signes attendus : sin(θ) {exercice.signeSin} ; cos(θ) {exercice.signeCos} ; tan(θ){" "}
+                {exercice.signeTan === "indefini" ? "∄" : exercice.signeTan}
+              </>
+            ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -75,29 +112,16 @@ export function AppCercleTrigonometrique() {
         <h1 className="app-title">Placement et lecture sur le cercle trigonométrique</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
+          </div>
+        </div>
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-          </div>
-        )}
-
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelCercleTrigonometrique
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionCercleTrigonometrique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "reduction" ? (
+          {etat.phase === "reduction" ? (
             <EtapeReductionCercleTrig
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
@@ -105,7 +129,8 @@ export function AppCercleTrigonometrique() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideReductionUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(valeur) => setEtat(soumettreReponseReduction(etat, valeur))}
+              onValider={(valeur) => terminerEtape(soumettreReponseReduction(etat, valeur))}
+              validation={validation}
             />
           ) : etat.phase === "quadrant" ? (
             <EtapeQuadrantCercleTrig
@@ -113,7 +138,8 @@ export function AppCercleTrigonometrique() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(quadrant) => setEtat(soumettreReponseQuadrant(etat, quadrant))}
+              onValider={(quadrant) => terminerEtape(soumettreReponseQuadrant(etat, quadrant))}
+              validation={validation}
             />
           ) : etat.phase === "anglePremierQuadrant" ? (
             <EtapeAnglePremierQuadrantCercleTrig
@@ -123,7 +149,8 @@ export function AppCercleTrigonometrique() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideAnglePremierQuadrantUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(valeur) => setEtat(soumettreReponseAnglePremierQuadrant(etat, valeur))}
+              onValider={(valeur) => terminerEtape(soumettreReponseAnglePremierQuadrant(etat, valeur))}
+              validation={validation}
             />
           ) : (
             <EtapeSignesCercleTrig
@@ -133,12 +160,10 @@ export function AppCercleTrigonometrique() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideSignesUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponseSignes(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseSignes(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

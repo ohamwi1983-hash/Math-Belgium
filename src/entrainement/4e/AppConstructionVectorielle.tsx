@@ -1,12 +1,10 @@
 import { useState } from "react";
-import type { ExerciceConstructionVectorielle } from "./core/constructionVectorielle.types";
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionConstructionVectorielle, soumettreReponseConstruction } from "./moteur/sessionConstructionVectorielle";
-import type { EtatSessionConstructionVectorielle, ResultatExerciceConstructionVectorielle } from "./moteur/typesConstructionVectorielle";
+import type { EtatSessionConstructionVectorielle } from "./moteur/typesConstructionVectorielle";
 import { genererExerciceConstructionVectorielle } from "./generateurs/constructionVectorielle";
 import { EtapeConstructionVectorielle } from "./components/EtapeConstructionVectorielle";
-import { ResultatPanelConstructionVectorielle } from "./components/ResultatPanelConstructionVectorielle";
-import { ResumeSessionConstructionVectorielle } from "./components/ResumeSessionConstructionVectorielle";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -20,22 +18,54 @@ function nouvelleSession(): EtatSessionConstructionVectorielle {
   return demarrerSessionConstructionVectorielle(REGLAGES_DEMO, genererExerciceConstructionVectorielle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceConstructionVectorielle;
-  exercice: ExerciceConstructionVectorielle;
+/** Notation matricielle colonne (2×1) — jamais la notation en ligne d'un point (correction
+ * transversale : un vecteur ne doit jamais être visuellement indiscernable d'un point). */
+function formatVecteurColonneLatex(v: { x: number; y: number }): string {
+  return `\\begin{pmatrix} ${v.x} \\\\ ${v.y} \\end{pmatrix}`;
+}
+
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionConstructionVectorielle;
+  revele: boolean;
 }
 
 export function AppConstructionVectorielle() {
   const [etat, setEtat] = useState<EtatSessionConstructionVectorielle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceConstructionVectorielle, nouvelEtat: EtatSessionConstructionVectorielle) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionConstructionVectorielle) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.constructionRevele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  const exercice = etat.exerciceCourant;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (
+          <>
+            Vecteur attendu : <Katex expression={formatVecteurColonneLatex(exercice.cibleComposantes)} />, depuis n'importe quel point d'ancrage.
+          </>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -47,27 +77,13 @@ export function AppConstructionVectorielle() {
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelConstructionVectorielle
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionConstructionVectorielle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : (
           <EtapeConstructionVectorielle
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseConstruction(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+            validation={validation}
           />
-        )}
         </div>
       </main>
     </div>

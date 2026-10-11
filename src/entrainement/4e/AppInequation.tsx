@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceInequation, ReponseRacines, SigneA, SolutionEnsemble } from "./core/inequation.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideIntervalle,
@@ -10,7 +9,7 @@ import {
   soumettreReponseSigneA,
   soumettreReponseSimplification,
 } from "./moteur/sessionInequation";
-import type { EtatSessionInequation, PhaseInequation, ResultatExerciceInequation } from "./moteur/sessionInequation";
+import type { EtatSessionInequation, PhaseInequation } from "./moteur/sessionInequation";
 import { diagnostiquerSimplification } from "./moteur/verificationInequation";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceInequation, type VarianteInequationId } from "./generateurs/inequations";
 import { EtapeRacines } from "./components/EtapeRacines";
@@ -18,8 +17,7 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSigneA } from "./components/EtapeSigneA";
 import { EtapeInequation } from "./components/EtapeInequation";
 import { EtapeSimplificationInequation } from "./components/EtapeSimplificationInequation";
-import { ResultatPanelInequation } from "./components/ResultatPanelInequation";
-import { ResumeSessionInequation } from "./components/ResumeSessionInequation";
+import { formatSolutionEnsemble } from "./ui/formatSolutionEnsemble";
 import { calculerRecapitulatifInequation } from "./ui/recapitulatifInequation";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -34,11 +32,6 @@ function nouvelleSession(): EtatSessionInequation {
   return demarrerSessionInequation(REGLAGES_DEMO, genererExerciceInequation);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceInequation;
-  exercice: ExerciceInequation;
-}
-
 const LIBELLE_PHASE: Record<PhaseInequation, string> = {
   simplification: "Simplification",
   racines: "Racines",
@@ -46,46 +39,69 @@ const LIBELLE_PHASE: Record<PhaseInequation, string> = {
   intervalle: "Ensemble-solution",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionInequation;
+  revele: boolean;
+}
+
 export function AppInequation() {
   const [etat, setEtat] = useState<EtatSessionInequation>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function validerSimplification(reponse: string) {
-    setEtat(soumettreReponseSimplification(etat, reponse));
-  }
-
-  function activerAideEtapeSimplification() {
-    setEtat(activerAideSimplification(etat));
-  }
-
-  function validerRacines(reponse: ReponseRacines) {
-    setEtat(soumettreReponseRacines(etat, reponse));
-  }
-
-  function validerSigneA(reponse: SigneA) {
-    setEtat(soumettreReponseSigneA(etat, reponse));
-  }
-
-  function activerAide() {
-    setEtat(activerAideIntervalle(etat));
-  }
-
-  function validerIntervalle(reponse: SolutionEnsemble) {
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseIntervalle(etat, reponse);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionInequation) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // "simplification" n'expose aucun champ `xxxRevele` dédié côté moteur (jamais de ligne de
+      // réponse révélée pour cette étape dans l'ancien ResultatPanel) — équivalent exact :
+      // score 0 ⟺ tentatives épuisées (voir etapeTentatives.ts, soumettreEtapeTentatives).
+      const revele =
+        etat.phase === "simplification"
+          ? nouvelEtat.scoreSimplificationExercice === 0
+          : etat.phase === "racines"
+            ? nouvelEtat.racinesRevele
+            : etat.phase === "signe_a"
+              ? nouvelEtat.signeARevele
+              : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.intervalleRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-  const recapitulatif = calculerRecapitulatifInequation(etat);
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+  function forcerVariante(varianteId: string) {
+    setEnAttente(null);
     setEtat(demarrerSessionInequation(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteInequationId)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifInequation(etat);
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec
+          ? undefined
+          : etat.phase === "simplification"
+            ? undefined
+            : etat.phase === "racines"
+              ? <>Zéros attendus : {exercice.racines === undefined ? "∅" : exercice.racines.join(" ; ")}</>
+              : etat.phase === "signe_a"
+                ? <>Signe de a attendu : {exercice.enonce.a > 0 ? "a > 0" : "a < 0"}</>
+                : <>Réponse attendue : S = {formatSolutionEnsemble(exercice.solution)}</>,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -93,65 +109,57 @@ export function AppInequation() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Tableau de signes d'un trinôme du second degré</h1>
         <p className="app-subtitle">Inéquations du second degré</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelInequation
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionInequation resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "simplification" ? (
+          {etat.phase === "simplification" ? (
             <EtapeSimplificationInequation
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              diagnostiquer={(v) => diagnostiquerSimplification(etat.exerciceCourant, v)}
+              diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
               aideActivee={etat.aideSimplificationUtilisee}
-              onActiverAide={activerAideEtapeSimplification}
-              onValider={validerSimplification}
+              onActiverAide={() => setEtat(activerAideSimplification(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "racines" ? (
             <EtapeRacines
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerRacines}
+              onValider={(reponse) => terminerEtape(soumettreReponseRacines(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "signe_a" ? (
             <EtapeSigneA
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={validerSigneA}
+              onValider={(reponse) => terminerEtape(soumettreReponseSigneA(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeInequation
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               aideActivee={etat.aideUtilisee}
-              onActiverAide={activerAide}
-              onValider={validerIntervalle}
+              onActiverAide={() => setEtat(activerAideIntervalle(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIntervalle(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

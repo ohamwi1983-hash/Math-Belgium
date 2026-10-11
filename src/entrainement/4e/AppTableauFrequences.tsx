@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceTableauFrequences } from "./core/tableauFrequences.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -9,14 +8,18 @@ import {
   soumettreReponseFrequencesCumulees,
   soumettreReponseIdentification,
 } from "./moteur/sessionTableauFrequences";
-import type { EtatSessionTableauFrequences, PhaseTableauFrequences, ResultatExerciceTableauFrequences } from "./moteur/typesTableauFrequences";
+import type { EtatSessionTableauFrequences, PhaseTableauFrequences } from "./moteur/typesTableauFrequences";
 import { genererExerciceTableauFrequences } from "./generateurs/tableauFrequences";
 import { EtapeIdentificationTableauFrequences } from "./components/EtapeIdentificationTableauFrequences";
 import { EtapeFrequencesTableauFrequences } from "./components/EtapeFrequencesTableauFrequences";
 import { EtapeCumulesTableauFrequences } from "./components/EtapeCumulesTableauFrequences";
 import { EtapeFrequencesCumuleesTableauFrequences } from "./components/EtapeFrequencesCumuleesTableauFrequences";
-import { ResultatPanelTableauFrequences } from "./components/ResultatPanelTableauFrequences";
-import { ResumeSessionTableauFrequences } from "./components/ResumeSessionTableauFrequences";
+import {
+  formatTableCumulesTexte,
+  formatTableFrequencesCumuleesTexte,
+  formatTableFrequencesTexte,
+  formatTableIdentificationTexte,
+} from "./ui/formatTableauFrequences";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,11 +33,6 @@ function nouvelleSession(): EtatSessionTableauFrequences {
   return demarrerSessionTableauFrequences(REGLAGES_DEMO, genererExerciceTableauFrequences);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceTableauFrequences;
-  exercice: ExerciceTableauFrequences;
-}
-
 const LIBELLE_PHASE: Record<PhaseTableauFrequences, string> = {
   identification: "Identification",
   frequences: "Fréquences",
@@ -42,18 +40,63 @@ const LIBELLE_PHASE: Record<PhaseTableauFrequences, string> = {
   frequencesCumulees: "Fréquences cumulées",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTableauFrequences;
+  revele: boolean;
+}
+
 export function AppTableauFrequences() {
   const [etat, setEtat] = useState<EtatSessionTableauFrequences>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceTableauFrequences, nouvelEtat: EtatSessionTableauFrequences) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionTableauFrequences) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "identification"
+          ? nouvelEtat.identificationRevele
+          : etat.phase === "frequences"
+            ? nouvelEtat.frequencesRevele
+            : etat.phase === "cumules"
+              ? nouvelEtat.cumulesRevele
+              : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.frequencesCumuleesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  const exercice = etat.exerciceCourant;
+
+  const reponseAttendue =
+    etat.phase === "identification" ? (
+      <>Valeurs/effectifs attendus : {formatTableIdentificationTexte(exercice)}</>
+    ) : etat.phase === "frequences" ? (
+      <>Fréquences attendues : {formatTableFrequencesTexte(exercice)}</>
+    ) : etat.phase === "cumules" ? (
+      <>Effectifs cumulés attendus : {formatTableCumulesTexte(exercice)}</>
+    ) : (
+      <>Fréquences cumulées attendues : {formatTableFrequencesCumuleesTexte(exercice)}</>
+    );
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -64,65 +107,54 @@ export function AppTableauFrequences() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelTableauFrequences
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionTableauFrequences resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "identification" ? (
+          {etat.phase === "identification" ? (
             <EtapeIdentificationTableauFrequences
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideIdentification}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseIdentification(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "frequences" ? (
             <EtapeFrequencesTableauFrequences
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideFrequences}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseFrequences(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseFrequences(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "cumules" ? (
             <EtapeCumulesTableauFrequences
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCumules}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseCumules(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCumules(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeFrequencesCumuleesTableauFrequences
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideFrequencesCumulees}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponseFrequencesCumulees(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseFrequencesCumulees(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

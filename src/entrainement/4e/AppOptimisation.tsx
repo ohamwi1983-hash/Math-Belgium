@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceOptimisation } from "./core/optimisation.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -12,7 +11,7 @@ import {
   soumettreReponseSommet,
   soumettreReponseSysteme,
 } from "./moteur/sessionOptimisation";
-import type { EtatSessionOptimisation, PhaseOptimisation, ResultatExerciceOptimisation } from "./moteur/typesOptimisation";
+import type { EtatSessionOptimisation, PhaseOptimisation } from "./moteur/typesOptimisation";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceOptimisation } from "./generateurs/optimisation";
 import { EtapeIdentificationOptimisation } from "./components/EtapeIdentificationOptimisation";
 import { EtapeContrainteEtGrandeurOptimisation } from "./components/EtapeContrainteEtGrandeurOptimisation";
@@ -22,8 +21,15 @@ import { EtapeDomaineOptimisation } from "./components/EtapeDomaineOptimisation"
 import { EtapeSommetOptimisation } from "./components/EtapeSommetOptimisation";
 import { EtapeDecisionOptimisation } from "./components/EtapeDecisionOptimisation";
 import { EtapeInterpretationOptimisation } from "./components/EtapeInterpretationOptimisation";
-import { ResultatPanelOptimisation } from "./components/ResultatPanelOptimisation";
-import { ResumeSessionOptimisation } from "./components/ResumeSessionOptimisation";
+import { Katex } from "./components/Katex";
+import {
+  formatDomaineLatex,
+  formatFonctionDeveloppeeLatex,
+  formatOptimalAttenduLatex,
+  formatSommetAttenduLatex,
+  formatSystemeAccoladeLatex,
+  libellePositionOptimum,
+} from "./ui/formatOptimisation";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -37,11 +43,6 @@ function nouvelleSession(): EtatSessionOptimisation {
   return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisation);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceOptimisation;
-  exercice: ExerciceOptimisation;
-}
-
 const LIBELLE_PHASE: Record<PhaseOptimisation, string> = {
   identification: "Identifier x et y",
   contrainteEtGrandeur: "Poser la contrainte et exprimer la grandeur",
@@ -52,24 +53,91 @@ const LIBELLE_PHASE: Record<PhaseOptimisation, string> = {
   interpretation: "Interprétation",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionOptimisation;
+  revele: boolean;
+}
+
 export function AppOptimisation() {
   const [etat, setEtat] = useState<EtatSessionOptimisation>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceOptimisation, nouvelEtat: EtatSessionOptimisation) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionOptimisation) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "identification"
+          ? nouvelEtat.identificationRevele
+          : etat.phase === "contrainteEtGrandeur"
+            ? nouvelEtat.contrainteEtGrandeurRevele
+            : etat.phase === "systeme"
+              ? nouvelEtat.systemeRevele
+              : etat.phase === "domaine"
+                ? nouvelEtat.domaineRevele
+                : etat.phase === "sommet"
+                  ? nouvelEtat.sommetRevele
+                  : etat.phase === "decision"
+                    ? nouvelEtat.decisionRevele
+                    : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.interpretationRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function onGenererDev(familleId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionOptimisation(REGLAGES_DEMO, () => construireAvecFamilleId(familleId as (typeof CATALOGUE_FAMILLES)[number]["id"])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
+
+  const reponseAttendue =
+    phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
+      <>
+        Relation attendue : <Katex expression={formatSystemeAccoladeLatex(exercice)} />
+      </>
+    ) : phase === "systeme" && exercice.variante === "modelisation" ? (
+      <>
+        Réponse attendue : <Katex expression={formatFonctionDeveloppeeLatex(exercice.fonction, exercice.contexte.labelVariable)} />
+      </>
+    ) : phase === "domaine" && exercice.variante === "modelisation" ? (
+      <>
+        Domaine attendu : <Katex expression={formatDomaineLatex(exercice.domaine, exercice.contexte.labelVariable)} />
+      </>
+    ) : phase === "sommet" ? (
+      <>
+        Sommet attendu : <Katex expression={formatSommetAttenduLatex(exercice)} />
+      </>
+    ) : phase === "decision" ? (
+      <>
+        Optimum attendu ({libellePositionOptimum(exercice)}) : <Katex expression={formatOptimalAttenduLatex(exercice)} />
+      </>
+    ) : phase === "interpretation" && optionCorrecte ? (
+      <>Interprétation attendue : {optionCorrecte.texte}</>
+    ) : null;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -78,93 +146,91 @@ export function AppOptimisation() {
         <h1 className="app-title">Problèmes d'optimisation (fonction du second degré)</h1>
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={onGenererDev} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
+          </div>
+        </div>
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-          </div>
-        )}
-
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelOptimisation
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionOptimisation resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "identification" && exercice.variante === "modelisation" ? (
+          {phase === "identification" && exercice.variante === "modelisation" ? (
             <EtapeIdentificationOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => setEtat(soumettreReponseIdentification(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
+          ) : phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
             <EtapeContrainteEtGrandeurOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideContrainteEtGrandeur}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseContrainteEtGrandeur(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseContrainteEtGrandeur(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "systeme" && exercice.variante === "modelisation" ? (
+          ) : phase === "systeme" && exercice.variante === "modelisation" ? (
             <EtapeSystemeOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSysteme}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => setEtat(soumettreReponseSysteme(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseSysteme(etat, texte))}
+              validation={validation}
             />
-          ) : etat.phase === "domaine" && exercice.variante === "modelisation" ? (
+          ) : phase === "domaine" && exercice.variante === "modelisation" ? (
             <EtapeDomaineOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDomaine}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseDomaine(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "sommet" ? (
+          ) : phase === "sommet" ? (
             <EtapeSommetOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSommet}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseSommet(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSommet(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "decision" ? (
+          ) : phase === "decision" ? (
             <EtapeDecisionOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDecision}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseDecision(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDecision(etat, reponse))}
+              validation={validation}
             />
-          ) : etat.phase === "interpretation" ? (
+          ) : phase === "interpretation" ? (
             <EtapeInterpretationOptimisation
+              key={phase}
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideInterpretation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(indexChoisi) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseInterpretation(etat, indexChoisi));
-              }}
+              onValider={(indexChoisi) => terminerEtape(soumettreReponseInterpretation(etat, indexChoisi))}
+              validation={validation}
             />
-          ) : null}{" "}
+          ) : null}
         </div>
       </main>
     </div>

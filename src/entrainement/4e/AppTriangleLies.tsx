@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceTriangleLies } from "./core/triangleLies.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -11,7 +10,7 @@ import {
   soumettreReponsePontSommetPartage,
   soumettreReponseSoustraction,
 } from "./moteur/sessionTriangleLies";
-import type { EtatSessionTriangleLies, PhaseTriangleLies, ResultatExerciceTriangleLies } from "./moteur/typesTriangleLies";
+import type { EtatSessionTriangleLies, PhaseTriangleLies } from "./moteur/typesTriangleLies";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceTriangleLies } from "./generateurs/triangleLies";
 import type { FamilleTriangleLies } from "./core/triangleLies.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -21,8 +20,6 @@ import { EtapeAnglesTriangleLies } from "./components/EtapeAnglesTriangleLies";
 import { EtapeSoustractionTriangleLies } from "./components/EtapeSoustractionTriangleLies";
 import { EtapeCibleTriangleLies } from "./components/EtapeCibleTriangleLies";
 import { EtapeInterpretationTriangleLies } from "./components/EtapeInterpretationTriangleLies";
-import { ResultatPanelTriangleLies } from "./components/ResultatPanelTriangleLies";
-import { ResumeSessionTriangleLies } from "./components/ResumeSessionTriangleLies";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -36,9 +33,8 @@ function nouvelleSession(): EtatSessionTriangleLies {
   return demarrerSessionTriangleLies(REGLAGES_DEMO, genererExerciceTriangleLies);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceTriangleLies;
-  exercice: ExerciceTriangleLies;
+function formatNombre(valeur: number): string {
+  return Number(valeur.toFixed(2)).toString();
 }
 
 /** Écrans nécessitant un calcul décimal non fourni par l'énoncé (résolution du triangle pont/cible
@@ -54,24 +50,88 @@ const LIBELLE_PHASE: Record<PhaseTriangleLies, string> = {
   interpretation: "Interprétation",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTriangleLies;
+  revele: boolean;
+}
+
 export function AppTriangleLies() {
   const [etat, setEtat] = useState<EtatSessionTriangleLies>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceTriangleLies, nouvelEtat: EtatSessionTriangleLies) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionTriangleLies) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "pont"
+          ? nouvelEtat.pontRevele
+          : etat.phase === "angles"
+            ? nouvelEtat.anglesRevele
+            : etat.phase === "soustraction"
+              ? nouvelEtat.soustractionRevele
+              : etat.phase === "cible"
+                ? nouvelEtat.cibleRevele
+                : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.interpretationRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-  const exercice = etat.exerciceCourant;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(familleId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionTriangleLies(REGLAGES_DEMO, () => construireAvecFamilleId(familleId as FamilleTriangleLies)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
+
+  const reponseAttendue =
+    etat.phase === "pont" ? (
+      exercice.variante === "sommetPartage" ? (
+        <>
+          Angle attendu : {formatNombre(exercice.trianglePont.A)}° — côté 1 attendu : {formatNombre(exercice.trianglePont.b)} — côté 2 attendu :{" "}
+          {formatNombre(exercice.trianglePont.c)}
+        </>
+      ) : (
+        <>
+          {exercice.labelCoteTransfere} attendu : {formatNombre(exercice.trianglePont.a)} m
+        </>
+      )
+    ) : etat.phase === "angles" ? (
+      <>
+        Angles attendus : angle utile = {formatNombre(exercice.triangleCible.B)}° — angle (hypothèse) = {formatNombre(exercice.triangleCible.C)}°
+      </>
+    ) : etat.phase === "soustraction" ? (
+      <>
+        Côtés attendus : côté 1 = {formatNombre(exercice.triangleCible.b)} — côté 2 = {formatNombre(exercice.triangleCible.c)}
+      </>
+    ) : etat.phase === "cible" ? (
+      <>
+        Réponse attendue : {formatNombre(exercice.valeurCibleAttendue)} {exercice.uniteGrandeurCible}
+      </>
+    ) : optionCorrecte ? (
+      <>Interprétation attendue : {optionCorrecte.texte}</>
+    ) : undefined;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -80,38 +140,26 @@ export function AppTriangleLies() {
         <h1 className="app-title">Triangles liés (triangulation, côté ou angle partagé)</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={onGenererDev} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
+          </div>
+        </div>
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-          </div>
-        )}
-
         <div className="card-body">
-          {enCoursDeSession && PHASES_CALCULATRICE.has(etat.phase) && <CalculatriceScientifique />}
-          {dernierBilan ? (
-            <ResultatPanelTriangleLies
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionTriangleLies resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "pont" ? (
+          {PHASES_CALCULATRICE.has(etat.phase) && <CalculatriceScientifique />}
+          {etat.phase === "pont" ? (
             <EtapePontTriangleLies
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAidePont}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(valeur) => setEtat(soumettreReponsePont(etat, valeur))}
-              onValiderSommetPartage={(reponse) => setEtat(soumettreReponsePontSommetPartage(etat, reponse))}
+              onValider={(valeur) => terminerEtape(soumettreReponsePont(etat, valeur))}
+              onValiderSommetPartage={(reponse) => terminerEtape(soumettreReponsePontSommetPartage(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "angles" ? (
             <EtapeAnglesTriangleLies
@@ -120,7 +168,8 @@ export function AppTriangleLies() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideAngles}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseAngles(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseAngles(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "soustraction" ? (
             <EtapeSoustractionTriangleLies
@@ -129,7 +178,8 @@ export function AppTriangleLies() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSoustraction}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseSoustraction(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSoustraction(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "cible" ? (
             <EtapeCibleTriangleLies
@@ -138,21 +188,20 @@ export function AppTriangleLies() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCible}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(valeur) => setEtat(soumettreReponseCible(etat, valeur))}
+              onValider={(valeur) => terminerEtape(soumettreReponseCible(etat, valeur))}
+              validation={validation}
             />
-          ) : etat.phase === "interpretation" ? (
+          ) : (
             <EtapeInterpretationTriangleLies
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideInterpretation}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(indexChoisi) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseInterpretation(etat, indexChoisi));
-              }}
+              onValider={(indexChoisi) => terminerEtape(soumettreReponseInterpretation(etat, indexChoisi))}
+              validation={validation}
             />
-          ) : null}{" "}
+          )}
         </div>
       </main>
     </div>

@@ -18,7 +18,7 @@ import {
   soumettreReponseTermeDominant,
 } from "./moteur5e/sessionLimites";
 import type { ReponseFactoriser, ReponseLimitesGaucheDroite, ReponseTermeDominant } from "./moteur5e/sessionLimites";
-import type { EtatSessionLimite, PhaseLimite, ResultatExerciceLimite } from "./moteur5e/typesLimites";
+import type { EtatSessionLimite, PhaseLimite } from "./moteur5e/typesLimites";
 import {
   diagnostiquerFacteurs,
   diagnostiquerNombre,
@@ -36,8 +36,9 @@ import { EtapeFactoriserLimite } from "./components5e/EtapeFactoriserLimite";
 import { EtapeLimitesGaucheDroite } from "./components5e/EtapeLimitesGaucheDroite";
 import { EtapeReconnaissanceLimite } from "./components5e/EtapeReconnaissanceLimite";
 import { EtapeTermeDominant } from "./components5e/EtapeTermeDominant";
-import { ResultatPanelLimite } from "./components5e/ResultatPanelLimite";
-import { ResumeSessionLimite } from "./components5e/ResumeSessionLimite";
+import { Katex } from "./components/Katex";
+import { LIBELLE_FAMILLE_LIMITE, formatReponseAttenduePhaseLatex, limNecessiteModeDisplay } from "./ui5e/formatLimites";
+import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -47,35 +48,72 @@ function nouvelleSession(): EtatSessionLimite {
   return demarrerSessionLimite(REGLAGES_DEMO, genererExerciceLimite);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceLimite;
-  aideParPhase: Partial<Record<PhaseLimite, { niveauAide: number; revele: boolean }>>;
+/** Réponse réellement attendue de la phase qui vient de se clore — même dispatch que l'ancien
+ * `ResultatPanelLimite.tsx` (supprimé, remplacé par la validation inline) : "reconnaissance"
+ * affiche le libellé de la VRAIE famille générée (jamais la réponse de l'élève), puis le LaTeX de
+ * `formatReponseAttenduePhaseLatex` quand il y en a (non vide pour "reconnaissance" seulement dans
+ * le cas "limiteReelle", où cet écran porte aussi la valeur numérique). */
+function reponseAttendueLimite(exercice: ExerciceLimite, phase: PhaseLimite) {
+  const reponseLatex = formatReponseAttenduePhaseLatex(exercice, phase);
+  const libelleFamille = phase === "reconnaissance" ? LIBELLE_FAMILLE_LIMITE[exercice.famille] ?? exercice.famille : null;
+  if (!libelleFamille && reponseLatex.length === 0) return undefined;
+  return (
+    <>
+      {libelleFamille}
+      {reponseLatex.length > 0 && (
+        <span className="equation-box-termes">
+          {reponseLatex.map((frag, i) => (
+            <Katex key={i} expression={frag} block={limNecessiteModeDisplay(frag)} />
+          ))}
+        </span>
+      )}
+    </>
+  );
+}
+
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionLimite;
+  revele: boolean;
 }
 
 export function App5gen20() {
   const [etat, setEtat] = useState<EtatSessionLimite>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseLimite, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionLimite) {
-    // A.1 : `revele` doit être lu sur `nouvelEtat` (POST-soumission), jamais `etat.etapeCourante.revelee`
-    // (PRÉ-soumission, structurellement toujours `false` ici — même motif que 5gen14).
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionLimite(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation: ValidationEtapeProps | null = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttendueLimite(exercice, phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -83,36 +121,20 @@ export function App5gen20() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites, reconnaissance et calcul</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionLimite(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <EcranCourant
-              exercice={exercice}
-              phase={phase}
-              etat={etat}
-              tentativesUtilisees={tentativesUtilisees}
-              tentativesMax={tentativesMax}
-              cleEcran={cleEcran}
-              terminerEtape={terminerEtape}
-              setEtat={setEtat}
-            />
-          )}
-          {dernierBilan && (
-            <ResultatPanelLimite
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && <ResumeSessionLimite resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />}{" "}
+          <EcranCourant
+            exercice={exercice}
+            phase={phase}
+            etat={etat}
+            tentativesUtilisees={tentativesUtilisees}
+            tentativesMax={tentativesMax}
+            cleEcran={cleEcran}
+            terminerEtape={terminerEtape}
+            setEtat={setEtat}
+            validation={validation}
+          />
         </div>
       </main>
     </div>
@@ -128,6 +150,7 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionLimite) => void;
   setEtat: (etat: EtatSessionLimite) => void;
+  validation: ValidationEtapeProps | null;
 }
 
 /** Dispatch par phase — chaque famille a une séquence FIXE (jamais de branche interne variable
@@ -136,7 +159,7 @@ interface EcranProps {
  * famille). "reconnaissance" (écran 0) est IDENTIQUE pour les 4 familles — famille "limiteReelle" :
  * ce même écran soumet classification ET valeur numérique en un seul geste (`soumettreReponseReconnaissance`
  * accepte un `valeurTexte` optionnel), aucun écran supplémentaire. */
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxLimite();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -152,6 +175,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(choix, valeurTexte) => terminerEtape(soumettreReponseReconnaissance(etat, choix, valeurTexte))}
+          validation={validation}
         />
       );
 
@@ -173,6 +197,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseFactoriser(etat, reponse))}
           diagnostiquer={diagnostiquer}
+          validation={validation}
         />
       );
     }
@@ -194,6 +219,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(texte) => terminerEtape(soumettreReponseSimplifierEvaluer(etat, texte))}
             placeholder="ex : -1/3"
             diagnostiquer={(t) => diagnostiquerNombre(t, cible)}
+            validation={validation}
           />
           <CalculatriceScientifique />
         </>
@@ -215,6 +241,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(textes) => terminerEtape(soumettreReponseFactoriserDenominateur(etat, textes))}
           diagnostiquer={(textes) => diagnostiquerFacteurs(textes, exo.a, exo.kD, autreRacine)}
+          validation={validation}
         />
       );
     }
@@ -237,6 +264,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
               gauche: verifierSigne(r.gauche, exo.signeLimiteGauche),
               droite: verifierSigne(r.droite, exo.signeLimiteDroite),
             })}
+            validation={validation}
           />
           <CalculatriceScientifique />
         </>
@@ -252,6 +280,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           onValider={(choix) => terminerEtape(soumettreReponseConclureLimite(etat, choix))}
+          validation={validation}
         />
       );
     }
@@ -274,6 +303,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseTermeDominant(etat, reponse))}
           diagnostiquer={diagnostiquer}
+          validation={validation}
         />
       );
     }
@@ -295,6 +325,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(texte) => terminerEtape(soumettreReponseSimplifierLimiteRef(etat, texte))}
             placeholder={exo.degreResultat === 0 ? "ex : -4" : "ex : 2x^2"}
             diagnostiquer={(t) => diagnostiquerRatioDominant(t, exo.ratioCoefficients, exo.degreResultat)}
+            validation={validation}
           />
           <CalculatriceScientifique />
         </>
@@ -321,6 +352,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
               onActiverAide={onActiverAide}
               onValider={(choix) => terminerEtape(soumettreReponseEvaluerLimiteFinaleSigne(etat, choix[0]))}
               diagnostiquer={(choix) => [verifierSigne(choix[0], attendu)]}
+              validation={validation}
             />
             <CalculatriceScientifique />
           </>
@@ -341,6 +373,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(texte) => terminerEtape(soumettreReponseEvaluerLimiteFinaleNumerique(etat, texte))}
             placeholder="ex : 0"
             diagnostiquer={(t) => diagnostiquerNombre(t, cible)}
+            validation={validation}
           />
           <CalculatriceScientifique />
         </>

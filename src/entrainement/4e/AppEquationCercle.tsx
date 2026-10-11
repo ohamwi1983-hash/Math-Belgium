@@ -1,16 +1,15 @@
 import { useState } from "react";
-import type { ExerciceEquationCercle } from "./core/equationCercle.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercle } from "./generateurs/equationCercle";
 import type { VarianteEquationCercle } from "./core/equationCercle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { activerAideSuivante, demarrerSessionEquationCercle, soumettreReponseCentre, soumettreReponseEquation, soumettreReponseRayon } from "./moteur/sessionEquationCercle";
-import type { EtatSessionEquationCercle, PhaseEquationCercle, ResultatExerciceEquationCercle } from "./moteur/typesEquationCercle";
+import type { EtatSessionEquationCercle, PhaseEquationCercle } from "./moteur/typesEquationCercle";
 import { EtapeCentreEquationCercle } from "./components/EtapeCentreEquationCercle";
 import { EtapeEquationEquationCercle } from "./components/EtapeEquationEquationCercle";
 import { EtapeRayonEquationCercle } from "./components/EtapeRayonEquationCercle";
-import { ResultatPanelEquationCercle } from "./components/ResultatPanelEquationCercle";
-import { ResumeSessionEquationCercle } from "./components/ResumeSessionEquationCercle";
+import { Katex } from "./components/Katex";
+import { formatEquationAttendueLatex, formatEtatActuelCentreLatex } from "./ui/formatEquationCercle";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -24,35 +23,67 @@ function nouvelleSession(): EtatSessionEquationCercle {
   return demarrerSessionEquationCercle(REGLAGES_DEMO, genererExerciceEquationCercle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceEquationCercle;
-  exercice: ExerciceEquationCercle;
-}
-
 const LIBELLE_PHASE: Record<PhaseEquationCercle, string> = {
   centre: "Centre du cercle",
   rayon: "Rayon du cercle",
   equation: "Équation du cercle",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEquationCercle;
+  revele: boolean;
+}
+
 export function AppEquationCercle() {
   const [etat, setEtat] = useState<EtatSessionEquationCercle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceEquationCercle, nouvelEtat: EtatSessionEquationCercle) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionEquationCercle) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "centre"
+          ? nouvelEtat.centreRevele
+          : etat.phase === "rayon"
+            ? nouvelEtat.rayonRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.equationRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionEquationCercle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationCercle)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "centre" ? (
+            <>Centre attendu : <Katex expression={formatEtatActuelCentreLatex(exercice)} /></>
+          ) : etat.phase === "rayon" ? (
+            <>Rayon attendu : <Katex expression={`R = ${exercice.rayon}`} /></>
+          ) : (
+            <>Équation attendue : <Katex expression={formatEquationAttendueLatex(exercice)} /></>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -61,35 +92,24 @@ export function AppEquationCercle() {
         <h1 className="app-title">Équation d'un cercle (non développée) à partir d'un graphe</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelEquationCercle
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionEquationCercle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "centre" ? (
+        {etat.phase === "centre" ? (
           <EtapeCentreEquationCercle
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentre}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseCentre(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseCentre(etat, reponse))}
+            validation={validation}
           />
         ) : etat.phase === "rayon" ? (
           <EtapeRayonEquationCercle
@@ -98,7 +118,8 @@ export function AppEquationCercle() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideRayon}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseRayon(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseRayon(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeEquationEquationCercle
@@ -107,10 +128,8 @@ export function AppEquationCercle() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideEquation}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseEquation(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseEquation(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

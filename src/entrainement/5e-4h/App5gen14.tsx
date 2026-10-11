@@ -23,7 +23,7 @@ import {
   soumettreReponseTrouverU1,
 } from "./moteur5e/sessionSuiteArithmetique";
 import type { ReponseEquation } from "./moteur5e/sessionSuiteArithmetique";
-import type { EtatSessionSuiteArithmetique, PhaseSuiteArithmetique, ResultatExerciceSuiteArithmetique } from "./moteur5e/typesSuiteArithmetique";
+import type { EtatSessionSuiteArithmetique, PhaseSuiteArithmetique } from "./moteur5e/typesSuiteArithmetique";
 import {
   diagnostiquerEquationComplete,
   diagnostiquerEquationCompleteEnN,
@@ -39,8 +39,8 @@ import { EtapeChampSimpleSuiteArithmetique } from "./components5e/EtapeChampSimp
 import { EtapeCoherenceJugement } from "./components5e/EtapeCoherenceJugement";
 import { EtapePoserEquation } from "./components5e/EtapePoserEquation";
 import { EtapeTermesMultiples } from "./components5e/EtapeTermesMultiples";
-import { ResultatPanelSuiteArithmetique } from "./components5e/ResultatPanelSuiteArithmetique";
-import { ResumeSessionSuiteArithmetique } from "./components5e/ResumeSessionSuiteArithmetique";
+import { formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteArithmetique";
+import { Katex } from "./components/Katex";
 
 type PhaseChampSimple =
   | "trouverR"
@@ -178,36 +178,58 @@ function nouvelleSession(): EtatSessionSuiteArithmetique {
   return demarrerSessionSuiteArithmetique(REGLAGES_DEMO, genererExerciceSuiteArithmetique);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceSuiteArithmetique;
-  aideParPhase: Partial<Record<PhaseSuiteArithmetique, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteArithmetique;
+  revele: boolean;
 }
 
 export function App5gen14() {
   const [etat, setEtat] = useState<EtatSessionSuiteArithmetique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseSuiteArithmetique, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionSuiteArithmetique) {
-    // A.1 : `revele` doit être lu sur `nouvelEtat` (POST-soumission) — `etat.etapeCourante.revelee`
-    // (PRÉ-soumission) est structurellement toujours `false` ici, voir `derniereEtapeRevelee` dans
-    // `typesSuiteArithmetique.ts`.
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          phase === "coherenceJugement" ? (
+            exercice.famille === "coherence" && exercice.coherent ? "Cohérentes" : "Incohérentes"
+          ) : (
+            <span className="equation-box-termes">
+              {formatReponseAttenduePhaseLatex(exercice, phase).map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </span>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -215,17 +237,10 @@ export function App5gen14() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites arithmétiques, formule générale et termes</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleSuiteArithmetique
                   key={cleEcran}
@@ -259,6 +274,7 @@ export function App5gen14() {
                     }
                   }}
                   diagnostiquer={(texte) => diagnostiquerChampSimple(exercice, phase as PhaseChampSimple, texte)}
+                  validation={validation}
                 />
               )}
               {PHASES_CALCULATRICE_CHAMP_SIMPLE.has(phase) && <CalculatriceScientifique />}
@@ -278,6 +294,7 @@ export function App5gen14() {
                     return terminerEtape(soumettreReponseCalculerTermesAlgebrique(etat, textes));
                   }}
                   diagnostiquer={(textes) => diagnostiquerTermesMultiples(exercice, phase as PhaseTermesMultiples, textes)}
+                  validation={validation}
                 />
               )}
               {PHASES_CALCULATRICE_TERMES_MULTIPLES.has(phase) && <CalculatriceScientifique />}
@@ -292,6 +309,7 @@ export function App5gen14() {
                   niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(choix) => terminerEtape(soumettreReponseCoherenceJugement(etat, choix))}
+                  validation={validation}
                 />
               )}
 
@@ -310,22 +328,11 @@ export function App5gen14() {
                     return terminerEtape(soumettreReponsePoserEquationAlgebrique(etat, reponse));
                   }}
                   diagnostiquer={(reponse) => diagnostiquerPoserEquation(exercice, phase as PhasePoserEquation, reponse)}
+                  validation={validation}
                 />
               )}
               {PHASES_CALCULATRICE_POSER_EQUATION.has(phase) && <CalculatriceScientifique />}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelSuiteArithmetique
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionSuiteArithmetique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

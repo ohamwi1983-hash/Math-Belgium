@@ -1,15 +1,13 @@
 import { useState } from "react";
-import type { ExercicePositionDroitePlan } from "./core/positionDroitePlan.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionPositionDroitePlan, soumettreReponseClassification, soumettreReponseJustification } from "./moteur/sessionPositionDroitePlan";
-import type { EtatSessionPositionDroitePlan, PhasePositionDroitePlan, ResultatExercicePositionDroitePlan } from "./moteur/typesPositionDroitePlan";
+import type { EtatSessionPositionDroitePlan, PhasePositionDroitePlan } from "./moteur/typesPositionDroitePlan";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePositionDroitePlan } from "./generateurs/positionDroitePlan";
 import type { ConclusionPositionDroitePlan } from "./core/positionDroitePlan.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeClassificationPositionDroitePlan } from "./components/EtapeClassificationPositionDroitePlan";
 import { EtapeJustificationPositionDroitePlan } from "./components/EtapeJustificationPositionDroitePlan";
-import { ResultatPanelPositionDroitePlan } from "./components/ResultatPanelPositionDroitePlan";
-import { ResumeSessionPositionDroitePlan } from "./components/ResumeSessionPositionDroitePlan";
+import { LIBELLE_CLASSIFICATION, libelleDroite, libellePlan, texteReponseJustificationAttendue } from "./ui/formatPositionDroitePlan";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -23,33 +21,65 @@ function nouvelleSession(): EtatSessionPositionDroitePlan {
   return demarrerSessionPositionDroitePlan(REGLAGES_DEMO, genererExercicePositionDroitePlan);
 }
 
-interface Bilan {
-  resultat: ResultatExercicePositionDroitePlan;
-  exercice: ExercicePositionDroitePlan;
-}
-
 const LIBELLE_PHASE: Record<PhasePositionDroitePlan, string> = {
   classification: "Classification",
   justification: "Justification",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionPositionDroitePlan;
+  revele: boolean;
+}
+
 export function AppPositionDroitePlan() {
   const [etat, setEtat] = useState<EtatSessionPositionDroitePlan>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExercicePositionDroitePlan, nouvelEtat: EtatSessionPositionDroitePlan) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionPositionDroitePlan) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "classification" ? nouvelEtat.classificationRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.justificationRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionPositionDroitePlan(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as ConclusionPositionDroitePlan)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          phase === "classification" ? (
+            <>
+              Classification attendue : la droite {libelleDroite(exercice)} est {LIBELLE_CLASSIFICATION[exercice.classification].toLowerCase()} (plan{" "}
+              {libellePlan(exercice)}).
+            </>
+          ) : (
+            <>Justification attendue : {texteReponseJustificationAttendue(exercice)}.</>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -58,47 +88,36 @@ export function AppPositionDroitePlan() {
         <h1 className="app-title">Position d'une droite par rapport à un plan</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie dans l'espace</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelPositionDroitePlan
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionPositionDroitePlan resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "classification" ? (
+        {phase === "classification" ? (
           <EtapeClassificationPositionDroitePlan
-            exercice={etat.exerciceCourant}
+            key={phase}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideClassification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponseClassification(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponseClassification(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeJustificationPositionDroitePlan
-            exercice={etat.exerciceCourant}
+            key={phase}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideJustification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseJustification(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseJustification(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

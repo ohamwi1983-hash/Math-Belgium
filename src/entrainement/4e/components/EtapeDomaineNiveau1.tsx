@@ -7,12 +7,18 @@ import { formatTermesApercuDomaine } from "../ui/apercuDomaine";
 import { formatEquationNiveau1Latex } from "../ui/formatCaracteristiquesAlgebriques";
 import { ListeMorceauxFractionInput } from "./ListeMorceauxFractionInput";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseDomaine) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const OPTIONS: { valeur: FormeDomaine; libelle: string }[] = [
@@ -33,7 +39,7 @@ const OPTIONS: { valeur: FormeDomaine; libelle: string }[] = [
  * `prompt-3-ameliorations-finales.md`, point 3 — même principe que `formatApercuSolution`,
  * exercice "tableau de signes").
  */
-export function EtapeDomaineNiveau1({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeDomaineNiveau1({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<FormeDomaine | null>(null);
   const [points, setPoints] = useState<string[]>([""]);
   const [intervalles, setIntervalles] = useState<EtatListeMorceauxFraction>(etatListeFractionInitiale());
@@ -139,19 +145,24 @@ export function EtapeDomaineNiveau1({ exercice, tentativesUtilisees, tentativesM
         </div>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

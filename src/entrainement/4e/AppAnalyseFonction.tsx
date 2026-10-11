@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Categorie } from "./core/generateur.types";
-import type { EtapeAnalyseFonction, ExerciceAnalyseFonction } from "./core/analyseFonction.types";
+import type { EtapeAnalyseFonction } from "./core/analyseFonction.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideAxeSommet,
@@ -18,7 +18,7 @@ import {
   soumettreReponseTableauSigneVariation,
 } from "./moteur/sessionAnalyseFonction";
 import { diagnostiquerChampPrincipal } from "./moteur/verification";
-import type { EtatSessionAnalyseFonction, PhaseAnalyseFonction, ResultatExerciceAnalyseFonction } from "./moteur/typesAnalyseFonction";
+import type { EtatSessionAnalyseFonction, PhaseAnalyseFonction } from "./moteur/typesAnalyseFonction";
 import {
   CATALOGUE_VARIANTES,
   construireAvecVarianteId,
@@ -36,12 +36,12 @@ import { EtapeReconnaissance } from "./components/EtapeReconnaissance";
 import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeRacinesFlexibles } from "./components/EtapeRacinesFlexibles";
 import { EtapeTableauSigneVariation } from "./components/EtapeTableauSigneVariation";
-import { ResultatPanelAnalyseFonction } from "./components/ResultatPanelAnalyseFonction";
-import { ResumeSessionAnalyseFonction } from "./components/ResumeSessionAnalyseFonction";
 import { calculerRecapitulatifAnalyseFonction } from "./ui/recapitulatifAnalyseFonction";
 import { calculerEtatActuelAnalyseFonctionRacines } from "./ui/etatActuelAnalyseFonction";
 import { formatEnonceLatex } from "./ui/formatEquation";
+import { formatFonctionColoreeLatex } from "./ui/formatAnalyseFonction";
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL } from "./ui/categorieLabels";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -69,9 +69,13 @@ function nouvelleSession(): EtatSessionAnalyseFonction {
   return demarrerSessionAnalyseFonction(REGLAGES_DEMO, ETAPES_ACTIVES_DEMO, genererExerciceAnalyseFonction);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceAnalyseFonction;
-  exercice: ExerciceAnalyseFonction;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionAnalyseFonction;
+  revele: boolean;
 }
 
 const LIBELLE_PHASE: Record<PhaseAnalyseFonction, string> = {
@@ -87,25 +91,62 @@ const LIBELLE_PHASE: Record<PhaseAnalyseFonction, string> = {
 
 export function AppAnalyseFonction() {
   const [etat, setEtat] = useState<EtatSessionAnalyseFonction>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceAnalyseFonction, nouvelEtat: EtatSessionAnalyseFonction) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionAnalyseFonction) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "coefficients"
+          ? nouvelEtat.coefficientsRevele
+          : etat.phase === "allure"
+            ? nouvelEtat.allureRevele
+            : etat.phase === "axeSommet"
+              ? nouvelEtat.axeSommetRevele
+              : etat.phase === "domaineImage"
+                ? nouvelEtat.domaineImageRevele
+                : etat.phase === "racinesReconnaissance"
+                  ? nouvelEtat.racinesReconnaissanceRevele
+                  : etat.phase === "racinesChamp1"
+                    ? nouvelEtat.racinesChamp1Revele
+                    : etat.phase === "racinesChamp2"
+                      ? nouvelEtat.racinesChamp2Revele
+                      : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.tableauSignesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const recapitulatif = calculerRecapitulatifAnalyseFonction(etat);
   const etatActuelRacines = calculerEtatActuelAnalyseFonctionRacines(etat);
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(
       demarrerSessionAnalyseFonction(REGLAGES_DEMO, ETAPES_ACTIVES_DEMO, () => construireAvecVarianteId(varianteId as VarianteAnalyseFonctionId)),
     );
   }
+
+  const exercice = etat.exerciceCourant;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          !etat.reglages.affichageReponseApresEchec || etat.phase !== "coefficients" ? undefined : (
+            <Katex expression={formatFonctionColoreeLatex(exercice.exercice.enonce)} />
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -115,36 +156,24 @@ export function AppAnalyseFonction() {
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <BoutonExportWord adaptateur={adaptateurExportWordAnalyseFonction} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
+          </div>
+        </div>
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
-          </div>
-        )}
-
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelAnalyseFonction
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionAnalyseFonction resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "coefficients" ? (
+          {etat.phase === "coefficients" ? (
             <EtapeCoefficients
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideCoefficientsUtilisee}
               onActiverAide={() => setEtat(activerAideCoefficients(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseCoefficients(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCoefficients(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "allure" ? (
             <EtapeAllure
@@ -152,7 +181,8 @@ export function AppAnalyseFonction() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => setEtat(soumettreReponseAllure(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseAllure(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "axeSommet" ? (
             <EtapeAxeSommet
@@ -162,7 +192,8 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideAxeSommetUtilisee}
               onActiverAide={() => setEtat(activerAideAxeSommet(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseAxeSommet(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseAxeSommet(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "domaineImage" ? (
             <EtapeDomaineImage
@@ -172,7 +203,8 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideDomaineImageUtilisee}
               onActiverAide={() => setEtat(activerAideDomaineImage(etat))}
-              onValider={(reponse) => setEtat(soumettreReponseImage(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseImage(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "racinesReconnaissance" ? (
             <EtapeReconnaissance
@@ -184,7 +216,8 @@ export function AppAnalyseFonction() {
               question="Quelle est la méthode la plus rapide pour trouver les racines de f ?"
               options={OPTIONS_CATEGORIE_SANS_CAS_GENERAL}
               etatActuel={etatActuelRacines}
-              onChoisir={(choix: Categorie) => setEtat(soumettreChoixRacinesCategorie(etat, choix))}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixRacinesCategorie(etat, choix))}
+              validation={validation}
             />
           ) : etat.phase === "racinesChamp1" ? (
             <EtapeChamp1
@@ -195,7 +228,8 @@ export function AppAnalyseFonction() {
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               etatActuel={etatActuelRacines}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.exercice, v)}
-              onValider={(reponse) => setEtat(soumettreReponseRacinesChamp1(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseRacinesChamp1(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "racinesChamp2" ? (
             <EtapeRacinesFlexibles
@@ -205,10 +239,8 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               etatActuel={etatActuelRacines}
-              onValider={(racines) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponseRacinesChamp2(etat, racines));
-              }}
+              onValider={(racines) => terminerEtape(soumettreReponseRacinesChamp2(etat, racines))}
+              validation={validation}
             />
           ) : (
             <EtapeTableauSigneVariation
@@ -218,12 +250,10 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideTableauSignesUtilisee}
               onActiverAide={() => setEtat(activerAideTableauSignes(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponseTableauSigneVariation(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseTableauSigneVariation(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

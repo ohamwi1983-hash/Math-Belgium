@@ -11,19 +11,15 @@ import {
   soumettreReponseInjective,
   soumettreReponseReciproque,
 } from "./moteur6e/sessionInjectiviteFonctions";
-import type {
-  EtatSessionInjectiviteFonctions,
-  PhaseInjectiviteFonctions,
-  ResultatExerciceInjectiviteFonctions,
-} from "./moteur6e/typesInjectiviteFonctions";
+import type { EtatSessionInjectiviteFonctions } from "./moteur6e/typesInjectiviteFonctions";
+import { Katex } from "./components/Katex";
 import { EtapeBijectionInjectiviteFonctions } from "./components6e/EtapeBijectionInjectiviteFonctions";
 import { EtapeDomaineInjectiviteFonctions } from "./components6e/EtapeDomaineInjectiviteFonctions";
 import { EtapeImageInjectiviteFonctions } from "./components6e/EtapeImageInjectiviteFonctions";
 import { EtapeInjectiveInjectiviteFonctions } from "./components6e/EtapeInjectiveInjectiviteFonctions";
 import { EtapeReciproqueInjectiviteFonctions } from "./components6e/EtapeReciproqueInjectiviteFonctions";
-import { ResultatPanelInjectiviteFonctions } from "./components6e/ResultatPanelInjectiviteFonctions";
-import { ResumeSessionInjectiviteFonctions } from "./components6e/ResumeSessionInjectiviteFonctions";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -31,38 +27,53 @@ function nouvelleSession(): EtatSessionInjectiviteFonctions {
   return demarrerSessionInjectiviteFonctions(REGLAGES_DEMO, genererExerciceInjectiviteFonctions);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceInjectiviteFonctions;
-  /** Niveau d'aide RÉELLEMENT utilisé par écran — capturé côté présentation (`etat.niveauAide`
-   * juste avant la soumission qui clôture chaque écran), puisque la Couche B ne le persiste pas par
-   * phase (seuls les scores/`reveleXxx` le sont, voir `typesInjectiviteFonctions.ts`). Consommé par
-   * `statutRecap` dans `ResultatPanelInjectiviteFonctions` (même convention que 5gen1/5gen3). */
-  niveauAideParPhase: Partial<Record<PhaseInjectiviteFonctions, number>>;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionInjectiviteFonctions;
+  revele: boolean;
 }
 
 export function App6gen1() {
   const [etat, setEtat] = useState<EtatSessionInjectiviteFonctions>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [niveauAideParPhase, setNiveauAideParPhase] = useState<Partial<Record<PhaseInjectiviteFonctions, number>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionInjectiviteFonctions) {
-    const miseAJour = { ...niveauAideParPhase, [etat.phase]: etat.niveauAide };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], niveauAideParPhase: miseAJour });
-      setNiveauAideParPhase({});
-    } else {
-      setNiveauAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // Le champ "Partiel" correspondant à la phase qui VIENT de se clore (`etat.phase`, pas
+      // `nouvelEtat.phase`) — sauf "bijection", dernière phase, dont la révélation n'est jamais
+      // stockée en "Partiel" mais directement dans le `resultats` qui vient d'être poussé (voir
+      // `avancerPhase`/`cloturerExerciceOuSuivant`, `sessionInjectiviteFonctions.ts`).
+      const revele =
+        etat.phase === "domaine"
+          ? (nouvelEtat.reveleDomainePartiel as boolean)
+          : etat.phase === "injective"
+            ? (nouvelEtat.reveleInjectivePartiel as boolean)
+            : etat.phase === "reciproque"
+              ? (nouvelEtat.reveleReciproquePartiel as boolean)
+              : etat.phase === "image"
+                ? (nouvelEtat.reveleImagePartiel as boolean)
+                : nouvelEtat.resultats[nouvelEtat.resultats.length - 1].reveleBijection;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
-    setNiveauAideParPhase({});
+    setEnAttente(null);
     setEtat(demarrerSessionInjectiviteFonctions(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -73,6 +84,45 @@ export function App6gen1() {
       ? exercice.intervalleGauche
       : exercice.intervalleDroite;
 
+  const reponseAttenduePhase = (phase: typeof etat.phase) => {
+    switch (phase) {
+      case "domaine":
+        return <Katex expression={formatEnsembleReelLatex(exercice.domaine)} />;
+      case "injective":
+        return exercice.injective ? (
+          "Oui"
+        ) : (
+          <>
+            Non — injective sur <Katex expression={formatEnsembleReelLatex(exercice.intervalleGauche)} /> ou sur{" "}
+            <Katex expression={formatEnsembleReelLatex(exercice.intervalleDroite)} />
+          </>
+        );
+      case "reciproque":
+        return "f⁻¹(x) — voir la méthode (poser y=f(x), échanger x/y, isoler y) appliquée à l'intervalle retenu.";
+      case "image":
+        return <Katex expression={formatEnsembleReelLatex(exercice.image)} />;
+      case "bijection":
+      default:
+        return (
+          <>
+            Sur <Katex expression={formatEnsembleReelLatex(exercice.intervalleGauche)} /> (ou{" "}
+            <Katex expression={formatEnsembleReelLatex(exercice.intervalleDroite)} />
+            {") dans "}
+            <Katex expression={formatEnsembleReelLatex(exercice.image)} />
+          </>
+        );
+    }
+  };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(etat.phase),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -82,87 +132,77 @@ export function App6gen1() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {etat.phase === "domaine" && (
-                <EtapeDomaineInjectiviteFonctions
-                  key={etat.phase}
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMax}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
-                />
-              )}
-              {etat.phase === "injective" && (
-                <EtapeInjectiveInjectiviteFonctions
-                  key={etat.phase}
-                  exercice={exercice}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMax}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseInjective(etat, reponse))}
-                />
-              )}
-              {etat.phase === "reciproque" && (
-                <EtapeReciproqueInjectiviteFonctions
-                  key={etat.phase}
-                  exercice={exercice}
-                  coteChoisi={etat.coteChoisi}
-                  intervalleConfirme={intervalleConfirme}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMax}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseReciproque(etat, reponse))}
-                />
-              )}
-              {etat.phase === "image" && (
-                <EtapeImageInjectiviteFonctions
-                  key={etat.phase}
-                  exercice={exercice}
-                  intervalleConfirme={intervalleConfirme}
-                  coteChoisi={etat.coteChoisi}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMax}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseImage(etat, reponse))}
-                />
-              )}
-              {etat.phase === "bijection" && (
-                <EtapeBijectionInjectiviteFonctions
-                  key={etat.phase}
-                  exercice={exercice}
-                  intervalleConfirme={intervalleConfirme}
-                  coteChoisi={etat.coteChoisi}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={etat.niveauAide}
-                  niveauAideMax={niveauAideMax}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseBijection(etat, reponse))}
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelInjectiviteFonctions
-              resultat={dernierBilan.resultat}
-              niveauAideParPhase={dernierBilan.niveauAideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {etat.phase === "domaine" && (
+            <EtapeDomaineInjectiviteFonctions
+              key={etat.phase}
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMax}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionInjectiviteFonctions resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+          {etat.phase === "injective" && (
+            <EtapeInjectiveInjectiviteFonctions
+              key={etat.phase}
+              exercice={exercice}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMax}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseInjective(etat, reponse))}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "reciproque" && (
+            <EtapeReciproqueInjectiviteFonctions
+              key={etat.phase}
+              exercice={exercice}
+              coteChoisi={etat.coteChoisi}
+              intervalleConfirme={intervalleConfirme}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMax}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseReciproque(etat, reponse))}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "image" && (
+            <EtapeImageInjectiviteFonctions
+              key={etat.phase}
+              exercice={exercice}
+              intervalleConfirme={intervalleConfirme}
+              coteChoisi={etat.coteChoisi}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMax}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseImage(etat, reponse))}
+              validation={validation}
+            />
+          )}
+          {etat.phase === "bijection" && (
+            <EtapeBijectionInjectiviteFonctions
+              key={etat.phase}
+              exercice={exercice}
+              intervalleConfirme={intervalleConfirme}
+              coteChoisi={etat.coteChoisi}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={etat.niveauAide}
+              niveauAideMax={niveauAideMax}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseBijection(etat, reponse))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

@@ -5,6 +5,8 @@ import { INSTRUCTION_ZEROS, formatEquationRechercheZerosLatex, placeholderExpres
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "aucun" | "auMoinsUn";
 
@@ -14,6 +16,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseZerosCaracteristiques) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -35,7 +41,7 @@ interface Props {
  * niveau 2 pour `inverse`/`racine_carree`/`racine_cubique` — voir
  * `calculerEtatActuelCaracteristiquesAlgebriques`).
  */
-export function EtapeZerosAlgebrique({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeZerosAlgebrique({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -119,25 +125,30 @@ export function EtapeZerosAlgebrique({ exercice, etatActuel, tentativesUtilisees
         </div>
       )}
 
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(
-            tentativesUtilisees,
-            tentativesMax,
-            choix === "auMoinsUn" && valeurs.some((v) => diagnostiquerExpressionNumerique(v) === "parse_error")
-              ? "parse_error"
-              : undefined,
-          )}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(
+              tentativesUtilisees,
+              tentativesMax,
+              choix === "auMoinsUn" && valeurs.some((v) => diagnostiquerExpressionNumerique(v) === "parse_error")
+                ? "parse_error"
+                : undefined,
+            )}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

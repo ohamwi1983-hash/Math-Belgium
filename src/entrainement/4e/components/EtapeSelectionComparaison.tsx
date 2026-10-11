@@ -3,12 +3,18 @@ import type { ExerciceComparaisonVecteurs } from "../core/comparaisonVecteurs.ty
 import { Katex } from "./Katex";
 import { VecteurGraph } from "./VecteurGraph";
 import { consigneSelection, vecteursAffichesComparaison } from "../ui/formatComparaisonVecteurs";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceComparaisonVecteurs;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (labels: string[]) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -20,7 +26,7 @@ interface Props {
  * vecteur correspondant sur le graphe (sélection "sur la figure" au sens visuel, même si
  * l'interaction elle-même passe par les boutons).
  */
-export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [selection, setSelection] = useState<string[]>([]);
   const consigne = consigneSelection(exercice);
   const { points, vecteurs } = vecteursAffichesComparaison(exercice, selection);
@@ -53,14 +59,19 @@ export function EtapeSelectionComparaison({ exercice, tentativesUtilisees, tenta
           ))}
       </div>
 
-      <button type="button" className="btn btn-primary" disabled={selection.length === 0} onClick={() => onValider(selection)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={selection.length === 0} onClick={() => onValider(selection)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

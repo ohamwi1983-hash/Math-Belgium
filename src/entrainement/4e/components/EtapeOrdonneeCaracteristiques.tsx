@@ -3,6 +3,8 @@ import type { ExerciceCaracteristiquesFonction, ReponseExistence } from "../core
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { verifierOrdonneeCaracteristiques } from "../moteur/verificationCaracteristiquesFonction";
 import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "nExistePas" | "existe";
 
@@ -11,6 +13,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseExistence) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -18,7 +24,7 @@ interface Props {
  * exclure un intervalle contenant x=0, l'ordonnée à l'origine peut ne pas exister — choix binaire
  * "pas d'ordonnée à l'origine"/"il y en a une", champ numérique seulement dans le second cas.
  */
-export function EtapeOrdonneeCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeOrdonneeCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeur, setValeur] = useState("");
 
@@ -63,19 +69,24 @@ export function EtapeOrdonneeCaracteristiques({ exercice, tentativesUtilisees, t
           />
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

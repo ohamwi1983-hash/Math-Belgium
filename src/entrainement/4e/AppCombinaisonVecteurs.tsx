@@ -1,15 +1,14 @@
 import { useState } from "react";
-import type { ExerciceCombinaisonVecteurs } from "./core/combinaisonVecteurs.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionCombinaisonVecteurs, soumettreReponseComposantes, soumettreReponseSimplification } from "./moteur/sessionCombinaisonVecteurs";
-import type { EtatSessionCombinaisonVecteurs, PhaseCombinaisonVecteurs, ResultatExerciceCombinaisonVecteurs } from "./moteur/typesCombinaisonVecteurs";
+import type { EtatSessionCombinaisonVecteurs, PhaseCombinaisonVecteurs } from "./moteur/typesCombinaisonVecteurs";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceCombinaisonVecteurs } from "./generateurs/combinaisonVecteurs";
 import type { VarianteCombinaisonVecteurs } from "./core/combinaisonVecteurs.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSimplificationCombinaisonVecteurs } from "./components/EtapeSimplificationCombinaisonVecteurs";
 import { EtapeComposantesCombinaisonVecteurs } from "./components/EtapeComposantesCombinaisonVecteurs";
-import { ResultatPanelCombinaisonVecteurs } from "./components/ResultatPanelCombinaisonVecteurs";
-import { ResumeSessionCombinaisonVecteurs } from "./components/ResumeSessionCombinaisonVecteurs";
+import { Katex } from "./components/Katex";
+import { formatEquationReduiteLatex, formatResultatLatex, formatVecteurColonneLatex } from "./ui/formatCombinaisonVecteurs";
 import { calculerRecapitulatifCombinaisonVecteurs } from "./ui/recapitulatifCombinaisonVecteurs";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -24,15 +23,19 @@ function nouvelleSession(): EtatSessionCombinaisonVecteurs {
   return demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, genererExerciceCombinaisonVecteurs);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceCombinaisonVecteurs;
-  exercice: ExerciceCombinaisonVecteurs;
-}
-
 const LIBELLE_PHASE: Record<PhaseCombinaisonVecteurs, string> = {
   simplification: "Réduction symbolique",
   composantes: "Composantes",
 };
+
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionCombinaisonVecteurs;
+  revele: boolean;
+}
 
 /**
  * "Calcul de composantes de combinaisons linéaires" — **remplace en place** (même position, 22e
@@ -42,22 +45,48 @@ const LIBELLE_PHASE: Record<PhaseCombinaisonVecteurs, string> = {
  */
 export function AppCombinaisonVecteurs() {
   const [etat, setEtat] = useState<EtatSessionCombinaisonVecteurs>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceCombinaisonVecteurs, nouvelEtat: EtatSessionCombinaisonVecteurs) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionCombinaisonVecteurs) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "simplification" ? nouvelEtat.simplificationRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.composantesRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
-  const recapitulatif = calculerRecapitulatifCombinaisonVecteurs(etat);
-
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
-    setEtat(demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteCombinaisonVecteurs)));
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
   }
+
+  const recapitulatif = calculerRecapitulatifCombinaisonVecteurs(etat);
+  const exercice = etat.exerciceCourant;
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteCombinaisonVecteurs)));
+  }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "simplification" ? (
+          <Katex expression={formatEquationReduiteLatex(exercice)} />
+        ) : (
+          <>
+            <Katex expression={formatResultatLatex(exercice)} /> attendu{" "}
+            <Katex expression={`= ${formatVecteurColonneLatex(exercice.reponse)}`} />
+          </>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -65,49 +94,36 @@ export function AppCombinaisonVecteurs() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Calcul de composantes de combinaisons linéaires</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelCombinaisonVecteurs
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionCombinaisonVecteurs resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "simplification" ? (
+        {etat.phase === "simplification" ? (
           <EtapeSimplificationCombinaisonVecteurs
-            exercice={etat.exerciceCourant}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideSimplification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => setEtat(soumettreReponseSimplification(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseSimplification(etat, texte))}
+            validation={validation}
           />
         ) : (
           <EtapeComposantesCombinaisonVecteurs
-            exercice={etat.exerciceCourant}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideComposantes}
             recapitulatif={recapitulatif}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseComposantes(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseComposantes(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

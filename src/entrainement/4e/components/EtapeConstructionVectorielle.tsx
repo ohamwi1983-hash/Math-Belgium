@@ -7,12 +7,18 @@ import { VecteurGraph } from "./VecteurGraph";
 import { consigneConstructionVectorielle, formatTermesDonneesConnuesConstructionLatex } from "../ui/formatConstructionVectorielle";
 import { diagnostiquerConstruction } from "../moteur/verificationConstructionVectorielle";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceConstructionVectorielle;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: { depart: Point; arrivee: Point }) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Magnétisme grille : chaque point s'accroche à la coordonnée entière la plus proche pendant le
@@ -39,7 +45,7 @@ const ARRIVEE_INITIALE: [number, number] = [1, 0];
  * (voir `verificationConstructionVectorielle.ts`) ne compare que le vecteur tracé (arrivée-départ)
  * à la cible, jamais la position absolue du départ.
  */
-export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [depart, setDepart] = useState<[number, number]>(DEPART_INITIAL);
   const [arrivee, setArrivee] = useState<[number, number]>(ARRIVEE_INITIALE);
 
@@ -85,14 +91,19 @@ export function EtapeConstructionVectorielle({ exercice, tentativesUtilisees, te
 
       {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 
-      <button type="button" className="btn btn-primary" onClick={() => onValider({ depart: departPoint, arrivee: arriveePoint })}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && statut !== "parse_error" && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" onClick={() => onValider({ depart: departPoint, arrivee: arriveePoint })}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && statut !== "parse_error" && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

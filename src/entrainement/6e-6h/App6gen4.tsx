@@ -24,16 +24,10 @@ import {
   soumettreReponseGDeriveeFinale,
   soumettreReponseGDeriveeInterne,
 } from "./moteur6e/sessionDeriveesCyclometriques";
-import type {
-  AideInfoEcran,
-  EtatSessionDeriveesCyclometriques,
-  PhaseDeriveesCyclometriques,
-  ResultatExerciceDeriveesCyclometriques,
-} from "./moteur6e/typesDeriveesCyclometriques";
+import type { EtatSessionDeriveesCyclometriques } from "./moteur6e/typesDeriveesCyclometriques";
 import { EtapeChampDeriveeCyclo } from "./components6e/EtapeChampDeriveeCyclo";
-import { ResultatPanelDeriveesCyclometriques } from "./components6e/ResultatPanelDeriveesCyclometriques";
-import { ResumeSessionDeriveesCyclometriques } from "./components6e/ResumeSessionDeriveesCyclometriques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { Katex } from "./components/Katex";
 import {
   formatFonctionALatex,
   formatFonctionBLatex,
@@ -95,44 +89,97 @@ function nouvelleSession(): EtatSessionDeriveesCyclometriques {
   return demarrerSessionDeriveesCyclometriques(REGLAGES_DEMO, genererExerciceDeriveesCyclometriques);
 }
 
-type AideParPhase = Partial<Record<PhaseDeriveesCyclometriques, AideInfoEcran>>;
-
-interface Bilan {
-  resultat: ResultatExerciceDeriveesCyclometriques;
-  aideParPhase: AideParPhase;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDeriveesCyclometriques;
+  revele: boolean;
 }
 
 export function App6gen4() {
   const [etat, setEtat] = useState<EtatSessionDeriveesCyclometriques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<AideParPhase>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   /** `nouvelEtat.derniereCloture` porte l'aide/révélation de l'écran qui vient PRÉCISÉMENT de se
    * fermer, capturée côté moteur (jamais reconstruite depuis un `etat` React déjà obsolète — voir
    * `typesDeriveesCyclometriques.ts`). */
   function terminerEtape(nouvelEtat: EtatSessionDeriveesCyclometriques) {
-    const cloture = nouvelEtat.derniereCloture;
-    const miseAJour = cloture ? { ...aideParPhase, [cloture.phase]: cloture.info } : aideParPhase;
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereCloture!.info.revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionDeriveesCyclometriques(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
   const placeholderGenerique = "ex : -2/sqrt(1-4*x^2)...";
+
+  const reponseAttenduePhase = () => {
+    // Narrowe `exercice.famille` avant d'appeler les `texteAideXxxNiveau2` typés par famille —
+    // `etat.phase` seul ne suffit pas à TypeScript pour prouver la correspondance phase/famille,
+    // même si elle est garantie à l'exécution (chaque famille a ses phases dédiées, jamais de nom
+    // partagé entre familles — voir `typesDeriveesCyclometriques.ts`).
+    if (exercice.famille === "A") {
+      if (etat.phase === "aDeriveeU") return <Katex expression={texteAideADeriveeUNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "aDeriveeFinale") return <Katex expression={texteAideADeriveeFinaleNiveau2(exercice).latex ?? ""} />;
+    }
+    if (exercice.famille === "B") {
+      if (etat.phase === "bDeriveeU") return <Katex expression={texteAideBDeriveeUNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "bDeriveeArc") return <Katex expression={texteAideBDeriveeArcNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "bDeriveeFinale") return <Katex expression={texteAideBDeriveeFinaleNiveau2(exercice).latex ?? ""} />;
+    }
+    if (exercice.famille === "C") {
+      if (etat.phase === "cNumerateur") return <Katex expression={texteAideCNumerateurNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "cDenominateur") return <Katex expression={texteAideCDenominateurNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "cDeriveeFinale") return <Katex expression={texteAideCDeriveeFinaleNiveau2(exercice).latex ?? ""} />;
+    }
+    if (exercice.famille === "D") {
+      if (etat.phase === "dNumerateur") return <Katex expression={texteAideDNumerateurNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "dDenominateur") return <Katex expression={texteAideDDenominateurNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "dBrut") return <Katex expression={texteAideDBrutNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "dSimplifiee") return <Katex expression={texteAideDSimplifieeNiveau2(exercice).latex ?? ""} />;
+    }
+    if (exercice.famille === "E") {
+      if (etat.phase === "eDeriveeInterne") return <Katex expression={texteAideEDeriveeInterneNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "eDeriveeFinale") return <Katex expression={texteAideEDeriveeFinaleNiveau2(exercice).latex ?? ""} />;
+    }
+    if (exercice.famille === "F") {
+      if (etat.phase === "fBrute") return <Katex expression={texteAideFBruteNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "fSimplifiee")
+        return "Forme simplifiée via l'identité trigonométrique adéquate (plusieurs écritures équivalentes acceptées).";
+    }
+    if (exercice.famille === "G") {
+      if (etat.phase === "gDeriveeInterne") return <Katex expression={texteAideGDeriveeInterneNiveau2(exercice).latex ?? ""} />;
+      if (etat.phase === "gDeriveeFinale") return <Katex expression={texteAideGDeriveeFinaleNiveau2(exercice).latex ?? ""} />;
+    }
+    return null;
+  };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -143,9 +190,7 @@ export function App6gen4() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {etat.phase === "aDeriveeU" && exercice.famille === "A" && (
+          {etat.phase === "aDeriveeU" && exercice.famille === "A" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
                   consigneEcran="Dérive u(x) seul."
@@ -159,6 +204,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseADeriveeU(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "aDeriveeFinale" && exercice.famille === "A" && (
@@ -176,6 +222,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseADeriveeFinale(etat, texte))}
+                  validation={validation}
                 />
               )}
 
@@ -193,6 +240,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseBDeriveeU(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "bDeriveeArc" && exercice.famille === "B" && (
@@ -210,6 +258,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseBDeriveeArc(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "bDeriveeFinale" && exercice.famille === "B" && (
@@ -230,6 +279,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseBDeriveeFinale(etat, texte))}
+                  validation={validation}
                 />
               )}
 
@@ -247,6 +297,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseCNumerateur(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "cDenominateur" && exercice.famille === "C" && (
@@ -264,6 +315,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseCDenominateur(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "cDeriveeFinale" && exercice.famille === "C" && (
@@ -284,6 +336,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseCDeriveeFinale(etat, texte))}
+                  validation={validation}
                 />
               )}
 
@@ -301,6 +354,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseDNumerateur(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "dDenominateur" && exercice.famille === "D" && (
@@ -318,6 +372,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseDDenominateur(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "dBrut" && exercice.famille === "D" && (
@@ -338,6 +393,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseDBrut(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "dSimplifiee" && exercice.famille === "D" && (
@@ -359,6 +415,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseDSimplifiee(etat, texte))}
+                  validation={validation}
                 />
               )}
 
@@ -376,6 +433,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseEDeriveeInterne(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "eDeriveeFinale" && exercice.famille === "E" && (
@@ -393,6 +451,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseEDeriveeFinale(etat, texte))}
+                  validation={validation}
                 />
               )}
 
@@ -410,6 +469,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseFBrute(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "fSimplifiee" && exercice.famille === "F" && (
@@ -427,6 +487,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseFSimplifiee(etat, texte))}
+                  validation={validation}
                 />
               )}
 
@@ -444,6 +505,7 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseGDeriveeInterne(etat, texte))}
+                  validation={validation}
                 />
               )}
               {etat.phase === "gDeriveeFinale" && exercice.famille === "G" && (
@@ -464,21 +526,9 @@ export function App6gen4() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreReponseGDeriveeFinale(etat, texte))}
+                  validation={validation}
                 />
               )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelDeriveesCyclometriques
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionDeriveesCyclometriques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

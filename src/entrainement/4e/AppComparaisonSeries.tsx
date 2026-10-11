@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceComparaisonSeries } from "./core/comparaisonSeries.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -9,7 +8,7 @@ import {
   soumettreReponseInterpretation,
   soumettreReponseSeuil,
 } from "./moteur/sessionComparaisonSeries";
-import type { EtatSessionComparaisonSeries, ResultatExerciceComparaisonSeries } from "./moteur/typesComparaisonSeries";
+import type { EtatSessionComparaisonSeries } from "./moteur/typesComparaisonSeries";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComparaisonSeries } from "./generateurs/comparaisonSeries";
 import type { VarianteComparaisonSeries } from "./core/comparaisonSeries.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -17,8 +16,8 @@ import { EtapeCentrageComparaison } from "./components/EtapeCentrageComparaison"
 import { EtapeDispersionComparaison } from "./components/EtapeDispersionComparaison";
 import { EtapeInterpretationComparaison } from "./components/EtapeInterpretationComparaison";
 import { EtapeSeuilComparaison } from "./components/EtapeSeuilComparaison";
-import { ResultatPanelComparaisonSeries } from "./components/ResultatPanelComparaisonSeries";
-import { ResumeSessionComparaisonSeries } from "./components/ResumeSessionComparaisonSeries";
+import { SegmentsInline } from "./components/SegmentsInline";
+import { segmentsReponseAttendue } from "./ui/formatComparaisonSeries";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -32,32 +31,54 @@ function nouvelleSession(): EtatSessionComparaisonSeries {
   return demarrerSessionComparaisonSeries(REGLAGES_DEMO, genererExerciceComparaisonSeries);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceComparaisonSeries;
-  exercice: ExerciceComparaisonSeries;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionComparaisonSeries;
+  revele: boolean;
 }
 
 /** Pas de `Phase` (comme "Quel angle ?"/"Transformations graphiques") : un seul écran par
  * exercice, dont la FORME dépend de `exercice.question.type` (4 possibles) — voir
- * `sessionComparaisonSeries.ts`. */
+ * `sessionComparaisonSeries.ts`. Mono-écran : la transition n'est jamais qu'une clôture
+ * d'exercice (`terminee` passe à `true`, `nombreExercices` vaut 1). */
 export function AppComparaisonSeries() {
   const [etat, setEtat] = useState<EtatSessionComparaisonSeries>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceComparaisonSeries, nouvelEtat: EtatSessionComparaisonSeries) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionComparaisonSeries) {
+    const transitionDEcran = nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
+      setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.revele });
+      return;
     }
     setEtat(nouvelEtat);
+  }
+
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
   }
 
   const exercice = etat.exerciceCourant;
   const question = exercice.question;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionComparaisonSeries(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteComparaisonSeries)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: <SegmentsInline segments={segmentsReponseAttendue(exercice)} />,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -71,17 +92,7 @@ export function AppComparaisonSeries() {
       <main className="card">
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelComparaisonSeries
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionComparaisonSeries resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : question.type === "centrage" ? (
+          {question.type === "centrage" ? (
             <EtapeCentrageComparaison
               exercice={exercice}
               question={question}
@@ -89,7 +100,8 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => terminerEtape(exercice, soumettreReponseCentrage(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseCentrage(etat, choix))}
+              validation={validation}
             />
           ) : question.type === "dispersion" ? (
             <EtapeDispersionComparaison
@@ -99,7 +111,8 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(exercice, soumettreReponseDispersion(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDispersion(etat, reponse))}
+              validation={validation}
             />
           ) : question.type === "seuil" ? (
             <EtapeSeuilComparaison
@@ -109,7 +122,8 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(exercice, soumettreReponseSeuil(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseSeuil(etat, texte))}
+              validation={validation}
             />
           ) : (
             <EtapeInterpretationComparaison
@@ -119,7 +133,8 @@ export function AppComparaisonSeries() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => terminerEtape(exercice, soumettreReponseInterpretation(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseInterpretation(etat, choix))}
+              validation={validation}
             />
           )}{" "}
         </div>

@@ -1,13 +1,5 @@
 import { useState } from "react";
-import type {
-  ExerciceFormeCanoniqueFonctionReference,
-  FamilleReference,
-  ReponseCanoniqueFR,
-  ReponseEhChSoy,
-  ReponseEvCvSoxFR,
-  ReponseThFR,
-  ReponseTvFR,
-} from "./core/formeCanoniqueFonctionsReference.types";
+import type { FamilleReference } from "./core/formeCanoniqueFonctionsReference.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   demarrerSessionFormeCanoniqueFonctionReference,
@@ -18,11 +10,8 @@ import {
   soumettreReponseThFR,
   soumettreReponseTvFR,
 } from "./moteur/sessionFormeCanoniqueFonctionsReference";
-import type {
-  EtatSessionFormeCanoniqueFonctionReference,
-  PhaseFormeCanoniqueFonctionReference,
-  ResultatExerciceFormeCanoniqueFonctionReference,
-} from "./moteur/typesFormeCanoniqueFonctionsReference";
+import type { EtatSessionFormeCanoniqueFonctionReference, PhaseFormeCanoniqueFonctionReference } from "./moteur/typesFormeCanoniqueFonctionsReference";
+import { cibleFinale } from "./moteur/verificationFormeCanoniqueFonctionsReference";
 import {
   CATALOGUE_VARIANTES,
   construireAvecFamille,
@@ -35,8 +24,15 @@ import { EtapeEhChSoy } from "./components/EtapeEhChSoy";
 import { EtapeThFR } from "./components/EtapeThFR";
 import { EtapeEvCvSoxFR } from "./components/EtapeEvCvSoxFR";
 import { EtapeTvFR } from "./components/EtapeTvFR";
-import { ResultatPanelFormeCanoniqueFonctionsReference } from "./components/ResultatPanelFormeCanoniqueFonctionsReference";
-import { ResumeSessionFormeCanoniqueFonctionsReference } from "./components/ResumeSessionFormeCanoniqueFonctionsReference";
+import {
+  formatCibleLatex,
+  formatGabaritEtape2Latex,
+  formatGabaritEtape3Latex,
+  formatGabaritEtape4Latex,
+  formatGabaritLatex,
+} from "./ui/formatFormeCanoniqueFonctionsReference";
+import { libelleFamille } from "./ui/famillesReferenceLabels";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -50,11 +46,6 @@ function nouvelleSession(): EtatSessionFormeCanoniqueFonctionReference {
   return demarrerSessionFormeCanoniqueFonctionReference(REGLAGES_DEMO, genererExerciceFormeCanoniqueFonctionReference);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceFormeCanoniqueFonctionReference;
-  exercice: ExerciceFormeCanoniqueFonctionReference;
-}
-
 const LIBELLE_PHASE: Record<PhaseFormeCanoniqueFonctionReference, string> = {
   reconnaissance: "Reconnaissance de la famille",
   canonique: "Forme canonique",
@@ -64,45 +55,73 @@ const LIBELLE_PHASE: Record<PhaseFormeCanoniqueFonctionReference, string> = {
   tv: "Translation verticale",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionFormeCanoniqueFonctionReference;
+  revele: boolean;
+}
+
 export function AppFormeCanoniqueFonctionsReference() {
   const [etat, setEtat] = useState<EtatSessionFormeCanoniqueFonctionReference>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function validerFamille(choix: FamilleReference) {
-    setEtat(soumettreChoixFamilleFR(etat, choix));
-  }
-
-  function validerCanonique(reponse: ReponseCanoniqueFR) {
-    setEtat(soumettreReponseCanoniqueFR(etat, reponse));
-  }
-
-  function validerEhChSoy(reponse: ReponseEhChSoy) {
-    setEtat(soumettreReponseEhChSoy(etat, reponse));
-  }
-
-  function validerTh(reponse: ReponseThFR) {
-    setEtat(soumettreReponseThFR(etat, reponse));
-  }
-
-  function validerEvCvSox(reponse: ReponseEvCvSoxFR) {
-    setEtat(soumettreReponseEvCvSoxFR(etat, reponse));
-  }
-
-  function validerTv(reponse: ReponseTvFR) {
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseTvFR(etat, reponse);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionFormeCanoniqueFonctionReference) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "reconnaissance"
+          ? nouvelEtat.reconnaissanceRevele
+          : etat.phase === "canonique"
+            ? nouvelEtat.canoniqueRevele
+            : etat.phase === "ehChSoy"
+              ? nouvelEtat.ehChSoyRevele
+              : etat.phase === "th"
+                ? nouvelEtat.thRevele
+                : etat.phase === "evCvSox"
+                  ? nouvelEtat.evCvSoxRevele
+                  : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.tvRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
-  function onGenererDev(familleId: string) {
-    setDernierBilan(null);
+  function forcerVariante(familleId: string) {
+    setEnAttente(null);
     setEtat(demarrerSessionFormeCanoniqueFonctionReference(REGLAGES_DEMO, () => construireAvecFamille(familleId as FamilleReference)));
   }
+
+  const exercice = etat.exerciceCourant;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : etat.phase === "reconnaissance" ? (
+          <>Famille attendue : {libelleFamille(exercice.famille)}</>
+        ) : etat.phase === "canonique" ? (
+          <Katex expression={formatCibleLatex(exercice.famille, cibleFinale(exercice))} />
+        ) : etat.phase === "ehChSoy" ? (
+          <Katex expression={formatGabaritEtape2Latex(exercice)} />
+        ) : etat.phase === "th" ? (
+          <Katex expression={formatGabaritEtape3Latex(exercice)} />
+        ) : etat.phase === "evCvSox" ? (
+          <Katex expression={formatGabaritEtape4Latex(exercice)} />
+        ) : (
+          <Katex expression={formatGabaritLatex(exercice)} />
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -110,72 +129,66 @@ export function AppFormeCanoniqueFonctionsReference() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Forme canonique et transformations — fonctions de référence</h1>
         <p className="app-subtitle">Chapitre 2</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelFormeCanoniqueFonctionsReference
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionFormeCanoniqueFonctionsReference resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : etat.phase === "reconnaissance" ? (
+          {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFormeCanoniqueFR
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onChoisir={validerFamille}
+              onChoisir={(choix) => terminerEtape(soumettreChoixFamilleFR(etat, choix))}
+              validation={validation}
             />
           ) : etat.phase === "canonique" ? (
             <EtapeCanoniqueFR
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerCanonique}
+              onValider={(reponse) => terminerEtape(soumettreReponseCanoniqueFR(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "ehChSoy" ? (
             <EtapeEhChSoy
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerEhChSoy}
+              onValider={(reponse) => terminerEtape(soumettreReponseEhChSoy(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "th" ? (
             <EtapeThFR
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerTh}
+              onValider={(reponse) => terminerEtape(soumettreReponseThFR(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "evCvSox" ? (
             <EtapeEvCvSoxFR
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerEvCvSox}
+              onValider={(reponse) => terminerEtape(soumettreReponseEvCvSoxFR(etat, reponse))}
+              validation={validation}
             />
           ) : (
             <EtapeTvFR
-              exercice={etat.exerciceCourant}
+              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={validerTv}
+              onValider={(reponse) => terminerEtape(soumettreReponseTvFR(etat, reponse))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

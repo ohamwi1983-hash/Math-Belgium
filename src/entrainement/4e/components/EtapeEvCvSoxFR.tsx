@@ -7,12 +7,18 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { courbeEtape2, courbeEtape3 } from "../ui/mafsFormeCanoniqueFonctionsReference";
 import { MafsGraphFormeCanoniqueFonctionsReference } from "./MafsGraphFormeCanoniqueFonctionsReference";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueFonctionReference;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseEvCvSoxFR) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const COULEUR_BLEU = "#1971c2";
@@ -20,7 +26,7 @@ const COULEUR_ORANGE = "#f08c00";
 
 /** Étape 4 (section 2 de la spec) : le graphe affiche les traces confirmées des étapes 2 (bleu) et
  * 3 (orange), curseurs EV/CV (exclusivité mutuelle) et toggle SOX, champ "fonction intermédiaire". */
-export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [ev, setEv] = useState(1);
   const [cv, setCv] = useState(1);
   const [sox, setSox] = useState(false);
@@ -88,21 +94,26 @@ export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, o
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ ev, cv, sox, fonctionIntermediaire })}
-      >
-        Valider
-      </button>
-      {montrerErreurs && (
-        <p className="alert-error" role="alert">
-          {diagnostiquerEvCvSoxFR(exercice, { ev, cv, sox, fonctionIntermediaire }) === "parse_error"
-            ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
-            : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ ev, cv, sox, fonctionIntermediaire })}
+        >
+          Valider
+        </button>
+        {montrerErreurs && (
+          <p className="alert-error" role="alert">
+            {diagnostiquerEvCvSoxFR(exercice, { ev, cv, sox, fonctionIntermediaire }) === "parse_error"
+              ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
+              : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

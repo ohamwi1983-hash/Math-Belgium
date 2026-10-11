@@ -35,7 +35,7 @@ import {
   soumettreReponseTrouverU1B2,
 } from "./moteur5e/sessionSuiteGeometrique";
 import type { ReponseEquation } from "./moteur5e/sessionSuiteGeometrique";
-import type { EtatSessionSuiteGeometrique, PhaseSuiteGeometrique, ResultatExerciceSuiteGeometrique } from "./moteur5e/typesSuiteGeometrique";
+import type { EtatSessionSuiteGeometrique, PhaseSuiteGeometrique } from "./moteur5e/typesSuiteGeometrique";
 import {
   diagnostiquerEquationComplete,
   diagnostiquerEquationCompleteEnN,
@@ -65,8 +65,8 @@ import { EtapeSommeInfinie } from "./components5e/EtapeSommeInfinie";
 import { EtapeTermesMultiplesSuiteGeometrique } from "./components5e/EtapeTermesMultiplesSuiteGeometrique";
 import { EtapeTrouverQ } from "./components5e/EtapeTrouverQ";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { ResultatPanelSuiteGeometrique } from "./components5e/ResultatPanelSuiteGeometrique";
-import { ResumeSessionSuiteGeometrique } from "./components5e/ResumeSessionSuiteGeometrique";
+import { formatTermesReponseAttendueSuiteGeometrique } from "./ui5e/formatSuiteGeometrique";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -242,9 +242,9 @@ function nouvelleSession(): EtatSessionSuiteGeometrique {
   return demarrerSessionSuiteGeometrique(REGLAGES_DEMO, genererExerciceSuiteGeometrique);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceSuiteGeometrique;
-  aideParPhase: Partial<Record<PhaseSuiteGeometrique, { niveauAide: number; revele: boolean }>>;
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionSuiteGeometrique;
+  revele: boolean;
 }
 
 function soumettreChampSimple(etat: EtatSessionSuiteGeometrique, phase: PhaseSuiteGeometrique, texte: string): EtatSessionSuiteGeometrique {
@@ -327,26 +327,48 @@ function soumettrePoserEquation(
 
 export function App5gen15() {
   const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
-  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseSuiteGeometrique, { niveauAide: number; revele: boolean }>>>({});
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionSuiteGeometrique) {
-    const miseAJour = { ...aideParPhase, [etat.phase]: { niveauAide: etat.niveauAide, revele: nouvelEtat.derniereEtapeRevelee } };
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], aideParPhase: miseAJour });
-      setAideParPhase({});
-    } else {
-      setAideParPhase(miseAJour);
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
+  }
+
   const exercice = etat.exerciceCourant;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: (
+          <span className="equation-box-termes">
+            {formatTermesReponseAttendueSuiteGeometrique(exercice, phase).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </span>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -354,17 +376,10 @@ export function App5gen15() {
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites géométriques, formule générale et termes</h1>
       </header>
-      <SelecteurVarianteDev
-        options={CATALOGUE_FAMILLES}
-        onGenerer={(id) => {
-          setDernierBilan(null);
-          setEtat(demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
-        }}
-      />
+      <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
+          <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleSuiteGeometrique
                   key={cleEcran}
@@ -377,6 +392,7 @@ export function App5gen15() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(texte) => terminerEtape(soumettreChampSimple(etat, phase, texte))}
                   diagnostiquer={(texte) => diagnostiquerChampSimpleGeo(exercice, phase, texte)}
+                  validation={validation}
                 />
               )}
               {PHASES_CHAMP_SIMPLE.has(phase) && <CalculatriceScientifique />}
@@ -394,6 +410,7 @@ export function App5gen15() {
                   onValider={(textes) => terminerEtape(soumettreTermesMultiples(etat, phase, textes))}
                   diagnostiquer={(textes) => diagnostiquerTermesMultiplesGeo(exercice, phase, textes)}
                   diagnostiquerChamp={(index, texte) => diagnostiquerChampTermesMultiplesGeo(exercice, phase, index, texte)}
+                  validation={validation}
                 />
               )}
               {PHASES_TERMES_MULTIPLES.has(phase) && <CalculatriceScientifique />}
@@ -410,6 +427,7 @@ export function App5gen15() {
                   onValider={(valeurs) => terminerEtape(soumettreReponseTrouverQ(etat, valeurs))}
                   diagnostiquer={(valeurs) => (exercice.famille === "principal" ? diagnostiquerTrouverQ(exercice, valeurs) : "parse_error")}
                   diagnostiquerChamp={(_index, texte) => diagnostiquerChampTrouverQ(exercice, texte)}
+                  validation={validation}
                 />
               )}
               {phase === "trouverQ" && <CalculatriceScientifique />}
@@ -426,6 +444,7 @@ export function App5gen15() {
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => terminerEtape(soumettreSommeInfinie(etat, phase, reponse))}
                   diagnostiquer={(reponse) => diagnostiquerSommeInfinieGeo(exercice, phase, reponse)}
+                  validation={validation}
                 />
               )}
               {PHASES_SOMME_INFINIE.has(phase) && <CalculatriceScientifique />}
@@ -446,22 +465,11 @@ export function App5gen15() {
                   diagnostiquer={(reponse) =>
                     diagnostiquerPoserEquationGeo(exercice, phase as "poserEquationAlgebrique" | "poserEquationRangN", reponse)
                   }
+                  validation={validation}
                 />
               )}
               {PHASES_POSER_EQUATION.has(phase) && <CalculatriceScientifique />}
             </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelSuiteGeometrique
-              resultat={dernierBilan.resultat}
-              aideParPhase={dernierBilan.aideParPhase}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionSuiteGeometrique resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
         </div>
       </main>
     </div>

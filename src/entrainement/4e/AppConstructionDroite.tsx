@@ -1,15 +1,14 @@
 import { useState } from "react";
-import type { ExerciceConstructionDroite } from "./core/constructionDroite.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionDroite } from "./generateurs/constructionDroite";
 import type { VarianteConstructionDroite } from "./core/constructionDroite.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { activerAideSuivante, demarrerSessionConstructionDroite, soumettreReponsePoints, soumettreReponseTrace } from "./moteur/sessionConstructionDroite";
-import type { EtatSessionConstructionDroite, PhaseConstructionDroite, ResultatExerciceConstructionDroite } from "./moteur/typesConstructionDroite";
+import type { EtatSessionConstructionDroite, PhaseConstructionDroite } from "./moteur/typesConstructionDroite";
 import { EtapePointsConstructionDroite } from "./components/EtapePointsConstructionDroite";
 import { EtapeTraceConstructionDroite } from "./components/EtapeTraceConstructionDroite";
-import { ResultatPanelConstructionDroite } from "./components/ResultatPanelConstructionDroite";
-import { ResumeSessionConstructionDroite } from "./components/ResumeSessionConstructionDroite";
+import { Katex } from "./components/Katex";
+import { formatEnonceLatex, formatEtatActuelPointsLatex } from "./ui/formatConstructionDroite";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -23,34 +22,59 @@ function nouvelleSession(): EtatSessionConstructionDroite {
   return demarrerSessionConstructionDroite(REGLAGES_DEMO, genererExerciceConstructionDroite);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceConstructionDroite;
-  exercice: ExerciceConstructionDroite;
-}
-
 const LIBELLE_PHASE: Record<PhaseConstructionDroite, string> = {
   points: "Points de la droite",
   trace: "Tracé sur le graphe",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionConstructionDroite;
+  revele: boolean;
+}
+
 export function AppConstructionDroite() {
   const [etat, setEtat] = useState<EtatSessionConstructionDroite>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceConstructionDroite, nouvelEtat: EtatSessionConstructionDroite) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionConstructionDroite) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele = etat.phase === "points" ? nouvelEtat.pointsRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.traceRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   const exercice = etat.exerciceCourant;
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionConstructionDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteConstructionDroite)));
   }
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          etat.phase === "points" ? (
+            <Katex expression={formatEtatActuelPointsLatex(exercice.point, { x: exercice.point.x + exercice.vecteur.x, y: exercice.point.y + exercice.vecteur.y })} />
+          ) : (
+            <Katex expression={formatEnonceLatex(exercice)} />
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -59,35 +83,24 @@ export function AppConstructionDroite() {
         <h1 className="app-title">Construction graphique — tracer une droite</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelConstructionDroite
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionConstructionDroite resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "points" ? (
+        {etat.phase === "points" ? (
           <EtapePointsConstructionDroite
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAidePoints}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => setEtat(soumettreReponsePoints(etat, reponse))}
+            onValider={(reponse) => terminerEtape(soumettreReponsePoints(etat, reponse))}
+            validation={validation}
           />
         ) : etat.cible1 !== null && etat.cible2 !== null ? (
           <EtapeTraceConstructionDroite
@@ -98,10 +111,8 @@ export function AppConstructionDroite() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideTrace}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = exercice;
-              terminerEtape(exerciceTermine, soumettreReponseTrace(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseTrace(etat, reponse))}
+            validation={validation}
           />
         ) : null}
         </div>

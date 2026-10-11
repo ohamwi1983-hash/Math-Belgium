@@ -9,6 +9,8 @@ import {
 } from "../ui/formatCaracteristiquesAlgebriques";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceNiveau2ValeurAbsolue;
@@ -16,6 +18,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseResolutionBranches) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -32,7 +38,7 @@ interface Props {
  * ordinaire ne peut rendre du KaTeX), jamais "branche 1"/"branche 2", un texte générique qui ne
  * disait rien de la condition effectivement en jeu.
  */
-export function EtapeResolutionBranches({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeResolutionBranches({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
   const v1 = parserNombreOuFraction(racine1);
@@ -77,19 +83,24 @@ export function EtapeResolutionBranches({ exercice, etatActuel, tentativesUtilis
           onChange={(e) => setRacine2(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => complet && onValider({ racineBranche1: v1, racineBranche2: v2 })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => complet && onValider({ racineBranche1: v1, racineBranche2: v2 })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

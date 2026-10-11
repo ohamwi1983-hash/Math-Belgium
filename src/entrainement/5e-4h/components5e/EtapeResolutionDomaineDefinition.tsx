@@ -5,6 +5,7 @@ import type { ReponseResolution } from "../moteur5e/sessionDomaineDefinition";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { GrilleQuotientDomfBuilder } from "./GrilleQuotientDomfBuilder";
 import { Katex } from "../components/Katex";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, formatEnsembleReelLatex, formatSlotConditionLatex, formatTermesEtatActuelCELatex } from "../ui5e/formatDomaineDefinition";
 
 interface Props {
@@ -15,6 +16,10 @@ interface Props {
    * des blocs) — jamais avant, contrairement au montage précédent d'`App5gen1.tsx`. */
   donnees: ReactNode;
   onValider: (reponse: ReponseResolution) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — transmis tel quel
+   * au widget de saisie actif (convention CLAUDE.md, "validation/invalidation avant de passer à
+   * l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 function EtatActuelCE({ exercice }: { exercice: ExerciceDomaineDefinition }) {
@@ -45,7 +50,7 @@ function EtatActuelLignes({ termes }: { termes: string[] }) {
  * n'existe donc plus que pour "fractionSousRacine" — le tableau de signes — et
  * "racineSurFraction"/"racineSurD" — 2 CE indépendantes). Aucune aide sur cet écran (jamais
  * spécifiée par la spec pour ces 2 cas, voir `niveauAideMaxResolution`). */
-export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, donnees, onValider }: Props) {
+export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, donnees, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
   if (exercice.famille === "fractionSousRacine") {
@@ -54,7 +59,12 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
         <p className="prompt-text">{CONSIGNE_GENERALE_DOMAINE_DEFINITION}</p>
         {donnees}
         <EtatActuelCE exercice={exercice} />
-        <GrilleQuotientDomfBuilder exercice={exercice} tentativesUtilisees={tentativesUtilisees} onValider={(grille) => onValider({ famille: "fractionSousRacine", grille })} />
+        <GrilleQuotientDomfBuilder
+          exercice={exercice}
+          tentativesUtilisees={tentativesUtilisees}
+          onValider={(grille) => onValider({ famille: "fractionSousRacine", grille })}
+          validation={validation}
+        />
       </div>
     );
   }
@@ -64,7 +74,7 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
       <div>
         <p className="prompt-text">{CONSIGNE_GENERALE_DOMAINE_DEFINITION}</p>
         {donnees}
-        <ResolutionRacineSurFraction exercice={exercice} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} onValider={onValider} />
+        <ResolutionRacineSurFraction exercice={exercice} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} onValider={onValider} validation={validation} />
       </div>
     );
   }
@@ -85,8 +95,9 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
         prefixApercu="CE : x\in"
         attendu={exercice.resolution}
         apresEchec={montrerErreurs}
+        validation={validation}
       />
-      {montrerErreurs && (
+      {!validation && montrerErreurs && (
         <p className="alert-error" role="alert">
           Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
         </p>
@@ -100,6 +111,7 @@ interface ResolutionRacineSurFractionProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseResolution) => void;
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -131,7 +143,7 @@ interface ResolutionRacineSurFractionProps {
  * futur composant de ce type (sélection guidée d'ensemble/intervalle avec state interne) réutilisé
  * plus d'une fois à la même position JSX pour des cibles différentes.
  */
-function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentativesMax, onValider }: ResolutionRacineSurFractionProps) {
+function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentativesMax, onValider, validation }: ResolutionRacineSurFractionProps) {
   const [radicande, setRadicande] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const [slotRadicande, slotDenominateur] = exercice.slots as [SlotCE, SlotCE];
@@ -152,6 +164,7 @@ function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentatives
           prefixApercu="CE : x\in"
           attendu={exercice.resolutionRadicande}
           apresEchec={montrerErreurs}
+          validation={validation}
         />
       </div>
     );
@@ -169,6 +182,7 @@ function ResolutionRacineSurFraction({ exercice, tentativesUtilisees, tentatives
         prefixApercu="CE : x\in"
         attendu={attenduDenominateur}
         apresEchec={montrerErreurs}
+        validation={validation}
       />
       {montrerErreurs && (
         <p className="alert-error" role="alert">

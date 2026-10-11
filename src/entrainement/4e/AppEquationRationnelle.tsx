@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { Categorie, Exercice } from "./core/generateur.types";
 import type { ExerciceCas4a, ExerciceCas4b, ExerciceEquationRationnelle } from "./core/equationRationnelle.types";
 import type { ExerciceSimplification, PolynomeLineaire } from "./core/simplification.types";
@@ -28,13 +29,9 @@ import {
   soumettreReponseSimplifierFraction,
   soumettreReponseSimplifierReduction,
 } from "./moteur/sessionEquationRationnelle";
-import type {
-  EtatSessionEquationRationnelle,
-  PhaseEquationRationnelle,
-  ResultatExerciceEquationRationnelle,
-} from "./moteur/typesEquationRationnelle";
+import type { EtatSessionEquationRationnelle, PhaseEquationRationnelle } from "./moteur/typesEquationRationnelle";
 import { diagnostiquerChampPrincipal, diagnostiquerFactorisationCasGeneral, diagnostiquerIsolement } from "./moteur/verification";
-import { diagnostiquerFractionSimplifiee, diagnostiquerSimplifierToutes } from "./moteur/verificationEquationRationnelle";
+import { diagnostiquerFractionSimplifiee, diagnostiquerSimplifierToutes, racinesDistinctes } from "./moteur/verificationEquationRationnelle";
 import { diagnostiquerMiseEnEvidenceFraction } from "./moteur/verificationSimplification";
 import {
   CATALOGUE_VARIANTES,
@@ -53,16 +50,17 @@ import { EtapeIsolement } from "./components/EtapeIsolement";
 import { EtapeReconnaissance } from "./components/EtapeReconnaissance";
 import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeRacinesEtrangeres } from "./components/EtapeRacinesEtrangeres";
-import { ResultatPanelEquationRationnelle } from "./components/ResultatPanelEquationRationnelle";
-import { ResumeSessionEquationRationnelle } from "./components/ResumeSessionEquationRationnelle";
 import { calculerRecapitulatifEquationRationnelle } from "./ui/recapitulatifEquationRationnelle";
 import {
   formatEquationRationnelleLatex,
   formatEquationRationnelleLatexApresSimplification,
   formatFractionGaucheFactorisee,
+  formatFractionReduiteOuConstante,
   formatRappelEquationRationnelle,
 } from "./ui/formatEquationRationnelle";
-import { formatEquationDenominateur, formatEquationNumerateur } from "./ui/formatSimplification";
+import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee } from "./ui/formatSimplification";
+import { libelleCategorie } from "./ui/categorieLabels";
+import { estSolutionUnique, formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 
 const QUESTION_FACTORISATION = "Quelle est la méthode la plus rapide pour résoudre cette équation ?";
 const QUESTION_FACTORISATION_FRACTION = "Quelle est la méthode la plus rapide pour factoriser ce polynôme ?";
@@ -98,11 +96,6 @@ function nouvelleSession(): EtatSessionEquationRationnelle {
   return demarrerSessionEquationRationnelle(REGLAGES_DEMO, genererExerciceEquationRationnelle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceEquationRationnelle;
-  exercice: ExerciceEquationRationnelle;
-}
-
 const LIBELLE_PHASE: Record<PhaseEquationRationnelle, string> = {
   ce: "Condition d'existence",
   simplifier: "Simplifier",
@@ -128,112 +121,200 @@ const LIBELLE_PHASE: Record<PhaseEquationRationnelle, string> = {
  */
 const PHASES_SANS_RAPPEL_SUPPLEMENTAIRE = new Set<PhaseEquationRationnelle>(["ce", "simplifier", "isolement", "simplifierFraction"]);
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionEquationRationnelle;
+  revele: boolean;
+}
+
+/** Reproduit exactement ce que `ResultatPanelEquationRationnelle.tsx` affichait (bloc
+ * "answer-reveal") pour UNE phase donnée, scopé à l'exercice/phase qui vient juste de se terminer
+ * (`etat.exerciceCourant`/`etat.phase`, jamais l'état suivant). Cet ancien panneau n'avait PAS de
+ * bloc "answer-reveal" pour "simplifierReduction" ni pour "reconnaissance" (seule la ligne colorée
+ * du récapitulatif existait) — fidèlement reproduit ici par `null` (pas de contenu ajouté qui
+ * n'existait pas avant). */
+function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
+  const exercice = etat.exerciceCourant;
+  switch (etat.phase) {
+    case "ce":
+      return (
+        <>
+          {exercice.ce.length === 1 ? "Condition d'existence attendue" : "Conditions d'existence attendues"} :{" "}
+          {exercice.ce.map((v) => `x ≠ ${v}`).join(" et ")}
+        </>
+      );
+    case "simplifier":
+      return (
+        <>
+          {exercice.fractionsSimplifiables.length === 1 ? "Fraction simplifiée attendue" : "Fractions simplifiées attendues"} :{" "}
+          {exercice.fractionsSimplifiables.map(formatFractionReduiteOuConstante).map((expr, index) => (
+            <Katex key={index} expression={expr} />
+          ))}
+        </>
+      );
+    case "simplifierReduction":
+      return null;
+    case "simplifierReconnaissance": {
+      const p2 = p2DeFractionGauche(exercice);
+      return <>Méthode attendue (fraction) : {libelleCategorie(p2.categorie)}</>;
+    }
+    case "simplifierChamp1": {
+      const p2 = p2DeFractionGauche(exercice);
+      return (
+        <>
+          Réponse attendue (fraction) :{" "}
+          {p2.categorie === "cas_general" ? `Δ = ${p2.solution.delta}` : `${p2.solution.formeFactorisee} = 0`}
+        </>
+      );
+    }
+    case "simplifierChamp2": {
+      const p2 = p2DeFractionGauche(exercice);
+      return (
+        <>
+          {estSolutionUnique(p2) ? "Racine attendue (fraction)" : "Racines attendues (fraction)"} :{" "}
+          <span className="equation-box-termes">
+            {formatTermesZerosAttendusLatex(p2).map((terme, i) => (
+              <Katex key={i} expression={terme} />
+            ))}
+          </span>
+        </>
+      );
+    }
+    case "simplifierFactorisation": {
+      const p2 = p2DeFractionGauche(exercice);
+      return (
+        <>
+          Forme factorisée attendue (fraction) :{" "}
+          <Katex expression={`${formatFormeFactoriseeDepuisRacines(p2.enonce, p2.solution.racines)} = 0`} />
+        </>
+      );
+    }
+    case "simplifierFraction":
+      if (!exercice.fractionGauche) return null;
+      return (
+        <>
+          Fraction simplifiée attendue : <Katex expression={formatFractionSimplifiee(exercice.fractionGauche)} />
+        </>
+      );
+    case "isolement":
+      return (
+        <>
+          Équation isolée attendue : <Katex expression={formatEnonceLatex(exercice.equationIsolee.enonce)} />
+        </>
+      );
+    case "reconnaissance":
+      return null;
+    case "champ1":
+      return (
+        <>
+          Réponse attendue :{" "}
+          {exercice.equationIsolee.categorie === "cas_general"
+            ? `Δ = ${exercice.equationIsolee.solution.delta}`
+            : `${exercice.equationIsolee.solution.formeFactorisee} = 0`}
+        </>
+      );
+    case "champ2":
+      return (
+        <>
+          {estSolutionUnique(exercice.equationIsolee) ? "Solution attendue" : "Solutions attendues"} :{" "}
+          <span className="equation-box-termes">
+            {formatTermesZerosAttendusLatex(exercice.equationIsolee).map((terme, i) => (
+              <Katex key={i} expression={terme} />
+            ))}
+          </span>
+        </>
+      );
+    case "racinesEtrangeres":
+      return (
+        <>
+          {racinesDistinctes(exercice.equationIsolee.solution.racines)
+            .map((r) => `x = ${r} : ${exercice.ce.includes(r) ? "à rejeter" : "valide"}`)
+            .join(" ; ")}
+        </>
+      );
+  }
+}
+
+/**
+ * Signal `revele` de la phase qui vient JUSTE de se terminer (`etat.phase`, avant la transition).
+ * Ce générateur n'a JAMAIS tracké de booléen `xxxRevele` fiable par écran au niveau du moteur
+ * (seules "simplifierReconnaissance"/"reconnaissance" en ont un, `simplifierCategorieRevelee`/
+ * `categorieRevelee` — QCM sans aide) : pour toutes les autres phases, l'ancien
+ * `ResultatPanelEquationRationnelle.tsx` dérivait `revele` post-hoc comme `scoreXxx === 0`
+ * (approximatif : une pénalité d'aide peut aussi ramener à 0 une réponse correcte mais aidée — même
+ * défaut qu'avant, reproduit ici à l'identique, PAS corrigé dans cette passe). "racinesEtrangeres"
+ * clôture TOUJOURS l'exercice : son score n'existe que sur le dernier `resultats[...]` de
+ * `nouvelEtat`, jamais sur un champ `xxxExercice` top-level. */
+function releveRevelePhase(etat: EtatSessionEquationRationnelle, nouvelEtat: EtatSessionEquationRationnelle): boolean {
+  switch (etat.phase) {
+    case "ce":
+      return nouvelEtat.scoreCEExercice === 0;
+    case "simplifier":
+      return nouvelEtat.scoreSimplifierExercice === 0;
+    case "simplifierReduction":
+      return nouvelEtat.scoreSimplifierReductionExercice === 0;
+    case "simplifierReconnaissance":
+      return nouvelEtat.simplifierCategorieRevelee;
+    case "simplifierChamp1":
+      return nouvelEtat.scoreSimplifierChamp1Exercice === 0;
+    case "simplifierChamp2":
+      return nouvelEtat.scoreSimplifierChamp2Exercice === 0;
+    case "simplifierFactorisation":
+      return nouvelEtat.scoreSimplifierFactorisationExercice === 0;
+    case "simplifierFraction":
+      return nouvelEtat.scoreSimplifierFractionExercice === 0;
+    case "isolement":
+      return nouvelEtat.scoreIsolementExercice === 0;
+    case "reconnaissance":
+      return nouvelEtat.categorieRevelee;
+    case "champ1":
+      return nouvelEtat.scoreChampPrincipalExercice === 0;
+    case "champ2":
+      return nouvelEtat.scoreRacinesExercice === 0;
+    case "racinesEtrangeres":
+      return nouvelEtat.resultats[nouvelEtat.resultats.length - 1].scoreRacinesEtrangeres === 0;
+  }
+}
+
 export function AppEquationRationnelle() {
   const [etat, setEtat] = useState<EtatSessionEquationRationnelle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function validerCE(valeurs: number[]) {
-    setEtat(soumettreReponseCE(etat, valeurs));
-  }
-
-  function validerSimplifier(reponses: Array<{ numerateur: string; denominateur: string }>) {
-    setEtat(soumettreReponseSimplifier(etat, reponses));
-  }
-
-  function validerSimplifierReduction(reponse: string) {
-    setEtat(soumettreReponseSimplifierReduction(etat, reponse));
-  }
-
-  function activerAideEtapeSimplifierReduction() {
-    setEtat(activerAideSimplifierReduction(etat));
-  }
-
-  function choisirSimplifierCategorie(choix: Categorie) {
-    setEtat(soumettreChoixSimplifierCategorie(etat, choix));
-  }
-
-  function validerSimplifierChamp1(reponse: string) {
-    setEtat(soumettreReponseSimplifierChamp1(etat, reponse));
-  }
-
-  function validerSimplifierChamp2(racines: [number, number]) {
-    setEtat(soumettreReponseSimplifierChamp2(etat, racines));
-  }
-
-  function validerSimplifierFactorisation(reponse: string) {
-    setEtat(soumettreReponseSimplifierFactorisation(etat, reponse));
-  }
-
-  function validerSimplifierFraction(numerateur: string, denominateur: string) {
-    setEtat(soumettreReponseSimplifierFraction(etat, numerateur, denominateur));
-  }
-
-  function validerIsolement(reponse: string) {
-    setEtat(soumettreReponseIsolement(etat, reponse));
-  }
-
-  function choisirCategorie(choix: Categorie) {
-    setEtat(soumettreChoixCategorie(etat, choix));
-  }
-
-  function validerChamp1(reponse: string) {
-    setEtat(soumettreReponseChamp1(etat, reponse));
-  }
-
-  function validerChamp2(racines: [number, number]) {
-    setEtat(soumettreReponseChamp2(etat, racines));
-  }
-
-  function validerRacinesEtrangeres(reponses: boolean[]) {
-    const exerciceTermine = etat.exerciceCourant;
-    const nouvelEtat = soumettreReponseRacinesEtrangeres(etat, reponses);
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionEquationRationnelle) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  function activerAideEtapeCe() {
-    setEtat(activerAideCe(etat));
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
   }
 
-  function activerAideEtapeSimplifierChamp1() {
-    setEtat(activerAideSimplifierChamp1(etat));
+  function onGenererDev(varianteId: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionEquationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationRationnelleId)));
   }
 
-  function activerAideEtapeSimplifierChamp2() {
-    setEtat(activerAideSimplifierChamp2(etat));
-  }
-
-  function activerAideEtapeSimplifierFactorisation() {
-    setEtat(activerAideSimplifierFactorisation(etat));
-  }
-
-  function activerAideEtapeSimplifierFraction() {
-    setEtat(activerAideSimplifierFraction(etat));
-  }
-
-  function activerAideEtapeIsolement() {
-    setEtat(activerAideIsolement(etat));
-  }
-
-  function activerAideEtapeChamp1() {
-    setEtat(activerAideChamp1(etat));
-  }
-
-  function activerAideEtapeChamp2() {
-    setEtat(activerAideChamp2(etat));
-  }
-
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const recapitulatif = calculerRecapitulatifEquationRationnelle(etat);
   const { tentativesUtilisees } = etat.etapeCourante;
   const { tentativesMax } = etat.reglages;
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
-    setEtat(demarrerSessionEquationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationRationnelleId)));
-  }
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(etat),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -245,210 +326,208 @@ export function AppEquationRationnelle() {
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelEquationRationnelle
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
+          {!PHASES_SANS_RAPPEL_SUPPLEMENTAIRE.has(etat.phase) && (
+            <div className="equation-box">
+              <Katex expression={formatRappelEquationRationnelle(etat.exerciceCourant, etat.phase)} block />
+            </div>
+          )}
+          {etat.phase === "ce" && etat.exerciceCourant.ce.length === 1 ? (
+            <EtapeCEDirecte
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              question={QUESTION_CE}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]))}
+              validation={validation}
             />
-          ) : etat.terminee ? (
-            <ResumeSessionEquationRationnelle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
+          ) : etat.phase === "ce" ? (
+            <EtapeRacinesFlexibles
+              exercice={etat.exerciceCourant.equationIsolee}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              labelChamp="Conditions d'existence (CE)"
+              libellePasDe="Pas de CE"
+              libelleAuMoins="Au moins une CE"
+              placeholderPrefixe="CE"
+              prefixeChamp="x \neq"
+              expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              question={QUESTION_CE}
+              texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
+              aideActivee={etat.aideCeUtilisee}
+              onActiverAide={() => setEtat(activerAideCe(etat))}
+              onValider={(valeurs) => terminerEtape(soumettreReponseCE(etat, valeurs))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifier" ? (
+            <EtapeSimplifierFractions
+              fractions={etat.exerciceCourant.fractionsSimplifiables}
+              expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              diagnostiquer={(reponses) => diagnostiquerSimplifierToutes(etat.exerciceCourant.fractionsSimplifiables, reponses)}
+              onValider={(reponses) => terminerEtape(soumettreReponseSimplifier(etat, reponses))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifierReduction" ? (
+            <EtapeReductionCoefficients
+              exercice={p2DeFractionGauche(etat.exerciceCourant)}
+              nom={etat.exerciceCourant.fractionGauche?.type === "P2/P1" ? "numérateur" : "dénominateur"}
+              variante="miseEnEvidence"
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(p2DeFractionGauche(etat.exerciceCourant), v)}
+              aideActivee={etat.aideSimplifierReductionUtilisee}
+              onActiverAide={() => setEtat(activerAideSimplifierReduction(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierReduction(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifierReconnaissance" ? (
+            <EtapeReconnaissance
+              exercice={p2DeFractionGauche(etat.exerciceCourant)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              expressionAffichee={expressionP2(etat.exerciceCourant)}
+              question={QUESTION_FACTORISATION_FRACTION}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierCategorie(etat, choix))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifierChamp1" ? (
+            <EtapeChamp1
+              exercice={p2DeFractionGauche(etat.exerciceCourant)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              expressionAffichee={expressionP2(etat.exerciceCourant)}
+              labelFactorisation={LABEL_FACTORISATION_FRACTION}
+              diagnostiquer={(v) => diagnostiquerChampPrincipal(p2DeFractionGauche(etat.exerciceCourant), v)}
+              aideActivee={etat.aideSimplifierChamp1Utilisee}
+              onActiverAide={() => setEtat(activerAideSimplifierChamp1(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierChamp1(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifierChamp2" ? (
+            <EtapeRacinesFlexibles
+              exercice={p2DeFractionGauche(etat.exerciceCourant)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              expressionAffichee={expressionP2(etat.exerciceCourant)}
+              prefixeChamp="x ="
+              aideActivee={etat.aideSimplifierChamp2Utilisee}
+              onActiverAide={() => setEtat(activerAideSimplifierChamp2(etat))}
+              onValider={(racines) => terminerEtape(soumettreReponseSimplifierChamp2(etat, racines))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifierFactorisation" ? (
+            <EtapeChamp1
+              exercice={p2DeFractionGauche(etat.exerciceCourant)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              expressionAffichee={expressionP2(etat.exerciceCourant)}
+              labelFactorisation="Forme factorisée"
+              etapeFactorisationForcee
+              diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(p2DeFractionGauche(etat.exerciceCourant), v)}
+              aideActivee={etat.aideSimplifierFactorisationUtilisee}
+              onActiverAide={() => setEtat(activerAideSimplifierFactorisation(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierFactorisation(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "simplifierFraction" ? (
+            <EtapeSimplification
+              expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              etatActuel={formatFractionGaucheFactorisee(etat.exerciceCourant as ExerciceCas4a | ExerciceCas4b)}
+              question="Simplifie la fraction ci-dessus."
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              diagnostiquer={(n, d) =>
+                diagnostiquerFractionSimplifiee(
+                  (etat.exerciceCourant.fractionGauche as ExerciceSimplification).numerateur as PolynomeLineaire,
+                  (etat.exerciceCourant.fractionGauche as ExerciceSimplification).denominateur as PolynomeLineaire,
+                  n,
+                  d,
+                )
+              }
+              aideActivee={etat.aideSimplifierFractionUtilisee}
+              onActiverAide={() => setEtat(activerAideSimplifierFraction(etat))}
+              onValider={(numerateur, denominateur) => terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur))}
+              validation={validation}
+            />
+          ) : etat.phase === "isolement" ? (
+            <EtapeIsolement
+              exercice={etat.exerciceCourant.equationIsolee}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              expressionAffichee={formatEquationRationnelleLatexApresSimplification(etat.exerciceCourant)}
+              diagnostiquer={(v) => diagnostiquerIsolement(etat.exerciceCourant.equationIsolee, v)}
+              texteAide="Multiplie chaque terme par le dénominateur commun pour éliminer les fractions, puis regroupe."
+              aideActivee={etat.aideIsolementUtilisee}
+              onActiverAide={() => setEtat(activerAideIsolement(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "reconnaissance" ? (
+            <EtapeReconnaissance
+              exercice={etat.exerciceCourant.equationIsolee}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              question={QUESTION_FACTORISATION}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix))}
+              validation={validation}
+            />
+          ) : etat.phase === "champ1" ? (
+            <EtapeChamp1
+              exercice={etat.exerciceCourant.equationIsolee}
+              diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.equationIsolee, v)}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              aideActivee={etat.aideChamp1Utilisee}
+              onActiverAide={() => setEtat(activerAideChamp1(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "champ2" ? (
+            <EtapeRacinesFlexibles
+              exercice={etat.exerciceCourant.equationIsolee}
+              labelChamp="Solutions"
+              libellePasDe="Pas de solution"
+              libelleAuMoins="Au moins une solution"
+              placeholderPrefixe="solution"
+              prefixeChamp="x ="
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              texteAide="Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution."
+              aideActivee={etat.aideChamp2Utilisee}
+              onActiverAide={() => setEtat(activerAideChamp2(etat))}
+              onValider={(racines) => terminerEtape(soumettreReponseChamp2(etat, racines))}
+              validation={validation}
+            />
           ) : (
-            <>
-              {!PHASES_SANS_RAPPEL_SUPPLEMENTAIRE.has(etat.phase) && (
-                <div className="equation-box">
-                  <Katex expression={formatRappelEquationRationnelle(etat.exerciceCourant, etat.phase)} block />
-                </div>
-              )}
-              {etat.phase === "ce" && etat.exerciceCourant.ce.length === 1 ? (
-                <EtapeCEDirecte
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
-                  question={QUESTION_CE}
-                  onValider={(reponse) => validerCE([Number(reponse)])}
-                />
-              ) : etat.phase === "ce" ? (
-                <EtapeRacinesFlexibles
-                  exercice={etat.exerciceCourant.equationIsolee}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  labelChamp="Conditions d'existence (CE)"
-                  libellePasDe="Pas de CE"
-                  libelleAuMoins="Au moins une CE"
-                  placeholderPrefixe="CE"
-                  prefixeChamp="x \neq"
-                  expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
-                  question={QUESTION_CE}
-                  texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
-                  aideActivee={etat.aideCeUtilisee}
-                  onActiverAide={activerAideEtapeCe}
-                  onValider={validerCE}
-                />
-              ) : etat.phase === "simplifier" ? (
-                <EtapeSimplifierFractions
-                  fractions={etat.exerciceCourant.fractionsSimplifiables}
-                  expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  diagnostiquer={(reponses) => diagnostiquerSimplifierToutes(etat.exerciceCourant.fractionsSimplifiables, reponses)}
-                  onValider={validerSimplifier}
-                />
-              ) : etat.phase === "simplifierReduction" ? (
-                <EtapeReductionCoefficients
-                  exercice={p2DeFractionGauche(etat.exerciceCourant)}
-                  nom={etat.exerciceCourant.fractionGauche?.type === "P2/P1" ? "numérateur" : "dénominateur"}
-                  variante="miseEnEvidence"
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(p2DeFractionGauche(etat.exerciceCourant), v)}
-                  aideActivee={etat.aideSimplifierReductionUtilisee}
-                  onActiverAide={activerAideEtapeSimplifierReduction}
-                  onValider={validerSimplifierReduction}
-                />
-              ) : etat.phase === "simplifierReconnaissance" ? (
-                <EtapeReconnaissance
-                  exercice={p2DeFractionGauche(etat.exerciceCourant)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  expressionAffichee={expressionP2(etat.exerciceCourant)}
-                  question={QUESTION_FACTORISATION_FRACTION}
-                  onChoisir={choisirSimplifierCategorie}
-                />
-              ) : etat.phase === "simplifierChamp1" ? (
-                <EtapeChamp1
-                  exercice={p2DeFractionGauche(etat.exerciceCourant)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  expressionAffichee={expressionP2(etat.exerciceCourant)}
-                  labelFactorisation={LABEL_FACTORISATION_FRACTION}
-                  diagnostiquer={(v) => diagnostiquerChampPrincipal(p2DeFractionGauche(etat.exerciceCourant), v)}
-                  aideActivee={etat.aideSimplifierChamp1Utilisee}
-                  onActiverAide={activerAideEtapeSimplifierChamp1}
-                  onValider={validerSimplifierChamp1}
-                />
-              ) : etat.phase === "simplifierChamp2" ? (
-                <EtapeRacinesFlexibles
-                  exercice={p2DeFractionGauche(etat.exerciceCourant)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  expressionAffichee={expressionP2(etat.exerciceCourant)}
-                  prefixeChamp="x ="
-                  aideActivee={etat.aideSimplifierChamp2Utilisee}
-                  onActiverAide={activerAideEtapeSimplifierChamp2}
-                  onValider={validerSimplifierChamp2}
-                />
-              ) : etat.phase === "simplifierFactorisation" ? (
-                <EtapeChamp1
-                  exercice={p2DeFractionGauche(etat.exerciceCourant)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  expressionAffichee={expressionP2(etat.exerciceCourant)}
-                  labelFactorisation="Forme factorisée"
-                  etapeFactorisationForcee
-                  diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(p2DeFractionGauche(etat.exerciceCourant), v)}
-                  aideActivee={etat.aideSimplifierFactorisationUtilisee}
-                  onActiverAide={activerAideEtapeSimplifierFactorisation}
-                  onValider={validerSimplifierFactorisation}
-                />
-              ) : etat.phase === "simplifierFraction" ? (
-                <EtapeSimplification
-                  expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
-                  etatActuel={formatFractionGaucheFactorisee(etat.exerciceCourant as ExerciceCas4a | ExerciceCas4b)}
-                  question="Simplifie la fraction ci-dessus."
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  diagnostiquer={(n, d) =>
-                    diagnostiquerFractionSimplifiee(
-                      (etat.exerciceCourant.fractionGauche as ExerciceSimplification).numerateur as PolynomeLineaire,
-                      (etat.exerciceCourant.fractionGauche as ExerciceSimplification).denominateur as PolynomeLineaire,
-                      n,
-                      d,
-                    )
-                  }
-                  aideActivee={etat.aideSimplifierFractionUtilisee}
-                  onActiverAide={activerAideEtapeSimplifierFraction}
-                  onValider={validerSimplifierFraction}
-                />
-              ) : etat.phase === "isolement" ? (
-                <EtapeIsolement
-                  exercice={etat.exerciceCourant.equationIsolee}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  expressionAffichee={formatEquationRationnelleLatexApresSimplification(etat.exerciceCourant)}
-                  diagnostiquer={(v) => diagnostiquerIsolement(etat.exerciceCourant.equationIsolee, v)}
-                  texteAide="Multiplie chaque terme par le dénominateur commun pour éliminer les fractions, puis regroupe."
-                  aideActivee={etat.aideIsolementUtilisee}
-                  onActiverAide={activerAideEtapeIsolement}
-                  onValider={validerIsolement}
-                />
-              ) : etat.phase === "reconnaissance" ? (
-                <EtapeReconnaissance
-                  exercice={etat.exerciceCourant.equationIsolee}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  question={QUESTION_FACTORISATION}
-                  onChoisir={choisirCategorie}
-                />
-              ) : etat.phase === "champ1" ? (
-                <EtapeChamp1
-                  exercice={etat.exerciceCourant.equationIsolee}
-                  diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.equationIsolee, v)}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  aideActivee={etat.aideChamp1Utilisee}
-                  onActiverAide={activerAideEtapeChamp1}
-                  onValider={validerChamp1}
-                />
-              ) : etat.phase === "champ2" ? (
-                <EtapeRacinesFlexibles
-                  exercice={etat.exerciceCourant.equationIsolee}
-                  labelChamp="Solutions"
-                  libellePasDe="Pas de solution"
-                  libelleAuMoins="Au moins une solution"
-                  placeholderPrefixe="solution"
-                  prefixeChamp="x ="
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  texteAide="Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution."
-                  aideActivee={etat.aideChamp2Utilisee}
-                  onActiverAide={activerAideEtapeChamp2}
-                  onValider={validerChamp2}
-                />
-              ) : (
-                <EtapeRacinesEtrangeres
-                  exercice={etat.exerciceCourant}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  recapitulatif={recapitulatif}
-                  onValider={validerRacinesEtrangeres}
-                />
-              )}
-            </>
-          )}{" "}
+            <EtapeRacinesEtrangeres
+              exercice={etat.exerciceCourant}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              recapitulatif={recapitulatif}
+              onValider={(reponses) => terminerEtape(soumettreReponseRacinesEtrangeres(etat, reponses))}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

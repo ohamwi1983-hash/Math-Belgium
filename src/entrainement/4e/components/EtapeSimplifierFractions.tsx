@@ -6,6 +6,8 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { formatPolynomeLineaireDeveloppe } from "../ui/formatEquationRationnelle";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   fractions: FractionAReduire[];
@@ -20,6 +22,10 @@ interface Props {
    */
   diagnostiquer?: (reponses: Array<{ numerateur: string; denominateur: string }>) => StatutVerification;
   onValider: (reponses: Array<{ numerateur: string; denominateur: string }>) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const LABEL_COTE: Record<"gauche" | "droite", string> = {
@@ -42,6 +48,7 @@ export function EtapeSimplifierFractions({
   recapitulatif,
   diagnostiquer,
   onValider,
+  validation,
 }: Props) {
   const [numerateurs, setNumerateurs] = useState<string[]>(() => fractions.map(() => ""));
   const [denominateurs, setDenominateurs] = useState<string[]>(() => fractions.map(() => ""));
@@ -100,14 +107,19 @@ export function EtapeSimplifierFractions({
           </div>
         </div>
       ))}
-      <button type="button" className="btn btn-primary" disabled={!tousRemplis} onClick={() => onValider(reponses)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(reponses))}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!tousRemplis} onClick={() => onValider(reponses)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, diagnostiquer?.(reponses))}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

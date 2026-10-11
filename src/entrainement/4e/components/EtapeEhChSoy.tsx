@@ -6,12 +6,18 @@ import { placeholderEquation } from "../ui/formatFonctionsReference";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { MafsGraphFormeCanoniqueFonctionsReference } from "./MafsGraphFormeCanoniqueFonctionsReference";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueFonctionReference;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseEhChSoy) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const NOM_G: Record<ExerciceFormeCanoniqueFonctionReference["famille"], string> = {
@@ -26,7 +32,7 @@ const NOM_G: Record<ExerciceFormeCanoniqueFonctionReference["famille"], string> 
 /** Étape 2 (section 2 de la spec) : graphe partant de la fonction de référence pure (sans aucune
  * transformation), curseurs EH/CH (exclusivité mutuelle) et toggle SOY, champ "fonction
  * intermédiaire" — première étape à afficher un graphe, aucune trace confirmée encore. */
-export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [eh, setEh] = useState(1);
   const [ch, setCh] = useState(1);
   const [soy, setSoy] = useState(false);
@@ -87,21 +93,26 @@ export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onV
           onChange={(e) => setFonctionIntermediaire(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ eh, ch, soy, fonctionIntermediaire })}
-      >
-        Valider
-      </button>
-      {statut !== undefined && statut !== "correct" && (
-        <p className="alert-error" role="alert">
-          {statut === "parse_error"
-            ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
-            : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ eh, ch, soy, fonctionIntermediaire })}
+        >
+          Valider
+        </button>
+        {statut !== undefined && statut !== "correct" && (
+          <p className="alert-error" role="alert">
+            {statut === "parse_error"
+              ? formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")
+              : `Incorrect (curseurs en rouge si fautifs) — tentative ${tentativesUtilisees}/${tentativesMax}, réessaie.`}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

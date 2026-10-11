@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceBoiteMoustaches } from "./core/boiteMoustaches.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -9,7 +8,7 @@ import {
   soumettreReponseConstruction,
   soumettreReponseLecture,
 } from "./moteur/sessionBoiteMoustaches";
-import type { EtatSessionBoiteMoustaches, PhaseBoiteMoustaches, ResultatExerciceBoiteMoustaches } from "./moteur/typesBoiteMoustaches";
+import type { EtatSessionBoiteMoustaches, PhaseBoiteMoustaches } from "./moteur/typesBoiteMoustaches";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBoiteMoustaches } from "./generateurs/boiteMoustaches";
 import type { VarianteBoiteMoustaches } from "./core/boiteMoustaches.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -17,8 +16,13 @@ import { EtapeConstruction } from "./components/EtapeConstruction";
 import { EtapeLecture } from "./components/EtapeLecture";
 import { EtapeComparaisonMedianes } from "./components/EtapeComparaisonMedianes";
 import { EtapeComparaisonDispersions } from "./components/EtapeComparaisonDispersions";
-import { ResultatPanelBoiteMoustaches } from "./components/ResultatPanelBoiteMoustaches";
-import { ResumeSessionBoiteMoustaches } from "./components/ResumeSessionBoiteMoustaches";
+import { Katex } from "./components/Katex";
+import { SegmentsInline } from "./components/SegmentsInline";
+import {
+  formatTermesCinqNombresLatex,
+  segmentsComparaisonDispersionsAttendue,
+  segmentsComparaisonMedianesAttendue,
+} from "./ui/formatBoiteMoustaches";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -32,11 +36,6 @@ function nouvelleSession(): EtatSessionBoiteMoustaches {
   return demarrerSessionBoiteMoustaches(REGLAGES_DEMO, genererExerciceBoiteMoustaches);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceBoiteMoustaches;
-  exercice: ExerciceBoiteMoustaches;
-}
-
 const LIBELLE_PHASE: Record<PhaseBoiteMoustaches, string> = {
   construction: "Construction",
   lecture: "Lecture",
@@ -44,24 +43,74 @@ const LIBELLE_PHASE: Record<PhaseBoiteMoustaches, string> = {
   comparaisonDispersions: "Comparaison — dispersions",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionBoiteMoustaches;
+  revele: boolean;
+}
+
 export function AppBoiteMoustaches() {
   const [etat, setEtat] = useState<EtatSessionBoiteMoustaches>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceBoiteMoustaches, nouvelEtat: EtatSessionBoiteMoustaches) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionBoiteMoustaches) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "comparaisonMedianes"
+          ? nouvelEtat.comparaisonMedianesRevele
+          : etat.phase === "comparaisonDispersions"
+            ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.comparaisonDispersionsRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.revele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  function forcerVariante(id: string) {
+    setEnAttente(null);
+    setEtat(demarrerSessionBoiteMoustaches(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteBoiteMoustaches)));
+  }
+
   const exercice = etat.exerciceCourant;
 
-  function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
-    setEtat(demarrerSessionBoiteMoustaches(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteBoiteMoustaches)));
+  function calculerReponseAttendue() {
+    if (!etat.reglages.affichageReponseApresEchec) return undefined;
+    if (exercice.variante === "construction" || exercice.variante === "lecture") {
+      return (
+        <span className="equation-box-termes">
+          {formatTermesCinqNombresLatex(exercice.valeurs).map((terme, i) => (
+            <Katex key={i} expression={terme} />
+          ))}
+        </span>
+      );
+    }
+    if (etat.phase === "comparaisonMedianes") {
+      return <SegmentsInline segments={segmentsComparaisonMedianesAttendue(exercice)} />;
+    }
+    return <SegmentsInline segments={segmentsComparaisonDispersionsAttendue(exercice)} />;
   }
+
+  const reponseAttendue = enAttente ? calculerReponseAttendue() : undefined;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue,
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -69,40 +118,26 @@ export function AppBoiteMoustaches() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Boîte à moustaches</h1>
         <p className="app-subtitle">Chapitre 5</p>
-        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 
       <main className="card">
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
-        )}
+        </div>
 
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelBoiteMoustaches
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionBoiteMoustaches resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : exercice.variante === "construction" ? (
+          {exercice.variante === "construction" ? (
             <EtapeConstruction
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseConstruction(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseConstruction(etat, reponse))}
+              validation={validation}
             />
           ) : exercice.variante === "lecture" ? (
             <EtapeLecture
@@ -111,10 +146,8 @@ export function AppBoiteMoustaches() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseLecture(etat, reponse));
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseLecture(etat, reponse))}
+              validation={validation}
             />
           ) : etat.phase === "comparaisonMedianes" ? (
             <EtapeComparaisonMedianes
@@ -123,7 +156,8 @@ export function AppBoiteMoustaches() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => setEtat(soumettreReponseComparaisonMedianes(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseComparaisonMedianes(etat, choix))}
+              validation={validation}
             />
           ) : (
             <EtapeComparaisonDispersions
@@ -132,12 +166,10 @@ export function AppBoiteMoustaches() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAide}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(choix) => {
-                const exerciceTermine = exercice;
-                terminerEtape(exerciceTermine, soumettreReponseComparaisonDispersions(etat, choix));
-              }}
+              onValider={(choix) => terminerEtape(soumettreReponseComparaisonDispersions(etat, choix))}
+              validation={validation}
             />
-          )}{" "}
+          )}
         </div>
       </main>
     </div>

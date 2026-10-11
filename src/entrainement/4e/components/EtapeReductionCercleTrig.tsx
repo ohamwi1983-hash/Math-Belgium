@@ -8,6 +8,8 @@ import { diagnostiquerReduction } from "../moteur/verificationCercleTrigonometri
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { AideReductionCercleTrig } from "./AideReductionCercleTrig";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCercleTrigonometrique;
@@ -17,6 +19,10 @@ interface Props {
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (valeur: number) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Premier écran rencontré si une réduction est nécessaire : valeur numérique simple. */
@@ -28,6 +34,7 @@ export function EtapeReductionCercleTrig({
   aideActivee,
   onActiverAide,
   onValider,
+  validation,
 }: Props) {
   const [texte, setTexte] = useState("");
 
@@ -55,14 +62,19 @@ export function EtapeReductionCercleTrig({
         />
       </div>
       <AideReductionCercleTrig exercice={exercice} aideActivee={aideActivee} onActiverAide={onActiverAide} />
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(valeur)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

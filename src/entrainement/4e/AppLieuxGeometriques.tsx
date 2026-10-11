@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { ExerciceLieuxGeometriques } from "./core/lieuxGeometriques.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLieuxGeometriques } from "./generateurs/lieuxGeometriques";
 import type { VarianteLieuxGeometriquesId } from "./generateurs/lieuxGeometriques";
@@ -11,12 +10,18 @@ import {
   soumettreReponseIdentification,
   soumettreReponseResolution,
 } from "./moteur/sessionLieuxGeometriques";
-import type { EtatSessionLieuxGeometriques, PhaseLieuxGeometriques, ResultatExerciceLieuxGeometriques } from "./moteur/typesLieuxGeometriques";
+import type { EtatSessionLieuxGeometriques, PhaseLieuxGeometriques } from "./moteur/typesLieuxGeometriques";
 import { EtapeEquationsLieuxGeometriques } from "./components/EtapeEquationsLieuxGeometriques";
 import { EtapeIdentificationLieuxGeometriques } from "./components/EtapeIdentificationLieuxGeometriques";
 import { EtapeResolutionLieuxGeometriques } from "./components/EtapeResolutionLieuxGeometriques";
-import { ResultatPanelLieuxGeometriques } from "./components/ResultatPanelLieuxGeometriques";
-import { ResumeSessionLieuxGeometriques } from "./components/ResumeSessionLieuxGeometriques";
+import { Katex } from "./components/Katex";
+import { RenduFragments } from "./components/RenduFragments";
+import {
+  formatEquationLieuLatex,
+  segmentsDescriptionLieu,
+  texteNombrePointsAttendu,
+  texteReponseResolutionAttendue,
+} from "./ui/formatLieuxGeometriques";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,34 +35,82 @@ function nouvelleSession(): EtatSessionLieuxGeometriques {
   return demarrerSessionLieuxGeometriques(REGLAGES_DEMO, genererExerciceLieuxGeometriques);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceLieuxGeometriques;
-  exercice: ExerciceLieuxGeometriques;
-}
-
 const LIBELLE_PHASE: Record<PhaseLieuxGeometriques, string> = {
   identification: "Identification",
   equations: "Équations",
   resolution: "Résolution",
 };
 
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionLieuxGeometriques;
+  revele: boolean;
+}
+
 export function AppLieuxGeometriques() {
   const [etat, setEtat] = useState<EtatSessionLieuxGeometriques>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceLieuxGeometriques, nouvelEtat: EtatSessionLieuxGeometriques) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!, exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionLieuxGeometriques) {
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      const revele =
+        etat.phase === "identification"
+          ? nouvelEtat.identificationRevele
+          : etat.phase === "equations"
+            ? nouvelEtat.equationsRevele
+            : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.resolutionRevele;
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
 
   function onGenererDev(varianteId: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(demarrerSessionLieuxGeometriques(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteLieuxGeometriquesId)));
   }
+
+  const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue:
+          phase === "identification" ? (
+            <>
+              Premier lieu : <RenduFragments fragments={segmentsDescriptionLieu(exercice.lieu1)} />. Second lieu :{" "}
+              <RenduFragments fragments={segmentsDescriptionLieu(exercice.lieu2)} />.
+            </>
+          ) : phase === "equations" ? (
+            <>
+              Équations attendues : <Katex expression={formatEquationLieuLatex(exercice.lieu1)} /> et{" "}
+              <Katex expression={formatEquationLieuLatex(exercice.lieu2)} />
+            </>
+          ) : (
+            <>
+              {texteNombrePointsAttendu(exercice.nombrePoints)}{" "}
+              {exercice.nombrePoints > 0 && (
+                <>
+                  Réponse attendue : <Katex expression={texteReponseResolutionAttendue(exercice)} />
+                </>
+              )}
+            </>
+          ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -66,62 +119,47 @@ export function AppLieuxGeometriques() {
         <h1 className="app-title">Lieux géométriques : intersection</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        {enCoursDeSession && (
-          <div className="card-progress">
-            <div className="card-progress-row">
-              <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-            </div>
+        <div className="card-progress">
+          <div className="card-progress-row">
+            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
           </div>
-        )}
+        </div>
       </header>
 
       <main className="card">
         <div className="card-body">
-        {dernierBilan ? (
-          <ResultatPanelLieuxGeometriques
-            resultat={dernierBilan.resultat}
-            exercice={dernierBilan.exercice}
-            afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-            labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-            onContinuer={() => setDernierBilan(null)}
-          />
-        ) : etat.terminee ? (
-          <ResumeSessionLieuxGeometriques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-        ) : etat.phase === "identification" ? (
+        {phase === "identification" ? (
           <EtapeIdentificationLieuxGeometriques
-            exercice={etat.exerciceCourant}
+            key={phase}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideIdentification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseIdentification(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
+            validation={validation}
           />
-        ) : etat.phase === "equations" ? (
+        ) : phase === "equations" ? (
           <EtapeEquationsLieuxGeometriques
-            exercice={etat.exerciceCourant}
+            key={phase}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideEquations}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseEquations(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseEquations(etat, reponse))}
+            validation={validation}
           />
         ) : (
           <EtapeResolutionLieuxGeometriques
-            exercice={etat.exerciceCourant}
+            key={phase}
+            exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideResolution}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(reponse) => {
-              const exerciceTermine = etat.exerciceCourant;
-              terminerEtape(exerciceTermine, soumettreReponseResolution(etat, reponse));
-            }}
+            onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse))}
+            validation={validation}
           />
         )}
         </div>

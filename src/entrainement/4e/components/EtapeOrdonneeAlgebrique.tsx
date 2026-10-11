@@ -4,6 +4,8 @@ import { diagnostiquerExpressionNumerique, parserExpressionNumerique } from "../
 import { formatEquationNiveau1Latex, placeholderExpressionNumerique } from "../ui/formatCaracteristiquesAlgebriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "nExistePas" | "existe";
 
@@ -12,6 +14,10 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseExistence) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Étape "ordonnée à l'origine" (spec section 4, point 1) — même principe que
@@ -25,7 +31,7 @@ interface Props {
  * `prompt-corrections-caracteristiquesalgebriques.md`, point 1 — corrige un exemple `sqrt(...)`
  * statique, jusque-là affiché même pour la famille `racine_cubique`, dont l'exemple pertinent
  * utilise `cbrt(...)`). */
-export function EtapeOrdonneeAlgebrique({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeOrdonneeAlgebrique({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeur, setValeur] = useState("");
 
@@ -73,23 +79,28 @@ export function EtapeOrdonneeAlgebrique({ exercice, tentativesUtilisees, tentati
           />
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={reponse === null}
-        onClick={() => reponse !== null && onValider(reponse)}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(
-            tentativesUtilisees,
-            tentativesMax,
-            choix === "existe" ? diagnostiquerExpressionNumerique(valeur) : undefined,
-          )}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reponse === null}
+          onClick={() => reponse !== null && onValider(reponse)}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(
+              tentativesUtilisees,
+              tentativesMax,
+              choix === "existe" ? diagnostiquerExpressionNumerique(valeur) : undefined,
+            )}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

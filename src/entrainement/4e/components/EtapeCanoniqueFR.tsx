@@ -4,12 +4,18 @@ import { diagnostiquerCanoniqueFR } from "../moteur/verificationFormeCanoniqueFo
 import { formatFormeDepartLatex } from "../ui/formatFormeCanoniqueFonctionsReference";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceFormeCanoniqueFonctionReference;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseCanoniqueFR) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 const EXEMPLE: Record<ExerciceFormeCanoniqueFonctionReference["famille"], string> = {
@@ -25,7 +31,7 @@ const EXEMPLE: Record<ExerciceFormeCanoniqueFonctionReference["famille"], string
  * (vérification structurelle + algébrique, comme pour "Forme canonique et transformations" —
  * chapitre 1). Pas de graphe ici : le graphe n'apparaît qu'à partir de l'étape suivante (EH/CH/SOY),
  * une fois la famille reconnue et confirmée. */
-export function EtapeCanoniqueFR({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeCanoniqueFR({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [formeCanonique, setFormeCanonique] = useState("");
   const complet = formeCanonique.trim() !== "";
   const statut = tentativesUtilisees > 0 ? diagnostiquerCanoniqueFR(exercice, { formeCanonique }) : undefined;
@@ -48,14 +54,19 @@ export function EtapeCanoniqueFR({ exercice, tentativesUtilisees, tentativesMax,
           onChange={(e) => setFormeCanonique(e.target.value)}
         />
       </div>
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ formeCanonique })}>
-        Valider
-      </button>
-      {statut !== undefined && statut !== "correct" && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider({ formeCanonique })}>
+          Valider
+        </button>
+        {statut !== undefined && statut !== "correct" && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { celluleQuotientEstErronee, cyclerValeurCelluleQuotient, grilleQuotientE
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceInequationRationnelleFacteurCommun;
@@ -18,6 +20,10 @@ interface Props {
   /** Bloc "état actuel" (prompt-corrections-moteur-partage.md, points 1 et 4) — absent/null par défaut : rien de rendu. */
   etatActuel?: string | null;
   onValider: (reponse: GrilleQuotient) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -39,6 +45,7 @@ export function EtapeGrilleQuotientFacteurCommun({
   recapitulatif,
   etatActuel,
   onValider,
+  validation,
 }: Props) {
   const entete = formatEnTeteInterieur(exercice.racines);
   const nbColonnes = entete.length;
@@ -148,14 +155,19 @@ export function EtapeGrilleQuotientFacteurCommun({
         </table>
       </div>
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

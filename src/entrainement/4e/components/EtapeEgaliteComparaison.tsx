@@ -5,16 +5,22 @@ import { VecteurGraph } from "./VecteurGraph";
 import { vecteursAffichesComparaison } from "../ui/formatComparaisonVecteurs";
 import { diagnostiquerEgalite } from "../moteur/verificationComparaisonVecteurs";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceComparaisonVecteurs;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (texte: string) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /** Dernière étape : écris l'égalité reliant `cibleEgalite` à `labelReference` (ex. `c = 2h`). */
-export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerEgalite(exercice, texte) : undefined;
@@ -43,14 +49,19 @@ export function EtapeEgaliteComparaison({ exercice, tentativesUtilisees, tentati
       </div>
       {statut === "parse_error" && <p className="alert-error">{formatMessageErreur(tentativesUtilisees, tentativesMax, "parse_error")}</p>}
 
-      <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && statut !== "parse_error" && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
+      {!validation && (
+        <>
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && statut !== "parse_error" && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

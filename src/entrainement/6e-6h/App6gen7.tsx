@@ -20,16 +20,13 @@ import {
   soumettreReponseESimplifier,
   soumettreReponseFDerivee,
 } from "./moteur6e/sessionDomaineDeriveeExponentielles";
-import type {
-  EtatSessionDomaineDeriveeExponentielle,
-  ResultatExerciceDomaineDeriveeExponentielle,
-} from "./moteur6e/typesDomaineDeriveeExponentielles";
+import type { EtatSessionDomaineDeriveeExponentielle } from "./moteur6e/typesDomaineDeriveeExponentielles";
 import { EtapeChampDomaineDerivee } from "./components6e/EtapeChampDomaineDerivee";
 import { EtapeDeuxChampsDomaineDerivee } from "./components6e/EtapeDeuxChampsDomaineDerivee";
 import { EtapeDomaineDomaineDerivee } from "./components6e/EtapeDomaineDomaineDerivee";
-import { ResultatPanelDomaineDeriveeExponentielle } from "./components6e/ResultatPanelDomaineDeriveeExponentielle";
-import { ResumeSessionDomaineDeriveeExponentielle } from "./components6e/ResumeSessionDomaineDeriveeExponentielle";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
+import { Katex } from "./components/Katex";
+import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import {
   aideNiveau1,
   aideNiveau2,
@@ -45,29 +42,48 @@ function nouvelleSession(): EtatSessionDomaineDeriveeExponentielle {
   return demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, genererExerciceDomaineDeriveeExponentielle);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceDomaineDeriveeExponentielle;
+/** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
+ * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionDomaineDeriveeExponentielle;
+  revele: boolean;
 }
 
 export function App6gen7() {
   const [etat, setEtat] = useState<EtatSessionDomaineDeriveeExponentielle>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
   function terminerEtape(nouvelEtat: EtatSessionDomaineDeriveeExponentielle) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1] });
+    const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
+    if (transitionDEcran) {
+      // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
+      // détail vit soit dans `detailsPartiels` (écran intermédiaire), soit dans le `resultats` qui
+      // vient d'être poussé (dernier écran de l'exercice), même principe que `App6gen6.tsx`.
+      const exerciceVientDeFinir = nouvelEtat.resultats.length > etat.resultats.length;
+      const detail = exerciceVientDeFinir
+        ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
+        : nouvelEtat.detailsPartiels[etat.phase];
+      setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
   function forcerVariante(id: string) {
-    setDernierBilan(null);
+    setEnAttente(null);
     setEtat(
       demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
     );
   }
 
-  const enCoursDeSession = !etat.terminee && !dernierBilan;
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
   const enonceLatex = formatFonctionLatex(exercice);
@@ -101,6 +117,31 @@ export function App6gen7() {
     fDerivee: "ex : -sin(e^(x^2-2))*2*x*e^(x^2-2)",
   };
 
+  // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
+  // `ResultatPanelDomaineDeriveeExponentielle.tsx` — jamais une cible recalculée séparément.
+  const reponseAttenduePhase = () => {
+    if (phasesDomaine.has(phase)) return <Katex expression={formatEnsembleReelLatex(exercice.domaine)} />;
+    if (phase === "aDerivee" || phase === "bDerivee" || phase === "fDerivee") {
+      return "Dérivée calculée directement, vérifiée par équivalence numérique avec f'(x).";
+    }
+    if (phase === "cFacteurs") return "u'(x) et v'(x), vérifiées séparément par équivalence numérique.";
+    if (phase === "cAssemblage") return "f'(x) assemblée, vérifiée par équivalence numérique.";
+    if (phase === "dND") return "N'(x) et D'(x), vérifiées séparément par équivalence numérique.";
+    if (phase === "dAssemblage") return "f'(x) assemblée via (N'D−ND')/D², vérifiée par équivalence numérique.";
+    if (phase === "eSimplifier") return "Forme simplifiée, équivalente à f(x) (jamais une recopie brute de l'énoncé).";
+    if (phase === "eDerivee") return "Dérivée de la forme simplifiée, vérifiée par équivalence numérique avec f'(x).";
+    return null;
+  };
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: reponseAttenduePhase(),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -110,83 +151,72 @@ export function App6gen7() {
       </header>
       <main className="card">
         <div className="card-body">
-          {enCoursDeSession && (
-            <>
-              {phasesDomaine.has(phase) && (
-                <EtapeDomaineDomaineDerivee
-                  key={phase}
-                  consigneEcran={consigne}
-                  enonceLatex={enonceLatex}
-                  etatActuel={etatActuelEcran}
-                  aideNiveau1={aide1}
-                  aideNiveau2={aide2}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
-                />
-              )}
-
-              {phasesDeuxChamps.has(phase) && (
-                <EtapeDeuxChampsDomaineDerivee
-                  key={phase}
-                  consigneEcran={consigne}
-                  enonceLatex={enonceLatex}
-                  etatActuel={etatActuelEcran}
-                  labelA={labels.a}
-                  labelB={labels.b}
-                  aideNiveau1={aide1}
-                  aideNiveau2={aide2}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) =>
-                    terminerEtape(phase === "cFacteurs" ? soumettreReponseCFacteurs(etat, reponse) : soumettreReponseDND(etat, reponse))
-                  }
-                />
-              )}
-
-              {phasesChampUnique.has(phase) && (
-                <EtapeChampDomaineDerivee
-                  key={phase}
-                  consigneEcran={consigne}
-                  enonceLatex={enonceLatex}
-                  etatActuel={etatActuelEcran}
-                  placeholder={PLACEHOLDERS[phase] ?? "ex : 2*x*3^(x^2)*ln(3)"}
-                  aideNiveau1={aide1}
-                  aideNiveau2={aide2}
-                  tentativesUtilisees={tentativesUtilisees}
-                  tentativesMax={tentativesMax}
-                  niveauAide={niveauAide}
-                  niveauAideMax={NIVEAU_AIDE_MAX}
-                  onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => {
-                    if (phase === "aDerivee") return terminerEtape(soumettreReponseADerivee(etat, texte));
-                    if (phase === "bDerivee") return terminerEtape(soumettreReponseBDerivee(etat, texte));
-                    if (phase === "cAssemblage") return terminerEtape(soumettreReponseCAssemblage(etat, texte));
-                    if (phase === "dAssemblage") return terminerEtape(soumettreReponseDAssemblage(etat, texte));
-                    if (phase === "eSimplifier") return terminerEtape(soumettreReponseESimplifier(etat, texte));
-                    if (phase === "eDerivee") return terminerEtape(soumettreReponseEDerivee(etat, texte));
-                    return terminerEtape(soumettreReponseFDerivee(etat, texte));
-                  }}
-                />
-              )}
-            </>
-          )}
-          {dernierBilan && (
-            <ResultatPanelDomaineDeriveeExponentielle
-              resultat={dernierBilan.resultat}
-              dernier={etat.terminee}
-              onContinuer={() => setDernierBilan(null)}
+          {phasesDomaine.has(phase) && (
+            <EtapeDomaineDomaineDerivee
+              key={phase}
+              consigneEcran={consigne}
+              enonceLatex={enonceLatex}
+              etatActuel={etatActuelEcran}
+              aideNiveau1={aide1}
+              aideNiveau2={aide2}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              validation={validation}
             />
           )}
-          {etat.terminee && !dernierBilan && (
-            <ResumeSessionDomaineDeriveeExponentielle resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          )}{" "}
+
+          {phasesDeuxChamps.has(phase) && (
+            <EtapeDeuxChampsDomaineDerivee
+              key={phase}
+              consigneEcran={consigne}
+              enonceLatex={enonceLatex}
+              etatActuel={etatActuelEcran}
+              labelA={labels.a}
+              labelB={labels.b}
+              aideNiveau1={aide1}
+              aideNiveau2={aide2}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) =>
+                terminerEtape(phase === "cFacteurs" ? soumettreReponseCFacteurs(etat, reponse) : soumettreReponseDND(etat, reponse))
+              }
+              validation={validation}
+            />
+          )}
+
+          {phasesChampUnique.has(phase) && (
+            <EtapeChampDomaineDerivee
+              key={phase}
+              consigneEcran={consigne}
+              enonceLatex={enonceLatex}
+              etatActuel={etatActuelEcran}
+              placeholder={PLACEHOLDERS[phase] ?? "ex : 2*x*3^(x^2)*ln(3)"}
+              aideNiveau1={aide1}
+              aideNiveau2={aide2}
+              tentativesUtilisees={tentativesUtilisees}
+              tentativesMax={tentativesMax}
+              niveauAide={niveauAide}
+              niveauAideMax={NIVEAU_AIDE_MAX}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => {
+                if (phase === "aDerivee") return terminerEtape(soumettreReponseADerivee(etat, texte));
+                if (phase === "bDerivee") return terminerEtape(soumettreReponseBDerivee(etat, texte));
+                if (phase === "cAssemblage") return terminerEtape(soumettreReponseCAssemblage(etat, texte));
+                if (phase === "dAssemblage") return terminerEtape(soumettreReponseDAssemblage(etat, texte));
+                if (phase === "eSimplifier") return terminerEtape(soumettreReponseESimplifier(etat, texte));
+                if (phase === "eDerivee") return terminerEtape(soumettreReponseEDerivee(etat, texte));
+                return terminerEtape(soumettreReponseFDerivee(etat, texte));
+              }}
+              validation={validation}
+            />
+          )}
         </div>
       </main>
     </div>

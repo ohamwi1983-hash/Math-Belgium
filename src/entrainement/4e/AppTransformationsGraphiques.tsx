@@ -1,12 +1,11 @@
 import { useState } from "react";
-import type { ExerciceTransformationGraphique } from "./core/transformationsGraphiques.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionTransformationGraphique, soumettreReponse } from "./moteur/sessionTransformationsGraphiques";
-import type { EtatSessionTransformationGraphique, ResultatExerciceTransformationGraphique } from "./moteur/typesTransformationsGraphiques";
+import type { EtatSessionTransformationGraphique } from "./moteur/typesTransformationsGraphiques";
 import { genererExerciceTransformationGraphique } from "./generateurs/transformationsGraphiques";
 import { EtapeTransformationExercice } from "./components/EtapeTransformationExercice";
-import { ResultatPanelTransformationsGraphiques } from "./components/ResultatPanelTransformationsGraphiques";
-import { ResumeSessionTransformationsGraphiques } from "./components/ResumeSessionTransformationsGraphiques";
+import { formatEquationTransformationLatex } from "./ui/formatTransformationsGraphiques";
+import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -20,22 +19,61 @@ function nouvelleSession(): EtatSessionTransformationGraphique {
   return demarrerSessionTransformationGraphique(REGLAGES_DEMO, genererExerciceTransformationGraphique);
 }
 
-interface Bilan {
-  resultat: ResultatExerciceTransformationGraphique;
-  exercice: ExerciceTransformationGraphique;
+/** État tenu en attente dès que les DEUX notes ("équation"/"curseurs") sont closes — l'état de
+ * session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
+ * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
+ * passer à l'écran suivant"). Pas de pause intermédiaire : une note qui se clôt seule désactive
+ * juste ses propres champs (déjà géré par `EtapeTransformationExercice`), l'élève continue de
+ * travailler l'autre note. */
+interface TransitionEnAttente {
+  etatSuivant: EtatSessionTransformationGraphique;
+  revele: boolean;
 }
 
 export function AppTransformationsGraphiques() {
   const [etat, setEtat] = useState<EtatSessionTransformationGraphique>(nouvelleSession);
-  const [dernierBilan, setDernierBilan] = useState<Bilan | null>(null);
+  const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
-  function terminerEtape(exerciceTermine: ExerciceTransformationGraphique, nouvelEtat: EtatSessionTransformationGraphique) {
-    if (nouvelEtat.resultats.length > etat.resultats.length) {
-      setDernierBilan({ resultat: nouvelEtat.resultats[nouvelEtat.resultats.length - 1], exercice: exerciceTermine });
+  function terminerEtape(nouvelEtat: EtatSessionTransformationGraphique) {
+    if (nouvelEtat.terminee !== etat.terminee) {
+      const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!;
+      setEnAttente({ etatSuivant: nouvelEtat, revele: resultat.equationRevele || resultat.curseursRevele });
+      return;
     }
     setEtat(nouvelEtat);
   }
 
+  function passerEcranSuivant() {
+    if (!enAttente) return;
+    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    setEnAttente(null);
+  }
+
+  const exercice = etat.exerciceCourant;
+  const resultatEnAttente = enAttente ? enAttente.etatSuivant.resultats[enAttente.etatSuivant.resultats.length - 1]! : null;
+
+  const validation = enAttente
+    ? {
+        revele: enAttente.revele,
+        reponseAttendue: resultatEnAttente && (
+          <>
+            {resultatEnAttente.scoreEquation === 0 && (
+              <div>
+                Fonction attendue : <Katex expression={formatEquationTransformationLatex(exercice)} />
+              </div>
+            )}
+            {resultatEnAttente.scoreCurseurs === 0 && (
+              <p>
+                Curseurs attendus : TH = {exercice.p} ; TV = {exercice.q} ; EV = {exercice.ev} ; CV = {exercice.cv} ; SOX ={" "}
+                {exercice.sox ? "Oui" : "Non"}
+              </p>
+            )}
+          </>
+        ),
+        labelSuivant: enAttente.etatSuivant.terminee ? "Nouvel exercice" : "Écran suivant",
+        onSuivant: passerEcranSuivant,
+      }
+    : null;
 
   return (
     <div className="app-shell">
@@ -46,34 +84,19 @@ export function AppTransformationsGraphiques() {
       </header>
 
       <main className="card">
-
         <div className="card-body">
-          {dernierBilan ? (
-            <ResultatPanelTransformationsGraphiques
-              resultat={dernierBilan.resultat}
-              exercice={dernierBilan.exercice}
-              afficherReponseApresEchec={etat.reglages.affichageReponseApresEchec}
-              labelBouton={etat.terminee ? "Voir le résumé" : "Exercice suivant"}
-              onContinuer={() => setDernierBilan(null)}
-            />
-          ) : etat.terminee ? (
-            <ResumeSessionTransformationsGraphiques resultats={etat.resultats} onRecommencer={() => setEtat(nouvelleSession())} />
-          ) : (
-            <EtapeTransformationExercice
-              exercice={etat.exerciceCourant}
-              tentativesEquation={etat.etapeEquation.tentativesUtilisees}
-              tentativesCurseurs={etat.etapeCurseurs.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              equationFermee={etat.etapeEquation.terminee}
-              curseursFermee={etat.etapeCurseurs.terminee}
-              aideActivee={etat.aideUtilisee}
-              onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(reponse) => {
-                const exerciceTermine = etat.exerciceCourant;
-                terminerEtape(exerciceTermine, soumettreReponse(etat, reponse));
-              }}
-            />
-          )}{" "}
+          <EtapeTransformationExercice
+            exercice={exercice}
+            tentativesEquation={etat.etapeEquation.tentativesUtilisees}
+            tentativesCurseurs={etat.etapeCurseurs.tentativesUtilisees}
+            tentativesMax={etat.reglages.tentativesMax}
+            equationFermee={etat.etapeEquation.terminee}
+            curseursFermee={etat.etapeCurseurs.terminee}
+            aideActivee={etat.aideUtilisee}
+            onActiverAide={() => setEtat(activerAide(etat))}
+            onValider={(reponse) => terminerEtape(soumettreReponse(etat, reponse))}
+            validation={validation}
+          />
         </div>
       </main>
     </div>

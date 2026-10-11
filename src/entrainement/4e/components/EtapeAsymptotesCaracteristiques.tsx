@@ -4,12 +4,18 @@ import { diagnostiquerAsymptotesCaracteristiques } from "../moteur/verificationC
 import { formatMessageErreur } from "../ui/messageErreur";
 import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { Katex } from "./Katex";
+import { ValidationEcran } from "../../components/ValidationEcran";
+import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCaracteristiquesFonction;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseAsymptotesCaracteristiques) => void;
+  /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
+   * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
+   * "validation/invalidation avant de passer à l'écran suivant"). */
+  validation?: ValidationEtapeProps | null;
 }
 
 /**
@@ -19,7 +25,7 @@ interface Props {
  * "Transformations graphiques"/`f(x) =`) — contrairement à "Axe de symétrie AS ≡" (Analyse d'une
  * fonction), qui reste un `.field` empilé, jamais mis à jour à l'identique ici.
  */
-export function EtapeAsymptotesCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider }: Props) {
+export function EtapeAsymptotesCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [ahTexte, setAhTexte] = useState("");
   const [avTexte, setAvTexte] = useState("");
   const complet = ahTexte.trim() !== "" && avTexte.trim() !== "";
@@ -53,19 +59,24 @@ export function EtapeAsymptotesCaracteristiques({ exercice, tentativesUtilisees,
           onChange={(e) => setAvTexte(e.target.value)}
         />
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        disabled={!complet}
-        onClick={() => onValider({ ahTexte, avTexte })}
-      >
-        Valider
-      </button>
-      {tentativesUtilisees > 0 && (
-        <p className="alert-error" role="alert">
-          {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
-        </p>
+      {!validation && (
+        <>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!complet}
+          onClick={() => onValider({ ahTexte, avTexte })}
+        >
+          Valider
+        </button>
+        {tentativesUtilisees > 0 && (
+          <p className="alert-error" role="alert">
+            {formatMessageErreur(tentativesUtilisees, tentativesMax, statut)}
+          </p>
+        )}
+        </>
       )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }
