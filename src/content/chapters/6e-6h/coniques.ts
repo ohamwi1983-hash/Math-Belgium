@@ -26,6 +26,7 @@ export const coniques: ChapterContent = {
         { kind: 'video', title: "Identifier une conique (2/5) : l'ellipse — définition, construction par deux cercles, équation", youtubeId: 'GnBXVzw0vKY' },
         { kind: 'video', title: "Identifier une conique (3/5) : l'ellipse — caractéristiques, axes, sommets, cercle aplati", youtubeId: 'g1CRzs4qeAk' },
         { kind: 'video', title: "Identifier une conique (4/5) : l'hyperbole — définition, construction, équation par les génératrices", youtubeId: 'oAIMvlSz3io' },
+        { kind: 'video', title: "Identifier une conique (5/5) : l'hyperbole — asymptotes, rectangle, hyperbole équilatère, xy=k", youtubeId: 'hHaOR0ULXS8' },
         {
           kind: 'para',
           text:
