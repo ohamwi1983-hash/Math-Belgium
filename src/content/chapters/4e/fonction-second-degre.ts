@@ -548,7 +548,6 @@ export const fonctionSecondDegre: ChapterContent = {
             },
           ],
         },
-        { kind: 'video', title: "Analyse d'une fonction du second degré", youtubeId: '2qRqyuZh4FE' },
         {
           kind: 'entrainement',
           title: "Analyse d'une fonction du second degré",
@@ -688,7 +687,6 @@ export const fonctionSecondDegre: ChapterContent = {
             'Coche AS, S ou OAO pour faire apparaître l’axe de symétrie, le sommet et l’ordonnée ' +
             'à l’origine directement sur le graphe, en direct.',
         },
-        { kind: 'video', title: 'Transformations graphiques d’une parabole', youtubeId: 'TviyRYRHono' },
         {
           kind: 'entrainement',
           title: 'Transformations graphiques',
@@ -748,7 +746,6 @@ export const fonctionSecondDegre: ChapterContent = {
             'd\'être ajouté au c d\'origine. L\'erreur la plus fréquente : le ressortir tel quel, ' +
             'sans multiplier par a.',
         },
-        { kind: 'video', title: 'Forme canonique et transformations', youtubeId: 'BOhdODKAigg' },
         {
           kind: 'entrainement',
           title: 'Forme canonique et transformations',

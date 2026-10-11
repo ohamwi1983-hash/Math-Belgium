@@ -464,7 +464,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'linéaires distinctes — jamais une seule ! Pour le carré : $P(x) = \\sqrt{K}$ et ' +
             '$P(x) = -\\sqrt{K}$. Pour la valeur absolue : $P(x) = K$ et $P(x) = -K$.',
         },
-        { kind: 'video', title: 'Caractéristiques algébriques d\'une fonction de référence', youtubeId: 'l4-QfH7ZPXU' },
         {
           kind: 'entrainement',
           title: 'Caractéristiques algébriques d\'une fonction de référence',
@@ -576,7 +575,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'ailleurs. Fais glisser TH vers la gauche ou la droite pour vérifier le piège du ' +
             'signe : la courbe se déplace du MÊME côté que TH, jamais de l\'opposé.',
         },
-        { kind: 'video', title: 'Transformations des fonctions de référence', youtubeId: 'ARPAa4MkGgA' },
         {
           kind: 'entrainement',
           title: 'Transformations graphiques — fonctions de référence',
@@ -629,7 +627,6 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           ],
           result: { tag: 'forme canonique', text: '$f(x) = 2|x-(-3)|$ — TH = −3, EV = 2, TV = 0' },
         },
-        { kind: 'video', title: 'Forme canonique et transformations — fonctions de référence', youtubeId: 'fQNVVzDKEoU' },
         {
           kind: 'entrainement',
           title: 'Forme canonique et transformations — fonctions de référence',
