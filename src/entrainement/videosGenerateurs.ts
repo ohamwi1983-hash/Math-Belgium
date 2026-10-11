@@ -26,4 +26,7 @@ export const VIDEOS_GENERATEURS: Record<string, VideoCapsuleGenerateur[]> = {
   gen7: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "uljJGHyI_Tg" }],
   gen8: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "ZpaYRtDPlfw" }],
   gen9: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "2ku6OJ9zfME" }],
+  gen10: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "aQgPzCbCBQI" }],
+  gen11: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "mATOPgGtoPc" }],
+  gen12: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "Y2nF1siWrzk" }],
 };
