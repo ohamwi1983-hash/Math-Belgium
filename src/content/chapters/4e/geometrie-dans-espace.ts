@@ -26,6 +26,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: 'Perspective cavalière — dessiner un solide en 3D',
       kicker: 'x à l\'horizontale, z à la verticale, y en profondeur à 45° et réduit de moitié',
       blocks: [
+        { kind: 'video', title: 'Perspective cavalière — dessiner un solide en 3D', youtubeId: 'hMaTBZeqAiA' },
         {
           kind: 'para',
           text:
@@ -113,6 +114,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: 'Déterminer un plan',
       kicker: "4 façons équivalentes de fixer un plan, sans jamais en donner l'équation",
       blocks: [
+        { kind: 'video', title: 'Déterminer un plan et positions de deux droites', youtubeId: 'azPMOAl2FD4' },
         {
           kind: 'para',
           text:
@@ -285,6 +287,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: "Position d'une droite par rapport à un plan",
       kicker: 'incluse, parallèle ou sécante — 3 questions, toujours dans le même ordre',
       blocks: [
+        { kind: 'video', title: 'Position d\'une droite par rapport à un plan et positions de deux plans', youtubeId: 'FFn-DPGPEZE' },
         {
           kind: 'para',
           text:
@@ -478,6 +481,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: 'Positions de trois plans',
       kicker: '3 droites d\'intersection, jamais indépendantes les unes des autres',
       blocks: [
+        { kind: 'video', title: 'Trois plans, critères de parallélisme et point de percée', youtubeId: 'k6hI1gqH1Eo' },
         {
           kind: 'intuition',
           label: 'Pour visualiser',
@@ -636,6 +640,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: "Section plane d'un solide",
       kicker: 'chaque face traversée fournit exactement 2 sommets de la section',
       blocks: [
+        { kind: 'video', title: 'Section plane d\'un solide', youtubeId: 'Px1zuBUYsw0' },
         {
           kind: 'para',
           text:
@@ -762,6 +767,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: 'La fenêtre de Dürer : le dispositif de la perspective centrale',
       kicker: 'vision monoculaire à travers une vitre quadrillée — un cadre inventé par Dürer',
       blocks: [
+        { kind: 'video', title: 'Perspective centrale (fenêtre de Dürer, point de fuite) et ombre au soleil', youtubeId: '-hIwnCIyjFU' },
         {
           kind: 'para',
           text:
@@ -1068,6 +1074,7 @@ export const geometrieDansEspace: ChapterContent = {
       title: 'Révision — quiz vrai/faux',
       kicker: '60 affirmations en 3 thèmes',
       blocks: [
+        { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'y9OlAV4pqK4' },
         {
           kind: 'para',
           text:
