@@ -18,6 +18,7 @@ export function calculerRecapitulatifCombinaisonVecteurs(etat: EtatSessionCombin
       libelle: "Expression réduite",
       estLatex: true,
       valeur: formatEquationReduiteLatex(etat.exerciceCourant),
+      revele: etat.simplificationRevele,
     },
   ];
 }

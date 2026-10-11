@@ -15,14 +15,14 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
 
   if (etat.scoreCoefficientsExercice !== null) {
     const { a, b, c } = exercice.enonce;
-    entrees.push({ libelle: "Coefficients", estLatex: false, valeur: `a = ${a} ; b = ${b} ; c = ${c}` });
+    entrees.push({ libelle: "Coefficients", estLatex: false, valeur: `a = ${a} ; b = ${b} ; c = ${c}`, revele: etat.coefficientsRevele });
   }
 
   if (etat.scoreAllureExercice !== null) {
     const signeA = signeReelA(exercice.enonce) === "+" ? "a > 0" : "a < 0";
     const signeAB = signeReelAB(exercice.enonce);
     const texteAB = signeAB === "0" ? "a·b = 0" : signeAB === "+" ? "a·b > 0" : "a·b < 0";
-    entrees.push({ libelle: "Allure", estLatex: false, valeur: `${signeA} ; ${texteAB}` });
+    entrees.push({ libelle: "Allure", estLatex: false, valeur: `${signeA} ; ${texteAB}`, revele: etat.allureRevele });
   }
 
   if (etat.scoreAxeSommetExercice !== null) {
@@ -34,24 +34,35 @@ export function calculerRecapitulatifAnalyseFonction(etat: EtatSessionAnalyseFon
       libelle: "Axe de symétrie et sommet",
       estLatex: false,
       valeur: `x = ${xSFrac} ; S(${xSFrac} ; ${ySFrac})`,
+      revele: etat.axeSommetRevele,
     });
   }
 
   if (etat.scoreDomaineImageExercice !== null) {
     const imf = exercice.enonce.a > 0 ? `[${yS} ; +∞[` : `]-∞ ; ${yS}]`;
-    entrees.push({ libelle: "Domaine et image", estLatex: false, valeur: `domf = ℝ ; imf = ${imf}` });
+    entrees.push({ libelle: "Domaine et image", estLatex: false, valeur: `domf = ℝ ; imf = ${imf}`, revele: etat.domaineImageRevele });
   }
 
   if (etat.scoreRacinesReconnaissanceExercice !== null) {
-    entrees.push({ libelle: "Méthode (racines)", estLatex: false, valeur: libelleCategorie(exercice.categorie) });
+    entrees.push({
+      libelle: "Méthode (racines)",
+      estLatex: false,
+      valeur: libelleCategorie(exercice.categorie),
+      revele: etat.racinesReconnaissanceRevele,
+    });
   }
 
   if (etat.scoreRacinesChamp1Exercice !== null) {
-    entrees.push({ libelle: "Forme factorisée", estLatex: true, valeur: `${exercice.solution.formeFactorisee} = 0` });
+    entrees.push({
+      libelle: "Forme factorisée",
+      estLatex: true,
+      valeur: `${exercice.solution.formeFactorisee} = 0`,
+      revele: etat.racinesChamp1Revele,
+    });
   }
 
   if (etat.scoreRacinesChamp2Exercice !== null) {
-    entrees.push({ libelle: "Racines", estLatex: false, valeur: exercice.solution.racines.join(" ; ") });
+    entrees.push({ libelle: "Racines", estLatex: false, valeur: exercice.solution.racines.join(" ; "), revele: etat.racinesChamp2Revele });
   }
 
   return entrees;

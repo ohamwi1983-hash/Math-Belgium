@@ -15,16 +15,23 @@ export function calculerRecapitulatifInequation(etat: EtatSessionInequation): En
   const entrees: EntreeRecapitulatif[] = [];
 
   if (etat.scoreSimplificationExercice !== null) {
-    entrees.push({ libelle: "Trinôme simplifié", estLatex: true, valeur: formatMembreGauche(exercice.enonce) });
+    entrees.push({
+      libelle: "Trinôme simplifié",
+      estLatex: true,
+      valeur: formatMembreGauche(exercice.enonce),
+      // Pas de `simplificationRevele` tracké par le moteur (`moteur/sessionInequation.ts`) — même
+      // heuristique que recapitulatif.ts : score exactement 0 ⟺ révélée.
+      revele: etat.scoreSimplificationExercice === 0,
+    });
   }
 
   if (etat.scoreRacinesExercice !== null) {
     const valeur = exercice.racines === undefined ? "∅" : exercice.racines.join(" ; ");
-    entrees.push({ libelle: "Racines", estLatex: false, valeur });
+    entrees.push({ libelle: "Racines", estLatex: false, valeur, revele: etat.racinesRevele });
   }
 
   if (etat.scoreSigneAExercice !== null) {
-    entrees.push({ libelle: "Signe de a", estLatex: false, valeur: exercice.enonce.a > 0 ? "a > 0" : "a < 0" });
+    entrees.push({ libelle: "Signe de a", estLatex: false, valeur: exercice.enonce.a > 0 ? "a > 0" : "a < 0", revele: etat.signeARevele });
   }
 
   return entrees;

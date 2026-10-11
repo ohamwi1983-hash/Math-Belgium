@@ -132,6 +132,60 @@
   color: var(--color-text-muted);
 }
 
+/* Barre de progression en puces (`ProgressionPuces.tsx`, src/entrainement/components — partagée
+ * entre les 3 chantiers) — remplace `.card-progress-row`/`.card-progress-phase` sur les écrans qui
+ * l'utilisent ; même emplacement (en-tête, au-dessus de `.card`), même logique "à plat" que le
+ * reste de cette piste. */
+.entrainement .progression-puces {
+  padding: 0 0 14px;
+}
+
+.entrainement .progression-puces-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.entrainement .progression-puces-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.entrainement .progression-puces-pourcentage {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.entrainement .progression-puces-rangee {
+  display: flex;
+  gap: 4px;
+}
+
+.entrainement .progression-puce {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+}
+
+.entrainement .progression-puce-correcte {
+  background: var(--color-success);
+}
+
+.entrainement .progression-puce-revele {
+  background: var(--color-error);
+}
+
+.entrainement .progression-puce-courante {
+  background: var(--color-primary);
+}
+
 .entrainement .progress-track {
   height: 3px;
   border-radius: 999px;
@@ -584,19 +638,68 @@
   color: var(--color-text-muted);
 }
 
+/* "Ce qu'on sait déjà" (`RecapitulatifPanel.tsx`) — jamais de fond/bordure propre (même principe
+ * "pas de boîte dans la boîte" que `.card` ci-dessous) : un simple filet en bas pour séparer la
+ * section de l'exercice en cours qui suit, à plat avec le reste. */
+.entrainement .recap-panel {
+  margin: 0 0 20px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.entrainement .recap-panel-titre {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
 .entrainement .recap-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 18px;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
 }
 
 .entrainement .recap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 13px;
   color: var(--color-text-muted);
+}
 
+.entrainement .recap-icone {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.entrainement .recap-icone-correcte {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.entrainement .recap-icone-revele {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement .recap-icone-svg {
+  display: block;
+}
+
+.entrainement .recap-corps {
   overflow-x: auto;
 }
 

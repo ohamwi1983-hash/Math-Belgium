@@ -15,6 +15,7 @@ export function calculerRecapitulatifTriangleQuelconque(etat: EtatSessionTriangl
       libelle: `Donnée retrouvée (${libelleDonneeManquante(etat.exerciceCourant)})`,
       estLatex: false,
       valeur: valeurAffichageDonneeManquante(etat.exerciceCourant),
+      revele: etat.donneeManquanteRevele,
     });
   }
   return entrees;

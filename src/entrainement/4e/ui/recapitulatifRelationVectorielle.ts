@@ -21,6 +21,7 @@ export function calculerRecapitulatifRelationVectorielle(etat: EtatSessionRelati
       libelle: "Traduction en coordonnées",
       estLatex: true,
       valeur: formatTraductionAttendueLatex(exercice),
+      revele: etat.traductionRevele,
     },
   ];
 }

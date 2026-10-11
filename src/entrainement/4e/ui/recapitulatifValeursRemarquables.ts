@@ -10,11 +10,16 @@ export function calculerRecapitulatifValeursRemarquables(etat: EtatSessionValeur
   const entrees: EntreeRecapitulatif[] = [];
 
   if (etat.scoreQuadrantExercice !== null) {
-    entrees.push({ libelle: "Quadrant", estLatex: false, valeur: libelleQuadrant(exercice.quadrant) });
+    entrees.push({ libelle: "Quadrant", estLatex: false, valeur: libelleQuadrant(exercice.quadrant), revele: etat.quadrantRevele });
   }
 
   if (etat.scoreAnglePremierQuadrantExercice !== null) {
-    entrees.push({ libelle: "Angle du premier quadrant", estLatex: false, valeur: `${exercice.anglePremierQuadrant}°` });
+    entrees.push({
+      libelle: "Angle du premier quadrant",
+      estLatex: false,
+      valeur: `${exercice.anglePremierQuadrant}°`,
+      revele: etat.anglePremierQuadrantRevele,
+    });
   }
 
   return entrees;

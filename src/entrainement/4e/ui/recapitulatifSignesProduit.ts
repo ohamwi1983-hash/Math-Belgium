@@ -48,17 +48,26 @@ export function calculerRecapitulatifSignesProduit(etat: EtatSessionSignesProdui
   const facteursQuadratiques = facteursQuadratiquesDe(etat);
   const facteursIrreductibles = facteursIrreductiblesDe(etat);
 
-  etat.scoresRacineLineaireExercice.forEach((_score, index) => {
+  etat.scoresRacineLineaireExercice.forEach((score, index) => {
     const facteur = facteursLineaires[index];
     entrees.push({
       libelle: `Racine (facteur linéaire${facteursLineaires.length > 1 ? ` ${index + 1}` : ""})`,
       estLatex: false,
       valeur: String(facteur.polynome.p),
+      // Pas de tableau "racineLineaireRevelees" tracké par le moteur (`moteur/typesSignesProduit.ts`)
+      // — même heuristique que recapitulatif.ts : score exactement 0 ⟺ révélée.
+      revele: score === 0,
     });
   });
 
   if (etat.scoreReductionFacteurExercice !== null && factorisable) {
-    entrees.push({ libelle: "Réduction (facteur à factoriser)", estLatex: true, valeur: formatPolynome(factorisable) });
+    entrees.push({
+      libelle: "Réduction (facteur à factoriser)",
+      estLatex: true,
+      valeur: formatPolynome(factorisable),
+      // Pas de `reductionFacteurRevele` tracké par le moteur — même heuristique que ci-dessus.
+      revele: etat.scoreReductionFacteurExercice === 0,
+    });
   }
 
   etat.scoresMethodeExercice.forEach((_score, index) => {
@@ -67,14 +76,22 @@ export function calculerRecapitulatifSignesProduit(etat: EtatSessionSignesProdui
       libelle: `Méthode${facteursQuadratiques.length > 1 ? ` (facteur ${index + 1})` : ""}`,
       estLatex: false,
       valeur: libelleCategorie(bonneReponseMethode(facteur)),
+      revele: etat.methodeRevelees[index],
     });
   });
 
   if (etat.scoreFactorisationChamp1Exercice !== null && factorisable) {
+    const revele = etat.scoreFactorisationChamp1Exercice === 0;
     entrees.push(
       factorisable.categorie === "cas_general"
-        ? { libelle: "Δ (facteur à factoriser)", estLatex: false, valeur: `Δ = ${factorisable.solution.delta}` }
-        : { libelle: "Forme factorisée (facteur à factoriser)", estLatex: true, valeur: `${factorisable.solution.formeFactorisee} = 0` },
+        ? { libelle: "Δ (facteur à factoriser)", estLatex: false, valeur: `Δ = ${factorisable.solution.delta}`, revele }
+        : {
+            libelle: "Forme factorisée (facteur à factoriser)",
+            estLatex: true,
+            valeur: `${factorisable.solution.formeFactorisee} = 0`,
+            // Pas de `factorisationChamp1Revele` tracké par le moteur — même heuristique.
+            revele,
+          },
     );
   }
 
@@ -83,6 +100,8 @@ export function calculerRecapitulatifSignesProduit(etat: EtatSessionSignesProdui
       libelle: "Racines (facteur à factoriser)",
       estLatex: false,
       valeur: [...factorisable.solution.racines].sort((a, b) => a - b).join(" ; "),
+      // Pas de `factorisationChamp2Revele` tracké par le moteur — même heuristique.
+      revele: etat.scoreFactorisationChamp2Exercice === 0,
     });
   }
 
@@ -91,14 +110,22 @@ export function calculerRecapitulatifSignesProduit(etat: EtatSessionSignesProdui
       libelle: "Forme factorisée (facteur à factoriser)",
       estLatex: true,
       valeur: `${formatFormeFactoriseeDepuisRacines(factorisable.enonce, factorisable.solution.racines)} = 0`,
+      // Pas de `factorisationFactorisationRevele` tracké par le moteur — même heuristique.
+      revele: etat.scoreFactorisationFactorisationExercice === 0,
     });
   }
 
   const plusieursIrreductibles = facteursIrreductibles.length > 1;
-  etat.scoresSigneIrreductibleExercice.forEach((_score, index) => {
+  etat.scoresSigneIrreductibleExercice.forEach((score, index) => {
     const facteur = facteursIrreductibles[index];
     const libelle = plusieursIrreductibles ? `Signe (facteur irréductible ${index + 1})` : "Signe (facteur irréductible)";
-    entrees.push({ libelle, estLatex: false, valeur: facteur.signe === "+" ? "toujours positif" : "toujours négatif" });
+    entrees.push({
+      libelle,
+      estLatex: false,
+      valeur: facteur.signe === "+" ? "toujours positif" : "toujours négatif",
+      // Pas de tableau "signeIrreductibleRevelees" tracké par le moteur — même heuristique.
+      revele: score === 0,
+    });
   });
 
   return entrees;

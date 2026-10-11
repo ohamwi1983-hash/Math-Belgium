@@ -11,5 +11,16 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
  */
 export function calculerRecapitulatifFonctionReference(etat: EtatSessionFonctionReference): EntreeRecapitulatif[] {
   if (etat.scoreReconnaissanceExercice === null) return [];
-  return [{ libelle: "Famille", estLatex: false, valeur: libelleFamille(etat.exerciceCourant.famille) }];
+  return [
+    {
+      libelle: "Famille",
+      estLatex: false,
+      valeur: libelleFamille(etat.exerciceCourant.famille),
+      // Pas de `reconnaissanceRevele` tracké par le moteur (`moteur/typesFonctionsReference.ts`) —
+      // même heuristique que les autres exceptions documentées ailleurs sur ce chantier : score
+      // exactement 0 ⟺ révélée (jamais atteint par une réussite, voir `etapeTentatives.ts` — le
+      // score d'une réussite reste toujours strictement positif).
+      revele: etat.scoreReconnaissanceExercice === 0,
+    },
+  ];
 }

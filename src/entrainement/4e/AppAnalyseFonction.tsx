@@ -35,6 +35,8 @@ import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeRacinesFlexibles } from "./components/EtapeRacinesFlexibles";
 import { EtapeTableauSigneVariation } from "./components/EtapeTableauSigneVariation";
 import { calculerRecapitulatifAnalyseFonction } from "./ui/recapitulatifAnalyseFonction";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { calculerEtatActuelAnalyseFonctionRacines } from "./ui/etatActuelAnalyseFonction";
 import { formatEnonceLatex } from "./ui/formatEquation";
 import { formatFonctionColoreeLatex } from "./ui/formatAnalyseFonction";
@@ -76,16 +78,60 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-const LIBELLE_PHASE: Record<PhaseAnalyseFonction, string> = {
-  coefficients: "Coefficients",
-  allure: "Allure",
-  axeSommet: "Axe et sommet",
-  domaineImage: "Domaine et image",
-  racinesReconnaissance: "Racines — méthode",
-  racinesChamp1: "Racines — factorisation",
-  racinesChamp2: "Racines",
-  tableauSignes: "Tableau de signes",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (voir `ETAPES_ACTIVES_DEMO`/les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseAnalyseFonction[] = [
+  "coefficients",
+  "allure",
+  "axeSommet",
+  "domaineImage",
+  "racinesReconnaissance",
+  "racinesChamp1",
+  "racinesChamp2",
+  "tableauSignes",
+];
+
+/** Même ternaire que `terminerEtape` (ci-dessous) pour lire `scoreXxxExercice`/`xxxRevele` — jamais
+ * une valeur recalculée séparément. `tableauSignes` (dernière phase) n'a pas de branche "close"
+ * propre ici : tant que l'exercice n'est pas terminé elle est forcément "courante" (dernière phase
+ * active), et une fois terminé un nouvel exercice démarre (l'état entier est remis à zéro). */
+function calculerSegmentsProgression(etat: EtatSessionAnalyseFonction): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "coefficients"
+        ? etat.scoreCoefficientsExercice
+        : phase === "allure"
+          ? etat.scoreAllureExercice
+          : phase === "axeSommet"
+            ? etat.scoreAxeSommetExercice
+            : phase === "domaineImage"
+              ? etat.scoreDomaineImageExercice
+              : phase === "racinesReconnaissance"
+                ? etat.scoreRacinesReconnaissanceExercice
+                : phase === "racinesChamp1"
+                  ? etat.scoreRacinesChamp1Exercice
+                  : phase === "racinesChamp2"
+                    ? etat.scoreRacinesChamp2Exercice
+                    : null;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "coefficients"
+        ? etat.coefficientsRevele
+        : phase === "allure"
+          ? etat.allureRevele
+          : phase === "axeSommet"
+            ? etat.axeSommetRevele
+            : phase === "domaineImage"
+              ? etat.domaineImageRevele
+              : phase === "racinesReconnaissance"
+                ? etat.racinesReconnaissanceRevele
+                : phase === "racinesChamp1"
+                  ? etat.racinesChamp1Revele
+                  : etat.racinesChamp2Revele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 export function AppAnalyseFonction() {
   const [etat, setEtat] = useState<EtatSessionAnalyseFonction>(nouvelleSession);
@@ -153,11 +199,7 @@ export function AppAnalyseFonction() {
         <h1 className="app-title">Analyse d'une fonction du second degré</h1>
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

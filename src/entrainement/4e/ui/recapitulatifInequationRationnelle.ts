@@ -30,10 +30,10 @@ function formatMiseEnEvidence(poly: Exercice): string {
  * relocalisé ici pour couvrir les 5 points où ce champ1 était manquant (prompt-corrections-
  * moteur-partage.md, point 2).
  */
-function entreeChamp1(p2: Exercice, suffixe: string): EntreeRecapitulatif {
+function entreeChamp1(p2: Exercice, suffixe: string, revele: boolean): EntreeRecapitulatif {
   return p2.categorie === "cas_general"
-    ? { libelle: `Δ (${suffixe})`, estLatex: false, valeur: `Δ = ${p2.solution.delta}` }
-    : { libelle: `Forme factorisée (${suffixe})`, estLatex: true, valeur: `${p2.solution.formeFactorisee} = 0` };
+    ? { libelle: `Δ (${suffixe})`, estLatex: false, valeur: `Δ = ${p2.solution.delta}`, revele }
+    : { libelle: `Forme factorisée (${suffixe})`, estLatex: true, valeur: `${p2.solution.formeFactorisee} = 0`, revele };
 }
 
 /**
@@ -41,11 +41,12 @@ function entreeChamp1(p2: Exercice, suffixe: string): EntreeRecapitulatif {
  * (après Δ et racines) vient d'être confirmée — même principe que dans les exercices 1/3/4/5
  * (voir CLAUDE.md, "Factorisation après Δ").
  */
-function entreeFactorisation(p2: Exercice, suffixe: string): EntreeRecapitulatif {
+function entreeFactorisation(p2: Exercice, suffixe: string, revele: boolean): EntreeRecapitulatif {
   return {
     libelle: `Forme factorisée (${suffixe})`,
     estLatex: true,
     valeur: `${formatFormeFactoriseeDepuisRacines(p2.enonce, p2.solution.racines)} = 0`,
+    revele,
   };
 }
 
@@ -103,6 +104,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
               : exercice.niveau === "sansFacteurCommun"
                 ? formatExpressionIsoleeSansFacteurCommunLatex(exercice)
                 : formatExpressionIsoleeNiveau4Latex(exercice),
+      revele: etat.isolerRevele,
     });
   }
 
@@ -111,6 +113,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       libelle: "Numérateur combiné",
       estLatex: true,
       valeur: formatLineaireDeveloppe(exercice.numerateur.k, exercice.numerateur.p),
+      revele: etat.combinerRevele,
     });
   }
 
@@ -121,7 +124,12 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       exercice.niveau === "sansFacteurCommun") &&
     etat.scoreCombinerExercice !== null
   ) {
-    entrees.push({ libelle: "Numérateur combiné", estLatex: true, valeur: formatMembreGauche(exercice.numerateur.enonce) });
+    entrees.push({
+      libelle: "Numérateur combiné",
+      estLatex: true,
+      valeur: formatMembreGauche(exercice.numerateur.enonce),
+      revele: etat.combinerRevele,
+    });
   }
 
   if (etat.scoreCEExercice !== null) {
@@ -132,9 +140,10 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
         estLatex: true,
         valeur: valeurs.join(" \\text{ et } "),
         valeurs,
+        revele: etat.ceRevele,
       });
     } else {
-      entrees.push({ libelle: "Condition d'existence (CE)", estLatex: true, valeur: `x \\neq ${exercice.ce}` });
+      entrees.push({ libelle: "Condition d'existence (CE)", estLatex: true, valeur: `x \\neq ${exercice.ce}`, revele: etat.ceRevele });
     }
   }
 
@@ -147,7 +156,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     exercice.niveau !== "cubique" &&
     etat.scoreRacineNumerateurExercice !== null
   ) {
-    entrees.push({ libelle: "Racine du numérateur", estLatex: false, valeur: String(exercice.numerateur.p) });
+    entrees.push({ libelle: "Racine du numérateur", estLatex: false, valeur: String(exercice.numerateur.p), revele: etat.racineNumerateurRevele });
   }
 
   if (
@@ -157,7 +166,14 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       exercice.niveau === "sansFacteurCommun") &&
     etat.scoreReductionExercice !== null
   ) {
-    entrees.push({ libelle: "Numérateur combiné réduit", estLatex: true, valeur: formatPolynome(exercice.numerateur) });
+    entrees.push({
+      libelle: "Numérateur combiné réduit",
+      estLatex: true,
+      valeur: formatPolynome(exercice.numerateur),
+      // Pas de `reductionRevele` tracké par le moteur (`moteur/sessionInequationRationnelle.ts`) —
+      // même heuristique que recapitulatif.ts : score exactement 0 ⟺ révélée.
+      revele: etat.scoreReductionExercice === 0,
+    });
   }
 
   if (
@@ -167,7 +183,12 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       exercice.niveau === "sansFacteurCommun") &&
     etat.scoreReconnaissanceExercice !== null
   ) {
-    entrees.push({ libelle: "Méthode (numérateur combiné)", estLatex: false, valeur: libelleCategorie(exercice.numerateur.categorie) });
+    entrees.push({
+      libelle: "Méthode (numérateur combiné)",
+      estLatex: false,
+      valeur: libelleCategorie(exercice.numerateur.categorie),
+      revele: etat.reconnaissanceRevele,
+    });
   }
 
   if (
@@ -177,7 +198,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       exercice.niveau === "sansFacteurCommun") &&
     etat.scoreChamp1Exercice !== null
   ) {
-    entrees.push(entreeChamp1(exercice.numerateur, "numérateur combiné"));
+    entrees.push(entreeChamp1(exercice.numerateur, "numérateur combiné", etat.champ1Revele));
   }
 
   if (
@@ -191,6 +212,7 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       libelle: "Racines (numérateur combiné)",
       estLatex: false,
       valeur: [...exercice.numerateur.solution.racines].sort((a, b) => a - b).join(" ; "),
+      revele: etat.champ2Revele,
     });
   }
 
@@ -201,23 +223,34 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       exercice.niveau === "sansFacteurCommun") &&
     etat.scoreFactorisationExercice !== null
   ) {
-    entrees.push(entreeFactorisation(exercice.numerateur, "numérateur combiné"));
+    entrees.push(entreeFactorisation(exercice.numerateur, "numérateur combiné", etat.factorisationRevele));
   }
 
   if (exercice.niveau === "sansFacteurCommun" && etat.scoreDenomReductionExercice !== null) {
-    entrees.push({ libelle: "Dénominateur réduit", estLatex: true, valeur: formatPolynome(exercice.denominateur) });
+    entrees.push({
+      libelle: "Dénominateur réduit",
+      estLatex: true,
+      valeur: formatPolynome(exercice.denominateur),
+      // Pas de `denomReductionRevele` tracké par le moteur — même heuristique de repli.
+      revele: etat.scoreDenomReductionExercice === 0,
+    });
   }
 
   if (exercice.niveau === "sansFacteurCommun" && etat.scoreDenomReconnaissanceExercice !== null) {
-    entrees.push({ libelle: "Méthode (dénominateur)", estLatex: false, valeur: libelleCategorie(exercice.denominateur.categorie) });
+    entrees.push({
+      libelle: "Méthode (dénominateur)",
+      estLatex: false,
+      valeur: libelleCategorie(exercice.denominateur.categorie),
+      revele: etat.denomReconnaissanceRevele,
+    });
   }
 
   if (exercice.niveau === "sansFacteurCommun" && etat.scoreDenomChamp1Exercice !== null) {
-    entrees.push(entreeChamp1(exercice.denominateur, "dénominateur"));
+    entrees.push(entreeChamp1(exercice.denominateur, "dénominateur", etat.denomChamp1Revele));
   }
 
   if (exercice.niveau === "sansFacteurCommun" && etat.scoreDenomFactorisationExercice !== null) {
-    entrees.push(entreeFactorisation(exercice.denominateur, "dénominateur"));
+    entrees.push(entreeFactorisation(exercice.denominateur, "dénominateur", etat.denomFactorisationRevele));
   }
 
   if (exercice.niveau === "cubique" && etat.scoreMiseEnEvidenceExercice !== null) {
@@ -225,19 +258,32 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       libelle: "Mise en évidence",
       estLatex: true,
       valeur: `x(${formatMembreGauche(exercice.numerateur.enonce)})`,
+      revele: etat.miseEnEvidenceRevele,
     });
   }
 
   if (exercice.niveau === "cubique" && etat.scoreReductionExercice !== null) {
-    entrees.push({ libelle: "Facteur quadratique réduit", estLatex: true, valeur: formatPolynome(exercice.numerateur) });
+    entrees.push({
+      libelle: "Facteur quadratique réduit",
+      estLatex: true,
+      valeur: formatPolynome(exercice.numerateur),
+      // Pas de `reductionRevele` tracké par le moteur — même heuristique de repli (même champ
+      // scoreReductionExercice que la branche niveau3/4/denominateurCarre/sansFacteurCommun ci-dessus).
+      revele: etat.scoreReductionExercice === 0,
+    });
   }
 
   if (exercice.niveau === "cubique" && etat.scoreReconnaissanceExercice !== null) {
-    entrees.push({ libelle: "Méthode (facteur quadratique)", estLatex: false, valeur: libelleCategorie(exercice.numerateur.categorie) });
+    entrees.push({
+      libelle: "Méthode (facteur quadratique)",
+      estLatex: false,
+      valeur: libelleCategorie(exercice.numerateur.categorie),
+      revele: etat.reconnaissanceRevele,
+    });
   }
 
   if (exercice.niveau === "cubique" && etat.scoreChamp1Exercice !== null) {
-    entrees.push(entreeChamp1(exercice.numerateur, "facteur quadratique"));
+    entrees.push(entreeChamp1(exercice.numerateur, "facteur quadratique", etat.champ1Revele));
   }
 
   if (exercice.niveau === "cubique" && etat.scoreChamp2Exercice !== null) {
@@ -245,11 +291,12 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
       libelle: "Racines (facteur quadratique)",
       estLatex: false,
       valeur: [...exercice.numerateur.solution.racines].sort((a, b) => a - b).join(" ; "),
+      revele: etat.champ2Revele,
     });
   }
 
   if (exercice.niveau === "cubique" && etat.scoreFactorisationExercice !== null) {
-    entrees.push(entreeFactorisation(exercice.numerateur, "facteur quadratique"));
+    entrees.push(entreeFactorisation(exercice.numerateur, "facteur quadratique", etat.factorisationRevele));
   }
 
   if (exercice.niveau === "facteurCommun") {
@@ -258,45 +305,81 @@ export function calculerRecapitulatifInequationRationnelle(etat: EtatSessionIneq
     if (!("categorie" in D) || !("categorie" in N)) throw new Error("calculerRecapitulatifInequationRationnelle : attendu des P2 pour facteurCommun");
 
     if (etat.scoreSimplifierDenomReductionExercice !== null) {
-      entrees.push({ libelle: "Dénominateur mis en évidence", estLatex: true, valeur: formatMiseEnEvidence(D) });
+      entrees.push({
+        libelle: "Dénominateur mis en évidence",
+        estLatex: true,
+        valeur: formatMiseEnEvidence(D),
+        // Pas de `simplifierDenomReductionRevele` tracké par le moteur — même heuristique de repli.
+        revele: etat.scoreSimplifierDenomReductionExercice === 0,
+      });
     }
     if (etat.scoreSimplifierDenomReconnaissanceExercice !== null) {
-      entrees.push({ libelle: "Méthode (dénominateur)", estLatex: false, valeur: libelleCategorie(D.categorie) });
+      entrees.push({
+        libelle: "Méthode (dénominateur)",
+        estLatex: false,
+        valeur: libelleCategorie(D.categorie),
+        revele: etat.simplifierDenomCategorieRevelee,
+      });
     }
     if (etat.scoreSimplifierDenomChamp1Exercice !== null) {
-      entrees.push(entreeChamp1(D, "dénominateur"));
+      // Pas de `simplifierDenomChamp1Revele` tracké par le moteur — même heuristique de repli.
+      entrees.push(entreeChamp1(D, "dénominateur", etat.scoreSimplifierDenomChamp1Exercice === 0));
     }
     if (etat.scoreSimplifierDenomChamp2Exercice !== null) {
       entrees.push({
         libelle: "Racines (dénominateur)",
         estLatex: false,
         valeur: [...D.solution.racines].sort((a, b) => a - b).join(" ; "),
+        // Pas de `simplifierDenomChamp2Revele` tracké par le moteur — même heuristique de repli.
+        revele: etat.scoreSimplifierDenomChamp2Exercice === 0,
       });
     }
     if (etat.scoreSimplifierDenomFactorisationExercice !== null) {
-      entrees.push(entreeFactorisation(D, "dénominateur"));
+      // Pas de `simplifierDenomFactorisationRevele` tracké par le moteur — même heuristique de repli.
+      entrees.push(entreeFactorisation(D, "dénominateur", etat.scoreSimplifierDenomFactorisationExercice === 0));
     }
     if (etat.scoreSimplifierNumReductionExercice !== null) {
-      entrees.push({ libelle: "Numérateur mis en évidence", estLatex: true, valeur: formatMiseEnEvidence(N) });
+      entrees.push({
+        libelle: "Numérateur mis en évidence",
+        estLatex: true,
+        valeur: formatMiseEnEvidence(N),
+        // Pas de `simplifierNumReductionRevele` tracké par le moteur — même heuristique de repli.
+        revele: etat.scoreSimplifierNumReductionExercice === 0,
+      });
     }
     if (etat.scoreSimplifierNumReconnaissanceExercice !== null) {
-      entrees.push({ libelle: "Méthode (numérateur)", estLatex: false, valeur: libelleCategorie(N.categorie) });
+      entrees.push({
+        libelle: "Méthode (numérateur)",
+        estLatex: false,
+        valeur: libelleCategorie(N.categorie),
+        revele: etat.simplifierNumCategorieRevelee,
+      });
     }
     if (etat.scoreSimplifierNumChamp1Exercice !== null) {
-      entrees.push(entreeChamp1(N, "numérateur"));
+      // Pas de `simplifierNumChamp1Revele` tracké par le moteur — même heuristique de repli.
+      entrees.push(entreeChamp1(N, "numérateur", etat.scoreSimplifierNumChamp1Exercice === 0));
     }
     if (etat.scoreSimplifierNumChamp2Exercice !== null) {
       entrees.push({
         libelle: "Racines (numérateur)",
         estLatex: false,
         valeur: [...N.solution.racines].sort((a, b) => a - b).join(" ; "),
+        // Pas de `simplifierNumChamp2Revele` tracké par le moteur — même heuristique de repli.
+        revele: etat.scoreSimplifierNumChamp2Exercice === 0,
       });
     }
     if (etat.scoreSimplifierNumFactorisationExercice !== null) {
-      entrees.push(entreeFactorisation(N, "numérateur"));
+      // Pas de `simplifierNumFactorisationRevele` tracké par le moteur — même heuristique de repli.
+      entrees.push(entreeFactorisation(N, "numérateur", etat.scoreSimplifierNumFactorisationExercice === 0));
     }
     if (etat.scoreSimplifierFractionExercice !== null) {
-      entrees.push({ libelle: "Fraction simplifiée", estLatex: true, valeur: formatFractionSimplifiee(exercice.fraction) });
+      entrees.push({
+        libelle: "Fraction simplifiée",
+        estLatex: true,
+        valeur: formatFractionSimplifiee(exercice.fraction),
+        // Pas de `simplifierFractionRevele` tracké par le moteur — même heuristique de repli.
+        revele: etat.scoreSimplifierFractionExercice === 0,
+      });
     }
   }
 

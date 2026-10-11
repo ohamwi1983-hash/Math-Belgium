@@ -237,15 +237,30 @@ export function calculerRecapitulatifApplicationPhysique(etat: EtatSessionApplic
   const entrees: EntreeRecapitulatif[] = [];
 
   if (etat.scoreModelisationExercice !== null) {
-    entrees.push({ libelle: "Configuration", estLatex: false, valeur: LIBELLES_VARIANTE[exercice.variante] });
+    entrees.push({
+      libelle: "Configuration",
+      estLatex: false,
+      valeur: LIBELLES_VARIANTE[exercice.variante],
+      revele: etat.modelisationReveleExercice,
+    });
   }
 
   if (etat.scoreNormeExercice !== null) {
-    entrees.push({ libelle: "Norme de la résultante", estLatex: false, valeur: `${arrondiDeux(exercice.triangle.a)} ${exercice.unite}` });
+    entrees.push({
+      libelle: "Norme de la résultante",
+      estLatex: false,
+      valeur: `${arrondiDeux(exercice.triangle.a)} ${exercice.unite}`,
+      revele: etat.normeReveleExercice,
+    });
   }
 
   if (etat.scoreDeviationExercice !== null) {
-    entrees.push({ libelle: "Angle de déviation", estLatex: false, valeur: `${arrondiDeux(exercice.triangle.C)}°` });
+    entrees.push({
+      libelle: "Angle de déviation",
+      estLatex: false,
+      valeur: `${arrondiDeux(exercice.triangle.C)}°`,
+      revele: etat.deviationReveleExercice,
+    });
   }
 
   return entrees;
