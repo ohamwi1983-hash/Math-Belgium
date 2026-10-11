@@ -25,9 +25,7 @@ import {
   genererExerciceAnalyseFonction,
   type VarianteAnalyseFonctionId,
 } from "./generateurs/analyseFonction";
-import { adaptateurExportWordAnalyseFonction } from "./generateurs/analyseFonction/exportWord";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
-import { BoutonExportWord } from "../components/BoutonExportWord";
 import { EtapeCoefficients } from "./components/EtapeCoefficients";
 import { EtapeAllure } from "./components/EtapeAllure";
 import { EtapeAxeSommet } from "./components/EtapeAxeSommet";
@@ -155,7 +153,6 @@ export function AppAnalyseFonction() {
         <h1 className="app-title">Analyse d'une fonction du second degré</h1>
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <BoutonExportWord adaptateur={adaptateurExportWordAnalyseFonction} />
         <div className="card-progress">
           <div className="card-progress-row">
             <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>

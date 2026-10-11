@@ -95,12 +95,6 @@
   margin-top: 6px;
 }
 
-.entrainement .export-word-formats .btn {
-  flex: 1;
-  padding: 6px 8px;
-  font-size: 12.5px;
-}
-
 /* Piste "Ardoise" : plus de bandeau (fond + filet) isolant la progression — juste le texte et la
  * barre fine, à plat avec le reste de l'en-tête (`.app-eyebrow`/`.app-title`, sans padding latéral
  * propre non plus), au lieu d'un panneau qui réintroduit la "boîte" qu'on vient de retirer de
@@ -418,6 +412,16 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+  /* Design "Ardoise + icônes" : tout `.btn` est un conteneur flex centré avec un espace réservé
+   * pour une icône (texte seul : visuellement identique à l'ancien bloc/inline-block, aucune
+   * régression pour les boutons qui n'en ont pas) — `.btn-aide` reçoit la sienne en JSX
+   * (`IconeAmpoule`, voir `BoutonAide.tsx`), `.btn-primary`/`.alert-error`/`.alert-success` la leur
+   * en CSS pure via `::before` (ci-dessous), pour ne jamais devoir toucher les ~310 écrans qui
+   * rendent eux-mêmes leur propre bouton "Valider"/message d'erreur. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* `:not(:disabled)` — sans lui, un bouton désactivé (ex. "Aide utilisée" une fois le plafond
@@ -470,6 +474,36 @@
   flex: 1 1 200px;
 }
 
+/* Icône coche — tout bouton `.btn-primary` ("Valider" dans ~310 écrans, "Refaire ce thème"/
+ * labelBouton des quiz, "Générer"...), posée en CSS pure (`::before` + `mask-image`, jamais une
+ * police d'icônes ni un fichier séparé) pour ne jamais devoir toucher ces écrans un par un — même
+ * principe que `.btn` ci-dessus. Le SVG du masque est rempli en blanc PLEIN (jamais un contour) :
+ * c'est ce qui le rend visible aussi bien en mode masque "alpha" qu'en mode "luminance" (les 2
+ * existent selon le moteur de rendu) — un remplissage noir serait invisible en luminance. La vraie
+ * couleur vient de `background-color: currentColor`, qui suit automatiquement celle du bouton. */
+.entrainement .btn-primary::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4.3 12.5 9 17.2 19.7 6.5 18.3 5.1 9 14.4 5.7 11.1Z'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4.3 12.5 9 17.2 19.7 6.5 18.3 5.1 9 14.4 5.7 11.1Z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+.entrainement .btn-primary:disabled::before {
+  display: none;
+}
+
+/* Le bouton de `ValidationEcran.tsx` ("Écran suivant"/"Nouvel exercice") est aussi un
+ * `.btn-primary` — une flèche y a plus de sens qu'une coche (on avance, on ne "valide" plus rien à
+ * cet instant) : sélecteur plus spécifique (2 classes), l'emporte sur la coche ci-dessus sans
+ * `!important`. */
+.entrainement .validation-ecran .btn-primary::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4 10.5h11.5V7l6 5-6 5v-3.5H4Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4 10.5h11.5V7l6 5-6 5v-3.5H4Z'/%3E%3C/svg%3E");
+}
+
 .entrainement .alert-error {
   margin-top: 16px;
   padding: 10px 14px;
@@ -478,6 +512,9 @@
   color: var(--color-error);
   font-size: 14px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .entrainement .alert-success {
@@ -488,6 +525,31 @@
   color: var(--color-success);
   font-size: 14px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Icône croix/coche des bandeaux — même technique `::before`/`mask-image` que `.btn-primary`
+ * ci-dessus, même raison (`.alert-error` est rendu par ~490 écrans, jamais un fichier partagé). */
+.entrainement .alert-error::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+.entrainement .alert-success::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4.3 12.5 9 17.2 19.7 6.5 18.3 5.1 9 14.4 5.7 11.1Z'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4.3 12.5 9 17.2 19.7 6.5 18.3 5.1 9 14.4 5.7 11.1Z'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .entrainement .validation-ecran {
@@ -2140,4 +2202,353 @@
   margin: 0 0 6px;
   font-weight: 700;
   text-align: center;
+}
+
+/* Calculatrice scientifique flottante (`CalculatriceScientifique.tsx`, 4e/5e-4h/6e-6h) —
+ * bouton pilule fixe en bas à droite, modale centrée au clic (fond ombré, fermeture au
+ * clic en dehors via `.calculatrice-overlay`). Jetons du site partout (mêmes teintes que
+ * le reste du chantier) ; seule exception assumée au `--shadow-card: none` du thème
+ * `.entrainement` : une ombre portée sur le bouton et le panneau, parce que cet élément-ci
+ * doit vraiment se lire comme flottant par-dessus l'écran actif. */
+
+.entrainement .calculatrice-bouton-flottant {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 500;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--on-accent);
+  font: 600 14px/1 var(--sans);
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(24, 36, 48, 0.28), 0 2px 6px rgba(24, 36, 48, 0.16);
+}
+
+.entrainement .calculatrice-bouton-flottant:hover {
+  background: var(--accent-ink);
+}
+
+.entrainement .calculatrice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(24, 36, 48, 0.4);
+}
+
+.entrainement .calculatrice-panneau {
+  display: flex;
+  flex-direction: column;
+  width: min(380px, 100%);
+  max-height: min(640px, calc(100vh - 32px));
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 48px rgba(24, 36, 48, 0.22);
+}
+
+.entrainement .calculatrice-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.entrainement .calculatrice-memoire-boutons {
+  display: flex;
+  gap: 4px;
+}
+
+.entrainement .calculatrice-memoire-boutons .calculatrice-touche {
+  padding: 4px 7px;
+  font: 500 11px var(--sans);
+  color: var(--color-text-muted);
+}
+
+.entrainement .calculatrice-toggle-mode {
+  padding: 4px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font: 600 11px var(--mono);
+  cursor: pointer;
+}
+
+.entrainement .calculatrice-toggle-mode-actif {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-line);
+  color: var(--accent-ink);
+}
+
+.entrainement .calculatrice-fermer {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.entrainement .calculatrice-fermer:hover {
+  background: var(--line-soft);
+  color: var(--color-text);
+}
+
+.entrainement .calculatrice-affichage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+}
+
+.entrainement .calculatrice-expression {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: 18px var(--mono);
+  text-align: right;
+}
+
+.entrainement .calculatrice-expression:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.entrainement .calculatrice-erreur {
+  font: 500 12px var(--sans);
+  color: var(--color-error);
+  text-align: right;
+}
+
+.entrainement .calculatrice-pave {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 12px 14px;
+}
+
+.entrainement .calculatrice-ligne {
+  display: flex;
+  gap: 6px;
+}
+
+.entrainement .calculatrice-ligne .calculatrice-touche {
+  flex: 1;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.entrainement .calculatrice-touche {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: 14px var(--mono);
+  cursor: pointer;
+}
+
+.entrainement .calculatrice-touche:hover {
+  background: var(--color-bg);
+}
+
+.entrainement .calculatrice-touche:active {
+  background: var(--line-soft);
+}
+
+.entrainement .calculatrice-touche:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.entrainement .calculatrice-touche-operateur {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-line);
+  color: var(--accent-ink);
+}
+
+.entrainement .calculatrice-touche-danger {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement .calculatrice-touche-primaire {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.entrainement .calculatrice-touche-primaire:hover {
+  background: var(--accent-ink);
+}
+
+.entrainement .calculatrice-touche-large {
+  flex: 1.6;
+}
+
+/* Onglet graphique (`CalculatriceScientifique.tsx`, 6e-6h uniquement — jamais répliqué sur les
+ * copies 4e/5e-4h) : entête à 2 rangées (`-groupe`/`-rangee`, classes propres à ce besoin, JAMAIS
+ * substituées à `.calculatrice-entete` ci-dessus — ce dernier reste en l'état pour 4e/5e-4h, dont
+ * l'entête n'a toujours qu'une seule rangée) et liste de fonctions au-dessus du graphe Mafs. */
+
+.entrainement .calculatrice-entete-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.entrainement .calculatrice-entete-rangee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.entrainement .calculatrice-mode-tabs {
+  display: flex;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.entrainement .calculatrice-mode-tab {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 600 12px var(--mono);
+  cursor: pointer;
+}
+
+.entrainement .calculatrice-mode-tab-actif {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.entrainement .calculatrice-panneau-graphique {
+  width: min(440px, 100%);
+}
+
+.entrainement .calculatrice-fonctions-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.entrainement .calculatrice-fonction-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.entrainement .calculatrice-fonction-pastille {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.entrainement .calculatrice-fonction-label {
+  flex: none;
+  font: 13px var(--mono);
+  color: var(--color-text-muted);
+}
+
+.entrainement .calculatrice-fonction-champ {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: 13px var(--mono);
+}
+
+.entrainement .calculatrice-fonction-champ:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.entrainement .calculatrice-fonction-champ-erreur {
+  border-color: var(--color-error);
+}
+
+.entrainement .calculatrice-fonction-oeil,
+.entrainement .calculatrice-fonction-supprimer {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--ink-faint);
+}
+
+.entrainement .calculatrice-fonction-oeil:hover,
+.entrainement .calculatrice-fonction-supprimer:hover {
+  background: var(--line-soft);
+}
+
+.entrainement .calculatrice-fonction-supprimer {
+  color: var(--color-error);
+}
+
+.entrainement .calculatrice-fonction-ajouter {
+  padding: 7px 10px;
+  border: 1px dashed var(--line-soft);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 13px var(--sans);
+  cursor: pointer;
+  text-align: left;
+}
+
+.entrainement .calculatrice-fonction-ajouter:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.entrainement .calculatrice-graphe {
+  margin: 0 14px 14px;
 }
