@@ -95,12 +95,6 @@
   margin-top: 6px;
 }
 
-.entrainement .export-word-formats .btn {
-  flex: 1;
-  padding: 6px 8px;
-  font-size: 12.5px;
-}
-
 /* Piste "Ardoise" : plus de bandeau (fond + filet) isolant la progression — juste le texte et la
  * barre fine, à plat avec le reste de l'en-tête (`.app-eyebrow`/`.app-title`, sans padding latéral
  * propre non plus), au lieu d'un panneau qui réintroduit la "boîte" qu'on vient de retirer de
