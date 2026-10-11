@@ -57,6 +57,19 @@ const LIGNES_TOUCHES: Touche[][] = [
     { libelle: "+", token: "+", classe: "calculatrice-touche-operateur" },
     { libelle: "=", token: "", classe: "calculatrice-touche-primaire calculatrice-touche-large" },
   ],
+  // Ligne propre au 6e-6h (jamais répliquée sur les copies 4e/5e-4h : ni nombres complexes, ni
+  // analyse combinatoire au programme de ces 2 chantiers). "i" insère l'unité imaginaire —
+  // `evaluerExpressionCalculatrice` détecte un résultat `Complex` et le formate via
+  // `formatComplexeCalculatrice` (voir ce fichier). "n!" insère le token postfixe "!" (même
+  // mécanisme d'insertion générique que "," ou "("), "nCr"/"nPr" insèrent `combinations(`/
+  // `permutations(` en préfixe — même convention que "√"/"ⁿ√" : l'élève complète les arguments à la
+  // main après la parenthèse ouvrante.
+  [
+    { libelle: "i", token: "i" },
+    { libelle: "n!", token: "!" },
+    { libelle: "nCr", token: "combinations(" },
+    { libelle: "nPr", token: "permutations(" },
+  ],
 ];
 
 interface Props {
@@ -180,6 +193,15 @@ function CalculatriceModale({ expression, setExpression, curseur, setCurseur, mo
     const resultat = evaluerExpressionCalculatrice(expression, mode);
     if (resultat.erreur) {
       setErreur(resultat.erreur);
+      return;
+    }
+    // Résultat complexe (expression utilisant "i") — déjà formaté en chaîne finale par
+    // `evaluerExpressionCalculatrice`, jamais repassé par `formatNombreCalculatrice` (pensé pour un
+    // réel seul).
+    if (resultat.valeurComplexe !== null) {
+      setExpression(resultat.valeurComplexe);
+      setCurseur(resultat.valeurComplexe.length);
+      setErreur(null);
       return;
     }
     if (resultat.valeur !== null) {
