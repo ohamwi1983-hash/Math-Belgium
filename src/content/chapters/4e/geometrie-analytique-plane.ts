@@ -21,6 +21,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Décrire une droite : point et vecteur directeur',
       kicker: "5 façons de donner une droite → un point + un vecteur directeur → 4 façons de l'écrire",
       blocks: [
+        { kind: 'video', title: 'Décrire une droite : point, vecteur directeur et 4 formes d\'équation', youtubeId: 'OkLInSNqf-Q' },
         {
           kind: 'para',
           text:
@@ -244,6 +245,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Lire une droite sur un graphe, la tracer depuis son équation',
       kicker: 'deux compétences réciproques, sur le même quadrillage',
       blocks: [
+        { kind: 'video', title: 'Lire, tracer une droite ; pente, angle et ordonnée à l\'origine', youtubeId: 'XhlMFkJ5XG4' },
         {
           kind: 'para',
           text:
@@ -424,6 +426,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Droites parallèles et perpendiculaires',
       kicker: 'déterminant nul ↔ parallèles — produit scalaire nul ↔ perpendiculaires',
       blocks: [
+        { kind: 'video', title: 'Droites parallèles, perpendiculaires et intersection de deux droites', youtubeId: 'E0Uvj1gvBi0' },
         {
           kind: 'para',
           text:
@@ -679,6 +682,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Distance point-droite et droite-droite',
       kicker: 'construire la perpendiculaire, trouver le pied, mesurer — sans formule toute faite',
       blocks: [
+        { kind: 'video', title: 'Distance point-droite, droite-droite et notion de lieu géométrique', youtubeId: 'mkdqsJBJKNU' },
         {
           kind: 'para',
           text:
@@ -829,6 +833,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Le cercle',
       kicker: "(x−x₀)² + (y−y₀)² = r² — depuis un graphe, ou depuis l'équation développée",
       blocks: [
+        { kind: 'video', title: 'Le cercle : équation, centre et rayon', youtubeId: 'tSgRL4q19Go' },
         {
           kind: 'para',
           text:
@@ -967,6 +972,8 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'La parabole : foyer, directrice et équation',
       kicker: 'équidistance d\'un point (foyer) et d\'une droite (directrice)',
       blocks: [
+        { kind: 'video', title: 'La parabole : foyer, directrice, équation et construction au compas', youtubeId: 'C8pnTijgKro' },
+        { kind: 'video', title: 'Construction d\'une parabole au compas et à l\'équerre', youtubeId: 'mmRHcf1ttrY' },
         {
           kind: 'para',
           text:
@@ -1173,6 +1180,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
       title: 'Lieux géométriques : intersection de deux courbes',
       kicker: 'traduire, écrire l\'équation, résoudre le système',
       blocks: [
+        { kind: 'video', title: 'Lieux géométriques, intersection de deux courbes, révision du chapitre', youtubeId: 'WZbxEM82VOo' },
         {
           kind: 'para',
           text:
