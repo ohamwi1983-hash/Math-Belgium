@@ -19,6 +19,8 @@ import { EtapeInequation } from "./components/EtapeInequation";
 import { EtapeSimplificationInequation } from "./components/EtapeSimplificationInequation";
 import { formatSolutionEnsemble } from "./ui/formatSolutionEnsemble";
 import { calculerRecapitulatifInequation } from "./ui/recapitulatifInequation";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -32,12 +34,36 @@ function nouvelleSession(): EtatSessionInequation {
   return demarrerSessionInequation(REGLAGES_DEMO, genererExerciceInequation);
 }
 
-const LIBELLE_PHASE: Record<PhaseInequation, string> = {
-  simplification: "Simplification",
-  racines: "Racines",
-  signe_a: "Signe de a",
-  intervalle: "Ensemble-solution",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (type `PhaseInequation` ci-dessus, et les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseInequation[] = ["simplification", "racines", "signe_a", "intervalle"];
+
+/** Même heuristique que `calculerRecapitulatifInequation` (`ui/recapitulatifInequation.ts`) et que
+ * `terminerEtape` ci-dessous pour lire `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée
+ * séparément. `intervalle` (dernière phase) n'a pas de champ `scoreXxxExercice` propre : elle clôt
+ * toujours immédiatement l'exercice, donc tant qu'elle n'est pas la phase courante elle est
+ * forcément "a-venir". */
+function calculerSegmentsProgression(etat: EtatSessionInequation): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "simplification"
+        ? etat.scoreSimplificationExercice
+        : phase === "racines"
+          ? etat.scoreRacinesExercice
+          : phase === "signe_a"
+            ? etat.scoreSigneAExercice
+            : null;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "simplification"
+        ? etat.scoreSimplificationExercice === 0
+        : phase === "racines"
+          ? etat.racinesRevele
+          : etat.signeARevele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -113,11 +139,7 @@ export function AppInequation() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           {etat.phase === "simplification" ? (

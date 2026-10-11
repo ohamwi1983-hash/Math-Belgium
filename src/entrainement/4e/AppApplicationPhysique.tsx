@@ -8,7 +8,7 @@ import {
   soumettreReponseModelisation,
   soumettreReponseNorme,
 } from "./moteur/sessionApplicationPhysique";
-import type { EtatSessionApplicationPhysique } from "./moteur/typesApplicationPhysique";
+import type { EtatSessionApplicationPhysique, PhaseApplicationPhysique } from "./moteur/typesApplicationPhysique";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceApplicationPhysique } from "./generateurs/applicationPhysique";
 import type { VarianteApplicationPhysique } from "./core/applicationPhysique.types";
 import { calculerRecapitulatifApplicationPhysique, notationVecteursApplicationPhysique } from "./ui/formatApplicationPhysique";
@@ -19,6 +19,8 @@ import { EtapeNormeApplicationPhysique } from "./components/EtapeNormeApplicatio
 import { EtapeDeviationApplicationPhysique } from "./components/EtapeDeviationApplicationPhysique";
 import { EtapeInterpretationApplicationPhysique } from "./components/EtapeInterpretationApplicationPhysique";
 import { Katex } from "./components/Katex";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -36,12 +38,33 @@ function nouvelleSession(): EtatSessionApplicationPhysique {
  * décimaux non fournis par l'énoncé ; "modelisation" est un choix catégoriel, "interpretation" un QCM. */
 const PHASES_CALCULATRICE = new Set<EtatSessionApplicationPhysique["phase"]>(["norme", "deviation"]);
 
-const LIBELLE_PHASE: Record<EtatSessionApplicationPhysique["phase"], string> = {
-  modelisation: "Configuration",
-  norme: "Norme",
-  deviation: "Déviation",
-  interpretation: "Interprétation",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (voir `PhaseApplicationPhysique`/les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseApplicationPhysique[] = ["modelisation", "norme", "deviation", "interpretation"];
+
+/** Même ternaire que `terminerEtape` (ci-dessous) et `calculerRecapitulatifApplicationPhysique`
+ * (`ui/formatApplicationPhysique.ts`) pour lire `scoreXxxExercice`/`xxxReveleExercice` — jamais une
+ * valeur recalculée séparément. "interpretation" (dernière phase) n'a pas de score tracké dans
+ * `EtatSessionApplicationPhysique` : tant que l'exercice n'est pas terminé elle est forcément
+ * "courante" (dernière phase active), et une fois terminé un nouvel exercice démarre (l'état entier
+ * est remis à zéro). */
+function calculerSegmentsProgression(etat: EtatSessionApplicationPhysique): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "modelisation"
+        ? etat.scoreModelisationExercice
+        : phase === "norme"
+          ? etat.scoreNormeExercice
+          : phase === "deviation"
+            ? etat.scoreDeviationExercice
+            : null;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "modelisation" ? etat.modelisationReveleExercice : phase === "norme" ? etat.normeReveleExercice : etat.deviationReveleExercice;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -115,11 +138,7 @@ export function AppApplicationPhysique() {
         <h1 className="app-title">Applications physiques (résultante de vecteurs)</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

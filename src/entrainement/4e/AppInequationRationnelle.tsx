@@ -135,6 +135,9 @@ import { formatLineaireDeveloppe } from "./ui/formatSignesProduit";
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./ui/formatEquation";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "./ui/categorieLabels";
+import { necessiteSimplification } from "./moteur/simplificationEquation";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /** `fraction.denominateur`/`.numerateur` sont toujours des P2 pour le type "P2/P2" (seul type utilisé par facteurCommun). */
 function estPolynomeLineaire(poly: Exercice | PolynomeLineaire): poly is PolynomeLineaire {
@@ -168,35 +171,185 @@ function nouvelleSession(): EtatSessionInequationRationnelle {
   return demarrerSessionInequationRationnelle(REGLAGES_DEMO, creerGenerateurInequationRationnelle(REGLAGES_NIVEAU));
 }
 
-const LIBELLE_PHASE: Record<PhaseInequationRationnelle, string> = {
-  isoler: "Isoler",
-  combiner: "Combiner",
-  ce: "Condition d'existence",
-  racineNumerateur: "Racine du numérateur",
-  denomReduction: "Réduction (dénominateur)",
-  denomReconnaissance: "Méthode (dénominateur)",
-  denomChamp1: "Factorisation (dénominateur)",
-  denomFactorisation: "Forme factorisée (dénominateur)",
-  miseEnEvidence: "Mise en évidence",
-  reduction: "Réduction (numérateur combiné)",
-  reconnaissance: "Méthode (numérateur combiné)",
-  champ1: "Factorisation (numérateur combiné)",
-  champ2: "Racines (numérateur combiné)",
-  factorisation: "Forme factorisée (numérateur combiné)",
-  simplifierDenomReduction: "Réduction (dénominateur)",
-  simplifierDenomReconnaissance: "Méthode (dénominateur)",
-  simplifierDenomChamp1: "Factorisation (dénominateur)",
-  simplifierDenomChamp2: "Racines (dénominateur)",
-  simplifierDenomFactorisation: "Forme factorisée (dénominateur)",
-  simplifierNumReduction: "Réduction (numérateur)",
-  simplifierNumReconnaissance: "Méthode (numérateur)",
-  simplifierNumChamp1: "Factorisation (numérateur)",
-  simplifierNumChamp2: "Racines (numérateur)",
-  simplifierNumFactorisation: "Forme factorisée (numérateur)",
-  simplifierFraction: "Simplification",
-  grille: "Tableau de signes",
-  intervalle: "Ensemble-solution",
-};
+/**
+ * Sous-séquence "reduction?→reconnaissance→champ1→champ2→factorisation?" du mécanisme
+ * "méthode la plus rapide" embarqué sur un P2 donné — identique pour `exercice.numerateur`
+ * (niveaux 3-4, denominateurCarre, sansFacteurCommun, cubique). `reduction` n'est incluse que si
+ * elle a réellement lieu : soit déjà close (`scoreReductionDejaFixe !== null`), soit encore à
+ * venir sur des coefficients pas encore réduits (`necessiteSimplification`) — cette disjonction
+ * reste valable après coup car une fois la réduction close, `poly` est déjà réduit (coefficients
+ * premiers entre eux) et `necessiteSimplification` y répondrait alors toujours non. `factorisation`
+ * n'existe que si `poly.categorie === "cas_general"` (jamais affecté par la réduction).
+ */
+function sequenceReductionP2(scoreReductionDejaFixe: number | null, poly: Exercice): PhaseInequationRationnelle[] {
+  const reductionApplicable = scoreReductionDejaFixe !== null || necessiteSimplification(poly);
+  return [
+    ...(reductionApplicable ? (["reduction"] as PhaseInequationRationnelle[]) : []),
+    "reconnaissance",
+    "champ1",
+    "champ2",
+    ...(poly.categorie === "cas_general" ? (["factorisation"] as PhaseInequationRationnelle[]) : []),
+  ];
+}
+
+/** Même principe que `sequenceReductionP2`, pour `exercice.denominateur` (sansFacteurCommun
+ * uniquement) — pas de "denomChamp2" : les racines de D sont fournies plus tard par "ce" elle-même. */
+function sequenceDenomSansFacteurCommun(scoreDenomReductionDejaFixe: number | null, poly: Exercice): PhaseInequationRationnelle[] {
+  const reductionApplicable = scoreDenomReductionDejaFixe !== null || necessiteSimplification(poly);
+  return [
+    ...(reductionApplicable ? (["denomReduction"] as PhaseInequationRationnelle[]) : []),
+    "denomReconnaissance",
+    "denomChamp1",
+    ...(poly.categorie === "cas_general" ? (["denomFactorisation"] as PhaseInequationRationnelle[]) : []),
+  ];
+}
+
+/** Même principe, pour D (`fraction.denominateur`, facteurCommun uniquement) — a bien son propre "champ2". */
+function sequenceSimplifierDenom(scoreDejaFixe: number | null, poly: Exercice): PhaseInequationRationnelle[] {
+  const reductionApplicable = scoreDejaFixe !== null || necessiteSimplification(poly);
+  return [
+    ...(reductionApplicable ? (["simplifierDenomReduction"] as PhaseInequationRationnelle[]) : []),
+    "simplifierDenomReconnaissance",
+    "simplifierDenomChamp1",
+    "simplifierDenomChamp2",
+    ...(poly.categorie === "cas_general" ? (["simplifierDenomFactorisation"] as PhaseInequationRationnelle[]) : []),
+  ];
+}
+
+/** Même principe, pour N (`fraction.numerateur`, facteurCommun uniquement). */
+function sequenceSimplifierNum(scoreDejaFixe: number | null, poly: Exercice): PhaseInequationRationnelle[] {
+  const reductionApplicable = scoreDejaFixe !== null || necessiteSimplification(poly);
+  return [
+    ...(reductionApplicable ? (["simplifierNumReduction"] as PhaseInequationRationnelle[]) : []),
+    "simplifierNumReconnaissance",
+    "simplifierNumChamp1",
+    "simplifierNumChamp2",
+    ...(poly.categorie === "cas_general" ? (["simplifierNumFactorisation"] as PhaseInequationRationnelle[]) : []),
+  ];
+}
+
+/**
+ * Séquence RÉELLE des phases pour l'exercice courant, dans l'ordre où elles se déroulent — jamais
+ * une liste statique indépendante du niveau (contrairement à AppAnalyseFonction.tsx) : chaque
+ * niveau a sa propre séquence (voir le commentaire de tête de sessionInequationRationnelle.ts et
+ * chaque fonction `soumettreReponseXxx` pour la transition exacte vers la phase suivante), avec des
+ * étapes "reduction"/"denomReduction"/"simplifier*Reduction" et "factorisation"/"denomFactorisation"/
+ * "simplifier*Factorisation" optionnelles selon l'exercice réellement généré.
+ */
+function ordrePhases(etat: EtatSessionInequationRationnelle): PhaseInequationRationnelle[] {
+  const exercice = etat.exerciceCourant;
+
+  if (exercice.niveau === "niveau1") {
+    return ["ce", "racineNumerateur", "grille", "intervalle"];
+  }
+  if (exercice.niveau === "niveau2") {
+    return ["isoler", "combiner", "ce", "racineNumerateur", "grille", "intervalle"];
+  }
+  if (exercice.niveau === "cubique") {
+    return ["ce", "miseEnEvidence", ...sequenceReductionP2(etat.scoreReductionExercice, exercice.numerateur), "grille", "intervalle"];
+  }
+  if (exercice.niveau === "facteurCommun") {
+    const D = denominateurFacteurCommun(exercice);
+    const N = numerateurFacteurCommun(exercice);
+    return [
+      "ce",
+      ...sequenceSimplifierDenom(etat.scoreSimplifierDenomReductionExercice, D),
+      ...sequenceSimplifierNum(etat.scoreSimplifierNumReductionExercice, N),
+      "simplifierFraction",
+      "grille",
+      "intervalle",
+    ];
+  }
+  if (exercice.niveau === "sansFacteurCommun") {
+    return [
+      "isoler",
+      "combiner",
+      ...sequenceDenomSansFacteurCommun(etat.scoreDenomReductionExercice, exercice.denominateur),
+      "ce",
+      ...sequenceReductionP2(etat.scoreReductionExercice, exercice.numerateur),
+      "grille",
+      "intervalle",
+    ];
+  }
+  // niveau3, niveau4, denominateurCarre
+  return ["isoler", "combiner", "ce", ...sequenceReductionP2(etat.scoreReductionExercice, exercice.numerateur), "grille", "intervalle"];
+}
+
+/**
+ * Signal `revele` d'une phase du PASSÉ de `etat` (déjà close) — même switch que `releveRevelePhase`
+ * ci-dessus, jamais recalculé différemment, mais lu directement sur `etat` (les champs persistent
+ * une fois fixés) plutôt que sur l'état transitoire `nouvelEtat` d'une transition en cours.
+ */
+function releveRevele(etat: EtatSessionInequationRationnelle, phase: PhaseInequationRationnelle): boolean {
+  switch (phase) {
+    case "isoler":
+      return etat.isolerRevele;
+    case "combiner":
+      return etat.combinerRevele;
+    case "ce":
+      return etat.ceRevele;
+    case "racineNumerateur":
+      return etat.racineNumerateurRevele;
+    case "denomReduction":
+      return etat.scoreDenomReductionExercice === 0;
+    case "denomReconnaissance":
+      return etat.denomReconnaissanceRevele;
+    case "denomChamp1":
+      return etat.denomChamp1Revele;
+    case "denomFactorisation":
+      return etat.denomFactorisationRevele;
+    case "miseEnEvidence":
+      return etat.miseEnEvidenceRevele;
+    case "reduction":
+      return etat.scoreReductionExercice === 0;
+    case "reconnaissance":
+      return etat.reconnaissanceRevele;
+    case "champ1":
+      return etat.champ1Revele;
+    case "champ2":
+      return etat.champ2Revele;
+    case "factorisation":
+      return etat.factorisationRevele;
+    case "simplifierDenomReduction":
+      return etat.scoreSimplifierDenomReductionExercice === 0;
+    case "simplifierDenomReconnaissance":
+      return etat.simplifierDenomCategorieRevelee;
+    case "simplifierDenomChamp1":
+      return etat.scoreSimplifierDenomChamp1Exercice === 0;
+    case "simplifierDenomChamp2":
+      return etat.scoreSimplifierDenomChamp2Exercice === 0;
+    case "simplifierDenomFactorisation":
+      return etat.scoreSimplifierDenomFactorisationExercice === 0;
+    case "simplifierNumReduction":
+      return etat.scoreSimplifierNumReductionExercice === 0;
+    case "simplifierNumReconnaissance":
+      return etat.simplifierNumCategorieRevelee;
+    case "simplifierNumChamp1":
+      return etat.scoreSimplifierNumChamp1Exercice === 0;
+    case "simplifierNumChamp2":
+      return etat.scoreSimplifierNumChamp2Exercice === 0;
+    case "simplifierNumFactorisation":
+      return etat.scoreSimplifierNumFactorisationExercice === 0;
+    case "simplifierFraction":
+      return etat.scoreSimplifierFractionExercice === 0;
+    case "grille":
+      return etat.grilleRevelee;
+    case "intervalle":
+      return etat.resultats[etat.resultats.length - 1]?.intervalleRevele ?? false;
+  }
+}
+
+/** Segments de la barre de progression en puces — "courante" sur `etat.phase`, "a-venir" après,
+ * "revele"/"correcte" (via `releveRevele`) avant, suivant `ordrePhases(etat)`. */
+function calculerSegmentsProgression(etat: EtatSessionInequationRationnelle): EtatPuceProgression[] {
+  const phases = ordrePhases(etat);
+  const indexCourant = phases.indexOf(etat.phase);
+  return phases.map((phase, k) => {
+    if (k > indexCourant) return "a-venir";
+    if (k === indexCourant) return "courante";
+    return releveRevele(etat, phase) ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -556,11 +709,7 @@ export function AppInequationRationnelle() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           {etat.phase === "isoler" && exerciceNiveau2 ? (

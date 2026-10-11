@@ -12,6 +12,8 @@ import { EtapeCoordonneesRelationVectorielle } from "./components/EtapeCoordonne
 import { formatTraductionAttendueLatex } from "./ui/formatRelationVectorielle";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifRelationVectorielle } from "./ui/recapitulatifRelationVectorielle";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -25,10 +27,28 @@ function nouvelleSession(): EtatSessionRelationVectorielle {
   return demarrerSessionRelationVectorielle(REGLAGES_DEMO, genererExerciceRelationVectorielle);
 }
 
-const LIBELLE_PHASE: Record<PhaseRelationVectorielle, string> = {
-  traduction: "Traduction en coordonnées",
-  coordonnees: "Coordonnées",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (voir `PhaseRelationVectorielle`/les branches de `terminerEtape` ci-dessous).
+ * Particularité de ce générateur (contrairement au gabarit) : la phase "traduction" n'existe que
+ * pour la variante `relationGenerale` — `phaseInitiale` démarre directement à "coordonnees" pour
+ * `translation`, qui n'a jamais cette étape (voir `typesRelationVectorielle.ts`). Un seul segment
+ * ("coordonnees") est donc affiché pour cette variante. */
+const ORDRE_PHASES: PhaseRelationVectorielle[] = ["traduction", "coordonnees"];
+
+/** Même ternaire que `terminerEtape` (ci-dessous) et `recapitulatifRelationVectorielle.ts` pour lire
+ * `scoreTraductionExercice`/`traductionRevele` — jamais une valeur recalculée séparément.
+ * "coordonnees" (dernière phase) n'a pas de score tracké dans `EtatSessionRelationVectorielle` :
+ * tant que l'exercice n'est pas terminé elle est forcément "courante" (dernière phase active), et
+ * une fois terminé un nouvel exercice démarre (l'état entier est remis à zéro). */
+function calculerSegmentsProgression(etat: EtatSessionRelationVectorielle): EtatPuceProgression[] {
+  const phases = etat.exerciceCourant.variante === "translation" ? ORDRE_PHASES.filter((phase) => phase !== "traduction") : ORDRE_PHASES;
+  return phases.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    if (phase !== "traduction") return "a-venir";
+    if (etat.scoreTraductionExercice === null) return "a-venir";
+    return etat.traductionRevele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -97,11 +117,7 @@ export function AppRelationVectorielle() {
         <h1 className="app-title">Point à partir d'une relation vectorielle</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel (version guidée)</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

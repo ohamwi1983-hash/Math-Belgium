@@ -18,6 +18,9 @@ import { EtapeAnglePremierQuadrantCercleTrig } from "./components/EtapeAnglePrem
 import { EtapeSignesCercleTrig } from "./components/EtapeSignesCercleTrig";
 import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
 import { calculerRecapitulatifCercleTrigonometrique } from "./ui/recapitulatifCercleTrigonometrique";
+import { necessiteReduction } from "./moteur/verificationCercleTrigonometrique";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -40,12 +43,39 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-const LIBELLE_PHASE: Record<PhaseCercleTrigonometrique, string> = {
-  reduction: "Réduction",
-  quadrant: "Quadrant",
-  anglePremierQuadrant: "Angle du premier quadrant",
-  signes: "Signes",
-};
+/** Les 3 phases toujours présentes, dans l'ordre réel — "reduction" s'intercale en tête, seulement
+ * si nécessaire (voir `calculerSegmentsProgression` ci-dessous et le commentaire de tête de
+ * sessionCercleTrigonometrique.ts : "[reduction] → quadrant → anglePremierQuadrant → signes"). */
+const PHASES_FIXES: PhaseCercleTrigonometrique[] = ["quadrant", "anglePremierQuadrant", "signes"];
+
+/**
+ * Segments de la barre de puces — "reduction" n'est incluse que si elle a réellement lieu : soit
+ * déjà close (`scoreReductionExercice !== null`), soit encore à venir sur un angle hors [0°,360°[
+ * (`necessiteReduction`) — valable après coup aussi, car l'angle de `exerciceCourant` ne change
+ * jamais une fois l'exercice généré (contrairement aux coefficients réduits ailleurs sur ce
+ * chantier). Les trois `xxxRevele` lus ci-dessous sont de vrais booléens trackés par le moteur
+ * (pas l'heuristique score===0 des autres générateurs) — mêmes champs que
+ * `calculerRecapitulatifCercleTrigonometrique` (ui/recapitulatifCercleTrigonometrique.ts). "signes"
+ * (dernière phase) n'a pas de branche "close" propre : une fois notée, un nouvel exercice démarre.
+ */
+function calculerSegmentsProgression(etat: EtatSessionCercleTrigonometrique): EtatPuceProgression[] {
+  const reductionApplicable = etat.scoreReductionExercice !== null || necessiteReduction(etat.exerciceCourant);
+  const phases: PhaseCercleTrigonometrique[] = reductionApplicable ? ["reduction", ...PHASES_FIXES] : PHASES_FIXES;
+  const indexCourant = phases.indexOf(etat.phase);
+
+  return phases.map((phase, k) => {
+    if (k > indexCourant) return "a-venir";
+    if (k === indexCourant) return "courante";
+    switch (phase) {
+      case "reduction":
+        return etat.reductionRevele ? "revele" : "correcte";
+      case "quadrant":
+        return etat.quadrantRevele ? "revele" : "correcte";
+      default:
+        return etat.anglePremierQuadrantRevele ? "revele" : "correcte";
+    }
+  });
+}
 
 export function AppCercleTrigonometrique() {
   const [etat, setEtat] = useState<EtatSessionCercleTrigonometrique>(nouvelleSession);
@@ -112,11 +142,7 @@ export function AppCercleTrigonometrique() {
         <h1 className="app-title">Placement et lecture sur le cercle trigonométrique</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

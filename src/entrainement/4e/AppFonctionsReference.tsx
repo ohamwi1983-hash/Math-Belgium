@@ -14,6 +14,8 @@ import { EtapeReglagesFonctionsReference } from "./components/EtapeReglagesFonct
 import { EtapeReconnaissanceFonction } from "./components/EtapeReconnaissanceFonction";
 import { EtapeFonctionsReferenceExercice } from "./components/EtapeFonctionsReferenceExercice";
 import { Katex } from "./components/Katex";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const NOMBRE_EXERCICES_ALEATOIRE = 5;
 
@@ -86,6 +88,25 @@ function releveRevelePhase(etatAvant: EtatSessionFonctionReference, nouvelEtat: 
   if (etatAvant.phase === "reconnaissance") return nouvelEtat.etapeReconnaissance.revelee;
   const resultat = nouvelEtat.resultats[nouvelEtat.resultats.length - 1];
   return resultat.equationRevele || resultat.curseursRevele;
+}
+
+/**
+ * Segments de la barre de puces pour les 2 phases FIXES de l'exercice courant (`PhaseFonctionReference`,
+ * typesFonctionsReference.ts) : "reconnaissance" (jamais sautée) puis "exercice". "reconnaissance"
+ * reprend exactement la même heuristique que `calculerRecapitulatifFonctionReference`
+ * (ui/recapitulatifFonctionsReference.ts) : pas de `reconnaissanceRevele` tracké au niveau de
+ * l'exercice par le moteur, donc `scoreReconnaissanceExercice === 0` ⟺ révélée. "exercice" (dernière
+ * phase) n'a pas de branche "close" propre : une fois notée, un nouvel exercice démarre (ou la
+ * session se termine) — même principe que la dernière phase d'AppAnalyseFonction.tsx. Ce indicateur
+ * est ORTHOGONAL au bloc "Exercice N / Total" ci-dessous (`.card-progress-step`/`.progress-track`,
+ * partagé avec les générateurs AppQuiz*) : celui-ci mesure la progression dans la SESSION (plusieurs
+ * exercices), jamais remplacé ici — voir le rapport de migration pour ce choix.
+ */
+function calculerSegmentsProgression(etat: EtatSessionFonctionReference): EtatPuceProgression[] {
+  return [
+    etat.phase === "reconnaissance" ? "courante" : etat.scoreReconnaissanceExercice === 0 ? "revele" : "correcte",
+    etat.phase === "exercice" ? "courante" : "a-venir",
+  ];
 }
 
 export function AppFonctionsReference() {
@@ -175,6 +196,7 @@ export function AppFonctionsReference() {
             <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
           </div>
         </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
         <div className="card-body">
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFonction

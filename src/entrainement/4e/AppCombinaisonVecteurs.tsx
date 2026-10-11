@@ -10,6 +10,8 @@ import { EtapeComposantesCombinaisonVecteurs } from "./components/EtapeComposant
 import { Katex } from "./components/Katex";
 import { formatEquationReduiteLatex, formatResultatLatex, formatVecteurColonneLatex } from "./ui/formatCombinaisonVecteurs";
 import { calculerRecapitulatifCombinaisonVecteurs } from "./ui/recapitulatifCombinaisonVecteurs";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -23,10 +25,23 @@ function nouvelleSession(): EtatSessionCombinaisonVecteurs {
   return demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, genererExerciceCombinaisonVecteurs);
 }
 
-const LIBELLE_PHASE: Record<PhaseCombinaisonVecteurs, string> = {
-  simplification: "Réduction symbolique",
-  composantes: "Composantes",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (voir `PhaseCombinaisonVecteurs`/les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseCombinaisonVecteurs[] = ["simplification", "composantes"];
+
+/** Même ternaire que `terminerEtape` (ci-dessous) et `recapitulatifCombinaisonVecteurs.ts` pour
+ * lire `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément. "composantes"
+ * (dernière phase) n'a pas de score tracké dans `EtatSessionCombinaisonVecteurs` : tant que
+ * l'exercice n'est pas terminé elle est forcément "courante" (dernière phase active), et une fois
+ * terminé un nouvel exercice démarre (l'état entier est remis à zéro). */
+function calculerSegmentsProgression(etat: EtatSessionCombinaisonVecteurs): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = phase === "simplification" ? etat.scoreSimplificationExercice : null;
+    if (score === null) return "a-venir";
+    return etat.simplificationRevele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -95,11 +110,7 @@ export function AppCombinaisonVecteurs() {
         <h1 className="app-title">Calcul de composantes de combinaisons linéaires</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

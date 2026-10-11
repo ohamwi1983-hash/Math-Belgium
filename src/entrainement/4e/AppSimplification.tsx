@@ -50,6 +50,8 @@ import { estSolutionUnique, formatFormeFactoriseeDepuisRacines, formatTermesZero
 import { libelleCategorie } from "./ui/categorieLabels";
 import { Katex } from "./components/Katex";
 import type { TypeFraction } from "./core/simplification.types";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * Questions/libellés de factorisation, adaptés au dénominateur ou au numérateur
@@ -88,22 +90,92 @@ function nouvelleSession(): EtatSessionSimplification {
   return demarrerSessionSimplification(REGLAGES_DEMO, genererExerciceSimplification);
 }
 
-const LIBELLE_PHASE: Record<PhaseSimplification, string> = {
-  denomReduction: "Réduction (dénominateur)",
-  denomReductionP1: "Réduction (dénominateur)",
-  denomReconnaissance: "Méthode (dénominateur)",
-  denomChamp1: "Factorisation (dénominateur)",
-  denomChamp2: "Conditions d'existence",
-  denomFactorisation: "Factorisation (dénominateur)",
-  ceDirecte: "Condition d'existence",
-  numReduction: "Réduction (numérateur)",
-  numReductionP1: "Réduction (numérateur)",
-  numReconnaissance: "Méthode (numérateur)",
-  numChamp1: "Factorisation (numérateur)",
-  numChamp2: "Racines (numérateur)",
-  numFactorisation: "Factorisation (numérateur)",
-  simplification: "Simplification",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (type `PhaseSimplification` dans `moteur/typesSimplification.ts`, et les branches de
+ * `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseSimplification[] = [
+  "denomReduction",
+  "denomReductionP1",
+  "denomReconnaissance",
+  "denomChamp1",
+  "denomChamp2",
+  "denomFactorisation",
+  "ceDirecte",
+  "numReduction",
+  "numReductionP1",
+  "numReconnaissance",
+  "numChamp1",
+  "numChamp2",
+  "numFactorisation",
+  "simplification",
+];
+
+/** Même heuristique que `calculerRecapitulatifSimplification` (`ui/recapitulatifSimplification.ts`)
+ * et que `terminerEtape` ci-dessous pour lire `scoreXxxExercice`/`xxxRevele` — jamais une valeur
+ * recalculée séparément. `simplification` (dernière phase) n'a pas de champ `scoreXxxExercice`
+ * propre : elle clôt toujours immédiatement l'exercice, donc tant qu'elle n'est pas la phase
+ * courante elle est forcément "a-venir". */
+function calculerSegmentsProgression(etat: EtatSessionSimplification): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "denomReduction"
+        ? etat.scoreDenomReductionExercice
+        : phase === "denomReductionP1"
+          ? etat.scoreDenomReductionP1Exercice
+          : phase === "denomReconnaissance"
+            ? etat.scoreDenomReconnaissanceExercice
+            : phase === "denomChamp1"
+              ? etat.scoreDenomChamp1Exercice
+              : phase === "denomChamp2"
+                ? etat.scoreDenomChamp2Exercice
+                : phase === "denomFactorisation"
+                  ? etat.scoreDenomFactorisationExercice
+                  : phase === "ceDirecte"
+                    ? etat.scoreCEDirecteExercice
+                    : phase === "numReduction"
+                      ? etat.scoreNumReductionExercice
+                      : phase === "numReductionP1"
+                        ? etat.scoreNumReductionP1Exercice
+                        : phase === "numReconnaissance"
+                          ? etat.scoreNumReconnaissanceExercice
+                          : phase === "numChamp1"
+                            ? etat.scoreNumChamp1Exercice
+                            : phase === "numChamp2"
+                              ? etat.scoreNumChamp2Exercice
+                              : phase === "numFactorisation"
+                                ? etat.scoreNumFactorisationExercice
+                                : null;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "denomReduction"
+        ? etat.scoreDenomReductionExercice === 0
+        : phase === "denomReductionP1"
+          ? etat.scoreDenomReductionP1Exercice === 0
+          : phase === "denomReconnaissance"
+            ? etat.denomCategorieRevelee
+            : phase === "denomChamp1"
+              ? etat.scoreDenomChamp1Exercice === 0
+              : phase === "denomChamp2"
+                ? etat.scoreDenomChamp2Exercice === 0
+                : phase === "denomFactorisation"
+                  ? etat.scoreDenomFactorisationExercice === 0
+                  : phase === "ceDirecte"
+                    ? etat.scoreCEDirecteExercice === 0
+                    : phase === "numReduction"
+                      ? etat.scoreNumReductionExercice === 0
+                      : phase === "numReductionP1"
+                        ? etat.scoreNumReductionP1Exercice === 0
+                        : phase === "numReconnaissance"
+                          ? etat.numCategorieRevelee
+                          : phase === "numChamp1"
+                            ? etat.scoreNumChamp1Exercice === 0
+                            : phase === "numChamp2"
+                              ? etat.scoreNumChamp2Exercice === 0
+                              : etat.scoreNumFactorisationExercice === 0;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -270,11 +342,7 @@ export function AppSimplification() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <p className="prompt-text">{CONSIGNE_GENERALE}</p>

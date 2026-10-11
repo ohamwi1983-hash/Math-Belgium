@@ -17,6 +17,8 @@ import { EtapeValeursExactesVR } from "./components/EtapeValeursExactesVR";
 import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifValeursRemarquables } from "./ui/recapitulatifValeursRemarquables";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,11 +32,24 @@ function nouvelleSession(): EtatSessionValeursRemarquables {
   return demarrerSessionValeursRemarquables(REGLAGES_DEMO, genererExerciceValeursRemarquables);
 }
 
-const LIBELLE_PHASE: Record<PhaseValeursRemarquables, string> = {
-  quadrant: "Quadrant",
-  anglePremierQuadrant: "Angle du premier quadrant",
-  valeursExactes: "Valeurs exactes",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (voir `PhaseValeursRemarquables`/les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseValeursRemarquables[] = ["quadrant", "anglePremierQuadrant", "valeursExactes"];
+
+/** Même ternaire que `terminerEtape` (ci-dessous) et `recapitulatifValeursRemarquables.ts` pour lire
+ * `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément. `valeursExactes`
+ * (dernière phase) n'a pas de score tracké dans `EtatSessionValeursRemarquables` : tant que
+ * l'exercice n'est pas terminé elle est forcément "courante" (dernière phase active), et une fois
+ * terminé un nouvel exercice démarre (l'état entier est remis à zéro). */
+function calculerSegmentsProgression(etat: EtatSessionValeursRemarquables): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = phase === "quadrant" ? etat.scoreQuadrantExercice : phase === "anglePremierQuadrant" ? etat.scoreAnglePremierQuadrantExercice : null;
+    if (score === null) return "a-venir";
+    const revele = phase === "quadrant" ? etat.quadrantRevele : etat.anglePremierQuadrantRevele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -106,11 +121,7 @@ export function AppValeursRemarquables() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           {etat.phase === "quadrant" ? (

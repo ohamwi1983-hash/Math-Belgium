@@ -30,6 +30,8 @@ import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
 import { calculerEtatActuel } from "./ui/etatActuel";
 import { formatEnonceAffichage, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -43,14 +45,44 @@ function nouvelleSession(): EtatSession {
   return demarrerSession(REGLAGES_DEMO, genererExerciceSecondDegre);
 }
 
-const LIBELLE_PHASE: Record<EtatSession["phase"], string> = {
-  simplification: "Simplification",
-  isolement: "Isolement",
-  developper: "Développement",
-  reconnaissance: "Reconnaissance",
-  champ1: "Calcul",
-  champ2: "Solutions",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (type `Phase` dans `moteur/types.ts`, et les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: EtatSession["phase"][] = ["simplification", "isolement", "developper", "reconnaissance", "champ1", "champ2"];
+
+/** Même heuristique que `calculerRecapitulatif` (`ui/recapitulatif.ts`) et que `terminerEtape`
+ * ci-dessous pour lire `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément.
+ * `champ2` (dernière phase) n'a pas de champ `scoreXxxExercice` propre : elle clôt toujours
+ * immédiatement l'exercice (voir commentaire sur `calculerRecapitulatif`), donc tant qu'elle n'est
+ * pas la phase courante elle est forcément "a-venir". */
+function calculerSegmentsProgression(etat: EtatSession): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "simplification"
+        ? etat.scoreSimplificationExercice
+        : phase === "isolement"
+          ? etat.scoreIsolementExercice
+          : phase === "developper"
+            ? etat.scoreDevelopperExercice
+            : phase === "reconnaissance"
+              ? etat.scoreReconnaissanceExercice
+              : phase === "champ1"
+                ? etat.scoreChampPrincipalExercice
+                : null;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "simplification"
+        ? etat.scoreSimplificationExercice === 0
+        : phase === "isolement"
+          ? etat.isolementRevele
+          : phase === "developper"
+            ? etat.scoreDevelopperExercice === 0
+            : phase === "reconnaissance"
+              ? etat.categorieRevelee
+              : etat.scoreChampPrincipalExercice === 0;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /**
  * Consigne générale — rappelle l'objectif complet de l'exercice, affichée identique sur tous les
@@ -166,11 +198,7 @@ export function AppMethodeRapide() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
         <div className="card-body">
           <p className="prompt-text">{CONSIGNE_GENERALE}</p>
           {phase === "simplification" ? (

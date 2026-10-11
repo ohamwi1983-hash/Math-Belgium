@@ -41,6 +41,9 @@ import { EtapeIntervalleProduit } from "./components/EtapeIntervalleProduit";
 import { calculerRecapitulatifSignesProduit } from "./ui/recapitulatifSignesProduit";
 import { calculerEtatActuelSignesProduit } from "./ui/etatActuelSignesProduit";
 import { formatTermesEnonceSignesProduitLatex } from "./ui/formatSignesProduit";
+import { necessiteSimplification } from "./moteur/simplificationEquation";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE } from "./ui/categorieLabels";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
 import { formatFormeFactoriseeDepuisRacines } from "./ui/formatEquation";
@@ -90,33 +93,106 @@ function exerciceFactice(enonce: Enonce): Exercice {
   };
 }
 
-const LIBELLE_PHASE_FIXE: Partial<Record<PhaseSignesProduit, string>> = {
-  reductionFacteur: "Réduction (facteur à factoriser)",
-  factorisationChamp1: "Factorisation",
-  factorisationChamp2: "Racines (facteur à factoriser)",
-  factorisationFactorisation: "Factorisation (facteur à factoriser)",
-  signeIrreductible: "Signe d'un facteur irréductible",
-  grille: "Tableau de signes",
-  intervalle: "Ensemble-solution",
-};
-
 /**
- * Libellé de la phase courante pour l'indicateur de progression — les phases "racineLineaire" et
- * "methodeFacteur" se répètent désormais une fois par facteur (promptgenerateur5signesProduit.md,
- * points 9-10), numérotées par la position (1-based) du facteur dans `exercice.facteurs` dès qu'il
- * y a plus d'un facteur du type concerné.
+ * Segments de la barre de progression en puces — calculés dynamiquement à partir de
+ * `exercice.facteurs` (jamais une liste statique de phases, contrairement à
+ * AppAnalyseFonction.tsx) : les phases "racineLineaire"/"methodeFacteur"/"signeIrreductible" se
+ * répètent une fois par facteur du type concerné, et "reductionFacteur" (facteur factorisable à
+ * coefficients non réduits)/"factorisationFactorisation" (uniquement si categorie === "cas_general")
+ * n'existent que pour certains exercices — voir le commentaire de `PhaseSignesProduit`
+ * (moteur/typesSignesProduit.ts) et `phasePourFacteur` (moteur/sessionSignesProduit.ts). Chaque
+ * segment reprend EXACTEMENT la même heuristique "revele" que `calculerRecapitulatifSignesProduit`
+ * (ui/recapitulatifSignesProduit.ts) pour la phase correspondante, jamais recalculée différemment.
  */
-function libellePhase(etat: EtatSessionSignesProduit): string {
-  const fixe = LIBELLE_PHASE_FIXE[etat.phase];
-  if (fixe !== undefined) return fixe;
+function calculerSegmentsProgression(etat: EtatSessionSignesProduit): EtatPuceProgression[] {
+  const segments: EtatPuceProgression[] = [];
+  let nbLineaireVus = 0;
+  let nbQuadratiqueVus = 0;
+  let nbIrreductibleVus = 0;
 
-  const nbLineaires = etat.exerciceCourant.facteurs.filter((f) => f.type === "lineaire").length;
-  const nbQuadratiques = etat.exerciceCourant.facteurs.filter((f) => f.type !== "lineaire").length;
+  etat.exerciceCourant.facteurs.forEach((facteur, i) => {
+    if (facteur.type === "lineaire") {
+      const index = nbLineaireVus;
+      nbLineaireVus += 1;
+      if (i > etat.indexFacteurExercice) {
+        segments.push("a-venir");
+      } else if (i === etat.indexFacteurExercice && etat.phase === "racineLineaire") {
+        segments.push("courante");
+      } else {
+        segments.push(etat.scoresRacineLineaireExercice[index] === 0 ? "revele" : "correcte");
+      }
+      return;
+    }
 
-  if (etat.phase === "racineLineaire") {
-    return `Racine (facteur linéaire${nbLineaires > 1 ? ` ${etat.scoresRacineLineaireExercice.length + 1}` : ""})`;
-  }
-  return `Méthode${nbQuadratiques > 1 ? ` (facteur ${etat.scoresMethodeExercice.length + 1})` : ""}`;
+    // Facteur quadratique (factorisable ou irréductible) : la sous-séquence de phases dépend de sa
+    // vraie nature et, pour le facteur factorisable, de sa catégorie et de ses coefficients
+    // initiaux — jamais du choix de l'élève à "methodeFacteur" (même principe que le moteur).
+    const indexQuadratique = nbQuadratiqueVus;
+    nbQuadratiqueVus += 1;
+    const indexIrreductible = facteur.type === "quadratique_irreductible" ? nbIrreductibleVus : -1;
+    if (facteur.type === "quadratique_irreductible") nbIrreductibleVus += 1;
+
+    const reductionApplicable =
+      facteur.type === "quadratique_factorisable" &&
+      (etat.scoreReductionFacteurExercice !== null || necessiteSimplification(facteur.exercice));
+
+    const sousPhases: PhaseSignesProduit[] = [
+      ...(reductionApplicable ? ["reductionFacteur" as const] : []),
+      "methodeFacteur",
+      ...(facteur.type === "quadratique_factorisable"
+        ? facteur.exercice.categorie === "cas_general"
+          ? ["factorisationChamp1" as const, "factorisationChamp2" as const, "factorisationFactorisation" as const]
+          : ["factorisationChamp1" as const, "factorisationChamp2" as const]
+        : ["signeIrreductible" as const]),
+    ];
+
+    const indexSousPhaseCourante =
+      i < etat.indexFacteurExercice ? sousPhases.length : i > etat.indexFacteurExercice ? -1 : sousPhases.indexOf(etat.phase);
+
+    sousPhases.forEach((sousPhase, k) => {
+      if (k > indexSousPhaseCourante) {
+        segments.push("a-venir");
+        return;
+      }
+      if (k === indexSousPhaseCourante && i === etat.indexFacteurExercice) {
+        segments.push("courante");
+        return;
+      }
+      const revele = (() => {
+        switch (sousPhase) {
+          case "reductionFacteur":
+            return etat.scoreReductionFacteurExercice === 0;
+          case "methodeFacteur":
+            return etat.methodeRevelees[indexQuadratique] ?? false;
+          case "factorisationChamp1":
+            return etat.scoreFactorisationChamp1Exercice === 0;
+          case "factorisationChamp2":
+            return etat.scoreFactorisationChamp2Exercice === 0;
+          case "factorisationFactorisation":
+            return etat.scoreFactorisationFactorisationExercice === 0;
+          default:
+            return etat.scoresSigneIrreductibleExercice[indexIrreductible] === 0;
+        }
+      })();
+      segments.push(revele ? "revele" : "correcte");
+    });
+  });
+
+  segments.push(
+    etat.scoreGrilleExercice !== null
+      ? etat.grilleRevelee
+        ? "revele"
+        : "correcte"
+      : etat.phase === "grille"
+        ? "courante"
+        : "a-venir",
+  );
+  // "intervalle" (dernière phase) n'a pas de branche "close" propre : une fois terminée, un nouvel
+  // exercice démarre (l'état entier est remis à zéro) — même principe que "tableauSignes" dans
+  // AppAnalyseFonction.tsx.
+  segments.push(etat.phase === "intervalle" ? "courante" : "a-venir");
+
+  return segments;
 }
 
 /** État tenu en attente dès qu'une SOUS-ÉTAPE notée se termine (bonne réponse, ou tentatives
@@ -261,11 +337,7 @@ export function AppSignesProduit() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{libellePhase(etat)}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           {etat.phase === "racineLineaire" && facteurCourant?.type === "lineaire" ? (

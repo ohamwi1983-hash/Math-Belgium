@@ -61,6 +61,8 @@ import {
 import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee } from "./ui/formatSimplification";
 import { libelleCategorie } from "./ui/categorieLabels";
 import { estSolutionUnique, formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const QUESTION_FACTORISATION = "Quelle est la méthode la plus rapide pour résoudre cette équation ?";
 const QUESTION_FACTORISATION_FRACTION = "Quelle est la méthode la plus rapide pour factoriser ce polynôme ?";
@@ -96,21 +98,88 @@ function nouvelleSession(): EtatSessionEquationRationnelle {
   return demarrerSessionEquationRationnelle(REGLAGES_DEMO, genererExerciceEquationRationnelle);
 }
 
-const LIBELLE_PHASE: Record<PhaseEquationRationnelle, string> = {
-  ce: "Condition d'existence",
-  simplifier: "Simplifier",
-  simplifierReduction: "Réduction (fraction)",
-  simplifierReconnaissance: "Méthode (fraction)",
-  simplifierChamp1: "Factorisation (fraction)",
-  simplifierChamp2: "Racines (fraction)",
-  simplifierFactorisation: "Factorisation (fraction)",
-  simplifierFraction: "Simplification",
-  isolement: "Isolement",
-  reconnaissance: "Méthode",
-  champ1: "Factorisation",
-  champ2: "Solutions",
-  racinesEtrangeres: "Solutions étrangères",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (type `PhaseEquationRationnelle` dans `moteur/typesEquationRationnelle.ts`, et les
+ * branches de `releveRevelePhase`/`terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseEquationRationnelle[] = [
+  "ce",
+  "simplifier",
+  "simplifierReduction",
+  "simplifierReconnaissance",
+  "simplifierChamp1",
+  "simplifierChamp2",
+  "simplifierFactorisation",
+  "simplifierFraction",
+  "isolement",
+  "reconnaissance",
+  "champ1",
+  "champ2",
+  "racinesEtrangeres",
+];
+
+/** Même heuristique que `calculerRecapitulatifEquationRationnelle`
+ * (`ui/recapitulatifEquationRationnelle.ts`) et que `releveRevelePhase` ci-dessus pour lire
+ * `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément. `racinesEtrangeres`
+ * (dernière phase) n'a pas de champ `scoreXxxExercice` persisté au niveau de la session (son score
+ * n'existe que sur le dernier `resultats[...]`, voir `releveRevelePhase`) : tant qu'elle n'est pas
+ * la phase courante elle est forcément "a-venir". */
+function calculerSegmentsProgression(etat: EtatSessionEquationRationnelle): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "ce"
+        ? etat.scoreCEExercice
+        : phase === "simplifier"
+          ? etat.scoreSimplifierExercice
+          : phase === "simplifierReduction"
+            ? etat.scoreSimplifierReductionExercice
+            : phase === "simplifierReconnaissance"
+              ? etat.scoreSimplifierReconnaissanceExercice
+              : phase === "simplifierChamp1"
+                ? etat.scoreSimplifierChamp1Exercice
+                : phase === "simplifierChamp2"
+                  ? etat.scoreSimplifierChamp2Exercice
+                  : phase === "simplifierFactorisation"
+                    ? etat.scoreSimplifierFactorisationExercice
+                    : phase === "simplifierFraction"
+                      ? etat.scoreSimplifierFractionExercice
+                      : phase === "isolement"
+                        ? etat.scoreIsolementExercice
+                        : phase === "reconnaissance"
+                          ? etat.scoreReconnaissanceExercice
+                          : phase === "champ1"
+                            ? etat.scoreChampPrincipalExercice
+                            : phase === "champ2"
+                              ? etat.scoreRacinesExercice
+                              : null;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "ce"
+        ? etat.scoreCEExercice === 0
+        : phase === "simplifier"
+          ? etat.scoreSimplifierExercice === 0
+          : phase === "simplifierReduction"
+            ? etat.scoreSimplifierReductionExercice === 0
+            : phase === "simplifierReconnaissance"
+              ? etat.simplifierCategorieRevelee
+              : phase === "simplifierChamp1"
+                ? etat.scoreSimplifierChamp1Exercice === 0
+                : phase === "simplifierChamp2"
+                  ? etat.scoreSimplifierChamp2Exercice === 0
+                  : phase === "simplifierFactorisation"
+                    ? etat.scoreSimplifierFactorisationExercice === 0
+                    : phase === "simplifierFraction"
+                      ? etat.scoreSimplifierFractionExercice === 0
+                      : phase === "isolement"
+                        ? etat.scoreIsolementExercice === 0
+                        : phase === "reconnaissance"
+                          ? etat.categorieRevelee
+                          : phase === "champ1"
+                            ? etat.scoreChampPrincipalExercice === 0
+                            : etat.scoreRacinesExercice === 0; // champ2
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /**
  * Écrans qui affichent déjà l'équation rationnelle complète comme contenu principal
@@ -326,11 +395,7 @@ export function AppEquationRationnelle() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           {!PHASES_SANS_RAPPEL_SUPPLEMENTAIRE.has(etat.phase) && (

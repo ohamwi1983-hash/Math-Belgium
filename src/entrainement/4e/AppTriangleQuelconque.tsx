@@ -16,6 +16,8 @@ import { EtapeAireTriangleQuelconque } from "./components/EtapeAireTriangleQuelc
 import { calculerRecapitulatifTriangleQuelconque } from "./ui/recapitulatifTriangleQuelconque";
 import { libelleDonneeManquante, valeurAffichageDonneeManquante } from "./ui/formatTriangleQuelconque";
 import { valeurAire } from "./moteur/verificationTriangleQuelconque";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -29,10 +31,23 @@ function nouvelleSession(): EtatSessionTriangleQuelconque {
   return demarrerSessionTriangleQuelconque(REGLAGES_DEMO, genererExerciceTriangleQuelconque);
 }
 
-const LIBELLE_PHASE: Record<PhaseTriangleQuelconque, string> = {
-  donneeManquante: "Donnée manquante",
-  aire: "Aire",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (voir `PhaseTriangleQuelconque`/les branches de `terminerEtape` ci-dessous). */
+const ORDRE_PHASES: PhaseTriangleQuelconque[] = ["donneeManquante", "aire"];
+
+/** Même ternaire que `terminerEtape` (ci-dessous) et `recapitulatifTriangleQuelconque.ts` pour lire
+ * `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément. "aire" (dernière phase)
+ * n'a pas de score tracké dans `EtatSessionTriangleQuelconque` : tant que l'exercice n'est pas
+ * terminé elle est forcément "courante" (dernière phase active), et une fois terminé un nouvel
+ * exercice démarre (l'état entier est remis à zéro). */
+function calculerSegmentsProgression(etat: EtatSessionTriangleQuelconque): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = phase === "donneeManquante" ? etat.scoreDonneeManquanteExercice : null;
+    if (score === null) return "a-venir";
+    return etat.donneeManquanteRevele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -98,11 +113,7 @@ export function AppTriangleQuelconque() {
         <h1 className="app-title">Triangle quelconque</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">
