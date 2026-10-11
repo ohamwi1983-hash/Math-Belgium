@@ -23,6 +23,7 @@ import {
   soumettreReponseTrouverU1,
 } from "./moteur5e/sessionSuiteArithmetique";
 import type { ReponseEquation } from "./moteur5e/sessionSuiteArithmetique";
+import { ordreComplet } from "./moteur5e/typesSuiteArithmetique";
 import type { EtatSessionSuiteArithmetique, PhaseSuiteArithmetique } from "./moteur5e/typesSuiteArithmetique";
 import {
   diagnostiquerEquationComplete,
@@ -40,6 +41,10 @@ import { EtapeCoherenceJugement } from "./components5e/EtapeCoherenceJugement";
 import { EtapePoserEquation } from "./components5e/EtapePoserEquation";
 import { EtapeTermesMultiples } from "./components5e/EtapeTermesMultiples";
 import { formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteArithmetique";
+import { calculerRecapitulatifSuiteArithmetique } from "./ui5e/recapitulatifSuiteArithmetique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 
 type PhaseChampSimple =
@@ -178,6 +183,24 @@ function nouvelleSession(): EtatSessionSuiteArithmetique {
   return demarrerSessionSuiteArithmetique(REGLAGES_DEMO, genererExerciceSuiteArithmetique);
 }
 
+/**
+ * Puces de progression — PAS de `ORDRE_PHASES` statique ici (contrairement à
+ * `AppAnalyseFonction.tsx`) : la séquence RÉELLE de phases dépend de `exercice.famille`/`combo`
+ * (5 familles structurellement disjointes, ordre parfois inversé — voir l'en-tête de
+ * `moteur5e/typesSuiteArithmetique.ts`), donc toujours recalculée via `ordreComplet(exercice)`,
+ * même principe que `App5gen4.tsx` (questions dynamiques). `scoresPartiels[phase]` (jamais
+ * undefined pour une phase déjà close) pilote "correcte"/"revele" avec la même heuristique
+ * `score === 0 ⟺ révélée` que `calculerRecapitulatifSuiteArithmetique`.
+ */
+function calculerSegmentsProgression(etat: EtatSessionSuiteArithmetique): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionSuiteArithmetique;
   revele: boolean;
@@ -236,10 +259,12 @@ export function App5gen14() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites arithmétiques, formule générale et termes</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteArithmetique(etat)} />
           <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleSuiteArithmetique

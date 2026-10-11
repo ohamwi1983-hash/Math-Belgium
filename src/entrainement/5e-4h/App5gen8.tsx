@@ -10,6 +10,7 @@ import {
   soumettreReponseParametresSinusoide,
 } from "./moteur5e/sessionParametresSinusoide";
 import type { EtatSessionParametresSinusoide } from "./moteur5e/typesParametresSinusoide";
+import { ORDRE_PHASES_SINUSOIDE } from "./moteur5e/typesParametresSinusoide";
 import { EtapeParametreSinusoide } from "./components5e/EtapeParametreSinusoide";
 import { formatChampParametreLatex } from "./ui5e/formatParametresSinusoide";
 import { Katex } from "./components/Katex";
@@ -22,6 +23,10 @@ import {
   ciblePeriode,
   diagnostiquerValeurSinusoide,
 } from "./moteur5e/verificationParametresSinusoide";
+import { calculerRecapitulatifParametresSinusoide } from "./ui5e/recapitulatifParametresSinusoide";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -45,6 +50,37 @@ function cibleActuellePourDiagnostic(exercice: ExerciceParametresSinusoide, phas
     case "decalage":
       return cibleDecalage(exercice);
   }
+}
+
+/** Score "partiel" (déjà clos) de `phase`, `null` si pas encore close — "decalage" (5e et dernière
+ * phase de `ORDRE_PHASES_SINUSOIDE`) n'a pas de champ `scoreDecalagePartiel` dédié à la racine de
+ * l'état (toujours la phase COURANTE tant que l'exercice est en cours, jamais "déjà close" —
+ * voir `moteur5e/typesParametresSinusoide.ts`). */
+function scorePartielDeLaPhase(etat: EtatSessionParametresSinusoide, phase: PhaseParametresSinusoide): number | null {
+  switch (phase) {
+    case "amplitude":
+      return etat.scoreAmplitudePartiel;
+    case "phi":
+      return etat.scorePhiPartiel;
+    case "periode":
+      return etat.scorePeriodePartiel;
+    case "frequence":
+      return etat.scoreFrequencePartiel;
+    case "decalage":
+      return null;
+  }
+}
+
+/** Même heuristique `scoreXxxPartiel === 0` que `calculerRecapitulatifParametresSinusoide`
+ * (`ui5e/recapitulatifParametresSinusoide.ts`) — ce générateur n'a pas de booléen `xxxRevele`
+ * dédié par phase (voir la note de ce fichier). */
+function calculerSegmentsProgression(etat: EtatSessionParametresSinusoide): EtatPuceProgression[] {
+  return ORDRE_PHASES_SINUSOIDE.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = scorePartielDeLaPhase(etat, phase);
+    if (score === null) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
@@ -96,10 +132,12 @@ export function App5gen8() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Paramètres d'une fonction sinusoïdale</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FORMES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifParametresSinusoide(etat)} />
           <EtapeParametreSinusoide
             key={etat.phase}
             exercice={exercice}

@@ -54,6 +54,7 @@ import {
   soumettreReponseSysteme,
 } from "./moteur5e/sessionModelisationSinusoide";
 import type { EtatSessionModelisationSinusoide, PhaseModelisationSinusoide } from "./moteur5e/typesModelisationSinusoide";
+import { ordreComplet } from "./moteur5e/typesModelisationSinusoide";
 import type { ReponseBornes, ReponseResolution, ReponseSysteme } from "./moteur5e/sessionModelisationSinusoide";
 import {
   diagnostiquerArgumentResoudre,
@@ -86,6 +87,10 @@ import { EtapeSysteme } from "./components5e/EtapeSysteme";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { formatTermesReponseAttendueModelisationSinusoide } from "./ui5e/formatModelisationSinusoide";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifModelisationSinusoide } from "./ui5e/recapitulatifModelisationSinusoide";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -222,6 +227,19 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Même ternaire que `calculerRecapitulatifModelisationSinusoide` (`scoresPartiels[phase] === 0 ⟺
+ * révélée`) — la séquence RÉELLE de phases dépend de la technique de Phase 1 ET du type de Phase 2
+ * tirés pour cette instance (`ordreComplet(exercice)`, jusqu'à 17 phases possibles — jamais un seul
+ * ordre générique, voir `moteur5e/typesModelisationSinusoide.ts`). */
+function calculerSegmentsProgression(etat: EtatSessionModelisationSinusoide): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase: PhaseModelisationSinusoide) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
+}
+
 export function App5gen13() {
   const [etat, setEtat] = useState<EtatSessionModelisationSinusoide>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
@@ -295,10 +313,12 @@ export function App5gen13() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Modéliser une fonction sinusoïdale en contexte</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_TECHNIQUE_PHASE2} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifModelisationSinusoide(etat)} />
           <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleModelisation

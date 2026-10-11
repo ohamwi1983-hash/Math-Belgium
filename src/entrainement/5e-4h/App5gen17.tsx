@@ -44,6 +44,7 @@ import {
   soumettreReponseTroisMethodes,
   soumettreReponseU64,
 } from "./moteur5e/sessionSuiteClassique";
+import { ordreComplet } from "./moteur5e/typesSuiteClassique";
 import type { EtatSessionSuiteClassique, PhaseSuiteClassique } from "./moteur5e/typesSuiteClassique";
 import {
   diagnostiquerAiresB,
@@ -76,6 +77,10 @@ import { EtapeQCMClassique } from "./components5e/EtapeQCMClassique";
 import { EtapeSuitesFinalesCombinees } from "./components5e/EtapeSuitesFinalesCombinees";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, texteReponseAttendueQCM } from "./ui5e/formatSuiteClassique";
+import { calculerRecapitulatifSuiteClassique } from "./ui5e/recapitulatifSuiteClassique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -140,6 +145,19 @@ const PHASES_CALCULATRICE_LISTE = new Set<PhaseSuiteClassique>([
 
 function nouvelleSession(): EtatSessionSuiteClassique {
   return demarrerSessionSuiteClassique(REGLAGES_DEMO, genererExerciceSuiteClassique);
+}
+
+/** Puces de progression — pas de `ORDRE_PHASES` local ici : celui déjà exporté par
+ * `moteur5e/typesSuiteClassique.ts` (`Record<ScenarioSuiteClassique, PhaseSuiteClassique[]>`) suffit
+ * via `ordreComplet(exercice)`, même principe que 5gen14/5gen15/5gen16. Même heuristique
+ * `score === 0 ⟺ révélée` que `calculerRecapitulatifSuiteClassique`. */
+function calculerSegmentsProgression(etat: EtatSessionSuiteClassique): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 interface TransitionEnAttente {
@@ -361,10 +379,12 @@ export function App5gen17() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes classiques sur les suites</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteClassique(etat)} />
           <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleClassique

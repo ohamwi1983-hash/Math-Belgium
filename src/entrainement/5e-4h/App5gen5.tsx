@@ -123,6 +123,10 @@ import { EtapeSystemeB } from "./components5e/EtapeSystemeB";
 import { EtapeTableauA } from "./components5e/EtapeTableauA";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifProblemeContexte } from "./ui5e/recapitulatifProblemesContexte";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -255,6 +259,109 @@ function reponseAttenduePhase(exercice: ExerciceProblemeContexte, phase: PhasePr
   }
 }
 
+/** Séquence RÉELLE de phases pour l'exercice en cours — 4 formes possibles selon
+ * `scenario`/`combo` (voir `PhaseProblemeContexte`, `moteur5e/typesProblemesContexte.ts`), jamais
+ * un unique `ORDRE_PHASES` fixe comme le gabarit 4e : scénario A/combo de référence (5 écrans),
+ * scénario A/combos réduits (3 écrans), scénario B (4 écrans), scénario C (5 écrans) — même
+ * principe que les 2 variantes d'`AppRelationVectorielle.tsx` (4e). */
+const ORDRE_PHASES_A_CONTENEUR: PhaseProblemeContexte[] = ["tableau", "generalisation", "egaliteAires", "graphique", "justification"];
+const ORDRE_PHASES_A_REDUIT: PhaseProblemeContexte[] = ["generalisationSimple", "intersectionSimple", "extremumSimple"];
+const ORDRE_PHASES_B: PhaseProblemeContexte[] = ["systeme", "resolution", "formule", "evaluation"];
+const ORDRE_PHASES_C: PhaseProblemeContexte[] = ["lecture", "coutMoyen", "reconnaissance", "benefice", "seuil"];
+
+function ordrePhasesPourExercice(exercice: ExerciceProblemeContexte): PhaseProblemeContexte[] {
+  if (exercice.scenario === "A") return exercice.combo === "kInverseXAxCarre" ? ORDRE_PHASES_A_CONTENEUR : ORDRE_PHASES_A_REDUIT;
+  if (exercice.scenario === "B") return ORDRE_PHASES_B;
+  return ORDRE_PHASES_C;
+}
+
+/** Score de la phase `phase` pour l'exercice en cours, `null` si pas encore close — les 4 phases
+ * TERMINALES (`justification`/`extremumSimple`/`evaluation`/`seuil`) n'ont pas de champ
+ * `scoreXxxExercice` dédié à la racine de `EtatSessionProblemeContexte` (seulement dans
+ * `resultats`, une fois l'exercice ENTIER clos) : tant que l'exercice est en cours, elles ne sont
+ * donc jamais "closes" au sens de cette fonction (`null`), ce qui est correct puisqu'une phase
+ * terminale est forcément la phase COURANTE jusqu'à la fin de l'exercice. */
+function scoreDeLaPhaseExercice(etat: EtatSessionProblemeContexte, phase: PhaseProblemeContexte): number | null {
+  switch (phase) {
+    case "tableau":
+      return etat.scoreTableauExercice;
+    case "generalisation":
+      return etat.scoreGeneralisationExercice;
+    case "egaliteAires":
+      return etat.scoreEgaliteAiresExercice;
+    case "graphique":
+      return etat.scoreGraphiqueExercice;
+    case "generalisationSimple":
+      return etat.scoreGeneralisationSimpleExercice;
+    case "intersectionSimple":
+      return etat.scoreIntersectionSimpleExercice;
+    case "systeme":
+      return etat.scoreSystemeExercice;
+    case "resolution":
+      return etat.scoreResolutionExercice;
+    case "formule":
+      return etat.scoreFormuleExercice;
+    case "lecture":
+      return etat.scoreLectureExercice;
+    case "coutMoyen":
+      return etat.scoreCoutMoyenExercice;
+    case "reconnaissance":
+      return etat.scoreReconnaissanceExercice;
+    case "benefice":
+      return etat.scoreBeneficeExercice;
+    case "justification":
+    case "extremumSimple":
+    case "evaluation":
+    case "seuil":
+      return null;
+  }
+}
+
+/** Même ternaire que `releveDeLaPhase` (ci-dessus) pour lire le booléen `xxxRevele` FIXE de la
+ * phase — jamais pour une phase terminale (toujours `false`, lue seulement via `scoreDeLaPhaseExercice`
+ * ci-dessus qui renvoie déjà `null` pour elles, donc jamais appelée en pratique). */
+function phaseExerciceRevelee(etat: EtatSessionProblemeContexte, phase: PhaseProblemeContexte): boolean {
+  switch (phase) {
+    case "tableau":
+      return etat.tableauRevele;
+    case "generalisation":
+      return etat.generalisationRevele;
+    case "egaliteAires":
+      return etat.egaliteAiresRevele;
+    case "graphique":
+      return etat.graphiqueRevele;
+    case "generalisationSimple":
+      return etat.generalisationSimpleRevele;
+    case "intersectionSimple":
+      return etat.intersectionSimpleRevele;
+    case "systeme":
+      return etat.systemeRevele;
+    case "resolution":
+      return etat.resolutionRevele;
+    case "formule":
+      return etat.formuleRevele;
+    case "lecture":
+      return etat.lectureRevele;
+    case "coutMoyen":
+      return etat.coutMoyenRevele;
+    case "reconnaissance":
+      return etat.reconnaissanceRevele;
+    case "benefice":
+      return etat.beneficeRevele;
+    default:
+      return false;
+  }
+}
+
+function calculerSegmentsProgression(etat: EtatSessionProblemeContexte): EtatPuceProgression[] {
+  return ordrePhasesPourExercice(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = scoreDeLaPhaseExercice(etat, phase);
+    if (score === null) return "a-venir";
+    return phaseExerciceRevelee(etat, phase) ? "revele" : "correcte";
+  });
+}
+
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
  * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
 interface TransitionEnAttente {
@@ -305,10 +412,12 @@ export function App5gen5() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes-contexte</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_SCENARIO} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifProblemeContexte(etat)} />
           {exercice.scenario === "A" && exercice.combo === "kInverseXAxCarre" && etat.phase === "tableau" && (
             <EtapeTableauA
               exercice={exercice}

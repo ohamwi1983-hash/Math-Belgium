@@ -7,7 +7,7 @@ import {
   soumettreReponseCompleterLimites,
   soumettreReponseNommerAsymptotes,
 } from "./moteur5e/sessionLectureGraphiqueLimites";
-import { listeAsymptotes, listeComportements } from "./moteur5e/typesLectureGraphiqueLimites";
+import { listeAsymptotes, listeComportements, ordreComplet } from "./moteur5e/typesLectureGraphiqueLimites";
 import type { EtatSessionLectureGraphiqueLimites, PhaseLectureGraphiqueLimites } from "./moteur5e/typesLectureGraphiqueLimites";
 import { diagnostiquerCibleAsymptote, diagnostiquerCibleComportement } from "./moteur5e/verificationLectureGraphiqueLimites";
 import type { ExerciceLectureGraphiqueLimites } from "./core5e/lectureGraphiqueLimites.types";
@@ -16,6 +16,10 @@ import { EtapeEquationsAsymptotes } from "./components5e/EtapeEquationsAsymptote
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { formatReponseAttenduePhaseLatex } from "./ui5e/formatLectureGraphiqueLimites";
+import { calculerRecapitulatifLectureGraphiqueLimites } from "./ui5e/recapitulatifLectureGraphiqueLimites";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -30,6 +34,21 @@ function nouvelleSession(): EtatSessionLectureGraphiqueLimites {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionLectureGraphiqueLimites;
   revele: boolean;
+}
+
+/** Une puce par phase de `ordreComplet(etat.exerciceCourant)` — "nommerAsymptotes" est SAUTÉE
+ * quand le tirage n'a aucune asymptote à nommer, jamais un `ORDRE_PHASES` fixe à 2 éléments
+ * reconstitué à la main : même source que `calculerRecapitulatifLectureGraphiqueLimites`.
+ * "courante" pour `etat.phase`, "correcte"/"revele" pour les phases déjà closes
+ * (`scoresPartiels[phase]`, 0 ⟺ révélée — exact ici, 5gen22 n'a pas de mécanisme d'aide), "a-venir"
+ * au-delà. */
+function calculerSegmentsProgression(etat: EtatSessionLectureGraphiqueLimites): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen22() {
@@ -77,6 +96,7 @@ export function App5gen22() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites et asymptotes — lecture graphique</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev
         options={CATALOGUE_FAMILLES}
@@ -87,6 +107,7 @@ export function App5gen22() {
       />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifLectureGraphiqueLimites(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={phase}

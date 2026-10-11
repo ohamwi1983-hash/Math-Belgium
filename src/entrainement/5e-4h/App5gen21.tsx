@@ -14,12 +14,17 @@ import {
 } from "./moteur5e/sessionAsymptoteOblique";
 import type { ReponseDiviserEuclidienne } from "./moteur5e/sessionAsymptoteOblique";
 import type { EtatSessionAsymptoteOblique, PhaseAsymptoteOblique } from "./moteur5e/typesAsymptoteOblique";
+import { ordreComplet } from "./moteur5e/typesAsymptoteOblique";
 import { diagnostiquerFormeDeveloppee, diagnostiquerNombre, diagnostiquerQuotient } from "./moteur5e/verificationAsymptoteOblique";
 import type { ExerciceAsymptoteOblique } from "./core5e/asymptoteOblique.types";
 import { EtapeChampLibreAsymptote } from "./components5e/EtapeChampLibreAsymptote";
 import { EtapeDiviserEuclidienne } from "./components5e/EtapeDiviserEuclidienne";
 import { Katex } from "./components/Katex";
 import { formatReponseAttenduePhaseLatex } from "./ui5e/formatAsymptoteOblique";
+import { calculerRecapitulatifAsymptoteOblique } from "./ui5e/recapitulatifAsymptoteOblique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -41,6 +46,20 @@ function reponseAttendueAsymptoteOblique(exercice: ExerciceAsymptoteOblique, pha
 interface TransitionEnAttente {
   etatSuivant: EtatSessionAsymptoteOblique;
   revele: boolean;
+}
+
+/** Une puce par phase de `ordreComplet(etat.exerciceCourant)` — séquence RÉELLE propre à la
+ * variante du tirage ("divisionEuclidienne"/"viaLimites"), jamais un `ORDRE_PHASES` fixe
+ * reconstitué à la main : même source que `calculerRecapitulatifAsymptoteOblique`. "courante" pour
+ * `etat.phase`, "correcte"/"revele" pour les phases déjà closes (`scoresPartiels[phase]`, 0 ⟺
+ * révélée), "a-venir" au-delà. */
+function calculerSegmentsProgression(etat: EtatSessionAsymptoteOblique): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen21() {
@@ -87,10 +106,12 @@ export function App5gen21() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Asymptote oblique</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifAsymptoteOblique(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={phase}

@@ -15,6 +15,7 @@ import {
   soumettreReponseVitessePointe,
 } from "./moteur5e/sessionVitessePosition";
 import type { EcranVitessePosition, EtatSessionVitessePosition } from "./moteur5e/typesVitessePosition";
+import { ordreEcransVitessePosition } from "./moteur5e/typesVitessePosition";
 import {
   diagnostiquerConversionKmh,
   diagnostiquerDeriveeVitesse,
@@ -27,6 +28,10 @@ import {
 import { EtapeChampVitessePosition } from "./components5e/EtapeChampVitessePosition";
 import { EtapeResoudreVitessePosition } from "./components5e/EtapeResoudreVitessePosition";
 import { formatReponseAttenduePhaseLatex } from "./ui5e/formatVitessePosition";
+import { calculerRecapitulatifVitessePosition } from "./ui5e/recapitulatifVitessePosition";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
@@ -41,6 +46,18 @@ function nouvelleSession(): EtatSessionVitessePosition {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionVitessePosition;
   revele: boolean;
+}
+
+/** Même heuristique que `calculerRecapitulatifVitessePosition` (`scoresPartiels[ecran] === 0 ⟺
+ * révélée`) — `ordreEcransVitessePosition(exercice)` donne la séquence RÉELLE (5 écrans pour la
+ * variante "A", 6 pour "B", fixée dès le tirage). */
+function calculerSegmentsProgression(etat: EtatSessionVitessePosition): EtatPuceProgression[] {
+  return ordreEcransVitessePosition(etat.exerciceCourant).map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen35() {
@@ -92,10 +109,12 @@ export function App5gen35() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Vitesse et position</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifVitessePosition(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={etat.phase}

@@ -24,6 +24,10 @@ import { EtapeReconnaissanceFonctionDerivee } from "./components5e/EtapeReconnai
 import { EtapeDecomposerFonctionDerivee } from "./components5e/EtapeDecomposerFonctionDerivee";
 import { EtapeCalculerFonctionDerivee } from "./components5e/EtapeCalculerFonctionDerivee";
 import { formatReponseAttendueCalculerLatex, formatTermesReponseAttendueDecomposerLatex, texteReponseAttendueReconnaissance } from "./ui5e/formatFonctionDerivee";
+import { calculerRecapitulatifFonctionDerivee } from "./ui5e/recapitulatifFonctionDerivee";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
@@ -53,6 +57,25 @@ function reponseAttendueFonctionDerivee(exercice: ExerciceFonctionDerivee, phase
 interface TransitionEnAttente {
   etatSuivant: EtatSessionFonctionDerivee;
   revele: boolean;
+}
+
+/** Séquence RÉELLE d'écrans pour CET exercice — "decomposer" est absent quand la famille est
+ * "reglebase" (`exercice.famille` fixe cela dès le tirage, voir `typesFonctionDerivee.ts`) ; connu
+ * dès le départ, contrairement à `etat.typeRetenu` (encore `null` tant que "reconnaissance" n'est
+ * pas close). */
+function ordreEcransReels(exercice: ExerciceFonctionDerivee): ("reconnaissance" | "decomposer" | "calculer")[] {
+  return exercice.famille === "reglebase" ? ["reconnaissance", "calculer"] : ["reconnaissance", "decomposer", "calculer"];
+}
+
+/** Même heuristique que `calculerRecapitulatifFonctionDerivee` (`scoresPartiels[ecran] === 0 ⟺
+ * révélée`). */
+function calculerSegmentsProgression(etat: EtatSessionFonctionDerivee): EtatPuceProgression[] {
+  return ordreEcransReels(etat.exerciceCourant).map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen27() {
@@ -98,10 +121,12 @@ export function App5gen27() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Fonction dérivée</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifFonctionDerivee(etat)} />
           <EcranCourant
             exercice={exercice}
             etat={etat}

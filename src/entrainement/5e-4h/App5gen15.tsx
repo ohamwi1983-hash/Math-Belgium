@@ -35,6 +35,7 @@ import {
   soumettreReponseTrouverU1B2,
 } from "./moteur5e/sessionSuiteGeometrique";
 import type { ReponseEquation } from "./moteur5e/sessionSuiteGeometrique";
+import { ordreComplet } from "./moteur5e/typesSuiteGeometrique";
 import type { EtatSessionSuiteGeometrique, PhaseSuiteGeometrique } from "./moteur5e/typesSuiteGeometrique";
 import {
   diagnostiquerEquationComplete,
@@ -66,6 +67,10 @@ import { EtapeTermesMultiplesSuiteGeometrique } from "./components5e/EtapeTermes
 import { EtapeTrouverQ } from "./components5e/EtapeTrouverQ";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { formatTermesReponseAttendueSuiteGeometrique } from "./ui5e/formatSuiteGeometrique";
+import { calculerRecapitulatifSuiteGeometrique } from "./ui5e/recapitulatifSuiteGeometrique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -242,6 +247,19 @@ function nouvelleSession(): EtatSessionSuiteGeometrique {
   return demarrerSessionSuiteGeometrique(REGLAGES_DEMO, genererExerciceSuiteGeometrique);
 }
 
+/** Puces de progression — pas de `ORDRE_PHASES` statique (même raison que 5gen14) : la séquence
+ * réelle dépend de `exercice.famille`/`combo`/`statutQ` (branches B1/B2 dupliquées), donc toujours
+ * recalculée via `ordreComplet(exercice)`. Même heuristique `score === 0 ⟺ révélée` que
+ * `calculerRecapitulatifSuiteGeometrique`. */
+function calculerSegmentsProgression(etat: EtatSessionSuiteGeometrique): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
+}
+
 interface TransitionEnAttente {
   etatSuivant: EtatSessionSuiteGeometrique;
   revele: boolean;
@@ -375,10 +393,12 @@ export function App5gen15() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites géométriques, formule générale et termes</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteGeometrique(etat)} />
           <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
                 <EtapeChampSimpleSuiteGeometrique

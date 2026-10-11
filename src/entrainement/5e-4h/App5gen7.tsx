@@ -32,6 +32,10 @@ import {
   formatSecteurMultiPasAttendueLatex,
 } from "./ui5e/formatPolygonesArcsSecteurs";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifPolygonesArcsSecteurs } from "./ui5e/recapitulatifPolygonesArcsSecteurs";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -85,6 +89,47 @@ function reponseAttenduePhase(exercice: ExercicePolygonesArcsSecteurs, phase: Ph
   }
 }
 
+/** Séquence RÉELLE des écrans traversés par CET exercice (3 à 5 écrans selon la présence des 2
+ * écrans optionnels) — même ordre que `phaseApres` (`moteur5e/typesPolygonesArcsSecteurs.ts`),
+ * jamais un unique `ORDRE_PHASES` fixe (2 écrans optionnels indépendants l'un de l'autre, même
+ * esprit que les 2 variantes d'`AppRelationVectorielle.tsx`, 4e). */
+function sequenceDesPhases(exercice: ExercicePolygonesArcsSecteurs): PhasePolygonesArcsSecteurs[] {
+  const sequence: PhasePolygonesArcsSecteurs[] = ["cercleEntier", "arcElementaire"];
+  if (exercice.arcMultiPas !== null) sequence.push("arcMultiPas");
+  sequence.push("secteurElementaire");
+  if (exercice.secteurMultiPas !== null) sequence.push("secteurMultiPas");
+  return sequence;
+}
+
+/** Même ternaire que `releveDeLaPhase` (ci-dessus) pour lire `scoreXxxExercice`/`xxxRevele` —
+ * jamais une valeur recalculée séparément. "secteurMultiPas" (toujours terminal quand présent,
+ * voir `transitionApresEcran`, `moteur5e/sessionPolygonesArcsSecteurs.ts`) n'a pas de champ
+ * `scoreSecteurMultiPasExercice` à la racine — jamais atteint ici puisque la 1re garde
+ * (`phase === etat.phase`) le capture déjà comme "courante" tant que l'exercice est en cours. */
+function calculerSegmentsProgression(etat: EtatSessionPolygonesArcsSecteurs): EtatPuceProgression[] {
+  return sequenceDesPhases(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "cercleEntier"
+        ? etat.scoreCercleEntierExercice
+        : phase === "arcElementaire"
+          ? etat.scoreArcElementaireExercice
+          : phase === "arcMultiPas"
+            ? etat.scoreArcMultiPasExercice
+            : etat.scoreSecteurElementaireExercice;
+    if (score === null) return "a-venir";
+    const revele =
+      phase === "cercleEntier"
+        ? etat.cercleEntierRevele
+        : phase === "arcElementaire"
+          ? etat.arcElementaireRevele
+          : phase === "arcMultiPas"
+            ? etat.arcMultiPasRevele
+            : etat.secteurElementaireRevele;
+    return revele ? "revele" : "correcte";
+  });
+}
+
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
  * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
 interface TransitionEnAttente {
@@ -135,10 +180,12 @@ export function App5gen7() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Polygones, arcs et secteurs</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_PRESENCE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifPolygonesArcsSecteurs(etat)} />
           {etat.phase === "cercleEntier" ? (
             <EtapeCercleEntier
               exercice={exercice}

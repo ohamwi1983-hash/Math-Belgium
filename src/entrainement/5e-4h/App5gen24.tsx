@@ -21,6 +21,7 @@ import {
   soumettreReponseTypeLimite,
 } from "./moteur5e/sessionEtudeComplete";
 import type { EtatSessionEtudeComplete, PhaseEtudeComplete } from "./moteur5e/typesEtudeComplete";
+import { ordreComplet } from "./moteur5e/typesEtudeComplete";
 import {
   diagnostiquerCasSpecial,
   diagnostiquerEnsembleEquationsAV,
@@ -53,6 +54,10 @@ import { EtapeConclusionPointVideEtudeComplete } from "./components5e/EtapeConcl
 import { EtapeListeNombresEtudeComplete } from "./components5e/EtapeListeNombresEtudeComplete";
 import { EtapeTypeLimiteEtudeComplete } from "./components5e/EtapeTypeLimiteEtudeComplete";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifEtudeComplete } from "./ui5e/recapitulatifEtudeComplete";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -80,6 +85,21 @@ function reponseAttendueEtudeComplete(exercice: ExerciceEtudeComplete, phase: Ph
 interface TransitionEnAttente {
   etatSuivant: EtatSessionEtudeComplete;
   revele: boolean;
+}
+
+/** Une puce par phase de `ordreComplet(etat.exerciceCourant)` — pipeline linéaire à longueur
+ * VARIABLE (1/2 exclusions, point vide optionnel, coefficient directeur optionnel, cas spécial
+ * optionnel, ou la seule phase "constructionInverse" pour la variante bonus), jamais un
+ * `ORDRE_PHASES` fixe reconstitué à la main : même source que `calculerRecapitulatifEtudeComplete`.
+ * "courante" pour `etat.phase`, "correcte"/"revele" pour les phases déjà closes
+ * (`scoresPartiels[phase]`, 0 ⟺ révélée), "a-venir" au-delà. */
+function calculerSegmentsProgression(etat: EtatSessionEtudeComplete): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen24() {
@@ -126,10 +146,12 @@ export function App5gen24() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude complète</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifEtudeComplete(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={phase}

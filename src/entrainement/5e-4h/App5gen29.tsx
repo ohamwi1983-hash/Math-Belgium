@@ -16,6 +16,7 @@ import {
   soumettreReponseTableauFSeconde,
 } from "./moteur5e/sessionEtudeLocale";
 import type { EcranEtudeLocale, EtatSessionEtudeLocale } from "./moteur5e/typesEtudeLocale";
+import { ordreEcransEtudeLocale } from "./moteur5e/typesEtudeLocale";
 import {
   diagnostiquerChampParmiCibles,
   racinesFPrimeNumeriques,
@@ -32,6 +33,8 @@ import { EtapeTableauEtudeLocale } from "./components5e/EtapeTableauEtudeLocale"
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import {
   formatEnteteColonnesTableau,
   formatReponseAttenduePhaseLatex,
@@ -79,6 +82,23 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Puces de progression — séquence RÉELLEMENT parcourue par CET exercice (`ordreEcransEtudeLocale`,
+ * 2 à 7 écrans selon `exercice.type`/`exercice.niveau`/le nombre de vrais extremums-PI — jamais la
+ * liste complète des 7 écrans possibles, "domaine"/"resoudreFSeconde"/"tableauFSeconde"/"inflexions"
+ * étant souvent sautés). Aucun booléen `xxxRevele` dédié par écran côté session : `scoresPartiels`
+ * (`moteur5e/typesEtudeLocale.ts`/`sessionEtudeLocale.ts`) garde le score de chaque écran déjà clos
+ * de l'exercice courant (remis à `{}` au prochain exercice) — heuristique `score === 0 ⟺ révélée`
+ * (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand
+ * l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e). */
+function calculerSegmentsProgression(etat: EtatSessionEtudeLocale): EtatPuceProgression[] {
+  return ordreEcransEtudeLocale(etat.exerciceCourant).map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
+}
+
 export function App5gen29() {
   const [etat, setEtat] = useState<EtatSessionEtudeLocale>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
@@ -122,6 +142,7 @@ export function App5gen29() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude locale (extremums et points critiques)</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">

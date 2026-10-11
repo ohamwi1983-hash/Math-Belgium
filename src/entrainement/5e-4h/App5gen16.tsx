@@ -12,6 +12,7 @@ import {
   soumettreReponseClassifierQuelconque,
   soumettreReponseDiviserQuelconque,
 } from "./moteur5e/sessionConvergenceSuites";
+import { ordreComplet } from "./moteur5e/typesConvergenceSuites";
 import type { EtatSessionConvergenceSuite, PhaseConvergenceSuite } from "./moteur5e/typesConvergenceSuites";
 import { diagnostiquerClassifierQuelconque, diagnostiquerDiviserQuelconque } from "./moteur5e/verificationConvergenceSuites";
 import { diagnostiquerNombre } from "./moteur5e/verificationSuiteArithmetique";
@@ -20,12 +21,29 @@ import { formatExpressionDiviseeLatex, libelleClassificationAttendue, texteAideN
 import { EtapeClassificationConvergence } from "./components5e/EtapeClassificationConvergence";
 import { EtapeDiviserQuelconque } from "./components5e/EtapeDiviserQuelconque";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
+import { calculerRecapitulatifConvergenceSuite } from "./ui5e/recapitulatifConvergenceSuites";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionConvergenceSuite {
   return demarrerSessionConvergenceSuite(REGLAGES_DEMO, genererExerciceConvergenceSuite);
+}
+
+/** Puces de progression — pas de `ORDRE_PHASES` statique : la séquence réelle dépend de
+ * `exercice.variante` (1 écran pour "arithmetique"/"geometrique", 2 pour "quelconque"), toujours
+ * recalculée via `ordreComplet(exercice)` (même principe que 5gen14/5gen15). Même heuristique
+ * `score === 0 ⟺ révélée` que `calculerRecapitulatifConvergenceSuite`. */
+function calculerSegmentsProgression(etat: EtatSessionConvergenceSuite): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 interface TransitionEnAttente {
@@ -95,10 +113,12 @@ export function App5gen16() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Convergence et divergence des suites</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifConvergenceSuite(etat)} />
           <>
               {phase === "classificationArithmetique" && (
                 <EtapeClassificationConvergence

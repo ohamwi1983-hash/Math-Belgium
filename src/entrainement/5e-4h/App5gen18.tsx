@@ -10,7 +10,7 @@ import {
   soumettreReponseConclusion,
   soumettreReponseTableau,
 } from "./moteur5e/sessionComparaisonSuites";
-import type { EtatSessionComparaisonSuites } from "./moteur5e/typesComparaisonSuites";
+import type { EtatSessionComparaisonSuites, PhaseComparaisonSuites } from "./moteur5e/typesComparaisonSuites";
 import {
   diagnostiquerCelluleTableau,
   diagnostiquerConclusion,
@@ -24,6 +24,8 @@ import { CalculatriceScientifique } from "./components5e/CalculatriceScientifiqu
 import { formatConclusionNLatex, formatTraductionAttendueTexte } from "./ui5e/formatComparaisonSuites";
 import { Katex } from "./components/Katex";
 import { TableComparaisonRecap } from "./components5e/TableComparaisonRecap";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -34,6 +36,26 @@ function nouvelleSession(): EtatSessionComparaisonSuites {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionComparaisonSuites;
   revele: boolean;
+}
+
+/** Ordre d'affichage des puces de progression — séquence FIXE à 2 écrans (`phaseApres`,
+ * `moteur5e/typesComparaisonSuites.ts`) : "tableau" puis "conclusion", identique pour les 3 familles. */
+const ORDRE_PHASES: PhaseComparaisonSuites[] = ["tableau", "conclusion"];
+
+/** Aucun booléen dédié `tableauRevele`/`conclusionRevele` ni `scoreTableauExercice` propre côté
+ * session (seul `derniereEtapeRevelee`, qui se réécrit à chaque clôture de phase, et
+ * `scoreTableauPartiel`, qui ne survit que jusqu'à la fin de l'exercice courant — voir
+ * `sessionComparaisonSuites.ts`) : heuristique `score === 0 ⟺ révélée` (`soumettreEtapeTentatives`,
+ * `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand l'étape est révélée), même
+ * convention que `AppMethodeRapide.tsx` (4e). "conclusion" (dernière phase) clôture toujours
+ * l'exercice : jamais de champ de score qui lui survivrait une fois la phase quittée, donc toujours
+ * "courante" ou "a-venir", jamais "revele"/"correcte" avant la fin. */
+function calculerSegmentsProgression(etat: EtatSessionComparaisonSuites): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    if (phase !== "tableau" || etat.scoreTableauPartiel === null) return "a-venir";
+    return etat.scoreTableauPartiel === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen18() {
@@ -86,6 +108,7 @@ export function App5gen18() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Comparaison numérique de deux suites</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">

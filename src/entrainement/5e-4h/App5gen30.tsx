@@ -14,6 +14,7 @@ import {
   soumettreReponseTableauFSeconde,
 } from "./moteur5e/sessionLectureGraphiqueDerivees";
 import type { EcranLectureGraphiqueDerivees, EtatSessionLectureGraphiqueDerivees } from "./moteur5e/typesLectureGraphiqueDerivees";
+import { ordreEcransLectureGraphiqueDerivees } from "./moteur5e/typesLectureGraphiqueDerivees";
 import { diagnostiquerCibleAsymptote, listeAsymptotes } from "./moteur5e/verificationLectureGraphiqueDerivees";
 import { diagnostiquerChampParmiCiblesExtremum, diagnostiquerChampParmiCiblesInflexion } from "./moteur5e/verificationLectureGraphiqueDerivees";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "./moteur5e/verificationLectureGraphiqueDerivees";
@@ -24,6 +25,8 @@ import { EtapeChampsLectureGraphiqueDerivees } from "./components5e/EtapeChampsL
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import {
   formatEnteteColonnesTableauFPrime,
   formatEnteteColonnesTableauFSeconde,
@@ -65,6 +68,23 @@ function reponseAttenduePhase(exercice: ExerciceLectureGraphiqueDerivees, phase:
 interface TransitionEnAttente {
   etatSuivant: EtatSessionLectureGraphiqueDerivees;
   revele: boolean;
+}
+
+/** Puces de progression — séquence RÉELLEMENT parcourue par CET exercice
+ * (`ordreEcransLectureGraphiqueDerivees`, 2 à 5 écrans selon les asymptotes/extrema/PI
+ * effectivement présents — jamais la liste complète des 5 écrans possibles). Aucun booléen
+ * `xxxRevele` dédié par écran côté session : `scoresPartiels`
+ * (`moteur5e/typesLectureGraphiqueDerivees.ts`/`sessionLectureGraphiqueDerivees.ts`) garde le score
+ * de chaque écran déjà clos de l'exercice courant (remis à `{}` au prochain exercice) — heuristique
+ * `score === 0 ⟺ révélée` (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0
+ * exactement quand l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e). */
+function calculerSegmentsProgression(etat: EtatSessionLectureGraphiqueDerivees): EtatPuceProgression[] {
+  return ordreEcransLectureGraphiqueDerivees(etat.exerciceCourant).map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen30() {
@@ -110,6 +130,7 @@ export function App5gen30() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Lecture graphique — dérivées et applications</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">

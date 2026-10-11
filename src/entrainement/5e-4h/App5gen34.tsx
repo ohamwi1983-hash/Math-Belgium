@@ -12,6 +12,7 @@ import {
   soumettreReponseValeursBornes,
   soumettreReponseValeursExtremumsBorne,
 } from "./moteur5e/sessionExtremaBornes";
+import { ORDRE_ECRANS_EXTREMA_BORNES } from "./moteur5e/typesExtremaBornes";
 import type { EcranExtremaBornes, EtatSessionExtremaBornes } from "./moteur5e/typesExtremaBornes";
 import {
   candidatsComparaisonBorne,
@@ -32,6 +33,8 @@ import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { formatReponseAttenduePhaseLatex, labelsChampsBornes, labelsChampsExtremums, placeholdersChampsBornes, placeholdersChampsExtremums } from "./ui5e/formatExtremaBornes";
 import type { ReactNode } from "react";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -64,6 +67,22 @@ function reponseAttendueEcran(exercice: EtatSessionExtremaBornes["exerciceCouran
 interface TransitionEnAttente {
   etatSuivant: EtatSessionExtremaBornes;
   revele: boolean;
+}
+
+/** Ordre d'affichage des puces de progression — séquence FIXE à 5 écrans
+ * (`ORDRE_ECRANS_EXTREMA_BORNES`, `moteur5e/typesExtremaBornes.ts`), jamais de saut pour ce
+ * générateur (contrairement à 5gen29/30/31). Aucun booléen `xxxRevele` dédié par écran côté
+ * session : `scoresPartiels` garde le score de chaque écran déjà clos de l'exercice courant (remis
+ * à `{}` au prochain exercice) — heuristique `score === 0 ⟺ révélée` (`soumettreEtapeTentatives`,
+ * `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand l'écran est révélé), même
+ * convention que `AppMethodeRapide.tsx` (4e). */
+function calculerSegmentsProgression(etat: EtatSessionExtremaBornes): EtatPuceProgression[] {
+  return ORDRE_ECRANS_EXTREMA_BORNES.map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen34() {
@@ -109,6 +128,7 @@ export function App5gen34() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Extrema en contexte borné</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">

@@ -16,11 +16,16 @@ import {
   soumettreReponseArcSecteur,
 } from "./moteur5e/sessionArcsSecteurs";
 import type { EtatSessionArcSecteur, PhaseArcSecteur } from "./moteur5e/typesArcsSecteurs";
+import { quantitesManquantes } from "./moteur5e/typesArcsSecteurs";
 import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteurs";
 import { EtapeConversionArcSecteur } from "./components5e/EtapeConversionArcSecteur";
 import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur";
 import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex } from "./ui5e/formatArcsSecteurs";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifArcSecteur } from "./ui5e/recapitulatifArcSecteur";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -47,6 +52,20 @@ function releveDeLaPhase(phase: PhaseArcSecteur, nouvelEtat: EtatSessionArcSecte
 function reponseAttenduePhase(exercice: ExerciceArcSecteur, phase: PhaseArcSecteur): ReactNode {
   if (exercice.mode === "conversion") return <Katex expression={formatValeurCibleConversionLatex(exercice)} />;
   return <Katex expression={formatValeurQuantiteLatex(phase as QuantiteArcSecteur, exercice)} />;
+}
+
+/** Une puce par quantité manquante (mode "deuxVersTrois", séquence dynamique — voir
+ * `quantitesManquantes`) — une seule puce toujours "courante" pour le mode "conversion" (unique
+ * écran, jamais de séquence à proprement parler). */
+function calculerSegmentsProgression(etat: EtatSessionArcSecteur): EtatPuceProgression[] {
+  const exercice = etat.exerciceCourant;
+  if (exercice.mode === "conversion") return ["courante"];
+  return quantitesManquantes(exercice).map((quantite) => {
+    if (quantite === etat.phase) return "courante";
+    const revele = etat.revelesPartiels[quantite];
+    if (revele === undefined) return "a-venir";
+    return revele ? "revele" : "correcte";
+  });
 }
 
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
@@ -98,10 +117,12 @@ export function App5gen6() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Arcs et secteurs</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_MODE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifArcSecteur(etat)} />
           {exercice.mode === "deuxVersTrois" && (
             <EtapeQuantiteArcSecteur
               key={etat.phase}

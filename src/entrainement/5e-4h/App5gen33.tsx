@@ -24,7 +24,7 @@ import {
   soumettreReponseTableauSigneBenefice,
 } from "./moteur5e/sessionContexteEconomique";
 import type { EcranContexteEconomique, EtatSessionContexteEconomique } from "./moteur5e/typesContexteEconomique";
-import { indexIteration } from "./moteur5e/typesContexteEconomique";
+import { indexIteration, ordreEcransContexteEconomique } from "./moteur5e/typesContexteEconomique";
 import {
   diagnostiquerBeneficeDerivee,
   diagnostiquerBeneficeFormule,
@@ -44,6 +44,10 @@ import {
   diagnostiquerRecetteTotale,
 } from "./moteur5e/verificationContexteEconomique";
 import { formatReponseAttenduePhaseLatex, PRECISION_ECART_POURCENT, precisionRacineApprochee } from "./ui5e/formatContexteEconomique";
+import { calculerRecapitulatifContexteEconomique } from "./ui5e/recapitulatifContexteEconomique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { EtapeChampsLibresCE } from "./components5e/EtapeChampsLibresCE";
@@ -65,6 +69,18 @@ function nouvelleSession(): EtatSessionContexteEconomique {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionContexteEconomique;
   revele: boolean;
+}
+
+/** Même heuristique que `calculerRecapitulatifContexteEconomique` (`scoresPartiels[ecran] === 0 ⟺
+ * révélée`) — `ordreEcransContexteEconomique(exercice)` donne la séquence RÉELLE (5 écrans pour la
+ * famille "A", 8 pour "B", 6 pour le bonus, fixée dès le tirage). */
+function calculerSegmentsProgression(etat: EtatSessionContexteEconomique): EtatPuceProgression[] {
+  return ordreEcransContexteEconomique(etat.exerciceCourant).map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen33() {
@@ -116,10 +132,12 @@ export function App5gen33() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Contexte économique</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifContexteEconomique(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={etat.phase}

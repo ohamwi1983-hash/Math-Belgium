@@ -21,12 +21,17 @@ import {
   diagnostiquerPoserEquationExtremum,
   diagnostiquerSolutionsExtremum,
 } from "./moteur5e/verificationExtremumsSinusoide";
-import type { EtatSessionExtremumsSinusoide } from "./moteur5e/typesExtremumsSinusoide";
+import type { EtatSessionExtremumsSinusoide, PhaseExtremumsSinusoide } from "./moteur5e/typesExtremumsSinusoide";
+import { ORDRE_PHASES_EXTREMUMS } from "./moteur5e/typesExtremumsSinusoide";
 import { formatTermesEtatActuelExtremums } from "./ui5e/formatExtremumsSinusoide";
 import { EtapeParametreExtremum } from "./components5e/EtapeParametreExtremum";
 import { EtapeSolutionsExtremum } from "./components5e/EtapeSolutionsExtremum";
 import { CercleTrigEquationSketch } from "./components5e/CercleTrigEquationSketch";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifExtremumsSinusoide } from "./ui5e/recapitulatifExtremumsSinusoide";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -37,6 +42,18 @@ function nouvelleSession(): EtatSessionExtremumsSinusoide {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionExtremumsSinusoide;
   revele: boolean;
+}
+
+/** Même ternaire que `calculerRecapitulatifExtremumsSinusoide` (`scoreXxxPartiel === 0 ⟺
+ * révélée`) — `solutions` (dernière phase) n'a pas de champ `scoreSolutionsPartiel` : forcément
+ * "courante" tant que l'exercice n'est pas terminé (dernière phase active). */
+function calculerSegmentsProgression(etat: EtatSessionExtremumsSinusoide): EtatPuceProgression[] {
+  return ORDRE_PHASES_EXTREMUMS.map((phase: PhaseExtremumsSinusoide) => {
+    if (phase === etat.phase) return "courante";
+    const score = phase === "poserEquation" ? etat.scorePoserEquationPartiel : phase === "isolerX" ? etat.scoreIsolerXPartiel : null;
+    if (score === null) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen11() {
@@ -90,10 +107,12 @@ export function App5gen11() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Extremums d'une fonction sinusoïdale</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_FONCTION} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifExtremumsSinusoide(etat)} />
           {(etat.phase === "poserEquation" || etat.phase === "isolerX") && (
             <EtapeParametreExtremum
               key={etat.phase}

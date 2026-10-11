@@ -11,6 +11,7 @@ import {
   soumettreReponseQuotient,
 } from "./moteur5e/sessionDefinitionDerivee";
 import type { EcranDefinitionDerivee, EtatSessionDefinitionDerivee } from "./moteur5e/typesDefinitionDerivee";
+import { ORDRE_COMPLET } from "./moteur5e/typesDefinitionDerivee";
 import {
   diagnostiquerDeveloppementH,
   diagnostiquerLimiteDerivee,
@@ -21,6 +22,10 @@ import type { ExerciceDefinitionDerivee } from "./core5e/definitionDerivee.types
 import { EtapeChampLibreDerivee } from "./components5e/EtapeChampLibreDerivee";
 import { EtapeDevelopperDerivee } from "./components5e/EtapeDevelopperDerivee";
 import { formatReponseAttendueEcranLatex, labelLimite, labelQuotient } from "./ui5e/formatDefinitionDerivee";
+import { calculerRecapitulatifDefinitionDerivee } from "./ui5e/recapitulatifDefinitionDerivee";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
@@ -43,6 +48,21 @@ function reponseAttendueDefinitionDerivee(exercice: ExerciceDefinitionDerivee, e
 interface TransitionEnAttente {
   etatSuivant: EtatSessionDefinitionDerivee;
   revele: boolean;
+}
+
+/** Ordre d'affichage des puces de progression — séquence FIXE à 3 écrans (`ORDRE_COMPLET`, voir
+ * `moteur5e/typesDefinitionDerivee.ts`). */
+const ORDRE_PHASES: EcranDefinitionDerivee[] = ORDRE_COMPLET;
+
+/** Même heuristique que `calculerRecapitulatifDefinitionDerivee` (`scoresPartiels[ecran] === 0 ⟺
+ * révélée`) — jamais une valeur recalculée séparément. */
+function calculerSegmentsProgression(etat: EtatSessionDefinitionDerivee): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen26() {
@@ -89,10 +109,12 @@ export function App5gen26() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Calculer f'(a) par la définition</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifDefinitionDerivee(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={phase}

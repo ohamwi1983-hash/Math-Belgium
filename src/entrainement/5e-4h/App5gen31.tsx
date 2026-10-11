@@ -18,6 +18,7 @@ import {
   soumettreReponseTableauFSeconde,
 } from "./moteur5e/sessionEtudierFonction";
 import type { EcranEtudierFonction, EtatSessionEtudierFonction } from "./moteur5e/typesEtudierFonction";
+import { ordreEcransEtudierFonction } from "./moteur5e/typesEtudierFonction";
 import { diagnostiquerCalculerFPrime, diagnostiquerCalculerFSeconde, pointsClesEtudierFonction } from "./moteur5e/verificationEtudierFonction";
 import { EtapeDomaineEtudierFonction } from "./components5e/EtapeDomaineEtudierFonction";
 import { EtapeLimitesEtudierFonction } from "./components5e/EtapeLimitesEtudierFonction";
@@ -28,6 +29,8 @@ import { PlacementPointsGraphique } from "./components5e/PlacementPointsGraphiqu
 import { EtudierFonctionGraph } from "./components5e/EtudierFonctionGraph";
 import { ResultatPanelEtudierFonction } from "./components5e/ResultatPanelEtudierFonction";
 import { ResumeSessionEtudierFonction } from "./components5e/ResumeSessionEtudierFonction";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -38,6 +41,27 @@ function nouvelleSession(): EtatSessionEtudierFonction {
 interface Bilan {
   resultat: EtatSessionEtudierFonction["resultats"][number];
   aideParPhase: Partial<Record<string, { niveauAide: number; revele: boolean }>>;
+}
+
+/** Puces de progression — séquence RÉELLEMENT parcourue par CET exercice
+ * (`ordreEcransEtudierFonction`, 7 ou 8 écrans selon `possedeDomaineRestreint`). Index-based plutôt
+ * que la seule présence d'un score dans `scoresPartiels` : l'écran "recap" (purement
+ * présentationnel, voir `typesEtudierFonction.ts`/`sessionEtudierFonction.ts::avancerRecap`) n'a
+ * JAMAIS de clé dans `scoresPartiels` même une fois franchi — seule sa position dans l'ordre avant
+ * `etat.phase` dit qu'il est déjà clos ("correcte", jamais "revele", aucune notion de révélation
+ * pour un écran sans question). Pour les autres écrans, heuristique `score === 0 ⟺ révélée`
+ * (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand
+ * l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e). */
+function calculerSegmentsProgression(etat: EtatSessionEtudierFonction): EtatPuceProgression[] {
+  const ordre = ordreEcransEtudierFonction(etat.exerciceCourant);
+  const indexCourant = ordre.indexOf(etat.phase);
+  return ordre.map((ecran, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "correcte";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen31() {
@@ -67,6 +91,7 @@ export function App5gen31() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction</h1>
+        {enCoursDeSession && <ProgressionPuces segments={calculerSegmentsProgression(etat)} />}
       </header>
       <SelecteurVarianteDev
         options={CATALOGUE_VARIANTES}

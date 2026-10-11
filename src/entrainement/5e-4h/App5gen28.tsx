@@ -17,6 +17,7 @@ import {
   soumettreReponseVerifierPente,
 } from "./moteur5e/sessionTangentes";
 import type { EcranTangente, EtatSessionTangente } from "./moteur5e/typesTangentes";
+import { ordreEcransTangente } from "./moteur5e/typesTangentes";
 import {
   diagnostiquerCoordonneeChamp,
   diagnostiquerEquationTangentePointDonne,
@@ -33,6 +34,10 @@ import { EtapeChampUniqueTangente } from "./components5e/EtapeChampUniqueTangent
 import { EtapeRacinesTangente } from "./components5e/EtapeRacinesTangente";
 import { EtapeCoordonneesTangente } from "./components5e/EtapeCoordonneesTangente";
 import { EtapeTangenteEnP } from "./components5e/EtapeTangenteEnP";
+import { calculerRecapitulatifTangentes } from "./ui5e/recapitulatifTangentes";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
@@ -55,6 +60,18 @@ function reponseAttendueTangentes(exercice: EtatSessionTangente["exerciceCourant
 interface TransitionEnAttente {
   etatSuivant: EtatSessionTangente;
   revele: boolean;
+}
+
+/** Même heuristique que `calculerRecapitulatifTangentes` (`scoresPartiels[ecran] === 0 ⟺
+ * révélée`) — `ordreEcransTangente(exercice)` donne la séquence RÉELLE (2 ou 3 écrans selon la
+ * variante, fixée dès le tirage). */
+function calculerSegmentsProgression(etat: EtatSessionTangente): EtatPuceProgression[] {
+  return ordreEcransTangente(etat.exerciceCourant).map((ecran) => {
+    if (ecran === etat.phase) return "courante";
+    const score = etat.scoresPartiels[ecran];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen28() {
@@ -100,10 +117,12 @@ export function App5gen28() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Tangentes</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifTangentes(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={etat.phase}

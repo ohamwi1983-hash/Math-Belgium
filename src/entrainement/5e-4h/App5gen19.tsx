@@ -16,7 +16,7 @@ import {
   soumettreReponseRegimePermanent,
   soumettreReponseTermesSuccessifs,
 } from "./moteur5e/sessionSuiteRecurrenteAffine";
-import type { EtatSessionSuiteRecurrenteAffine } from "./moteur5e/typesSuiteRecurrenteAffine";
+import type { EtatSessionSuiteRecurrenteAffine, PhaseSuiteRecurrenteAffine } from "./moteur5e/typesSuiteRecurrenteAffine";
 import {
   diagnostiquerPoserRecurrence,
   diagnostiquerRegimePermanent,
@@ -27,6 +27,10 @@ import { EtapeRegimePermanent } from "./components5e/EtapeRegimePermanent";
 import { EtapeTermesSuccessifs } from "./components5e/EtapeTermesSuccessifs";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteRecurrenteAffine";
+import { calculerRecapitulatifSuiteRecurrenteAffine } from "./ui5e/recapitulatifSuiteRecurrenteAffine";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -38,6 +42,23 @@ function nouvelleSession(): EtatSessionSuiteRecurrenteAffine {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionSuiteRecurrenteAffine;
   revele: boolean;
+}
+
+/** Séquence RÉELLE identique à `moteur5e/typesSuiteRecurrenteAffine.ts` (`phaseInitiale`/
+ * `phaseApres`) — ORDRE_PHASES statique, comme `AppAnalyseFonction.tsx` (4e), puisque cette
+ * séquence à 3 écrans est FIXE pour les 2 régimes (jamais de saut). "termesSuccessifs" (dernière
+ * phase) n'a pas de branche "close" propre : tant que l'exercice n'est pas terminé elle est
+ * forcément "courante", et une fois terminé un nouvel exercice démarre (même convention que
+ * "tableauSignes" dans `AppAnalyseFonction.tsx`). */
+const ORDRE_PHASES: PhaseSuiteRecurrenteAffine[] = ["poserRecurrence", "regimePermanent", "termesSuccessifs"];
+
+function calculerSegmentsProgression(etat: EtatSessionSuiteRecurrenteAffine): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = phase === "poserRecurrence" ? etat.scorePoserRecurrencePartiel : phase === "regimePermanent" ? etat.scoreRegimePermanentPartiel : null;
+    if (score === null) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen19() {
@@ -89,10 +110,12 @@ export function App5gen19() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suite récurrente affine et régime permanent</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_REGIME} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifSuiteRecurrenteAffine(etat)} />
           <>
               {etat.phase === "poserRecurrence" && (
                 <EtapePoserRecurrence

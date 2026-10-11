@@ -71,6 +71,7 @@ import type {
   EtatSessionEquationTrigonometrique,
   PhaseEquationTrigonometrique,
 } from "./moteur5e/typesEquationTrig";
+import { phaseApres, phaseInitiale } from "./moteur5e/typesEquationTrig";
 import { EtapeArgumentEquationTrig } from "./components5e/EtapeArgumentEquationTrig";
 import { EtapeArgumentProduit } from "./components5e/EtapeArgumentProduit";
 import { EtapeConversionEgalite } from "./components5e/EtapeConversionEgalite";
@@ -105,6 +106,10 @@ import {
   formatTermesXProduitLatex,
   regimeProduit,
 } from "./ui5e/formatEquationTrigonometrique";
+import { calculerRecapitulatifEquationTrig } from "./ui5e/recapitulatifEquationTrig";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -195,6 +200,31 @@ function reponseAttenduePhase(exercice: ExerciceEquationTrigonometrique, phase: 
   return null;
 }
 
+/** Marche la vraie séquence de phases de CETTE instance en suivant `phaseInitiale`/`phaseApres`
+ * (moteur, `moteur5e/typesEquationTrig.ts`) pas à pas jusqu'à "termine" — jamais une table
+ * recopiée à la main (la séquence dépend de la famille ET de sauts conditionnels, ex.
+ * `aucuneSolution`/`sousCas`, voir le commentaire en tête de ce fichier moteur). */
+function ordrePhasesPourExercice(exercice: ExerciceEquationTrigonometrique): PhaseEquationTrigonometrique[] {
+  const ordre: PhaseEquationTrigonometrique[] = [];
+  let phase: PhaseEquationTrigonometrique | "termine" = phaseInitiale();
+  while (phase !== "termine") {
+    ordre.push(phase);
+    phase = phaseApres(exercice, phase);
+  }
+  return ordre;
+}
+
+/** Même ternaire que `calculerRecapitulatifEquationTrig` (`scoresPartiels[phase] === 0 ⟺
+ * révélée`). */
+function calculerSegmentsProgression(etat: EtatSessionEquationTrigonometrique): EtatPuceProgression[] {
+  return ordrePhasesPourExercice(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
+}
+
 export function App5gen10() {
   const [etat, setEtat] = useState<EtatSessionEquationTrigonometrique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
@@ -233,6 +263,7 @@ export function App5gen10() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Équations trigonométriques</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev
         options={OPTIONS_FAMILLE}
@@ -243,6 +274,7 @@ export function App5gen10() {
       />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifEquationTrig(etat)} />
           {etat.phase === "reconnaissance" && (
             <EtapeReconnaissanceEquationTrig
               key={cleEcran}

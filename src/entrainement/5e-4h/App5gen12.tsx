@@ -11,10 +11,14 @@ import {
 } from "./moteur5e/sessionGeometrieCercle";
 import type { EtatSessionGeometrieCercle, PhaseGeometrieCercle } from "./moteur5e/typesGeometrieCercle";
 import { diagnostiquerChamp } from "./moteur5e/verificationGeometrieCercle";
-import { formatValeurPhaseLatex } from "./ui5e/formatGeometrieCercle";
+import { formatValeurPhaseLatex, phasesDuScenario } from "./ui5e/formatGeometrieCercle";
 import { EtapeChampGeometrieCercle } from "./components5e/EtapeChampGeometrieCercle";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifGeometrieCercle } from "./ui5e/recapitulatifGeometrieCercle";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -50,6 +54,18 @@ function nouvelleSession(): EtatSessionGeometrieCercle {
 interface TransitionEnAttente {
   etatSuivant: EtatSessionGeometrieCercle;
   revele: boolean;
+}
+
+/** Même ternaire que `calculerRecapitulatifGeometrieCercle` (`scoresPartiels[phase] === 0 ⟺
+ * révélée`) — la séquence de phases dépend du scénario de l'exercice courant (`phasesDuScenario`),
+ * jamais un seul ordre générique (voir `moteur5e/typesGeometrieCercle.ts`). */
+function calculerSegmentsProgression(etat: EtatSessionGeometrieCercle): EtatPuceProgression[] {
+  return phasesDuScenario(etat.exerciceCourant.scenario).map((phase: PhaseGeometrieCercle) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen12() {
@@ -94,10 +110,12 @@ export function App5gen12() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes de géométrie du cercle</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifGeometrieCercle(etat)} />
           <EtapeChampGeometrieCercle
             key={etat.phase}
             exercice={exercice}

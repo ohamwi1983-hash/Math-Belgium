@@ -12,6 +12,7 @@ import { EtapeParametreSinusoideGraphique } from "./components5e/EtapeParametreS
 import { formatChampParametreGraphiqueLatex } from "./ui5e/formatParametresSinusoideGraphique";
 import { Katex } from "./components/Katex";
 import type { PhaseParametresSinusoideGraphique } from "./moteur5e/typesParametresSinusoideGraphique";
+import { ORDRE_PHASES_SINUSOIDE_GRAPHIQUE } from "./moteur5e/typesParametresSinusoideGraphique";
 import type { ExerciceParametresSinusoideGraphique } from "./core5e/parametresSinusoideGraphique.types";
 import type { StatutVerification } from "./moteur/statutVerification";
 import {
@@ -23,6 +24,10 @@ import {
   diagnostiquerPhiModuloT,
   diagnostiquerValeurSinusoide,
 } from "./moteur5e/verificationParametresSinusoideGraphique";
+import { calculerRecapitulatifParametresSinusoideGraphique } from "./ui5e/recapitulatifParametresSinusoideGraphique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -57,6 +62,27 @@ function diagnostiquerReponsePourPhase(
 interface TransitionEnAttente {
   etatSuivant: EtatSessionParametresSinusoideGraphique;
   revele: boolean;
+}
+
+/** Même ternaire que `calculerRecapitulatifParametresSinusoideGraphique` (`scoreXxxPartiel === 0 ⟺
+ * révélée`) — `phi` (dernière phase) n'a pas de champ `scorePhiPartiel` : forcément "courante" tant
+ * que l'exercice n'est pas terminé (dernière phase active). */
+function calculerSegmentsProgression(etat: EtatSessionParametresSinusoideGraphique): EtatPuceProgression[] {
+  return ORDRE_PHASES_SINUSOIDE_GRAPHIQUE.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score =
+      phase === "decalage"
+        ? etat.scoreDecalagePartiel
+        : phase === "amplitude"
+          ? etat.scoreAmplitudePartiel
+          : phase === "periode"
+            ? etat.scorePeriodePartiel
+            : phase === "frequence"
+              ? etat.scoreFrequencePartiel
+              : null;
+    if (score === null) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen9() {
@@ -96,9 +122,11 @@ export function App5gen9() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Paramètres d'une fonction sinusoïdale — lecture graphique</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifParametresSinusoideGraphique(etat)} />
           <EtapeParametreSinusoideGraphique
             key={etat.phase}
             exercice={exercice}

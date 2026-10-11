@@ -20,6 +20,8 @@ import { EtapeDomfDomaineDefinition } from "./components5e/EtapeDomfDomaineDefin
 import { GrilleQuotientDomfRecap } from "./components5e/GrilleQuotientDomfRecap";
 import { formatCEAttendueLatex, formatDomfLatex, formatResolutionAttendueLatex } from "./ui5e/formatDomaineDefinition";
 import { Katex } from "./components/Katex";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -56,6 +58,27 @@ function releveRevelePhase(nouvelEtat: EtatSessionDomaineDefinition, phaseFinie:
   if (phaseFinie === "ce") return nouvelEtat.ceRevele;
   if (phaseFinie === "resolution") return nouvelEtat.resolutionRevele;
   return nouvelEtat.resultats[nouvelEtat.resultats.length - 1].domfRevele;
+}
+
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases du
+ * générateur (`phaseApresCE`, `moteur5e/typesDomaineDefinition.ts`, et les affectations `phase:` de
+ * `moteur5e/sessionDomaineDefinition.ts`) : "ce" toujours en premier, puis "resolution" (sautée pour
+ * la plupart des familles/instances — reste alors "a-venir" indéfiniment pour cet exercice, aucun
+ * score n'étant jamais posé), puis "domf" (dernière phase, clôture toujours l'exercice — pas de
+ * champ `scoreDomfExercice` dédié au niveau session, donc toujours "courante" ou "a-venir", jamais
+ * "revele"/"correcte" avant la fin). */
+const ORDRE_PHASES: PhaseDomaineDefinition[] = ["ce", "resolution", "domf"];
+
+/** Même lecture que `releveRevelePhase` ci-dessus pour `scoreXxxExercice`/`xxxRevele` — jamais une
+ * valeur recalculée séparément. */
+function calculerSegmentsProgression(etat: EtatSessionDomaineDefinition): EtatPuceProgression[] {
+  return ORDRE_PHASES.map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = phase === "ce" ? etat.scoreCEExercice : phase === "resolution" ? etat.scoreResolutionExercice : null;
+    if (score === null) return "a-venir";
+    const revele = phase === "ce" ? etat.ceRevele : etat.resolutionRevele;
+    return revele ? "revele" : "correcte";
+  });
 }
 
 export function App5gen1() {
@@ -100,6 +123,7 @@ export function App5gen1() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Domaine de définition</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev
         options={CATALOGUE_FAMILLES}

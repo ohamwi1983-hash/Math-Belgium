@@ -20,6 +20,7 @@ import {
   soumettreReponseVASens,
 } from "./moteur5e/sessionLimitesContexte";
 import type { EtatSessionLimitesContexte, PhaseLimitesContexte } from "./moteur5e/typesLimitesContexte";
+import { ordreComplet } from "./moteur5e/typesLimitesContexte";
 import {
   diagnostiquerConstructionC,
   diagnostiquerEvaluerSeuil,
@@ -33,6 +34,10 @@ import { EtapeChampsLimitesContexte } from "./components5e/EtapeChampsLimitesCon
 import { EtapeEvaluerSeuilPopulation } from "./components5e/EtapeEvaluerSeuilPopulation";
 import { EtapeQCMLimitesContexte } from "./components5e/EtapeQCMLimitesContexte";
 import { Katex } from "./components/Katex";
+import { calculerRecapitulatifLimitesContexte } from "./ui5e/recapitulatifLimitesContexte";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -57,6 +62,20 @@ function reponseAttendueLimitesContexte(exercice: ExerciceLimitesContexte, phase
 interface TransitionEnAttente {
   etatSuivant: EtatSessionLimitesContexte;
   revele: boolean;
+}
+
+/** Une puce par phase de `ordreComplet(etat.exerciceCourant)` — séquence RÉELLE propre à la
+ * famille du tirage (4 familles fixes, chacune sa propre séquence), jamais un `ORDRE_PHASES` fixe
+ * reconstitué à la main : même source que `calculerRecapitulatifLimitesContexte`. "courante" pour
+ * `etat.phase`, "correcte"/"revele" pour les phases déjà closes (`scoresPartiels[phase]`, 0 ⟺
+ * révélée), "a-venir" au-delà. */
+function calculerSegmentsProgression(etat: EtatSessionLimitesContexte): EtatPuceProgression[] {
+  return ordreComplet(etat.exerciceCourant).map((phase) => {
+    if (phase === etat.phase) return "courante";
+    const score = etat.scoresPartiels[phase];
+    if (score === undefined) return "a-venir";
+    return score === 0 ? "revele" : "correcte";
+  });
 }
 
 export function App5gen23() {
@@ -103,10 +122,12 @@ export function App5gen23() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites et asymptotes en contexte</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifLimitesContexte(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={phase}

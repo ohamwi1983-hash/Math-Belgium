@@ -31,7 +31,6 @@ import {
   consigneFormule,
   estPhaseFRondG,
   formatTermesConditionsLatex,
-  formatTermesEtatActuelComposerFonctions,
   latexAideC1Niveau2,
   latexAideC2Niveau2,
   latexAideConditionsNiveau2,
@@ -43,6 +42,10 @@ import {
   texteAideDomaineNiveau1,
   texteAideFormuleNiveau1,
 } from "./ui5e/formatComposerFonctions";
+import { calculerRecapitulatifComposerFonctions } from "./ui5e/recapitulatifComposerFonctions";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -118,6 +121,18 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Une puce par phase de la séquence RÉELLE de CET exercice (`etat.ordre`, dynamique — voir
+ * `ordreComplet`, `moteur5e/typesComposerFonctions.ts`) : contrairement au gabarit 4e, aucun
+ * `ORDRE_PHASES` fixe n'est possible ici (2 à 10 écrans selon `sens`/richesse de chaque direction),
+ * même principe que `calculerSegmentsProgression` de `App5gen4.tsx` (questions dynamiques). */
+function calculerSegmentsProgression(etat: EtatSessionComposerFonctions): EtatPuceProgression[] {
+  return etat.ordre.map((phase, index) => {
+    if (index === etat.indexPhase) return "courante";
+    if (index > etat.indexPhase) return "a-venir";
+    return etat.revelesPartiels[phase] ? "revele" : "correcte";
+  });
+}
+
 export function App5gen3() {
   const [etat, setEtat] = useState<EtatSessionComposerFonctions>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
@@ -145,7 +160,7 @@ export function App5gen3() {
 
   const exercice = etat.exerciceCourant;
   const donnees = <DonneesComposerFonctions exercice={exercice} />;
-  const termesEtatActuel = formatTermesEtatActuelComposerFonctions(exercice, etat.ordre, etat.indexPhase);
+  const recapitulatif = calculerRecapitulatifComposerFonctions(etat);
   const dir = directionCourante(etat);
 
   const validation = enAttente
@@ -162,10 +177,12 @@ export function App5gen3() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Composer f et g</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_COMPOSITION} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           {etat.phase.startsWith("formule") && (
             <EtapeFormuleComposerFonctions
               key={etat.phase}
@@ -179,7 +196,6 @@ export function App5gen3() {
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideFormuleNiveau1(dir)}
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideFormuleNiveau2(dir) : null}
-              termesEtatActuel={termesEtatActuel}
               onValider={(texte) => terminerEtape(soumettreReponseFormule(etat, texte))}
               diagnostiquer={(texte) => diagnostiquerFormuleDirectionSimplifiee(dir, texte)}
               validation={validation}
@@ -198,7 +214,6 @@ export function App5gen3() {
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideConditionsNiveau1(dir)}
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideConditionsNiveau2(dir) : null}
-              termesEtatActuel={termesEtatActuel}
               onValider={(reponse) => terminerEtape(soumettreReponseConditions(etat, reponse))}
               validation={validation}
             />
@@ -217,7 +232,6 @@ export function App5gen3() {
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideC1Niveau1(dir)}
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideC1Niveau2(dir) : null}
-              termesEtatActuel={termesEtatActuel}
               onValider={(reponse) => terminerEtape(soumettreReponseC1(etat, reponse))}
               validation={validation}
             />
@@ -236,7 +250,6 @@ export function App5gen3() {
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideC2Niveau1(dir)}
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideC2Niveau2(dir) : null}
-              termesEtatActuel={termesEtatActuel}
               onValider={(reponse) => terminerEtape(soumettreReponseC2(etat, reponse))}
               validation={validation}
             />
@@ -255,7 +268,6 @@ export function App5gen3() {
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               texteAideNiveau1={texteAideDomaineNiveau1(dir)}
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideDomaineNiveau2(dir) : null}
-              termesEtatActuel={termesEtatActuel}
               onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
               validation={validation}
             />
