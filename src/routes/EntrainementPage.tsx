@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { findChapter, trouverSectionGenerateur } from '../content/chaptersIndex'
 import { ENTRAINEMENT_REGISTRY, LEVEL_LABELS } from '../entrainement/registry'
+import { LienVideoGenerateur } from '../entrainement/components/LienVideoGenerateur'
 import '../entrainement/theme.css'
 
 /** Page générique `/entrainement/:chantier/:generatorId` pour TOUT générateur rapatrié depuis
@@ -46,6 +47,7 @@ export function EntrainementPage() {
         <Link className="entrainement-retour" to={lienChapitre}>
           <span aria-hidden="true">←</span> Retour {section ? `à « ${section.title} »` : `au chapitre « ${entry.chapitreTitle} »`}
         </Link>
+        {generatorId && <LienVideoGenerateur generatorId={generatorId} />}
         <Suspense fallback={null}>{Component && <Component />}</Suspense>
       </div>
     </>
