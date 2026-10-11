@@ -20,6 +20,9 @@ export const variablesAleatoires: ChapterContent = {
       number: 1,
       title: 'Variables aléatoires discrètes et espérance',
       blocks: [
+        { kind: 'video', title: 'Variable aléatoire, loi de probabilité et espérance', youtubeId: '7i_g1bBza6g' },
+        { kind: 'video', title: 'Variance, écart-type et événements contraires', youtubeId: '3qi0zTgRcdA' },
+        { kind: 'video', title: 'Jeux et gains, loi hypergéométrique, loi uniforme discrète', youtubeId: 'y2aS-lt6_PE' },
         {
           kind: 'intuition',
           label: 'Pour visualiser',
@@ -291,6 +294,7 @@ export const variablesAleatoires: ChapterContent = {
       number: 2,
       title: 'Loi binomiale',
       blocks: [
+        { kind: 'video', title: 'La loi binomiale', youtubeId: 'v5fGVg2Hco4' },
         {
           kind: 'definition',
           label: 'Schéma de Bernoulli répété, 4 conditions',
@@ -440,6 +444,7 @@ export const variablesAleatoires: ChapterContent = {
       number: 3,
       title: 'Variable aléatoire continue et densité de probabilité',
       blocks: [
+        { kind: 'video', title: 'Variable aléatoire continue et densité de probabilité', youtubeId: '8GrFoKV_Y_0' },
         {
           kind: 'para',
           text: "Jusqu'ici, une variable aléatoire ne prenait qu'un nombre fini de valeurs. Mais si la valeur observée peut être **n'importe quel réel d'un intervalle** — la graduation exacte où s'arrête une aiguille, la masse exacte d'un sachet de sucre — la probabilité qu'elle tombe pile sur une valeur précise est nulle ! Sinon, la somme des probabilités serait infinie, jamais égale à 1. On ne peut donc plus définir une loi valeur par valeur comme pour une variable discrète : on n'attribue une probabilité qu'à des événements définis par un **intervalle**.",
@@ -531,6 +536,7 @@ export const variablesAleatoires: ChapterContent = {
       number: 4,
       title: 'Variable aléatoire discrète ? Variable aléatoire continue ?',
       blocks: [
+        { kind: 'video', title: 'Discrète ou continue ? Loi uniforme continue', youtubeId: 'bmZ2Q-zl-F4' },
         {
           kind: 'para',
           text: 'Les deux familles partagent exactement les mêmes notions — loi, fonction de répartition, espérance, variance, écart-type — mais chacune les porte avec un outil différent : une somme pondérée en discret, une intégrale en continu.',
@@ -618,6 +624,8 @@ export const variablesAleatoires: ChapterContent = {
       number: 6,
       title: 'Loi normale',
       blocks: [
+        { kind: 'video', title: 'Loi normale (1/2) : la cloche et la règle empirique', youtubeId: 'oRr2_t58-9A' },
+        { kind: 'video', title: 'Loi normale (2/2) : standardiser et lire la table de Φ', youtubeId: 'HRKbrDnIOmA' },
         {
           kind: 'intuition',
           label: 'Pourquoi la courbe a cette forme de cloche',
@@ -788,6 +796,7 @@ export const variablesAleatoires: ChapterContent = {
       number: 7,
       title: 'Extensions : binomiale, normale et Bayes',
       blocks: [
+        { kind: 'video', title: 'Extensions : épreuves composées, Bayes, approximation normale', youtubeId: 'EdM_I4B6wnA' },
         {
           kind: 'para',
           text: 'Cet exercice de clôture combine ce que les sections précédentes ont établi — « trouver n » en binomiale, sens inverse de la loi normale — avec le **théorème de Bayes** à 3 catégories, une approximation de la binomiale par la loi normale, une loi uniforme continue, et une loi discrète appliquée à une population entière.',
@@ -971,6 +980,7 @@ export const variablesAleatoires: ChapterContent = {
       number: 8,
       title: 'Loi de Poisson',
       blocks: [
+        { kind: 'video', title: 'La loi de Poisson', youtubeId: 'E6SK3Awv1fQ' },
         {
           kind: 'definition',
           label: 'Loi de Poisson, paramètre λ',
