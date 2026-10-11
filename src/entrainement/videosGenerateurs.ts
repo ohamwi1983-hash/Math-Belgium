@@ -22,4 +22,6 @@ export interface VideoCapsuleGenerateur {
  * 1 seule entrée → `LienVideoGenerateur` saute directement au lecteur au clic (pas de liste
  * intermédiaire pour une seule vidéo). Plusieurs entrées → une liste s'affiche d'abord.
  */
-export const VIDEOS_GENERATEURS: Record<string, VideoCapsuleGenerateur[]> = {};
+export const VIDEOS_GENERATEURS: Record<string, VideoCapsuleGenerateur[]> = {
+  gen7: [{ titre: "Vue d'ensemble et exemple résolu", youtubeId: "uljJGHyI_Tg" }],
+};
