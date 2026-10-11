@@ -18,6 +18,10 @@ import { diagnostiquerReponseQuestion } from "./moteur5e/verificationComposeeGra
 import { PaireGraphesComposeeGraphique } from "./components5e/PaireGraphesComposeeGraphique";
 import { EtapeQuestionComposeeGraphique } from "./components5e/EtapeQuestionComposeeGraphique";
 import { labelChampResultat, nomInterne } from "./ui5e/formatComposeeGraphique";
+import { calculerRecapitulatifComposeeGraphique } from "./ui5e/recapitulatifComposeeGraphique";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -27,6 +31,18 @@ function nouvelleSession(): EtatSessionComposeeGraphique {
 
 function formatResultatAttendu(resultatAttendu: number | null): string {
   return resultatAttendu === null ? "n'existe pas" : String(resultatAttendu);
+}
+
+/** Une puce par question de l'exercice courant — "courante" pour `indexQuestion`, "correcte"/"revele"
+ * pour les questions déjà closes (`resultatsQuestionsExercice`, un élément par question close, dans
+ * l'ordre), "a-venir" au-delà. */
+function calculerSegmentsProgression(etat: EtatSessionComposeeGraphique): EtatPuceProgression[] {
+  return etat.exerciceCourant.questions.map((_, index) => {
+    if (index === etat.indexQuestion) return "courante";
+    const resultat = etat.resultatsQuestionsExercice[index];
+    if (resultat === undefined) return "a-venir";
+    return resultat.revele ? "revele" : "correcte";
+  });
 }
 
 /** État tenu en attente dès qu'une question se termine (bonne réponse, ou tentatives épuisées) —
@@ -89,10 +105,12 @@ export function App5gen4() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Composée de fonctions — lecture graphique</h1>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_RESTREINTE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifComposeeGraphique(etat)} />
           <p className="prompt-text">
             Question {etat.indexQuestion + 1}/{exercice.questions.length}
           </p>
