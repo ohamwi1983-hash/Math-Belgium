@@ -20,6 +20,8 @@ export const lieuxGeometriques: ChapterContent = {
       title: 'Points et droites remarquables du triangle',
       kicker: 'toute droite en forme implicite ax+by+c=0 — bissectrice, milieux, aire variable, symétrique',
       blocks: [
+        { kind: 'video', title: 'Points et droites remarquables (1/2) : repère, forme implicite, pente, distance', youtubeId: 'IxrD4EpvX88' },
+        { kind: 'video', title: 'Points et droites remarquables (2/2) : milieux, bissectrice, aire variable', youtubeId: 'cGborW9oZH8' },
         {
           kind: 'para',
           text:
@@ -523,6 +525,7 @@ export const lieuxGeometriques: ChapterContent = {
       title: 'Cercles',
       kicker: 'x²+y²+Dx+Ey+F=0 ↔ centre (−D/2;−E/2), rayon — 3 points, 2 points+rayon, inscrit, tangentes',
       blocks: [
+        { kind: 'video', title: 'Cercles : équation, 3 points, 2 points et rayon, inscrit, tangentes', youtubeId: 'jt_aOsw6y4k' },
         {
           kind: 'para',
           text:
@@ -801,6 +804,7 @@ export const lieuxGeometriques: ChapterContent = {
       title: 'Démontrer une propriété par la géométrie analytique',
       kicker: 'méthode générale en 4 étapes — repère adapté, paramètres génériques, traduire, développer',
       blocks: [
+        { kind: 'video', title: 'Démontrer par la géométrie analytique (la vidéo traite aussi le début des lieux)', youtubeId: 'zBLg2ppOiN4' },
         {
           kind: 'methode',
           label: 'Méthode en 4 étapes',
@@ -883,6 +887,8 @@ export const lieuxGeometriques: ChapterContent = {
       title: 'Lieux géométriques et élimination de paramètre',
       kicker: 'traduire une condition en (x;y), sans paramètre à éliminer — 7 natures possibles',
       blocks: [
+        { kind: 'video', title: 'Lieux (1/2) : natures et valeurs absolues (suite de la vidéo précédente)', youtubeId: 'zBLg2ppOiN4' },
+        { kind: 'video', title: "Lieux (2/2) : théorème de la médiane, cercle d'Apollonius, somme de distances, bande", youtubeId: '0t9CTcdP-Sg' },
         {
           kind: 'para',
           text:
@@ -1198,6 +1204,7 @@ export const lieuxGeometriques: ChapterContent = {
       title: 'Problèmes de lieux : méthode des génératrices',
       kicker: 'deux droites mobiles, un paramètre commun α — éliminer, factoriser, trier singulier/parasite/propre',
       blocks: [
+        { kind: 'video', title: 'Méthode des génératrices (la vidéo traite aussi la représentation paramétrique)', youtubeId: 'YeIGZS6xZs0' },
         {
           kind: 'para',
           text:
@@ -1441,6 +1448,7 @@ export const lieuxGeometriques: ChapterContent = {
       title: 'Lieux définis par une représentation paramétrique',
       kicker: "x=f(t), y=g(t) — éliminer t via une identité, ex. l'astroïde",
       blocks: [
+        { kind: 'video', title: 'Lieu défini par une représentation paramétrique (suite de la vidéo de la section 5)', youtubeId: 'YeIGZS6xZs0' },
         {
           kind: 'definition',
           items: [

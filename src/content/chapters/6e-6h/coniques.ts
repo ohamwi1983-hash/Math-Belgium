@@ -22,6 +22,10 @@ export const coniques: ChapterContent = {
       title: 'Identifier et caractériser une conique',
       kicker: 'Parabole, ellipse, hyperbole : trois lieux, une même structure de section.',
       blocks: [
+        { kind: 'video', title: 'Identifier une conique (1/5) : la parabole — lampe de poche, foyer-directrice, construction', youtubeId: 'rvNL1CDMuNE' },
+        { kind: 'video', title: "Identifier une conique (2/5) : l'ellipse — définition, construction par deux cercles, équation", youtubeId: 'GnBXVzw0vKY' },
+        { kind: 'video', title: "Identifier une conique (3/5) : l'ellipse — caractéristiques, axes, sommets, cercle aplati", youtubeId: 'g1CRzs4qeAk' },
+        { kind: 'video', title: "Identifier une conique (4/5) : l'hyperbole — définition, construction, équation par les génératrices", youtubeId: 'oAIMvlSz3io' },
         {
           kind: 'para',
           text:
@@ -508,6 +512,9 @@ export const coniques: ChapterContent = {
       title: "Excentricité, foyers, directrices et réduction d'équation",
       kicker: "Un seul énoncé, un seul nombre e, trois coniques.",
       blocks: [
+        { kind: 'video', title: 'Excentricité (1/3) : un seul curseur e, trois courbes, caractérisation focale, équation générale', youtubeId: 'c1b3hbCqCl8' },
+        { kind: 'video', title: 'Excentricité (2/3) : le cône de révolution et le théorème de Dandelin-Quételet (version 3D)', youtubeId: 'g_g7C0Xe3n4' },
+        { kind: 'video', title: "Excentricité (3/3) : réduire l'équation d'une conique par translation", youtubeId: '8-PZoz8OWzM' },
         {
           kind: 'para',
           text:
@@ -755,6 +762,8 @@ export const coniques: ChapterContent = {
       title: 'Aire, rayons focaux et excentricité',
       kicker: 'Exploiter les distances aux foyers sans jamais repasser par une équation.',
       blocks: [
+        { kind: 'video', title: "Aire et rayons focaux (1/2) : l'aire du triangle FPF'", youtubeId: 'oOk45q1kWKw' },
+        { kind: 'video', title: "Aire et rayons focaux (2/2) : l'excentricité à partir d'une condition géométrique", youtubeId: 'fHReGue2Rbc' },
         {
           kind: 'para',
           text:
@@ -950,6 +959,7 @@ export const coniques: ChapterContent = {
       title: "Intersection d'une conique et d'une droite",
       kicker: 'Un système à résoudre, jamais plus de deux points.',
       blocks: [
+        { kind: 'video', title: "Intersection d'une conique et d'une droite", youtubeId: 'RR6ODGuacN0' },
         {
           kind: 'methode',
           label: 'Méthode',
@@ -1061,6 +1071,7 @@ export const coniques: ChapterContent = {
       title: 'Tangentes à une conique',
       kicker: "Chaque conique est l'union de deux graphiques : dériver le bon.",
       blocks: [
+        { kind: 'video', title: 'Tangentes à une conique', youtubeId: 'JBo7U-lIeK4' },
         {
           kind: 'para',
           text:
@@ -1184,6 +1195,7 @@ export const coniques: ChapterContent = {
       title: 'Propriétés optiques des coniques',
       kicker: 'Un rayon lumineux, une tangente, un foyer — trois miroirs, une seule loi.',
       blocks: [
+        { kind: 'video', title: 'Propriétés optiques des coniques', youtubeId: 'ITXxHxKQQeM' },
         {
           kind: 'para',
           text:
@@ -1330,6 +1342,7 @@ export const coniques: ChapterContent = {
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 63. Propriétés optiques des coniques »',
         },
+        { kind: 'video', title: 'Synthèse du chapitre', youtubeId: 'nebYPmMQg38' },
       ],
     },
   ],
