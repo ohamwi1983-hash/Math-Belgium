@@ -1,29 +1,13 @@
 import { useState } from "react";
 import type { ExerciceConvergenceSuite } from "../core5e/convergenceSuites.types";
 import type { PhaseConvergenceSuite } from "../moteur5e/typesConvergenceSuites";
-import { consigneGenerale, consignePhase, formatTermesDonneesLatex, formatTermesEtatActuelConvergence, optionsClassification, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatConvergenceSuites";
+import { consigneGenerale, consignePhase, formatTermesDonneesLatex, optionsClassification, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatConvergenceSuites";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
-
-/** Bloc "état actuel" — ne rend rien pour "classificationArithmetique"/"classificationGeometrique"
- * (écran unique de leur variante, rien à récapituler avant) ni pour "diviserQuelconque" (premier
- * écran de la variante "quelconque") — seul "classifierQuelconque" rappelle l'expression déjà
- * simplifiée à l'écran précédent. */
-function EtatActuelConvergence({ exercice, phase }: { exercice: ExerciceConvergenceSuite; phase: PhaseConvergenceSuite }) {
-  const termes = formatTermesEtatActuelConvergence(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceConvergenceSuite;
@@ -96,7 +80,6 @@ export function EtapeClassificationConvergence({
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelConvergence exercice={exercice} phase={phase as PhaseConvergenceSuite} />
       <p className="prompt-text">{consignePhase(exercice, phase as PhaseConvergenceSuite)}</p>
 
       <div className={options.length > 4 ? "options-liste-longue" : "options-grid-compact"}>

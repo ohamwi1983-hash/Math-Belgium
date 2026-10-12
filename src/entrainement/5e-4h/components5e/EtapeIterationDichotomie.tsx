@@ -8,7 +8,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -76,7 +75,6 @@ export function EtapeIterationDichotomie({
         ))}
       </div>
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelContexteEconomique exercice={exercice} ecran={ecran} />
       <div className="etat-actuel-box etat-actuel-box-termes">
         <Katex expression={`\\text{intervalle courant : } [${formatNombreLatex(gauche)}\\,;\\,${formatNombreLatex(droite)}]`} />
       </div>

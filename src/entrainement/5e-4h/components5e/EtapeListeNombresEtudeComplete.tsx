@@ -6,7 +6,6 @@ import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -56,7 +55,6 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       <BlocDonneesEtudeComplete exercice={exercice} />
-      <EtatActuelEtudeComplete exercice={exercice} phase="domaine" />
       <p className="prompt-text">{consignePhase(exercice, "domaine")}</p>
       {valeurs.map((v, i) => (
         <div key={i} className="field-row">

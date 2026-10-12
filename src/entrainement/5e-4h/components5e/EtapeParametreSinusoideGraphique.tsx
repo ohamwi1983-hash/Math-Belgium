@@ -4,7 +4,6 @@ import type { PhaseParametresSinusoideGraphique } from "../moteur5e/typesParamet
 import {
   consigneGenerale,
   consignePhase,
-  formatTermesEtatActuelParametresSinusoideGraphiqueLatex,
   labelPhase,
   texteAideNiveau1,
   texteAideNiveau2,
@@ -14,7 +13,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -36,21 +34,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Bloc "état actuel" — rappelle les paramètres déjà CONFIRMÉS avant l'écran courant (jamais la
- * saisie brute de l'élève, dérivé uniquement de `exercice`) ; absent sur le premier écran
- * (decalage), rien à rappeler. Même patron que `EtatActuelCE` (5gen1)/5gen8. */
-function EtatActuelParametresSinusoideGraphique({ exercice, phase }: { exercice: ExerciceParametresSinusoideGraphique; phase: PhaseParametresSinusoideGraphique }) {
-  const termes = formatTermesEtatActuelParametresSinusoideGraphiqueLatex(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 /**
  * Écran UNIQUE, paramétré par la phase courante — les 5 écrans (b, A, T, f, φ) réutilisent tous ce
  * composant. `App5gen9.tsx` le rend avec `key={phase}` DÈS LA CONCEPTION (leçon retenue de
@@ -60,7 +43,9 @@ function EtatActuelParametresSinusoideGraphique({ exercice, phase }: { exercice:
  * graphique (`SinusoideGraph`) pour que l'aide y mette en évidence les points/segments qu'elle décrit
  * — jamais de persistance entre écrans (décision explicite de l'utilisateur, chaque écran suit
  * uniquement ce qui a été demandé pour LUI, voir `pointsAideActive`/`segmentsAideActive`,
- * `ui5e/sinusoideGraph.ts`).
+ * `ui5e/sinusoideGraph.ts`). Les paramètres déjà confirmés sont présentés par `RecapitulatifPanel`
+ * (`App5gen9.tsx`, `ui5e/recapitulatifParametresSinusoideGraphique.ts`), plus l'ancien bloc "état
+ * actuel" local (`EtatActuelParametresSinusoideGraphique`, retiré ici — doublon visuel).
  */
 export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -79,7 +64,6 @@ export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUt
     <div>
       <p className="prompt-text">{consigneGenerale()}</p>
       <SinusoideGraph exercice={exercice} phase={phase} niveauAide={niveauAide} />
-      <EtatActuelParametresSinusoideGraphique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(phase)}</p>
       <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
       <div className="field field-inline">

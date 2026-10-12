@@ -8,7 +8,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
@@ -63,7 +62,6 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
     <div>
       <p className="prompt-text">{estBonus ? CONSIGNE_GENERALE_CONSTRUCTION_INVERSE : CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       {pipeline && <BlocDonneesEtudeComplete exercice={pipeline} />}
-      {pipeline && <EtatActuelEtudeComplete exercice={exercice} phase={phase} />}
       {exercice.mode === "constructionInverse" && (
         <div className="equation-box equation-box-donnees">
           {formatProprietesConstructionInverseTexte(exercice.proprietes).map((p, i) => (

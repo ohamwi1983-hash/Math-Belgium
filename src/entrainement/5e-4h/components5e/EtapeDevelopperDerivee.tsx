@@ -7,7 +7,6 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelDefinitionDerivee } from "./EtatActuelDefinitionDerivee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -60,7 +59,6 @@ export function EtapeDevelopperDerivee({ exercice, tentativesUtilisees, tentativ
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelDefinitionDerivee exercice={exercice} ecran="developper" />
       <p className="prompt-text">{question.texteAvant}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

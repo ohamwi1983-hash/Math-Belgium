@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig } from "../core5e/equationsTrigonometriques.types";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, formatEquationEnonceLatex } from "../ui5e/formatEquationTrig";
-import { formatTermesEtatActuelDirecte } from "../ui5e/formatEquationTrigonometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -23,20 +22,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle l'argument déjà posé à l'écran précédent ("argument"), sous forme
- * symbolique (D.2 — l'argument réel substitué, jamais le bare "u"). */
-function EtatActuelDirecte({ exercice, phase }: { exercice: ExerciceEquationTrig; phase: "isolerX" | "solutions" }) {
-  const termes = formatTermesEtatActuelDirecte(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 /** Écran 2 (absent si `exercice.aucuneSolution`) — isoler x=(u-b)/a. Add-as-needed, pré-rempli au
@@ -71,7 +56,6 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
       <div className="equation-box">
         <Katex expression={formatEquationEnonceLatex(exercice)} block />
       </div>
-      <EtatActuelDirecte exercice={exercice} phase="isolerX" />
       <p className="prompt-text">
         Résous ces équations ci-dessus et donne les valeurs de x.
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}

@@ -1,23 +1,11 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { TEXTE_AIDE_COUT_MOYEN_C_1, consigneCoutMoyenC, formatTermesEtatActuelC } from "../ui5e/formatProblemesContexte";
+import { TEXTE_AIDE_COUT_MOYEN_C_1, consigneCoutMoyenC } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerCoutMoyenC } from "../moteur5e/verificationProblemesContexte";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-
-function EtatActuelC({ exercice }: { exercice: ExerciceScenarioC }) {
-  const termes = formatTermesEtatActuelC(exercice, "coutMoyen");
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -49,7 +37,6 @@ export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentat
   return (
     <div>
       {donnees}
-      <EtatActuelC exercice={exercice} />
       <p className="prompt-text">{consigneCoutMoyenC(exercice)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CM (€) =</label>

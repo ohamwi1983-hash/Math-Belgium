@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteArithmetique } from "./EtatActuelSuiteArithmetique";
 
 interface Props {
   exercice: ExerciceSuiteArithmetique;
@@ -37,7 +36,6 @@ export function EtapeCoherenceJugement({ exercice, tentativesUtilisees, tentativ
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteArithmetique exercice={exercice} phase="coherenceJugement" />
       <p className="prompt-text">{consignePhase(exercice, "coherenceJugement")}</p>
       <div className="options-grid">
         <button type="button" className={choix === true ? "btn toggle-active" : "btn"} onClick={() => setChoix(true)}>

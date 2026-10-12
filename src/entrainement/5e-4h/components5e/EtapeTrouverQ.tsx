@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -66,7 +65,6 @@ export function EtapeTrouverQ({ exercice, tentativesUtilisees, tentativesMax, ni
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteGeometrique exercice={exercice} phase="trouverQ" />
       <p className="prompt-text">{consignePhase(exercice, "trouverQ")}</p>
 
       {valeurs.map((v, i) => {

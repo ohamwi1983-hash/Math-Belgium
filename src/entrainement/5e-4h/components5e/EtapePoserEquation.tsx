@@ -8,7 +8,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteArithmetique } from "./EtatActuelSuiteArithmetique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -63,7 +62,6 @@ export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tenta
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteArithmetique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field-row">

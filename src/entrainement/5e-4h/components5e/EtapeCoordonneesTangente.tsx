@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelTangente } from "./EtatActuelTangente";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -74,7 +73,6 @@ export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentat
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelTangente exercice={exercice} phase="coordonnees" />
       <p className="prompt-text">{question.texteAvant}</p>
       {points.map((p, i) => {
         const statut = statuts ? statuts[i] : null;

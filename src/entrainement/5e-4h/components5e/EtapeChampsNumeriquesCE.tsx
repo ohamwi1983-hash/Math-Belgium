@@ -7,7 +7,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -85,7 +84,6 @@ export function EtapeChampsNumeriquesCE({
         ))}
       </div>
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelContexteEconomique exercice={exercice} ecran={ecran} />
       <p className="prompt-text">{consigne}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

@@ -7,7 +7,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -56,7 +55,6 @@ export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentat
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteGeometrique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
 
       <div className="options-grid-compact">

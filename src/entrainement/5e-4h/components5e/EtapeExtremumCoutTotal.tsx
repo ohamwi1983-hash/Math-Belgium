@@ -7,7 +7,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -87,7 +86,6 @@ export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativ
         ))}
       </div>
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelContexteEconomique exercice={exercice} ecran="extremum" />
       <p className="prompt-text">{consigneEcran(exercice, "extremum")}</p>
 
       {proposeChoixExistence && (

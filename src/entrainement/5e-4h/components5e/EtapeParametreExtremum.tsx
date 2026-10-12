@@ -6,7 +6,6 @@ import {
   PLACEHOLDER_POSER_EQUATION_EXTREMUMS,
   consignePhaseExtremums,
   formatFonctionSourceLatex,
-  formatTermesEtatActuelExtremums,
   texteAideNiveau1Extremums,
 } from "../ui5e/formatExtremumsSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
@@ -17,21 +16,6 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
-
-/** Bloc "état actuel" — ne rend rien tant qu'aucune valeur n'est encore confirmée (écran
- * "poserEquation"), même convention que `EtatActuelCE`/`EtatActuelPanel` ailleurs sur la
- * plateforme. */
-function EtatActuelExtremums({ exercice, phase }: { exercice: ExerciceExtremumsSinusoide; phase: "poserEquation" | "isolerX" }) {
-  const termes = formatTermesEtatActuelExtremums(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceExtremumsSinusoide;
@@ -87,7 +71,6 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelExtremums exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhaseExtremums(phase)}</p>
       {phase === "poserEquation" ? (
         <>

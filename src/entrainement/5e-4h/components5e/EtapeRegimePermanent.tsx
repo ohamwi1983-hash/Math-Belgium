@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteRecurrenteAffine } from "./EtatActuelSuiteRecurrenteAffine";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -45,7 +44,6 @@ export function EtapeRegimePermanent({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <EtatActuelSuiteRecurrenteAffine exercice={exercice} phase="regimePermanent" />
       <p className="prompt-text">{consigneRegimePermanent(exercice)}</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${existe === false ? "toggle-active" : ""}`} onClick={() => setExiste(false)}>

@@ -1,23 +1,11 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { TEXTE_AIDE_BENEFICE_C_1, consigneBeneficeC, formatTermesEtatActuelC } from "../ui5e/formatProblemesContexte";
+import { TEXTE_AIDE_BENEFICE_C_1, consigneBeneficeC } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerBeneficeC } from "../moteur5e/verificationProblemesContexte";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-
-function EtatActuelC({ exercice }: { exercice: ExerciceScenarioC }) {
-  const termes = formatTermesEtatActuelC(exercice, "benefice");
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -49,7 +37,6 @@ export function EtapeBeneficeC({ exercice, donnees, tentativesUtilisees, tentati
   return (
     <div>
       {donnees}
-      <EtatActuelC exercice={exercice} />
       <p className="prompt-text">{consigneBeneficeC(exercice)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">Bénéfice =</label>

@@ -6,7 +6,6 @@ import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -58,7 +57,6 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase="listerIntervallesInequation" />
       <p className="prompt-text">{consignePhase(exercice, "listerIntervallesInequation")}</p>
       {paires.map(([inf, sup], i) => (
         <div key={i} className="field-row">

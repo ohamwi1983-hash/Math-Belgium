@@ -8,7 +8,6 @@ import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerNombre } from "../moteur5e/verificationModelisationSinusoide";
@@ -56,7 +55,6 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase="resolution" />
       <p className="prompt-text">{consignePhase(exercice, "resolution")}</p>
       <div className="field-row">
         <div>

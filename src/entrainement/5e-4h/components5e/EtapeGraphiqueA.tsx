@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.types";
-import { CONSIGNE_GRAPHIQUE_A, TEXTE_AIDE_GRAPHIQUE_A_1, formatTermesEtatActuelA } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_GRAPHIQUE_A, TEXTE_AIDE_GRAPHIQUE_A_1 } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerGraphiqueA } from "../moteur5e/verificationProblemesContexte";
-import { Katex } from "../components/Katex";
 import { ScenarioAGraph } from "./ScenarioAGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -26,17 +25,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAConteneur }) {
-  const termes = formatTermesEtatActuelA(exercice, "graphique", null);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeGraphiqueA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -50,7 +38,6 @@ export function EtapeGraphiqueA({ exercice, donnees, tentativesUtilisees, tentat
   return (
     <div>
       {donnees}
-      <EtatActuelA exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_GRAPHIQUE_A}</p>
       <ScenarioAGraph exercice={exercice} />
       <div className="field field-inline">

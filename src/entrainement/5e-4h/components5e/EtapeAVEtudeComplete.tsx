@@ -6,7 +6,6 @@ import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ReponseAV } from "../moteur5e/sessionEtudeComplete";
@@ -61,7 +60,6 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       <BlocDonneesEtudeComplete exercice={exercice} />
-      <EtatActuelEtudeComplete exercice={exercice} phase="av" />
       <p className="prompt-text">{consignePhase(exercice, "av")}</p>
       <div className="options-grid">
         <button type="button" className={auMoinsUneAV === false ? "btn toggle-active" : "btn"} onClick={() => setAuMoinsUneAV(false)}>

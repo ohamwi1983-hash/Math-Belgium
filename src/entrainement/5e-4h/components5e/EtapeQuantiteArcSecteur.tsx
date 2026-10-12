@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceModeDeuxVersTrois, QuantiteArcSecteur } from "../core5e/arcsSecteurs.types";
-import { consigneQuantite, latexAideNiveau2ArcSecteur, quantitesConnuesJusqua, segmentsDonneesConnues, segmentsEtatActuelArcSecteur, texteAideNiveau1ArcSecteur } from "../ui5e/formatArcsSecteurs";
+import { consigneQuantite, latexAideNiveau2ArcSecteur, quantitesConnuesJusqua, segmentsDonneesConnues, texteAideNiveau1ArcSecteur } from "../ui5e/formatArcsSecteurs";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -31,11 +31,12 @@ interface Props {
  * Écran UNIQUE, paramétré par la quantité manquante courante — les 3 écrans du mode "deuxVersTrois"
  * (jamais plus de 3 pour un même exercice) réutilisent tous ce composant, seul `phase` change.
  * Bloc de données FIXE (les 2 données de départ, `exercice.connues`, jamais recalculé selon
- * l'écran) — distinct du bloc "état actuel" (`segmentsEtatActuelArcSecteur`, `apercu-box`), qui
- * accumule les quantités déjà résolues aux écrans précédents et n'apparaît qu'à partir du 2e écran
- * (vide au 1er, rien n'a encore été résolu). `connues` (`quantitesConnuesJusqua`, données + déjà
- * résolues) reste utilisée telle quelle pour les aides, qui doivent connaître tout ce qui est déjà
- * disponible côté élève, pas seulement les données de départ.
+ * l'écran). Les quantités déjà résolues aux écrans précédents sont désormais présentées par
+ * `RecapitulatifPanel` (`App5gen6.tsx`, `ui5e/recapitulatifArcSecteur.ts`), plus l'ancien bloc
+ * "état actuel" local (`segmentsEtatActuelArcSecteur`, retiré ici — doublon visuel). `connues`
+ * (`quantitesConnuesJusqua`, données + déjà résolues) reste utilisée telle quelle pour les aides,
+ * qui doivent connaître tout ce qui est déjà disponible côté élève, pas seulement les données de
+ * départ.
  */
 export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -44,7 +45,6 @@ export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, 
   const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
   const connues = quantitesConnuesJusqua(exercice, phase);
   const segmentsDonnees = segmentsDonneesConnues(exercice, exercice.connues);
-  const segmentsEtatActuel = segmentsEtatActuelArcSecteur(exercice, phase);
 
   function valider() {
     if (texte.trim() === "") return;
@@ -59,13 +59,6 @@ export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, 
           <Katex key={i} expression={s} />
         ))}
       </div>
-      {segmentsEtatActuel.length > 0 && (
-        <div className="etat-actuel-box etat-actuel-box-termes">
-          {segmentsEtatActuel.map((s, i) => (
-            <Katex key={i} expression={s} />
-          ))}
-        </div>
-      )}
       <p className="prompt-text">{consigneQuantite(phase)}</p>
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 5*pi/6 ou 2.62" />

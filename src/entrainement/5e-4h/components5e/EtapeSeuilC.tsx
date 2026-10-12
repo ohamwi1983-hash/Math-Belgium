@@ -1,24 +1,12 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { CONSIGNE_SEUIL_C, TEXTE_AIDE_SEUIL_C_1, formatTermesEtatActuelC } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_SEUIL_C, TEXTE_AIDE_SEUIL_C_1 } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerSeuilC } from "../moteur5e/verificationProblemesContexte";
-import { Katex } from "../components/Katex";
 import { ScenarioCGraph } from "./ScenarioCGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-
-function EtatActuelC({ exercice }: { exercice: ExerciceScenarioC }) {
-  const termes = formatTermesEtatActuelC(exercice, "seuil");
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceScenarioC;
@@ -50,7 +38,6 @@ export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentatives
   return (
     <div>
       {donnees}
-      <EtatActuelC exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_SEUIL_C}</p>
       <ScenarioCGraph exercice={exercice} />
       <div className="field field-inline">

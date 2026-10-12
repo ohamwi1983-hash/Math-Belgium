@@ -9,7 +9,6 @@ import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerNombre } from "../moteur5e/verificationModelisationSinusoide";
@@ -65,7 +64,6 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <div className="field-row">
         <div>

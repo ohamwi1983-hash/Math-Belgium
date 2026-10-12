@@ -6,7 +6,6 @@ import {
   TEXTE_AIDE_SOLUTIONS_NIVEAU2,
   TEXTE_CONSIGNE_SOLUTIONS,
   formatFonctionSourceLatex,
-  formatTermesEtatActuelExtremums,
 } from "../ui5e/formatExtremumsSinusoide";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -17,21 +16,6 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
-
-/** Bloc "état actuel" — accumule ici les 2 valeurs déjà confirmées (l'équation substituée puis x),
- * jamais un remplacement (même principe que "fractionSousRacine", 5gen1). Toujours symbolique
- * (fractions de π), jamais décimal (B.3). */
-function EtatActuelExtremums({ exercice }: { exercice: ExerciceExtremumsSinusoide }) {
-  const termes = formatTermesEtatActuelExtremums(exercice, "solutions");
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceExtremumsSinusoide;
@@ -93,7 +77,6 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelExtremums exercice={exercice} />
       <p className="prompt-text">{TEXTE_CONSIGNE_SOLUTIONS}</p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (

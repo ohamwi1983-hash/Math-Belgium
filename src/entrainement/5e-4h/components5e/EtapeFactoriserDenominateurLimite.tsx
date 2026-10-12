@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelLimite } from "./EtatActuelLimite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -51,7 +50,6 @@ export function EtapeFactoriserDenominateurLimite({ exercice, tentativesUtilisee
       <div className="equation-box equation-box-donnees">
         <Katex expression={formatBlocDonneesLatex(exercice)} block />
       </div>
-      <EtatActuelLimite exercice={exercice} phase="factoriserDenominateur" />
       <p className="prompt-text">{consignePhase(exercice, "factoriserDenominateur")}</p>
 
       <ApercuExpressionLatex texte={texte} />

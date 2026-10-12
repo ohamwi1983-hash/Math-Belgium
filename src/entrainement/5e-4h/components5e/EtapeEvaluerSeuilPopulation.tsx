@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelLimitesContexte } from "./EtatActuelLimitesContexte";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 interface Props {
@@ -53,7 +52,6 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelLimitesContexte exercice={exercice} phase="evaluerSeuil" />
       <p className="prompt-text">{consignePhase(exercice, "evaluerSeuil")}</p>
 
       <div className="field champ-reponse-latex champ-reponse-latex-etroit">

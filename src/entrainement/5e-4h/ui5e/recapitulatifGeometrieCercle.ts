@@ -13,11 +13,9 @@ import { formatValeurPhaseLatex, labelRecapPhase, phasesDuScenario } from "./for
  * `ui5e/formatGeometrieCercle.ts`, "Bloc 'état actuel' (écran...) + récapitulatif final").
  *
  * NOTE D'ARCHITECTURE : l'ancien bloc "état actuel" maison (`EtatActuelGeometrieCercle`, local à
- * `components5e/EtapeChampGeometrieCercle.tsx`) n'est PAS retiré — hors du périmètre autorisé pour
- * cette tâche (seulement `App5gen12.tsx` + ce nouveau fichier, même principe que
- * `recapitulatifProblemesContexte.ts`/5gen5). `RecapitulatifPanel` est donc ajouté EN PLUS, juste
- * avant l'écran en cours, sans retirer l'ancien bloc `etat-actuel-box` existant (qui continue de
- * s'afficher à l'intérieur de l'écran, inchangé).
+ * `components5e/EtapeChampGeometrieCercle.tsx`, affiché SANS CONDITION) a depuis été retiré
+ * (fonction + site d'appel) une fois devenu un doublon visuel avec `RecapitulatifPanel`, ajouté
+ * juste avant l'écran en cours.
  */
 export function calculerRecapitulatifGeometrieCercle(etat: EtatSessionGeometrieCercle): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;

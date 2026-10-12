@@ -638,13 +638,15 @@
   color: var(--color-text-muted);
 }
 
-/* "Ce qu'on sait déjà" (`RecapitulatifPanel.tsx`) — jamais de fond/bordure propre (même principe
- * "pas de boîte dans la boîte" que `.card` ci-dessous) : un simple filet en bas pour séparer la
- * section de l'exercice en cours qui suit, à plat avec le reste. */
+/* "Ce qu'on sait déjà" (`RecapitulatifPanel.tsx`) — fond blanc/surface + bordure, même traitement
+ * que `.selecteur-variante` (seule section de l'écran à mériter réellement une boîte propre : elle
+ * résume un état PASSÉ, distinct visuellement de l'exercice en cours qui suit). */
 .entrainement .recap-panel {
   margin: 0 0 20px;
-  padding: 0 0 18px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }
 
 .entrainement .recap-panel-titre {

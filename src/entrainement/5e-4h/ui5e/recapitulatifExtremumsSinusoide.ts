@@ -15,12 +15,9 @@ import { formatTermesEtatActuelExtremums } from "./formatExtremumsSinusoide";
  * fois et on filtre selon les scores partiels déjà trackés, jamais un second algorithme de rendu.
  *
  * NOTE D'ARCHITECTURE : les anciens blocs "état actuel" maison (`EtatActuelExtremums`, dupliqués
- * localement dans `components5e/EtapeParametreExtremum.tsx` et `EtapeSolutionsExtremum.tsx`) ne
- * sont PAS retirés — hors du périmètre autorisé pour cette tâche (seulement `App5gen11.tsx` + ce
- * nouveau fichier, même principe que `recapitulatifProblemesContexte.ts`/5gen5). `RecapitulatifPanel`
- * est donc ajouté EN PLUS, juste avant l'écran en cours, sans retirer les anciens blocs
- * `etat-actuel-box` existants (qui continuent de s'afficher à l'intérieur de chaque écran,
- * inchangés).
+ * localement dans `components5e/EtapeParametreExtremum.tsx` et `EtapeSolutionsExtremum.tsx`,
+ * affichés SANS CONDITION) ont depuis été retirés (fonctions + sites d'appel) une fois devenus un
+ * doublon visuel avec `RecapitulatifPanel`, ajouté juste avant l'écran en cours.
  */
 export function calculerRecapitulatifExtremumsSinusoide(etat: EtatSessionExtremumsSinusoide): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;

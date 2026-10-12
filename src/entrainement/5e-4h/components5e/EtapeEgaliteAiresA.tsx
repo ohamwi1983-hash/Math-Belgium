@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.types";
-import { CONSIGNE_EGALITE_AIRES_A, TEXTE_AIDE_EGALITE_AIRES_A_1, formatTermesEtatActuelA, latexAideEgaliteAiresA2 } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_EGALITE_AIRES_A, TEXTE_AIDE_EGALITE_AIRES_A_1, latexAideEgaliteAiresA2 } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerEgaliteAiresA } from "../moteur5e/verificationProblemesContexte";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -25,17 +25,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAConteneur }) {
-  const termes = formatTermesEtatActuelA(exercice, "egaliteAires", null);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -49,7 +38,6 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
   return (
     <div>
       {donnees}
-      <EtatActuelA exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_EGALITE_AIRES_A}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x =</label>

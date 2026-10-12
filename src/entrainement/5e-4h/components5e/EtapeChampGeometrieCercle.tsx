@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceGeometrieCercle } from "../core5e/geometrieCercle.types";
 import type { PhaseGeometrieCercle } from "../moteur5e/typesGeometrieCercle";
-import { blocDonneesLatex, consigneGenerale, consignePhase, formatTermesEtatActuelGeometrieCercle, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatGeometrieCercle";
+import { blocDonneesLatex, consigneGenerale, consignePhase, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatGeometrieCercle";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -9,18 +9,6 @@ import { BoutonAide } from "./BoutonAide";
 import { GeometrieCercleSketch } from "./GeometrieCercleSketch";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
-
-function EtatActuelGeometrieCercle({ exercice, phase }: { exercice: ExerciceGeometrieCercle; phase: PhaseGeometrieCercle }) {
-  const termes = formatTermesEtatActuelGeometrieCercle(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceGeometrieCercle;
@@ -78,7 +66,6 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
         ))}
       </div>
       <GeometrieCercleSketch exercice={exercice} />
-      <EtatActuelGeometrieCercle exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <div className="field field-inline">
         <label className="field-label">{labelPhase(phase)}</label>

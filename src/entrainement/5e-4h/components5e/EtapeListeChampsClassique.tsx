@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteClassique } from "./EtatActuelSuiteClassique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -61,7 +60,6 @@ export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteClassique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

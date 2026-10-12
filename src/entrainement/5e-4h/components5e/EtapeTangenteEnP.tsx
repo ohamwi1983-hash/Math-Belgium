@@ -7,7 +7,6 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelTangente } from "./EtatActuelTangente";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -61,7 +60,6 @@ export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax,
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelTangente exercice={exercice} phase="tangenteEnP" />
       <p className="prompt-text">{question.texteAvant}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

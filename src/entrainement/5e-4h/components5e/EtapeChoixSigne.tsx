@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelLimite } from "./EtatActuelLimite";
 
 interface Champ {
   /** Étiquette au-dessus du groupe de 2 boutons — vide pour un champ unique (bilatéral). */
@@ -58,7 +57,6 @@ export function EtapeChoixSigne({ exercice, phase, champs, options, tentativesUt
       <div className="equation-box equation-box-donnees">
         <Katex expression={formatBlocDonneesLatex(exercice)} block />
       </div>
-      <EtatActuelLimite exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {champs.map((champ, i) => (
         <div key={i}>

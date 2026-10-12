@@ -15,7 +15,6 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelFonctionDerivee } from "./EtatActuelFonctionDerivee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -74,7 +73,6 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
       <p className="prompt-text">
         Objectif : calculer <Katex expression={questionFinale()} />.
       </p>
-      <EtatActuelFonctionDerivee exercice={exercice} ecran="decomposer" typeRetenu={typeRetenu} />
       <p className="prompt-text">{consigneEcran("decomposer", typeRetenu)}</p>
       <ApercuExpressionLatex texte={champ1} label={label1} />
       <div className="field field-inline">

@@ -7,7 +7,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -56,7 +55,6 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
         ))}
       </div>
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelContexteEconomique exercice={exercice} ecran="resoudreEgaliteMarginales" />
       <p className="prompt-text">{consigneEcran(exercice, "resoudreEgaliteMarginales")}</p>
 
       <div className="field field-inline">

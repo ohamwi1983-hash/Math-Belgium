@@ -1,10 +1,9 @@
 import { useState } from "react";
 import type { ExercicePythagoricienne } from "../core5e/equationsTrigonometriques.types";
 import { diagnostiquerUneRacine, type ReponseRacine, type ReponseRacinesPythagoricienne } from "../moteur5e/verificationEquationTrig";
-import { CONSIGNE_RACINES_RESOLUTION, TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1, formatTermesEtatActuelPythagoricienne } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_RACINES_RESOLUTION, TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -25,26 +24,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle la conversion pythagoricienne ET les racines t déjà confirmées
- * aux 2 écrans précédents. */
-function EtatActuelPythagoricienne({
-  exercice,
-  phase,
-}: {
-  exercice: ExercicePythagoricienne;
-  phase: "racinesPythagoricienne" | "racinesResolution" | "solutionsPythagoricienne";
-}) {
-  const termes = formatTermesEtatActuelPythagoricienne(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 function formatT(t: number): string {
@@ -82,7 +61,6 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <EtatActuelPythagoricienne exercice={exercice} phase="racinesResolution" />
       <p className="prompt-text">{CONSIGNE_RACINES_RESOLUTION}</p>
 
       <p className="prompt-text">Racine t = {formatT(exercice.racine1.t)} :</p>

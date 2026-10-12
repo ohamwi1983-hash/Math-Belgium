@@ -7,7 +7,6 @@ import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -66,7 +65,6 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {lignes.map((ligne, i) => (
         <div key={i}>

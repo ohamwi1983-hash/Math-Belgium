@@ -6,7 +6,6 @@ import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -42,7 +41,6 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase="isolerSinInequation" />
       <p className="prompt-text">{consignePhase(exercice, "isolerSinInequation")}</p>
       {question.casSpecial !== null ? (
         <>

@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteRecurrenteAffine } from "./EtatActuelSuiteRecurrenteAffine";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -49,7 +48,6 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
   return (
     <div>
       <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <EtatActuelSuiteRecurrenteAffine exercice={exercice} phase="termesSuccessifs" />
       <p className="prompt-text">{consigneTermesSuccessifs(exercice)}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

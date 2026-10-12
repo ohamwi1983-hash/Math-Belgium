@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
 import { diagnostiquerIsolerX, type ReponseDeuxFacteursLignes } from "../moteur5e/verificationEquationTrig";
-import { formatEnonceProduitLatex, formatTermesEtatActuelProduit } from "../ui5e/formatEquationTrigonometrique";
+import { formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -28,26 +28,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle prefacteur (si présent) + les facteurs séparés + l'argument
- * (formes réelles substituées, D.2) déjà confirmés aux 2 écrans précédents. */
-function EtatActuelProduit({
-  exercice,
-  phase,
-}: {
-  exercice: ExerciceProduitFacteurs;
-  phase: "separerFacteurs" | "argumentProduit" | "isolerXProduit" | "solutionsProduit";
-}) {
-  const termes = formatTermesEtatActuelProduit(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 /** Écran "isoler x pour chaque facteur" (famille "produit") — les 2 facteurs traités ENSEMBLE,
@@ -85,7 +65,6 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelProduit exercice={exercice} phase="isolerXProduit" />
       <p className="prompt-text">Résous ces équations ci-dessus et donne les valeurs de x.</p>
 
       <p className="prompt-text">

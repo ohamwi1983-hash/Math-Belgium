@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteClassique } from "./EtatActuelSuiteClassique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -57,7 +56,6 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteClassique exercice={exercice} phase="suitesFinalesCombinees" />
       <p className="prompt-text">{consignePhase(exercice, "suitesFinalesCombinees")}</p>
 
       <p>Suite arithmétique :</p>

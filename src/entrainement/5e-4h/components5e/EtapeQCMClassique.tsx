@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteClassique } from "./EtatActuelSuiteClassique";
 
 interface Props {
   exercice: ExerciceSuiteClassique;
@@ -43,7 +42,6 @@ export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentat
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteClassique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <div className="options-liste-longue">
         {options.map((o) => (

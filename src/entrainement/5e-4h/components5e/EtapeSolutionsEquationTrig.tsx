@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig } from "../core5e/equationsTrigonometriques.types";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2, formatEquationEnonceLatex } from "../ui5e/formatEquationTrig";
-import { formatTermesEtatActuelDirecte } from "../ui5e/formatEquationTrigonometrique";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
@@ -25,20 +24,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle l'argument u ET les branches x déjà isolées aux 2 écrans
- * précédents ("argument" puis "isolerX"). */
-function EtatActuelDirecte({ exercice, phase }: { exercice: ExerciceEquationTrig; phase: "isolerX" | "solutions" }) {
-  const termes = formatTermesEtatActuelDirecte(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 /** Écran 3 (absent si `exercice.aucuneSolution`) — lister les solutions distinctes dans [0;2π[.
@@ -74,7 +59,6 @@ export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tent
       <div className="equation-box">
         <Katex expression={formatEquationEnonceLatex(exercice)} block />
       </div>
-      <EtatActuelDirecte exercice={exercice} phase="solutions" />
       <p className="prompt-text">
         Liste toutes les solutions distinctes dans [0;2π[ (une valeur par point).
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}

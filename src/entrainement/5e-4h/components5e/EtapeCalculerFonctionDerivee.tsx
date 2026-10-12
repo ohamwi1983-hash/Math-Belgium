@@ -6,7 +6,6 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelFonctionDerivee } from "./EtatActuelFonctionDerivee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -55,7 +54,6 @@ export function EtapeCalculerFonctionDerivee({ exercice, typeRetenu, tentativesU
       <p className="prompt-text">
         Objectif : calculer <Katex expression={questionFinale()} />.
       </p>
-      <EtatActuelFonctionDerivee exercice={exercice} ecran="calculer" typeRetenu={typeRetenu} />
       <p className="prompt-text">{consigneEcran("calculer", typeRetenu)}</p>
       <ApercuExpressionLatex texte={texte} label="f'(x)=" />
       <div className="field field-inline">

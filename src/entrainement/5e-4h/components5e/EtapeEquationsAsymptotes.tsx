@@ -3,7 +3,6 @@ import type { ExerciceLectureGraphiqueLimites } from "../core5e/lectureGraphique
 import { listeAsymptotes } from "../moteur5e/typesLectureGraphiqueLimites";
 import { consigneGenerale, consignePhase, labelAsymptoteLatex } from "../ui5e/formatLectureGraphiqueLimites";
 import { Katex } from "../components/Katex";
-import { EtatActuelLectureGraphiqueLimites } from "./EtatActuelLectureGraphiqueLimites";
 import { LectureGraphiqueLimitesGraph } from "./LectureGraphiqueLimitesGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -50,7 +49,6 @@ export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentat
     <div>
       <p className="prompt-text">{consigneGenerale()}</p>
       <LectureGraphiqueLimitesGraph exercice={exercice} />
-      <EtatActuelLectureGraphiqueLimites exercice={exercice} phase="nommerAsymptotes" />
       <p className="prompt-text">{consignePhase("nommerAsymptotes")}</p>
       {slots.map((slot, i) => (
         <div key={i} className="field field-inline">

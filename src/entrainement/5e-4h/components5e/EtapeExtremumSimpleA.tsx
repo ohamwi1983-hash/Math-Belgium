@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { diagnostiquerExtremumSimpleA } from "../moteur5e/verificationProblemesContexte";
-import { consigneExtremumSimpleA, formatTermesEtatActuelAReduit, texteAideExtremumSimpleA1 } from "../ui5e/formatProblemesContexte";
+import { consigneExtremumSimpleA, texteAideExtremumSimpleA1 } from "../ui5e/formatProblemesContexte";
 import type { ExerciceScenarioAReduit } from "../ui5e/scenarioAGraphReduit";
-import { Katex } from "../components/Katex";
 import { ScenarioAGraphReduit } from "./ScenarioAGraphReduit";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -24,17 +23,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAReduit }) {
-  const termes = formatTermesEtatActuelAReduit(exercice, "extremumSimple");
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeExtremumSimpleA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -48,7 +36,6 @@ export function EtapeExtremumSimpleA({ exercice, donnees, tentativesUtilisees, t
   return (
     <div>
       {donnees}
-      <EtatActuelA exercice={exercice} />
       <p className="prompt-text">{consigneExtremumSimpleA(exercice)}</p>
       <ScenarioAGraphReduit exercice={exercice} />
       <div className="field field-inline">

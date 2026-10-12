@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_SOLUTIONS_EGALITE, formatTermesEtatActuelEgalite } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_SOLUTIONS_EGALITE } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -27,20 +26,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Bloc "état actuel" — rappelle la conversion ET les branches en x déjà résolues aux 2 écrans
- * précédents. */
-function EtatActuelEgalite({ exercice, phase }: { exercice: ExerciceEgaliteExpressions; phase: "resoudreEgalite" | "solutionsEgalite" }) {
-  const termes = formatTermesEtatActuelEgalite(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 /** Écran final (famille "egalite") — solutions distinctes dans [0;2π[, add-as-needed. Régime
  * toujours "exact" pour cette famille (voir CLAUDE.md — b1/b2 toujours fraction de π). */
 export function EtapeSolutionsEgalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
@@ -60,7 +45,6 @@ export function EtapeSolutionsEgalite({ exercice, tentativesUtilisees, tentative
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <EtatActuelEgalite exercice={exercice} phase="solutionsEgalite" />
       <p className="prompt-text">{CONSIGNE_SOLUTIONS_EGALITE}</p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (

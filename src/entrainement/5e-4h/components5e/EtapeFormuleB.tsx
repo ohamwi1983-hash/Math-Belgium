@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerFormuleB } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_FORMULE_B, texteAideFormuleB1, latexFormuleFB, formatTermesEtatActuelB } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_FORMULE_B, texteAideFormuleB1, latexFormuleFB } from "../ui5e/formatProblemesContexte";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -32,17 +32,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelB({ exercice, aRetenu, bRetenu }: { exercice: ExerciceScenarioB; aRetenu: number; bRetenu: number }) {
-  const termes = formatTermesEtatActuelB(exercice, "formule", aRetenu, bRetenu);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 /** Jamais de placeholder construit à partir de a/b RETENUS — reviendrait à afficher la réponse
  * attendue en clair dans le champ. */
 export function EtapeFormuleB({ exercice, donnees, aRetenu, bRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
@@ -60,7 +49,6 @@ export function EtapeFormuleB({ exercice, donnees, aRetenu, bRetenu, tentativesU
   return (
     <div>
       {donnees}
-      <EtatActuelB exercice={exercice} aRetenu={aRetenu} bRetenu={bRetenu} />
       <p className="prompt-text">{CONSIGNE_FORMULE_B}</p>
       <ApercuExpressionLatex texte={texte} label="f(x) =" />
       <div className="field field-inline">

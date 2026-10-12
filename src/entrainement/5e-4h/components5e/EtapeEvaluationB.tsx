@@ -2,8 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerF1EvaluationB, diagnostiquerF2EvaluationB, type ReponseEvaluationB } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_EVALUATION_B_1, consigneEvaluationB, formatTermesEtatActuelB } from "../ui5e/formatProblemesContexte";
-import { Katex } from "../components/Katex";
+import { TEXTE_AIDE_EVALUATION_B_1, consigneEvaluationB } from "../ui5e/formatProblemesContexte";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -28,17 +27,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelB({ exercice, aRetenu, bRetenu }: { exercice: ExerciceScenarioB; aRetenu: number; bRetenu: number }) {
-  const termes = formatTermesEtatActuelB(exercice, "evaluation", aRetenu, bRetenu);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [f1, setF1] = useState("");
   const [f2, setF2] = useState("");
@@ -55,7 +43,6 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
   return (
     <div>
       {donnees}
-      <EtatActuelB exercice={exercice} aRetenu={aRetenu} bRetenu={bRetenu} />
       <p className="prompt-text">{consigneEvaluationB(exercice)}</p>
       <div className="field-row">
         <div className="field field-inline">

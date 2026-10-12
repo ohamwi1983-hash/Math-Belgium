@@ -8,7 +8,6 @@ import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -68,7 +67,6 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase="argumentResoudre" />
       <p className="prompt-text">{consignePhase(exercice, "argumentResoudre")}</p>
       <div className="options-grid">
         <button type="button" className={choixAucunAngle === true ? "btn toggle-active" : "btn"} onClick={() => setChoixAucunAngle(true)}>

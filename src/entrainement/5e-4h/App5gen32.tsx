@@ -97,7 +97,6 @@ export function App5gen32() {
             key={cleEcran}
             exercice={exercice}
             phase={etat.phase}
-            dernieresReponsesParEcran={etat.dernieresReponsesParEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}

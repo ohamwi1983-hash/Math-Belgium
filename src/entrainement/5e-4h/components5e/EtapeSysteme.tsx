@@ -8,7 +8,6 @@ import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelModelisation } from "./EtatActuelModelisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerSysteme } from "../moteur5e/verificationModelisationSinusoide";
@@ -62,7 +61,6 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
   return (
     <div>
       <BlocDonneesModelisation exercice={exercice} />
-      <EtatActuelModelisation exercice={exercice} phase="systeme" />
       <p className="prompt-text">{consignePhase(exercice, "systeme")}</p>
       <ApercuExpressionLatex texte={equation1} />
       <div className="field">

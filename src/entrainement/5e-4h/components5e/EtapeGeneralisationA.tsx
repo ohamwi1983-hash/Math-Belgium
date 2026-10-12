@@ -11,7 +11,6 @@ import {
 import {
   CONSIGNE_GENERALISATION_A,
   TEXTE_AIDE_GENERALISATION_A_1,
-  formatTermesEtatActuelA,
   latexAideGeneralisationA2F,
   latexAideGeneralisationA2G,
   latexAideGeneralisationA2H,
@@ -41,17 +40,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAConteneur }) {
-  const termes = formatTermesEtatActuelA(exercice, "generalisation", null);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeGeneralisationA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [h, setH] = useState("");
   const [f, setF] = useState("");
@@ -73,7 +61,6 @@ export function EtapeGeneralisationA({ exercice, donnees, tentativesUtilisees, t
   return (
     <div>
       {donnees}
-      <EtatActuelA exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_GENERALISATION_A}</p>
       <ApercuExpressionLatex texte={h} label="h(x) =" />
       <div className="field field-inline">

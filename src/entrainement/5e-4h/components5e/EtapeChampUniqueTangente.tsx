@@ -7,7 +7,6 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelTangente } from "./EtatActuelTangente";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -74,7 +73,6 @@ export function EtapeChampUniqueTangente({
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelTangente exercice={exercice} phase={phase} />
       <p className="prompt-text">
         {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
       </p>

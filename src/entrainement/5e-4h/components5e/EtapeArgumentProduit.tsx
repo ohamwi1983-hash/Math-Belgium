@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceEquationTrig, ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
 import { diagnostiquerArgument, type ReponseArgument, type ReponseDeuxFacteursArgument } from "../moteur5e/verificationEquationTrig";
-import { CONSIGNE_ARGUMENT_PRODUIT, formatEnonceProduitLatex, formatQuestionArgumentTexte, formatTermesEtatActuelProduit } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_ARGUMENT_PRODUIT, formatEnonceProduitLatex, formatQuestionArgumentTexte } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ANNONCE_PRECISION_DECIMAL, CONSIGNE_GENERALE_EQUATION_TRIG, texteAideArgumentNiveau1, texteAideArgumentNiveau2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -27,26 +27,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle prefacteur (si présent) + les 2 équations séparées déjà
- * confirmées à l'écran "separerFacteurs". */
-function EtatActuelProduit({
-  exercice,
-  phase,
-}: {
-  exercice: ExerciceProduitFacteurs;
-  phase: "separerFacteurs" | "argumentProduit" | "isolerXProduit" | "solutionsProduit";
-}) {
-  const termes = formatTermesEtatActuelProduit(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 /** Un facteur (moitié de l'écran), même mécanique/gate que `EtapeArgumentEquationTrig` (D.1),
@@ -157,7 +137,6 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelProduit exercice={exercice} phase="argumentProduit" />
       <p className="prompt-text">{CONSIGNE_ARGUMENT_PRODUIT}</p>
 
       <BlocFacteurArgument facteur={exercice.facteur1} numero={1} choix={choix1} setChoix={setChoix1} lignes={lignes1} setLignes={setLignes1} erronee={facteur1Erronee} />

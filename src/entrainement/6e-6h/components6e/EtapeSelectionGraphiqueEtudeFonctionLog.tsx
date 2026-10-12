@@ -1,7 +1,7 @@
 import { Katex } from "../components/Katex";
 import type { ExerciceEtudeLogNonE } from "../core6e/etudeFonctionLogarithme.types";
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionLogarithme";
-import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, etatActuel, formatFonctionLatex } from "../ui6e/formatEtudeFonctionLogarithme";
+import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, formatFonctionLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionEtudeFonctionLog } from "./GrapheOptionEtudeFonctionLog";
@@ -31,13 +31,6 @@ export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1,
       <p className="prompt-text">{CONSIGNE_GENERALE}</p>
       <div className="equation-box">
         <Katex expression={formatFonctionLatex(exercice)} />
-      </div>
-      <div className="etat-actuel-box">
-        <div className="etat-actuel-box-termes">
-          {(etatActuel("graphique", exercice) ?? []).map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
       </div>
       <p className="prompt-text">{consigneGraphique()}</p>
 

@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteArithmetique } from "./EtatActuelSuiteArithmetique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerNombre } from "../moteur5e/verificationSuiteArithmetique";
@@ -89,7 +88,6 @@ export function EtapeTermesMultiples({ exercice, phase, tentativesUtilisees, ten
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteArithmetique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

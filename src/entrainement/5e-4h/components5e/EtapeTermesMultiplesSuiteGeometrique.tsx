@@ -14,7 +14,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteGeometrique } from "./EtatActuelSuiteGeometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -87,7 +86,6 @@ export function EtapeTermesMultiplesSuiteGeometrique({
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelSuiteGeometrique exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => {
         const champErronee = apresEchec && !!diagnostiquerChamp && diagnostiquerChamp(i, valeurs[i]) !== "correct";

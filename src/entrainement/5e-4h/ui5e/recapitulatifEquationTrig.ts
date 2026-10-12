@@ -69,11 +69,9 @@ function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): En
  * qu'en `ReactNode`.
  *
  * NOTE D'ARCHITECTURE : les anciens blocs "état actuel" maison (`etat-actuel-box`, dupliqués
- * localement dans chacun des ~10 `Etape*.tsx` de ce générateur) ne sont PAS retirés — hors du
- * périmètre autorisé pour cette tâche (seulement `App5gen10.tsx` + ce nouveau fichier, même
- * principe que `recapitulatifProblemesContexte.ts`/5gen5). `RecapitulatifPanel` est donc ajouté EN
- * PLUS, juste avant l'écran en cours, sans retirer les anciens blocs existants (qui continuent de
- * s'afficher à l'intérieur de chaque écran, inchangés).
+ * localement dans chacun des ~10 `Etape*.tsx` de ce générateur, affichés SANS CONDITION) ont depuis
+ * été retirés (fonctions + sites d'appel) une fois devenus un doublon visuel avec
+ * `RecapitulatifPanel`, ajouté juste avant l'écran en cours.
  */
 export function calculerRecapitulatifEquationTrig(etat: EtatSessionEquationTrigonometrique): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;

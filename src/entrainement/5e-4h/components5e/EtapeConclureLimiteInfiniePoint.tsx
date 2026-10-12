@@ -5,7 +5,6 @@ import { consigneGenerale, consignePhase, formatBlocDonneesLatex } from "../ui5e
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
-import { EtatActuelLimite } from "./EtatActuelLimite";
 
 const OPTIONS_CONCLURE: { id: string; label: string }[] = [
   { id: "-1", label: "−∞" },
@@ -40,7 +39,6 @@ export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees,
       <div className="equation-box equation-box-donnees">
         <Katex expression={formatBlocDonneesLatex(exercice)} block />
       </div>
-      <EtatActuelLimite exercice={exercice} phase="conclureLimite" />
       <p className="prompt-text">{consignePhase(exercice, "conclureLimite")}</p>
       <select className="ce-select" aria-label="Conclusion de la limite" value={choixId} onChange={(e) => setChoixId(e.target.value)} disabled={!!validation}>
         <option value="" disabled>

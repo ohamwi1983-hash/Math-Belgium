@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { ReponseCasSpecial } from "../moteur5e/verificationEtudeComplete";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -52,7 +51,6 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       <BlocDonneesEtudeComplete exercice={exercice} />
-      <EtatActuelEtudeComplete exercice={exercice} phase="casSpecial" />
       <Katex expression={consignePhase(exercice, "casSpecial")} block />
       <div className="field-row">
         <div className="field field-inline">

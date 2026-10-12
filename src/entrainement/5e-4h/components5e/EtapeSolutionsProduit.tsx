@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { ANNONCE_PRECISION_PRODUIT_SOLUTIONS, CONSIGNE_SOLUTIONS_PRODUIT, formatEnonceProduitLatex, formatTermesEtatActuelProduit, regimeProduit } from "../ui5e/formatEquationTrigonometrique";
+import { ANNONCE_PRECISION_PRODUIT_SOLUTIONS, CONSIGNE_SOLUTIONS_PRODUIT, formatEnonceProduitLatex, regimeProduit } from "../ui5e/formatEquationTrigonometrique";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { CONSIGNE_GENERALE_EQUATION_TRIG, TEXTE_AIDE_SOLUTIONS_NIVEAU1, TEXTE_AIDE_SOLUTIONS_NIVEAU2 } from "../ui5e/formatEquationTrig";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -26,26 +26,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle prefacteur (si présent) + facteurs séparés + argument (u1/u2) +
- * x isolé, tout ce qui a déjà été confirmé aux 3 écrans précédents. */
-function EtatActuelProduit({
-  exercice,
-  phase,
-}: {
-  exercice: ExerciceProduitFacteurs;
-  phase: "separerFacteurs" | "argumentProduit" | "isolerXProduit" | "solutionsProduit";
-}) {
-  const termes = formatTermesEtatActuelProduit(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 /** Écran final (famille "produit") — l'union des solutions des 2 facteurs, add-as-needed, même
@@ -78,7 +58,6 @@ export function EtapeSolutionsProduit({ exercice, tentativesUtilisees, tentative
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelProduit exercice={exercice} phase="solutionsProduit" />
       <p className="prompt-text">
         {CONSIGNE_SOLUTIONS_PRODUIT}
         {auMoinsUnFacteurDecimal && ANNONCE_PRECISION_PRODUIT_SOLUTIONS}

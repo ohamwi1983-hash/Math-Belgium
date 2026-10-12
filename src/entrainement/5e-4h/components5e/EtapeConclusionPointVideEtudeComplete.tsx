@@ -6,7 +6,6 @@ import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import type { ReponseConclusionPointVide } from "../moteur5e/sessionEtudeComplete";
 
 interface Props {
@@ -43,7 +42,6 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtil
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       <BlocDonneesEtudeComplete exercice={exercice} />
-      <EtatActuelEtudeComplete exercice={exercice} phase="pointVideConclusion" />
       <p className="prompt-text">{consignePhase(exercice, "pointVideConclusion")}</p>
 
       <p className="prompt-text">{`Y a-t-il une asymptote verticale en x=${point?.position} ?`}</p>

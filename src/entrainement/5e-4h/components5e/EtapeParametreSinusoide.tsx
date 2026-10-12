@@ -5,7 +5,6 @@ import {
   consigneGenerale,
   consignePhase,
   formatFormuleLatex,
-  formatTermesEtatActuelParametresSinusoideLatex,
   labelPhase,
   latexAideNiveau2,
   texteAideNiveau1,
@@ -37,27 +36,15 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Bloc "état actuel" — rappelle les paramètres déjà CONFIRMÉS avant l'écran courant (jamais la
- * saisie brute de l'élève, dérivé uniquement de `exercice`) ; absent sur le premier écran
- * (amplitude), rien à rappeler. Même patron que `EtatActuelCE` (5gen1). */
-function EtatActuelParametresSinusoide({ exercice, phase }: { exercice: ExerciceParametresSinusoide; phase: PhaseParametresSinusoide }) {
-  const termes = formatTermesEtatActuelParametresSinusoideLatex(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 /**
  * Écran UNIQUE, paramétré par la phase courante — les 5 écrans du générateur (A, φ, T, f, b)
  * réutilisent tous ce composant. `App5gen8.tsx` doit le rendre avec `key={phase}` (leçon retenue de
  * 5gen6/5gen7 : sans cette clé, React réutilise la même instance entre deux phases et le champ
  * `texte` local garde la réponse de l'écran précédent). Consigne générale + bloc de données
- * (formule tirée) redondants sur les 5 écrans (convention transversale de la plateforme).
+ * (formule tirée) redondants sur les 5 écrans (convention transversale de la plateforme). Les
+ * paramètres déjà confirmés sont présentés par `RecapitulatifPanel` (`App5gen8.tsx`,
+ * `ui5e/recapitulatifParametresSinusoide.ts`), plus l'ancien bloc "état actuel" local
+ * (`EtatActuelParametresSinusoide`, retiré ici — doublon visuel).
  */
 export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -80,7 +67,6 @@ export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, 
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelParametresSinusoide exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(phase)}</p>
       <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
       <div className="field field-inline">

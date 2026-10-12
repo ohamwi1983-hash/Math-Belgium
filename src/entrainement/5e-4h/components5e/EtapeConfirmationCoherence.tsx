@@ -6,7 +6,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueB;
@@ -46,7 +45,6 @@ export function EtapeConfirmationCoherence({ exercice, tentativesUtilisees, tent
         ))}
       </div>
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelContexteEconomique exercice={exercice} ecran="confirmationCoherence" />
       <p className="prompt-text">{consigneEcran(exercice, "confirmationCoherence")}</p>
 
       <div className="options-grid-compact">

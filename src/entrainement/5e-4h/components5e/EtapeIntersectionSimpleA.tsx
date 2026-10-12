@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { diagnostiquerIntersectionSimpleA } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_INTERSECTION_SIMPLE_A_1, consigneIntersectionSimpleA, formatTermesEtatActuelAReduit } from "../ui5e/formatProblemesContexte";
+import { TEXTE_AIDE_INTERSECTION_SIMPLE_A_1, consigneIntersectionSimpleA } from "../ui5e/formatProblemesContexte";
 import type { ExerciceScenarioAReduit } from "../ui5e/scenarioAGraphReduit";
-import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -23,17 +22,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelA({ exercice }: { exercice: ExerciceScenarioAReduit }) {
-  const termes = formatTermesEtatActuelAReduit(exercice, "intersectionSimple");
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -47,7 +35,6 @@ export function EtapeIntersectionSimpleA({ exercice, donnees, tentativesUtilisee
   return (
     <div>
       {donnees}
-      <EtatActuelA exercice={exercice} />
       <p className="prompt-text">{consigneIntersectionSimpleA()}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x =</label>

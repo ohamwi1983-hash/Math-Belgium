@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelSuiteRecurrenteAffine } from "./EtatActuelSuiteRecurrenteAffine";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -45,7 +44,6 @@ export function EtapePoserRecurrence({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <EtatActuelSuiteRecurrenteAffine exercice={exercice} phase="poserRecurrence" />
       <p className="prompt-text">{consignePoserRecurrence(exercice)}</p>
       <ApercuExpressionLatex texte={texte} label={`${exercice.variableGrandeur}_n+1 =`} />
       <div className="field field-inline">

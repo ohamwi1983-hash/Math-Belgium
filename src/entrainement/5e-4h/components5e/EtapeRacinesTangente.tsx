@@ -5,7 +5,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelTangente } from "./EtatActuelTangente";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -68,7 +67,6 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelTangente exercice={exercice} phase="resoudre" />
       <p className="prompt-text">{question.texteAvant}</p>
       {valeurs.map((v, i) => (
         <div key={i} className="field-row">

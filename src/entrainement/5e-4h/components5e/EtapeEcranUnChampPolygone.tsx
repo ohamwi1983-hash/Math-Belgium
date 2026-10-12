@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import type { PhasePolygonesArcsSecteurs } from "../moteur5e/typesPolygonesArcsSecteurs";
-import { consigneGenerale, consignePhase, latexAideNiveau2, segmentsEtatActuelPolygone, surlignagePourPhase, texteAideNiveau1, texteAideNiveau3 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { consigneGenerale, consignePhase, latexAideNiveau2, surlignagePourPhase, texteAideNiveau1, texteAideNiveau3 } from "../ui5e/formatPolygonesArcsSecteurs";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -31,15 +31,16 @@ interface Props {
 
 /** Réutilisé pour les 4 écrans à un seul champ (arcElementaire/arcMultiPas/secteurElementaire/
  * secteurMultiPas) — seuls consigne de phase/surlignage/aides changent selon `phase`. Ordre des
- * blocs : consigne générale (intègre r/n, pas de bloc de données séparé) → état actuel (jamais vide
- * ici, jamais atteint pour "cercleEntier") → consigne de phase + diagramme + champ. */
+ * blocs : consigne générale (intègre r/n, pas de bloc de données séparé) → consigne de phase +
+ * diagramme + champ. Les écrans déjà clos sont désormais présentés par `RecapitulatifPanel`
+ * (`App5gen7.tsx`, `ui5e/recapitulatifPolygonesArcsSecteurs.ts`), plus l'ancien bloc "état actuel"
+ * local (`segmentsEtatActuelPolygone`, retiré ici — doublon visuel). */
 export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const texteErronee = montrerErreurs && !!diagnostiquer && diagnostiquer(texte) !== "correct";
   const aideNiveau3 = texteAideNiveau3(exercice, phase);
-  const segmentsEtatActuel = segmentsEtatActuelPolygone(exercice, phase);
 
   function valider() {
     if (texte.trim() === "") return;
@@ -50,13 +51,6 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
   return (
     <div>
       <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      {segmentsEtatActuel.length > 0 && (
-        <div className="etat-actuel-box etat-actuel-box-termes">
-          {segmentsEtatActuel.map((s, i) => (
-            <Katex key={i} expression={s} />
-          ))}
-        </div>
-      )}
       <p className="prompt-text">{consignePhase(phase)}</p>
       <PolygoneCercleSketch r={exercice.r} n={exercice.n} surlignage={surlignagePourPhase(exercice, phase)} />
       <ApercuExpressionLatex texte={texte} />

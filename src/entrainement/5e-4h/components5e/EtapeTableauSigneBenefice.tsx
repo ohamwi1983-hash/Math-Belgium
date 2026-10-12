@@ -7,7 +7,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelContexteEconomique } from "./EtatActuelContexteEconomique";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueB;
@@ -46,7 +45,6 @@ export function EtapeTableauSigneBenefice({ exercice, tentativesUtilisees, tenta
         ))}
       </div>
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelContexteEconomique exercice={exercice} ecran="tableauSigneBenefice" />
       <p className="prompt-text">{consigneEcran(exercice, "tableauSigneBenefice")}</p>
 
       <p className="field-label field-label-minuscule">

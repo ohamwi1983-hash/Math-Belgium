@@ -7,9 +7,8 @@ import {
   diagnostiquerReconnaissanceC,
   type ReponseReconnaissanceC,
 } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_RECONNAISSANCE_C, texteAideReconnaissanceC1, formatTermesEtatActuelC } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_RECONNAISSANCE_C, texteAideReconnaissanceC1 } from "../ui5e/formatProblemesContexte";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
-import { Katex } from "../components/Katex";
 import { ScenarioCGraph } from "./ScenarioCGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -34,17 +33,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelC({ exercice }: { exercice: ExerciceScenarioC }) {
-  const termes = formatTermesEtatActuelC(exercice, "reconnaissance");
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cv, setCv] = useState("");
   const [cp, setCp] = useState("");
@@ -64,7 +52,6 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
   return (
     <div>
       {donnees}
-      <EtatActuelC exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_RECONNAISSANCE_C}</p>
       <ScenarioCGraph exercice={exercice} courbes="cvCp" />
       <ApercuExpressionLatex texte={cv} label="CV(x) =" />

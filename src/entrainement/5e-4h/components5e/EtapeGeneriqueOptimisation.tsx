@@ -8,14 +8,12 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelOptimisation } from "./EtatActuelOptimisation";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 interface Props {
   exercice: ExerciceOptimisation;
   phase: EcranOptimisation;
-  dernieresReponsesParEcran: Partial<Record<EcranOptimisation, Record<string, string>>>;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +33,7 @@ interface Props {
  * comme UNE SEULE tentative combinée (même patron que `EtapeSubstituerTangente.tsx`, 5gen28).
  * Calculatrice affichée dès qu'AU MOINS un champ texte de l'écran la demande.
  */
-export function EtapeGeneriqueOptimisation({ exercice, phase, dernieresReponsesParEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeGeneriqueOptimisation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const champs = champsEcran(exercice, phase);
   const [reponses, setReponses] = useState<Record<string, string>>(() => Object.fromEntries(champs.map((c) => [c.id, ""])));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -69,7 +67,6 @@ export function EtapeGeneriqueOptimisation({ exercice, phase, dernieresReponsesP
       <p className="prompt-text">
         Objectif : <Katex expression={questionFinale(exercice)} />
       </p>
-      <EtatActuelOptimisation exercice={exercice} phase={phase} dernieresReponsesParEcran={dernieresReponsesParEcran} />
       <p className="prompt-text">
         <strong>{LIBELLE_ECRAN[phase]}</strong> — {consigneEcran(exercice, phase)}
       </p>

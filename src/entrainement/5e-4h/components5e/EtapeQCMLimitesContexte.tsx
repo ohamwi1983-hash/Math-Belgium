@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelLimitesContexte } from "./EtatActuelLimitesContexte";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 interface Props {
@@ -44,7 +43,6 @@ export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUt
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelLimitesContexte exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
 
       <div className="options-grid">

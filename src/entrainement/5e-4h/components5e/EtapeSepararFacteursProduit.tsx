@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceProduitFacteurs } from "../core5e/equationsTrigonometriques.types";
-import { CONSIGNE_SEPARER_FACTEURS, TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1, formatEnonceProduitLatex, formatTermesEtatActuelProduit } from "../ui5e/formatEquationTrigonometrique";
+import { CONSIGNE_SEPARER_FACTEURS, TEXTE_AIDE_SEPARER_FACTEURS_NIVEAU1, formatEnonceProduitLatex } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
 import { decouperEquationLongueLatex } from "../ui5e/blocFitterEquation";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
@@ -25,27 +25,6 @@ interface Props {
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
    * "validation/invalidation avant de passer à l'écran suivant"). */
   validation?: ValidationEtapeProps | null;
-}
-
-/** Bloc "état actuel" — rappelle la factorisation déjà confirmée à l'écran "prefacteur" (sousCas
- * "nonFactoree" uniquement — pour "factoree", cet écran est le tout premier de la famille, rien à
- * rappeler, `formatTermesEtatActuelProduit` retourne alors `[]`). */
-function EtatActuelProduit({
-  exercice,
-  phase,
-}: {
-  exercice: ExerciceProduitFacteurs;
-  phase: "separerFacteurs" | "argumentProduit" | "isolerXProduit" | "solutionsProduit";
-}) {
-  const termes = formatTermesEtatActuelProduit(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
 }
 
 /** Écran "séparer en 2 équations" (famille "produit") — EXACTEMENT 2 champs (un produit à 2
@@ -75,7 +54,6 @@ export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, ten
           <Katex key={i} expression={morceau} />
         ))}
       </div>
-      <EtatActuelProduit exercice={exercice} phase="separerFacteurs" />
       <p className="prompt-text">{CONSIGNE_SEPARER_FACTEURS}</p>
       <ApercuExpressionLatex texte={ligne1} label="Équation 1" />
       <div className="field field-inline">

@@ -3,7 +3,6 @@ import type { ExerciceEgaliteExpressions } from "../core5e/equationsTrigonometri
 import {
   CONSIGNE_RESOUDRE_EGALITE,
   formatAideResoudreEgaliteNiveau2Latex,
-  formatTermesEtatActuelEgalite,
   texteAideResoudreEgaliteNiveau1,
 } from "../ui5e/formatEquationTrigonometrique";
 import { CONSIGNE_GENERALE_EQUATION_TRIG } from "../ui5e/formatEquationTrig";
@@ -31,20 +30,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Bloc "état actuel" — rappelle la conversion déjà confirmée à l'écran précédent
- * ("conversionEgalite", l'équation entière une fois les 2 côtés alignés sur la même fonction). */
-function EtatActuelEgalite({ exercice, phase }: { exercice: ExerciceEgaliteExpressions; phase: "resoudreEgalite" | "solutionsEgalite" }) {
-  const termes = formatTermesEtatActuelEgalite(exercice, phase);
-  if (termes.length === 0) return null;
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 /** Écran 2 (famille "egalite", fusionne "appliquer l'identité"/"isoler x" de la spec) — résoudre x
  * directement, add-as-needed pré-rempli au nombre de branches réelles (1 pour tanVersTan, 2
  * sinon). */
@@ -65,7 +50,6 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <EtatActuelEgalite exercice={exercice} phase="resoudreEgalite" />
       <p className="prompt-text">{CONSIGNE_RESOUDRE_EGALITE}</p>
       {lignes.map((ligne, i) => (
         <div key={i}>

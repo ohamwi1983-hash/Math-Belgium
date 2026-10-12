@@ -2,8 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioB } from "../core5e/problemesContexte.types";
 import { diagnostiquerAResolutionB, diagnostiquerBResolutionB, type ReponseResolutionB } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_RESOLUTION_B, TEXTE_AIDE_RESOLUTION_B_1, formatTermesEtatActuelB } from "../ui5e/formatProblemesContexte";
-import { Katex } from "../components/Katex";
+import { CONSIGNE_RESOLUTION_B, TEXTE_AIDE_RESOLUTION_B_1 } from "../ui5e/formatProblemesContexte";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -25,17 +24,6 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-function EtatActuelB({ exercice }: { exercice: ExerciceScenarioB }) {
-  const termes = formatTermesEtatActuelB(exercice, "resolution", null, null);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
-
 export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
@@ -52,7 +40,6 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
   return (
     <div>
       {donnees}
-      <EtatActuelB exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_RESOLUTION_B}</p>
       <div className="field-row">
         <div className="field field-inline">

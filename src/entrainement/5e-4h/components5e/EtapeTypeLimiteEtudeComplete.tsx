@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 
 type Choix = "infini" | "pointVide";
 
@@ -47,7 +46,6 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, te
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       <BlocDonneesEtudeComplete exercice={exercice} />
-      <EtatActuelEtudeComplete exercice={exercice} phase="typeLimite" />
       <p className="prompt-text">{consignePhase(exercice, "typeLimite")}</p>
       {exercice.exclusions.map((excl, i) => {
         const erronee = correction !== null && correction[i] === false;

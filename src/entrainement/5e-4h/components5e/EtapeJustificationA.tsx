@@ -2,22 +2,10 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioAConteneur } from "../core5e/problemesContexte.types";
 import { diagnostiquerJustificationA, type ReponseJustificationA } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_JUSTIFICATION_A_1, consigneJustificationA, formatTermesEtatActuelA, texteCorrectionJustificationA } from "../ui5e/formatProblemesContexte";
-import { Katex } from "../components/Katex";
+import { TEXTE_AIDE_JUSTIFICATION_A_1, consigneJustificationA, texteCorrectionJustificationA } from "../ui5e/formatProblemesContexte";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-
-function EtatActuelA({ exercice, xOptimalRetenu }: { exercice: ExerciceScenarioAConteneur; xOptimalRetenu: number }) {
-  const termes = formatTermesEtatActuelA(exercice, "justification", xOptimalRetenu);
-  return (
-    <div className="etat-actuel-box etat-actuel-box-termes">
-      {termes.map((t, i) => (
-        <Katex key={i} expression={t} />
-      ))}
-    </div>
-  );
-}
 
 interface Props {
   exercice: ExerciceScenarioAConteneur;
@@ -57,7 +45,6 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
   return (
     <div>
       {donnees}
-      <EtatActuelA exercice={exercice} xOptimalRetenu={xOptimalRetenu} />
       <p className="prompt-text">{consigneJustificationA()}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">h ≈</label>

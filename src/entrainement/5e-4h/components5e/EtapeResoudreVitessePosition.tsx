@@ -3,7 +3,6 @@ import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import { consigneEcran, consigneJustification, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
 import type { ReponseResoudre } from "../moteur5e/verificationVitessePosition";
 import { EnonceVitessePosition } from "./EnonceVitessePosition";
-import { EtatActuelVitessePosition } from "./EtatActuelVitessePosition";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -65,7 +64,6 @@ export function EtapeResoudreVitessePosition({
   return (
     <div>
       <EnonceVitessePosition exercice={exercice} />
-      <EtatActuelVitessePosition exercice={exercice} ecran="resoudre" />
       <p className="prompt-text">{consigneEcran(exercice, "resoudre")}</p>
 
       <div className="field field-inline">

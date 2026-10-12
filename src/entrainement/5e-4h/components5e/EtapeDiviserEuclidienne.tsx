@@ -7,7 +7,6 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelAsymptoteOblique } from "./EtatActuelAsymptoteOblique";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
@@ -57,7 +56,6 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelAsymptoteOblique exercice={exercice} phase="diviserEuclidienne" />
       <p className="prompt-text">{consignePhase(exercice, "diviserEuclidienne")}</p>
       <ApercuExpressionLatex texte={quotient} label="Q(x)=" />
       <div className="field field-inline">

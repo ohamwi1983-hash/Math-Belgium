@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelLimite } from "./EtatActuelLimite";
 
 const OPTIONS_SIGNE_INFINI: { id: "1" | "-1"; label: string }[] = [
   { id: "1", label: "+∞" },
@@ -75,8 +74,6 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
       <div className="equation-box equation-box-donnees">
         <Katex expression={formatBlocDonneesLatex(exercice)} block />
       </div>
-      <EtatActuelLimite exercice={exercice} phase="limitesGaucheDroite" />
-
       <p className="prompt-text">Détermine la limite à gauche.</p>
       <div className="field-row">
         <span className="field-label field-label-minuscule">

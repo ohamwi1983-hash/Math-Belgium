@@ -18,12 +18,10 @@ import { LIBELLE_PHASE, formatTermesReponseAttendueModelisationSinusoide } from 
  * repli texte joint par `\quad`).
  *
  * NOTE D'ARCHITECTURE : l'ancien bloc "état actuel" maison partagé (`EtatActuelModelisation`,
- * `components5e/EtatActuelModelisation.tsx`, utilisé par les 8 composants d'écran de 5gen13) n'est
- * PAS retiré — hors du périmètre autorisé pour cette tâche (seulement `App5gen13.tsx` + ce nouveau
- * fichier, même principe que `recapitulatifProblemesContexte.ts`/5gen5). `RecapitulatifPanel` est
- * donc ajouté EN PLUS, juste avant l'écran en cours, sans retirer les anciens blocs
- * `etat-actuel-box` existants (qui continuent de s'afficher à l'intérieur de chaque écran,
- * inchangés).
+ * `components5e/EtatActuelModelisation.tsx`, utilisé SANS CONDITION par les 8 composants d'écran de
+ * 5gen13) a depuis été retiré (fonction + sites d'appel), devenu un doublon visuel une fois
+ * `RecapitulatifPanel` ajouté juste avant l'écran en cours — l'ancien fichier `EtatActuelModelisation.tsx`
+ * a été supprimé, n'étant plus référencé par aucun écran.
  */
 export function calculerRecapitulatifModelisationSinusoide(etat: EtatSessionModelisationSinusoide): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;

@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelLimitesContexte } from "./EtatActuelLimitesContexte";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -82,7 +81,6 @@ export function EtapeChampsLimitesContexte({
           <Katex key={i} expression={frag} />
         ))}
       </div>
-      <EtatActuelLimitesContexte exercice={exercice} phase={phase} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => (
         <div key={i} className={`field champ-reponse-latex${champsEtroits?.[i] ?? true ? " champ-reponse-latex-etroit" : ""}`}>

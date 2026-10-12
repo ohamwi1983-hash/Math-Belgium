@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EtatActuelEtudeComplete } from "./EtatActuelEtudeComplete";
 import type { ReponseAsymptoteInfini, ReponseBlocAsymptote } from "../moteur5e/sessionEtudeComplete";
 
 interface Props {
@@ -108,7 +107,6 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
     <div>
       <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
       <BlocDonneesEtudeComplete exercice={exercice} />
-      <EtatActuelEtudeComplete exercice={exercice} phase="asymptoteInfini" />
       <p className="prompt-text">{consignePhase(exercice, "asymptoteInfini")}</p>
       <BlocDirection titre="Vers −∞" etat={moins} setEtat={setMoins} erronee={correction !== null && !correction.moins} />
       <BlocDirection titre="Vers +∞" etat={plus} setEtat={setPlus} erronee={correction !== null && !correction.plus} />
