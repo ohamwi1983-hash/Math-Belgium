@@ -9,7 +9,10 @@ import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
 import { EtapeRacinesCalculAires } from "./components6e/EtapeRacinesCalculAires";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatVolumesRevolution";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatVolumesRevolution";
+import { calculerRecapitulatifVolumesRevolution, calculerSegmentsProgressionVolumesRevolution } from "./ui6e/recapitulatifVolumesRevolution";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen27` — Volumes de révolution (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -107,15 +110,17 @@ export function App6gen27() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Volumes de révolution</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionVolumesRevolution(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifVolumesRevolution(etat)} />
         {ECRANS_RACINES.includes(phase) && (
           <EtapeRacinesCalculAires
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             placeholder="ex : 2"
             labelAjout="+ Ajouter une valeur"
@@ -132,7 +137,7 @@ export function App6gen27() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

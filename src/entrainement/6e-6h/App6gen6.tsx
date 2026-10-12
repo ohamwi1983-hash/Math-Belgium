@@ -46,7 +46,10 @@ import { EtapeOrdre1G } from "./components6e/EtapeOrdre1G";
 import { EtapeReponseLimite } from "./components6e/EtapeReponseLimite";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, consigneEcran, etatActuel, formatCibleTexte, formatLimiteEnonceLatex } from "./ui6e/formatLimitesExponentielles";
+import { aideNiveau1, aideNiveau2, consigneEcran, formatCibleTexte, formatLimiteEnonceLatex } from "./ui6e/formatLimitesExponentielles";
+import { calculerRecapitulatifLimitesExponentielles, calculerSegmentsProgressionLimitesExponentielles } from "./ui6e/recapitulatifLimitesExponentielles";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -104,7 +107,6 @@ export function App6gen6() {
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
   const consigne = consigneEcran(phase, exercice);
-  const rappelEtatActuel = etatActuel(exercice, phase);
 
   // Hook de vérification Playwright/dev — même principe que les autres générateurs 6e (ex.
   // App6gen23.tsx) : exposé UNIQUEMENT en mode dev (import.meta.env.DEV OU ?dev=1), jamais en prod.
@@ -211,14 +213,16 @@ export function App6gen6() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calcul de limites (fonctions exponentielles)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLimitesExponentielles(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifLimitesExponentielles(etat)} />
         <div className="card-body">
           {(phase === "aExposant" || phase === "aGlobale") && (
                 <EtapeReponseLimite
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   optionsCategorielles={phase === "aExposant" ? ["plus_infini", "moins_infini"] : ["plus_infini", "zero"]}
                   autoriserValeurLibre
@@ -240,7 +244,7 @@ export function App6gen6() {
                 <EtapeReponseLimite
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   optionsCategorielles={["plus_infini", "zero"]}
                   autoriserValeurLibre
@@ -259,7 +263,7 @@ export function App6gen6() {
                 <EtapeReponseLimite
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   optionsCategorielles={["plus_infini", "moins_infini"]}
                   autoriserValeurLibre={false}
@@ -281,7 +285,7 @@ export function App6gen6() {
                 <EtapeFacteursC
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -298,7 +302,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 0"
                   aideNiveau1={aide1}
@@ -317,7 +321,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : (1-exp(pi/2-x)+cos(x))/(cos(x)*(1-exp(pi/2-x)))"
                   aideNiveau1={aide1}
@@ -335,7 +339,7 @@ export function App6gen6() {
                 <EtapeOrdre1G
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -352,7 +356,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 1/2, 0.5"
                   aideNiveau1={aide1}
@@ -371,7 +375,7 @@ export function App6gen6() {
                 <EtapeFormeFI
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -388,7 +392,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={exercice.famille === "H" && exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*${exercice.base}^(3*x)` : "ex : 2"}
                   aideNiveau1={aide1}
@@ -406,7 +410,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "H" && !exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*${exercice.base}^(3*x)` : "ex : 2"
@@ -426,7 +430,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3/2, 1.5"
                   aideNiveau1={aide1}
@@ -445,7 +449,7 @@ export function App6gen6() {
                 <EtapeFormeFI
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -462,7 +466,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "I" && !exercice.sinAuNumerateur ? `ex : 2*ln(${exercice.base})*${exercice.base}^(2*x)` : "ex : 3*cos(3*x)"
@@ -482,7 +486,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "I" && exercice.sinAuNumerateur
@@ -506,7 +510,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3/2, 1.5"
                   aideNiveau1={aide1}
@@ -525,7 +529,7 @@ export function App6gen6() {
                 <EtapeFormeFI
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -542,7 +546,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "J" && exercice.arcAuNumerateur
@@ -568,7 +572,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "J" && !exercice.arcAuNumerateur
@@ -594,7 +598,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3/2, 1.5"
                   aideNiveau1={aide1}
@@ -613,7 +617,7 @@ export function App6gen6() {
                 <EtapeFormeFI
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -630,7 +634,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*(${exercice.base}^(3*x)-1)` : "ex : 4*x"
@@ -650,7 +654,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && !exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*(${exercice.base}^(3*x)-1)` : "ex : 4*x"
@@ -670,7 +674,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && exercice.expAuNumerateur ? `ex : 9*ln(${exercice.base})^2*${exercice.base}^(3*x)` : "ex : 4"
@@ -690,7 +694,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && !exercice.expAuNumerateur ? `ex : 9*ln(${exercice.base})^2*${exercice.base}^(3*x)` : "ex : 4"
@@ -710,7 +714,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 9/4, 2.25"
                   aideNiveau1={aide1}
@@ -729,7 +733,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "L" && exercice.sousType === "L1"
@@ -751,7 +755,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : e^6, exp(6)"
                   aideNiveau1={aide1}
@@ -770,7 +774,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={exercice.famille === "N" ? `ex : ${exercice.base}^(6+3*x)` : "ex : 2^(6+3*x)"}
                   aideNiveau1={aide1}
@@ -788,7 +792,7 @@ export function App6gen6() {
                 <EtapeChampLimiteExpo
                   key={phase}
                   consigneEcran={consigne}
-                  etatActuel={rappelEtatActuel}
+                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={exercice.famille === "N" ? `ex : ${exercice.base}^6` : "ex : 2^6"}
                   aideNiveau1={aide1}

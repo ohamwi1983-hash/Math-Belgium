@@ -23,7 +23,10 @@ import { EtapeValeurOuVideEquExpo } from "./components6e/EtapeValeurOuVideEquExp
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, consigneEcran, etatActuel, formatEnonceLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatEquationsExponentielles";
+import { aideNiveau1, aideNiveau2, consigneEcran, formatEnonceLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatEquationsExponentielles";
+import { calculerRecapitulatifEquationsExponentielles, calculerSegmentsProgressionEquationsExponentielles } from "./ui6e/recapitulatifEquationsExponentielles";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen9` — Résoudre une équation exponentielle. Validation INLINE même écran (rollout UX
@@ -83,7 +86,6 @@ export function App6gen9() {
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
   const consigne = consigneEcran(phase, exercice);
-  const etatActuelValeur = etatActuel(exercice, phase);
 
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
@@ -116,15 +118,17 @@ export function App6gen9() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Résoudre une équation exponentielle</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionEquationsExponentielles(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifEquationsExponentielles(etat)} />
         <div className="card-body">
           {phase === "aEcran1" && (
             <EtapeChampEquExpo
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               placeholder={exercice.famille === "A" && exercice.sousType === "A2" ? "ex : 2^(3*x-1)-2^5=0" : "ex : 3, -2, 1/2..."}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
@@ -142,7 +146,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               placeholder="ex : 4/3, -1.5..."
               aideNiveau1={aide1}
               aideNiveau2={aide2}
@@ -160,7 +164,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               placeholder="ex : -1"
@@ -181,7 +185,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               placeholder="ex : (3*x+1)/2"
               aideNiveau1={aide1}
               aideNiveau2={aide2}
@@ -199,7 +203,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               placeholder="ex : 1, -2/3..."
               aideNiveau1={aide1}
               aideNiveau2={aide2}
@@ -218,7 +222,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               placeholder="ex : 2*t^2-3*t-5=0"
               aideNiveau1={aide1}
               aideNiveau2={aide2}
@@ -236,7 +240,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               placeholder="ex : -3, 5..."
@@ -256,7 +260,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               placeholder="ex : 1, 2.5..."
@@ -278,7 +282,7 @@ export function App6gen9() {
               key={phase}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
-              etatActuel={etatActuelValeur}
+              etatActuel={null}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
               tentativesUtilisees={tentativesUtilisees}

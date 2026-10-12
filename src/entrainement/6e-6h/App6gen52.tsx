@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationExtensionsBinomialeNo
 import { EtapeChampsExtensionsBinomialeNormaleBayes } from "./components6e/EtapeChampsExtensionsBinomialeNormaleBayes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, calculerReferenceExtensionsBinomialeNormaleBayes, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatExtensionsBinomialeNormaleBayes";
+import { blocDonnees, calculerReferenceExtensionsBinomialeNormaleBayes, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatExtensionsBinomialeNormaleBayes";
+import { calculerRecapitulatifExtensionsBinomialeNormaleBayes, calculerSegmentsProgressionExtensionsBinomialeNormaleBayes } from "./ui6e/recapitulatifExtensionsBinomialeNormaleBayes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen52` — Extensions binomiale, normale et Bayes (problèmes). GÉNÉRATEUR DE CLÔTURE du chapitre
@@ -101,8 +104,10 @@ export function App6gen52() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Extensions binomiale, normale et Bayes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionExtensionsBinomialeNormaleBayes(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifExtensionsBinomialeNormaleBayes(etat)} />
         <EtapeChampsExtensionsBinomialeNormaleBayes
           // `${generationId}-${phase}`, PAS `phase` seul — famille B a un nombre de champs
           // variable (`termesACalculer.length`) à écran de départ constant (voir
@@ -111,7 +116,7 @@ export function App6gen52() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

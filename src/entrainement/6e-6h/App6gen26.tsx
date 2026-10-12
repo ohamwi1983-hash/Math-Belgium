@@ -9,7 +9,10 @@ import { EtapeChampsCalculAires } from "./components6e/EtapeChampsCalculAires";
 import { EtapeRacinesCalculAires } from "./components6e/EtapeRacinesCalculAires";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCalculAires";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatCalculAires";
+import { calculerRecapitulatifCalculAires, calculerSegmentsProgressionCalculAires } from "./ui6e/recapitulatifCalculAires";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen26` — Calcul d'aires par intégrale (chapitre 4, "Intégrales et primitives"). Même patron que
@@ -107,15 +110,17 @@ export function App6gen26() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calcul d'aires par intégrale</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionCalculAires(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifCalculAires(etat)} />
         {ECRANS_RACINES.includes(phase) && (
           <EtapeRacinesCalculAires
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             placeholder="ex : 2"
             labelAjout="+ Ajouter une racine"
@@ -132,7 +137,7 @@ export function App6gen26() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

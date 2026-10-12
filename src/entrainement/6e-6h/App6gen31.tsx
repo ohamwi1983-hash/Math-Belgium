@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationTiragesArbres";
 import { Katex } from "./components/Katex";
 import { EtapeChampsTiragesArbres } from "./components6e/EtapeChampsTiragesArbres";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex } from "./ui6e/formatTiragesArbres";
+import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatTiragesArbres";
+import { calculerRecapitulatifTiragesArbres, calculerSegmentsProgressionTiragesArbres } from "./ui6e/recapitulatifTiragesArbres";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen31` — Tirages, arbres et dénombrement (chapitre 8, "Probabilités", DEUXIÈME générateur de ce
@@ -94,7 +97,7 @@ export function App6gen31() {
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: etatActuel(exercice, phase),
+    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
@@ -108,8 +111,10 @@ export function App6gen31() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Tirages, arbres et dénombrement</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionTiragesArbres(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifTiragesArbres(etat)} />
         <EtapeChampsTiragesArbres key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />
       </main>
     </div>

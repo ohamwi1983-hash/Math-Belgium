@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationBinomeNewton";
 import { EtapeChampsBinomeNewton } from "./components6e/EtapeChampsBinomeNewton";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatBinomeNewton";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatBinomeNewton";
+import { calculerRecapitulatifBinomeNewton, calculerSegmentsProgressionBinomeNewton } from "./ui6e/recapitulatifBinomeNewton";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen45` — Binôme de Newton. Chapitre "Analyse combinatoire" (mirroir 6gen43/6gen44 : réutilise
@@ -99,14 +102,16 @@ export function App6gen45() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Binôme de Newton</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionBinomeNewton(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifBinomeNewton(etat)} />
         <EtapeChampsBinomeNewton
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

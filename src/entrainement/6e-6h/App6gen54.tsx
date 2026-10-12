@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationPointsDroitesRemarqua
 import { Katex } from "./components/Katex";
 import { EtapeChampsPointsDroitesRemarquablesTriangle } from "./components6e/EtapeChampsPointsDroitesRemarquablesTriangle";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, consigneEcran, consigneGenerale, definitionEcran, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatPointsDroitesRemarquablesTriangle";
+import { blocDonnees, consigneEcran, consigneGenerale, definitionEcran, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatPointsDroitesRemarquablesTriangle";
+import { calculerRecapitulatifPointsDroitesRemarquablesTriangle, calculerSegmentsProgressionPointsDroitesRemarquablesTriangle } from "./ui6e/recapitulatifPointsDroitesRemarquablesTriangle";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen54` — Points et droites remarquables du triangle. GÉNÉRATEUR D'OUVERTURE du chapitre "Lieux
@@ -103,14 +106,16 @@ export function App6gen54() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Points et droites remarquables du triangle</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionPointsDroitesRemarquablesTriangle(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifPointsDroitesRemarquablesTriangle(etat)} />
         <EtapeChampsPointsDroitesRemarquablesTriangle
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           definition={definitionEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

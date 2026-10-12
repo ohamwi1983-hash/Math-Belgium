@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationProbabiliteHypergeome
 import { EtapeChampsProbabiliteHypergeometrique } from "./components6e/EtapeChampsProbabiliteHypergeometrique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProbabiliteHypergeometrique";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProbabiliteHypergeometrique";
+import { calculerRecapitulatifProbabiliteHypergeometrique, calculerSegmentsProgressionProbabiliteHypergeometrique } from "./ui6e/recapitulatifProbabiliteHypergeometrique";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen47` — Probabilité hypergéométrique (tirage sans remise). Chapitre "Analyse combinatoire".
@@ -101,14 +104,16 @@ export function App6gen47() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Probabilité hypergéométrique (tirage sans remise)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionProbabiliteHypergeometrique(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifProbabiliteHypergeometrique(etat)} />
         <EtapeChampsProbabiliteHypergeometrique
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

@@ -46,9 +46,11 @@ import {
   contenuRecapPhase,
   directionLabelsAsymptotes,
   directionLabelsLimites,
-  etatActuel,
   formatFonctionLatex,
 } from "./ui6e/formatEtudeFonctionLogarithme";
+import { calculerRecapitulatifEtudeFonctionLogarithme, calculerSegmentsProgressionEtudeFonctionLogarithme } from "./ui6e/recapitulatifEtudeFonctionLogarithme";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -139,8 +141,10 @@ export function App6gen21() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction (synthèse, logarithmes)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionEtudeFonctionLogarithme(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifEtudeFonctionLogarithme(etat)} />
         {etat.phase === "domaine" && (
               <EtapeDomaineEtudeFonctionLog
                 key={cle}
@@ -163,7 +167,7 @@ export function App6gen21() {
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneLimites(exercice)}
-                etatActuel={etatActuel("limites", exercice) ?? []}
+                etatActuel={[]}
                 labels={directionLabelsLimites(exercice)}
                 aideNiveau1={aideLimitesNiveau1(exercice)}
                 aideNiveau2={aideLimitesNiveau2(exercice)}
@@ -182,7 +186,7 @@ export function App6gen21() {
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneAsymptotes(exercice)}
-                etatActuel={etatActuel("asymptotes", exercice) ?? []}
+                etatActuel={[]}
                 labels={directionLabelsAsymptotes(exercice)}
                 forcerPresence={forcerPresenceAsymptotes(exercice.famille)}
                 aideNiveau1={aideAsymptotesNiveau1(exercice)}
@@ -202,7 +206,7 @@ export function App6gen21() {
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneCroissance(exercice)}
-                etatActuel={etatActuel("croissance", exercice) ?? []}
+                etatActuel={[]}
                 k={exercice.k}
                 aideNiveau1={aideCroissanceNiveau1(exercice)}
                 aideNiveau2={aideCroissanceNiveau2(exercice)}
@@ -220,7 +224,7 @@ export function App6gen21() {
                 key={cle}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneCroissance(exercice)}
-                etatActuel={etatActuel("croissance", exercice) ?? []}
+                etatActuel={[]}
                 aideNiveau1={aideCroissanceNiveau1(exercice)}
                 aideNiveau2={aideCroissanceNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}
@@ -237,7 +241,7 @@ export function App6gen21() {
               <EtapeConcaviteLog
                 key={cle}
                 enonceLatex={enonceLatex}
-                etatActuel={etatActuel("concavite", exercice) ?? []}
+                etatActuel={[]}
                 aideNiveau1={aideConcaviteNiveau1(exercice)}
                 aideNiveau2={aideConcaviteNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}
@@ -270,7 +274,7 @@ export function App6gen21() {
               <EtapeComportementInfiniE
                 key={cle}
                 enonceLatex={enonceLatex}
-                etatActuel={etatActuel("comportementInfini", exercice) ?? []}
+                etatActuel={[]}
                 aideNiveau1={aideComportementInfiniNiveau1()}
                 aideNiveau2={aideComportementInfiniNiveau2(exercice)}
                 tentativesUtilisees={tentativesUtilisees}

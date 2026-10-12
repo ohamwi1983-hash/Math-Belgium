@@ -10,7 +10,10 @@ import { EtapeChampsEquationsComplexes } from "./components6e/EtapeChampsEquatio
 import { EtapeChoixEquationsComplexes } from "./components6e/EtapeChoixEquationsComplexes";
 import { EtapeListeEquationsComplexes } from "./components6e/EtapeListeEquationsComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { OPTIONS_EQUATION_B, OPTIONS_EQUATION_E, OPTIONS_SYSTEME_A, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, nombreCibleEnsemble, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatEquationsComplexes";
+import { OPTIONS_EQUATION_B, OPTIONS_EQUATION_E, OPTIONS_SYSTEME_A, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, nombreCibleEnsemble, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatEquationsComplexes";
+import { calculerRecapitulatifEquationsComplexes, calculerSegmentsProgressionEquationsComplexes } from "./ui6e/recapitulatifEquationsComplexes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen36` — Équations dans ℂ (chapitre 7, "Nombres complexes", TROISIÈME générateur de ce
@@ -95,7 +98,7 @@ export function App6gen36() {
   const ecranCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: etatActuel(exercice, phase),
+    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
@@ -125,8 +128,12 @@ export function App6gen36() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Équations dans ℂ</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionEquationsComplexes(etat)} />
       </header>
-      <main className="card">{rendreEcran()}</main>
+      <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifEquationsComplexes(etat)} />
+        {rendreEcran()}
+      </main>
     </div>
   );
 }

@@ -9,7 +9,10 @@ import { EtapeChampsAireExcentriciteConique } from "./components6e/EtapeChampsAi
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAireExcentriciteConique";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAireExcentriciteConique";
+import { calculerRecapitulatifAireExcentriciteConique, calculerSegmentsProgressionAireExcentriciteConique } from "./ui6e/recapitulatifAireExcentriciteConique";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen60` — Aire via rayons focaux et excentricité depuis une condition géométrique. Chapitre "Les
@@ -119,14 +122,16 @@ export function App6gen60() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Aire via rayons focaux et excentricité</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionAireExcentriciteConique(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifAireExcentriciteConique(etat)} />
         <EtapeChampsAireExcentriciteConique
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

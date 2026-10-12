@@ -73,6 +73,9 @@ import {
   texteAideGDeriveeInterneNiveau1,
   texteAideGDeriveeInterneNiveau2,
 } from "./ui6e/formatDeriveesCyclometriques";
+import { calculerRecapitulatifDeriveesCyclometriques, calculerSegmentsProgressionDeriveesCyclometriques } from "./ui6e/recapitulatifDeriveesCyclometriques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -187,8 +190,10 @@ export function App6gen4() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Dérivées de fonctions cyclométriques</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDeriveesCyclometriques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDeriveesCyclometriques(etat)} />
         <div className="card-body">
           {etat.phase === "aDeriveeU" && exercice.famille === "A" && (
                 <EtapeChampDeriveeCyclo

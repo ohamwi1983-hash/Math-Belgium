@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationNombresComplexes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsNombresComplexes } from "./components6e/EtapeChampsNombresComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatNombresComplexes";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatNombresComplexes";
+import { calculerRecapitulatifNombresComplexes, calculerSegmentsProgressionNombresComplexes } from "./ui6e/recapitulatifNombresComplexes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen34` — Nombres complexes : opérations de base et puissances de i (chapitre 7, "Nombres
@@ -96,14 +99,16 @@ export function App6gen34() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Nombres complexes : opérations de base et puissances de i</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionNombresComplexes(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifNombresComplexes(etat)} />
         <EtapeChampsNombresComplexes
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

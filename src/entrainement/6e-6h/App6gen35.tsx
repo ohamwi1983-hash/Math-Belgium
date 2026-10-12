@@ -10,7 +10,10 @@ import { EtapeChampsAffixesRacines } from "./components6e/EtapeChampsAffixesRaci
 import { EtapeChoixAffixesRacines } from "./components6e/EtapeChoixAffixesRacines";
 import { EtapeRacinesAffixesRacines } from "./components6e/EtapeRacinesAffixesRacines";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { OPTIONS_RELATION_B, OPTIONS_SYSTEME_C, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAffixesRacines";
+import { OPTIONS_RELATION_B, OPTIONS_SYSTEME_C, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAffixesRacines";
+import { calculerRecapitulatifAffixesRacines, calculerSegmentsProgressionAffixesRacines } from "./ui6e/recapitulatifAffixesRacines";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen35` — Nombres complexes : affixes et racines carrées (chapitre 7, "Nombres complexes",
@@ -95,7 +98,7 @@ export function App6gen35() {
   const ecranCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: etatActuel(exercice, phase),
+    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
@@ -121,8 +124,12 @@ export function App6gen35() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Nombres complexes : affixes et racines carrées</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionAffixesRacines(etat)} />
       </header>
-      <main className="card">{rendreEcran()}</main>
+      <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifAffixesRacines(etat)} />
+        {rendreEcran()}
+      </main>
     </div>
   );
 }

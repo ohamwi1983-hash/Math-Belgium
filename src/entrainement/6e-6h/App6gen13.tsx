@@ -7,7 +7,10 @@ import { diagnostiquerEcran1, diagnostiquerEcran2 } from "./moteur6e/verificatio
 import { Katex } from "./components/Katex";
 import { EtapeProprieteLogarithme } from "./components6e/EtapeProprieteLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatProprietesLogarithme";
+import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatProprietesLogarithme";
+import { calculerRecapitulatifProprietesLogarithme, calculerSegmentsProgressionProprietesLogarithme } from "./ui6e/recapitulatifProprietesLogarithme";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -73,7 +76,7 @@ export function App6gen13() {
     consigneGenerale: CONSIGNE_GENERALE,
     expressionLatex: expressionDemandeeLatex(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: etatActuel(exercice, phase),
+    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: aideNiveau1(exercice, phase),
     aideNiveau2: aideNiveau2(exercice, phase),
@@ -91,8 +94,10 @@ export function App6gen13() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Propriétés du logarithme</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionProprietesLogarithme(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifProprietesLogarithme(etat)} />
         {phase === "ecran1" && (
           <EtapeProprieteLogarithme
             key={phase}

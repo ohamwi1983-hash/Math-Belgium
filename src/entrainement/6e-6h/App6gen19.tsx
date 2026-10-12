@@ -28,6 +28,9 @@ import { EtapeListeValeursHyperboliques } from "./components6e/EtapeListeValeurs
 import { EtapeStatutPariteHyperboliques } from "./components6e/EtapeStatutPariteHyperboliques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel } from "./ui6e/formatHyperboliques";
+import { calculerRecapitulatifHyperboliques, calculerSegmentsProgressionHyperboliques } from "./ui6e/recapitulatifHyperboliques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -148,8 +151,10 @@ export function App6gen19() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Sinus et cosinus hyperboliques (sh, ch)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionHyperboliques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifHyperboliques(etat)} />
         {phase === "aParite" && (
               <EtapeStatutPariteHyperboliques
                 key={phase}

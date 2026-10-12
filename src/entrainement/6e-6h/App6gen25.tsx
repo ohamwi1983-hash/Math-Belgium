@@ -9,7 +9,10 @@ import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPri
 import { EtapeResoudreMIntegralesDefinies } from "./components6e/EtapeResoudreMIntegralesDefinies";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntegralesDefinies";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntegralesDefinies";
+import { calculerRecapitulatifIntegralesDefinies, calculerSegmentsProgressionIntegralesDefinies } from "./ui6e/recapitulatifIntegralesDefinies";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen25` — Intégrales définies, paramètre et valeur moyenne (chapitre 4, "Intégrales et
@@ -100,15 +103,17 @@ export function App6gen25() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Intégrales définies, paramètre et valeur moyenne</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionIntegralesDefinies(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifIntegralesDefinies(etat)} />
         {phase === "resoudreM" && (
           <EtapeResoudreMIntegralesDefinies
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             placeholder={champsEcran(exercice, phase)[0]?.placeholder ?? ""}
             labelAjout="+ Ajouter une valeur de m"
@@ -123,7 +128,7 @@ export function App6gen25() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

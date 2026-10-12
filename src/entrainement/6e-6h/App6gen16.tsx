@@ -42,6 +42,9 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, labelsDeuxChamps } from "./ui6e/formatDomaineDeriveeLogarithme";
+import { calculerRecapitulatifDomaineDeriveeLogarithme, calculerSegmentsProgressionDomaineDeriveeLogarithme } from "./ui6e/recapitulatifDomaineDeriveeLogarithme";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -198,8 +201,10 @@ export function App6gen16() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Domaine, dérivée et dérivation logarithmique</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDomaineDeriveeLogarithme(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDomaineDeriveeLogarithme(etat)} />
         {PHASES_DOMAINE.has(phase) && (
           <EtapeDomaineDomaineDeriveeLog
             key={phase}

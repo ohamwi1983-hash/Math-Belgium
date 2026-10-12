@@ -19,6 +19,9 @@ import {
   formatFonctionLatex,
   placeholderDerivee,
 } from "./ui6e/formatGraphiqueDeriveeLogarithme";
+import { calculerRecapitulatifGraphiqueDeriveeLogarithme, calculerSegmentsProgressionGraphiqueDeriveeLogarithme } from "./ui6e/recapitulatifGraphiqueDeriveeLogarithme";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -84,8 +87,10 @@ export function App6gen20() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Graphique de la dérivée (fonctions logarithmes)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionGraphiqueDeriveeLogarithme(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifGraphiqueDeriveeLogarithme(etat)} />
         {etat.phase === "derivee" && (
           <EtapeChampGraphiqueDeriveeLogarithme
             key={cle}

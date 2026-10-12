@@ -8,7 +8,10 @@ import { diagnostiquerEcranQuellePrimitive } from "./moteur6e/verificationQuelle
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonneesQuellePrimitive, champsQuellePrimitive, consigneEcranQuellePrimitive, consigneGeneraleQuellePrimitive, etatActuelQuellePrimitive, formatReponseAttenduePhaseLatexQuellePrimitive, aideNiveau1QuellePrimitive, aideNiveau2QuellePrimitive } from "./ui6e/formatQuellePrimitive";
+import { blocDonneesQuellePrimitive, champsQuellePrimitive, consigneEcranQuellePrimitive, consigneGeneraleQuellePrimitive, formatReponseAttenduePhaseLatexQuellePrimitive, aideNiveau1QuellePrimitive, aideNiveau2QuellePrimitive } from "./ui6e/formatQuellePrimitive";
+import { calculerRecapitulatifQuellePrimitive, calculerSegmentsProgressionQuellePrimitive } from "./ui6e/recapitulatifQuellePrimitive";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen24` — Quelle primitive ? (condition initiale) (chapitre 4, "Intégrales et primitives",
@@ -105,14 +108,16 @@ export function App6gen24() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Quelle primitive ? (condition initiale)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionQuellePrimitive(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifQuellePrimitive(etat)} />
         <EtapeChampsCalculPrimitives
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGeneraleQuellePrimitive()}
           blocDonnees={blocDonneesQuellePrimitive(exercice)}
-          etatActuel={etatActuelQuellePrimitive(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcranQuellePrimitive(exercice, phase)}
           champs={champsQuellePrimitive(exercice, phase)}
           aideNiveau1={aideNiveau1QuellePrimitive(exercice, phase)}

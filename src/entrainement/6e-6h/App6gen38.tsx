@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationFormuleMoivre";
 import { Katex } from "./components/Katex";
 import { EtapeChampsFormuleMoivre } from "./components6e/EtapeChampsFormuleMoivre";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatFormuleMoivre";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatFormuleMoivre";
+import { calculerRecapitulatifFormuleMoivre, calculerSegmentsProgressionFormuleMoivre } from "./ui6e/recapitulatifFormuleMoivre";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen38` — Formule de Moivre : développer cos(nx) et sin(nx) (chapitre 7, "Nombres complexes",
@@ -95,14 +98,16 @@ export function App6gen38() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Formule de Moivre : développer cos(nx) et sin(nx)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionFormuleMoivre(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifFormuleMoivre(etat)} />
         <EtapeChampsFormuleMoivre
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

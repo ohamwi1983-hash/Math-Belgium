@@ -9,7 +9,10 @@ import { Katex } from "./components/Katex";
 import { EtapeChampsFormeTrigonometrique } from "./components6e/EtapeChampsFormeTrigonometrique";
 import { EtapeChoixCongruenceFormeTrigonometrique } from "./components6e/EtapeChoixCongruenceFormeTrigonometrique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatFormeTrigonometrique";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatFormeTrigonometrique";
+import { calculerRecapitulatifFormeTrigonometrique, calculerSegmentsProgressionFormeTrigonometrique } from "./ui6e/recapitulatifFormeTrigonometrique";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen37` — Forme trigonométrique, module, argument et opérations (chapitre 7, "Nombres
@@ -99,15 +102,17 @@ export function App6gen37() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Forme trigonométrique, module, argument et opérations</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionFormeTrigonometrique(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifFormeTrigonometrique(etat)} />
         {estEcranChoixCongruence ? (
           <EtapeChoixCongruenceFormeTrigonometrique
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
@@ -120,7 +125,7 @@ export function App6gen37() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

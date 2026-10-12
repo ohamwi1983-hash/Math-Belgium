@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationBinomialeSequenceOrdo
 import { EtapeChampsBinomialeSequenceOrdonnee } from "./components6e/EtapeChampsBinomialeSequenceOrdonnee";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatBinomialeSequenceOrdonnee";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatBinomialeSequenceOrdonnee";
+import { calculerRecapitulatifBinomialeSequenceOrdonnee, calculerSegmentsProgressionBinomialeSequenceOrdonnee } from "./ui6e/recapitulatifBinomialeSequenceOrdonnee";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen48` — Probabilité binomiale et séquence exacte sans remise. Même patron que
@@ -101,8 +104,10 @@ export function App6gen48() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Probabilité binomiale et séquence exacte</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionBinomialeSequenceOrdonnee(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifBinomialeSequenceOrdonnee(etat)} />
         <EtapeChampsBinomialeSequenceOrdonnee
           // `${etat.generationId}-${phase}`, JAMAIS `phase` seul — voir `generationId`
           // (`moteur6e/typesBinomialeSequenceOrdonnee.ts`/`sessionBinomialeSequenceOrdonnee.ts`) :
@@ -114,7 +119,7 @@ export function App6gen48() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

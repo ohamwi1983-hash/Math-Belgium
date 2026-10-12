@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationMethodeGeneratrices";
 import { EtapeChampsMethodeGeneratrices } from "./components6e/EtapeChampsMethodeGeneratrices";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatMethodeGeneratrices";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatMethodeGeneratrices";
+import { calculerRecapitulatifMethodeGeneratrices, calculerSegmentsProgressionMethodeGeneratrices } from "./ui6e/recapitulatifMethodeGeneratrices";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen57` — Problèmes de lieux : méthode des génératrices. Générateur D'OUVERTURE du chapitre
@@ -107,14 +110,16 @@ export function App6gen57() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Problèmes de lieux : méthode des génératrices</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionMethodeGeneratrices(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifMethodeGeneratrices(etat)} />
         <EtapeChampsMethodeGeneratrices
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale()}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

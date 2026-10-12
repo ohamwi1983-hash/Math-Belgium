@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationIntersectionsConiques
 import { EtapeChampsIntersectionsConiques } from "./components6e/EtapeChampsIntersectionsConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntersectionsConiques";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntersectionsConiques";
+import { calculerRecapitulatifIntersectionsConiques, calculerSegmentsProgressionIntersectionsConiques } from "./ui6e/recapitulatifIntersectionsConiques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen61` — Intersections : droite-conique et conique-conique. TROISIÈME générateur du chapitre
@@ -106,14 +109,16 @@ export function App6gen61() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Intersections droite-conique et conique-conique</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionIntersectionsConiques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifIntersectionsConiques(etat)} />
         <EtapeChampsIntersectionsConiques
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

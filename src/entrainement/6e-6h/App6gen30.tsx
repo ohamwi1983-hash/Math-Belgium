@@ -9,7 +9,10 @@ import { Katex } from "./components/Katex";
 import { EtapeChampsProbabilitesEnsembles } from "./components6e/EtapeChampsProbabilitesEnsembles";
 import { EtapeChoixProbabilitesEnsembles } from "./components6e/EtapeChoixProbabilitesEnsembles";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, estEcranChoix, etatActuel, formatReponseAttenduePhaseLatex } from "./ui6e/formatProbabilitesEnsembles";
+import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, estEcranChoix, formatReponseAttenduePhaseLatex } from "./ui6e/formatProbabilitesEnsembles";
+import { calculerRecapitulatifProbabilitesEnsembles, calculerSegmentsProgressionProbabilitesEnsembles } from "./ui6e/recapitulatifProbabilitesEnsembles";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen30` — Probabilités et ensembles (chapitre 8, "Probabilités", PREMIER générateur de ce
@@ -91,7 +94,7 @@ export function App6gen30() {
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: etatActuel(exercice, phase),
+    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
@@ -105,8 +108,10 @@ export function App6gen30() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Probabilités et ensembles</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionProbabilitesEnsembles(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifProbabilitesEnsembles(etat)} />
         {estEcranChoix(phase) ? (
           <EtapeChoixProbabilitesEnsembles key={phase} {...propsCommun} options={choixEcran(exercice, phase)} diagnostiquer={(choixId) => diagnostiquerEcran(exercice, phase, [choixId])} onValider={(choixId) => terminerEtape(soumettreReponseEcran(etat, [choixId]))} />
         ) : (

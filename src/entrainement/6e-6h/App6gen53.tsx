@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationLoiPoisson";
 import { EtapeChampsLoiPoisson } from "./components6e/EtapeChampsLoiPoisson";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiPoisson";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiPoisson";
+import { calculerRecapitulatifLoiPoisson, calculerSegmentsProgressionLoiPoisson } from "./ui6e/recapitulatifLoiPoisson";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen53` — Loi de Poisson. Même patron que `App6gen50.tsx` : un dispatcher générique piloté par
@@ -105,8 +108,10 @@ export function App6gen53() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Loi de Poisson</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLoiPoisson(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifLoiPoisson(etat)} />
         <EtapeChampsLoiPoisson
           // `${etat.generationId}-${phase}`, JAMAIS `phase` seul — voir `generationId`
           // (`moteur6e/typesLoiPoisson.ts`/`sessionLoiPoisson.ts`) : la famille B (écran
@@ -116,7 +121,7 @@ export function App6gen53() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

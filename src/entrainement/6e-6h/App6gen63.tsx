@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationProprietesOptiquesCon
 import { EtapeChampsProprietesOptiquesConiques } from "./components6e/EtapeChampsProprietesOptiquesConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProprietesOptiquesConiques";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProprietesOptiquesConiques";
+import { calculerRecapitulatifProprietesOptiquesConiques, calculerSegmentsProgressionProprietesOptiquesConiques } from "./ui6e/recapitulatifProprietesOptiquesConiques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen63` — Propriétés optiques des coniques. Chapitre "Les coniques", 6e FWB (6h) — générateur DE
@@ -107,14 +110,16 @@ export function App6gen63() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Propriétés optiques des coniques</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionProprietesOptiquesConiques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifProprietesOptiquesConiques(etat)} />
         <EtapeChampsProprietesOptiquesConiques
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

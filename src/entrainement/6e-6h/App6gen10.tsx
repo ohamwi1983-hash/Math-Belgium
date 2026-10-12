@@ -26,7 +26,10 @@ import { EtapeIntervalleIneqExpo } from "./components6e/EtapeIntervalleIneqExpo"
 import { EtapeSigneUnZeroIneqExpo } from "./components6e/EtapeSigneUnZeroIneqExpo";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, etatActuel, formatEnonceLatex } from "./ui6e/formatInequationsExponentielles";
+import { aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, formatEnonceLatex } from "./ui6e/formatInequationsExponentielles";
+import { calculerRecapitulatifInequationsExponentielles, calculerSegmentsProgressionInequationsExponentielles } from "./ui6e/recapitulatifInequationsExponentielles";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -78,7 +81,6 @@ export function App6gen10() {
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
   const consigne = consigneEcran(phase, exercice);
-  const etatAct = etatActuel(exercice, phase);
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
   // Hook de debug dev-only (même patron que `App6gen23.tsx` et les autres générateurs 6e) — expose
@@ -105,15 +107,17 @@ export function App6gen10() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Résoudre une inéquation exponentielle</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionInequationsExponentielles(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifInequationsExponentielles(etat)} />
         <div className="card-body">
           {phase === "aReconnaitre" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   placeholder="ex : 3, -2, 1/2..."
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -131,7 +135,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -149,7 +153,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   optionGauche={{ id: "existe", label: "Il existe une solution" }}
                   optionDroite={{ id: "vide", label: "∅ — Aucune solution" }}
                   aideNiveau1={aide1}
@@ -169,7 +173,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
                   optionDroite={{ id: "pasToujours", label: "Ce n'est pas toujours vrai" }}
                   aideNiveau1={aide1}
@@ -189,7 +193,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   placeholder="ex : (2/9)^(x^2+5)<=1"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -207,7 +211,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
                   optionDroite={{ id: "pasToujours", label: "Ce n'est pas toujours vrai" }}
                   aideNiveau1={aide1}
@@ -227,7 +231,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   optionGauche={{ id: "positif", label: "Toujours positif" }}
                   optionDroite={{ id: "negatif", label: "Toujours négatif" }}
                   aideNiveau1={aide1}
@@ -246,7 +250,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -264,7 +268,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -281,7 +285,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -298,7 +302,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -316,7 +320,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   placeholder="ex : (2/5)^x<1"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -334,7 +338,7 @@ export function App6gen10() {
                   key={phase}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatAct}
+                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}

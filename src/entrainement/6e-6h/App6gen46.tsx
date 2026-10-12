@@ -9,7 +9,10 @@ import { EtapeChampsDenombrementCombinatoirePur } from "./components6e/EtapeCham
 import { EtapeListeDecompositionsDenombrementCombinatoirePur } from "./components6e/EtapeListeDecompositionsDenombrementCombinatoirePur";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatDenombrementCombinatoirePur";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatDenombrementCombinatoirePur";
+import { calculerRecapitulatifDenombrementCombinatoirePur, calculerSegmentsProgressionDenombrementCombinatoirePur } from "./ui6e/recapitulatifDenombrementCombinatoirePur";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen46` — Dénombrement combinatoire pur : problèmes. 3ᵉ générateur du chapitre "Analyse
@@ -114,15 +117,17 @@ export function App6gen46() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Dénombrement combinatoire pur : problèmes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDenombrementCombinatoirePur(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDenombrementCombinatoirePur(etat)} />
         {estEcranListeDecompositionsD && exercice.famille === "D" && (
           <EtapeListeDecompositionsDenombrementCombinatoirePur
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             s1={exercice.s1}
             s2={exercice.s2}
@@ -138,7 +143,7 @@ export function App6gen46() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationLoiBinomiale";
 import { EtapeChampsLoiBinomiale } from "./components6e/EtapeChampsLoiBinomiale";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiBinomiale";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiBinomiale";
+import { calculerRecapitulatifLoiBinomiale, calculerSegmentsProgressionLoiBinomiale } from "./ui6e/recapitulatifLoiBinomiale";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen50` — Loi binomiale. Même patron que `App6gen48.tsx` : un dispatcher générique piloté par
@@ -100,8 +103,10 @@ export function App6gen50() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Loi binomiale</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLoiBinomiale(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifLoiBinomiale(etat)} />
         <EtapeChampsLoiBinomiale
           // `${etat.generationId}-${phase}`, JAMAIS `phase` seul — voir `generationId`
           // (`moteur6e/typesLoiBinomiale.ts`/`sessionLoiBinomiale.ts`) : la famille B (écran de
@@ -111,7 +116,7 @@ export function App6gen50() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

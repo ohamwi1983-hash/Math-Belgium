@@ -35,6 +35,9 @@ import {
   formatFonctionLatex,
   labelsDeuxChamps,
 } from "./ui6e/formatDomaineDeriveeExponentielles";
+import { calculerRecapitulatifDomaineDeriveeExponentielle, calculerSegmentsProgressionDomaineDeriveeExponentielle } from "./ui6e/recapitulatifDomaineDeriveeExponentielles";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -148,8 +151,10 @@ export function App6gen7() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Domaine et dérivée de fonctions exponentielles</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDomaineDeriveeExponentielle(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDomaineDeriveeExponentielle(etat)} />
         <div className="card-body">
           {phasesDomaine.has(phase) && (
             <EtapeDomaineDomaineDerivee

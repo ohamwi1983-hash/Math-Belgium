@@ -42,9 +42,11 @@ import {
   consigneLimites,
   contenuRecapPhase,
   directionLabels,
-  etatActuel,
   formatFonctionLatex,
 } from "./ui6e/formatEtudeFonctionExponentielle";
+import { calculerRecapitulatifEtudeFonctionExponentielle, calculerSegmentsProgressionEtudeFonctionExponentielle } from "./ui6e/recapitulatifEtudeFonctionExponentielle";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -126,8 +128,10 @@ export function App6gen11() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction exponentielle (synthèse)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionEtudeFonctionExponentielle(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifEtudeFonctionExponentielle(etat)} />
         <div className="card-body">
           {etat.phase === "domaine" && (
                 <EtapeDomaineEtudeFonction
@@ -151,7 +155,7 @@ export function App6gen11() {
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideLimitesNiveau1(exercice)}
                   aideNiveau2={aideLimitesNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -169,7 +173,7 @@ export function App6gen11() {
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideLimitesNiveau1(exercice)}
                   aideNiveau2={aideLimitesNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -187,7 +191,7 @@ export function App6gen11() {
                   key={cle}
                   enonceLatex={enonceLatex}
                   p={exercice.p}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideAsymptotesBNiveau1()}
                   aideNiveau2={aideAsymptotesBNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -205,7 +209,7 @@ export function App6gen11() {
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneAsymptotes(exercice)}
                   labels={directionLabels(exercice)}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideAsymptotesNiveau1(exercice)}
                   aideNiveau2={aideAsymptotesNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -222,7 +226,7 @@ export function App6gen11() {
                 <EtapeCroissance
                   key={cle}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideCroissanceNiveau1(exercice)}
                   aideNiveau2={aideCroissanceNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -239,7 +243,7 @@ export function App6gen11() {
                 <EtapeConcavite
                   key={cle}
                   enonceLatex={enonceLatex}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideConcaviteNiveau1(exercice)}
                   aideNiveau2={aideConcaviteNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -256,7 +260,7 @@ export function App6gen11() {
                 <EtapeSelectionGraphiqueEtudeFonction
                   key={cle}
                   exercice={exercice}
-                  etatActuel={etatActuel(exercice, etat.phase)}
+                  etatActuel={null}
                   aideNiveau1={aideGraphiqueNiveau1(exercice)}
                   aideNiveau2={aideGraphiqueNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}

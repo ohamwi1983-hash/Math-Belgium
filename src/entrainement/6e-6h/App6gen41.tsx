@@ -9,7 +9,10 @@ import { Katex } from "./components/Katex";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { EtapeTrianglesComplexes } from "./components6e/EtapeTrianglesComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTrianglesComplexes";
+import { blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTrianglesComplexes";
+import { calculerRecapitulatifTrianglesComplexes, calculerSegmentsProgressionTrianglesComplexes } from "./ui6e/recapitulatifTrianglesComplexes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen41` — Propriétés géométriques de triangles via les nombres complexes (chapitre 7, "Nombres
@@ -107,14 +110,16 @@ export function App6gen41() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Propriétés géométriques de triangles via les nombres complexes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionTrianglesComplexes(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifTrianglesComplexes(etat)} />
         <EtapeTrianglesComplexes
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           choix={choixEcran(exercice, phase)}

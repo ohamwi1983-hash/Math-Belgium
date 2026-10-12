@@ -32,6 +32,9 @@ import {
   texteAideSolutionsNiveau1,
   texteAideSolutionsNiveau2,
 } from "./ui6e/formatEquationsCyclometriques";
+import { calculerRecapitulatifEquationsCyclometriques, calculerSegmentsProgressionEquationsCyclometriques } from "./ui6e/recapitulatifEquationsCyclometriques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -165,8 +168,10 @@ export function App6gen3() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Équations avec fonctions cyclométriques</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionEquationsCyclometriques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifEquationsCyclometriques(etat)} />
         <div className="card-body">
           {etat.phase === "ce" && (
             <EtapeCEEquationsCyclometriques

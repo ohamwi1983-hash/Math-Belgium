@@ -35,6 +35,9 @@ import {
   formatCibleTexte,
   formatLimiteEnonceLatex,
 } from "./ui6e/formatLimitesLogarithmiques";
+import { calculerRecapitulatifLimiteLogarithmique, calculerSegmentsProgressionLimiteLogarithmique } from "./ui6e/recapitulatifLimitesLogarithmiques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -150,8 +153,10 @@ export function App6gen17() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calculer des limites (fonctions logarithmes)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLimiteLogarithmique(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifLimiteLogarithmique(etat)} />
         {phase === "aDominance" && exercice.famille === "A" && (
               <EtapeDominanceA
                 key={phase}

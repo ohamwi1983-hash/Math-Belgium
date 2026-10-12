@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationDenombrementFondament
 import { EtapeChampsDenombrementFondamental } from "./components6e/EtapeChampsDenombrementFondamental";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatDenombrementFondamental";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatDenombrementFondamental";
+import { calculerRecapitulatifDenombrementFondamental, calculerSegmentsProgressionDenombrementFondamental } from "./ui6e/recapitulatifDenombrementFondamental";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen43` — Dénombrement fondamental et arrangements. GÉNÉRATEUR D'OUVERTURE du chapitre "Analyse
@@ -103,14 +106,16 @@ export function App6gen43() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Dénombrement fondamental et arrangements</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDenombrementFondamental(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDenombrementFondamental(etat)} />
         <EtapeChampsDenombrementFondamental
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

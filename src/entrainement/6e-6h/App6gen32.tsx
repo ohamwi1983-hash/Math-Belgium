@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationIndependanceBayes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsIndependanceBayes } from "./components6e/EtapeChampsIndependanceBayes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, tableauDonnees, tableauEtatActuel } from "./ui6e/formatIndependanceBayes";
+import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, tableauDonnees } from "./ui6e/formatIndependanceBayes";
+import { calculerRecapitulatifIndependanceBayes, calculerSegmentsProgressionIndependanceBayes } from "./ui6e/recapitulatifIndependanceBayes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen32` — Indépendance, conditionnement et Bayes (chapitre 8, "Probabilités", 3e générateur du
@@ -93,8 +96,8 @@ export function App6gen32() {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
     tableauDonnees: tableauDonnees(exercice),
-    etatActuel: etatActuel(exercice, phase),
-    tableauEtatActuel: tableauEtatActuel(exercice, phase),
+    etatActuel: null,
+    tableauEtatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),
@@ -108,8 +111,10 @@ export function App6gen32() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Indépendance, conditionnement et Bayes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionIndependanceBayes(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifIndependanceBayes(etat)} />
         <EtapeChampsIndependanceBayes key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />
       </main>
     </div>

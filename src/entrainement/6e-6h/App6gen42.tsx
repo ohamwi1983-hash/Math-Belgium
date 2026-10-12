@@ -18,7 +18,6 @@ import {
   champsEcran,
   consigneEcran,
   consigneGenerale,
-  etatActuel,
   niveauAideMaxEcran,
   optionsEcran1A,
   optionsEcran2A,
@@ -30,6 +29,9 @@ import {
   aideNiveau1 as formatAideNiveau1,
   aideNiveau2 as formatAideNiveau2,
 } from "./ui6e/formatComplexesAvances";
+import { calculerRecapitulatifComplexesAvances, calculerSegmentsProgressionComplexesAvances } from "./ui6e/recapitulatifComplexesAvances";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen42` — Nombres complexes : problèmes avancés (chapitre 7, "Nombres complexes", 9e et DERNIER
@@ -154,15 +156,17 @@ export function App6gen42() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Nombres complexes : problèmes avancés</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionComplexesAvances(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifComplexesAvances(etat)} />
         {estEcranQcmA && exercice.famille === "A" && (
           <EtapeQcmComplexesAvances
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             options={phase === "aEcran1" ? optionsEcran1A(exercice.n) : phase === "aEcran2" ? optionsEcran2A(exercice.n) : optionsEcran3A(exercice)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -177,7 +181,7 @@ export function App6gen42() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             options={optionsStatutE()}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -192,7 +196,7 @@ export function App6gen42() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             demandePoleExclu={exercice.poleExclu !== null}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -208,7 +212,7 @@ export function App6gen42() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             optionsStatut={optionsStatutC()}
             optionsReciproque={optionsReciproqueC()}
@@ -224,7 +228,7 @@ export function App6gen42() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             nombreMaxLignes={nombreMaxListe()}
             placeholder={placeholderListe()}
@@ -240,7 +244,7 @@ export function App6gen42() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

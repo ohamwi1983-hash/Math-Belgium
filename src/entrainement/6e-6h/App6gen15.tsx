@@ -28,7 +28,10 @@ import { EtapeDeuxCasIneqLog } from "./components6e/EtapeDeuxCasIneqLog";
 import { EtapeIntervalleIneqLog } from "./components6e/EtapeIntervalleIneqLog";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, etatActuel, formatEnonceLatex } from "./ui6e/formatInequationsLogarithmiques";
+import { aideNiveau1, aideNiveau2, consigneEcran, contenuRecapPhase, formatEnonceLatex } from "./ui6e/formatInequationsLogarithmiques";
+import { calculerRecapitulatifInequationsLogarithmiques, calculerSegmentsProgressionInequationsLogarithmiques } from "./ui6e/recapitulatifInequationsLogarithmiques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -78,7 +81,6 @@ export function App6gen15() {
   const aide1 = aideNiveau1(phase, exercice);
   const aide2 = aideNiveau2(phase, exercice);
   const consigne = consigneEcran(phase, exercice);
-  const etatAct = etatActuel(phase, exercice);
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
   const contenuRecap = contenuRecapPhase(exercice, phase);
@@ -97,14 +99,16 @@ export function App6gen15() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Résoudre une inéquation logarithmique</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionInequationsLogarithmiques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifInequationsLogarithmiques(etat)} />
         {phase === "aCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -121,7 +125,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -139,7 +143,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -156,7 +160,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -174,7 +178,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -191,7 +195,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 placeholder="ex : (x+1)*(x-3)  ou  (x+1)/(x-3)"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -209,7 +213,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -227,7 +231,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -244,7 +248,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 placeholder="ex : y^2-y-2<0"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -262,7 +266,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -279,7 +283,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -316,7 +320,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -333,7 +337,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 placeholder="ex : (x-3)^2"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -351,7 +355,7 @@ export function App6gen15() {
                 key={phase}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={etatAct}
+                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}

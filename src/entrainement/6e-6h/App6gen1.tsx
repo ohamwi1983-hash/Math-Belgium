@@ -20,6 +20,9 @@ import { EtapeInjectiveInjectiviteFonctions } from "./components6e/EtapeInjectiv
 import { EtapeReciproqueInjectiviteFonctions } from "./components6e/EtapeReciproqueInjectiviteFonctions";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
+import { calculerRecapitulatifInjectiviteFonctions, calculerSegmentsProgressionInjectiviteFonctions } from "./ui6e/recapitulatifInjectiviteFonctions";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -129,8 +132,10 @@ export function App6gen1() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Fonctions injectives / surjectives / bijectives</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionInjectiviteFonctions(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifInjectiviteFonctions(etat)} />
         <div className="card-body">
           {etat.phase === "domaine" && (
             <EtapeDomaineInjectiviteFonctions

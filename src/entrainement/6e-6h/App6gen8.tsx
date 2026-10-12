@@ -25,12 +25,14 @@ import {
   aideSelectionNiveau2,
   calculerViewBoxGraphique,
   consigneEcranDerivee,
-  etatActuel,
   formatDeriveeCorrecteLatex,
   formatFonctionLatex,
   placeholderDerivee,
   rappelDomaineDerivee,
 } from "./ui6e/formatGraphiquesDeriveeExponentielles";
+import { calculerRecapitulatifGraphiquesDeriveeExponentielles, calculerSegmentsProgressionGraphiquesDeriveeExponentielles } from "./ui6e/recapitulatifGraphiquesDeriveeExponentielles";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -104,15 +106,17 @@ export function App6gen8() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Graphique de la dérivée (fonctions exponentielles)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionGraphiquesDeriveeExponentielles(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifGraphiquesDeriveeExponentielles(etat)} />
         <div className="card-body">
           {etat.phase === "derivee" && (
             <EtapeDeriveeGraphExpo
               key={cle}
               consigneEcran={consigneEcranDerivee()}
               fonctionLatex={formatFonctionLatex(exercice)}
-              etatActuel={etatActuel(exercice, etat.phase)}
+              etatActuel={null}
               rappelDomaine={rappelDomaineDerivee(exercice)}
               placeholder={placeholderDerivee(exercice)}
               aideNiveau1={aideDeriveeNiveau1(exercice)}
@@ -130,7 +134,7 @@ export function App6gen8() {
             <EtapeSelectionGraphiqueDeriveeExpo
               key={cle}
               exercice={exercice}
-              etatActuel={etatActuel(exercice, etat.phase)}
+              etatActuel={null}
               aideNiveau1={aideSelectionNiveau1(exercice)}
               aideNiveau2={aideSelectionNiveau2(exercice)}
               tentativesUtilisees={tentativesUtilisees}

@@ -37,9 +37,6 @@ import {
   consigneGeneraleA,
   consigneGeneraleB,
   consigneGeneraleC,
-  etatActuelA,
-  etatActuelB,
-  etatActuelC,
   formatReponseAttenduePhaseLatex,
   labelsEcranA,
   labelsEcranB,
@@ -47,6 +44,9 @@ import {
   placeholdersEcranA,
   placeholdersEcranB,
 } from "./ui6e/formatDeterminerParametresLogarithme";
+import { calculerRecapitulatifDeterminerParametresLogarithme, calculerSegmentsProgressionDeterminerParametresLogarithme } from "./ui6e/recapitulatifDeterminerParametresLogarithme";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -128,8 +128,10 @@ export function App6gen18() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Déterminer des paramètres depuis des conditions graphiques</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionDeterminerParametresLogarithme(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifDeterminerParametresLogarithme(etat)} />
         {exercice.famille === "A" && (
           <>
             {phase === "aEcran1" && (
@@ -138,7 +140,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleA()}
                 blocDonnees={blocDonneesA(exercice)}
-                etatActuel={etatActuelA(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranA(phase)}
                 labelA={labelsEcranA(exercice, phase).a}
                 labelB={labelsEcranA(exercice, phase).b}
@@ -156,7 +158,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleA()}
                 blocDonnees={blocDonneesA(exercice)}
-                etatActuel={etatActuelA(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranA(phase)}
                 labelA={labelsEcranA(exercice, phase).a}
                 labelB={labelsEcranA(exercice, phase).b}
@@ -179,7 +181,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleB()}
                 blocDonnees={blocDonneesB(exercice)}
-                etatActuel={etatActuelB(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranB(phase)}
                 labelA={labelsEcranB(phase).a}
                 labelB={labelsEcranB(phase).b}
@@ -197,7 +199,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleB()}
                 blocDonnees={blocDonneesB(exercice)}
-                etatActuel={etatActuelB(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranB(phase)}
                 placeholder="ex : 1,3"
                 aideNiveau1={aideNiveau1B(phase)}
@@ -212,7 +214,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleB()}
                 blocDonnees={blocDonneesB(exercice)}
-                etatActuel={etatActuelB(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranB(phase)}
                 labelA={labelsEcranB(phase).a}
                 labelB={labelsEcranB(phase).b}
@@ -235,7 +237,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleC(exercice)}
                 blocDonnees={blocDonneesC(exercice)}
-                etatActuel={etatActuelC(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranC(phase)}
                 placeholder={placeholderEcranC(exercice, phase)}
                 aideNiveau1={aideNiveau1C(phase)}
@@ -250,7 +252,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleC(exercice)}
                 blocDonnees={blocDonneesC(exercice)}
-                etatActuel={etatActuelC(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranC(phase)}
                 placeholder={placeholderEcranC(exercice, phase)}
                 aideNiveau1={aideNiveau1C(phase)}
@@ -265,7 +267,7 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleC(exercice)}
                 blocDonnees={blocDonneesC(exercice)}
-                etatActuel={etatActuelC(exercice, phase)}
+                etatActuel={null}
                 consigneEcran={consigneEcranC(phase)}
                 placeholder={placeholderEcranC(exercice, phase)}
                 aideNiveau1={aideNiveau1C(phase)}

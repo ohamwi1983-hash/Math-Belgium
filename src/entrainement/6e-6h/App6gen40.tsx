@@ -11,7 +11,10 @@ import { EtapeChoixFormuleTransformationsPlan } from "./components6e/EtapeChoixF
 import { EtapeImagesTransformationsPlan } from "./components6e/EtapeImagesTransformationsPlan";
 import { EtapeTypeParametresTransformationsPlan } from "./components6e/EtapeTypeParametresTransformationsPlan";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, optionsFormuleA, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTransformationsPlan";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, optionsFormuleA, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTransformationsPlan";
+import { calculerRecapitulatifTransformationsPlan, calculerSegmentsProgressionTransformationsPlan } from "./ui6e/recapitulatifTransformationsPlan";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen40` — Transformations du plan via les nombres complexes (chapitre 7, "Nombres complexes",
@@ -104,15 +107,17 @@ export function App6gen40() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Transformations du plan via les nombres complexes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionTransformationsPlan(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifTransformationsPlan(etat)} />
         {estEcranChoixFormule && exercice.famille === "A" && (
           <EtapeChoixFormuleTransformationsPlan
             key={phase}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             options={optionsFormuleA(exercice.parametres.sousType)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -128,7 +133,7 @@ export function App6gen40() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
@@ -144,7 +149,7 @@ export function App6gen40() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             nombreMaxPoints={exercice.autresPoints.length}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -160,7 +165,7 @@ export function App6gen40() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={etatActuel(exercice, phase)}
+            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

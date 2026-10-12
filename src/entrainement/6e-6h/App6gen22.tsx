@@ -60,7 +60,10 @@ import { EtapeDeuxValeursLogProblemes } from "./components6e/EtapeDeuxValeursLog
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex } from "./ui6e/formatLogarithmesProblemes";
+import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatLogarithmesProblemes";
+import { calculerRecapitulatifLogarithmesProblemes, calculerSegmentsProgressionLogarithmesProblemes } from "./ui6e/recapitulatifLogarithmesProblemes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -111,7 +114,6 @@ export function App6gen22() {
   const consigneG = consigneGenerale(exercice);
   const donnees = blocDonnees(exercice);
   const consigne = consigneEcran(exercice, phase);
-  const etatAct = etatActuel(exercice, phase);
 
   const validation = enAttente
     ? {
@@ -131,7 +133,7 @@ export function App6gen22() {
   const propsChampCommun = {
     consigneGenerale: consigneG,
     blocDonnees: donnees,
-    etatActuel: etatAct,
+    etatActuel: null,
     consigneEcran: consigne,
     aideNiveau1: aide1,
     aideNiveau2: aide2,
@@ -168,8 +170,10 @@ export function App6gen22() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Logarithmes : problèmes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLogarithmesProblemes(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifLogarithmesProblemes(etat)} />
         {phase === "aEcran1" && (
           <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1000*1.05^t>=1500" diagnostiquer={(t) => (exercice.famille === "A" ? diagnostiquerAEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte))} />
         )}
@@ -181,7 +185,7 @@ export function App6gen22() {
             key={phase}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
-            etatActuel={etatAct}
+            etatActuel={null}
             consigneEcran={consigne}
             labelChamp1="t_1="
             labelChamp2="t_2="

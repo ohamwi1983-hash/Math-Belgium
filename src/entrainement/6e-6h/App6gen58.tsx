@@ -8,7 +8,10 @@ import { diagnostiquerEcran } from "./moteur6e/verificationIdentificationConique
 import { EtapeChampsIdentificationConiques } from "./components6e/EtapeChampsIdentificationConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIdentificationConiques";
+import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIdentificationConiques";
+import { calculerRecapitulatifIdentificationConiques, calculerSegmentsProgressionIdentificationConiques } from "./ui6e/recapitulatifIdentificationConiques";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 /**
  * `6gen58` — Identification d'une conique et de ses éléments caractéristiques. GÉNÉRATEUR
@@ -112,14 +115,16 @@ export function App6gen58() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Identification d'une conique et de ses éléments caractéristiques</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionIdentificationConiques(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifIdentificationConiques(etat)} />
         <EtapeChampsIdentificationConiques
           key={phase}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={etatActuel(exercice, phase)}
+          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

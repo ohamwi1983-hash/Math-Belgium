@@ -37,7 +37,10 @@ import { EtapeChoixOuiNonExpoProblemes } from "./components6e/EtapeChoixOuiNonEx
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, etatActuel, formatReponseAttenduePhaseLatex } from "./ui6e/formatExponentiellesProblemes";
+import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatExponentiellesProblemes";
+import { calculerRecapitulatifExponentiellesProblemes, calculerSegmentsProgressionExponentiellesProblemes } from "./ui6e/recapitulatifExponentiellesProblemes";
+import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -90,7 +93,6 @@ export function App6gen12() {
   const consigneG = consigneGenerale(exercice);
   const donnees = blocDonnees(exercice);
   const consigne = consigneEcran(exercice, phase);
-  const etatAct = etatActuel(exercice, phase);
 
   const validation = enAttente
     ? {
@@ -110,7 +112,7 @@ export function App6gen12() {
   const propsChampCommun = {
     consigneGenerale: consigneG,
     blocDonnees: donnees,
-    etatActuel: etatAct,
+    etatActuel: null,
     consigneEcran: consigne,
     aideNiveau1: aide1,
     aideNiveau2: aide2,
@@ -150,8 +152,10 @@ export function App6gen12() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Exponentielles : problèmes</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
+        <ProgressionPuces segments={calculerSegmentsProgressionExponentiellesProblemes(etat)} />
       </header>
       <main className="card">
+        <RecapitulatifPanel entrees={calculerRecapitulatifExponentiellesProblemes(etat)} />
         <div className="card-body">
           {phase === "aEcran1" && (
             <EtapeChampExpoProblemes
@@ -352,7 +356,7 @@ export function App6gen12() {
               key={phase}
               consigneGenerale={consigneG}
               blocDonnees={donnees}
-              etatActuel={etatAct}
+              etatActuel={null}
               consigneEcran={consigne}
               aideNiveau1={aide1}
               aideNiveau2={aide2}
