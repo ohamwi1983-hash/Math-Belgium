@@ -1083,7 +1083,7 @@ export const trigonometrie: ChapterContent = {
       title: 'Équations trigonométriques trig(ax+b) = k',
       kicker: 'isoler l\'argument, résoudre au cercle trigonométrique, puis diviser par a',
       blocks: [
-        { kind: 'video', title: 'Équations trigonométriques trig(ax + b) = k', youtubeId: 'ZtlKK_N3xrY' },
+        { kind: 'video', title: 'Équations trigonométriques trig(ax + b) = k', youtubeId: 'mOwnAw5DlCY' },
         { kind: 'subheading', text: 'Résoudre sin x = t, cos x = t, tan x = t' },
         {
           kind: 'para',
