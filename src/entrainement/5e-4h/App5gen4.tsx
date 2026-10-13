@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { construireAvecRestreinte, genererExerciceComposeeGraphique } from "./generateurs5e/composeeGraphique";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -87,6 +87,14 @@ export function App5gen4() {
   // Aide niveau 2 (E.7) : révèle le point (a;bAttendu) sur le graphe de la fonction INTERNE.
   const pointRevele = etat.niveauAide >= 2 ? { fonction: nomInterne(question.composition), point: { x: question.a, y: question.bAttendu } } : null;
 
+  const premierePhaseRef = useRef(etat.indexQuestion);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.indexQuestion;
+  }
+  const estPremierEcran = etat.indexQuestion === premierePhaseRef.current;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -126,6 +134,7 @@ export function App5gen4() {
             onValider={(reponse) => terminerEtape(soumettreReponseQuestion(etat, reponse))}
             diagnostiquer={(reponse) => diagnostiquerReponseQuestion(question, reponse)}
             validation={validation}
+            estPremierEcran={estPremierEcran}
           />
         </div>
       </main>

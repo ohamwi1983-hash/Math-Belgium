@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceGraphiqueDeriveeLogarithme } from "./generateurs6e/graphiqueDeriveeLogarithme/index";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionGraphiqueDeriveeLogarithme, soumettreReponseDerivee, soumettreReponseSelection } from "./moteur6e/sessionGraphiqueDeriveeLogarithme";
@@ -59,6 +59,13 @@ export function App6gen20() {
   }
 
   const exercice = etat.exerciceCourant;
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   // Inclut `indexExercice` dans la clé — la phase seule peut rester identique entre 2 exercices
@@ -94,6 +101,7 @@ export function App6gen20() {
         {etat.phase === "derivee" && (
           <EtapeChampGraphiqueDeriveeLogarithme
             key={cle}
+            estPremierEcran={estPremierEcran}
             consigneEcran={consigneEcranDerivee()}
             fonctionLatex={formatFonctionLatex(exercice)}
             placeholder={placeholderDerivee(exercice)}
@@ -111,6 +119,7 @@ export function App6gen20() {
         {etat.phase === "selection" && (
           <EtapeSelectionGraphiqueDeriveeLogarithme
             key={cle}
+            estPremierEcran={estPremierEcran}
             exercice={exercice}
             aideNiveau1={aideSelectionNiveau1(exercice)}
             aideNiveau2={aideSelectionNiveau2(exercice)}

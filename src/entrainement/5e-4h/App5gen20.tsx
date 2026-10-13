@@ -158,6 +158,7 @@ export function App5gen20() {
             exercice={exercice}
             phase={phase}
             etat={etat}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -175,6 +176,7 @@ interface EcranProps {
   exercice: ExerciceLimite;
   phase: PhaseLimite;
   etat: EtatSessionLimite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -189,7 +191,18 @@ interface EcranProps {
  * famille). "reconnaissance" (écran 0) est IDENTIQUE pour les 4 familles — famille "limiteReelle" :
  * ce même écran soumet classification ET valeur numérique en un seul geste (`soumettreReponseReconnaissance`
  * accepte un `valeurTexte` optionnel), aucun écran supplémentaire. */
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
+function EcranCourant({
+  exercice,
+  phase,
+  etat,
+  estPremierEcran,
+  tentativesUtilisees,
+  tentativesMax,
+  cleEcran,
+  terminerEtape,
+  setEtat,
+  validation,
+}: EcranProps) {
   const niveauAideMax = niveauAideMaxLimite();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -199,6 +212,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeReconnaissanceLimite
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -220,6 +234,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeFactoriserLimite
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -241,6 +256,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             key={cleEcran}
             exercice={exercice}
             phase="simplifierEvaluer"
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
@@ -264,6 +280,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeFactoriserDenominateurLimite
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -284,6 +301,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           <EtapeLimitesGaucheDroite
             key={cleEcran}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
@@ -307,6 +325,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeConclureLimiteInfiniePoint
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           onValider={(choix) => terminerEtape(soumettreReponseConclureLimite(etat, choix))}
@@ -326,6 +345,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeTermeDominant
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -347,6 +367,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             key={cleEcran}
             exercice={exercice}
             phase="simplifierLimiteRef"
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
@@ -375,6 +396,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
               phase="evaluerLimiteFinale"
               champs={[{ label: "" }]}
               options={OPTIONS_SIGNE_INFINI}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -395,6 +417,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             key={cleEcran}
             exercice={exercice}
             phase="evaluerLimiteFinale"
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}

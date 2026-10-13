@@ -87,6 +87,13 @@ export function App6gen17() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
   const enonceLatex = formatLimiteEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -160,6 +167,7 @@ export function App6gen17() {
         {phase === "aDominance" && exercice.famille === "A" && (
               <EtapeDominanceA
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 aideNiveau1={aide1}
@@ -176,6 +184,7 @@ export function App6gen17() {
             {phase === "aConclure" && exercice.famille === "A" && (
               <EtapeReponseLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -196,6 +205,7 @@ export function App6gen17() {
             {phase === "bReformuler" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -214,6 +224,7 @@ export function App6gen17() {
             {phase === "bConclure" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -233,6 +244,7 @@ export function App6gen17() {
             {phase === "cDiagnostic" && exercice.famille === "C" && (
               <EtapeDiagnosticC
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 partie1={configDiagnosticPartiesC(exercice).partie1}
@@ -251,6 +263,7 @@ export function App6gen17() {
             {phase === "cConclure" && (
               <EtapeReponseLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -271,6 +284,7 @@ export function App6gen17() {
             {phase === "dExposant" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -289,6 +303,7 @@ export function App6gen17() {
             {phase === "dLimiteExposant" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -307,6 +322,7 @@ export function App6gen17() {
             {phase === "dConclure" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -326,6 +342,7 @@ export function App6gen17() {
             {phase === "eDevelopper" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -344,6 +361,7 @@ export function App6gen17() {
             {phase === "eSimplifier" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}
@@ -362,6 +380,7 @@ export function App6gen17() {
             {phase === "eConclure" && (
               <EtapeChampLimiteLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={etatAct}

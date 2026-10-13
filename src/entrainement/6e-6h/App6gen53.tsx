@@ -127,6 +127,7 @@ export function App6gen53() {
           // entre 2 exercices consécutifs — mirroir du bug trouvé/corrigé sur 6gen48.
           key={`${etat.generationId}-${phase}`}
           {...aideCommun}
+          estPremierEcran={estPremierEcran}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
           etatActuel={null}
