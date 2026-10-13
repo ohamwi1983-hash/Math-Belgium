@@ -24,7 +24,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -50,7 +49,7 @@ interface Props {
  * passent par ce composant. Structure d'écran imposée par CLAUDE.md conservée à l'identique.
  * `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -80,15 +79,6 @@ export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, est
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => champEstCompose(champ) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
       <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>

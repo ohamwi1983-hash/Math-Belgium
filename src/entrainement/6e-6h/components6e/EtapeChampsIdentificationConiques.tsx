@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -46,7 +45,7 @@ interface Props {
  * (consigne générale → bloc données → état actuel → bloc de travail) conservée à l'identique. À
  * rendre avec `key={phase}` par `App6gen58.tsx` parent.
  */
-export function EtapeChampsIdentificationConiques({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsIdentificationConiques({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -76,15 +75,6 @@ export function EtapeChampsIdentificationConiques({ estPremierEcran, consigneGen
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) =>
         champ.type === "choix" ? (

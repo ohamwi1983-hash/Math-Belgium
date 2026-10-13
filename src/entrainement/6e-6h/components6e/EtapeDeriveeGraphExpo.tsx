@@ -12,10 +12,6 @@ interface Props {
   consigneEcran: string;
   fonctionLatex: string;
   estPremierEcran: boolean;
-  /** `null` — jamais rendu — sur "derivee", TOUJOURS le premier écran de sa famille (B/D) : rien à
-   * rappeler. Présent dans le contrat pour rester alignable avec `EtapeSelectionGraphiqueDeriveeExpo`,
-   * jamais alimenté que par `null` en pratique côté `App6gen8.tsx`. */
-  etatActuel: string[] | null;
   rappelDomaine: string | null;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -37,7 +33,7 @@ interface Props {
  * (famille D seule, "x≠0") est TOUJOURS affiché, jamais gagné par une aide. `App6gen8.tsx` doit
  * rendre ce composant avec une `key` qui change entre 2 exercices (même si la phase reste
  * "derivee"), sinon le champ garderait la saisie de l'exercice précédent. */
-export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, estPremierEcran, etatActuel, rappelDomaine, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, estPremierEcran, rappelDomaine, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -57,15 +53,6 @@ export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, estPremier
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {rappelDomaine && <p className="prompt-text">{rappelDomaine}</p>}
       <ApercuExpressionLatex texte={texte} label="f'(x) =" />

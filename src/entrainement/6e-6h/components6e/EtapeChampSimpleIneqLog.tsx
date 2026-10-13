@@ -15,9 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  /** `null` sur le premier écran de chaque famille (rien à rappeler) — voir
-   * `ui6e/formatInequationsLogarithmiques.ts::etatActuel`. */
-  etatActuel: string[] | null;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -38,7 +35,7 @@ interface Props {
  * seul log), dReecrire (poser y=log_base(x)) et fSimplifier (carré parfait). `App6gen15.tsx` doit
  * le rendre avec `key={phase}`.
  */
-export function EtapeChampSimpleIneqLog({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChampSimpleIneqLog({ estPremierEcran, consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -58,15 +55,6 @@ export function EtapeChampSimpleIneqLog({ estPremierEcran, consigneEcran, enonce
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="field">
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />

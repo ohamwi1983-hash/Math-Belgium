@@ -17,8 +17,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
-  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -41,11 +39,11 @@ interface Props {
 /**
  * Écran GÉNÉRIQUE à un seul champ texte libre pour `6gen14` — réutilisé par la quasi-totalité des
  * écrans du générateur (exposants, équations développées/en t/en y, valeurs numériques). Structure
- * d'écran imposée par CLAUDE.md : consigne générale → bloc données → bloc "état actuel" → bloc de
- * travail, toujours cet ordre. `App6gen14.tsx` doit le rendre avec `key={phase}` (remet le champ à
- * vide à chaque écran) — même patron que `EtapeChampExpoProblemes.tsx` (6gen12).
+ * d'écran imposée par CLAUDE.md : consigne générale → bloc données → bloc de travail, toujours cet
+ * ordre. `App6gen14.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran)
+ * — même patron que `EtapeChampExpoProblemes.tsx` (6gen12).
  */
-export function EtapeChampEquationsExpLog({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampEquationsExpLog({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
@@ -70,15 +68,6 @@ export function EtapeChampEquationsExpLog({ estPremierEcran, consigneGenerale, b
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

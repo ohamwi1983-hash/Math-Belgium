@@ -16,7 +16,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -36,11 +35,10 @@ interface Props {
  * Écran GÉNÉRIQUE "CE" pour `6gen14` — construction guidée via `EnsembleReelGuideBuilder` (module
  * partagé avec 6gen1/6gen3/6gen7/6gen10) — familles D (écran 1), E (écran 1), F (écran 1). Même
  * patron que `EtapeEtablirCEEquationsCyclometriques.tsx` (6gen3), généralisé à consommer
- * `consigneGenerale`/`blocDonnees`/`etatActuel` en props plutôt que résolus en interne (`6gen14`
- * réutilise ce SEUL composant pour 3 familles différentes). `App6gen14.tsx` doit le rendre avec
- * `key={phase}`.
+ * `consigneGenerale`/`blocDonnees` en props plutôt que résolus en interne (`6gen14` réutilise ce
+ * SEUL composant pour 3 familles différentes). `App6gen14.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeCEEquationsExpLog({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCEEquationsExpLog({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -64,15 +62,6 @@ export function EtapeCEEquationsExpLog({ estPremierEcran, consigneGenerale, bloc
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <EnsembleReelGuideBuilder onChange={setReponse} label="x\in" />
       {!validation && (

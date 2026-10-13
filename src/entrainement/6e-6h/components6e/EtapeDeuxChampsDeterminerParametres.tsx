@@ -14,7 +14,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   labelA: string;
   labelB: string;
@@ -45,7 +44,6 @@ export function EtapeDeuxChampsDeterminerParametres({
   estPremierEcran,
   consigneGenerale,
   blocDonnees,
-  etatActuel,
   consigneEcran,
   labelA,
   labelB,
@@ -87,15 +85,6 @@ export function EtapeDeuxChampsDeterminerParametres({
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={a} label={labelA} />
       <ApercuExpressionLatex texte={b} label={labelB} />

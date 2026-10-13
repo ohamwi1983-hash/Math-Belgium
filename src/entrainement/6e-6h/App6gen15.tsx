@@ -116,7 +116,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -134,7 +133,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -153,7 +151,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -171,7 +168,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -190,7 +186,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -208,7 +203,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 placeholder="ex : (x+1)*(x-3)  ou  (x+1)/(x-3)"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -227,7 +221,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -246,7 +239,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -264,7 +256,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 placeholder="ex : y^2-y-2<0"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -283,7 +274,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -301,7 +291,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -340,7 +329,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}
@@ -358,7 +346,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 placeholder="ex : (x-3)^2"
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
@@ -377,7 +364,6 @@ export function App6gen15() {
                 estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
-                etatActuel={null}
                 aideNiveau1={aide1}
                 aideNiveau2={aide2}
                 tentativesUtilisees={tentativesUtilisees}

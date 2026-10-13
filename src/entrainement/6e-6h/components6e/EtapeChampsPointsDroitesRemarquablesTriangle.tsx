@@ -12,7 +12,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   definition: DefinitionEcran;
   aideNiveau1: AideAvecLatex;
@@ -48,7 +47,7 @@ const MAX_LIGNES_LISTE = 4;
  * historique de 6gen43, donc `.field-inline` (qui force `white-space:nowrap` et déborde sur mobile)
  * est banni ici sans exception, y compris pour les champs courts.
  */
-export function EtapeChampsPointsDroitesRemarquablesTriangle({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
+export function EtapeChampsPointsDroitesRemarquablesTriangle({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   return (
     <div>
       <EnTeteExercice
@@ -64,15 +63,6 @@ export function EtapeChampsPointsDroitesRemarquablesTriangle({ estPremierEcran, 
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {definition.kind === "champs" ? (
         <BlocChamps

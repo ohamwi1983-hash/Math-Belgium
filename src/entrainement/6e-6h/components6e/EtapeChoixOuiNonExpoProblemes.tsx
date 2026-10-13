@@ -14,7 +14,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -33,7 +32,7 @@ interface Props {
 /** Écran GÉNÉRIQUE "statut oui/non" — famille G écran 3 uniquement (décision atteignable/non
  * atteignable). Choix véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS
  * `.btn-primary` (réservé à "Valider", convention CLAUDE.md). */
-export function EtapeChoixOuiNonExpoProblemes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixOuiNonExpoProblemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -57,15 +56,6 @@ export function EtapeChoixOuiNonExpoProblemes({ estPremierEcran, consigneGeneral
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${choix === true ? "toggle-active" : ""} ${montrerErreurs && choix === true ? "is-erronee" : ""}`} onClick={() => setChoix(true)}>

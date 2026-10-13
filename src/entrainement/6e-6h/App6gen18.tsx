@@ -148,7 +148,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleA()}
                 blocDonnees={blocDonneesA(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranA(phase)}
                 labelA={labelsEcranA(exercice, phase).a}
                 labelB={labelsEcranA(exercice, phase).b}
@@ -166,7 +165,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleA()}
                 blocDonnees={blocDonneesA(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranA(phase)}
                 labelA={labelsEcranA(exercice, phase).a}
                 labelB={labelsEcranA(exercice, phase).b}
@@ -189,7 +187,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleB()}
                 blocDonnees={blocDonneesB(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranB(phase)}
                 labelA={labelsEcranB(phase).a}
                 labelB={labelsEcranB(phase).b}
@@ -207,7 +204,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleB()}
                 blocDonnees={blocDonneesB(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranB(phase)}
                 placeholder="ex : 1,3"
                 aideNiveau1={aideNiveau1B(phase)}
@@ -222,7 +218,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleB()}
                 blocDonnees={blocDonneesB(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranB(phase)}
                 labelA={labelsEcranB(phase).a}
                 labelB={labelsEcranB(phase).b}
@@ -245,7 +240,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleC(exercice)}
                 blocDonnees={blocDonneesC(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranC(phase)}
                 placeholder={placeholderEcranC(exercice, phase)}
                 aideNiveau1={aideNiveau1C(phase)}
@@ -260,7 +254,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleC(exercice)}
                 blocDonnees={blocDonneesC(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranC(phase)}
                 placeholder={placeholderEcranC(exercice, phase)}
                 aideNiveau1={aideNiveau1C(phase)}
@@ -275,7 +268,6 @@ export function App6gen18() {
                 {...aideCommun}
                 consigneGenerale={consigneGeneraleC(exercice)}
                 blocDonnees={blocDonneesC(exercice)}
-                etatActuel={null}
                 consigneEcran={consigneEcranC(phase)}
                 placeholder={placeholderEcranC(exercice, phase)}
                 aideNiveau1={aideNiveau1C(phase)}

@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -46,7 +45,7 @@ const MAX_LIGNES = 5;
  * (`soumettreReponseEcran(etat, valeurs: string[])`). `App6gen55.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeListeCentresCercles({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeCentresCercles({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [centres, setCentres] = useState<string[]>([""]);
   const [rayon, setRayon] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -78,15 +77,6 @@ export function EtapeListeCentresCercles({ estPremierEcran, consigneGenerale, bl
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="contenu-conditionnel">
         <div className="field">

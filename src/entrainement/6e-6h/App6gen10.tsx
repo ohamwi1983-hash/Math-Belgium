@@ -125,7 +125,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   placeholder="ex : 3, -2, 1/2..."
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -144,7 +143,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -163,7 +161,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   optionGauche={{ id: "existe", label: "Il existe une solution" }}
                   optionDroite={{ id: "vide", label: "∅ — Aucune solution" }}
                   aideNiveau1={aide1}
@@ -184,7 +181,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
                   optionDroite={{ id: "pasToujours", label: "Ce n'est pas toujours vrai" }}
                   aideNiveau1={aide1}
@@ -205,7 +201,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   placeholder="ex : (2/9)^(x^2+5)<=1"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -224,7 +219,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
                   optionDroite={{ id: "pasToujours", label: "Ce n'est pas toujours vrai" }}
                   aideNiveau1={aide1}
@@ -245,7 +239,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   optionGauche={{ id: "positif", label: "Toujours positif" }}
                   optionDroite={{ id: "negatif", label: "Toujours négatif" }}
                   aideNiveau1={aide1}
@@ -265,7 +258,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -284,7 +276,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -302,7 +293,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -320,7 +310,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}
@@ -339,7 +328,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   placeholder="ex : (2/5)^x<1"
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -358,7 +346,6 @@ export function App6gen10() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
                   tentativesUtilisees={tentativesUtilisees}

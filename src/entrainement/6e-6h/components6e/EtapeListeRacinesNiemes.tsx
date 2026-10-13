@@ -18,7 +18,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   /** Nombre de racines attendues (n de l'exercice) — détermine le nombre de lignes de départ. */
   nAttendu: number;
@@ -49,7 +48,7 @@ interface Props {
  * mirroir `EtapeRacinesAffixesRacines.tsx`, 6gen35). `App6gen39.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeListeRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, nAttendu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, nAttendu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<Ligne[]>(() => Array.from({ length: nAttendu }, () => ({ re: "", im: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
   const aplati = lignes.flatMap((l) => [l.re, l.im]);
@@ -87,15 +86,6 @@ export function EtapeListeRacinesNiemes({ estPremierEcran, consigneGenerale, blo
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="contenu-conditionnel">
         {lignes.map((ligne, i) => (

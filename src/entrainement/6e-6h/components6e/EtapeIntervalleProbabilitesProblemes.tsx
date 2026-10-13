@@ -12,7 +12,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -35,7 +34,7 @@ interface Props {
  * "champs"/"choix", l'app affiche l'erreur générique standard (le statut détaillé de l'inéquation
  * n'apporte rien de plus qu'un "correct"/"incorrect" côté élève). `App6gen33.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -61,15 +60,6 @@ export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, estPrem
           ) : null
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
 
       <EnsembleReelGuideBuilder onChange={setReponse} label="S =" />

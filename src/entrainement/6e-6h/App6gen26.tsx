@@ -131,7 +131,6 @@ export function App6gen26() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             placeholder="ex : 2"
             labelAjout="+ Ajouter une racine"
@@ -149,7 +148,6 @@ export function App6gen26() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

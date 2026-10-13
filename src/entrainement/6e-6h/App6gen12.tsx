@@ -120,7 +120,6 @@ export function App6gen12() {
     estPremierEcran,
     consigneGenerale: consigneG,
     blocDonnees: donnees,
-    etatActuel: null,
     consigneEcran: consigne,
     aideNiveau1: aide1,
     aideNiveau2: aide2,
@@ -366,7 +365,6 @@ export function App6gen12() {
               estPremierEcran={estPremierEcran}
               consigneGenerale={consigneG}
               blocDonnees={donnees}
-              etatActuel={null}
               consigneEcran={consigne}
               aideNiveau1={aide1}
               aideNiveau2={aide2}

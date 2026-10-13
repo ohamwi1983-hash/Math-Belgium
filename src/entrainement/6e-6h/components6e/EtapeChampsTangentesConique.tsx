@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -101,7 +100,7 @@ function ChampListe({ champ, valeur, onChange, montrerErreurs }: { champ: ChampD
  * bloc données → état actuel → bloc de travail) conservée à l'identique. À rendre avec `key={phase}`
  * par `App6gen62.tsx` parent.
  */
-export function EtapeChampsTangentesConique({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsTangentesConique({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map((c) => (c.type === "liste" ? JSON.stringify([(c.sousChamps ?? []).map(() => "")]) : "")));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -142,15 +141,6 @@ export function EtapeChampsTangentesConique({ estPremierEcran, consigneGenerale,
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => {
         if (champ.type === "liste") return <ChampListe key={i} champ={champ} valeur={valeurs[i] ?? ""} onChange={(v) => changer(i, v)} montrerErreurs={montrerErreurs} />;

@@ -10,7 +10,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   optionsStatut: OptionQcm[];
   optionsReciproque: OptionQcm[];
@@ -37,7 +36,7 @@ interface Props {
  * reciproqueId]` soumis à `onValider` — voir `moteur6e/verificationComplexesAvances.ts`,
  * `diagnostiquerCEcran3`. `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeConclusionC({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, optionsStatut, optionsReciproque, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionC({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, optionsStatut, optionsReciproque, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<string | null>(null);
   const [reciproque, setReciproque] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -63,15 +62,6 @@ export function EtapeConclusionC({ estPremierEcran, consigneGenerale, blocDonnee
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <p className="prompt-text">Les 2 expressions confirmées sont-elles égales ?</p>
       <div className="options-grid-compact">

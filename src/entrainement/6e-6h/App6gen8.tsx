@@ -129,7 +129,6 @@ export function App6gen8() {
               estPremierEcran={estPremierEcran}
               consigneEcran={consigneEcranDerivee()}
               fonctionLatex={formatFonctionLatex(exercice)}
-              etatActuel={null}
               rappelDomaine={rappelDomaineDerivee(exercice)}
               placeholder={placeholderDerivee(exercice)}
               aideNiveau1={aideDeriveeNiveau1(exercice)}
@@ -148,7 +147,6 @@ export function App6gen8() {
               key={cle}
               estPremierEcran={estPremierEcran}
               exercice={exercice}
-              etatActuel={null}
               aideNiveau1={aideSelectionNiveau1(exercice)}
               aideNiveau2={aideSelectionNiveau2(exercice)}
               tentativesUtilisees={tentativesUtilisees}

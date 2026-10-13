@@ -12,7 +12,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   options: OptionChoix[];
   aideNiveau1: AideAvecLatex;
@@ -37,9 +36,9 @@ interface Props {
  * incompatibilité en ont 2) partagent le même besoin, jamais dupliqué en 2 composants quasi
  * identiques. Choix véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS
  * `.btn-primary` (réservé à "Valider", convention CLAUDE.md). Même structure d'écran (consigne
- * générale → bloc données → état actuel → bloc de travail) que `EtapeChampsProbabilitesEnsembles`.
+ * générale → bloc données → bloc de travail) que `EtapeChampsProbabilitesEnsembles`.
  * `App6gen30.tsx` doit le rendre avec `key={phase}` (remet le choix à zéro à chaque écran). */
-export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && choixId !== null ? diagnostiquer(choixId) : null;
@@ -64,15 +63,6 @@ export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, estPremierEc
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {options.map((option) => (

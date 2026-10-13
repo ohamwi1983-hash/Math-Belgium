@@ -17,8 +17,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
-  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -44,7 +42,7 @@ interface Props {
  * CLAUDE.md : consigne générale → bloc données → bloc "état actuel" → bloc de travail, toujours cet
  * ordre. `App6gen12.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
  */
-export function EtapeChampExpoProblemes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampExpoProblemes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
@@ -69,15 +67,6 @@ export function EtapeChampExpoProblemes({ consigneGenerale, blocDonnees, estPrem
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

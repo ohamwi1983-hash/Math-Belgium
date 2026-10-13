@@ -13,7 +13,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -42,7 +41,7 @@ interface Props {
  * lignes (largement suffisant : la cible n'a jamais plus de 2 valeurs, la marge sert seulement à
  * corriger une saisie sans tout effacer). `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => ["", ""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(lignes) : null;
@@ -78,15 +77,6 @@ export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, estP
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="contenu-conditionnel">
         {lignes.map((ligne, i) => (

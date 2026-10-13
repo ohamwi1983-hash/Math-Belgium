@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -33,7 +32,7 @@ interface Props {
 /** Écran "gOrdre1" (`6gen6`, famille G, instance unique) — QCM booléen "un développement à
  * l'ordre 1 suffit-il à conclure ?" (Oui/Non), voir la note de conception dans
  * `core6e/limitesExponentielles.types.ts`. `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeOrdre1G({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeOrdre1G({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -48,15 +47,6 @@ export function EtapeOrdre1G({ estPremierEcran, consigneEcran, enonceLatex, etat
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${choix === true ? "toggle-active" : ""} ${montrerErreurs && choix === true ? "is-erronee" : ""}`} onClick={() => setChoix(true)}>

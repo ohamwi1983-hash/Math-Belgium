@@ -23,7 +23,6 @@ const OPTIONS: { id: ReponseCroissance["type"]; label: string; requiertPosition:
 interface Props {
   estPremierEcran: boolean;
   enonceLatex: string;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -40,10 +39,10 @@ interface Props {
 
 /** Écran 4/6, "croissance" — COMMUN aux 4 familles (même contrat `CibleCroissance`). Choix
  * catégoriel à 4 options, révélant un champ "position de l'extremum" ssi minimum/maximum.
- * `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. `etatActuel` rappelle le domaine, les
- * limites ET les asymptotes CONFIRMÉS aux 3 écrans précédents (voir `ui6e/
- * formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeCroissance({ estPremierEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. Le domaine, les limites et les
+ * asymptotes confirmés aux 3 écrans précédents sont listés dans le récapitulatif "Ce qu'on sait
+ * déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
+export function EtapeCroissance({ estPremierEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<ReponseCroissance["type"] | null>(null);
   const [position, setPosition] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -67,15 +66,6 @@ export function EtapeCroissance({ estPremierEcran, enonceLatex, etatActuel, aide
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneCroissance()}</p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (

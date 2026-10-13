@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel?: string[] | null;
   consigneEcran: string;
   /** Libellés LaTeX des 2 champs (ex. "a=", "b=") — ORDONNÉS, jamais interchangeables. */
   labelChamp1: string;
@@ -38,7 +37,7 @@ interface Props {
  * E écran 1, famille G écran 1) — jamais un pattern add-as-needed ici (le nombre de champs est
  * toujours EXACTEMENT 2, connu à la conception). Copié-adapté de
  * `EtapeDeuxValeursExpoProblemes.tsx` (6gen12). */
-export function EtapeDeuxValeursLogProblemes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxValeursLogProblemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte1, setTexte1] = useState("");
   const [texte2, setTexte2] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -64,15 +63,6 @@ export function EtapeDeuxValeursLogProblemes({ estPremierEcran, consigneGenerale
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte1} label={labelChamp1} />
       <div className="field-row">

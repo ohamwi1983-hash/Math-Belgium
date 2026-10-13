@@ -107,7 +107,6 @@ export function App6gen35() {
     estPremierEcran,
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),

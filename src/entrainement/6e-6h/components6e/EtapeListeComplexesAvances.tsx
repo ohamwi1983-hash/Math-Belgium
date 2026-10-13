@@ -10,7 +10,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   nombreMaxLignes: number;
   placeholder: string;
@@ -41,7 +40,7 @@ interface Props {
  * `EtapeRacinesAffixesRacines.tsx`/6gen35 pour ce même chapitre). Croix rouge `×` pour retirer une
  * ligne, jamais un bouton texte "Retirer". `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, nombreMaxLignes) }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -76,15 +75,6 @@ export function EtapeListeComplexesAvances({ estPremierEcran, consigneGenerale, 
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {lignes.map((ligne, i) => (
         <div key={i} className="field-row">

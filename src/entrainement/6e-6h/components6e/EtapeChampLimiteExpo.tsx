@@ -16,7 +16,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  etatActuel: string[] | null;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -35,7 +34,7 @@ interface Props {
 /** Écran GÉNÉRIQUE à un seul champ texte libre (`6gen6`) — réutilisé par les 9 écrans à réponse
  * en expression/valeur libre (C-globale, D×2, E×2, F×2, G-combiner/conclure). `App6gen6.tsx` doit
  * le rendre avec `key={phase}`. */
-export function EtapeChampLimiteExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChampLimiteExpo({ estPremierEcran, consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -55,15 +54,6 @@ export function EtapeChampLimiteExpo({ estPremierEcran, consigneEcran, enonceLat
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

@@ -13,8 +13,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   tableauDonnees: TableauAffichage | null;
-  etatActuel: string[] | null;
-  tableauEtatActuel: TableauAffichage | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -65,13 +63,13 @@ function TableAffichage({ tableau }: { tableau: TableauAffichage }) {
 
 /** Écran GÉNÉRIQUE à N champs texte libre (1 à 5) pour `6gen32` — même patron que
  * `EtapeChampsProbabilitesEnsembles.tsx` (6gen30), copié plutôt qu'importé (chaque générateur garde
- * son propre écran, voir CLAUDE.md). Étend le patron avec 2 tables OPTIONNELLES en lecture seule
- * (`tableauDonnees`/`tableauEtatActuel`, famille B) — structure d'écran imposée par CLAUDE.md
- * (consigne générale → bloc données [+ table] → bloc "état actuel" [+ table] → bloc de travail)
- * conservée à l'identique. AUCUN écran à choix dans ce générateur (voir en-tête de
+ * son propre écran, voir CLAUDE.md). Étend le patron avec une table OPTIONNELLE en lecture seule
+ * (`tableauDonnees`, famille B) — structure d'écran imposée par CLAUDE.md (consigne générale →
+ * bloc données [+ table] → bloc de travail) conservée à l'identique. AUCUN écran à choix dans ce
+ * générateur (voir en-tête de
  * `ui6e/formatIndependanceBayes.ts`) — un seul composant écran suffit, jamais de variante "choix".
  * `App6gen32.tsx` doit le rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
-export function EtapeChampsIndependanceBayes({ estPremierEcran, consigneGenerale, blocDonnees, tableauDonnees, etatActuel, tableauEtatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsIndependanceBayes({ estPremierEcran, consigneGenerale, blocDonnees, tableauDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -104,16 +102,6 @@ export function EtapeChampsIndependanceBayes({ estPremierEcran, consigneGenerale
           </>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
-      {tableauEtatActuel && <TableAffichage tableau={tableauEtatActuel} />}
       <p className="prompt-text">{consigneEcran}</p>
       <div className={`field-row ${champs.length > 3 ? "field-row-wrap" : ""}`}>
         {champs.map((champ, i) => (

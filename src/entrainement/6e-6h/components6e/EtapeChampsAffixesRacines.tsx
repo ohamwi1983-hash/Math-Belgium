@@ -22,7 +22,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -45,10 +44,10 @@ interface Props {
  * (6gen34), copié plutôt qu'importé (convention CLAUDE.md, "un motif nouveau se réplique à la main
  * plutôt que d'être extrait" — chaque générateur reste indépendant). Utilisé par les écrans à saisie
  * libre à arité FIXE : aEcran1 (2 champs), bEcran2/cEcran2 (1 champ). Structure d'écran imposée par
- * CLAUDE.md (consigne générale → bloc données → état actuel → bloc de travail) conservée à
- * l'identique. `App6gen35.tsx` doit le rendre avec `key={phase}`.
+ * CLAUDE.md (consigne générale → bloc données → bloc de travail) conservée à l'identique.
+ * `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsAffixesRacines({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsAffixesRacines({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -78,15 +77,6 @@ export function EtapeChampsAffixesRacines({ estPremierEcran, consigneGenerale, b
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => champEstCompose(champ.placeholder) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
       {/* `field-row-wrap` dès 2 champs INDÉPENDANTS côte à côte — même vigilance débordement

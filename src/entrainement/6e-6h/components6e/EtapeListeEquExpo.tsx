@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   placeholder: string;
@@ -36,7 +35,7 @@ interface Props {
 /** Écran GÉNÉRIQUE add-as-needed (0 à 2 valeurs numériques) — réutilisé par aEcran2 (A3), cEcran2,
  * cEcran3 — même patron que `EtapeListeSolutionsCyclo.tsx` (6gen3). `App6gen9.tsx` doit le rendre
  * avec `key={phase}`. */
-export function EtapeListeEquExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, placeholder, labelAjout, labelAucune, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeEquExpo({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, placeholder, labelAjout, labelAucune, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [aucune, setAucune] = useState(false);
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -67,15 +66,6 @@ export function EtapeListeEquExpo({ estPremierEcran, consigneEcran, enonceLatex,
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <button type="button" className={`btn ${aucune ? "toggle-active" : ""} ${montrerErreurs && aucune ? "is-erronee" : ""}`} onClick={() => setAucune((v) => !v)}>
         {labelAucune}

@@ -21,8 +21,6 @@ interface Props {
    * bloc de données m/n/M/N. */
   expressionLatex: string;
   blocDonnees: string[];
-  /** `null` — jamais rendu — sur l'écran 1 (rien à rappeler). */
-  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -46,15 +44,14 @@ interface Props {
  * Écran GÉNÉRIQUE à un seul champ texte libre pour `6gen13` — les 2 écrans (propriété du
  * logarithme / calcul numérique) partagent strictement la même structure. Ordre imposé par
  * CLAUDE.md : consigne générale (+ expression logarithmique demandée) → bloc données (m,n,M,N) →
- * bloc "état actuel" (`null` sur l'écran 1) → bloc de travail. `App6gen13.tsx` doit le rendre avec
- * `key={phase}` (remet le champ à vide à chaque écran).
+ * bloc de travail. `App6gen13.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à
+ * chaque écran).
  */
 export function EtapeProprieteLogarithme({
   estPremierEcran,
   consigneGenerale,
   expressionLatex,
   blocDonnees,
-  etatActuel,
   consigneEcran,
   placeholder,
   aideNiveau1,
@@ -97,15 +94,6 @@ export function EtapeProprieteLogarithme({
           </>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

@@ -23,7 +23,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -49,7 +48,7 @@ interface Props {
  * générale → bloc données → état actuel → bloc de travail) conservée à l'identique. `App6gen40.tsx`
  * doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsTransformationsPlan({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsTransformationsPlan({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -79,15 +78,6 @@ export function EtapeChampsTransformationsPlan({ consigneGenerale, estPremierEcr
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => champEstCompose(champ.placeholder) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
       <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>

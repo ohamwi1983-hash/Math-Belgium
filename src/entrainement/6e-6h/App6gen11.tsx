@@ -164,7 +164,6 @@ export function App6gen11() {
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
-                  etatActuel={null}
                   aideNiveau1={aideLimitesNiveau1(exercice)}
                   aideNiveau2={aideLimitesNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -183,7 +182,6 @@ export function App6gen11() {
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
-                  etatActuel={null}
                   aideNiveau1={aideLimitesNiveau1(exercice)}
                   aideNiveau2={aideLimitesNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -202,7 +200,6 @@ export function App6gen11() {
                   estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   p={exercice.p}
-                  etatActuel={null}
                   aideNiveau1={aideAsymptotesBNiveau1()}
                   aideNiveau2={aideAsymptotesBNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -221,7 +218,6 @@ export function App6gen11() {
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneAsymptotes(exercice)}
                   labels={directionLabels(exercice)}
-                  etatActuel={null}
                   aideNiveau1={aideAsymptotesNiveau1(exercice)}
                   aideNiveau2={aideAsymptotesNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -239,7 +235,6 @@ export function App6gen11() {
                   key={cle}
                   estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aideCroissanceNiveau1(exercice)}
                   aideNiveau2={aideCroissanceNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -257,7 +252,6 @@ export function App6gen11() {
                   key={cle}
                   estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
-                  etatActuel={null}
                   aideNiveau1={aideConcaviteNiveau1(exercice)}
                   aideNiveau2={aideConcaviteNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}
@@ -275,7 +269,6 @@ export function App6gen11() {
                   key={cle}
                   estPremierEcran={estPremierEcran}
                   exercice={exercice}
-                  etatActuel={null}
                   aideNiveau1={aideGraphiqueNiveau1(exercice)}
                   aideNiveau2={aideGraphiqueNiveau2(exercice)}
                   tentativesUtilisees={tentativesUtilisees}

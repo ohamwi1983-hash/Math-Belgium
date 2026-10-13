@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -37,7 +36,7 @@ interface Props {
  * verificationFormeTrigonometrique.ts`) fixe l'ordre des boutons — synchronisé avec
  * `diagnostiquerDEcran2`, qui compare directement l'identifiant choisi à `exercice.condition`.
  */
-export function EtapeChoixCongruenceFormeTrigonometrique({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixCongruenceFormeTrigonometrique({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<ConditionD | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -61,15 +60,6 @@ export function EtapeChoixCongruenceFormeTrigonometrique({ estPremierEcran, cons
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {OPTIONS_CONDITION_D.map((option) => (

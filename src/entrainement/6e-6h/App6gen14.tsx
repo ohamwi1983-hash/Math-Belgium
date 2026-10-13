@@ -124,7 +124,6 @@ export function App6gen14() {
     estPremierEcran,
     consigneGenerale: consigneG,
     blocDonnees: donnees,
-    etatActuel: null,
     consigneEcran: consigne,
     aideNiveau1: aide1,
     aideNiveau2: aide2,

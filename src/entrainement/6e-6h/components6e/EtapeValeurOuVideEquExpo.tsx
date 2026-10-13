@@ -17,7 +17,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  etatActuel: string[] | null;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -36,7 +35,7 @@ interface Props {
 /** Écran "existe/n'existe pas" (famille B, écran 2) — même patron que 5gen4/6gen3
  * (`EtapeAppliquerArcFonctionsCyclometriques.tsx`) : le toggle gate le champ numérique, jamais une
  * variante de "faux" en cas de "n'existe pas". `App6gen9.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeValeurOuVideEquExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeValeurOuVideEquExpo({ estPremierEcran, consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,15 +57,6 @@ export function EtapeValeurOuVideEquExpo({ estPremierEcran, consigneEcran, enonc
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
 
       <div className="options-grid-compact">

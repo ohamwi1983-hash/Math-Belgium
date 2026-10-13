@@ -22,7 +22,6 @@ const OPTIONS: { id: ReponseConcavite["type"]; label: string; requiertPosition: 
 interface Props {
   estPremierEcran: boolean;
   enonceLatex: string;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -40,10 +39,10 @@ interface Props {
 /** Écran 5/6, "concavité" — COMMUN aux 4 familles (même contrat `CibleConcavite`). Nouveauté du
  * chapitre : l'aide niveau 1 rappelle TOUJOURS la méthode complète (signe de f'', voir
  * `ui6e/formatEtudeFonctionExponentielle.ts::aideConcaviteNiveau1`) — jamais seulement "la première
- * fois". `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. `etatActuel` rappelle le
- * domaine, les limites, les asymptotes ET la croissance CONFIRMÉS aux 4 écrans précédents (voir
- * `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeConcavite({ estPremierEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * fois". `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. Le domaine, les limites, les
+ * asymptotes et la croissance confirmés aux 4 écrans précédents sont listés dans le récapitulatif
+ * "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
+export function EtapeConcavite({ estPremierEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<ReponseConcavite["type"] | null>(null);
   const [position, setPosition] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -67,15 +66,6 @@ export function EtapeConcavite({ estPremierEcran, enonceLatex, etatActuel, aideN
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneConcavite()}</p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (

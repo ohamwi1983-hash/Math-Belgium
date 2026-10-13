@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -43,7 +42,7 @@ interface Props {
  * `moteur6e/verificationTransformationsPlan.ts`, `diagnostiquerBEcran2`, pour le statut combiné.
  * `App6gen40.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeTypeParametresTransformationsPlan({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTypeParametresTransformationsPlan({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [type, setType] = useState<TypeTransformationB | null>(null);
   const [vecteur, setVecteur] = useState("");
   const [rapport, setRapport] = useState("");
@@ -78,15 +77,6 @@ export function EtapeTypeParametresTransformationsPlan({ estPremierEcran, consig
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${type === "translation" ? "toggle-active" : ""} ${montrerErreurs && type === "translation" ? "is-erronee" : ""}`} onClick={() => choisirType("translation")}>

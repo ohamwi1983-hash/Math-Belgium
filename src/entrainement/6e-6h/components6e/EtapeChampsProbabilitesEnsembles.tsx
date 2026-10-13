@@ -12,7 +12,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -34,9 +33,9 @@ interface Props {
  * Écran GÉNÉRIQUE à N champs texte libre (1 à 5) pour `6gen30` — même patron que
  * `EtapeChampsCalculPrimitives.tsx` (6gen23), copié plutôt qu'importé (fondation d'un nouveau
  * chapitre, aucun couplage entre chapitres). Structure d'écran imposée par CLAUDE.md (consigne
- * générale → bloc données → bloc "état actuel" → bloc de travail) conservée à l'identique.
+ * générale → bloc données → bloc de travail) conservée à l'identique.
  * `App6gen30.tsx` doit le rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
-export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -66,15 +65,6 @@ export function EtapeChampsProbabilitesEnsembles({ consigneGenerale, estPremierE
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className={`field-row ${champs.length > 3 ? "field-row-wrap" : ""}`}>
         {champs.map((champ, i) => (

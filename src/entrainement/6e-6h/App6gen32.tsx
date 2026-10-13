@@ -105,8 +105,6 @@ export function App6gen32() {
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
     tableauDonnees: tableauDonnees(exercice),
-    etatActuel: null,
-    tableauEtatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: formatAideNiveau1(exercice, phase),
     aideNiveau2: formatAideNiveau2(exercice, phase),

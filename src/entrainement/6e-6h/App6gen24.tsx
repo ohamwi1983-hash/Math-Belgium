@@ -125,7 +125,6 @@ export function App6gen24() {
           {...aideCommun}
           consigneGenerale={consigneGeneraleQuellePrimitive()}
           blocDonnees={blocDonneesQuellePrimitive(exercice)}
-          etatActuel={null}
           consigneEcran={consigneEcranQuellePrimitive(exercice, phase)}
           champs={champsQuellePrimitive(exercice, phase)}
           aideNiveau1={aideNiveau1QuellePrimitive(exercice, phase)}

@@ -15,7 +15,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -41,7 +40,7 @@ const OPTIONS: { id: IssueSimplificationG; label: string }[] = [
  * l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary`, convention CLAUDE.md). Même
  * patron que `EtapeChoixOuiNonExpoProblemes.tsx` (6gen12), étendu à 3 options plutôt que 2.
  * `App6gen14.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeStatutGEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeStatutGEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IssueSimplificationG | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -65,15 +64,6 @@ export function EtapeStatutGEquationsExpLog({ consigneGenerale, estPremierEcran,
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {OPTIONS.map((o) => (

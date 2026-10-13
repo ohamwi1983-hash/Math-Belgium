@@ -11,7 +11,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   consigneEcran: string;
   nombreMaxPoints: number;
   aideNiveau1: AideAvecLatex;
@@ -42,7 +41,7 @@ interface Props {
  * `EtapeListeEquationsComplexes.tsx`/6gen36 et `EtapeRacinesAffixesRacines.tsx`/6gen35). `App6gen40.
  * tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, nombreMaxPoints, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, nombreMaxPoints, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, nombreMaxPoints) }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -77,15 +76,6 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {lignes.map((ligne, i) => (
         <div key={i}>

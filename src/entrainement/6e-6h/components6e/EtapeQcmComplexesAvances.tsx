@@ -10,7 +10,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   options: OptionQcm[];
   aideNiveau1: AideAvecLatex;
@@ -35,7 +34,7 @@ interface Props {
  * sur le même écran (`EtapeConclusionC.tsx`). Boutons `.btn.toggle-active`, JAMAIS `.btn-primary`
  * (réservé à "Valider", convention CLAUDE.md). `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeQcmComplexesAvances({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeQcmComplexesAvances({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -59,15 +58,6 @@ export function EtapeQcmComplexesAvances({ consigneGenerale, estPremierEcran, bl
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {options.map((option) => (

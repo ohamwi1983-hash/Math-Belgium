@@ -128,7 +128,6 @@ export function App6gen57() {
           estPremierEcran={estPremierEcran}
           consigneGenerale={consigneGenerale()}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

@@ -43,7 +43,6 @@ interface Props {
   enonceLatex: string;
   consigneEcran: string;
   labels: DirectionLabel[];
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -63,9 +62,9 @@ interface Props {
  * "Existe/N'existe pas" déjà établi ailleurs sur la plateforme, 5gen15 `EtapeSommeInfinie`) —
  * vérifiée par ÉQUIVALENCE NUMÉRIQUE de l'équation soumise (décision de conception explicite, voir
  * `core6e/etudeFonctionExponentielle.types.ts`). `App6gen11.tsx` doit le rendre avec
- * `key={indexExercice}`. `etatActuel` rappelle le domaine ET les limites CONFIRMÉS aux 2 écrans
- * précédents (voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeAsymptotesDeux({ estPremierEcran, enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * `key={indexExercice}`. Le domaine et les limites confirmés aux 2 écrans précédents sont listés
+ * dans le récapitulatif "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
+export function EtapeAsymptotesDeux({ estPremierEcran, enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const VIDE: ReponseAsymptoteDirection = { existe: false, texte: "" };
   const [plusInfini, setPlusInfini] = useState<ReponseAsymptoteDirection & { touche?: boolean }>({ ...VIDE });
   const [moinsInfini, setMoinsInfini] = useState<ReponseAsymptoteDirection & { touche?: boolean }>({ ...VIDE });
@@ -93,15 +92,6 @@ export function EtapeAsymptotesDeux({ estPremierEcran, enonceLatex, consigneEcra
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeAsymptote
         label={labels[0].latex}

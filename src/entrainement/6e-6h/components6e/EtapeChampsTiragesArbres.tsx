@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -35,7 +34,7 @@ interface Props {
  * Écran GÉNÉRIQUE à N champs texte libre (1 à 2) pour `6gen31` — même patron que
  * `EtapeChampsProbabilitesEnsembles.tsx` (6gen30), copié plutôt qu'importé (chaque générateur garde
  * sa propre pile de présentation, CLAUDE.md). Structure d'écran imposée par CLAUDE.md (consigne
- * générale → bloc données → bloc "état actuel" → bloc de travail) conservée à l'identique. Sert
+ * générale → bloc données → bloc de travail) conservée à l'identique. Sert
  * INDIFFÉREMMENT un champ numérique (la plupart des écrans) ou un champ "équation" texte libre
  * (`cEcran1` de la famille C) — le `diagnostiquer`/`onValider` fournis par l'appelant savent déjà
  * quoi faire de chaque valeur, ce composant reste agnostique du contenu. `App6gen31.tsx` doit le
@@ -52,7 +51,7 @@ function champComporteCalcul(placeholder: string | undefined): boolean {
   return true;
 }
 
-export function EtapeChampsTiragesArbres({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsTiragesArbres({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -82,15 +81,6 @@ export function EtapeChampsTiragesArbres({ estPremierEcran, consigneGenerale, bl
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => (champComporteCalcul(champ.placeholder) ? <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} /> : null))}
       <div className={`field-row ${champs.length > 3 ? "field-row-wrap" : ""}`}>

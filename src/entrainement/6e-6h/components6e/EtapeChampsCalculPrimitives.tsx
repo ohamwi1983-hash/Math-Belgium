@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -46,7 +45,6 @@ export function EtapeChampsCalculPrimitives({
   estPremierEcran,
   consigneGenerale,
   blocDonnees,
-  etatActuel,
   consigneEcran,
   champs,
   aideNiveau1,
@@ -89,15 +87,6 @@ export function EtapeChampsCalculPrimitives({
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => (
         <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />

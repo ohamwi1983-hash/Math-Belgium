@@ -20,7 +20,6 @@ interface Props {
   enonceLatex: string;
   consigneEcran: string;
   labels: DirectionLabel[];
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -45,7 +44,7 @@ const VIDE: EtatLimiteLocal = { statut: null, texte: "" };
  * indépendante — l'écran le plus dense du générateur, spec explicite. `App6gen11.tsx` doit le
  * rendre avec `key={indexExercice}`.
  */
-export function EtapeLimitesQuatre({ estPremierEcran, enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesQuatre({ estPremierEcran, enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [pointPlus, setPointPlus] = useState<EtatLimiteLocal>(VIDE);
   const [pointMoins, setPointMoins] = useState<EtatLimiteLocal>(VIDE);
   const [plusInfini, setPlusInfini] = useState<EtatLimiteLocal>(VIDE);
@@ -78,15 +77,6 @@ export function EtapeLimitesQuatre({ estPremierEcran, enonceLatex, consigneEcran
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeLimite label={labels[0].latex} etat={pointPlus} erreur={montrerErreurs} onChange={setPointPlus} />
       <GroupeLimite label={labels[1].latex} etat={pointMoins} erreur={montrerErreurs} onChange={setPointMoins} />

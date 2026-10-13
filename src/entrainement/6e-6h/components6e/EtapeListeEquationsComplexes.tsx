@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   /** Nombre de valeurs RÉELLEMENT attendu par cet écran précis (2 ou 4 selon la famille/écran —
    * voir `ui6e/formatEquationsComplexes.ts`, `nombreCibleEnsemble`) — démarre à CE nombre (jamais
@@ -45,7 +44,7 @@ interface Props {
  * "Retirer"), jusqu'à `nombreCible+2` lignes (marge pour corriger une saisie sans tout effacer).
  * `App6gen36.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeEquationsComplexes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, nombreCible, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeEquationsComplexes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, nombreCible, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: nombreCible }, () => ""));
   const maxLignes = nombreCible + 2;
   const montrerErreurs = tentativesUtilisees > 0;
@@ -82,15 +81,6 @@ export function EtapeListeEquationsComplexes({ estPremierEcran, consigneGenerale
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="contenu-conditionnel">
         {lignes.map((ligne, i) => (

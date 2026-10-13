@@ -84,7 +84,6 @@ export function App6gen13() {
     consigneGenerale: CONSIGNE_GENERALE,
     expressionLatex: expressionDemandeeLatex(exercice),
     blocDonnees: blocDonnees(exercice),
-    etatActuel: null,
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: aideNiveau1(exercice, phase),
     aideNiveau2: aideNiveau2(exercice, phase),

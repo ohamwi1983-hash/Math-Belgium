@@ -12,8 +12,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
-  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -41,7 +39,6 @@ export function EtapeChampDeterminerParametres({
   consigneGenerale,
   blocDonnees,
   estPremierEcran,
-  etatActuel,
   consigneEcran,
   placeholder,
   aideNiveau1,
@@ -79,15 +76,6 @@ export function EtapeChampDeterminerParametres({
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="field">
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />

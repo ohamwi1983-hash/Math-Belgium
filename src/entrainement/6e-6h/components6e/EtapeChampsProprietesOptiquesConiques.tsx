@@ -13,7 +13,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -46,7 +45,7 @@ function estChampPointLitteral(champ: ChampDef): boolean {
  * aucune sous-UI add-as-needed. Chaque champ TOUJOURS dans un `.field` empilé (label AU-DESSUS),
  * **jamais `.field-inline`** (CLAUDE.md).
  */
-export function EtapeChampsProprietesOptiquesConiques({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsProprietesOptiquesConiques({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
 
   const montrerErreurs = tentativesUtilisees > 0;
@@ -77,15 +76,6 @@ export function EtapeChampsProprietesOptiquesConiques({ consigneGenerale, blocDo
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) =>
         champ.type === "choix" ? (

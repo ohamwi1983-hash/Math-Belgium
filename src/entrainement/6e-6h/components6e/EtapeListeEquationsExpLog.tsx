@@ -15,7 +15,6 @@ interface Props {
   consigneGenerale: string;
   estPremierEcran: boolean;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   labelAjout: string;
@@ -42,7 +41,7 @@ interface Props {
  * `EtapeListeExpoProblemes.tsx` (6gen12, croix rouge), les 2 mécaniques réunies ici. `App6gen14.tsx`
  * doit le rendre avec `key={phase}`.
  */
-export function EtapeListeEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, placeholder, labelAjout, labelAucune, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, placeholder, labelAjout, labelAucune, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [aucune, setAucune] = useState(false);
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -81,15 +80,6 @@ export function EtapeListeEquationsExpLog({ consigneGenerale, estPremierEcran, b
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <button type="button" className={`btn ${aucune ? "toggle-active" : ""}`} onClick={basculerAucune}>
         {labelAucune}

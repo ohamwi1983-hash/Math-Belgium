@@ -23,7 +23,6 @@ interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -47,10 +46,9 @@ interface Props {
  * motif nouveau se réplique à la main plutôt que d'être extrait"). Utilisé par les écrans à saisie
  * libre à arité FIXE : aSansEcran1 (1), aAvecEcran2 (3), bEcran2/cEcran1/dEcran1/fEcran1/fEcran2
  * (1), fEcran3 (2). Structure d'écran imposée par CLAUDE.md (consigne générale → bloc données →
- * état actuel → bloc de travail) conservée à l'identique. `App6gen36.tsx` doit le rendre avec
- * `key={phase}`.
+ * bloc de travail) conservée à l'identique. `App6gen36.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -80,15 +78,6 @@ export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, e
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       {champs.map((champ, i) => champEstCompose(champ.placeholder) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
       <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>

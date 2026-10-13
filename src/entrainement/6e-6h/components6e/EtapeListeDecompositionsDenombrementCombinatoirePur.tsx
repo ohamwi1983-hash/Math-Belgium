@@ -18,7 +18,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   s1: number;
   s2: number;
@@ -79,7 +78,7 @@ function ListeUneSomme({ sommeCible, lignes, onModifier, onAjouter, onRetirer, m
  * générique (`soumettreReponseEcran(etat, valeurs: string[])`, format uniforme quel que soit
  * l'écran). `App6gen46.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeDecompositionsDenombrementCombinatoirePur({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeDecompositionsDenombrementCombinatoirePur({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignesS1, setLignesS1] = useState<string[]>([""]);
   const [lignesS2, setLignesS2] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -111,15 +110,6 @@ export function EtapeListeDecompositionsDenombrementCombinatoirePur({ estPremier
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="contenu-conditionnel">
         <ListeUneSomme

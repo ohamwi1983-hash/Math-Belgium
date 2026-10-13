@@ -175,7 +175,6 @@ export function App6gen42() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             options={phase === "aEcran1" ? optionsEcran1A(exercice.n) : phase === "aEcran2" ? optionsEcran2A(exercice.n) : optionsEcran3A(exercice)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -191,7 +190,6 @@ export function App6gen42() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             options={optionsStatutE()}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -207,7 +205,6 @@ export function App6gen42() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             demandePoleExclu={exercice.poleExclu !== null}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -224,7 +221,6 @@ export function App6gen42() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             optionsStatut={optionsStatutC()}
             optionsReciproque={optionsReciproqueC()}
@@ -241,7 +237,6 @@ export function App6gen42() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             nombreMaxLignes={nombreMaxListe()}
             placeholder={placeholderListe()}
@@ -258,7 +253,6 @@ export function App6gen42() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

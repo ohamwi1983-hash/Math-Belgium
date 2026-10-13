@@ -11,7 +11,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   labelAjout: string;
@@ -40,7 +39,7 @@ interface Props {
  * propre famille C pour ta propre famille B", point 6 des clarifications de la spec).
  * `App6gen26.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeRacinesCalculAires({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, placeholder, labelAjout, nombreInitial, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeRacinesCalculAires({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, nombreInitial, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: nombreInitial }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -75,15 +74,6 @@ export function EtapeRacinesCalculAires({ estPremierEcran, consigneGenerale, blo
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="contenu-conditionnel">
         {lignes.map((ligne, i) => (

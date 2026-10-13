@@ -128,7 +128,6 @@ export function App6gen41() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           choix={choixEcran(exercice, phase)}

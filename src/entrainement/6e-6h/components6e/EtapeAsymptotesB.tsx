@@ -17,7 +17,6 @@ interface Props {
   estPremierEcran: boolean;
   enonceLatex: string;
   p: number;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -36,9 +35,9 @@ interface Props {
  * présente (jamais un toggle "aucune", contrairement aux 3 autres familles), seul le CÔTÉ est à
  * déterminer — piège central de cet écran (spec explicite). Suivi de l'équation de l'asymptote
  * horizontale (texte libre, commune aux deux infinis). `App6gen11.tsx` doit le rendre avec
- * `key={indexExercice}`. `etatActuel` rappelle le domaine ET les limites CONFIRMÉS aux 2 écrans
- * précédents (voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeAsymptotesB({ estPremierEcran, enonceLatex, p, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+ * `key={indexExercice}`. Le domaine et les limites confirmés aux 2 écrans précédents sont listés
+ * dans le récapitulatif "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
+export function EtapeAsymptotesB({ estPremierEcran, enonceLatex, p, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cote, setCote] = useState<"plus" | "moins" | null>(null);
   const [texteHorizontale, setTexteHorizontale] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -61,15 +60,6 @@ export function EtapeAsymptotesB({ estPremierEcran, enonceLatex, p, etatActuel, 
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneAsymptotesB()}</p>
 
       <div className="field">

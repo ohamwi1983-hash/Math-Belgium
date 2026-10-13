@@ -117,7 +117,6 @@ export function App6gen34() {
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
-          etatActuel={null}
           consigneEcran={consigneEcran(exercice, phase)}
           champs={champsEcran(exercice, phase)}
           aideNiveau1={formatAideNiveau1(exercice, phase)}

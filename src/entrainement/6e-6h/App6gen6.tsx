@@ -235,7 +235,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   optionsCategorielles={phase === "aExposant" ? ["plus_infini", "moins_infini"] : ["plus_infini", "zero"]}
                   autoriserValeurLibre
@@ -258,7 +257,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   optionsCategorielles={["plus_infini", "zero"]}
                   autoriserValeurLibre
@@ -278,7 +276,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   optionsCategorielles={["plus_infini", "moins_infini"]}
                   autoriserValeurLibre={false}
@@ -301,7 +298,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -319,7 +315,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 0"
                   aideNiveau1={aide1}
@@ -339,7 +334,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : (1-exp(pi/2-x)+cos(x))/(cos(x)*(1-exp(pi/2-x)))"
                   aideNiveau1={aide1}
@@ -358,7 +352,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -376,7 +369,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 1/2, 0.5"
                   aideNiveau1={aide1}
@@ -396,7 +388,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -414,7 +405,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={exercice.famille === "H" && exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*${exercice.base}^(3*x)` : "ex : 2"}
                   aideNiveau1={aide1}
@@ -433,7 +423,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "H" && !exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*${exercice.base}^(3*x)` : "ex : 2"
@@ -454,7 +443,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3/2, 1.5"
                   aideNiveau1={aide1}
@@ -474,7 +462,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -492,7 +479,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "I" && !exercice.sinAuNumerateur ? `ex : 2*ln(${exercice.base})*${exercice.base}^(2*x)` : "ex : 3*cos(3*x)"
@@ -513,7 +499,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "I" && exercice.sinAuNumerateur
@@ -538,7 +523,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3/2, 1.5"
                   aideNiveau1={aide1}
@@ -558,7 +542,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -576,7 +559,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "J" && exercice.arcAuNumerateur
@@ -603,7 +585,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "J" && !exercice.arcAuNumerateur
@@ -630,7 +611,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3/2, 1.5"
                   aideNiveau1={aide1}
@@ -650,7 +630,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
                   aideNiveau2={aide2}
@@ -668,7 +647,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*(${exercice.base}^(3*x)-1)` : "ex : 4*x"
@@ -689,7 +667,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && !exercice.expAuNumerateur ? `ex : 3*ln(${exercice.base})*(${exercice.base}^(3*x)-1)` : "ex : 4*x"
@@ -710,7 +687,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && exercice.expAuNumerateur ? `ex : 9*ln(${exercice.base})^2*${exercice.base}^(3*x)` : "ex : 4"
@@ -731,7 +707,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "K" && !exercice.expAuNumerateur ? `ex : 9*ln(${exercice.base})^2*${exercice.base}^(3*x)` : "ex : 4"
@@ -752,7 +727,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 9/4, 2.25"
                   aideNiveau1={aide1}
@@ -772,7 +746,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={
                     exercice.famille === "L" && exercice.sousType === "L1"
@@ -795,7 +768,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder="ex : e^6, exp(6)"
                   aideNiveau1={aide1}
@@ -815,7 +787,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={exercice.famille === "N" ? `ex : ${exercice.base}^(6+3*x)` : "ex : 2^(6+3*x)"}
                   aideNiveau1={aide1}
@@ -834,7 +805,6 @@ export function App6gen6() {
                   key={phase}
                   estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
-                  etatActuel={null}
                   enonceLatex={enonceLatex}
                   placeholder={exercice.famille === "N" ? `ex : ${exercice.base}^6` : "ex : 2^6"}
                   aideNiveau1={aide1}

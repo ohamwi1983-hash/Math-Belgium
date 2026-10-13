@@ -126,7 +126,6 @@ export function App6gen40() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             options={optionsFormuleA(exercice.parametres.sousType)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -143,7 +142,6 @@ export function App6gen40() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
@@ -160,7 +158,6 @@ export function App6gen40() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             nombreMaxPoints={exercice.autresPoints.length}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
@@ -177,7 +174,6 @@ export function App6gen40() {
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

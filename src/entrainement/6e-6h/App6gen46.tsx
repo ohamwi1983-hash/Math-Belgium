@@ -136,7 +136,6 @@ export function App6gen46() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             s1={exercice.s1}
             s2={exercice.s2}
@@ -153,7 +152,6 @@ export function App6gen46() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
-            etatActuel={null}
             consigneEcran={consigneEcran(exercice, phase)}
             champs={champsEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}

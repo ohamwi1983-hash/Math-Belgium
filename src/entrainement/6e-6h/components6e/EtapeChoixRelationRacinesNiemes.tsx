@@ -13,7 +13,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -37,7 +36,7 @@ interface Props {
  * des boutons — synchronisé avec `diagnostiquerCEcran1`, qui compare directement l'identifiant
  * choisi à `"correct"`.
  */
-export function EtapeChoixRelationRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixRelationRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IdRelationRacineUnite | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -61,15 +60,6 @@ export function EtapeChoixRelationRacinesNiemes({ estPremierEcran, consigneGener
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {OPTIONS_RELATION_C.map((option) => (

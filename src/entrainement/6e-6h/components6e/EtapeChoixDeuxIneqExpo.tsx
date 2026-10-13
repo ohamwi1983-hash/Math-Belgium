@@ -20,8 +20,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
-  etatActuel: string[] | null;
   optionGauche: Option;
   optionDroite: Option;
   aideNiveau1: AideAvecLatex;
@@ -46,7 +44,7 @@ interface Props {
  * PARAMÉTRÉS par l'appelant (`optionGauche`/`optionDroite`) — chaque famille pose une question
  * différente, jamais le même texte de bouton. `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixDeuxIneqExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixDeuxIneqExpo({ estPremierEcran, consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -66,15 +64,6 @@ export function EtapeChoixDeuxIneqExpo({ estPremierEcran, consigneEcran, enonceL
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
 
       <div className="options-grid-compact">

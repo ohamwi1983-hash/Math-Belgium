@@ -17,9 +17,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  /** `null` sur le premier écran de chaque famille (rien à rappeler) — voir
-   * `ui6e/formatInequationsLogarithmiques.ts::etatActuel`. */
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -40,7 +37,7 @@ interface Props {
  * composant partagé `EnsembleReelGuideBuilder` que 6gen1/6gen3/6gen7/6gen10. `App6gen15.tsx` doit
  * le rendre avec `key={phase}`.
  */
-export function EtapeIntervalleIneqLog({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntervalleIneqLog({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -60,15 +57,6 @@ export function EtapeIntervalleIneqLog({ estPremierEcran, consigneEcran, enonceL
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
 
       <EnsembleReelGuideBuilder onChange={setReponse} label="S =" />

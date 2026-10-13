@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   demandePoleExclu: boolean;
   aideNiveau1: AideAvecLatex;
@@ -51,7 +50,7 @@ const NOMBRE_MAX_ANGLES = 2;
  * `moteur6e/verificationComplexesAvances.ts`, `diagnostiquerBEcran2`. `App6gen42.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeLocusComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, demandePoleExclu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeLocusComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, demandePoleExclu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [nature, setNature] = useState<NatureLieu | null>(null);
   const [point1, setPoint1] = useState("");
   const [point2, setPoint2] = useState("");
@@ -107,15 +106,6 @@ export function EtapeLocusComplexesAvances({ estPremierEcran, consigneGenerale, 
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {NATURES_DISPONIBLES.map((option) => (

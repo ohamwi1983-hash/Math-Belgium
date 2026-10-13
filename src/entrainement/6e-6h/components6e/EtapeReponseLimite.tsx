@@ -21,7 +21,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
-  etatActuel: string[] | null;
   /** Sous-ensemble des 3 boutons catégoriels pertinents pour CET écran (voir la note de
    * conception dans `core6e/limitesExponentielles.types.ts` — un seul composant réutilisé pour
    * tous les écrans catégoriels, jamais un par écran, seule la LISTE d'options varie). */
@@ -49,7 +48,7 @@ interface Props {
  * `EtapeFacteursC`, qui réutilise le même jeu de boutons en interne). `App6gen6.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeReponseLimite({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReponseLimite({ estPremierEcran, consigneEcran, enonceLatex, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<ReponseLimite["type"] | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -71,15 +70,6 @@ export function EtapeReponseLimite({ estPremierEcran, consigneEcran, enonceLatex
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {optionsCategorielles.map((option) => (

@@ -15,7 +15,6 @@ interface Props {
   estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
-  etatActuel: string[] | null;
   consigneEcran: string;
   options: Option[];
   aideNiveau1: AideAvecLatex;
@@ -39,7 +38,7 @@ interface Props {
  * CLAUDE.md), mirroir `EtapeChoixAffixesRacines.tsx` (6gen35). `App6gen40.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeChoixFormuleTransformationsPlan({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixFormuleTransformationsPlan({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -63,15 +62,6 @@ export function EtapeChoixFormuleTransformationsPlan({ estPremierEcran, consigne
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {options.map((o) => (

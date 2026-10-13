@@ -10,7 +10,6 @@ import { GrapheOptionEtudeFonction } from "./GrapheOptionEtudeFonction";
 interface Props {
   exercice: ExerciceEtudeFonctionExponentielle;
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -24,10 +23,10 @@ interface Props {
 
 /** Écran 6/6, "graphique" (`6gen11`) — en-tête propre à ce générateur ; le corps du QCM (4
  * graphiques lettrés A→D empilés, non cliquables, + 4 boutons de choix texte séparés + Valider) est
- * délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen20/6gen21. `etatActuel`
- * rappelle les 5 écrans précédents (domaine, limites, asymptotes, croissance, concavité) — le plus
- * long rappel de ce générateur, voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`. */
-export function EtapeSelectionGraphiqueEtudeFonction({ exercice, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+ * délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen20/6gen21. Les 5 écrans
+ * précédents (domaine, limites, asymptotes, croissance, concavité) sont listés dans le
+ * récapitulatif "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
+export function EtapeSelectionGraphiqueEtudeFonction({ exercice, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBox(exercice);
 
   return (
@@ -41,15 +40,6 @@ export function EtapeSelectionGraphiqueEtudeFonction({ exercice, estPremierEcran
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneGraphique()}</p>
 
       <EtapeSelectionGraphiqueQCM

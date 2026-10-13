@@ -141,7 +141,6 @@ export function App6gen22() {
     estPremierEcran,
     consigneGenerale: consigneG,
     blocDonnees: donnees,
-    etatActuel: null,
     consigneEcran: consigne,
     aideNiveau1: aide1,
     aideNiveau2: aide2,
@@ -194,7 +193,6 @@ export function App6gen22() {
             estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
-            etatActuel={null}
             consigneEcran={consigne}
             labelChamp1="t_1="
             labelChamp2="t_2="

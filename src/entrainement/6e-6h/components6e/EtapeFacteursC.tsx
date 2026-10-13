@@ -20,7 +20,6 @@ interface Props {
   consigneEcran: string;
   enonceLatex: string;
   estPremierEcran: boolean;
-  etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -53,7 +52,7 @@ function GroupeBoutons({ label, valeur, erreur, onChange }: { label: string; val
 /** Écran "cFacteurs" (`6gen6`, famille C) — 2 sous-réponses catégorielles indépendantes (limite de
  * chaque facteur), combinées derrière UN SEUL bouton "Valider" (spec : "Champ : 2 valeurs").
  * `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeFacteursC({ consigneEcran, enonceLatex, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFacteursC({ consigneEcran, enonceLatex, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [facteur1, setFacteur1] = useState<OptionCategorielle | null>(null);
   const [facteur2, setFacteur2] = useState<OptionCategorielle | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -76,15 +75,6 @@ export function EtapeFacteursC({ consigneEcran, enonceLatex, estPremierEcran, et
           </div>
         }
       />
-      {etatActuel && (
-        <div className="etat-actuel-box">
-          <div className="etat-actuel-box-termes">
-            {etatActuel.map((frag, i) => (
-              <Katex key={i} expression={frag} />
-            ))}
-          </div>
-        </div>
-      )}
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeBoutons label="x^r →" valeur={facteur1} erreur={montrerErreurs} onChange={setFacteur1} />
       <GroupeBoutons label="e^(-x^s) →" valeur={facteur2} erreur={montrerErreurs} onChange={setFacteur2} />
