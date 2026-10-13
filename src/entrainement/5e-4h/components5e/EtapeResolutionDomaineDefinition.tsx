@@ -7,9 +7,11 @@ import { GrilleQuotientDomfBuilder } from "./GrilleQuotientDomfBuilder";
 import { Katex } from "../components/Katex";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, formatEnsembleReelLatex, formatSlotConditionLatex, formatTermesEtatActuelCELatex } from "../ui5e/formatDomaineDefinition";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDomaineDefinition;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   /** Bloc "données" redondant (f(x)), rendu juste APRÈS la consigne générale (A.9, ordre standard
@@ -50,14 +52,13 @@ function EtatActuelLignes({ termes }: { termes: string[] }) {
  * n'existe donc plus que pour "fractionSousRacine" — le tableau de signes — et
  * "racineSurFraction"/"racineSurD" — 2 CE indépendantes). Aucune aide sur cet écran (jamais
  * spécifiée par la spec pour ces 2 cas, voir `niveauAideMaxResolution`). */
-export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, donnees, onValider, validation }: Props) {
+export function EtapeResolutionDomaineDefinition({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, donnees, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
   if (exercice.famille === "fractionSousRacine") {
     return (
       <div>
-        <p className="prompt-text">{CONSIGNE_GENERALE_DOMAINE_DEFINITION}</p>
-        {donnees}
+        <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
         <EtatActuelCE exercice={exercice} />
         <GrilleQuotientDomfBuilder
           exercice={exercice}
@@ -72,8 +73,7 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
   if (exercice.famille === "racineSurFraction") {
     return (
       <div>
-        <p className="prompt-text">{CONSIGNE_GENERALE_DOMAINE_DEFINITION}</p>
-        {donnees}
+        <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
         <ResolutionRacineSurFraction exercice={exercice} tentativesUtilisees={tentativesUtilisees} tentativesMax={tentativesMax} onValider={onValider} validation={validation} />
       </div>
     );
@@ -86,8 +86,7 @@ export function EtapeResolutionDomaineDefinition({ exercice, tentativesUtilisees
   const famille = exercice.famille;
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_DOMAINE_DEFINITION}</p>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
       <EtatActuelCE exercice={exercice} />
       <p className="prompt-text">Résous la condition d'existence.</p>
       <EnsembleReelGuideBuilder

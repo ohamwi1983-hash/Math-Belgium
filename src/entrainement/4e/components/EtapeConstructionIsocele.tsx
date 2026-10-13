@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIsocele;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +30,7 @@ interface Props {
  * substituée) — `promptgen26refontecomplete.md`, Partie D : graphe supprimé (chevauchement de
  * labels non résolvable simplement, n'apporte pas d'information essentielle).
  */
-export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeConstructionIsocele({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -73,12 +75,17 @@ export function EtapeConstructionIsocele({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ISOCELE}</p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesIsoceleLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ISOCELE}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesDonneesIsoceleLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">
         Calcule les composantes des vecteurs <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} />,{" "}
         <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} /> et <Katex expression={`\\vec{${exercice.labelB}${exercice.labelC}}`} />.

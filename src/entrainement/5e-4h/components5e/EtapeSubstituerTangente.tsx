@@ -9,9 +9,11 @@ import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceTangentePointDonne;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +32,7 @@ interface Props {
  * INDÉPENDAMMENT pour l'affichage mais notés comme UNE SEULE tentative combinée — même patron que
  * `EtapeDevelopperDerivee.tsx` (5gen26). Calculatrice PRÉSENTE : substitution numérique, valeur
  * potentiellement irrationnelle (sous-famille radicale). */
-export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSubstituerTangente({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [fA, setFA] = useState("");
   const [fPrimeA, setFPrimeA] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -53,12 +55,17 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{question.texteAvant}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

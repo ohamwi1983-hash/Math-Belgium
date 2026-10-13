@@ -7,12 +7,14 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { ReponseCasSpecial } from "../moteur5e/verificationEtudeComplete";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +36,7 @@ interface Props {
  * même convention 4e que les coordonnées d'un point — `EtapeCoordonneesRelationVectorielle.tsx`),
  * jamais empilés verticalement comme le rendait `EtapeChampsEtudeComplete` générique.
  */
-export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCasSpecialEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -49,8 +51,11 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
-      <BlocDonneesEtudeComplete exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
+        blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
+      />
       <Katex expression={consignePhase(exercice, "casSpecial")} block />
       <div className="field-row">
         <div className="field field-inline">

@@ -4,6 +4,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -11,6 +12,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel?: string[] | null;
@@ -36,7 +38,7 @@ interface Props {
  * E écran 1, famille G écran 1) — jamais un pattern add-as-needed ici (le nombre de champs est
  * toujours EXACTEMENT 2, connu à la conception). Copié-adapté de
  * `EtapeDeuxValeursExpoProblemes.tsx` (6gen12). */
-export function EtapeDeuxValeursLogProblemes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxValeursLogProblemes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte1, setTexte1] = useState("");
   const [texte2, setTexte2] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -49,14 +51,19 @@ export function EtapeDeuxValeursLogProblemes({ consigneGenerale, blocDonnees, et
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

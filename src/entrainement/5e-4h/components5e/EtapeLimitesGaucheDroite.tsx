@@ -49,22 +49,24 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
 
   function comboboxSigne(id: string, valeur: 1 | -1 | null, setValeur: (v: 1 | -1) => void, erronee: boolean) {
     return (
-      <select
-        id={id}
-        className={erronee ? "ce-select is-erronee" : "ce-select"}
-        aria-label="Signe de la limite"
-        value={valeur === null ? "" : String(valeur)}
-        onChange={(e) => setValeur(Number(e.target.value) as 1 | -1)}
-      >
-        <option value="" disabled>
-          Choisis…
-        </option>
-        {OPTIONS_SIGNE_INFINI.map((o) => (
-          <option key={o.id} value={o.id}>
-            {o.label}
+      <span className="select-souligne-wrap">
+        <select
+          id={id}
+          className={erronee ? "ce-select is-erronee" : "ce-select"}
+          aria-label="Signe de la limite"
+          value={valeur === null ? "" : String(valeur)}
+          onChange={(e) => setValeur(Number(e.target.value) as 1 | -1)}
+        >
+          <option value="" disabled>
+            Choisis…
           </option>
-        ))}
-      </select>
+          {OPTIONS_SIGNE_INFINI.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </span>
     );
   }
 

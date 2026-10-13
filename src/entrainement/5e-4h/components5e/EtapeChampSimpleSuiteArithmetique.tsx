@@ -8,11 +8,13 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 type PhaseChampSimple = "trouverR" | "trouverU1" | "formuleGenerale" | "termeEloigne" | "sommeSn" | "calculerSn" | "resoudreXAlgebrique" | "resoudreRangN";
 
 interface Props {
   exercice: ExerciceSuiteArithmetique;
+  estPremierEcran: boolean;
   phase: PhaseChampSimple;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -34,7 +36,7 @@ interface Props {
 /** Écran à UN SEUL champ texte libre — réutilisé par 6 des 10 phases de 5gen14. `App5gen14.tsx`
  * doit le rendre avec `key={phase}` (leçon retenue de tout le chantier 5e — sans cette clé, React
  * réutilise la même instance entre deux écrans et le champ garde la réponse précédente). */
-export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampSimpleSuiteArithmetique({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -59,12 +61,17 @@ export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesU
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase as PhaseSuiteArithmetique)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -131,6 +131,17 @@ export function AppNormeDistance() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
+   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
+   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionNormeDistance(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteNormeDistance)));
@@ -225,6 +236,7 @@ export function AppNormeDistance() {
           <EtapeConstructionDistance
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -236,6 +248,7 @@ export function AppNormeDistance() {
           <EtapeCalculDistance
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -247,6 +260,7 @@ export function AppNormeDistance() {
           <EtapeConstructionIsocele
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -258,6 +272,7 @@ export function AppNormeDistance() {
           <EtapeCalculIsocele
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -269,6 +284,7 @@ export function AppNormeDistance() {
           <EtapeConclusionIsocele
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -302,6 +318,7 @@ export function AppNormeDistance() {
           <EtapeConstructionPythagore
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -313,6 +330,7 @@ export function AppNormeDistance() {
           <EtapeCalculPythagore
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -324,6 +342,7 @@ export function AppNormeDistance() {
           <EtapeTestPythagore
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}

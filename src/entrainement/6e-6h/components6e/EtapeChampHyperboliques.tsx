@@ -7,8 +7,10 @@ import type { AideAvecLatex } from "../ui6e/formatHyperboliques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   /** `null` — jamais rendu — quand cet écran ne dépend d'aucun écran précédent. */
@@ -39,6 +41,7 @@ interface Props {
  * "état actuel" → bloc de travail. `App6gen19.tsx` doit le rendre avec `key={phase}`.
  */
 export function EtapeChampHyperboliques({
+  estPremierEcran,
   consigneGenerale,
   blocDonnees,
   etatActuel,
@@ -66,12 +69,17 @@ export function EtapeChampHyperboliques({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        {blocDonnees.map((frag, i) => (
-          <Katex key={i} expression={frag} block />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            {blocDonnees.map((frag, i) => (
+              <Katex key={i} expression={frag} block />
+            ))}
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           {etatActuel.map((frag, i) => (

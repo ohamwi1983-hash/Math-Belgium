@@ -10,11 +10,13 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 type PhasePoserEquation = "poserEquationAlgebrique" | "poserEquationRangN";
 
 interface Props {
   exercice: ExerciceSuiteArithmetique;
+  estPremierEcran: boolean;
   phase: PhasePoserEquation;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -37,7 +39,7 @@ interface Props {
  * champs gauche/droite séparés par un '=' visuel" — `diagnostiquerEquationComplete`/
  * `diagnostiquerEquationCompleteEnN`, `moteur5e/verificationSuiteArithmetique.ts`, splittent le
  * texte sur "=" avant de déléguer à la vérification par différences finies existante). */
-export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapePoserEquation({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -56,12 +58,17 @@ export function EtapePoserEquation({ exercice, phase, tentativesUtilisees, tenta
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field-row">

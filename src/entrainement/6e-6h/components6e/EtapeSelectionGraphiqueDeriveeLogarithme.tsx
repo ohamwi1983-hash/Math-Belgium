@@ -3,11 +3,13 @@ import type { ExerciceGraphiqueDeriveeLogarithme } from "../core6e/graphiqueDeri
 import type { AideAvecLatex } from "../ui6e/formatGraphiqueDeriveeLogarithme";
 import { CONSIGNE_GENERALE, calculerViewBoxGraphique, consigneEcranSelection, etatActuelSelection, formatFonctionLatex } from "../ui6e/formatGraphiqueDeriveeLogarithme";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionDeriveeLogarithme } from "./GrapheOptionDeriveeLogarithme";
 
 interface Props {
   exercice: ExerciceGraphiqueDeriveeLogarithme;
+  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -22,15 +24,20 @@ interface Props {
 /** Écran "selection" (les 3 familles, `6gen20`) — en-tête propre à ce générateur ; le corps du QCM
  * (4 graphiques lettrés A→D empilés, non cliquables, + 4 boutons de choix texte séparés + Valider)
  * est délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen11/6gen21. */
-export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBoxGraphique(exercice);
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFonctionLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFonctionLatex(exercice)} />
+          </div>
+        }
+      />
       <div className="etat-actuel-box">
         <div className="etat-actuel-box-termes">
           {etatActuelSelection(exercice).map((frag, i) => (

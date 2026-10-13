@@ -10,9 +10,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
  * développée) reste affiché, fixe, sur les 3 écrans. Champ de texte libre, vérifié par équivalence
  * algébrique à 2 variables (`diagnostiquerRegroupement`).
  */
-export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -40,10 +42,15 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativ
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneRegroupement(exercice)} />
       </p>

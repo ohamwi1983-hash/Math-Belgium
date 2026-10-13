@@ -9,9 +9,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistance;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +28,7 @@ interface Props {
  * pour `dist(A,B)` (label reformulé, fraction/irrationnel irréductible acceptés —
  * `promptgen26refontecomplete.md`, Partie F). Aide à 2 niveaux, texte seul.
  */
-export function EtapeCalculDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeCalculDistance({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX.calculDistance;
   const complet = texte.trim() !== "";
@@ -36,12 +38,17 @@ export function EtapeCalculDistance({ exercice, tentativesUtilisees, tentativesM
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_DISTANCE}</p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesDistanceLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_DISTANCE}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesDonneesDistanceLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatVecteurLatex(`${exercice.labelA}${exercice.labelB}`, exercice.vecteurAB)} />
       <p className="prompt-text">Calcule la distance entre ces deux points.</p>
 

@@ -19,10 +19,12 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -45,7 +47,7 @@ interface Props {
  * intervalle) : le composant choisit quelle paire afficher selon `ouiNon` (jamais les deux en même
  * temps).
  */
-export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeInjectiveInjectiviteFonctions({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [ouiNon, setOuiNon] = useState<boolean | null>(null);
   const [intervalle, setIntervalle] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<ReponseInjective | null>(null);
@@ -64,10 +66,15 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilise
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFLatexAffichage(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFLatexAffichage(exercice)} />
+          </div>
+        }
+      />
       <EtatActuelPanel label="Domaine" latex={formatEnsembleReelLatex(exercice.domaine)} />
       <p className="prompt-text">{CONSIGNE_ECRAN_INJECTIVE}</p>
 

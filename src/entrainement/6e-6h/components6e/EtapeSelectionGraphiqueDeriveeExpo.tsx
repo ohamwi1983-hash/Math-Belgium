@@ -3,11 +3,13 @@ import type { ExerciceGraphiqueDeriveeExponentielle } from "../core6e/graphiques
 import type { AideAvecLatex } from "../ui6e/formatGraphiquesDeriveeExponentielles";
 import { CONSIGNE_GENERALE, calculerViewBoxGraphique, consigneEcranSelection, formatFonctionLatex } from "../ui6e/formatGraphiquesDeriveeExponentielles";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionDeriveeExpo } from "./GrapheOptionDeriveeExpo";
 
 interface Props {
   exercice: ExerciceGraphiqueDeriveeExponentielle;
+  estPremierEcran: boolean;
   /** `null` pour les familles A/C ("selection" est alors le PREMIER écran de leur séquence, rien à
    * rappeler) ; pour B/D, la dérivée CORRECTE confirmée à l'écran "derivee" qui précède
    * (`ui6e/formatGraphiquesDeriveeExponentielles.ts::etatActuel`). */
@@ -26,15 +28,20 @@ interface Props {
 /** Écran "selection" (les 4 familles, `6gen8`) — en-tête propre à ce générateur ; le corps du QCM
  * (4 graphiques lettrés A→D empilés, non cliquables, + 4 boutons de choix texte séparés + Valider)
  * est délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen11/6gen20/6gen21. */
-export function EtapeSelectionGraphiqueDeriveeExpo({ exercice, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueDeriveeExpo({ exercice, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBoxGraphique(exercice);
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFonctionLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFonctionLatex(exercice)} />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

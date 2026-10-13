@@ -7,10 +7,12 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { EnTeteExercice } from "./EnTeteExercice";
 import type { ReponseAsymptoteInfini, ReponseBlocAsymptote } from "../moteur5e/sessionEtudeComplete";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -68,10 +70,12 @@ function BlocDirection({
       </div>
       {(etat.choix === "horizontale" || etat.choix === "oblique") && (
         <div className="field-row contenu-conditionnel">
-          <select className="ce-select" aria-label="Type d'asymptote" value={etat.choix} onChange={(e) => setEtat({ choix: e.target.value as Choix, valeur: "" })}>
-            <option value="horizontale">AH</option>
-            <option value="oblique">AO</option>
-          </select>
+          <span className="select-souligne-wrap">
+            <select className="ce-select" aria-label="Type d'asymptote" value={etat.choix} onChange={(e) => setEtat({ choix: e.target.value as Choix, valeur: "" })}>
+              <option value="horizontale">AH</option>
+              <option value="oblique">AO</option>
+            </select>
+          </span>
           <span className="field-label field-label-minuscule">{etat.choix === "horizontale" ? "AH≡" : "AO≡"}</span>
           <input
             type="text"
@@ -88,7 +92,7 @@ function BlocDirection({
 
 /** Écran "asymptoteInfini" — 2 blocs indépendants "vers −∞"/"vers +∞", TOUJOURS vérifiés contre la
  * même cible (voir `moteur5e/sessionEtudeComplete.ts`). */
-export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeAsymptoteInfiniEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [moins, setMoins] = useState<EtatBloc>({ choix: null, valeur: "" });
   const [plus, setPlus] = useState<EtatBloc>({ choix: null, valeur: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -105,8 +109,11 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
-      <BlocDonneesEtudeComplete exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
+        blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
+      />
       <p className="prompt-text">{consignePhase(exercice, "asymptoteInfini")}</p>
       <BlocDirection titre="Vers −∞" etat={moins} setEtat={setMoins} erronee={correction !== null && !correction.moins} />
       <BlocDirection titre="Vers +∞" etat={plus} setEtat={setPlus} erronee={correction !== null && !correction.plus} />

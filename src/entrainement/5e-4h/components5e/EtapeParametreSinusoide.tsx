@@ -17,9 +17,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceParametresSinusoide;
+  estPremierEcran: boolean;
   phase: PhaseParametresSinusoide;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -46,7 +48,7 @@ interface Props {
  * `ui5e/recapitulatifParametresSinusoide.ts`), plus l'ancien bloc "état actuel" local
  * (`EtatActuelParametresSinusoide`, retiré ici — doublon visuel).
  */
-export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeParametreSinusoide({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -61,12 +63,17 @@ export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, 
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-termes">
-        {decouperEquationLongueLatex(formatFormuleLatex(exercice)).map((morceau, i) => (
-          <Katex key={i} expression={morceau} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {decouperEquationLongueLatex(formatFormuleLatex(exercice)).map((morceau, i) => (
+              <Katex key={i} expression={morceau} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(phase)}</p>
       <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
       <div className="field field-inline">

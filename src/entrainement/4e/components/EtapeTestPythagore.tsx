@@ -8,9 +8,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExercicePythagore;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,19 +31,24 @@ const SOMMETS: ("A" | "B" | "C")[] = ["A", "B", "C"];
  * actuel" : les 3 normes confirmées à l'écran précédent. Aide à 2 niveaux : la relation de Pythagore
  * pour chaque sommet (niveau 1), puis substituée avec un "?" à la place du signe "=" (niveau 2).
  */
-export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeTestPythagore({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<"A" | "B" | "C" | null>(null);
   const complet = choix !== null;
   const max = NIVEAU_AIDE_MAX.testPythagore;
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_PYTHAGORE}</p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesPythagoreLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_PYTHAGORE}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesDonneesPythagoreLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelLongueursPythagoreLatex(exercice)} />
       <p className="prompt-text">Le triangle est rectangle en</p>
 

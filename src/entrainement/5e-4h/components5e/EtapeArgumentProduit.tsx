@@ -12,9 +12,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceProduitFacteurs;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -102,7 +104,7 @@ function BlocFacteurArgument({
  * ENSEMBLE sur un seul écran, chacun avec son propre add-as-needed + gate "Aucune solution"/"Au
  * moins une série d'angles" (E.1, applique D.1 par facteur — un facteur peut être sin décimal
  * pendant que l'autre est cos exact). */
-export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeArgumentProduit({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choix1, setChoix1] = useState<boolean | null>(exercice.facteur1.fonction === "tan" ? false : null);
   const [lignes1, setLignes1] = useState<string[]>([""]);
   const [choix2, setChoix2] = useState<boolean | null>(exercice.facteur2.fonction === "tan" ? false : null);
@@ -131,12 +133,17 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box equation-box-termes">
-        {decouperEquationLongueLatex(formatEnonceProduitLatex(exercice)).map((morceau, i) => (
-          <Katex key={i} expression={morceau} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {decouperEquationLongueLatex(formatEnonceProduitLatex(exercice)).map((morceau, i) => (
+              <Katex key={i} expression={morceau} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_ARGUMENT_PRODUIT}</p>
 
       <BlocFacteurArgument facteur={exercice.facteur1} numero={1} choix={choix1} setChoix={setChoix1} lignes={lignes1} setLignes={setLignes1} erronee={facteur1Erronee} />

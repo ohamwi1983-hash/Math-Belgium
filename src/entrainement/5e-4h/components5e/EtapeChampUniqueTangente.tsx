@@ -10,9 +10,11 @@ import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceTangente;
+  estPremierEcran: boolean;
   phase: EcranTangente;
   labelChamp: string;
   placeholder: string;
@@ -38,6 +40,7 @@ interface Props {
  * gardant la réponse précédente) — même patron que `EtapeChampLibreDerivee.tsx` (5gen26). */
 export function EtapeChampUniqueTangente({
   exercice,
+  estPremierEcran,
   phase,
   labelChamp,
   placeholder,
@@ -67,12 +70,17 @@ export function EtapeChampUniqueTangente({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">
         {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
       </p>

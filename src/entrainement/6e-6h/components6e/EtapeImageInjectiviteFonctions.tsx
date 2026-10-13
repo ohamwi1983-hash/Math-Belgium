@@ -17,9 +17,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
+  estPremierEcran: boolean;
   /** Intervalle de travail CONFIRMÉ à l'écran précédent (le domaine entier si `injective`, une des
    * 2 moitiés sinon) — affiché dans le bloc "état actuel", jamais recalculé ici. */
   intervalleConfirme: EnsembleReelGuide;
@@ -42,7 +44,7 @@ interface Props {
 
 /** Écran 4 — image de f sur l'intervalle retenu à l'écran précédent, un seul
  * `EnsembleReelGuideBuilder`. `App6gen1.tsx` rend ce composant avec `key={phase}`. */
-export function EtapeImageInjectiviteFonctions({ exercice, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeImageInjectiviteFonctions({ exercice, estPremierEcran, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [image, setImage] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0 && derniereReponse !== null;
@@ -59,10 +61,15 @@ export function EtapeImageInjectiviteFonctions({ exercice, intervalleConfirme, c
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFLatexAffichage(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFLatexAffichage(exercice)} />
+          </div>
+        }
+      />
       {lignesEtatActuel.map((ligne) => (
         <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
       ))}

@@ -9,9 +9,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueB;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * calculées, voir `verificationContexteEconomique.ts::ReponseEgaliteMarginales`). Le rappel du
  * domaine économique (x>0) est affiché en clair — c'est le RAISONNEMENT qui doit être explicite,
  * jamais un indice sur la valeur. */
-export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine, validation}: Props) {
+export function EtapeResoudreEgaliteMarginales({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerRacine, validation}: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
   const [choix, setChoix] = useState<"positive" | "negative" | null>(null);
@@ -48,12 +50,17 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <p className="prompt-text">{consigneEcran(exercice, "resoudreEgaliteMarginales")}</p>
 

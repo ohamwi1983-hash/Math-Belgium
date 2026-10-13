@@ -8,9 +8,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeLocale;
+  estPremierEcran: boolean;
   phase: "tableauFPrime" | "tableauFSeconde";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -24,19 +26,24 @@ interface Props {
 /** Écrans "tableauFPrime"/"tableauFSeconde" — tableau de signes étendu (`TableauEtudeLocaleBuilder`),
  * racines/exclusions déjà pré-placées en en-tête (résolues à l'écran précédent). Calculatrice
  * ABSENTE (question purement structurelle/qualitative). */
-export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeTableauEtudeLocale({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = formatEnteteColonnesTableau(exercice, attendu.colonnes, mode);
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_LOCALE}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
       <EtatActuelEtudeLocale exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigneEcranEtudeLocale(phase)}</p>

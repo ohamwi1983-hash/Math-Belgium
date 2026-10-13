@@ -6,8 +6,10 @@ import type { AideAvecLatex } from "../ui6e/formatHyperboliques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -40,7 +42,7 @@ const OPTIONS: { id: SigneLimiteHyperbolique; latex: string }[] = [
  * 6gen6, qui réutilise en interne le même jeu de boutons 2 fois). `App6gen19.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesHyperboliquesD({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [plusInfini, setPlusInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const [moinsInfini, setMoinsInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -53,12 +55,17 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        {blocDonnees.map((frag, i) => (
-          <Katex key={i} expression={frag} block />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            {blocDonnees.map((frag, i) => (
+              <Katex key={i} expression={frag} block />
+            ))}
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           {etatActuel.map((frag, i) => (

@@ -6,6 +6,7 @@ import { CONSIGNE_GENERALE, formatCategorieLabel } from "../ui6e/formatLimitesLo
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -15,6 +16,7 @@ interface AideAvecLatex {
 const OPTIONS: CategorieCroissance[] = ["log", "polynome", "exponentielle"];
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -51,7 +53,7 @@ function GroupeCategorie({ label, valeur, erreur, onChange }: { label: string; v
  * combinées derrière UN SEUL bouton "Valider" (spec : "Champ : description du terme dominant de
  * chaque côté"). Même patron que `EtapeFacteursC.tsx` (6gen6). `App6gen17.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDominanceA({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [numerateur, setNumerateur] = useState<CategorieCroissance | null>(null);
   const [denominateur, setDenominateur] = useState<CategorieCroissance | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -63,10 +65,15 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeCategorie label="Numérateur — terme dominant" valeur={numerateur} erreur={montrerErreurs} onChange={setNumerateur} />
       <GroupeCategorie label="Dénominateur — terme dominant" valeur={denominateur} erreur={montrerErreurs} onChange={setDenominateur} />

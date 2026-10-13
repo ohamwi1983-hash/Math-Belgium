@@ -11,9 +11,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
+  estPremierEcran: boolean;
   cible1: Point;
   cible2: Point;
   tentativesUtilisees: number;
@@ -37,7 +39,7 @@ const MARQUEUR2_INITIAL: [number, number] = [1, 0];
  * actuel" en toutes lettres, puisqu'ils viennent d'être validés par l'élève lui-même à l'écran
  * précédent (ou révélés après épuisement), jamais une donnée cachée.
  */
-export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTraceConstructionDroite({ exercice, estPremierEcran, cible1, cible2, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [marqueur1, setMarqueur1] = useState<[number, number]>(MARQUEUR1_INITIAL);
   const [marqueur2, setMarqueur2] = useState<[number, number]>(MARQUEUR2_INITIAL);
 
@@ -50,10 +52,15 @@ export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentati
 
   return (
     <div>
-      <p className="prompt-text">{consigneGeneraleTrace(exercice)}</p>
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGeneraleTrace(exercice)}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelPointsLatex(cible1, cible2)} label="Points trouvés" />
       <p className="prompt-text">{CONSIGNE_TRACE}</p>
 

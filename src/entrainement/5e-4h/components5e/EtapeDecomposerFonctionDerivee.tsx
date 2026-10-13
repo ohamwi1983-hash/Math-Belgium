@@ -17,9 +17,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceFonctionDerivee;
+  estPremierEcran: boolean;
   /** Jamais "reglebase" ici — cet écran est sauté pour ce type (voir `sessionFonctionDerivee.ts`). */
   typeRetenu: Exclude<TypeDerivee, "reglebase">;
   tentativesUtilisees: number;
@@ -40,7 +42,7 @@ interface Props {
  * 1-tentative-combinée que `EtapeDevelopperDerivee.tsx` (5gen26). Le champ1/champ2 générique est
  * mappé côté `App5gen27.tsx` vers `ReponseDecomposerUV`/`ReponseDecomposerComposee` selon
  * `typeRetenu`. */
-export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeDecomposerFonctionDerivee({ exercice, estPremierEcran, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [champ1, setChamp1] = useState("");
   const [champ2, setChamp2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -64,12 +66,17 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">
         Objectif : calculer <Katex expression={questionFinale()} />.
       </p>

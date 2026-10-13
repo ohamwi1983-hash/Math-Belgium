@@ -7,6 +7,7 @@ import type { AideAvecLatex, ChampDef } from "../ui6e/formatEquationsComplexes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 /** Vrai si le placeholder NE représente PAS un simple nombre isolé (entier/décimal, signe
  * optionnel) — distingue un champ purement réel (ex. "x =", "r₁ =") d'un champ complexe/composé
@@ -21,6 +22,7 @@ function champEstCompose(placeholder?: string): boolean {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
@@ -48,7 +50,7 @@ interface Props {
  * état actuel → bloc de travail) conservée à l'identique. `App6gen36.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -65,14 +67,19 @@ export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, e
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

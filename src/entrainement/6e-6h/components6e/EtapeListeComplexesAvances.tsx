@@ -4,8 +4,10 @@ import type { AideAvecLatex } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -39,7 +41,7 @@ interface Props {
  * `EtapeRacinesAffixesRacines.tsx`/6gen35 pour ce même chapitre). Croix rouge `×` pour retirer une
  * ligne, jamais un bouton texte "Retirer". `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, nombreMaxLignes) }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Categorie, Exercice } from "./core/generateur.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -32,6 +32,7 @@ import { calculerEtatActuel } from "./ui/etatActuel";
 import { formatEnonceAffichage, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -168,6 +169,16 @@ export function AppMethodeRapide() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
+   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const reponseAttendue =
     phase === "champ1" ? (
       <Katex expression={exercice.categorie === "cas_general" ? `\\Delta = ${exercice.solution.delta}` : `${exercice.solution.formeFactorisee} = 0`} />
@@ -200,7 +211,7 @@ export function AppMethodeRapide() {
       <main className="card">
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
         <div className="card-body">
-          <p className="prompt-text">{CONSIGNE_GENERALE}</p>
+          <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {phase === "simplification" ? (
             <EtapeSimplificationCoefficients
               key={phase}

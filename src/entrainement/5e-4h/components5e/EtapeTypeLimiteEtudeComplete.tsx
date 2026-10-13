@@ -54,18 +54,20 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, te
             <span className="field-label field-label-minuscule">
               <Katex expression={formatLabelTypeLimiteLatex(excl.position)} block />
             </span>
-            <select
-              className={erronee ? "ce-select is-erronee" : "ce-select"}
-              aria-label={`Type de limite en x=${excl.position}`}
-              value={choix[i] ?? ""}
-              onChange={(e) => modifier(i, e.target.value as Choix)}
-            >
-              <option value="" disabled>
-                Choisis…
-              </option>
-              <option value="infini">∞</option>
-              <option value="pointVide">0/0</option>
-            </select>
+            <span className="select-souligne-wrap">
+              <select
+                className={erronee ? "ce-select is-erronee" : "ce-select"}
+                aria-label={`Type de limite en x=${excl.position}`}
+                value={choix[i] ?? ""}
+                onChange={(e) => modifier(i, e.target.value as Choix)}
+              >
+                <option value="" disabled>
+                  Choisis…
+                </option>
+                <option value="infini">∞</option>
+                <option value="pointVide">0/0</option>
+              </select>
+            </span>
           </div>
         );
       })}

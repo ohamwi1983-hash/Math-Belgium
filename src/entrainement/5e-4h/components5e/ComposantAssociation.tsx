@@ -101,22 +101,24 @@ export function ComposantAssociation({
             <p className="field-label field-label-minuscule">{i + 1}</p>
             {renderItem(i)}
           </div>
-          <select
-            className={`ce-select${correction && correction[i] === false ? " is-erronee" : ""}`}
-            aria-label={`Lettre correspondant à l'élément ${i + 1}`}
-            value={choix[i] ?? ""}
-            onChange={(e) => modifier(i, e.target.value)}
-          >
-            <option value="" disabled>
-              Choisis…
-            </option>
-            {lettres.map((lettre, j) => (
-              <option key={lettre} value={j}>
-                {lettre}
+          <span className="select-souligne-wrap">
+            <select
+              className={`ce-select${correction && correction[i] === false ? " is-erronee" : ""}`}
+              aria-label={`Lettre correspondant à l'élément ${i + 1}`}
+              value={choix[i] ?? ""}
+              onChange={(e) => modifier(i, e.target.value)}
+            >
+              <option value="" disabled>
+                Choisis…
               </option>
-            ))}
-            {libelleOptionSupplementaire && <option value="aucune">{libelleOptionSupplementaire}</option>}
-          </select>
+              {lettres.map((lettre, j) => (
+                <option key={lettre} value={j}>
+                  {lettre}
+                </option>
+              ))}
+              {libelleOptionSupplementaire && <option value="aucune">{libelleOptionSupplementaire}</option>}
+            </select>
+          </span>
         </div>
       ))}
       {!validation && (

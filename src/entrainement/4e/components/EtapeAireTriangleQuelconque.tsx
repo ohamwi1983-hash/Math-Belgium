@@ -71,14 +71,16 @@ export function EtapeAireTriangleQuelconque({
             onChange={(e) => setTexte(filtrerSaisieNumerique(e.target.value))}
             onKeyDown={gererKeyDownNumerique}
           />
-          <select className="champ-avec-unite-select" aria-label="Unité" value={unite} onChange={(e) => setUnite(e.target.value as UniteLongueur | "")}>
-            <option value="">Unité…</option>
-            {OPTIONS_UNITE_AIRE.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <span className="select-souligne-wrap">
+            <select className="champ-avec-unite-select" aria-label="Unité" value={unite} onChange={(e) => setUnite(e.target.value as UniteLongueur | "")}>
+              <option value="">Unité…</option>
+              {OPTIONS_UNITE_AIRE.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </span>
         </div>
       </div>
 

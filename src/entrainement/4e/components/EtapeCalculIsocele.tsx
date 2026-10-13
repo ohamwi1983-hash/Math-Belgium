@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIsocele;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +29,7 @@ interface Props {
  * irréductible acceptés), labels en notation norme ($\|\vec{AB}\|=$, remplace l'ancien "AB=").
  * Aide à 2 niveaux, limitée à $\vec{AB}$ — `promptgen26refontecomplete.md`, Partie D.
  */
-export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeCalculIsocele({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [ab, setAb] = useState("");
   const [ac, setAc] = useState("");
   const [bc, setBc] = useState("");
@@ -45,12 +47,17 @@ export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMa
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ISOCELE}</p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesIsoceleLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ISOCELE}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesDonneesIsoceleLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">Calcule la longueur des 3 côtés du triangle.</p>
 

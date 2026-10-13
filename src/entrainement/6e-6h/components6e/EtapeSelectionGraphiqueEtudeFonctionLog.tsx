@@ -3,11 +3,13 @@ import type { ExerciceEtudeLogNonE } from "../core6e/etudeFonctionLogarithme.typ
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, formatFonctionLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionEtudeFonctionLog } from "./GrapheOptionEtudeFonctionLog";
 
 interface Props {
   exercice: ExerciceEtudeLogNonE;
+  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -23,15 +25,20 @@ interface Props {
  * propre à ce générateur ; le corps du QCM (4 graphiques lettrés A→D empilés, non cliquables, + 4
  * boutons de choix texte séparés + Valider) est délégué à `EtapeSelectionGraphiqueQCM`, partagé
  * avec 6gen5/6gen8/6gen11/6gen20. */
-export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBox(exercice);
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFonctionLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFonctionLatex(exercice)} />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneGraphique()}</p>
 
       <EtapeSelectionGraphiqueQCM

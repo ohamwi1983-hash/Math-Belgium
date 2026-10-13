@@ -11,9 +11,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * (`diagnostiquerCompletionCarre` — cible IDENTIQUE à l'écran 1, voir l'en-tête de
  * `verificationEquationParaboleDeveloppee.ts`).
  */
-export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCompletionEquationParaboleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -42,10 +44,15 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatRegroupementLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_COMPLETION}</p>
 

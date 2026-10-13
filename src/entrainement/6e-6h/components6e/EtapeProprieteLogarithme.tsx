@@ -6,6 +6,7 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -13,6 +14,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   /** Expression logarithmique DEMANDÉE (KaTeX) — rattachée visuellement à la consigne générale
    * (même patron que `expressionLatex` de `EtapeChampCycloSimple.tsx`, 6gen2), affichée AVANT le
@@ -48,6 +50,7 @@ interface Props {
  * `key={phase}` (remet le champ à vide à chaque écran).
  */
 export function EtapeProprieteLogarithme({
+  estPremierEcran,
   consigneGenerale,
   expressionLatex,
   blocDonnees,
@@ -76,17 +79,24 @@ export function EtapeProprieteLogarithme({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <Katex expression={expressionLatex} />
-      </div>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <>
+            <div className="equation-box">
+              <Katex expression={expressionLatex} />
+            </div>
+            <div className="equation-box">
+              <div className="equation-box-donnees">
+                {blocDonnees.map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </div>
+            </div>
+          </>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

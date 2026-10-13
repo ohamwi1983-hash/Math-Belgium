@@ -7,10 +7,12 @@ import type { AideAvecLatex, ChampDef } from "../ui6e/formatProprietesOptiquesCo
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
@@ -44,7 +46,7 @@ function estChampPointLitteral(champ: ChampDef): boolean {
  * aucune sous-UI add-as-needed. Chaque champ TOUJOURS dans un `.field` empilé (label AU-DESSUS),
  * **jamais `.field-inline`** (CLAUDE.md).
  */
-export function EtapeChampsProprietesOptiquesConiques({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsProprietesOptiquesConiques({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
 
   const montrerErreurs = tentativesUtilisees > 0;
@@ -62,14 +64,19 @@ export function EtapeChampsProprietesOptiquesConiques({ consigneGenerale, blocDo
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

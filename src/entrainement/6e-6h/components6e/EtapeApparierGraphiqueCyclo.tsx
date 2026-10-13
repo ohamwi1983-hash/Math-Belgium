@@ -232,18 +232,20 @@ export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2
 
           <div className="field">
             <p className="field-label">Parité</p>
-            <select
-              className={`ce-select${diagnostic && diagnostic.parite !== "correct" ? " is-erronee" : ""}`}
-              value={parite}
-              onChange={(e) => setParite(e.target.value as ParticulariteParite)}
-            >
-              <option value="" disabled>
-                choisir…
-              </option>
-              <option value="paire">{LIBELLE_PARITE.paire}</option>
-              <option value="impaire">{LIBELLE_PARITE.impaire}</option>
-              <option value="aucune">{LIBELLE_PARITE.aucune}</option>
-            </select>
+            <span className="select-souligne-wrap">
+              <select
+                className={`ce-select${diagnostic && diagnostic.parite !== "correct" ? " is-erronee" : ""}`}
+                value={parite}
+                onChange={(e) => setParite(e.target.value as ParticulariteParite)}
+              >
+                <option value="" disabled>
+                  choisir…
+                </option>
+                <option value="paire">{LIBELLE_PARITE.paire}</option>
+                <option value="impaire">{LIBELLE_PARITE.impaire}</option>
+                <option value="aucune">{LIBELLE_PARITE.aucune}</option>
+              </select>
+            </span>
           </div>
 
           <ChampExtremum

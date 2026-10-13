@@ -7,6 +7,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -58,6 +59,7 @@ function GroupeAsymptote({
 }
 
 interface Props {
+  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   /** Rappel des limites confirmées à l'écran précédent (consigne explicite : "à partir des limites
@@ -87,7 +89,7 @@ interface Props {
  * `forcerPresence`, où l'existence est déjà acquise), vérifiée par ÉQUIVALENCE NUMÉRIQUE de
  * l'équation soumise (même décision de conception que `6gen11`). `App6gen21.tsx` doit le rendre
  * avec `key={indexExercice}`. */
-export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, forcerPresence, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeAsymptotesMultiLog({ estPremierEcran, enonceLatex, consigneEcran, etatActuel, labels, forcerPresence, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etats, setEtats] = useState<ReponseAsymptoteDirection[]>(() => labels.map((_, i) => ({ existe: forcerPresence[i], texte: "" })));
   const [touches, setTouches] = useState<boolean[]>(() => labels.map(() => false));
   const montrerErreurs = tentativesUtilisees > 0;
@@ -111,10 +113,15 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       <div className="etat-actuel-box">
         <div className="etat-actuel-box-termes">
           {etatActuel.map((frag, i) => (

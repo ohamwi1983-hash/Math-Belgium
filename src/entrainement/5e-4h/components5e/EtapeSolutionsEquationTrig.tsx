@@ -9,9 +9,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationTrig;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
 /** Écran 3 (absent si `exercice.aucuneSolution`) — lister les solutions distinctes dans [0;2π[.
  * Add-as-needed, cercle trigonométrique VIDE tant que l'aide 2 n'est pas activée (jamais donner la
  * réponse en avance) — l'aide 2 y place alors le PREMIER point à titre d'exemple seulement. */
-export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSolutionsEquationTrig({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -55,10 +57,15 @@ export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tent
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationEnonceLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationEnonceLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">
         Liste toutes les solutions distinctes dans [0;2π[ (une valeur par point).
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}

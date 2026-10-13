@@ -6,9 +6,11 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueB;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +28,7 @@ interface Props {
  * marginales" ? Toujours vraie par construction (`Cm(x)-Rm(x) ≡ -B'(x)` exactement, voir
  * `generateurs5e/contexteEconomique/index.ts`), mais l'élève doit néanmoins la confirmer
  * explicitement. */
-export function EtapeConfirmationCoherence({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConfirmationCoherence({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = reponse !== null;
@@ -38,12 +40,17 @@ export function EtapeConfirmationCoherence({ exercice, tentativesUtilisees, tent
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <p className="prompt-text">{consigneEcran(exercice, "confirmationCoherence")}</p>
 

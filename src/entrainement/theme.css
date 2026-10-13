@@ -382,8 +382,66 @@
   gap: 12px;
 }
 
+/* Bug préexistant corrigé au passage : cette classe est utilisée dans ~20 écrans (6e-6h + un en
+ * 4e) mais n'avait AUCUNE règle CSS — elle retombait en bloc normal (pas de grille 2 colonnes). */
+.entrainement .options-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
 .entrainement .contenu-conditionnel {
   margin-top: 16px;
+}
+
+/* Option 1B retenue : "plein puis compact" — la consigne générale + le bloc de données
+ * s'affichent en entier au premier écran d'un exercice (`.entete-exercice`), puis se replient en
+ * bandeau compact dépliable sur les écrans suivants du même exercice (`.entete-exercice-compacte`)
+ * — évite de répéter le même contexte en entier à chaque écran. Rendu par le composant partagé
+ * `EnTeteExercice` (dupliqué par chantier, voir `components/EnTeteExercice.tsx`). */
+.entrainement .entete-exercice-compacte {
+  margin-bottom: 18px;
+}
+
+.entrainement .entete-exercice-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.entrainement .entete-exercice-toggle:hover {
+  border-color: var(--color-primary);
+}
+
+.entrainement .entete-exercice-toggle svg {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.entrainement .entete-exercice-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.entrainement .entete-exercice-toggle span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entrainement .entete-exercice-contenu {
+  margin-top: 8px;
 }
 
 .entrainement .apercu-expression-latex {
@@ -786,9 +844,70 @@
   margin-bottom: 6px;
 }
 
+/* Option 2B retenue : combobox "soulignée", délibérément différente du `.text-input` encadré —
+ * une affordance distincte dit "choisis dans une liste" plutôt que "tape une réponse" avant même
+ * le tap. Nécessite un wrapper (`.select-souligne-wrap`) autour de chaque `<select>` concerné car
+ * un `<select>` natif ne peut pas recevoir son propre `::after` de façon fiable cross-navigateur —
+ * même technique de chevron (bordure pivotée) que `.selecteur-variante-select-wrap` plus bas. */
+.entrainement .select-souligne-wrap {
+  position: relative;
+  display: block;
+}
+
+.entrainement .select-souligne-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  margin-top: -6px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.entrainement .select-souligne-wrap:hover::after {
+  border-color: var(--color-primary);
+}
+
+.entrainement .ce-select,
+.entrainement .champ-avec-unite-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 20px 8px 2px;
+  border: none;
+  border-bottom: 2px solid var(--color-text-muted);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.entrainement .ce-select:hover,
+.entrainement .champ-avec-unite-select:hover {
+  border-bottom-color: var(--color-primary);
+}
+
+.entrainement .ce-select:focus-visible,
+.entrainement .champ-avec-unite-select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--color-primary);
+}
+
 .entrainement .ce-select.is-erronee {
+  border-bottom-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.entrainement .select-souligne-wrap:has(.is-erronee)::after {
   border-color: var(--color-error);
-  background: var(--color-error-bg);
 }
 
 .entrainement .field-inline {
@@ -954,6 +1073,35 @@
   border-color: var(--color-error);
   background: var(--color-error-bg);
   color: var(--color-error);
+}
+
+/* Option 3B retenue : marqueur radio explicite — différencie un bouton de CHOIX du bouton
+ * "Valider" (`.btn-primary`) par la FORME (rond vide/plein), pas seulement par une couleur que
+ * `.toggle-active` partageait déjà avec `.btn-primary`. Scopé aux conteneurs de choix
+ * (`.options-grid`/`.options-grid-compact`) pour ne jamais toucher les autres `.btn` (Aide,
+ * "+ Ajouter"...). */
+.entrainement .options-grid .btn::before,
+.entrainement .options-grid-compact .btn::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  flex: none;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+}
+
+.entrainement .options-grid .btn.toggle-active::before,
+.entrainement .options-grid-compact .btn.toggle-active::before {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 3px var(--color-surface);
+}
+
+.entrainement .options-grid .btn.toggle-active.is-erronee::before,
+.entrainement .options-grid-compact .btn.toggle-active.is-erronee::before {
+  border-color: var(--color-error);
+  background: var(--color-error);
 }
 
 /* Sélecteur de variante — panneau toujours visible (plus un outil de dev caché derrière ?dev=1,

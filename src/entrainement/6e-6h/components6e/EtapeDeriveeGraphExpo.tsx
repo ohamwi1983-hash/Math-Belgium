@@ -6,10 +6,12 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatGraphiquesDeriveeExponentielles
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneEcran: string;
   fonctionLatex: string;
+  estPremierEcran: boolean;
   /** `null` — jamais rendu — sur "derivee", TOUJOURS le premier écran de sa famille (B/D) : rien à
    * rappeler. Présent dans le contrat pour rester alignable avec `EtapeSelectionGraphiqueDeriveeExpo`,
    * jamais alimenté que par `null` en pratique côté `App6gen8.tsx`. */
@@ -35,7 +37,7 @@ interface Props {
  * (famille D seule, "x≠0") est TOUJOURS affiché, jamais gagné par une aide. `App6gen8.tsx` doit
  * rendre ce composant avec une `key` qui change entre 2 exercices (même si la phase reste
  * "derivee"), sinon le champ garderait la saisie de l'exercice précédent. */
-export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, etatActuel, rappelDomaine, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, estPremierEcran, etatActuel, rappelDomaine, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -46,10 +48,15 @@ export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, etatActuel
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={fonctionLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={fonctionLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

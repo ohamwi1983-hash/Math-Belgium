@@ -7,6 +7,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -19,6 +20,7 @@ const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", mo
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
+  estPremierEcran: boolean;
   partie1: ConfigPartieDiagnostic;
   partie2: ConfigPartieDiagnostic;
   aideNiveau1: AideAvecLatex;
@@ -88,7 +90,7 @@ function reponseDepuisEtat(etat: EtatPartie): ReponseLimiteLog | null {
  * indépendantes combinées derrière UN SEUL bouton "Valider" (spec : "Champ : valeurs/statuts de
  * chaque partie"). Même patron que `EtapeFacteursC.tsx` (6gen6), étendu pour supporter une option
  * "Valeur finie" par partie. `App6gen17.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDiagnosticC({ consigneEcran, enonceLatex, estPremierEcran, partie1, partie2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etat1, setEtat1] = useState<EtatPartie>({ statut: null, texte: "" });
   const [etat2, setEtat2] = useState<EtatPartie>({ statut: null, texte: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -104,10 +106,15 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneEcran}</p>
       <GroupePartie config={partie1} etat={etat1} erreur={montrerErreurs} onChange={setEtat1} />
       <GroupePartie config={partie2} etat={etat2} erreur={montrerErreurs} onChange={setEtat2} />

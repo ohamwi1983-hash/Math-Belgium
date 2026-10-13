@@ -44,43 +44,47 @@ export function DoubleComboboxIntervalle({ labelX, labelY, optionsX, optionsY, v
   return (
     <div className="ce-ligne-champs">
       <span>{labelX}</span>
-      <select
-        className={`ce-select${erroneeX ? " is-erronee" : ""}`}
-        value={indexDe(optionsX, valeurX)}
-        disabled={disabled}
-        onChange={(e) => {
-          const i = Number(e.target.value);
-          if (Number.isInteger(i) && optionsX[i]) onChangeX(optionsX[i]);
-        }}
-      >
-        <option value="" disabled>
-          choisir…
-        </option>
-        {optionsX.map((o, i) => (
-          <option key={i} value={i}>
-            {formatEnsembleReelTexte(o)}
+      <span className="select-souligne-wrap">
+        <select
+          className={`ce-select${erroneeX ? " is-erronee" : ""}`}
+          value={indexDe(optionsX, valeurX)}
+          disabled={disabled}
+          onChange={(e) => {
+            const i = Number(e.target.value);
+            if (Number.isInteger(i) && optionsX[i]) onChangeX(optionsX[i]);
+          }}
+        >
+          <option value="" disabled>
+            choisir…
           </option>
-        ))}
-      </select>
+          {optionsX.map((o, i) => (
+            <option key={i} value={i}>
+              {formatEnsembleReelTexte(o)}
+            </option>
+          ))}
+        </select>
+      </span>
       <span>{labelY}</span>
-      <select
-        className={`ce-select${erroneeY ? " is-erronee" : ""}`}
-        value={indexDe(optionsY, valeurY)}
-        disabled={disabled}
-        onChange={(e) => {
-          const i = Number(e.target.value);
-          if (Number.isInteger(i) && optionsY[i]) onChangeY(optionsY[i]);
-        }}
-      >
-        <option value="" disabled>
-          choisir…
-        </option>
-        {optionsY.map((o, i) => (
-          <option key={i} value={i}>
-            {formatEnsembleReelTexte(o)}
+      <span className="select-souligne-wrap">
+        <select
+          className={`ce-select${erroneeY ? " is-erronee" : ""}`}
+          value={indexDe(optionsY, valeurY)}
+          disabled={disabled}
+          onChange={(e) => {
+            const i = Number(e.target.value);
+            if (Number.isInteger(i) && optionsY[i]) onChangeY(optionsY[i]);
+          }}
+        >
+          <option value="" disabled>
+            choisir…
           </option>
-        ))}
-      </select>
+          {optionsY.map((o, i) => (
+            <option key={i} value={i}>
+              {formatEnsembleReelTexte(o)}
+            </option>
+          ))}
+        </select>
+      </span>
     </div>
   );
 }

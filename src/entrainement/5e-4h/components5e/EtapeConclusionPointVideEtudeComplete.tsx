@@ -6,10 +6,12 @@ import { BlocDonneesEtudeComplete } from "./BlocDonneesEtudeComplete";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import type { ReponseConclusionPointVide } from "../moteur5e/sessionEtudeComplete";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +28,7 @@ interface Props {
  * compact` + `.btn.toggle-active`, même patron que `EtapeConfirmationCoherence.tsx`) : le point est-il
  * une AV ? appartient-il au domaine de f ? Réponse TOUJOURS "Non" aux deux pour un vrai point vide —
  * l'écran existe pour casser la croyance qu'une limite finie signifierait un point du domaine. */
-export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionPointVideEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [estAV, setEstAV] = useState<boolean | null>(null);
   const [appartientDomaine, setAppartientDomaine] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -40,8 +42,11 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtil
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
-      <BlocDonneesEtudeComplete exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
+        blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
+      />
       <p className="prompt-text">{consignePhase(exercice, "pointVideConclusion")}</p>
 
       <p className="prompt-text">{`Y a-t-il une asymptote verticale en x=${point?.position} ?`}</p>

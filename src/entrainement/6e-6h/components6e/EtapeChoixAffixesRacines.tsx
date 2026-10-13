@@ -4,6 +4,7 @@ import type { AideAvecLatex } from "../ui6e/formatAffixesRacines";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Option {
   id: string;
@@ -13,6 +14,7 @@ interface Option {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   options: Option[];
@@ -37,7 +39,7 @@ interface Props {
  * `EtapeStatutGEquationsExpLog.tsx` (6gen14) étendu pour rendre chaque option en KaTeX plutôt qu'en
  * texte brut (les options sont des formules). `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixAffixesRacines({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixAffixesRacines({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 

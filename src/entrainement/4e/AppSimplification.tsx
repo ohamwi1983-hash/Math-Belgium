@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Exercice } from "./core/generateur.types";
 import type { PolynomeLineaire } from "./core/simplification.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -52,6 +52,7 @@ import { Katex } from "./components/Katex";
 import type { TypeFraction } from "./core/simplification.types";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 /**
  * Questions/libellés de factorisation, adaptés au dénominateur ou au numérateur
@@ -252,6 +253,16 @@ export function AppSimplification() {
   const { tentativesMax } = etat.reglages;
   const exercice = etat.exerciceCourant;
 
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
+   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -345,10 +356,9 @@ export function AppSimplification() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <p className="prompt-text">{CONSIGNE_GENERALE}</p>
+          <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<FractionHeader exercice={exercice} />} />
           {etat.phase === "denomReduction" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
                 exercice={exercice.denominateur as Exercice}
@@ -367,7 +377,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "denomReductionP1" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
                 exercice={exercice.denominateur as PolynomeLineaire}
@@ -386,7 +395,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "denomReconnaissance" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReconnaissance
                 exercice={exercice.denominateur as Exercice}
@@ -401,7 +409,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "denomChamp1" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
                 exercice={exercice.denominateur as Exercice}
@@ -419,7 +426,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "denomChamp2" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeRacinesFlexibles
                 exercice={exercice.denominateur as Exercice}
@@ -442,7 +448,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "denomFactorisation" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
                 exercice={exercice.denominateur as Exercice}
@@ -470,7 +475,6 @@ export function AppSimplification() {
             />
           ) : etat.phase === "numReduction" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
                 exercice={exercice.numerateur as Exercice}
@@ -489,7 +493,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "numReconnaissance" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReconnaissance
                 exercice={exercice.numerateur as Exercice}
@@ -504,7 +507,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "numChamp1" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
                 exercice={exercice.numerateur as Exercice}
@@ -522,7 +524,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "numChamp2" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeRacinesFlexibles
                 exercice={exercice.numerateur as Exercice}
@@ -539,7 +540,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "numFactorisation" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeChamp1
                 exercice={exercice.numerateur as Exercice}
@@ -558,7 +558,6 @@ export function AppSimplification() {
             </>
           ) : etat.phase === "numReductionP1" ? (
             <>
-              <FractionHeader exercice={exercice} />
               <EtatActuelPanel latex={etatActuel} />
               <EtapeReductionCoefficients
                 exercice={exercice.numerateur as PolynomeLineaire}

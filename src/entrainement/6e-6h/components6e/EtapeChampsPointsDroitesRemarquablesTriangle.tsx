@@ -6,8 +6,10 @@ import type { AideAvecLatex, DefinitionEcran } from "../ui6e/formatPointsDroites
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -46,17 +48,22 @@ const MAX_LIGNES_LISTE = 4;
  * historique de 6gen43, donc `.field-inline` (qui force `white-space:nowrap` et déborde sur mobile)
  * est banni ici sans exception, y compris pour les champs courts.
  */
-export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
+export function EtapeChampsPointsDroitesRemarquablesTriangle({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

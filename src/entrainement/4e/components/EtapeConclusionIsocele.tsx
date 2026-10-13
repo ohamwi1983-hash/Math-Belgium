@@ -8,9 +8,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIsocele;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +28,7 @@ interface Props {
  * "Isocèle", le sommet (A/B/C) — l'option "Équilatéral" a été retirée entièrement (piège
  * volontairement abandonné). Aide à 1 niveau : définition des 2 natures.
  */
-export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeConclusionIsocele({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [nature, setNature] = useState<NatureTriangle | null>(null);
   const [sommet, setSommet] = useState<"A" | "B" | "C" | null>(null);
   const max = NIVEAU_AIDE_MAX.conclusionIsocele;
@@ -41,12 +43,17 @@ export function EtapeConclusionIsocele({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ISOCELE}</p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesIsoceleLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ISOCELE}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesDonneesIsoceleLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelLongueursIsoceleLatex(exercice)} />
       <p className="prompt-text">Ce triangle est :</p>
 

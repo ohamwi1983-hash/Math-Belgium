@@ -8,9 +8,11 @@ import { BoutonAide } from "./BoutonAide";
 import { EtatActuelLectureGraphiqueDerivees } from "./EtatActuelLectureGraphiqueDerivees";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
+  estPremierEcran: boolean;
   phase: "tableauFPrime" | "tableauFSeconde";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -28,15 +30,18 @@ interface Props {
  * voir `ui5e/formatLectureGraphiqueDerivees.ts::texteAideNiveau1`) — le mécanisme de cellule
  * active du tableau, générique/partagé avec 5gen29, n'expose aucun callback de focus exploitable
  * pour un surlignage visuel du graphique sans le modifier. */
-export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeTableauLectureGraphiqueDerivees({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = mode === "fprime" ? formatEnteteColonnesTableauFPrime(exercice, attendu.colonnes) : formatEnteteColonnesTableauFSeconde(exercice, attendu.colonnes);
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <LectureGraphiqueDeriveesGraph exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} />}
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <EtatActuelLectureGraphiqueDerivees exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigneEcran(phase)}</p>

@@ -5,8 +5,10 @@ import type { AideAvecLatex } from "../ui6e/formatHyperboliques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -34,7 +36,7 @@ const OPTIONS: { id: StatutPariteHyperbolique; label: string }[] = [
  * présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary` (convention CLAUDE.md).
  * Même patron que `EtapeStatutGEquationsExpLog.tsx` (`6gen14`). `App6gen19.tsx` doit le rendre
  * avec `key={phase}`. */
-export function EtapeStatutPariteHyperboliques({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeStatutPariteHyperboliques({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<StatutPariteHyperbolique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -45,14 +47,19 @@ export function EtapeStatutPariteHyperboliques({ consigneGenerale, blocDonnees, 
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneEcran}</p>
       <div className="options-grid-compact">
         {OPTIONS.map((o) => (

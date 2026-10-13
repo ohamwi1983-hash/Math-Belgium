@@ -3,11 +3,13 @@ import type { ExerciceEtudeFonctionExponentielle } from "../core6e/etudeFonction
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, formatFonctionLatex } from "../ui6e/formatEtudeFonctionExponentielle";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtapeSelectionGraphiqueQCM } from "./EtapeSelectionGraphiqueQCM";
 import { GrapheOptionEtudeFonction } from "./GrapheOptionEtudeFonction";
 
 interface Props {
   exercice: ExerciceEtudeFonctionExponentielle;
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -25,15 +27,20 @@ interface Props {
  * délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen20/6gen21. `etatActuel`
  * rappelle les 5 écrans précédents (domaine, limites, asymptotes, croissance, concavité) — le plus
  * long rappel de ce générateur, voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`. */
-export function EtapeSelectionGraphiqueEtudeFonction({ exercice, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueEtudeFonction({ exercice, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBox(exercice);
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFonctionLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFonctionLatex(exercice)} />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

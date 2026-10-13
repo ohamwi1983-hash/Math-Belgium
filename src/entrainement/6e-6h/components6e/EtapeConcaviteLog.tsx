@@ -7,6 +7,7 @@ import { CONSIGNE_GENERALE, consigneConcavite } from "../ui6e/formatEtudeFonctio
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -20,6 +21,7 @@ const OPTIONS: { id: TypeConcaviteLog; label: string }[] = [
 ];
 
 interface Props {
+  estPremierEcran: boolean;
   enonceLatex: string;
   /** Rappel de domaine + limites + asymptotes + croissance déjà confirmés — voir
    * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
@@ -43,7 +45,7 @@ interface Props {
  * la famille B, qui a TOUJOURS un point d'inflexion mais parfois DEUX (voir
  * `generateurs6e/etudeFonctionLogarithme/familles/B.ts`). Commun aux 4 familles A-D.
  * `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConcaviteLog({ estPremierEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<TypeConcaviteLog | null>(null);
   const [positions, setPositions] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,10 +60,15 @@ export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNi
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       <div className="etat-actuel-box">
         <div className="etat-actuel-box-termes">
           {etatActuel.map((frag, i) => (

@@ -51,23 +51,25 @@ function ComboboxTexte({
   placeholder?: string;
 }) {
   return (
-    <select
-      className={erronee ? "ce-select is-erronee" : "ce-select"}
-      aria-label={ariaLabel}
-      value={valeur}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {placeholder && valeur === "" && (
-        <option value="" disabled>
-          {placeholder}
-        </option>
-      )}
-      {options.map((o) => (
-        <option key={o.id} value={o.id}>
-          {o.texte}
-        </option>
-      ))}
-    </select>
+    <span className="select-souligne-wrap">
+      <select
+        className={erronee ? "ce-select is-erronee" : "ce-select"}
+        aria-label={ariaLabel}
+        value={valeur}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {placeholder && valeur === "" && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.texte}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }
 

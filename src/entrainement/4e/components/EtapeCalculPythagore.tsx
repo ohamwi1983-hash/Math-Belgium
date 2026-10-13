@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExercicePythagore;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
  * aide à 2 niveaux limitée à $\vec{AB}$. Remplace l'ancien écran qui demandait les longueurs AU
  * CARRÉ (toujours entières) — c'est désormais la norme elle-même qui est demandée.
  */
-export function EtapeCalculPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeCalculPythagore({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [ab, setAb] = useState("");
   const [ac, setAc] = useState("");
   const [bc, setBc] = useState("");
@@ -45,12 +47,17 @@ export function EtapeCalculPythagore({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_PYTHAGORE}</p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesPythagoreLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_PYTHAGORE}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesDonneesPythagoreLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelVecteursPythagoreLatex(exercice)} />
       <p className="prompt-text">Calcule la longueur des 3 côtés du triangle (forme exacte ou décimale arrondie au centième).</p>
 

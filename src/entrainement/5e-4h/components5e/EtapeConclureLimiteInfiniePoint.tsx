@@ -40,16 +40,18 @@ export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees,
         <Katex expression={formatBlocDonneesLatex(exercice)} block />
       </div>
       <p className="prompt-text">{consignePhase(exercice, "conclureLimite")}</p>
-      <select className="ce-select" aria-label="Conclusion de la limite" value={choixId} onChange={(e) => setChoixId(e.target.value)} disabled={!!validation}>
-        <option value="" disabled>
-          Choisis…
-        </option>
-        {OPTIONS_CONCLURE.map((o) => (
-          <option key={o.id} value={o.id}>
-            {o.label}
+      <span className="select-souligne-wrap">
+        <select className="ce-select" aria-label="Conclusion de la limite" value={choixId} onChange={(e) => setChoixId(e.target.value)} disabled={!!validation}>
+          <option value="" disabled>
+            Choisis…
           </option>
-        ))}
-      </select>
+          {OPTIONS_CONCLURE.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </span>
       {!validation && (
         <>
           <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => complet && onValider(idVersChoix(choixId))}>

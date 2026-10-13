@@ -98,16 +98,18 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
           <span className="ce-slot-latex">
             <Katex expression={`${dir.nomInterieure}(x)`} />
           </span>
-          <select className="ce-select" aria-label="Comparateur" value={ligne.comparateur ?? ""} onChange={(e) => modifierComparateur(i, e.target.value)}>
-            <option value="" disabled>
-              Choisis…
-            </option>
-            {OPTIONS_COMPARATEUR.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.texte}
+          <span className="select-souligne-wrap">
+            <select className="ce-select" aria-label="Comparateur" value={ligne.comparateur ?? ""} onChange={(e) => modifierComparateur(i, e.target.value)}>
+              <option value="" disabled>
+                Choisis…
               </option>
-            ))}
-          </select>
+              {OPTIONS_COMPARATEUR.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.texte}
+                </option>
+              ))}
+            </select>
+          </span>
           <input
             type="text"
             className={`text-input${seuilErronee(i) ? " is-erronee" : ""}`}

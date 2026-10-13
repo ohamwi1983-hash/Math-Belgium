@@ -14,11 +14,13 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
+  estPremierEcran: boolean;
   phase: PhaseSuiteGeometrique;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -48,6 +50,7 @@ function labelsPourPhase(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGe
  * selon la famille/le sous-cas, labels LaTeX également — voir `labelsCalculerTermesAlgebrique`). */
 export function EtapeTermesMultiplesSuiteGeometrique({
   exercice,
+  estPremierEcran,
   phase,
   tentativesUtilisees,
   tentativesMax,
@@ -80,12 +83,17 @@ export function EtapeTermesMultiplesSuiteGeometrique({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => {
         const champErronee = apresEchec && !!diagnostiquerChamp && diagnostiquerChamp(i, valeurs[i]) !== "correct";

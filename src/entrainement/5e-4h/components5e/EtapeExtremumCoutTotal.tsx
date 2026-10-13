@@ -9,9 +9,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueA;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -37,7 +39,7 @@ interface Props {
  * (a≠0) a TOUJOURS 0 ou 2 points critiques réels, jamais 1 (hors racine double, exclue à la
  * génération) : ce nombre est un fait MATHÉMATIQUE, jamais dérivé de `exercice.extrema.length`
  * (qui fuirait la bonne réponse si l'élève se trompe de choix). */
-export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerPosition, validation}: Props) {
+export function EtapeExtremumCoutTotal({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquerPosition, validation}: Props) {
   const proposeChoixExistence = exercice.coutTotal.degre === 3;
   const [existeChoisi, setExisteChoisi] = useState<boolean | null>(proposeChoixExistence ? null : true);
   useEffect(() => {

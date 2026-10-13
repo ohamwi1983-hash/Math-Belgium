@@ -10,9 +10,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueBonus;
+  estPremierEcran: boolean;
   ecran: Extract<EcranContexteEconomique, "iteration0" | "iteration1" | "iteration2" | "iteration3">;
   /** Intervalle COURANT (gauche;droite) de CETTE itération — vérité terrain pré-calculée par le
    * générateur, JAMAIS recalculée depuis la réponse de l'élève à l'itération précédente (même
@@ -39,6 +41,7 @@ interface Props {
  * ces libellés ne font que décrire les 2 candidats). */
 export function EtapeIterationDichotomie({
   exercice,
+  estPremierEcran,
   ecran,
   intervalleCourant,
   tentativesUtilisees,
@@ -68,12 +71,17 @@ export function EtapeIterationDichotomie({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <div className="etat-actuel-box etat-actuel-box-termes">
         <Katex expression={`\\text{intervalle courant : } [${formatNombreLatex(gauche)}\\,;\\,${formatNombreLatex(droite)}]`} />
