@@ -13,9 +13,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +34,7 @@ interface Props {
  * (selon `exercice.critere`) au vecteur de référence déjà confirmé à l'écran 1. Vérifiée par
  * `diagnostiquerConstruction` (colinéarité ou orthogonalité, jamais un couple exact imposé).
  */
-export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionRelationsDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -48,11 +50,16 @@ export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisee
 
   return (
     <div>
-      <ConsigneGeneraleRelationsDroites exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} block />
-        <Katex expression={formatDonneesRechercheeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleRelationsDroites exercice={exercice} />}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} block />
+            <Katex expression={formatDonneesRechercheeLatex(exercice)} block />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelVecteurReferenceLatex(exercice)} />
       <p className="prompt-text">{consigneConstruction(exercice)}</p>
 

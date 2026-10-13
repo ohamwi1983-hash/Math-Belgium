@@ -18,9 +18,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationDroite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -44,7 +46,7 @@ const PLACEHOLDER_TEXTE_Y = "ex : y=1-t×2";
  * saisie numérique/implicite) ou égalité exacte (explicite) — voir `verificationEquationDroite.ts`,
  * jamais recalculée ici.
  */
-export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCoefficientsEquationDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const [champ1, setChamp1] = useState("");
@@ -86,10 +88,15 @@ export function EtapeCoefficientsEquationDroite({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <ConsigneGeneraleEquationDroite exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleEquationDroite exercice={exercice} />}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelPointVecteurLatex(exercice)} />
       <p className="prompt-text">{consigneCoefficients(exercice)}</p>
 

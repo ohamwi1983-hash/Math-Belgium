@@ -11,9 +11,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearVecteurs | ExerciceColinearPoints;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -44,7 +46,7 @@ interface Props {
  * `formatEnonceLatex` (2 vecteurs seulement, aucun risque de coupure). État actuel de "points"
  * (`etatActuelTestPoints`) déjà empilé verticalement, inchangé par ce prompt.
  */
-export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTestColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteCritere, setTexteCritere] = useState("");
   const [conclusionAlignement, setConclusionAlignement] = useState<boolean | null>(null);
   const [conclusionColinearite, setConclusionColinearite] = useState<boolean | null>(null);
@@ -58,18 +60,23 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      {estPoints && exercice.variante === "points" ? (
-        <div className="equation-box equation-box-termes">
-          {formatTermesEnoncePointsLatex(exercice).map((t, i) => (
-            <Katex key={i} expression={t} />
-          ))}
-        </div>
-      ) : (
-        <div className="equation-box">
-          <Katex expression={formatEnonceLatex(exercice)} />
-        </div>
-      )}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          estPoints && exercice.variante === "points" ? (
+            <div className="equation-box equation-box-termes">
+              {formatTermesEnoncePointsLatex(exercice).map((t, i) => (
+                <Katex key={i} expression={t} />
+              ))}
+            </div>
+          ) : (
+            <div className="equation-box">
+              <Katex expression={formatEnonceLatex(exercice)} />
+            </div>
+          )
+        }
+      />
       {estPoints && exercice.variante === "points" && <EtatActuelPanel latex={etatActuelTestPoints(exercice)} />}
       <p className="prompt-text">Calcule le critère de colinéarité, puis conclus.</p>
 

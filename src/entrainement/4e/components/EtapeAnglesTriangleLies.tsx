@@ -7,13 +7,16 @@ import { consigneAngles, formatAnglesBrutsViseeTexte, formatEtatActuelPontConfir
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
-import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
+import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +30,7 @@ interface Props {
 
 /** Écran 2, `anglePartage` uniquement — l'angle utile (différence des 2 visées) et l'angle déduit
  * de l'hypothèse annexe, les 2 angles qui ferment le triangle cible. */
-export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeAnglesTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [utile, setUtile] = useState("");
   const [hypothese, setHypothese] = useState("");
   const complet = utile.trim() !== "" && hypothese.trim() !== "";
@@ -37,7 +40,16 @@ export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentati
 
   return (
     <div>
-      <EnonceTriangleLies exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={exercice.contexte}
+        blocDonnees={
+          <>
+            <QuestionFinale question={exercice.questionCible} />
+            <TriangleLiesSketch exercice={exercice} />
+          </>
+        }
+      />
       <BlocDonneesTriangleLies titre="État actuel" lignes={[formatEtatActuelPontConfirme(exercice)]} />
       <BlocDonneesTriangleLies titre="Visées depuis le point d'observation" lignes={formatAnglesBrutsViseeTexte(exercice)} />
       <p className="prompt-text">{consigneAngles()}</p>

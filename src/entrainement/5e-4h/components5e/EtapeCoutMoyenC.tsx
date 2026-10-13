@@ -1,14 +1,16 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { TEXTE_AIDE_COUT_MOYEN_C_1, consigneCoutMoyenC } from "../ui5e/formatProblemesContexte";
+import { TEXTE_AIDE_COUT_MOYEN_C_1, consigneContexteC, consigneCoutMoyenC } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerCoutMoyenC } from "../moteur5e/verificationProblemesContexte";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
+  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données -> question, jamais l'inverse). */
   donnees: ReactNode;
@@ -24,7 +26,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCoutMoyenC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerCoutMoyenC(exercice, Number(valeur.replace(",", "."))) !== "correct";
@@ -36,7 +38,7 @@ export function EtapeCoutMoyenC({ exercice, donnees, tentativesUtilisees, tentat
 
   return (
     <div>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={consigneContexteC()} blocDonnees={donnees} />
       <p className="prompt-text">{consigneCoutMoyenC(exercice)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CM (€) =</label>

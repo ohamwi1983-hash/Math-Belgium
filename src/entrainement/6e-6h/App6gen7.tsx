@@ -190,6 +190,7 @@ export function App6gen7() {
           {phasesDeuxChamps.has(phase) && (
             <EtapeDeuxChampsDomaineDerivee
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}
@@ -212,6 +213,7 @@ export function App6gen7() {
           {phasesChampUnique.has(phase) && (
             <EtapeChampDomaineDerivee
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}

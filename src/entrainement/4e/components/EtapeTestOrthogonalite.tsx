@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTest;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +37,7 @@ interface Props {
  * points 6-7), puis la formule substituée avec les valeurs réelles (non calculée). Marquage rouge
  * en direct du champ critère après un échec (point 5).
  */
-export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTestOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteCritere, setTexteCritere] = useState("");
   const [conclusion, setConclusion] = useState<boolean | null>(null);
   const max = NIVEAU_AIDE_MAX.test;
@@ -48,10 +50,15 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} />
+          </div>
+        }
+      />
       <p className="prompt-text">Calcule le critère d'orthogonalité, puis conclus.</p>
 
       <div className="field field-inline">

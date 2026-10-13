@@ -9,9 +9,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
+  estPremierEcran: boolean;
   sommet: Sommet;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -67,7 +69,7 @@ function Piege({ sommet }: { sommet: Sommet }) {
  * A/B/C, "bloc fitter" via `formatTermesEnonceTriangleParametreLatex`) ajoutés — jusque-là tous
  * deux absents de cet écran (seul le bloc "état actuel" y était affiché).
  */
-export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeReductionSommetOrthogonalite({ exercice, estPremierEcran, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX[PHASE_PAR_SOMMET[sommet]];
   const complet = texte.trim() !== "";
@@ -76,12 +78,17 @@ export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentatives
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={etatActuelReductionSommet(exercice, sommet)} />
       <p className="prompt-text">Réduis le critère d'orthogonalité du sommet {labelSommet(exercice, sommet)} à une équation.</p>
 

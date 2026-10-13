@@ -5,13 +5,16 @@ import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionTriangleLies";
 import { consigneInterpretation, formatEtatActuelAnglesConfirmes, formatEtatActuelCibleConfirme, formatEtatActuelPontConfirme, formatEtatActuelSoustractionConfirme, texteAideInterpretationNiveau1 } from "../ui/formatTriangleLies";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
-import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
+import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -25,7 +28,7 @@ interface Props {
 
 /** Écran commun aux 2 variantes, toujours TERMINAL — QCM, choisir la phrase de conclusion correcte
  * parmi `exercice.optionsInterpretation` (ordre déjà mélangé à la génération, jamais retrié). */
-export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
@@ -41,7 +44,16 @@ export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <EnonceTriangleLies exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={exercice.contexte}
+        blocDonnees={
+          <>
+            <QuestionFinale question={exercice.questionCible} />
+            <TriangleLiesSketch exercice={exercice} />
+          </>
+        }
+      />
       <BlocDonneesTriangleLies titre="État actuel" lignes={etatActuel} />
       <p className="prompt-text">{consigneInterpretation()}</p>
 

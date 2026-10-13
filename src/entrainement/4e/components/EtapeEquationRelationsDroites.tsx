@@ -14,9 +14,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +36,7 @@ interface Props {
  * par `exercice.formeSortie` : champ texte libre pour "cartesienne" (même style qu'"Lecture
  * graphique — équation d'une droite"), 4 champs numériques bloqués pour "parametrique".
  */
-export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationRelationsDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const cartesienne = exercice.formeSortie === "cartesienne";
 
   const [texte, setTexte] = useState("");
@@ -67,11 +69,16 @@ export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <ConsigneGeneraleRelationsDroites exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} block />
-        <Katex expression={formatDonneesRechercheeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleRelationsDroites exercice={exercice} />}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} block />
+            <Katex expression={formatDonneesRechercheeLatex(exercice)} block />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelVecteurChercheLatex(exercice)} />
       <p className="prompt-text">{consigneEquation(exercice)}</p>
 

@@ -8,9 +8,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -45,7 +47,7 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangle, sommet: Sommet): s
  * seul bloc violet visible sur cet écran n'affichait que les coordonnées de départ (le bloc de
  * données), jamais un récapitulatif des critères déjà calculés.
  */
-export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionTriangleOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
   const [sommet, setSommet] = useState<Sommet | null>(null);
   const max = NIVEAU_AIDE_MAX.conclusionTriangle;
@@ -54,12 +56,17 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtili
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnonceTriangleLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnonceTriangleLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={etatActuelConclusionTriangle(exercice)} />
       <p className="prompt-text">{QUESTION_TRIANGLE_RECTANGLE}</p>
 

@@ -12,9 +12,11 @@ import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistanceParalleles;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +32,7 @@ interface Props {
  * que "Construction graphique — tracer une droite depuis son équation" (écran "points"). Rien
  * n'est encore confirmé à ce stade (pas de bloc "état actuel").
  */
-export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeChoixPointDistanceDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -46,13 +48,20 @@ export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <ConsigneGeneraleDistanceDroite exercice={exercice} />
-      <DonneesDistanceDroite exercice={exercice} />
-      <DistanceDroiteGraph
-        lignes={[
-          { droite: exercice.d1, label: "d₁", couleur: COULEUR_D },
-          { droite: exercice.d2, label: "d₂", couleur: COULEUR_D },
-        ]}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleDistanceDroite exercice={exercice} />}
+        blocDonnees={
+          <>
+            <DonneesDistanceDroite exercice={exercice} />
+            <DistanceDroiteGraph
+              lignes={[
+                { droite: exercice.d1, label: "d₁", couleur: COULEUR_D },
+                { droite: exercice.d2, label: "d₂", couleur: COULEUR_D },
+              ]}
+            />
+          </>
+        }
       />
       <p className="prompt-text">{consigneChoixPoint(exercice)}</p>
 

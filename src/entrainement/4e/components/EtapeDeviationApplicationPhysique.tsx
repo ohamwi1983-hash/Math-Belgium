@@ -10,9 +10,11 @@ import { RenduFragments } from "./RenduFragments";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
@@ -26,7 +28,7 @@ interface Props {
 /** Angle de déviation entre la trajectoire/l'orientation de référence (v1) et la résultante —
  * trigonométrie de base (angle droit) ou loi des sinus (angle quelconque) selon la variante, déjà
  * calculé à la génération (`triangle.C`) — même principe que l'étape "norme". */
-export function EtapeDeviationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeDeviationApplicationPhysique({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -38,8 +40,11 @@ export function EtapeDeviationApplicationPhysique({ exercice, tentativesUtilisee
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">{formatEnonceApplicationPhysique(exercice)}</p>
-      <SchemaApplicationPhysique exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={formatEnonceApplicationPhysique(exercice)}
+        blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
+      />
 
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneDeviation(exercice)} />

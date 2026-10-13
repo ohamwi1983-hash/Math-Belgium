@@ -8,14 +8,16 @@ import {
   diagnostiquerCvLectureC,
   type ReponseLectureC,
 } from "../moteur5e/verificationProblemesContexte";
-import { TEXTE_AIDE_LECTURE_C_1, consigneLectureC } from "../ui5e/formatProblemesContexte";
+import { TEXTE_AIDE_LECTURE_C_1, consigneContexteC, consigneLectureC } from "../ui5e/formatProblemesContexte";
 import { ScenarioCGraph } from "./ScenarioCGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
+  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données/graphe → question, jamais l'inverse). */
   donnees: ReactNode;
@@ -31,7 +33,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLectureC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cf, setCf] = useState("");
   const [cv, setCv] = useState("");
   const [cp, setCp] = useState("");
@@ -50,8 +52,16 @@ export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativ
 
   return (
     <div>
-      {donnees}
-      <ScenarioCGraph exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneContexteC()}
+        blocDonnees={
+          <>
+            {donnees}
+            <ScenarioCGraph exercice={exercice} />
+          </>
+        }
+      />
       <p className="prompt-text">{consigneLectureC(exercice)}</p>
       <div className="field-row">
         <div className="field field-inline">

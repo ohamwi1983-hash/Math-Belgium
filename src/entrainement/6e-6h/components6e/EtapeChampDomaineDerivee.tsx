@@ -5,6 +5,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatDomaineDeriveeExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -12,6 +13,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -35,7 +37,7 @@ interface Props {
  * `App6gen7.tsx` doit le rendre avec `key={phase}`. `etatActuel` (non-`null` pour cAssemblage/
  * dAssemblage/eDerivee UNIQUEMENT, voir `ui6e/formatDomaineDeriveeExponentielles.ts::etatActuel`)
  * rappelle les réponses de dérivée CONFIRMÉES d'un écran précédent de la même famille. */
-export function EtapeChampDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChampDomaineDerivee({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -46,10 +48,15 @@ export function EtapeChampDomaineDerivee({ consigneEcran, enonceLatex, etatActue
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

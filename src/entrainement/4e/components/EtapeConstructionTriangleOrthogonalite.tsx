@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -39,7 +41,7 @@ interface Props {
  * l'aide ne montre plus que la formule de AB⃗ (jamais AC⃗/BC⃗) ; point 5, marquage rouge en direct de
  * chaque champ fautif après un échec.
  */
-export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionTriangleOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -86,12 +88,17 @@ export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUti
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnonceTriangleLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnonceTriangleLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">
         Calcule les composantes de <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} />,{" "}
         <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} /> et <Katex expression={`\\vec{${exercice.labelB}${exercice.labelC}}`} />.

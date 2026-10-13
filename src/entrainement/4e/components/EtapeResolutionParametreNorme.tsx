@@ -9,11 +9,13 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 type Choix = "aucune" | "auMoins";
 
 interface Props {
   exercice: ExerciceParametreNorme;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +34,7 @@ interface Props {
  * solutions réelles). Aide à 2 niveaux : rappel de la méthode (discriminant), puis la valeur du
  * discriminant déjà calculée (racines non extraites).
  */
-export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeResolutionParametreNorme({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const max = NIVEAU_AIDE_MAX.resolutionParametreNorme;
@@ -70,14 +72,17 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <p className="prompt-text">
-        <RenduFragments fragments={segmentsConsigneParametre(exercice)} />
-      </p>
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnonceParametreLatex(exercice).map((terme, i) => (
-          <Katex key={i} expression={terme} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<RenduFragments fragments={segmentsConsigneParametre(exercice)} />}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnonceParametreLatex(exercice).map((terme, i) => (
+              <Katex key={i} expression={terme} />
+            ))}
+          </div>
+        }
+      />
       <div className="equation-box">
         <Katex expression={formatEquationReduiteParametreNormeLatex(exercice)} />
       </div>

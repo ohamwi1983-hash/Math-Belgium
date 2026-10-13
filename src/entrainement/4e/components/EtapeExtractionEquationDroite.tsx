@@ -12,9 +12,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationDroite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * "point sur la droite + vecteur colinéaire au vecteur de référence" (`diagnostiquerExtraction`),
  * jamais par un couple exact imposé — plusieurs réponses différentes peuvent être correctes.
  */
-export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeExtractionEquationDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x0, setX0] = useState("");
   const [y0, setY0] = useState("");
   const [a, setA] = useState("");
@@ -54,10 +56,15 @@ export function EtapeExtractionEquationDroite({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <ConsigneGeneraleEquationDroite exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleEquationDroite exercice={exercice} />}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneExtraction(exercice)}</p>
 
       <div className="field-row">

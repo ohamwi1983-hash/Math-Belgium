@@ -7,9 +7,11 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (valeur: number) => void;
@@ -33,7 +35,7 @@ interface Props {
  * validée à l'écran précédent) devient conceptuellement le bloc "état actuel", aucun changement
  * structurel de son propre rendu.
  */
-export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeResolutionParametreOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const valeur = Number(texte.replace(",", "."));
   const complet = texte.trim() !== "";
@@ -42,10 +44,15 @@ export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtil
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} />
+          </div>
+        }
+      />
       <div className="equation-box">
         <Katex expression={formatEquationReduiteParametreLatex(exercice)} />
       </div>

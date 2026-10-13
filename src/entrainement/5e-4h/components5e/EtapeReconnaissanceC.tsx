@@ -7,7 +7,7 @@ import {
   diagnostiquerReconnaissanceC,
   type ReponseReconnaissanceC,
 } from "../moteur5e/verificationProblemesContexte";
-import { CONSIGNE_RECONNAISSANCE_C, texteAideReconnaissanceC1 } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_RECONNAISSANCE_C, consigneContexteC, texteAideReconnaissanceC1 } from "../ui5e/formatProblemesContexte";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ScenarioCGraph } from "./ScenarioCGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -15,9 +15,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
+  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données -> question, jamais l'inverse). */
   donnees: ReactNode;
@@ -33,7 +35,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReconnaissanceC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cv, setCv] = useState("");
   const [cp, setCp] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -51,9 +53,17 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
 
   return (
     <div>
-      {donnees}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneContexteC()}
+        blocDonnees={
+          <>
+            {donnees}
+            <ScenarioCGraph exercice={exercice} courbes="cvCp" />
+          </>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_RECONNAISSANCE_C}</p>
-      <ScenarioCGraph exercice={exercice} courbes="cvCp" />
       <ApercuExpressionLatex texte={cv} label="CV(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">CV(x) =</label>

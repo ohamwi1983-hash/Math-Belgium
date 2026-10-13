@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { genererExerciceParametresSinusoideGraphique } from "./generateurs5e/parametresSinusoideGraphique";
 import {
@@ -105,8 +105,19 @@ export function App5gen9() {
   }
 
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
+
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
+   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
 
   const validation = enAttente
     ? {
@@ -131,6 +142,7 @@ export function App5gen9() {
             key={etat.phase}
             exercice={exercice}
             phase={etat.phase}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}

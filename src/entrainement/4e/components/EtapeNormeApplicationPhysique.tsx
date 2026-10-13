@@ -18,9 +18,11 @@ import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -41,6 +43,7 @@ interface Props {
  * avoir une aide (2 niveaux, `promptgen29modificationscompletes.md`, point 4.3). */
 export function EtapeNormeApplicationPhysique({
   exercice,
+  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -60,8 +63,11 @@ export function EtapeNormeApplicationPhysique({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">{formatEnonceApplicationPhysique(exercice)}</p>
-      <SchemaApplicationPhysique exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={formatEnonceApplicationPhysique(exercice)}
+        blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
+      />
 
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneNorme(exercice)} />

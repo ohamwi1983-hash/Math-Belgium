@@ -296,6 +296,7 @@ export function AppNormeDistance() {
           <EtapeReductionParametreNorme
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -307,6 +308,7 @@ export function AppNormeDistance() {
           <EtapeResolutionParametreNorme
             key={phase}
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}

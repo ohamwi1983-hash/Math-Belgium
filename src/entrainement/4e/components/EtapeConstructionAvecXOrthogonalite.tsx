@@ -9,9 +9,11 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -77,7 +79,7 @@ function ChampSymbolique({
  * (`formatTermesEnonceTriangleParametreLatex`) pour ne jamais couper/déborder un point symbolique
  * potentiellement long (ex. "C(3x-15;x-6)") sur mobile.
  */
-export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionAvecXOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -99,12 +101,17 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilis
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnonceTriangleParametreLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">
         Calcule les composantes de <Katex expression={`\\vec{${exercice.labelA}${exercice.labelB}}`} />,{" "}
         <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} /> et <Katex expression={`\\vec{${exercice.labelB}${exercice.labelC}}`} />.

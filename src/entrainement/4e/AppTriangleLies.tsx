@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -94,6 +94,18 @@ export function AppTriangleLies() {
   }
 
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
+   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
 
   const reponseAttendue =
@@ -153,6 +165,7 @@ export function AppTriangleLies() {
           {etat.phase === "pont" ? (
             <EtapePontTriangleLies
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAidePont}
@@ -164,6 +177,7 @@ export function AppTriangleLies() {
           ) : etat.phase === "angles" ? (
             <EtapeAnglesTriangleLies
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideAngles}
@@ -174,6 +188,7 @@ export function AppTriangleLies() {
           ) : etat.phase === "soustraction" ? (
             <EtapeSoustractionTriangleLies
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSoustraction}
@@ -184,6 +199,7 @@ export function AppTriangleLies() {
           ) : etat.phase === "cible" ? (
             <EtapeCibleTriangleLies
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCible}
@@ -194,6 +210,7 @@ export function AppTriangleLies() {
           ) : (
             <EtapeInterpretationTriangleLies
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideInterpretation}

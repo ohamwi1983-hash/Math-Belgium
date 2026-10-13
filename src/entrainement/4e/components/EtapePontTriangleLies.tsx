@@ -7,13 +7,16 @@ import { consignePont, formatDonneesPontTexte, texteAidePontNiveau1, texteAidePo
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
-import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
+import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +30,7 @@ interface Props {
 
 /** Écran 1, commun aux 3 configurations — résoudre le triangle "pont". `cotePartage`/`anglePartage`
  * n'ont qu'un seul côté transféré à trouver ; `sommetPartage` demande 3 valeurs (angle + 2 côtés). */
-export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, onValiderSommetPartage, validation }: Props) {
+export function EtapePontTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, onValiderSommetPartage, validation }: Props) {
   const [texte, setTexte] = useState("");
   const [texteAngle, setTexteAngle] = useState("");
   const [texteCote1, setTexteCote1] = useState("");
@@ -46,7 +49,16 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
 
     return (
       <div>
-        <EnonceTriangleLies exercice={exercice} />
+        <EnTeteExercice
+          estPremierEcran={estPremierEcran}
+          consigneGenerale={exercice.contexte}
+          blocDonnees={
+            <>
+              <QuestionFinale question={exercice.questionCible} />
+              <TriangleLiesSketch exercice={exercice} />
+            </>
+          }
+        />
         <BlocDonneesTriangleLies titre="Données" lignes={formatDonneesPontTexte(exercice)} />
         <p className="prompt-text">{consignePont(exercice)}</p>
         <div className="field field-inline">
@@ -128,7 +140,16 @@ export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <EnonceTriangleLies exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={exercice.contexte}
+        blocDonnees={
+          <>
+            <QuestionFinale question={exercice.questionCible} />
+            <TriangleLiesSketch exercice={exercice} />
+          </>
+        }
+      />
       <BlocDonneesTriangleLies titre="Données" lignes={formatDonneesPontTexte(exercice)} />
       <p className="prompt-text">{consignePont(exercice)}</p>
       <div className="field field-inline">

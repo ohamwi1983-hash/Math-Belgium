@@ -6,13 +6,16 @@ import { consigneCible, formatDonneesCibleEnonceTexte, formatEtatActuelAnglesCon
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
-import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
+import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +30,7 @@ interface Props {
 /** Écran commun aux 2 variantes, toujours suivi de "interpretation" — résoudre le triangle cible
  * pour la grandeur demandée (côté/angle/aire). Plafond d'aide DYNAMIQUE
  * (`niveauAideMaxCible`, 3 niveaux si aire — terrain pédagogique neuf — 2 sinon). */
-export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCibleTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const valeur = Number(texte.replace(",", "."));
@@ -45,7 +48,16 @@ export function EtapeCibleTriangleLies({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <EnonceTriangleLies exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={exercice.contexte}
+        blocDonnees={
+          <>
+            <QuestionFinale question={exercice.questionCible} />
+            <TriangleLiesSketch exercice={exercice} />
+          </>
+        }
+      />
       <BlocDonneesTriangleLies titre="État actuel" lignes={etatActuel} />
       {exercice.variante === "cotePartage" && <BlocDonneesTriangleLies titre="Données" lignes={formatDonneesCibleEnonceTexte(exercice)} />}
       <p className="prompt-text">{consigneCible(exercice)}</p>

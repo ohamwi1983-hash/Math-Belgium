@@ -12,9 +12,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * Vérifiée par colinéarité avec `exercice.vecteurReference` (`diagnostiquerExtraction`), jamais un
  * couple exact imposé — n'importe quel multiple non nul convient. Un seul niveau d'aide.
  */
-export function EtapeExtractionRelationsDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeExtractionRelationsDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -47,11 +49,16 @@ export function EtapeExtractionRelationsDroites({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <ConsigneGeneraleRelationsDroites exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} block />
-        <Katex expression={formatDonneesRechercheeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleRelationsDroites exercice={exercice} />}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} block />
+            <Katex expression={formatDonneesRechercheeLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneExtraction(exercice)}</p>
 
       <div className="field-row">

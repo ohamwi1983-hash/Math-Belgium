@@ -215,6 +215,7 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           phase={phase}
+          estPremierEcran={estPremierEcran}
           labels={["f(x) ="]}
           placeholders={["ex : (3x+1)/(x-2)"]}
           {...propsCommunes}
@@ -261,6 +262,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
+        estPremierEcran={estPremierEcran}
         labels={["f(x) ="]}
         placeholders={["ex : (3x+1)/(x-2)"]}
         {...propsCommunes}
@@ -278,6 +280,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
+        estPremierEcran={estPremierEcran}
         labels={[formatLabelLimiteFLatex(point?.position as number)]}
         labelsLatex
         placeholders={["ex : 2.5"]}
@@ -309,6 +312,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
+        estPremierEcran={estPremierEcran}
         labels={[formatLabelLimiteGaucheLatex(excl.position), formatLabelLimiteDroiteLatex(excl.position)]}
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
@@ -350,6 +354,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
+        estPremierEcran={estPremierEcran}
         labels={[formatLabelLimiteFLatex("moins-infini"), formatLabelLimiteFLatex("plus-infini")]}
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
@@ -379,6 +384,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
+        estPremierEcran={estPremierEcran}
         labels={[formatLabelCoefDirecteurLatex("moins-infini"), formatLabelCoefDirecteurLatex("plus-infini")]}
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
@@ -405,6 +411,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
+        estPremierEcran={estPremierEcran}
         labels={bornes.map((borne) => formatLabelCoefBLatex(borne, a))}
         labelsLatex
         placeholders={bornes.map(() => "ex : 2, -3/2, +inf, -inf")}

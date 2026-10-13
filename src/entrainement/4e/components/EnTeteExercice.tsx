@@ -5,7 +5,7 @@ interface Props {
    * `estPremierEcran` dans un `AppXxx.tsx`), `false` sur tous les écrans suivants du même
    * exercice. */
   estPremierEcran: boolean;
-  consigneGenerale: string;
+  consigneGenerale: ReactNode;
   blocDonnees: ReactNode;
 }
 

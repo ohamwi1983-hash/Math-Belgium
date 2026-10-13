@@ -5,9 +5,11 @@ import { RenduFragments } from "./RenduFragments";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onChoisir: (choix: VarianteApplicationPhysique) => void;
@@ -25,14 +27,17 @@ const OPTIONS: { valeur: VarianteApplicationPhysique; libelle: string }[] = [
 /** Première étape, toujours la même : contexte narratif + schéma, affichés ici et persistants sur
  * les 3 écrans suivants (jamais d'écran "énoncé" séparé sans question, même leçon déjà établie
  * ailleurs dans le projet — voir CLAUDE.md). */
-export function EtapeModelisationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
+export function EtapeModelisationApplicationPhysique({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
   const [choix, setChoix] = useState<VarianteApplicationPhysique | null>(null);
   const erronee = tentativesUtilisees > 0;
 
   return (
     <div>
-      <p className="prompt-text">{formatEnonceApplicationPhysique(exercice)}</p>
-      <SchemaApplicationPhysique exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={formatEnonceApplicationPhysique(exercice)}
+        blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
+      />
 
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneConfiguration(exercice)} />

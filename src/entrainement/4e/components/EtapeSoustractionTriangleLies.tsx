@@ -7,13 +7,16 @@ import { consigneSoustraction, formatDistancesParcouruesTexte, formatEtatActuelP
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BlocDonneesTriangleLies } from "./BlocDonneesTriangleLies";
-import { EnonceTriangleLies } from "./EnonceTriangleLies";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
+import { TriangleLiesSketch } from "./TriangleLiesSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +30,7 @@ interface Props {
 
 /** Écran 2, `sommetPartage` uniquement — les 2 côtés du triangle cible, chacun obtenu en
  * soustrayant la distance déjà parcourue au côté correspondant du triangle pont. */
-export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSoustractionTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [cote1, setCote1] = useState("");
   const [cote2, setCote2] = useState("");
   const complet = cote1.trim() !== "" && cote2.trim() !== "";
@@ -38,7 +41,16 @@ export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <EnonceTriangleLies exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={exercice.contexte}
+        blocDonnees={
+          <>
+            <QuestionFinale question={exercice.questionCible} />
+            <TriangleLiesSketch exercice={exercice} />
+          </>
+        }
+      />
       <BlocDonneesTriangleLies titre="État actuel" lignes={[formatEtatActuelPontConfirme(exercice)]} />
       <BlocDonneesTriangleLies titre="Distances déjà parcourues" lignes={formatDistancesParcouruesTexte(exercice)} />
       <p className="prompt-text">{consigneSoustraction()}</p>

@@ -11,9 +11,11 @@ import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import type { ExerciceEtudeCompletePipeline } from "../core5e/etudeComplete.types";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeComplete;
+  estPremierEcran: boolean;
   phase: PhaseEtudeComplete;
   labels: string[];
   placeholders: string[];
@@ -38,7 +40,7 @@ interface Props {
  * (1 champ), "AH"/"AO" (1 champ), "casSpecial" (2 champs), "constructionInverse" (1 champ).
  * Calculatrice TOUJOURS présente (contextes réalistes, arithmétique non triviale), sauf sur l'écran
  * "domaine"/"classification" (purement symbolique, gérés par `EtapeListeNombresEtudeComplete`). */
-export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEtudeComplete({ exercice, estPremierEcran, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(labels.map(() => ""));
   const [dernierStatuts, setDernierStatuts] = useState<StatutVerification[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -60,15 +62,22 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
 
   return (
     <div>
-      <p className="prompt-text">{estBonus ? CONSIGNE_GENERALE_CONSTRUCTION_INVERSE : CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
-      {pipeline && <BlocDonneesEtudeComplete exercice={pipeline} />}
-      {exercice.mode === "constructionInverse" && (
-        <div className="equation-box equation-box-donnees">
-          {formatProprietesConstructionInverseTexte(exercice.proprietes).map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
-      )}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={estBonus ? CONSIGNE_GENERALE_CONSTRUCTION_INVERSE : CONSIGNE_GENERALE_ETUDE_COMPLETE}
+        blocDonnees={
+          <>
+            {pipeline && <BlocDonneesEtudeComplete exercice={pipeline} />}
+            {exercice.mode === "constructionInverse" && (
+              <div className="equation-box equation-box-donnees">
+                {formatProprietesConstructionInverseTexte(exercice.proprietes).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            )}
+          </>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => (
         <div key={i} className="field-row">

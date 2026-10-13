@@ -1,14 +1,16 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { TEXTE_AIDE_BENEFICE_C_1, consigneBeneficeC } from "../ui5e/formatProblemesContexte";
+import { TEXTE_AIDE_BENEFICE_C_1, consigneBeneficeC, consigneContexteC } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerBeneficeC } from "../moteur5e/verificationProblemesContexte";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
+  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données -> question, jamais l'inverse). */
   donnees: ReactNode;
@@ -24,7 +26,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeBeneficeC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeBeneficeC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerBeneficeC(exercice, Number(valeur.replace(",", "."))) !== "correct";
@@ -36,7 +38,7 @@ export function EtapeBeneficeC({ exercice, donnees, tentativesUtilisees, tentati
 
   return (
     <div>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={consigneContexteC()} blocDonnees={donnees} />
       <p className="prompt-text">{consigneBeneficeC(exercice)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">Bénéfice =</label>

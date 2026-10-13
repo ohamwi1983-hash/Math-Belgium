@@ -6,9 +6,11 @@ import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { SchemaApplicationPhysique } from "./SchemaApplicationPhysique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
@@ -23,15 +25,18 @@ interface Props {
  * troisième nombre brut (déjà obtenus aux 2 étapes précédentes), mais la direction cardinale
  * réelle vers laquelle elle pointe (Nord toujours pris comme référence, simplification
  * documentée — voir `core/applicationPhysique.types.ts`). */
-export function EtapeInterpretationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeInterpretationApplicationPhysique({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const erronee = tentativesUtilisees > 0;
 
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">{formatEnonceApplicationPhysique(exercice)}</p>
-      <SchemaApplicationPhysique exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={formatEnonceApplicationPhysique(exercice)}
+        blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
+      />
 
       <p className="prompt-text">Dans quelle direction cardinale se dirige la résultante ?</p>
       <div className="options-grid-compact">

@@ -9,9 +9,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -38,7 +40,7 @@ interface Props {
  * (`formatTermesEnoncePointsParametreLatex`) — l'état actuel (`etatActuelReductionAvecX`) reçoit le
  * même correctif directement dans `formatColinearite.ts` (`\begin{gathered}`, jamais `\qquad`).
  */
-export function EtapeReductionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeReductionAvecXColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -47,12 +49,17 @@ export function EtapeReductionAvecXColinearite({ exercice, tentativesUtilisees, 
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnoncePointsParametreLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnoncePointsParametreLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={etatActuelReductionAvecX(exercice)} />
       <p className="prompt-text">{CONSIGNE_REDUCTION_AVEC_X}</p>
 

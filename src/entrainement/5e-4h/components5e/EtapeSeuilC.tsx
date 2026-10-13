@@ -1,15 +1,17 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceScenarioC } from "../core5e/problemesContexte.types";
-import { CONSIGNE_SEUIL_C, TEXTE_AIDE_SEUIL_C_1 } from "../ui5e/formatProblemesContexte";
+import { CONSIGNE_SEUIL_C, TEXTE_AIDE_SEUIL_C_1, consigneContexteC } from "../ui5e/formatProblemesContexte";
 import { diagnostiquerSeuilC } from "../moteur5e/verificationProblemesContexte";
 import { ScenarioCGraph } from "./ScenarioCGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
+  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données -> question, jamais l'inverse). */
   donnees: ReactNode;
@@ -25,7 +27,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeSeuilC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerSeuilC(exercice, Number(valeur.replace(",", "."))) !== "correct";
@@ -37,9 +39,17 @@ export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentatives
 
   return (
     <div>
-      {donnees}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneContexteC()}
+        blocDonnees={
+          <>
+            {donnees}
+            <ScenarioCGraph exercice={exercice} />
+          </>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_SEUIL_C}</p>
-      <ScenarioCGraph exercice={exercice} />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">x ≈</label>
         <input

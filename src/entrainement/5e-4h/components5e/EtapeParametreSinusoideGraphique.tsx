@@ -15,9 +15,11 @@ import { BoutonAide } from "./BoutonAide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceParametresSinusoideGraphique;
+  estPremierEcran: boolean;
   phase: PhaseParametresSinusoideGraphique;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -47,7 +49,7 @@ interface Props {
  * (`App5gen9.tsx`, `ui5e/recapitulatifParametresSinusoideGraphique.ts`), plus l'ancien bloc "état
  * actuel" local (`EtatActuelParametresSinusoideGraphique`, retiré ici — doublon visuel).
  */
-export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeParametreSinusoideGraphique({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -62,8 +64,11 @@ export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUt
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <SinusoideGraph exercice={exercice} phase={phase} niveauAide={niveauAide} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={<SinusoideGraph exercice={exercice} phase={phase} niveauAide={niveauAide} />}
+      />
       <p className="prompt-text">{consignePhase(phase)}</p>
       <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
       <div className="field field-inline">

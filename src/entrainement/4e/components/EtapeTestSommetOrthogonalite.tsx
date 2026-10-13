@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
+  estPremierEcran: boolean;
   sommet: Sommet;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -70,7 +72,7 @@ function Piege({ sommet }: { sommet: Sommet }) {
  * dans son contenu (seulement son rendu interne passé de `\qquad` à `\begin{gathered}`, voir
  * `ui/formatOrthogonalite.ts`).
  */
-export function EtapeTestSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTestSommetOrthogonalite({ exercice, estPremierEcran, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX[PHASE_PAR_SOMMET[sommet]];
   const valeur = Number(texte.replace(",", "."));
@@ -81,12 +83,17 @@ export function EtapeTestSommetOrthogonalite({ exercice, sommet, tentativesUtili
 
   return (
     <div>
-      {consigneGlobale && <p className="prompt-text">{consigneGlobale}</p>}
-      <div className="equation-box equation-box-termes">
-        {formatTermesEnonceTriangleLatex(exercice).map((t, i) => (
-          <Katex key={i} expression={t} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGlobale}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {formatTermesEnonceTriangleLatex(exercice).map((t, i) => (
+              <Katex key={i} expression={t} />
+            ))}
+          </div>
+        }
+      />
       <EtatActuelPanel latex={etatActuelTestSommet(exercice, sommet)} />
       <p className="prompt-text">
         Ce triangle est-il rectangle en {labelSommet(exercice, sommet)} ? Calcule le critère d'orthogonalité correspondant.

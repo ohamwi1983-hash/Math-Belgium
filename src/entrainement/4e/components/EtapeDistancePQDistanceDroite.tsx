@@ -15,9 +15,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
+  estPremierEcran: boolean;
   point: Point;
   droiteCible: DroiteImplicite;
   bAttendue: DroiteImplicite;
@@ -41,7 +43,7 @@ interface Props {
  * éléments (droite(s), P, b, Q) sont désormais CONFIRMÉS : toujours affichés sur le graphe, sans
  * conditionner à un niveau d'aide.
  */
-export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bAttendue, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDistancePQDistanceDroite({ exercice, estPremierEcran, point, droiteCible, bAttendue, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
 
@@ -62,14 +64,21 @@ export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bA
 
   return (
     <div>
-      <ConsigneGeneraleDistanceDroite exercice={exercice} />
-      <DonneesDistanceDroite exercice={exercice} />
-      <DistanceDroiteGraph
-        lignes={lignes}
-        points={[
-          { point, label: "P", couleur: COULEUR_P },
-          { point: qAttendu, label: "Q", couleur: COULEUR_Q },
-        ]}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<ConsigneGeneraleDistanceDroite exercice={exercice} />}
+        blocDonnees={
+          <>
+            <DonneesDistanceDroite exercice={exercice} />
+            <DistanceDroiteGraph
+              lignes={lignes}
+              points={[
+                { point, label: "P", couleur: COULEUR_P },
+                { point: qAttendu, label: "Q", couleur: COULEUR_Q },
+              ]}
+            />
+          </>
+        }
       />
       <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">{CONSIGNE_DISTANCE_PQ}</p>

@@ -140,6 +140,7 @@ export function App6gen40() {
           <EtapeTypeParametresTransformationsPlan
             key={phase}
             {...aideCommun}
+            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
             etatActuel={null}

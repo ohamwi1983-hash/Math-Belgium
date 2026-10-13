@@ -7,10 +7,12 @@ import type { AideAvecLatex } from "../ui6e/formatTransformationsPlan";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 type TypeTransformationB = "translation" | "similitude";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -41,7 +43,7 @@ interface Props {
  * `moteur6e/verificationTransformationsPlan.ts`, `diagnostiquerBEcran2`, pour le statut combiné.
  * `App6gen40.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeTypeParametresTransformationsPlan({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTypeParametresTransformationsPlan({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [type, setType] = useState<TypeTransformationB | null>(null);
   const [vecteur, setVecteur] = useState("");
   const [rapport, setRapport] = useState("");
@@ -63,14 +65,19 @@ export function EtapeTypeParametresTransformationsPlan({ consigneGenerale, blocD
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">
