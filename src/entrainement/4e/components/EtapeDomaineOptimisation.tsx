@@ -3,17 +3,20 @@ import type { ExerciceOptimisationModelisation } from "../core/optimisation.type
 import { diagnostiquerDomaine } from "../moteur/verificationOptimisation";
 import type { ReponseDomaine } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_DOMAINE } from "../moteur/sessionOptimisation";
-import { consigneDomaine, formatFonctionDeveloppeeLatex, texteAideDomaineNiveau1, texteAideDomaineNiveau2, texteAideDomaineNiveau3 } from "../ui/formatOptimisation";
+import { consigneDomaine, formatFonctionDeveloppeeLatex, segmentsPhraseEnonce, texteAideDomaineNiveau1, texteAideDomaineNiveau2, texteAideDomaineNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +29,7 @@ interface Props {
 }
 
 /** Écran 3 (`modelisation` uniquement) — déterminer le domaine de validité de la variable. */
-export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
   const complet = inf.trim() !== "" && sup.trim() !== "";
@@ -43,7 +46,11 @@ export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatFonctionDeveloppeeLatex(exercice.fonction, exercice.contexte.labelVariable)} />
       <p className="prompt-text">{consigneDomaine(exercice)}</p>
       <div className="field-row">

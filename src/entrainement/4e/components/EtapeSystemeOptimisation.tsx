@@ -5,8 +5,9 @@ import { NIVEAU_AIDE_MAX_SYSTEME } from "../moteur/sessionOptimisation";
 import { consigneSysteme, formatSystemeAccoladeLatex, segmentsPhraseEnonce, texteAideSystemeNiveau1, texteAideSystemeNiveau2, texteAideSystemeNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
+import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -14,6 +15,7 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,14 +37,18 @@ interface Props {
  * vérification que l'ancien écran "construction" (`diagnostiquerSysteme`, alias direct — voir
  * `verificationOptimisation.ts`).
  */
-export function EtapeSystemeOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSystemeOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerSysteme(exercice, texte) : undefined;
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       <div className="equation-box">
         <Katex expression={formatSystemeAccoladeLatex(exercice)} block />
       </div>

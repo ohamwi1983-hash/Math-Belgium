@@ -4,16 +4,20 @@ import type { ReponseIntervalle } from "../moteur/verificationEquationInequation
 import { diagnostiquerValidationInequation, verifierValidationEquation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_VALIDATION } from "../moteur/sessionEquationInequationSecondDegre";
 import { consigneValidation, formatDonneesAvecResolutionLatex, texteAideValidationNiveau1, texteAideValidationNiveau2, texteAideValidationNiveau3 } from "../ui/formatEquationInequationSecondDegre";
+import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,6 +31,7 @@ interface Props {
  * racine (`equation`) ou 2 bornes numériques (`inequation`, intersection avec le domaine). */
 export function EtapeValidationEquationInequationSecondDegre({
   exercice,
+  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -58,6 +63,7 @@ export function EtapeValidationEquationInequationSecondDegre({
     return (
       <EcranValidationEquation
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         candidates={candidates}
         apresEchec={apresEchec}
         tentativesUtilisees={tentativesUtilisees}
@@ -72,6 +78,7 @@ export function EtapeValidationEquationInequationSecondDegre({
   return (
     <EcranValidationInequation
       exercice={exercice}
+      estPremierEcran={estPremierEcran}
       apresEchec={apresEchec}
       tentativesUtilisees={tentativesUtilisees}
       tentativesMax={tentativesMax}
@@ -84,6 +91,7 @@ export function EtapeValidationEquationInequationSecondDegre({
 
 interface PropsEquation {
   exercice: Extract<ExerciceEquationInequationSecondDegre, { variante: "equation" }>;
+  estPremierEcran: boolean;
   candidates: [number, number];
   apresEchec: boolean;
   tentativesUtilisees: number;
@@ -93,7 +101,7 @@ interface PropsEquation {
   validation?: ValidationEtapeProps | null;
 }
 
-function EcranValidationEquation({ exercice, candidates, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsEquation) {
+function EcranValidationEquation({ exercice, estPremierEcran, candidates, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsEquation) {
   const [reponses, setReponses] = useState<(boolean | null)[]>(candidates.map(() => null));
   const complet = reponses.every((r) => r !== null);
   const erronee = apresEchec && complet && !verifierValidationEquation(exercice, reponses as boolean[]);
@@ -110,7 +118,11 @@ function EcranValidationEquation({ exercice, candidates, apresEchec, tentativesU
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice.base} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesAvecResolutionLatex(exercice)} />
       <p className="prompt-text">{consigneValidation(exercice)}</p>
 
@@ -162,6 +174,7 @@ function EcranValidationEquation({ exercice, candidates, apresEchec, tentativesU
 
 interface PropsInequation {
   exercice: Extract<ExerciceEquationInequationSecondDegre, { variante: "inequation" }>;
+  estPremierEcran: boolean;
   apresEchec: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -170,7 +183,7 @@ interface PropsInequation {
   validation?: ValidationEtapeProps | null;
 }
 
-function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsInequation) {
+function EcranValidationInequation({ exercice, estPremierEcran, apresEchec, tentativesUtilisees, tentativesMax, aide, onValider, validation }: PropsInequation) {
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
   const complet = inf.trim() !== "" && sup.trim() !== "";
@@ -186,7 +199,11 @@ function EcranValidationInequation({ exercice, apresEchec, tentativesUtilisees, 
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice.base} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesAvecResolutionLatex(exercice)} />
       <p className="prompt-text">{consigneValidation(exercice)}</p>
 

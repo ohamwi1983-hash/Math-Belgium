@@ -2,16 +2,19 @@ import { useState } from "react";
 import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { verifierInterpretation } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionOptimisation";
-import { consigneInterpretation, formatDonneesFinalesLatex, texteAideInterpretationNiveau1 } from "../ui/formatOptimisation";
+import { consigneInterpretation, formatDonneesFinalesLatex, segmentsPhraseEnonce, texteAideInterpretationNiveau1 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -25,14 +28,18 @@ interface Props {
 
 /** Écran commun aux 2 variantes, toujours TERMINAL — QCM, choisir la phrase de conclusion correcte
  * parmi `exercice.optionsInterpretation` (ordre déjà mélangé à la génération, jamais retrié). */
-export function EtapeInterpretationOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesFinalesLatex(exercice)} label="Données" />
       <p className="prompt-text">{consigneInterpretation()}</p>
 

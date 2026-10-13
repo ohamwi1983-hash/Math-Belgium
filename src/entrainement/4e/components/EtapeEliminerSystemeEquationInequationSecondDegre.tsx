@@ -3,16 +3,20 @@ import type { ExerciceEquationInequationSecondDegre } from "../core/equationIneq
 import { diagnostiquerEliminationSysteme } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_ELIMINER_SYSTEME } from "../moteur/sessionEquationInequationSecondDegre";
 import { consigneEliminerSysteme, formatSystemeConfirmeLatex, texteAideEliminerSystemeNiveau1, texteAideEliminerSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,14 +30,18 @@ interface Props {
 
 /** Écran 0b (`voieSysteme` uniquement) — relation LINÉAIRE obtenue en soustrayant les 2 équations du
  * système (élimination du terme croisé `xy`). */
-export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerEliminationSysteme(exercice, texte) : undefined;
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice.base} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatSystemeConfirmeLatex(exercice)} label="Système" />
       <p className="prompt-text">{consigneEliminerSysteme()}</p>
       <div className="field">

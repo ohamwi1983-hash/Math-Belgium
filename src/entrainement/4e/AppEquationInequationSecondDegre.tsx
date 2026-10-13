@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -144,7 +144,18 @@ export function AppEquationInequationSecondDegre() {
   }
 
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
   const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
+
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
+   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
 
   const validation = enAttente
     ? {
@@ -203,6 +214,7 @@ export function AppEquationInequationSecondDegre() {
           {etat.phase === "poserSysteme" ? (
             <EtapePoserSystemeEquationInequationSecondDegre
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAidePoserSysteme}
@@ -213,6 +225,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "eliminerSysteme" ? (
             <EtapeEliminerSystemeEquationInequationSecondDegre
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideEliminerSysteme}
@@ -223,6 +236,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "identification" && exercice.base.variante === "modelisation" ? (
             <EtapeIdentificationOptimisation
               exercice={exercice.base}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
@@ -231,6 +245,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "contrainteEtGrandeur" && exercice.base.variante === "modelisation" ? (
             <EtapeContrainteEtGrandeurOptimisation
               exercice={exercice.base}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideContrainteEtGrandeur}
@@ -241,6 +256,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "systeme" && exercice.base.variante === "modelisation" ? (
             <EtapeSystemeOptimisation
               exercice={exercice.base}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSysteme}
@@ -251,6 +267,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "domaine" && exercice.base.variante === "modelisation" ? (
             <EtapeDomaineOptimisation
               exercice={exercice.base}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDomaine}
@@ -261,6 +278,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "poserEquationInequation" ? (
             <EtapePoserEquationInequationSecondDegre
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAidePoserEquationInequation}
@@ -271,6 +289,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "resoudre" ? (
             <EtapeResoudreEquationInequationSecondDegre
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideResoudre}
@@ -281,6 +300,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "validation" ? (
             <EtapeValidationEquationInequationSecondDegre
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideValidation}
@@ -292,6 +312,7 @@ export function AppEquationInequationSecondDegre() {
           ) : etat.phase === "interpretation" ? (
             <EtapeInterpretationEquationInequationSecondDegre
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideInterpretation}

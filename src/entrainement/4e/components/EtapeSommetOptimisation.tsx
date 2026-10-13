@@ -5,8 +5,9 @@ import type { ReponseSommet } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_SOMMET } from "../moteur/sessionOptimisation";
 import { consigneSommet, contexteLabelX, contexteLabelY, formatDonneesConfirmeesLatex, segmentsPhraseEnonce, texteAideSommetNiveau1, texteAideSommetNiveau2 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -14,6 +15,7 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -40,7 +42,7 @@ interface Props {
  * textes d'aide contiennent leur propre notation à underscore ($x_S$...) rendue via
  * `<SegmentsInline>`, jamais en texte brut (point 2 du même prompt).
  */
-export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSommetOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
   const complet = x.trim() !== "" && y.trim() !== "";
@@ -60,7 +62,11 @@ export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentati
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesConfirmeesLatex(exercice)} label="Données" />
       <p className="prompt-text">{consigneSommet(exercice)}</p>
       <div className="field">

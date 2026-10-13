@@ -5,8 +5,9 @@ import type { ReponseDecision } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_DECISION } from "../moteur/sessionOptimisation";
 import { consigneDecision, contexteLabelX, contexteLabelY, formatDonneesAvecSommetLatex, segmentsPhraseEnonce, texteAideDecisionNiveau1, texteAideDecisionNiveau2, texteAideDecisionNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -14,6 +15,7 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +36,7 @@ interface Props {
  * architecture-modelisation.md`, points 1-2) : `x_{opt}`/`valeur_{optimale}` REMPLACÉS par le nom
  * concret, aide rendue via `<SegmentsInline>` pour toute notation à underscore.
  */
-export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDecisionOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [dansDomaine, setDansDomaine] = useState<boolean | null>(null);
   const [x, setX] = useState("");
   const [y, setY] = useState("");
@@ -56,7 +58,11 @@ export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesAvecSommetLatex(exercice)} label="Données" />
       <p className="prompt-text">{consigneDecision(exercice)}</p>
 

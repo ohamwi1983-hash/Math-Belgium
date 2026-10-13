@@ -3,16 +3,20 @@ import type { ExerciceEquationInequationSecondDegre } from "../core/equationIneq
 import { diagnostiquerPoserEquationInequation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION } from "../moteur/sessionEquationInequationSecondDegre";
 import { consignePoserEquationInequation, formatDonneesConfirmeesLatex, texteAidePoserEquationInequationNiveau1, texteAidePoserEquationInequationNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +30,7 @@ interface Props {
 
 /** Écran 4 — traduire le seuil de l'énoncé (`exercice.k`, jamais mentionné dans la phrase narrative)
  * en équation/inéquation `f(x) [=/>/<] k`. */
-export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapePoserEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerPoserEquationInequation(exercice, texte) : undefined;
@@ -34,7 +38,11 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice.base} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesConfirmeesLatex(exercice)} />
       <p className="prompt-text">{consignePoserEquationInequation(exercice)}</p>
       <div className="field">

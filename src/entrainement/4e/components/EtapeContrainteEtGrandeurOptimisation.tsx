@@ -6,7 +6,8 @@ import { NIVEAU_AIDE_MAX_CONTRAINTE_ET_GRANDEUR } from "../moteur/sessionOptimis
 import { consigneContrainteEtGrandeur, segmentsPhraseEnonce, texteAideContrainteNiveau1, texteAideContrainteNiveau2, texteAideGrandeurNiveau1, texteAideGrandeurNiveau2 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { CroquisOptimisation } from "./CroquisOptimisation";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -14,6 +15,7 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,6 +37,7 @@ interface Props {
  */
 export function EtapeContrainteEtGrandeurOptimisation({
   exercice,
+  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -59,7 +62,11 @@ export function EtapeContrainteEtGrandeurOptimisation({
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       {exercice.contexte.croquis && <CroquisOptimisation croquis={exercice.contexte.croquis} />}
       <p className="prompt-text">{consigneContrainteEtGrandeur(exercice)}</p>
 

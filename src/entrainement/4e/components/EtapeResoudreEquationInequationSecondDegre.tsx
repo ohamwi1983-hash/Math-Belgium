@@ -3,16 +3,20 @@ import type { ExerciceEquationInequationSecondDegre } from "../core/equationIneq
 import { diagnostiquerResoudre } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_RESOUDRE } from "../moteur/sessionEquationInequationSecondDegre";
 import { consigneResoudre, formatDonneesAvecEquationLatex, texteAideResoudreNiveau1, texteAideResoudreNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +30,7 @@ interface Props {
 
 /** Écran 5 — résoudre algébriquement (2 valeurs, ordre indifférent : les 2 racines pour `equation`,
  * les 2 bornes de l'intervalle BRUT pour `inequation`). */
-export function EtapeResoudreEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeResoudreEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [valeurs, setValeurs] = useState<[string, string]>(["", ""]);
   const complet = valeurs.every((v) => v.trim() !== "");
   const statut = complet ? diagnostiquerResoudre(exercice, valeurs) : undefined;
@@ -37,7 +41,11 @@ export function EtapeResoudreEquationInequationSecondDegre({ exercice, tentative
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice.base} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesAvecEquationLatex(exercice)} />
       <p className="prompt-text">{consigneResoudre()}</p>
 

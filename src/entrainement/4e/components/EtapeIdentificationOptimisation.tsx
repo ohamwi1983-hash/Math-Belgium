@@ -2,13 +2,17 @@ import { useState } from "react";
 import type { ExerciceOptimisationModelisation } from "../core/optimisation.types";
 import type { ReponseIdentification } from "../moteur/verificationOptimisation";
 import { diagnostiquerIdentification } from "../moteur/verificationOptimisation";
+import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseIdentification) => void;
@@ -26,7 +30,7 @@ interface Props {
  * écran entièrement sinon, jamais rendu vide. Pas d'aide sur cet écran (vérification par sélection,
  * même convention que "interpretation") — voir `NIVEAU_AIDE_MAX_IDENTIFICATION=0`.
  */
-export function EtapeIdentificationOptimisation({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeIdentificationOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const identification = exercice.identificationXY;
   const [indexX, setIndexX] = useState<number | null>(null);
   const [indexY, setIndexY] = useState<number | null>(null);
@@ -41,7 +45,11 @@ export function EtapeIdentificationOptimisation({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
+      />
       <p className="prompt-text">
         Identifie ce que représentent {exercice.contexte.labelVariable} et {exercice.contrainte.lettreCherchee} dans cette situation.
       </p>

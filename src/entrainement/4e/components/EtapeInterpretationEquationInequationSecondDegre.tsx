@@ -3,15 +3,19 @@ import type { ExerciceEquationInequationSecondDegre } from "../core/equationIneq
 import { verifierInterpretation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionEquationInequationSecondDegre";
 import { consigneInterpretation, formatDonneesFinalesLatex, texteAideInterpretationNiveau1 } from "../ui/formatEquationInequationSecondDegre";
+import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceOptimisation } from "./EnonceOptimisation";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { QuestionFinale } from "./QuestionFinale";
+import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -24,14 +28,18 @@ interface Props {
 }
 
 /** Écran 7, TOUJOURS terminal — QCM, phrase de conclusion correcte parmi 4 options mélangées. */
-export function EtapeInterpretationEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
 
   return (
     <div>
-      <EnonceOptimisation exercice={exercice.base} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
+        blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
+      />
       <EtatActuelPanel latex={formatDonneesFinalesLatex(exercice)} />
       <p className="prompt-text">{consigneInterpretation()}</p>
 
