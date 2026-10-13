@@ -65,9 +65,12 @@ export function EtapeSimplificationCoefficients({
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">
-                Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'équation par ce nombre.
-              </p>
+              <div className="triangle-quelconque-aide">
+                <p>
+                  Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'équation par ce
+                  nombre.
+                </p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

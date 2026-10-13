@@ -65,9 +65,12 @@ export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, t
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">
-                θ appartient au quadrant {libelleQuadrantUnSansLautre(exercice.quadrant)}, donc <Katex expression={formatSigneCibleLatex(exercice)} />.
-              </p>
+              <div className="triangle-quelconque-aide">
+                <p>
+                  θ appartient au quadrant {libelleQuadrantUnSansLautre(exercice.quadrant)}, donc{" "}
+                  <Katex expression={formatSigneCibleLatex(exercice)} />.
+                </p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

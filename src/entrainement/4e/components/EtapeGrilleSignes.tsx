@@ -145,10 +145,12 @@ export function EtapeGrilleSignes({
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">
-                Rappel : dans chaque colonne, un nombre pair de facteurs négatifs donne un produit positif ; un nombre
-                impair donne un produit négatif.
-              </p>
+              <div className="triangle-quelconque-aide">
+                <p>
+                  Rappel : dans chaque colonne, un nombre pair de facteurs négatifs donne un produit positif ; un
+                  nombre impair donne un produit négatif.
+                </p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

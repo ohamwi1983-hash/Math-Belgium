@@ -124,7 +124,11 @@ export function EtapeIsolement({
       {!validation && (
         <>
           <div>
-            {aideActivee && <p className="prompt-text">{texteAide}</p>}
+            {aideActivee && (
+              <div className="triangle-quelconque-aide">
+                <p>{texteAide}</p>
+              </div>
+            )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>
           <button type="button" className="btn btn-primary" disabled={reponse.trim() === ""} onClick={() => onValider(reponse)}>

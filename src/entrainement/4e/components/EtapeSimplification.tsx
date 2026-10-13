@@ -158,7 +158,9 @@ export function EtapeSimplification({
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
+              <div className="triangle-quelconque-aide">
+                <p>Simplifie en divisant numérateur et dénominateur par leur facteur commun.</p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

@@ -28,6 +28,8 @@
   --color-error-bg: var(--bad-soft);
   --color-warning: var(--attn);
   --color-warning-bg: var(--attn-soft);
+  --color-tip: var(--tip);
+  --color-tip-bg: var(--tip-soft);
   --shadow-card: none;
   /* --radius-md/--radius-lg ne reprennent PAS --radius (3px, pensé pour les pages de cours,
    * éditorial/quasi droit) : sur un écran d'exercice tactile, ces coins presque droits combinés à
@@ -346,20 +348,6 @@
   cursor: pointer;
 }
 
-.entrainement .btn-aide {
-  width: 100%;
-  margin-top: 10px;
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.entrainement .btn-aide:disabled {
-  border-color: var(--color-border);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
-  background: var(--color-surface);
-}
-
 .entrainement .prompt-text {
   font-size: 14px;
   color: var(--color-text-muted);
@@ -503,6 +491,24 @@
   outline-offset: 2px;
 }
 
+/* Déplacée APRÈS `.btn` (même spécificité, l'ordre de cascade décide) — restée avant jusqu'ici,
+ * `color`/`border-color` ne prenaient donc jamais effet, le bouton "Aide" s'affichant toujours
+ * comme un `.btn` neutre malgré cette règle (bug préexistant, pas introduit par la couleur "tip"
+ * ci-dessous — juste révélé en la cherchant). */
+.entrainement .btn-aide {
+  width: 100%;
+  margin-top: 10px;
+  border-color: var(--color-tip);
+  color: var(--color-tip);
+}
+
+.entrainement .btn-aide:disabled {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  background: var(--color-surface);
+}
+
 .entrainement .btn-primary {
   width: 100%;
   background: var(--color-primary);
@@ -607,6 +613,49 @@
   background-color: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4.3 12.5 9 17.2 19.7 6.5 18.3 5.1 9 14.4 5.7 11.1Z'/%3E%3C/svg%3E") no-repeat center / contain;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M4.3 12.5 9 17.2 19.7 6.5 18.3 5.1 9 14.4 5.7 11.1Z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* "Bandeau teinté" (design C, validé avec l'utilisateur) — même grammaire que `.alert-error`/
+ * `.alert-success` (fond teinté + icône en ::before, même technique mask-image) mais une couleur
+ * dédiée (`--color-tip`), jamais recalculée avec le rouge/vert déjà pris par le feedback de
+ * validation. `.aide-5e` (5e-4h/6e-6h) et `.triangle-quelconque-aide` (4e — nom hérité du premier
+ * générateur qui l'a introduite, mais déjà réutilisée par 131 des 150 écrans 4e à bouton Aide avant
+ * ce changement) sont toutes deux rendues par ~280 écrans au total, jamais un fichier partagé — une
+ * seule règle couvre les 3 chantiers d'un coup. Le bouton "Aide" (`.btn-aide` ci-dessus) reprend la
+ * même couleur, pour que le déclencheur et le contenu révélé se lisent comme un seul système. */
+.entrainement .aide-5e,
+.entrainement .triangle-quelconque-aide {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-tip-bg);
+  border-left: 3px solid var(--color-tip);
+  color: var(--color-text);
+  font-size: 14px;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.entrainement .aide-5e p,
+.entrainement .triangle-quelconque-aide p {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.entrainement .aide-5e p:first-child::before,
+.entrainement .triangle-quelconque-aide p:first-child::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 1px;
+  background-color: var(--color-tip);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle fill='%23fff' cx='12' cy='10' r='6.5'/%3E%3Crect fill='%23fff' x='9' y='17' width='6' height='2' rx='1'/%3E%3Crect fill='%23fff' x='9.5' y='20' width='5' height='1.6' rx='0.8'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle fill='%23fff' cx='12' cy='10' r='6.5'/%3E%3Crect fill='%23fff' x='9' y='17' width='6' height='2' rx='1'/%3E%3Crect fill='%23fff' x='9.5' y='20' width='5' height='1.6' rx='0.8'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .entrainement .validation-ecran {
@@ -2275,14 +2324,6 @@
   fill: #f08c00;
 }
 
-.entrainement .quel-angle-aide {
-  margin-bottom: 16px;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-}
-
 .entrainement .triangle-quelconque-sketch {
   max-width: 280px;
 }
@@ -2305,15 +2346,6 @@
   stroke: #f08c00;
   stroke-width: 1.5;
   stroke-dasharray: 4 3;
-}
-
-.entrainement .triangle-quelconque-aide {
-  margin-bottom: 16px;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  overflow-x: auto;
 }
 
 .entrainement .courbe-graph-label {

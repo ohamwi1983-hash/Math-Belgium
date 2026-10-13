@@ -67,11 +67,13 @@ export function EtapeSimplificationInequation({
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">
-                Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'inéquation par ce
-                nombre (positif ou négatif). Si tu choisis un diviseur négatif, le sens de l'inégalité s'inverse —
-                indique alors le nouveau symbole dans ta réponse.
-              </p>
+              <div className="triangle-quelconque-aide">
+                <p>
+                  Cherche le plus grand diviseur commun aux trois coefficients, puis divise toute l'inéquation par ce
+                  nombre (positif ou négatif). Si tu choisis un diviseur négatif, le sens de l'inégalité s'inverse —
+                  indique alors le nouveau symbole dans ta réponse.
+                </p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

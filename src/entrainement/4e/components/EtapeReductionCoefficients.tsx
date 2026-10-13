@@ -135,11 +135,13 @@ export function EtapeReductionCoefficients({
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">
-                {variante === "miseEnEvidence"
-                  ? "Cherche le plus grand diviseur commun aux trois coefficients, puis mets-le en évidence devant une parenthèse — ne divise jamais le polynôme par ce nombre, il doit rester visible en facteur."
-                  : "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le polynôme par ce nombre."}
-              </p>
+              <div className="triangle-quelconque-aide">
+                <p>
+                  {variante === "miseEnEvidence"
+                    ? "Cherche le plus grand diviseur commun aux trois coefficients, puis mets-le en évidence devant une parenthèse — ne divise jamais le polynôme par ce nombre, il doit rester visible en facteur."
+                    : "Cherche le plus grand diviseur commun aux trois coefficients, puis divise tout le polynôme par ce nombre."}
+                </p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

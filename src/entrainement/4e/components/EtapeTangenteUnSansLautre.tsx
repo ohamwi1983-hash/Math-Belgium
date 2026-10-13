@@ -64,7 +64,7 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
         <>
           <div>
             {aideActivee && (
-              <div className="equation-box">
+              <div className="triangle-quelconque-aide">
                 <Katex expression="\tan\theta = \dfrac{\sin\theta}{\cos\theta}" block />
               </div>
             )}

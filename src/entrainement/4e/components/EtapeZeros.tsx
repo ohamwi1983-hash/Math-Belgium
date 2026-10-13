@@ -180,7 +180,9 @@ export function EtapeZeros({
         <>
           <div>
             {aideActivee && (
-              <p className="prompt-text">Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution.</p>
+              <div className="triangle-quelconque-aide">
+                <p>Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution.</p>
+              </div>
             )}
             <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
           </div>

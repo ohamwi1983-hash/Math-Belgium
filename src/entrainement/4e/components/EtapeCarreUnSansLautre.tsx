@@ -55,7 +55,7 @@ export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativ
         <>
           <div>
             {aideActivee && (
-              <div className="equation-box">
+              <div className="triangle-quelconque-aide">
                 <Katex expression="\cos^2\theta + \sin^2\theta = 1" block />
                 <Katex
                   expression={`${formatCarreLatex(exercice.fonctionCible)} = 1 - ${formatCarreLatex(exercice.fonctionConnue)}`}

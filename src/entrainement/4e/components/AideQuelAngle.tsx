@@ -50,7 +50,7 @@ export function AideQuelAngle({ exercice, aideActivee, onActiverAide }: Props) {
   return (
     <div>
       {aideActivee && (
-        <div className="quel-angle-aide">
+        <div className="triangle-quelconque-aide">
           <p>{texteAideQuadrants(exercice)}</p>
           <CercleTrigBase ariaLabel="Cercle trigonométrique montrant les quadrants concernés, les points candidats et leurs projections">
             {exercice.fonction === "tan" && (

@@ -171,7 +171,11 @@ export function EtapeChamp1({
         <>
           {onActiverAide && (
             <div>
-              {aideActivee && <p className="prompt-text">{texteAideChamp1(exercice.categorie)}</p>}
+              {aideActivee && (
+                <div className="triangle-quelconque-aide">
+                  <p>{texteAideChamp1(exercice.categorie)}</p>
+                </div>
+              )}
               <BoutonAide niveauAide={aideActivee ? 1 : 0} niveauAideMax={1} onActiverAide={onActiverAide} />
             </div>
           )}
