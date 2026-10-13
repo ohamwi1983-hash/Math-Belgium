@@ -28,7 +28,6 @@ import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeZeros } from "./components/EtapeZeros";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
-import { calculerEtatActuel } from "./ui/etatActuel";
 import { formatEnonceAffichage, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -151,7 +150,6 @@ export function AppMethodeRapide() {
   }
 
   const recapitulatif = calculerRecapitulatif(etat);
-  const etatActuel = calculerEtatActuel(etat);
   // Bloc "énoncé" fixe : toujours l'exercice tel que généré, jamais la forme réduite par la
   // simplification (etat.exerciceCourant) — voir EtatSession.exerciceOriginal.
   const enonceFixe = formatEnonceAffichage(
@@ -232,7 +230,6 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               question={demandeFormeGeneraleDirecte(exercice) ? undefined : "Regroupe tous les termes du même côté."}
               label={demandeFormeGeneraleDirecte(exercice) ? undefined : null}
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
@@ -249,7 +246,6 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
               aideActivee={etat.aideDevelopperUtilisee}
               onActiverAide={() => setEtat(activerAideDevelopper(etat))}
@@ -264,7 +260,6 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix))}
               validation={validation}
             />
@@ -276,7 +271,6 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice, v)}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
@@ -291,7 +285,6 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               aideActivee={etat.aideZerosUtilisee}
               onActiverAide={() => setEtat(activerAideZeros(etat))}
               onValider={(reponse: ReponseZeros) => terminerEtape(soumettreReponseChamp2(etat, reponse))}

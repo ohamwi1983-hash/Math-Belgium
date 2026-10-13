@@ -1,30 +1,19 @@
 import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
-import type { CoteBranche } from "../moteur6e/typesInjectiviteFonctions";
 import type { ReponseBijection } from "../moteur6e/verificationInjectiviteFonctions";
 import { diagnostiquerBijection } from "../moteur6e/verificationInjectiviteFonctions";
-import { CONSIGNE_ECRAN_BIJECTION, CONSIGNE_GENERALE, TEXTE_AIDE_BIJECTION_NIVEAU1, formatFLatexAffichage, lignesEtatActuelApresImage } from "../ui6e/formatInjectiviteFonctions";
+import { CONSIGNE_ECRAN_BIJECTION, CONSIGNE_GENERALE, TEXTE_AIDE_BIJECTION_NIVEAU1, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { DoubleComboboxIntervalle } from "./DoubleComboboxIntervalle";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
   estPremierEcran: boolean;
-  /** Intervalle d'injectivité retenu (écran 2) — pour le bloc "état actuel" ACCUMULÉ (correctif
-   * transversal, voir `ui6e/formatInjectiviteFonctions.ts::lignesEtatActuelApresImage`), jamais
-   * recalculé ici. `exercice.image` (écran 4) est déjà disponible directement sur `exercice`. */
-  intervalleConfirme: EnsembleReelGuide;
-  /** Branche mémorisée par la Couche B (écran "injective") — pour reformer la réciproque
-   * CONFIRMÉE à l'écran 3 dans le bloc "état actuel" (voir
-   * `ui6e/formatInjectiviteFonctions.ts::lignesEtatActuelApresImage`), jamais recalculée depuis la
-   * saisie brute de l'élève. */
-  coteChoisi: CoteBranche;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -46,7 +35,7 @@ interface Props {
  * sur TOUS les écrans, y compris les écrans à choix). Un seul palier d'aide sur cet écran (complément
  * ciblé — voir `moteur6e/sessionInjectiviteFonctions.ts::NIVEAU_AIDE_MAX`).
  */
-export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState<EnsembleReelGuide | null>(null);
   const [y, setY] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<ReponseBijection | null>(null);
@@ -54,7 +43,6 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, 
   const complet = x !== null && y !== null;
   const montrerErreurs = tentativesUtilisees > 0 && derniereReponse !== null;
   const statut = montrerErreurs ? diagnostiquerBijection(exercice, derniereReponse as ReponseBijection) : null;
-  const lignesEtatActuel = lignesEtatActuelApresImage(exercice, intervalleConfirme, coteChoisi);
 
   function valider() {
     if (x === null || y === null) return;
@@ -74,9 +62,6 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, 
           </div>
         }
       />
-      {lignesEtatActuel.map((ligne) => (
-        <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
-      ))}
       <p className="prompt-text">{CONSIGNE_ECRAN_BIJECTION}</p>
       <p className="prompt-text">La fonction f est bijective</p>
 

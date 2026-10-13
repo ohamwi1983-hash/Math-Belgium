@@ -88,11 +88,6 @@ export function App6gen1() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAideMax = NIVEAU_AIDE_MAX[etat.phase];
-  const intervalleConfirme = exercice.injective
-    ? exercice.domaine
-    : etat.coteChoisi === "gauche"
-      ? exercice.intervalleGauche
-      : exercice.intervalleDroite;
 
   const reponseAttenduePhase = (phase: typeof etat.phase) => {
     switch (phase) {
@@ -178,7 +173,6 @@ export function App6gen1() {
               estPremierEcran={estPremierEcran}
               exercice={exercice}
               coteChoisi={etat.coteChoisi}
-              intervalleConfirme={intervalleConfirme}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -193,8 +187,6 @@ export function App6gen1() {
               key={etat.phase}
               estPremierEcran={estPremierEcran}
               exercice={exercice}
-              intervalleConfirme={intervalleConfirme}
-              coteChoisi={etat.coteChoisi}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -209,8 +201,6 @@ export function App6gen1() {
               key={etat.phase}
               estPremierEcran={estPremierEcran}
               exercice={exercice}
-              intervalleConfirme={intervalleConfirme}
-              coteChoisi={etat.coteChoisi}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}

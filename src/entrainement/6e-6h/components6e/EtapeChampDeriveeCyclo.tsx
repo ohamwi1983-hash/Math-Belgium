@@ -7,21 +7,11 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
-
-interface EtatActuelLigne {
-  label: string;
-  latex: string;
-}
 
 interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   fonctionLatex: string;
-  /** Absent (ou vide) sur le 1er écran d'une famille ; sinon 1-2 lignes dérivées de l'exercice/des
-   * écrans précédents déjà confirmés (voir CLAUDE.md, "Bloc 'état actuel'") — jamais la saisie
-   * brute de l'élève. */
-  etatActuel?: EtatActuelLigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   placeholder: string;
@@ -44,7 +34,6 @@ export function EtapeChampDeriveeCyclo({
   estPremierEcran,
   consigneEcran,
   fonctionLatex,
-  etatActuel = [],
   aideNiveau1,
   aideNiveau2,
   placeholder,
@@ -75,9 +64,6 @@ export function EtapeChampDeriveeCyclo({
           </div>
         }
       />
-      {etatActuel.map((ligne) => (
-        <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
-      ))}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

@@ -13,7 +13,6 @@ import {
   soumettreReponseSolutions,
 } from "./moteur6e/sessionEquationsCyclometriques";
 import type { EtatSessionEquationsCyclometriques } from "./moteur6e/typesEquationsCyclometriques";
-import type { EtatActuelLigne } from "./components6e/EtapeChampEquationCyclo";
 import { EtapeAccepterRejeterEquationsCyclometriques } from "./components6e/EtapeAccepterRejeterEquationsCyclometriques";
 import { EtapeCEEquationsCyclometriques } from "./components6e/EtapeCEEquationsCyclometriques";
 import { EtapeChampEquationCyclo } from "./components6e/EtapeChampEquationCyclo";
@@ -40,34 +39,6 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3,
 
 function nouvelleSession(): EtatSessionEquationsCyclometriques {
   return demarrerSessionEquationsCyclometriques(REGLAGES_DEMO, genererExerciceEquationsCyclometriques);
-}
-
-/** Bloc "état actuel" de l'écran "equation" — CE seule pour les variantes 1/2/3 (immédiatement
- * précédente) ; CE (écran 1) + condition de compatibilité des codomaines (écran précédent) pour la
- * variante 4, dont la séquence est décalée d'un cran par l'écran "condition" intercalaire (voir
- * `phaseApres`). */
-function etatActuelAvantEquation(exercice: EtatSessionEquationsCyclometriques["exerciceCourant"]): EtatActuelLigne[] {
-  if (exercice.variante !== "arcfonctionsDifferentes") {
-    return [{ label: "CE établie à l'étape précédente", latex: formatEnsembleReelLatex(exercice.ce, MAX_DEN) }];
-  }
-  return [
-    { label: "CE établie à l'étape 1", latex: formatEnsembleReelLatex(exercice.ce, MAX_DEN) },
-    { label: "Condition de compatibilité des codomaines (étape précédente)", latex: formatEnsembleReelLatex(exercice.conditionParasite, MAX_DEN) },
-  ];
-}
-
-/** Bloc "état actuel" de l'écran "solutions" — CE (écran 1) + [condition (écran 2), variante 4
- * uniquement] + équation non cyclométrique (écran précédent, dans tous les cas). */
-function etatActuelAvantSolutions(exercice: EtatSessionEquationsCyclometriques["exerciceCourant"]): EtatActuelLigne[] {
-  const lignes: EtatActuelLigne[] = [{ label: "CE établie à l'étape 1", latex: formatEnsembleReelLatex(exercice.ce, MAX_DEN) }];
-  if (exercice.variante === "arcfonctionsDifferentes") {
-    lignes.push({
-      label: "Condition de compatibilité des codomaines (étape 2)",
-      latex: formatEnsembleReelLatex(exercice.conditionParasite, MAX_DEN),
-    });
-  }
-  lignes.push({ label: "Équation non cyclométrique (étape précédente)", latex: formatEquationNonCycloLatex(exercice) });
-  return lignes;
 }
 
 function ListeSolutions({ solutions }: { solutions: number[] }) {
@@ -218,7 +189,6 @@ export function App6gen3() {
               estPremierEcran={estPremierEcran}
               consigneEcran="Écris l'équation obtenue après avoir éliminé toutes les arcfonctions."
               equationLatex={formatEquationOriginaleLatex(exercice)}
-              etatActuel={etatActuelAvantEquation(exercice)}
               aideNiveau1={{ texte: texteAideEquationNiveau1(exercice), latex: null }}
               aideNiveau2={texteAideEquationNiveau2(exercice)}
               placeholder="ex : 2x-1=1/2"
@@ -238,7 +208,6 @@ export function App6gen3() {
               estPremierEcran={estPremierEcran}
               consigneEcran="Cette équation a-t-elle des solutions ? Si oui, liste-les TOUTES (sans encore tenir compte de la CE)."
               equationLatex={formatEquationOriginaleLatex(exercice)}
-              etatActuel={etatActuelAvantSolutions(exercice)}
               aideNiveau1={{ texte: texteAideSolutionsNiveau1(exercice), latex: null }}
               aideNiveau2={texteAideSolutionsNiveau2(exercice)}
               placeholder="ex : 2, -2..."

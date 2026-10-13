@@ -7,7 +7,6 @@ import { expressionLibreVersLatex } from "../ui/formatExpressionLatex";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -20,7 +19,6 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
-  etatActuel?: string | null;
   /**
    * Bloc "Énoncé" fixe (voir EtapeIsolement.tsx) — absent par défaut : comportement historique
    * inchangé (l'équation-box affiche directement `exercice`). Fourni : l'équation-box affiche
@@ -49,7 +47,6 @@ export function EtapeZeros({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  etatActuel,
   enonceFixe,
   aideActivee,
   onActiverAide,
@@ -121,7 +118,6 @@ export function EtapeZeros({
           block
         />
       </div>
-      <EtatActuelPanel latex={etatActuel ?? null} />
       <p className="prompt-text">Quelles sont les solutions de cette équation ?</p>
       <div className="options-grid">
         <button type="button" className={choix === "aucun" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucun")}>

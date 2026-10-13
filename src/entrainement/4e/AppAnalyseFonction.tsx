@@ -37,7 +37,6 @@ import { EtapeTableauSigneVariation } from "./components/EtapeTableauSigneVariat
 import { calculerRecapitulatifAnalyseFonction } from "./ui/recapitulatifAnalyseFonction";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import { calculerEtatActuelAnalyseFonctionRacines } from "./ui/etatActuelAnalyseFonction";
 import { formatEnonceLatex } from "./ui/formatEquation";
 import { formatFonctionColoreeLatex } from "./ui/formatAnalyseFonction";
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL } from "./ui/categorieLabels";
@@ -169,7 +168,6 @@ export function AppAnalyseFonction() {
   }
 
   const recapitulatif = calculerRecapitulatifAnalyseFonction(etat);
-  const etatActuelRacines = calculerEtatActuelAnalyseFonctionRacines(etat);
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -254,7 +252,6 @@ export function AppAnalyseFonction() {
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               question="Quelle est la méthode la plus rapide pour trouver les racines de f ?"
               options={OPTIONS_CATEGORIE_SANS_CAS_GENERAL}
-              etatActuel={etatActuelRacines}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixRacinesCategorie(etat, choix))}
               validation={validation}
             />
@@ -265,7 +262,6 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
-              etatActuel={etatActuelRacines}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.exercice, v)}
               onValider={(reponse) => terminerEtape(soumettreReponseRacinesChamp1(etat, reponse))}
               validation={validation}
@@ -277,7 +273,6 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
-              etatActuel={etatActuelRacines}
               onValider={(racines) => terminerEtape(soumettreReponseRacinesChamp2(etat, racines))}
               validation={validation}
             />

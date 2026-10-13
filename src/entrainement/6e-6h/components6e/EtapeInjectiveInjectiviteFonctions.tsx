@@ -13,14 +13,12 @@ import {
   formatFLatexAffichage,
   texteAideOuiNonNiveau1,
 } from "../ui6e/formatInjectiviteFonctions";
-import { formatEnsembleReelLatex } from "../ui6e/formatEnsembleReel";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
@@ -75,7 +73,6 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, estPremierEcran, 
           </div>
         }
       />
-      <EtatActuelPanel label="Domaine" latex={formatEnsembleReelLatex(exercice.domaine)} />
       <p className="prompt-text">{CONSIGNE_ECRAN_INJECTIVE}</p>
 
       <div className="options-grid-compact">

@@ -5,7 +5,6 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatEquationsCyclometriques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
@@ -13,19 +12,10 @@ interface AideAvecLatex {
   latex: string | null;
 }
 
-/** Une ligne de l'état déjà confirmé aux écrans précédents (jamais la saisie brute de l'élève). */
-export interface EtatActuelLigne {
-  label: string;
-  latex: string;
-}
-
 interface Props {
   estPremierEcran: boolean;
   consigneEcran: string;
   equationLatex: string;
-  /** Absent (ou vide) sur l'écran 1 d'une famille ; sinon 1-2 lignes dérivées de l'exercice/des
-   * écrans précédents déjà confirmés (voir CLAUDE.md, "Bloc 'état actuel'"). */
-  etatActuel?: EtatActuelLigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   placeholder: string;
@@ -48,7 +38,6 @@ export function EtapeChampEquationCyclo({
   estPremierEcran,
   consigneEcran,
   equationLatex,
-  etatActuel = [],
   aideNiveau1,
   aideNiveau2,
   placeholder,
@@ -79,9 +68,6 @@ export function EtapeChampEquationCyclo({
           </div>
         }
       />
-      {etatActuel.map((ligne) => (
-        <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
-      ))}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

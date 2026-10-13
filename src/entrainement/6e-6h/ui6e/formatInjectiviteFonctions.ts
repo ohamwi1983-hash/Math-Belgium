@@ -2,7 +2,6 @@ import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
 import { formatAffineLatex, formatPuissanceMonomeLatex } from "../generateurs6e/injectiviteFonctions/formatFLatex";
 import type { CoteBranche, ResultatExerciceInjectiviteFonctions } from "../moteur6e/typesInjectiviteFonctions";
-import { formatEnsembleReelLatex } from "./formatEnsembleReel";
 import { approxFractionLatex } from "./formatFraction";
 
 // ============================================================================
@@ -150,59 +149,6 @@ export const TEXTE_AIDE_INTERVALLE_NIVEAU1 = "Rappel : le plus grand intervalle 
 export function aideIntervalleNiveau2(exercice: ExerciceInjectiviteFonctions): AideAvecLatex {
   const pivot = approxFractionLatex(exercice.pivot as number);
   return { texte: "Le pivot est déjà connu — il ne reste plus qu'à choisir de quel côté (gauche ou droite) construire l'intervalle (les deux sont acceptés).", latex: `x = ${pivot}` };
-}
-
-// ============================================================================
-// Bloc "état actuel" — ACCUMULATION (correctif transversal, voir CLAUDE.md/`docs/historique-6e.md`
-// pour le pattern général) : jusqu'ici chaque écran ≥3 n'affichait QUE l'info de l'écran
-// immédiatement précédent (écran "réciproque" : rien du tout côté injective ; écran "image" :
-// seulement l'intervalle d'injectivité, sans le domaine de l'écran 1 ; écran "bijection" : aucun
-// bloc état actuel du tout). Corrigé en 2 fonctions qui GRANDISSENT d'un écran à l'autre, plus
-// anciennes en premier, jamais un remplacement de la ligne précédente.
-// ============================================================================
-
-/** Une ligne de l'état déjà confirmé à un écran précédent (jamais la saisie brute de l'élève —
- * `exercice.domaine`/`exercice.injective`/`intervalleConfirme` sont tous des valeurs canoniques
- * déjà déterminées par la Couche A/B, jamais recalculées depuis une réponse élève). */
-export interface LigneEtatActuelInjectivite {
-  label: string;
-  latex: string;
-}
-
-/** Lignes accumulées disponibles à partir de l'écran 3 ("réciproque") : domaine (écran 1) puis
- * injectivité (écran 2) — Oui/Non, plus l'intervalle retenu si "Non". */
-export function lignesEtatActuelApresInjective(exercice: ExerciceInjectiviteFonctions, intervalleConfirme: EnsembleReelGuide): LigneEtatActuelInjectivite[] {
-  const lignes: LigneEtatActuelInjectivite[] = [
-    { label: "Domaine (étape 1)", latex: formatEnsembleReelLatex(exercice.domaine) },
-    { label: "f est-elle injective ? (étape 2)", latex: exercice.injective ? "\\text{Oui}" : "\\text{Non}" },
-  ];
-  if (!exercice.injective) {
-    lignes.push({ label: "Intervalle d'injectivité retenu (étape 2)", latex: formatEnsembleReelLatex(intervalleConfirme) });
-  }
-  return lignes;
-}
-
-/** Lignes accumulées disponibles à partir de l'écran 4 ("image") : tout ce qui précède (domaine +
- * injectivité), plus la réciproque confirmée à l'écran 3 — BUG RÉSIDUEL corrigé ici :
- * `lignesEtatActuelApresImage` (ci-dessous) enchaînait directement `lignesEtatActuelApresInjective`
- * + Image, sautant complètement la réciproque (l'écran "réciproque" lui-même l'affichait
- * correctement via `lignesEtatActuelApresInjective`, mais aucun écran suivant ne la reprenait).
- * `formatReciproqueLatex` (ci-dessous, écran 3) fournit la forme canonique — jamais la saisie
- * brute de l'élève, conforme à CLAUDE.md. */
-export function lignesEtatActuelApresReciproque(exercice: ExerciceInjectiviteFonctions, intervalleConfirme: EnsembleReelGuide, cote: CoteBranche): LigneEtatActuelInjectivite[] {
-  return [
-    ...lignesEtatActuelApresInjective(exercice, intervalleConfirme),
-    { label: "Réciproque confirmée (étape 3)", latex: `f^{-1}(x) = ${formatReciproqueLatex(exercice, cote)}` },
-  ];
-}
-
-/** Lignes accumulées disponibles à partir de l'écran 5 ("bijection") : tout ce qui précède
- * (domaine + injectivité + réciproque), plus l'image confirmée à l'écran 4. */
-export function lignesEtatActuelApresImage(exercice: ExerciceInjectiviteFonctions, intervalleConfirme: EnsembleReelGuide, cote: CoteBranche): LigneEtatActuelInjectivite[] {
-  return [
-    ...lignesEtatActuelApresReciproque(exercice, intervalleConfirme, cote),
-    { label: "Image (étape 4)", latex: formatEnsembleReelLatex(exercice.image) },
-  ];
 }
 
 // ============================================================================

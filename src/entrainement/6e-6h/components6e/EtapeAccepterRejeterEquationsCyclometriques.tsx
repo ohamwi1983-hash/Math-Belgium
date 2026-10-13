@@ -2,18 +2,14 @@ import { useState } from "react";
 import type { ExerciceEquationsCyclometriques } from "../core6e/equationsCyclometriques.types";
 import {
   CONSIGNE_GENERALE,
-  MAX_DEN,
   formatCandidatLatex,
-  formatEquationNonCycloLatex,
   formatEquationOriginaleLatex,
   texteAideAcceptRejetNiveau1,
   texteAideAcceptRejetNiveau2,
 } from "../ui6e/formatEquationsCyclometriques";
-import { formatEnsembleReelLatex } from "../ui6e/formatEnsembleReel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "../components/Katex";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -61,11 +57,6 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, estPremi
           </div>
         }
       />
-      <EtatActuelPanel label="CE établie à l'étape 1" latex={formatEnsembleReelLatex(exercice.ce, MAX_DEN)} />
-      {exercice.variante === "arcfonctionsDifferentes" && (
-        <EtatActuelPanel label="Condition de compatibilité des codomaines (étape 2)" latex={formatEnsembleReelLatex(exercice.conditionParasite, MAX_DEN)} />
-      )}
-      <EtatActuelPanel label="Équation non cyclométrique (étape précédente)" latex={formatEquationNonCycloLatex(exercice)} />
       <p className="prompt-text">Pour chaque solution trouvée à l'étape précédente, accepte-la ou rejette-la.</p>
       <div className="liste-morceaux">
         {exercice.candidats.map((cand, i) => (

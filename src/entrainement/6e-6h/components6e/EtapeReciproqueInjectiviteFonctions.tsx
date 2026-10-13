@@ -3,22 +3,13 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonctions.types";
 import type { CoteBranche } from "../moteur6e/typesInjectiviteFonctions";
 import { diagnostiquerReciproque } from "../moteur6e/verificationInjectiviteFonctions";
-import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
-import {
-  CONSIGNE_ECRAN_RECIPROQUE,
-  CONSIGNE_GENERALE,
-  TEXTE_AIDE_RECIPROQUE_NIVEAU1,
-  aideReciproqueNiveau2,
-  formatFLatexAffichage,
-  lignesEtatActuelApresInjective,
-} from "../ui6e/formatInjectiviteFonctions";
+import { CONSIGNE_ECRAN_RECIPROQUE, CONSIGNE_GENERALE, TEXTE_AIDE_RECIPROQUE_NIVEAU1, aideReciproqueNiveau2, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
@@ -26,10 +17,6 @@ interface Props {
   /** Branche mémorisée par la Couche B à la clôture de l'écran précédent (voir en-tête de
    * `moteur6e/typesInjectiviteFonctions.ts`) — détermine la bonne closure de réciproque. */
   coteChoisi: CoteBranche;
-  /** Intervalle d'injectivité retenu (domaine entier si `injective`, une des 2 moitiés sinon) —
-   * pour le bloc "état actuel" ACCUMULÉ (correctif transversal, voir
-   * `ui6e/formatInjectiviteFonctions.ts::lignesEtatActuelApresInjective`), jamais recalculé ici. */
-  intervalleConfirme: EnsembleReelGuide;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -44,11 +31,10 @@ interface Props {
 
 /** Écran 3 — champ libre "f⁻¹(x)=", label à gauche. `App6gen1.tsx` rend ce composant avec
  * `key={phase}`. */
-export function EtapeReciproqueInjectiviteFonctions({ exercice, estPremierEcran, coteChoisi, intervalleConfirme, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReciproqueInjectiviteFonctions({ exercice, estPremierEcran, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquerReciproque(exercice, coteChoisi, texte) : null;
-  const lignesEtatActuel = lignesEtatActuelApresInjective(exercice, intervalleConfirme);
 
   function valider() {
     if (texte.trim() === "") return;
@@ -68,9 +54,6 @@ export function EtapeReciproqueInjectiviteFonctions({ exercice, estPremierEcran,
           </div>
         }
       />
-      {lignesEtatActuel.map((ligne) => (
-        <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
-      ))}
       <p className="prompt-text">{CONSIGNE_ECRAN_RECIPROQUE}</p>
 
       <ApercuExpressionLatex texte={texte} label="f⁻¹(x) =" />

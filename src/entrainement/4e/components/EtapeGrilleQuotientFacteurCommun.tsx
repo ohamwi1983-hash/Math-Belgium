@@ -8,7 +8,6 @@ import { celluleEstErronee, cyclerValeurCellule } from "../ui/cycleValeurCellule
 import { celluleQuotientEstErronee, cyclerValeurCelluleQuotient, grilleQuotientEstComplete } from "../ui/cycleValeurCelluleQuotient";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -17,8 +16,6 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
-  /** Bloc "état actuel" (prompt-corrections-moteur-partage.md, points 1 et 4) — absent/null par défaut : rien de rendu. */
-  etatActuel?: string | null;
   onValider: (reponse: GrilleQuotient) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -43,7 +40,6 @@ export function EtapeGrilleQuotientFacteurCommun({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  etatActuel,
   onValider,
   validation,
 }: Props) {
@@ -89,7 +85,6 @@ export function EtapeGrilleQuotientFacteurCommun({
       <div className="equation-box">
         <Katex expression={formatEnonceFacteurCommunSimplifieLatex(exercice)} block />
       </div>
-      <EtatActuelPanel latex={etatActuel ?? null} />
       <p className="prompt-text">Complète le tableau de signes.</p>
 
       <div className="grille-signes-scroll">

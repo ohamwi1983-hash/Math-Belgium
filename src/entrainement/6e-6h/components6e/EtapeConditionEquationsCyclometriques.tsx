@@ -1,13 +1,11 @@
 import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import type { ExerciceArcfonctionsDifferentes } from "../core6e/equationsCyclometriques.types";
-import { MAX_DEN, CONSIGNE_GENERALE, formatEquationOriginaleLatex, texteAideConditionNiveau1, texteAideConditionNiveau2 } from "../ui6e/formatEquationsCyclometriques";
-import { formatEnsembleReelLatex } from "../ui6e/formatEnsembleReel";
+import { CONSIGNE_GENERALE, formatEquationOriginaleLatex, texteAideConditionNiveau1, texteAideConditionNiveau2 } from "../ui6e/formatEquationsCyclometriques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "../components/Katex";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -30,7 +28,7 @@ interface Props {
  * (`arcfonctionsDifferentes` — jamais rendu pour les 3 autres variantes, voir `phaseApres`).
  * Demande la condition de compatibilité des CODOMAINES des 2 arcfonctions (`exercice.
  * conditionParasite`) — DISTINCTE de la CE de domaine posée à l'écran précédent (`exercice.ce`,
- * rappelée en bloc "état actuel"), et c'est ELLE qui permettra de rejeter les racines parasites à
+ * déjà listée dans le récapitulatif "Ce qu'on sait déjà"), et c'est ELLE qui permettra de rejeter les racines parasites à
  * l'écran final. Réutilise `EnsembleReelGuideBuilder` TEL QUEL, exactement comme l'écran "ce". */
 export function EtapeConditionEquationsCyclometriques({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [condition, setCondition] = useState<EnsembleReelGuide | null>(null);
@@ -52,7 +50,6 @@ export function EtapeConditionEquationsCyclometriques({ exercice, estPremierEcra
           </div>
         }
       />
-      <EtatActuelPanel label="CE établie à l'étape précédente" latex={formatEnsembleReelLatex(exercice.ce, MAX_DEN)} />
       <p className="prompt-text">
         La méthode utilisée à l'étape suivante (application d'une fonction trigonométrique directe des deux côtés) n'est valable que si les CODOMAINES des deux arcfonctions restent compatibles.
         Établis cette condition supplémentaire sous forme de x∈[intervalle].

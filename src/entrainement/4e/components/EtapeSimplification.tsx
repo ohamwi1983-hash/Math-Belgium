@@ -6,7 +6,6 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import { expressionLibreVersLatex } from "../ui/formatExpressionLatex";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { FractionHeader } from "./FractionHeader";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -20,8 +19,6 @@ interface Props {
   recapitulatif: EntreeRecapitulatif[];
   /** Remplace le FractionHeader par défaut — ex: la fraction P2/P1_1 développée pour "L'inconnue au dénominateur" (cas 4a/4b). */
   expressionAffichee?: string;
-  /** Bloc "état actuel" (prompt-corrections-moteur-partage.md, point 1) — absent/null par défaut : rien de rendu. */
-  etatActuel?: string | null;
   /**
    * Remplace la consigne par défaut ("Simplifie la fraction.") — ex: "Simplifie la fraction
    * ci-dessus." pour "L'inconnue au dénominateur" (cas 4a/4b), une fois l'énoncé à deux fractions
@@ -31,7 +28,7 @@ interface Props {
   question?: string;
   /**
    * Bloc "Énoncé" fixe (générateur 6, restructuration en 3 blocs) — absent par défaut :
-   * comportement historique inchangé. Fourni : 3 blocs empilés (enonceFixe → EtatActuelPanel →
+   * comportement historique inchangé. Fourni : 2 blocs empilés (enonceFixe →
    * expressionAffichee, ce dernier omis s'il duplique enonceFixe) — voir EtapeIsolement.tsx.
    */
   enonceFixe?: string;
@@ -50,13 +47,6 @@ interface Props {
 
 /**
  * Étape finale : deux champs libres, vérifiés par produit en croix (section 4 de la spec).
- *
- * Deux encadrés distincts (prompt-generateurs123vague2.md, générateur 3, point 6) — l'énoncé (la
- * fraction d'origine, jamais factorisée) et l'"état actuel" (la fraction déjà factorisée des deux
- * côtés mais pas encore simplifiée, calculée par calculerEtatActuelSimplification et transmise par
- * l'appelant) — plutôt qu'un unique bloc combiné "fraction brute = fraction factorisée" (retiré,
- * voir formatFractionAvecFactorisation), conforme au même patron "énoncé / état actuel" déjà
- * utilisé sur tous les autres écrans de ce générateur.
  */
 export function EtapeSimplification({
   exercice,
@@ -64,7 +54,6 @@ export function EtapeSimplification({
   tentativesMax,
   recapitulatif,
   expressionAffichee,
-  etatActuel,
   question,
   enonceFixe,
   diagnostiquer,
@@ -106,7 +95,6 @@ export function EtapeSimplification({
           <div className="equation-box">
             <Katex expression={enonceFixe} block />
           </div>
-          <EtatActuelPanel latex={etatActuel ?? null} />
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
               <Katex expression={expressionAffichee} block />
@@ -122,7 +110,6 @@ export function EtapeSimplification({
           ) : (
             <FractionHeader exercice={exercice as ExerciceSimplification} />
           )}
-          <EtatActuelPanel latex={etatActuel ?? null} />
         </>
       )}
       <p className="prompt-text">{question ?? "Simplifie la fraction."}</p>

@@ -6,8 +6,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
-import type { EtatActuelLigne } from "./EtapeChampEquationCyclo";
 
 interface AideAvecLatex {
   texte: string;
@@ -18,9 +16,6 @@ interface Props {
   consigneEcran: string;
   equationLatex: string;
   estPremierEcran: boolean;
-  /** Absent (ou vide) quand cet écran est le 1er de sa famille ; sinon 1-2 lignes dérivées de
-   * l'exercice/des écrans précédents déjà confirmés (voir CLAUDE.md, "Bloc 'état actuel'"). */
-  etatActuel?: EtatActuelLigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   placeholder: string;
@@ -45,7 +40,6 @@ export function EtapeListeSolutionsCyclo({
   consigneEcran,
   equationLatex,
   estPremierEcran,
-  etatActuel = [],
   aideNiveau1,
   aideNiveau2,
   placeholder,
@@ -89,9 +83,6 @@ export function EtapeListeSolutionsCyclo({
           </div>
         }
       />
-      {etatActuel.map((ligne) => (
-        <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
-      ))}
       <p className="prompt-text">{consigneEcran}</p>
       <button type="button" className={`btn ${aucune ? "toggle-active" : ""}`} onClick={() => setAucune((v) => !v)}>
         {labelAucune}

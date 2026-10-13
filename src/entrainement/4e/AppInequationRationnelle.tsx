@@ -105,11 +105,7 @@ import { EtapeGrilleQuotientCubique } from "./components/EtapeGrilleQuotientCubi
 import { EtapeIntervalleQuotient } from "./components/EtapeIntervalleQuotient";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifInequationRationnelle } from "./ui/recapitulatifInequationRationnelle";
-import {
-  calculerEtatActuelInequationRationnelle,
-  calculerEtatActuelNumerateurCombine,
-  numerateurCombineEstFactorise,
-} from "./ui/etatActuelInequationRationnelle";
+import { numerateurCombineEstFactorise } from "./ui/etatActuelInequationRationnelle";
 import {
   formatEnonceCombineDenominateurCarreLatex,
   formatEnonceCombineNiveau3Latex,
@@ -635,8 +631,6 @@ export function AppInequationRationnelle() {
   }
 
   const recapitulatif = calculerRecapitulatifInequationRationnelle(etat);
-  const etatActuel = calculerEtatActuelInequationRationnelle(etat);
-  const etatActuelNumerateurCombine = calculerEtatActuelNumerateurCombine(etat);
   /**
    * Bloc "Énoncé" fixe (promptcorrectionsgenerateurs764transversal.md, générateur 6, point 2.1) —
    * l'inéquation de départ complète, identique quel que soit l'écran/la phase courante, passée à
@@ -671,12 +665,11 @@ export function AppInequationRationnelle() {
       : undefined;
 
   /**
-   * Bloc de travail "N(x) = ..." (numérateur combiné isolé), positionné APRÈS le bloc "État
-   * actuel" (`etatActuelNumerateurCombine` ci-dessus — promptcorrectionsgenerateurs76complement.md,
-   * point 2.3.1 : jamais l'inverse). Affiche N(x) sous sa forme factorisée dès que sa propre
-   * factorisation est confirmée, jamais régressé vers la forme développée ensuite (point 2.3.3) —
-   * même primitive `numerateurCombineEstFactorise` que le bloc "État actuel", jamais recalculée
-   * différemment entre les deux. Pour `cubique`, `exercice.numerateur` ne représente que le facteur
+   * Bloc de travail "N(x) = ..." (numérateur combiné isolé). Affiche N(x) sous sa forme factorisée
+   * dès que sa propre factorisation est confirmée, jamais régressé vers la forme développée
+   * ensuite (point 2.3.3) — même primitive `numerateurCombineEstFactorise` que celle qui alimentait
+   * l'ancien bloc "État actuel" (retiré, désormais redondant avec le récapitulatif), jamais
+   * recalculée différemment. Pour `cubique`, `exercice.numerateur` ne représente que le facteur
    * quadratique RESTANT après mise en évidence de x (pas N(x) tout entier, voir
    * core/inequationRationnelle.types.ts) : le préfixe "N(x) =" y serait trompeur, remplacé par un
    * libellé textuel baké directement dans le LaTeX (même convention que formatLigneNumerateurLabel)
@@ -1051,7 +1044,6 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={[formatEquationDenominateur(denominateurFacteurCommun(exerciceFacteurCommun))]}
-              etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(denominateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierDenomReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomReduction(etat))}
@@ -1068,7 +1060,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierDenomCategorie(etat, choix))}
               validation={validation}
             />
@@ -1081,7 +1072,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(denominateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierDenomChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomChamp1(etat))}
@@ -1098,7 +1088,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               aideActivee={etat.aideSimplifierDenomChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierDenomChamp2(etat))}
               onValider={(racines) => terminerEtape(soumettreReponseSimplifierDenomChamp2(etat, racines))}
@@ -1113,7 +1102,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               labelFactorisation="Forme factorisée"
               etapeFactorisationForcee
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(denominateurFacteurCommun(exerciceFacteurCommun), v)}
@@ -1132,7 +1120,6 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={[formatEquationNumerateur(numerateurFacteurCommun(exerciceFacteurCommun))]}
-              etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(numerateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierNumReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumReduction(etat))}
@@ -1149,7 +1136,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierNumCategorie(etat, choix))}
               validation={validation}
             />
@@ -1162,7 +1148,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(numerateurFacteurCommun(exerciceFacteurCommun), v)}
               aideActivee={etat.aideSimplifierNumChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumChamp1(etat))}
@@ -1179,7 +1164,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               aideActivee={etat.aideSimplifierNumChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierNumChamp2(etat))}
               onValider={(racines) => terminerEtape(soumettreReponseSimplifierNumChamp2(etat, racines))}
@@ -1194,7 +1178,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               labelFactorisation="Forme factorisée"
               etapeFactorisationForcee
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(numerateurFacteurCommun(exerciceFacteurCommun), v)}
@@ -1211,7 +1194,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               diagnostiquer={(n, d) => diagnostiquerSimplification(exerciceFacteurCommun.fraction, n, d)}
               aideActivee={etat.aideSimplifierFractionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFraction(etat))}
@@ -1253,7 +1235,6 @@ export function AppInequationRationnelle() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={[blocNumerateurQuadratique(exerciceNumerateurQuadratique)]}
-              etatActuel={etatActuelNumerateurCombine}
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(exerciceNumerateurQuadratique.numerateur, v)}
               aideActivee={etat.aideReductionUtilisee}
               onActiverAide={() => setEtat(activerAideReduction(etat))}
@@ -1270,7 +1251,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuelNumerateurCombine}
               onChoisir={(choix: Categorie) => terminerEtape(soumettreReponseReconnaissance(etat, choix))}
               validation={validation}
             />
@@ -1284,7 +1264,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuelNumerateurCombine}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(exerciceNumerateurQuadratique.numerateur, v)}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
@@ -1301,7 +1280,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuelNumerateurCombine}
               aideActivee={etat.aideChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideChamp2(etat))}
               onValider={(racines) => terminerEtape(soumettreReponseChamp2(etat, racines))}
@@ -1316,7 +1294,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuelNumerateurCombine}
               labelFactorisation="Forme factorisée"
               etapeFactorisationForcee
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exerciceNumerateurQuadratique.numerateur, v)}
@@ -1358,7 +1335,6 @@ export function AppInequationRationnelle() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              etatActuel={etatActuel}
               onValider={(reponse: GrilleQuotient) => terminerEtape(soumettreReponseGrille(etat, reponse))}
               validation={validation}
             />

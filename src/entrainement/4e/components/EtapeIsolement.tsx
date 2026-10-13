@@ -7,7 +7,6 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -31,16 +30,14 @@ interface Props {
    * à nommer).
    */
   label?: string | null;
-  /** Bloc "état actuel" (prompt-corrections-moteur-partage.md, point 1) — absent/null par défaut : rien de rendu. */
-  etatActuel?: string | null;
   /**
    * Bloc "Énoncé" fixe (promptcorrectionsgenerateurs764transversal.md, générateur 6, point 2.1) —
    * absent par défaut : comportement historique strictement inchangé (`expressionAffichee` reste le
-   * seul bloc, rendu en premier, suivi de l'état actuel). Fourni : restructure en 3 blocs empilés —
-   * `enonceFixe` (l'énoncé de départ complet, fixe) en premier, puis `EtatActuelPanel`, puis
-   * `expressionAffichee` en dernier (le "bloc de travail" de cette étape) — omis automatiquement
-   * s'il est littéralement identique à `enonceFixe` (aucun bloc de travail distinct sur cette
-   * étape, ex. l'étape "isoler" elle-même, où travailler consiste justement à transformer l'énoncé).
+   * seul bloc). Fourni : restructure en 2 blocs empilés — `enonceFixe` (l'énoncé de départ complet,
+   * fixe) en premier, puis `expressionAffichee` en dernier (le "bloc de travail" de cette étape) —
+   * omis automatiquement s'il est littéralement identique à `enonceFixe` (aucun bloc de travail
+   * distinct sur cette étape, ex. l'étape "isoler" elle-même, où travailler consiste justement à
+   * transformer l'énoncé).
    */
   enonceFixe?: string;
   /**
@@ -69,7 +66,6 @@ export function EtapeIsolement({
   expressionAffichee,
   question,
   label,
-  etatActuel,
   enonceFixe,
   diagnostiquer,
   aideActivee,
@@ -96,7 +92,6 @@ export function EtapeIsolement({
           <div className="equation-box">
             <Katex expression={enonceFixe} block />
           </div>
-          <EtatActuelPanel latex={etatActuel ?? null} />
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
               <Katex expression={expressionAffichee} block />
@@ -108,7 +103,6 @@ export function EtapeIsolement({
           <div className="equation-box">
             <Katex expression={expressionParDefaut()} block />
           </div>
-          <EtatActuelPanel latex={etatActuel ?? null} />
         </>
       )}
       <p className="prompt-text">{question ?? "Réécris cette équation sous la forme ax² + bx + c = 0."}</p>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import type { Categorie, Exercice } from "./core/generateur.types";
-import type { ExerciceCas4a, ExerciceCas4b, ExerciceEquationRationnelle } from "./core/equationRationnelle.types";
+import type { ExerciceEquationRationnelle } from "./core/equationRationnelle.types";
 import type { ExerciceSimplification, PolynomeLineaire } from "./core/simplification.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -54,7 +54,6 @@ import { calculerRecapitulatifEquationRationnelle } from "./ui/recapitulatifEqua
 import {
   formatEquationRationnelleLatex,
   formatEquationRationnelleLatexApresSimplification,
-  formatFractionGaucheFactorisee,
   formatFractionReduiteOuConstante,
   formatRappelEquationRationnelle,
 } from "./ui/formatEquationRationnelle";
@@ -512,7 +511,6 @@ export function AppEquationRationnelle() {
           ) : etat.phase === "simplifierFraction" ? (
             <EtapeSimplification
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
-              etatActuel={formatFractionGaucheFactorisee(etat.exerciceCourant as ExerciceCas4a | ExerciceCas4b)}
               question="Simplifie la fraction ci-dessus."
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}

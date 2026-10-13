@@ -79,15 +79,6 @@ import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
-/** Convertit une aide `{texte, latex}` (dont le `latex` est en pratique toujours non-null pour les
- * fonctions utilisées ici) en 1 ligne du bloc "état actuel" — jamais la saisie brute de l'élève,
- * toujours la vérité terrain déjà confirmée à l'écran précédent (voir CLAUDE.md, "Bloc 'état
- * actuel'"). Réutilise TELLES QUELLES les fonctions d'aide niveau 2 déjà exactes (substituées, non
- * simplifiées) des écrans précédents plutôt que de dupliquer leur calcul. */
-function ligneEtatActuel(label: string, aide: { latex: string | null }): { label: string; latex: string }[] {
-  return aide.latex ? [{ label, latex: aide.latex }] : [];
-}
-
 function nouvelleSession(): EtatSessionDeriveesCyclometriques {
   return demarrerSessionDeriveesCyclometriques(REGLAGES_DEMO, genererExerciceDeriveesCyclometriques);
 }
@@ -229,7 +220,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) — utilise le u(x) et le u'(x) corrects, simplifie si possible."
                   fonctionLatex={formatFonctionALatex(exercice)}
-                  etatActuel={ligneEtatActuel("u(x) et u'(x), établis à l'étape précédente", texteAideADeriveeUNiveau2(exercice))}
                   aideNiveau1={texteAideADeriveeFinaleNiveau1(exercice)}
                   aideNiveau2={texteAideADeriveeFinaleNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -267,7 +257,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive arcfonction(v(x)) séparément."
                   fonctionLatex={formatFonctionBLatex(exercice)}
-                  etatActuel={ligneEtatActuel("u'(x), établi à l'étape précédente", texteAideBDeriveeUNiveau2(exercice))}
                   aideNiveau1={{ texte: texteAideBDeriveeArcNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideBDeriveeArcNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -286,10 +275,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la règle du produit."
                   fonctionLatex={formatFonctionBLatex(exercice)}
-                  etatActuel={[
-                    ...ligneEtatActuel("u'(x), étape 1", texteAideBDeriveeUNiveau2(exercice)),
-                    ...ligneEtatActuel("[arcfonction(v(x))]', étape précédente", texteAideBDeriveeArcNiveau2(exercice)),
-                  ]}
                   aideNiveau1={{ texte: texteAideBDeriveeFinaleNiveau1(), latex: null }}
                   aideNiveau2={texteAideBDeriveeFinaleNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -327,7 +312,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive le dénominateur."
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  etatActuel={ligneEtatActuel("N'(x), établi à l'étape précédente", texteAideCNumerateurNiveau2(exercice))}
                   aideNiveau1={{ texte: texteAideCDenominateurNiveau1(), latex: null }}
                   aideNiveau2={texteAideCDenominateurNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -346,10 +330,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la formule du quotient."
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  etatActuel={[
-                    ...ligneEtatActuel("N'(x), étape 1", texteAideCNumerateurNiveau2(exercice)),
-                    ...ligneEtatActuel("D'(x), étape précédente", texteAideCDenominateurNiveau2(exercice)),
-                  ]}
                   aideNiveau1={{ texte: texteAideCDeriveeFinaleNiveau1(), latex: null }}
                   aideNiveau2={texteAideCDeriveeFinaleNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -387,7 +367,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive le dénominateur."
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  etatActuel={ligneEtatActuel("N'(x), établi à l'étape précédente", texteAideDNumerateurNiveau2(exercice))}
                   aideNiveau1={{ texte: texteAideDDenominateurNiveau1(), latex: null }}
                   aideNiveau2={texteAideDDenominateurNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -406,10 +385,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la formule du quotient — résultat BRUT, ne simplifie pas encore."
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  etatActuel={[
-                    ...ligneEtatActuel("N'(x), étape 1", texteAideDNumerateurNiveau2(exercice)),
-                    ...ligneEtatActuel("D'(x), étape précédente", texteAideDDenominateurNiveau2(exercice)),
-                  ]}
                   aideNiveau1={{ texte: texteAideDBrutNiveau1(), latex: null }}
                   aideNiveau2={texteAideDBrutNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -428,11 +403,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Simplifie le résultat précédent grâce à l'identité arcsin(u)+arccos(u)=π/2."
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  etatActuel={[
-                    ...ligneEtatActuel("N'(x), étape 1", texteAideDNumerateurNiveau2(exercice)),
-                    ...ligneEtatActuel("D'(x), étape 2", texteAideDDenominateurNiveau2(exercice)),
-                    ...ligneEtatActuel("f'(x) BRUT, établi à l'étape précédente", texteAideDBrutNiveau2(exercice)),
-                  ]}
                   aideNiveau1={texteAideDSimplifieeNiveau1()}
                   aideNiveau2={texteAideDSimplifieeNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -470,7 +440,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la chaîne extérieure."
                   fonctionLatex={formatFonctionELatex(exercice)}
-                  etatActuel={ligneEtatActuel("w'(x), établi à l'étape précédente", texteAideEDeriveeInterneNiveau2(exercice))}
                   aideNiveau1={{ texte: texteAideEDeriveeFinaleNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideEDeriveeFinaleNiveau2(exercice)}
                   placeholder={placeholderGenerique}
@@ -508,7 +477,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Donne la forme finale simplifiée via l'identité trigonométrique adéquate."
                   fonctionLatex={formatFonctionFLatex(exercice)}
-                  etatActuel={ligneEtatActuel("f'(x) BRUT, établi à l'étape précédente", texteAideFBruteNiveau2(exercice))}
                   aideNiveau1={texteAideFSimplifieeNiveau1()}
                   aideNiveau2={{ texte: texteAideFSimplifieeNiveau2(exercice), latex: null }}
                   placeholder={placeholderGenerique}
@@ -546,10 +514,6 @@ export function App6gen4() {
                   estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x)."
                   fonctionLatex={formatFonctionGLatex(exercice)}
-                  etatActuel={ligneEtatActuel(
-                    exercice.sousCas === "h" ? "v'(x), établi à l'étape précédente" : "u'(x), établi à l'étape précédente",
-                    texteAideGDeriveeInterneNiveau2(exercice),
-                  )}
                   aideNiveau1={{ texte: texteAideGDeriveeFinaleNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideGDeriveeFinaleNiveau2(exercice)}
                   placeholder={placeholderGenerique}
