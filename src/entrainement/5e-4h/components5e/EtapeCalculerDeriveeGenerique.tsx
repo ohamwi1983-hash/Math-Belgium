@@ -9,11 +9,13 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelEtudierFonction } from "./EtatActuelEtudierFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
+  estPremierEcran: boolean;
   phase: "calculerFPrime" | "calculerFSeconde";
   /** "f'(x)=" ou "f''(x)=" — label du champ de saisie. */
   labelChamp: string;
@@ -40,7 +42,7 @@ interface Props {
  * fidèlement, jamais réinventé — voir le rapport de tâche pour la justification complète de cet
  * écart documenté.
  */
-export function EtapeCalculerDeriveeGenerique({ exercice, phase, labelChamp, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCalculerDeriveeGenerique({ exercice, estPremierEcran, phase, labelChamp, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -56,12 +58,17 @@ export function EtapeCalculerDeriveeGenerique({ exercice, phase, labelChamp, ten
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDIER_FONCTION}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinaleEtudierFonction()} />
       <EtatActuelEtudierFonction exercice={exercice} phase={ecran} />
       <p className="prompt-text">{consigneEcranEtudierFonction(ecran)}</p>

@@ -9,8 +9,10 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   exercice: ExerciceFonctionsCyclometriques;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -34,7 +36,7 @@ interface Props {
  * "Valider" présent y compris pour la partie à choix. Pas de bloc "état actuel" : écran UNIQUE, rien
  * à dériver d'un écran précédent (voir `moteur6e/typesFonctionsCyclometriques.ts`).
  */
-export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFonctionsCyclometriques({ estPremierEcran, exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -51,10 +53,15 @@ export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, te
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatExpressionLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatExpressionLatex(exercice)} />
+          </div>
+        }
+      />
 
       <div className="options-grid-compact">
         <button

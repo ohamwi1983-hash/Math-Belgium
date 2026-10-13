@@ -7,10 +7,12 @@ import type { AideAvecLatex } from "../ui6e/formatAffixesRacines";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
@@ -40,7 +42,7 @@ interface Props {
  * lignes (largement suffisant : la cible n'a jamais plus de 2 valeurs, la marge sert seulement à
  * corriger une saisie sans tout effacer). `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => ["", ""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(lignes) : null;
@@ -63,14 +65,19 @@ export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, etat
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

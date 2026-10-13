@@ -8,9 +8,11 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   question: QuestionComposeeGraphique;
+  estPremierEcran: boolean;
   /** Bloc "données" persistant (`PaireGraphesComposeeGraphique`, les 2 courbes) — rendu APRÈS la
    * consigne générale (A.2/A.9), la question spécifique venant ENSUITE (E.3 : "sous le deuxième
    * graphique, après les deux graphiques"). */
@@ -40,7 +42,7 @@ interface Props {
  * aucun clavier restreint imposé (E.4) — jamais un filtrage de caractères, la validation se fait
  * entièrement à la soumission (`diagnostiquer`).
  */
-export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeQuestionComposeeGraphique({ question, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   // `null` tant que l'élève n'a pas encore cliqué — aucun choix pré-sélectionné au début de chaque
   // question (retour utilisateur direct : "Existe" restait sélectionné par défaut).
   const [resultatExiste, setResultatExiste] = useState<boolean | null>(null);
@@ -70,8 +72,7 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE}</p>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_COMPOSEE_GRAPHIQUE} blocDonnees={donnees} />
       <p className="prompt-text">{consigneQuestion(question)}</p>
       <div className="options-grid">
         <button type="button" className={`btn ${resultatExiste === false ? "toggle-active" : ""}`} onClick={() => setResultatExiste(false)}>

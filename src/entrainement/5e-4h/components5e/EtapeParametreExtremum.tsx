@@ -67,12 +67,17 @@ export function EtapeParametreExtremum({ exercice, estPremierEcran, phase, tenta
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EXTREMUMS}</p>
-      <div className="equation-box equation-box-termes">
-        {decouperEquationLongueLatex(formatFonctionSourceLatex(exercice)).map((morceau, i) => (
-          <Katex key={i} expression={morceau} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EXTREMUMS}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {decouperEquationLongueLatex(formatFonctionSourceLatex(exercice)).map((morceau, i) => (
+              <Katex key={i} expression={morceau} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhaseExtremums(phase)}</p>
       {phase === "poserEquation" ? (
         <>

@@ -11,9 +11,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { DoubleComboboxIntervalle } from "./DoubleComboboxIntervalle";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
+  estPremierEcran: boolean;
   /** Intervalle d'injectivité retenu (écran 2) — pour le bloc "état actuel" ACCUMULÉ (correctif
    * transversal, voir `ui6e/formatInjectiviteFonctions.ts::lignesEtatActuelApresImage`), jamais
    * recalculé ici. `exercice.image` (écran 4) est déjà disponible directement sur `exercice`. */

@@ -5,12 +5,14 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelComparaisonSuites } from "./EtatActuelComparaisonSuites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceComparaisonSuites;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,6 +34,7 @@ interface Props {
  * (année/mois) — les 2 doivent être corrects (piège explicite de la spec : oublier de traduire). */
 export function EtapeConclusionComparaisonSuites({
   exercice,
+  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -63,8 +66,11 @@ export function EtapeConclusionComparaisonSuites({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <EtatActuelComparaisonSuites exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={<EtatActuelComparaisonSuites exercice={exercice} />}
+      />
       <p className="prompt-text">{consigneConclusion(exercice)}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

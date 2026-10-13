@@ -6,6 +6,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -21,6 +22,7 @@ const OPTIONS: { id: ReponseCroissanceStandard["type"]; label: string; requiertP
 
 interface Props {
   enonceLatex: string;
+  estPremierEcran: boolean;
   consigneEcran: string;
   /** Rappel de domaine + limites + asymptotes déjà confirmés — voir
    * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
@@ -42,7 +44,7 @@ interface Props {
 /** Écran "croissance", forme "standard" — familles A/B/D (catégorie + position d'extremum
  * optionnelle, même contrat `CibleCroissance` que `6gen11`). Voir `EtapeCroissanceGrilleCLog.tsx`
  * pour la famille C. `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCroissanceStandardLog({ enonceLatex, estPremierEcran, consigneEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<ReponseCroissanceStandard["type"] | null>(null);
   const [position, setPosition] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -57,10 +59,15 @@ export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, etatAct
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       <div className="etat-actuel-box">
         <div className="etat-actuel-box-termes">
           {etatActuel.map((frag, i) => (

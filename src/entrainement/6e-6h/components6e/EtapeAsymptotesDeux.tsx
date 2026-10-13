@@ -7,6 +7,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionExponentielle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -38,6 +39,7 @@ function GroupeAsymptote({ label, etat, erreur, onChange }: { label: string; eta
 }
 
 interface Props {
+  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   labels: DirectionLabel[];
@@ -63,7 +65,7 @@ interface Props {
  * `core6e/etudeFonctionExponentielle.types.ts`). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. `etatActuel` rappelle le domaine ET les limites CONFIRMÉS aux 2 écrans
  * précédents (voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeAsymptotesDeux({ enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeAsymptotesDeux({ estPremierEcran, enonceLatex, consigneEcran, labels, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const VIDE: ReponseAsymptoteDirection = { existe: false, texte: "" };
   const [plusInfini, setPlusInfini] = useState<ReponseAsymptoteDirection & { touche?: boolean }>({ ...VIDE });
   const [moinsInfini, setMoinsInfini] = useState<ReponseAsymptoteDirection & { touche?: boolean }>({ ...VIDE });
@@ -82,10 +84,15 @@ export function EtapeAsymptotesDeux({ enonceLatex, consigneEcran, labels, etatAc
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

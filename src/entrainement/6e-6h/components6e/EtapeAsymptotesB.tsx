@@ -38,7 +38,7 @@ interface Props {
  * horizontale (texte libre, commune aux deux infinis). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. `etatActuel` rappelle le domaine ET les limites CONFIRMÉS aux 2 écrans
  * précédents (voir `ui6e/formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeAsymptotesB({ enonceLatex, p, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeAsymptotesB({ estPremierEcran, enonceLatex, p, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cote, setCote] = useState<"plus" | "moins" | null>(null);
   const [texteHorizontale, setTexteHorizontale] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -52,10 +52,15 @@ export function EtapeAsymptotesB({ enonceLatex, p, etatActuel, aideNiveau1, aide
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

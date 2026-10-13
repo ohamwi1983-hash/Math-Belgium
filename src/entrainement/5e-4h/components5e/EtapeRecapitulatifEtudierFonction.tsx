@@ -13,10 +13,12 @@ import {
 } from "../ui5e/formatEtudierFonction";
 import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { TableauEtudeLocaleRecap } from "./TableauEtudeLocaleRecap";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
+  estPremierEcran: boolean;
   onContinuer: () => void;
 }
 
@@ -31,7 +33,7 @@ interface Props {
  * erreur sur ce qui est réellement vrai à chaque zone. Aucune vérification ici (bouton "Continuer"
  * simple, jamais un `Valider`).
  */
-export function EtapeRecapitulatifEtudierFonction({ exercice, onContinuer }: Props) {
+export function EtapeRecapitulatifEtudierFonction({ exercice, estPremierEcran, onContinuer }: Props) {
   const attenduFPrime = tableauFPrimeAttendu(exercice);
   const attenduFSeconde = tableauFSecondeAttendu(exercice);
   const enteteFPrime = formatEnteteColonnesTableauEtudierFonction(exercice, attenduFPrime.colonnes, "fprime");
@@ -40,12 +42,17 @@ export function EtapeRecapitulatifEtudierFonction({ exercice, onContinuer }: Pro
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDIER_FONCTION}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinaleEtudierFonction()} />
 
       <h3>Synthèse de l'étude</h3>

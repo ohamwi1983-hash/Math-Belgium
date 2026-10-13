@@ -4,6 +4,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -18,6 +19,7 @@ interface Option {
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
+  estPremierEcran: boolean;
   optionGauche: Option;
   optionDroite: Option;
   aideNiveau1: AideAvecLatex;
@@ -39,7 +41,7 @@ interface Props {
  * PARAMÉTRÉS par l'appelant. `.btn.toggle-active`, jamais `.btn-primary` (réservé à "Valider") —
  * voir CLAUDE.md. `App6gen15.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixDeuxIneqLog({ consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixDeuxIneqLog({ consigneEcran, enonceLatex, estPremierEcran, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -50,10 +52,15 @@ export function EtapeChoixDeuxIneqLog({ consigneEcran, enonceLatex, optionGauche
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneEcran}</p>
 
       <div className="options-grid-compact">

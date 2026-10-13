@@ -8,9 +8,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ const OPTIONS: ConclusionIntersectionDroites[] = ["secantes", "paralleles_distin
  * `EtapeClassificationPositionDroitePlan.tsx`. Aide DIFFÉRENCIÉE selon la combinaison de formes
  * d'entrée des deux droites (`promptgen48modifications.md`, point 3).
  */
-export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDiagnosticIntersectionDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<ConclusionIntersectionDroites | null>(null);
   const max = NIVEAU_AIDE_MAX_DIAGNOSTIC;
   const erronee = tentativesUtilisees > 0;
@@ -37,11 +39,16 @@ export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilise
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_INTERSECTION}</p>
-      <div className="equation-box">
-        <Katex expression={ligneD1} block />
-        <Katex expression={ligneD2} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_INTERSECTION}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={ligneD1} block />
+            <Katex expression={ligneD2} block />
+          </div>
+        }
+      />
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneDiagnostic()} />
       </p>

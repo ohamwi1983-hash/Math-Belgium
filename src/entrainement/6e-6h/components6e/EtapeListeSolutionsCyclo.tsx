@@ -5,6 +5,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatEquationsCyclometriques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import type { EtatActuelLigne } from "./EtapeChampEquationCyclo";
 
@@ -16,6 +17,7 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   equationLatex: string;
+  estPremierEcran: boolean;
   /** Absent (ou vide) quand cet écran est le 1er de sa famille ; sinon 1-2 lignes dérivées de
    * l'exercice/des écrans précédents déjà confirmés (voir CLAUDE.md, "Bloc 'état actuel'"). */
   etatActuel?: EtatActuelLigne[];
@@ -42,6 +44,7 @@ interface Props {
 export function EtapeListeSolutionsCyclo({
   consigneEcran,
   equationLatex,
+  estPremierEcran,
   etatActuel = [],
   aideNiveau1,
   aideNiveau2,
@@ -77,10 +80,15 @@ export function EtapeListeSolutionsCyclo({
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={equationLatex} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={equationLatex} />
+          </div>
+        }
+      />
       {etatActuel.map((ligne) => (
         <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
       ))}

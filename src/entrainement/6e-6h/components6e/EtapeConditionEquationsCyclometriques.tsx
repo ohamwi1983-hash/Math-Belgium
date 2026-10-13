@@ -9,9 +9,11 @@ import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "../components/Katex";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceArcfonctionsDifferentes;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +32,7 @@ interface Props {
  * conditionParasite`) — DISTINCTE de la CE de domaine posée à l'écran précédent (`exercice.ce`,
  * rappelée en bloc "état actuel"), et c'est ELLE qui permettra de rejeter les racines parasites à
  * l'écran final. Réutilise `EnsembleReelGuideBuilder` TEL QUEL, exactement comme l'écran "ce". */
-export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConditionEquationsCyclometriques({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [condition, setCondition] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -41,10 +43,15 @@ export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtil
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationOriginaleLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationOriginaleLatex(exercice)} />
+          </div>
+        }
+      />
       <EtatActuelPanel label="CE établie à l'étape précédente" latex={formatEnsembleReelLatex(exercice.ce, MAX_DEN)} />
       <p className="prompt-text">
         La méthode utilisée à l'étape suivante (application d'une fonction trigonométrique directe des deux côtés) n'est valable que si les CODOMAINES des deux arcfonctions restent compatibles.
