@@ -237,6 +237,7 @@ export function App6gen11() {
               {etat.phase === "croissance" && (
                 <EtapeCroissance
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
                   aideNiveau1={aideCroissanceNiveau1(exercice)}
