@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeComplete } from "./generateurs5e/etudeComplete/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -132,6 +132,14 @@ export function App5gen24() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -156,6 +164,7 @@ export function App5gen24() {
             exercice={exercice}
             phase={phase}
             etat={etat}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -173,6 +182,7 @@ interface EcranProps {
   exercice: ExerciceEtudeComplete;
   phase: PhaseEtudeComplete;
   etat: EtatSessionEtudeComplete;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -181,7 +191,18 @@ interface EcranProps {
   validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
+function EcranCourant({
+  exercice,
+  phase,
+  etat,
+  estPremierEcran,
+  tentativesUtilisees,
+  tentativesMax,
+  cleEcran,
+  terminerEtape,
+  setEtat,
+  validation,
+}: EcranProps) {
   const niveauAideMax = niveauAideMaxEtudeComplete();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
   const propsCommunes = { tentativesUtilisees, tentativesMax, niveauAide: etat.niveauAide, niveauAideMax, onActiverAide, validation };
@@ -211,6 +232,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       <EtapeListeNombresEtudeComplete
         key={cleEcran}
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(v) => terminerEtape(soumettreReponseDomaine(etat, v))}
         diagnostiquer={(v) => diagnostiquerEnsembleNombres(v, cibles)}
@@ -223,6 +245,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       <EtapeTypeLimiteEtudeComplete
         key={cleEcran}
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(choix) => terminerEtape(soumettreReponseTypeLimite(etat, choix))}
         diagnostiquer={(choix) => exercice.exclusions.map((e, i) => verifierTypeLimite(choix[i], e.type === "pointVide"))}
@@ -270,6 +293,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       <EtapeConclusionPointVideEtudeComplete
         key={cleEcran}
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponsePointVideConclusion(etat, reponse))}
       />
@@ -301,6 +325,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       <EtapeAVEtudeComplete
         key={cleEcran}
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponseAV(etat, reponse))}
         diagnostiquer={(v) => diagnostiquerEnsembleEquationsAV(v, cibles)}
@@ -405,6 +430,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       <EtapeAsymptoteInfiniEtudeComplete
         key={cleEcran}
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponseAsymptoteInfini(etat, reponse))}
         diagnostiquer={(reponse) => ({ moins: blocCorrect(reponse.moins), plus: blocCorrect(reponse.plus) })}
@@ -418,6 +444,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       <EtapeCasSpecialEtudeComplete
         key={cleEcran}
         exercice={exercice}
+        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponseCasSpecial(etat, reponse))}
         diagnostiquer={(reponse) => diagnostiquerCasSpecial(reponse, x, y)}

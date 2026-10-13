@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesDefinies } from "./generateurs6e/integralesDefinies";
 import type { IdVarianteIntegralesDefinies } from "./generateurs6e/integralesDefinies";
@@ -65,6 +65,13 @@ export function App6gen25() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
 
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) — même patron que 6gen23, voir
   // son en-tête `App6gen23.tsx`.
@@ -89,6 +96,7 @@ export function App6gen25() {
     : null;
 
   const aideCommun = {
+    estPremierEcran,
     tentativesUtilisees: etat.etapeCourante.tentativesUtilisees,
     tentativesMax: etat.reglages.tentativesMax,
     niveauAide: etat.niveauAide,

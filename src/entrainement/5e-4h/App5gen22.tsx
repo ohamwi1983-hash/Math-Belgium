@@ -163,6 +163,7 @@ function EcranCourant({
         <EtapeComportementsLimites
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           onValider={(textes) => terminerEtape(soumettreReponseCompleterLimites(etat, textes))}
@@ -178,6 +179,7 @@ function EcranCourant({
         <EtapeEquationsAsymptotes
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           onValider={(textes) => terminerEtape(soumettreReponseNommerAsymptotes(etat, textes))}

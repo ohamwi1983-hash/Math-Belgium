@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceFonctionDerivee } from "./generateurs5e/fonctionDerivee/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -107,6 +107,14 @@ export function App5gen27() {
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
 
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -130,6 +138,7 @@ export function App5gen27() {
           <EcranCourant
             exercice={exercice}
             etat={etat}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -146,6 +155,7 @@ export function App5gen27() {
 interface EcranProps {
   exercice: ExerciceFonctionDerivee;
   etat: EtatSessionFonctionDerivee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -154,7 +164,17 @@ interface EcranProps {
   validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
+function EcranCourant({
+  exercice,
+  etat,
+  estPremierEcran,
+  tentativesUtilisees,
+  tentativesMax,
+  cleEcran,
+  terminerEtape,
+  setEtat,
+  validation,
+}: EcranProps) {
   const niveauAideMax = niveauAideMaxFonctionDerivee();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 

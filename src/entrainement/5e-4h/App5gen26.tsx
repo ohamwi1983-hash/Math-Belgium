@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDefinitionDerivee } from "./generateurs5e/definitionDerivee/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -95,6 +95,14 @@ export function App5gen26() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -119,6 +127,7 @@ export function App5gen26() {
             exercice={exercice}
             phase={phase}
             etat={etat}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -136,6 +145,7 @@ interface EcranProps {
   exercice: ExerciceDefinitionDerivee;
   phase: EcranDefinitionDerivee;
   etat: EtatSessionDefinitionDerivee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -144,7 +154,18 @@ interface EcranProps {
   validation: ValidationEtapeProps | null;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
+function EcranCourant({
+  exercice,
+  phase,
+  etat,
+  estPremierEcran,
+  tentativesUtilisees,
+  tentativesMax,
+  cleEcran,
+  terminerEtape,
+  setEtat,
+  validation,
+}: EcranProps) {
   const niveauAideMax = niveauAideMaxDefinitionDerivee();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
   const a = exercice.a;
@@ -155,6 +176,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
         <EtapeDevelopperDerivee
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -174,6 +196,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           ecran="quotient"
           labelChamp={labelQuotient(a)}
           placeholder="ex : 2*a+h"
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -193,6 +216,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           ecran="limite"
           labelChamp={labelLimite(a)}
           placeholder="ex : 3"
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
