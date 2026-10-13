@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceParametreNorme } from "../core/normeDistance.types";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { PLACEHOLDER_SOLUTION_X, TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE, formatDiscriminantLatex, formatEquationReduiteParametreNormeLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
+import { PLACEHOLDER_SOLUTION_X, TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE, formatDiscriminantLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -26,9 +26,9 @@ interface Props {
 
 /**
  * Écran "résolution" — variante 5, écran 2 (dernier) : consigne générale + bloc de données
- * redondant (vecteur v et sa norme cible) + le bloc violet existant, devenu conceptuellement le
- * bloc "état actuel" (aucun changement structurel, juste une clarification de rôle —
- * `promptgen26refontecomplete.md`, Partie C). Interface "add-as-needed" (0, 1 ou 2 champs selon le
+ * redondant (vecteur v et sa norme cible) — l'équation réduite, confirmée à l'écran précédent, est
+ * désormais listée dans le récapitulatif "Ce qu'on sait déjà" plutôt que répétée ici
+ * (`promptgen26refontecomplete.md`, Partie C). Interface "add-as-needed" (0, 1 ou 2 champs selon le
  * nombre de solutions réelles, jamais un nombre fixe) — même patron que `EtapeZerosAlgebrique.tsx`,
  * plafonné à 2 champs (jamais plus, cette équation ne peut structurellement pas avoir plus de 2
  * solutions réelles). Aide à 2 niveaux : rappel de la méthode (discriminant), puis la valeur du
@@ -83,9 +83,6 @@ export function EtapeResolutionParametreNorme({ exercice, estPremierEcran, tenta
           </div>
         }
       />
-      <div className="equation-box">
-        <Katex expression={formatEquationReduiteParametreNormeLatex(exercice)} />
-      </div>
       <p className="prompt-text">Résous cette équation.</p>
 
       <div className="options-grid">

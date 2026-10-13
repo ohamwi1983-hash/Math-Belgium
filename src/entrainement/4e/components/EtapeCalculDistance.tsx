@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { ExerciceDistance } from "../core/normeDistance.types";
 import { diagnostiquerCalculDistance } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_DISTANCE, FORMULE_GENERALE_DISTANCE_LATEX, PLACEHOLDER_NORME, formatTermesDonneesDistanceLatex, formatVecteurLatex, formuleSubstitueeNormeLatex } from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_DISTANCE, FORMULE_GENERALE_DISTANCE_LATEX, PLACEHOLDER_NORME, formatTermesDonneesDistanceLatex, formuleSubstitueeNormeLatex } from "../ui/formatNormeDistance";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -23,10 +22,10 @@ interface Props {
 }
 
 /**
- * Écran "calcul" — variante 2, écran 2 (dernier) : consigne générale + bloc de données redondant +
- * bloc "état actuel" (AB⃗ déjà confirmé à l'écran précédent, inchangé) + un champ de texte libre
- * pour `dist(A,B)` (label reformulé, fraction/irrationnel irréductible acceptés —
- * `promptgen26refontecomplete.md`, Partie F). Aide à 2 niveaux, texte seul.
+ * Écran "calcul" — variante 2, écran 2 (dernier) : consigne générale + bloc de données redondant
+ * (AB⃗, déjà confirmé à l'écran précédent et listé dans le récapitulatif "Ce qu'on sait déjà") +
+ * un champ de texte libre pour `dist(A,B)` (label reformulé, fraction/irrationnel irréductible
+ * acceptés — `promptgen26refontecomplete.md`, Partie F). Aide à 2 niveaux, texte seul.
  */
 export function EtapeCalculDistance({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
@@ -49,7 +48,6 @@ export function EtapeCalculDistance({ exercice, estPremierEcran, tentativesUtili
           </div>
         }
       />
-      <EtatActuelPanel latex={formatVecteurLatex(`${exercice.labelA}${exercice.labelB}`, exercice.vecteurAB)} />
       <p className="prompt-text">Calcule la distance entre ces deux points.</p>
 
       <div className="field field-inline">

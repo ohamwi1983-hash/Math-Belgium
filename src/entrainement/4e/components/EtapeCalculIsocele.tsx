@@ -3,9 +3,8 @@ import type { ExerciceIsocele } from "../core/normeDistance.types";
 import { evaluerCalculIsocele } from "../moteur/verificationNormeDistance";
 import type { ReponseCalculIsocele } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_LONGUEUR, formatAideNormeABNiveau1Latex, formatAideNormeABNiveau2Latex, formatEtatActuelVecteursTriangleLatex, formatLabelNormeLatex, formatTermesDonneesIsoceleLatex } from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_ISOCELE, PLACEHOLDER_LONGUEUR, formatAideNormeABNiveau1Latex, formatAideNormeABNiveau2Latex, formatLabelNormeLatex, formatTermesDonneesIsoceleLatex } from "../ui/formatNormeDistance";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -24,10 +23,11 @@ interface Props {
 }
 
 /**
- * Écran "calcul" — variante 4, écran 2 : consigne générale + bloc de données redondant + bloc "état
- * actuel" (les 3 vecteurs confirmés à l'écran 1) + 3 champs de texte libre (fraction/irrationnel
- * irréductible acceptés), labels en notation norme ($\|\vec{AB}\|=$, remplace l'ancien "AB=").
- * Aide à 2 niveaux, limitée à $\vec{AB}$ — `promptgen26refontecomplete.md`, Partie D.
+ * Écran "calcul" — variante 4, écran 2 : consigne générale + bloc de données redondant (les 3
+ * vecteurs confirmés à l'écran 1, listés dans le récapitulatif "Ce qu'on sait déjà") + 3 champs de
+ * texte libre (fraction/irrationnel irréductible acceptés), labels en notation norme
+ * ($\|\vec{AB}\|=$, remplace l'ancien "AB="). Aide à 2 niveaux, limitée à $\vec{AB}$ —
+ * `promptgen26refontecomplete.md`, Partie D.
  */
 export function EtapeCalculIsocele({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [ab, setAb] = useState("");
@@ -43,8 +43,6 @@ export function EtapeCalculIsocele({ exercice, estPremierEcran, tentativesUtilis
   const apresEchec = tentativesUtilisees > 0;
   const evaluation = apresEchec ? evaluerCalculIsocele(exercice, construireReponse()) : null;
 
-  const etatActuel = formatEtatActuelVecteursTriangleLatex(exercice.labelA, exercice.labelB, exercice.labelC, exercice.vecteurAB, exercice.vecteurAC, exercice.vecteurBC);
-
   return (
     <div>
       <EnTeteExercice
@@ -58,7 +56,6 @@ export function EtapeCalculIsocele({ exercice, estPremierEcran, tentativesUtilis
           </div>
         }
       />
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">Calcule la longueur des 3 côtés du triangle.</p>
 
       <div className="field field-inline">

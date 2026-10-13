@@ -2,8 +2,7 @@ import { useState } from "react";
 import type { ExercicePythagore } from "../core/normeDistance.types";
 import type { ReponseTestPythagore } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_PYTHAGORE, TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1, formatEtatActuelLongueursPythagoreLatex, formatRelationsPythagoreNiveau1Latex, formatRelationsPythagoreNiveau2Latex, formatTermesDonneesPythagoreLatex, libelleRectangleEn } from "../ui/formatNormeDistance";
-import { EtatActuelPanel } from "./EtatActuelPanel";
+import { CONSIGNE_GENERALE_PYTHAGORE, TEXTE_AIDE_TEST_PYTHAGORE_NIVEAU1, formatRelationsPythagoreNiveau1Latex, formatRelationsPythagoreNiveau2Latex, formatTermesDonneesPythagoreLatex, libelleRectangleEn } from "../ui/formatNormeDistance";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -27,8 +26,9 @@ const SOMMETS: ("A" | "B" | "C")[] = ["A", "B", "C"];
  * Écran "test" — variante 6, écran 3 (dernier depuis `promptgen26refontecomplete.md`, Partie E) :
  * fusionne l'ancien écran numérique `testPythagore` et l'ancien écran catégoriel `conclusionPythagore`
  * (supprimé) en une seule question "Le triangle est rectangle en" à 3 choix (A/B/C — plus d'option
- * "pas rectangle", voir `core/normeDistance.types.ts` pour le gap connu et assumé). Bloc "état
- * actuel" : les 3 normes confirmées à l'écran précédent. Aide à 2 niveaux : la relation de Pythagore
+ * "pas rectangle", voir `core/normeDistance.types.ts` pour le gap connu et assumé). Les 3 normes
+ * confirmées aux écrans précédents sont listées dans le récapitulatif "Ce qu'on sait déjà". Aide à
+ * 2 niveaux : la relation de Pythagore
  * pour chaque sommet (niveau 1), puis substituée avec un "?" à la place du signe "=" (niveau 2).
  */
 export function EtapeTestPythagore({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
@@ -49,7 +49,6 @@ export function EtapeTestPythagore({ exercice, estPremierEcran, tentativesUtilis
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelLongueursPythagoreLatex(exercice)} />
       <p className="prompt-text">Le triangle est rectangle en</p>
 
       <div className="options-grid-compact">

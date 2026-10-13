@@ -31,6 +31,8 @@ import { EtapeResolutionParametreNorme } from "./components/EtapeResolutionParam
 import { EtapeConstructionPythagore } from "./components/EtapeConstructionPythagore";
 import { EtapeCalculPythagore } from "./components/EtapeCalculPythagore";
 import { EtapeTestPythagore } from "./components/EtapeTestPythagore";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifNormeDistance } from "./ui/recapitulatifNormeDistance";
 import { Katex } from "./components/Katex";
 import { sommetAttenduPythagore } from "./moteur/verificationNormeDistance";
 import {
@@ -141,6 +143,7 @@ export function AppNormeDistance() {
     premierePhaseRef.current = phase;
   }
   const estPremierEcran = phase === premierePhaseRef.current;
+  const recapitulatif = calculerRecapitulatifNormeDistance(etat);
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -220,6 +223,7 @@ export function AppNormeDistance() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {phase === "calculPythagore" && !enAttente && <CalculatriceScientifique />}
         {phase === "normeVecteur" && exercice.variante === "vecteur" ? (
           <EtapeNormeVecteur

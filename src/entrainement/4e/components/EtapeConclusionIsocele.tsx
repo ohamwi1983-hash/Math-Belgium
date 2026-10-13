@@ -2,8 +2,7 @@ import { useState } from "react";
 import type { ExerciceIsocele } from "../core/normeDistance.types";
 import type { ReponseClassificationIsocele } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_ISOCELE, OPTIONS_NATURE_TRIANGLE, SOMMETS_ISOCELE, TEXTE_AIDE_ISOCELE_SCALENE, composerClassificationIsocele, formatEtatActuelLongueursIsoceleLatex, formatTermesDonneesIsoceleLatex, type NatureTriangle } from "../ui/formatNormeDistance";
-import { EtatActuelPanel } from "./EtatActuelPanel";
+import { CONSIGNE_GENERALE_ISOCELE, OPTIONS_NATURE_TRIANGLE, SOMMETS_ISOCELE, TEXTE_AIDE_ISOCELE_SCALENE, composerClassificationIsocele, formatTermesDonneesIsoceleLatex, type NatureTriangle } from "../ui/formatNormeDistance";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -23,7 +22,8 @@ interface Props {
 
 /**
  * Écran "conclusion" — variante 4, écran 3 (dernier) : consigne générale + bloc de données
- * redondant + bloc "état actuel" (les 3 longueurs confirmées à l'écran 2) + choix en 2 temps
+ * redondant (les 3 vecteurs/longueurs confirmés aux écrans 1/2, listés dans le récapitulatif
+ * "Ce qu'on sait déjà") + choix en 2 temps
  * (`promptgen26refontecomplete.md`, Partie D) : nature du triangle (Isocèle/Scalène), puis si
  * "Isocèle", le sommet (A/B/C) — l'option "Équilatéral" a été retirée entièrement (piège
  * volontairement abandonné). Aide à 1 niveau : définition des 2 natures.
@@ -54,7 +54,6 @@ export function EtapeConclusionIsocele({ exercice, estPremierEcran, tentativesUt
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelLongueursIsoceleLatex(exercice)} />
       <p className="prompt-text">Ce triangle est :</p>
 
       <div className="options-grid-compact">

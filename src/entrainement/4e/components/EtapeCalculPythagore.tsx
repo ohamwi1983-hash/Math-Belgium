@@ -3,9 +3,8 @@ import type { ExercicePythagore } from "../core/normeDistance.types";
 import { evaluerCalculPythagore } from "../moteur/verificationNormeDistance";
 import type { ReponseCalculPythagore } from "../moteur/verificationNormeDistance";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { CONSIGNE_GENERALE_PYTHAGORE, PLACEHOLDER_LONGUEUR, formatAideNormeABNiveau1Latex, formatAideNormeABNiveau2Latex, formatEtatActuelVecteursPythagoreLatex, formatLabelNormeLatex, formatTermesDonneesPythagoreLatex } from "../ui/formatNormeDistance";
+import { CONSIGNE_GENERALE_PYTHAGORE, PLACEHOLDER_LONGUEUR, formatAideNormeABNiveau1Latex, formatAideNormeABNiveau2Latex, formatLabelNormeLatex, formatTermesDonneesPythagoreLatex } from "../ui/formatNormeDistance";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -58,7 +57,6 @@ export function EtapeCalculPythagore({ exercice, estPremierEcran, tentativesUtil
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelVecteursPythagoreLatex(exercice)} />
       <p className="prompt-text">Calcule la longueur des 3 côtés du triangle (forme exacte ou décimale arrondie au centième).</p>
 
       <div className="field field-inline">
