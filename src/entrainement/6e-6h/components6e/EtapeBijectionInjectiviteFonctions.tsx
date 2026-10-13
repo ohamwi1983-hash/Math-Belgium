@@ -46,7 +46,7 @@ interface Props {
  * sur TOUS les écrans, y compris les écrans à choix). Un seul palier d'aide sur cet écran (complément
  * ciblé — voir `moteur6e/sessionInjectiviteFonctions.ts::NIVEAU_AIDE_MAX`).
  */
-export function EtapeBijectionInjectiviteFonctions({ exercice, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, intervalleConfirme, coteChoisi, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState<EnsembleReelGuide | null>(null);
   const [y, setY] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<ReponseBijection | null>(null);
@@ -65,10 +65,15 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, intervalleConfirm
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFLatexAffichage(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFLatexAffichage(exercice)} />
+          </div>
+        }
+      />
       {lignesEtatActuel.map((ligne) => (
         <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
       ))}
