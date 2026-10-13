@@ -31,6 +31,8 @@ import { EtapeChampsNumeriquesEtudeLocale } from "./components5e/EtapeChampsNume
 import { EtapeZerosDeriveeEtudeLocale } from "./components5e/EtapeZerosDeriveeEtudeLocale";
 import { EtapeTableauEtudeLocale } from "./components5e/EtapeTableauEtudeLocale";
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import { calculerRecapitulatifEtudeLocale } from "./ui5e/recapitulatifEtudeLocale";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -155,6 +157,7 @@ export function App5gen29() {
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifEtudeLocale(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={etat.phase}

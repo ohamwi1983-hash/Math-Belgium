@@ -6,7 +6,6 @@ import { Katex } from "../components/Katex";
 import { QuestionFinale } from "../components/QuestionFinale";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -45,7 +44,6 @@ export function EtapeTableauEtudeLocale({ exercice, estPremierEcran, phase, tent
         }
       />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
-      <EtatActuelEtudeLocale exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigneEcranEtudeLocale(phase)}</p>
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}

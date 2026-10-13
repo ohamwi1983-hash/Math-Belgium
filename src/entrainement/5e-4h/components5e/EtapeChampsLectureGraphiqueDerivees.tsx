@@ -6,7 +6,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelLectureGraphiqueDerivees } from "./EtatActuelLectureGraphiqueDerivees";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { consigneEcran, consigneGenerale, questionFinale } from "../ui5e/formatLectureGraphiqueDerivees";
@@ -94,7 +93,6 @@ export function EtapeChampsLectureGraphiqueDerivees({
         blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} surlignage={surlignage} />}
       />
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelLectureGraphiqueDerivees exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigne}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

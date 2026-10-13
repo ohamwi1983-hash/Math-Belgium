@@ -10,7 +10,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelEtudierFonction } from "./EtatActuelEtudierFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 interface Props {
@@ -70,7 +69,6 @@ export function EtapeCalculerDeriveeGenerique({ exercice, estPremierEcran, phase
         }
       />
       <QuestionFinale question={questionFinaleEtudierFonction()} />
-      <EtatActuelEtudierFonction exercice={exercice} phase={ecran} />
       <p className="prompt-text">{consigneEcranEtudierFonction(ecran)}</p>
       <ApercuExpressionLatex texte={texte} label={labelChamp} />
       <div className="field field-inline">

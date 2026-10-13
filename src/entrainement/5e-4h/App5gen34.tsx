@@ -29,6 +29,8 @@ import { EtapeTableauFPrimeExtremaBornes } from "./components5e/EtapeTableauFPri
 import { EtapeChampsNumeriquesExtremaBornes } from "./components5e/EtapeChampsNumeriquesExtremaBornes";
 import { EtapeComparaisonExtremaBornes } from "./components5e/EtapeComparaisonExtremaBornes";
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import { calculerRecapitulatifExtremaBornes } from "./ui5e/recapitulatifExtremaBornes";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import { formatReponseAttenduePhaseLatex, labelsChampsBornes, labelsChampsExtremums, placeholdersChampsBornes, placeholdersChampsExtremums } from "./ui5e/formatExtremaBornes";
@@ -133,6 +135,7 @@ export function App5gen34() {
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifExtremaBornes(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={etat.phase}

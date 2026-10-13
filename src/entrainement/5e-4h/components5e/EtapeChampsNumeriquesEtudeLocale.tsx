@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatTermesDonneesLatex, questionFinaleEtudeLocale, texteAideNiveau1EtudeLocale, texteAideNiveau2EtudeLocale } from "../ui5e/formatEtudeLocale";
@@ -95,7 +94,6 @@ export function EtapeChampsNumeriquesEtudeLocale({
         }
       />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
-      <EtatActuelEtudeLocale exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigne}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

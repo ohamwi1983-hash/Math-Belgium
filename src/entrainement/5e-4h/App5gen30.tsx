@@ -23,6 +23,8 @@ import { EtapeAsymptotesLectureGraphiqueDerivees } from "./components5e/EtapeAsy
 import { EtapeTableauLectureGraphiqueDerivees } from "./components5e/EtapeTableauLectureGraphiqueDerivees";
 import { EtapeChampsLectureGraphiqueDerivees } from "./components5e/EtapeChampsLectureGraphiqueDerivees";
 import { TableauEtudeLocaleRecap } from "./components5e/TableauEtudeLocaleRecap";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import { calculerRecapitulatifLectureGraphiqueDerivees } from "./ui5e/recapitulatifLectureGraphiqueDerivees";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -143,6 +145,7 @@ export function App5gen30() {
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={calculerRecapitulatifLectureGraphiqueDerivees(etat)} />
           <EcranCourant
             exercice={exercice}
             phase={etat.phase}

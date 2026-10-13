@@ -7,7 +7,6 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import {
@@ -111,7 +110,6 @@ export function EtapeZerosDeriveeEtudeLocale({
         }
       />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
-      <EtatActuelEtudeLocale exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigne}</p>
       <div className="options-grid">
         <button type="button" className={choix === "aucun" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucun")}>

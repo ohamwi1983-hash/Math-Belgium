@@ -29,6 +29,8 @@ import { PlacementPointsGraphique } from "./components5e/PlacementPointsGraphiqu
 import { EtudierFonctionGraph } from "./components5e/EtudierFonctionGraph";
 import { ResultatPanelEtudierFonction } from "./components5e/ResultatPanelEtudierFonction";
 import { ResumeSessionEtudierFonction } from "./components5e/ResumeSessionEtudierFonction";
+import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import { calculerRecapitulatifEtudierFonction } from "./ui5e/recapitulatifEtudierFonction";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 
@@ -111,6 +113,7 @@ export function App5gen31() {
       />
       <main className="card">
         <div className="card-body">
+          {enCoursDeSession && <RecapitulatifPanel entrees={calculerRecapitulatifEtudierFonction(etat)} />}
           {enCoursDeSession && (
             <EcranCourant
               exercice={exercice}

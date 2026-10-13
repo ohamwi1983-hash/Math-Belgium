@@ -5,7 +5,6 @@ import { consigneEcran, consigneGenerale, formatEnteteColonnesTableauFPrime, for
 import { QuestionFinale } from "../components/QuestionFinale";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelLectureGraphiqueDerivees } from "./EtatActuelLectureGraphiqueDerivees";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
@@ -43,7 +42,6 @@ export function EtapeTableauLectureGraphiqueDerivees({ exercice, estPremierEcran
         blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} />}
       />
       <QuestionFinale question={questionFinale(exercice)} />
-      <EtatActuelLectureGraphiqueDerivees exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigneEcran(phase)}</p>
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}

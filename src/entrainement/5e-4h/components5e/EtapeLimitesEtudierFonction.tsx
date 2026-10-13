@@ -8,7 +8,6 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EtatActuelEtudierFonction } from "./EtatActuelEtudierFonction";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -80,7 +79,6 @@ export function EtapeLimitesEtudierFonction({ exercice, estPremierEcran, tentati
         }
       />
       <QuestionFinale question={questionFinaleEtudierFonction()} />
-      <EtatActuelEtudierFonction exercice={exercice} phase="limites" />
       <p className="prompt-text">{consigneEcranEtudierFonction("limites")}</p>
       {slots.map((slot, i) => {
         const labelSlot = formatLabelSlotLimite(slot);
