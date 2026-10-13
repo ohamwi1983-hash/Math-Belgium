@@ -179,6 +179,7 @@ export function App6gen11() {
               {etat.phase === "limites" && exercice.famille !== "B" && (
                 <EtapeLimitesDeux
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}

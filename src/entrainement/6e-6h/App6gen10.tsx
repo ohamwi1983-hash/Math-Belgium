@@ -160,6 +160,7 @@ export function App6gen10() {
               {phase === "bReconnaitre" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -180,6 +181,7 @@ export function App6gen10() {
               {phase === "cfReconnaitre" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -219,6 +221,7 @@ export function App6gen10() {
               {phase === "ckConclure" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -239,6 +242,7 @@ export function App6gen10() {
               {phase === "dConstantSigne" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}

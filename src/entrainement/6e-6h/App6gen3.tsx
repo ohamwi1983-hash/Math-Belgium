@@ -215,6 +215,7 @@ export function App6gen3() {
           {etat.phase === "equation" && (
             <EtapeChampEquationCyclo
               key={etat.phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran="Écris l'équation obtenue après avoir éliminé toutes les arcfonctions."
               equationLatex={formatEquationOriginaleLatex(exercice)}
               etatActuel={etatActuelAvantEquation(exercice)}
@@ -257,6 +258,7 @@ export function App6gen3() {
             <EtapeAccepterRejeterEquationsCyclometriques
               key={etat.phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={niveauAide}

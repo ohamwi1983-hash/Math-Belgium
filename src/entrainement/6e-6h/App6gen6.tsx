@@ -356,6 +356,7 @@ export function App6gen6() {
               {phase === "gOrdre1" && (
                 <EtapeOrdre1G
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   etatActuel={null}
                   enonceLatex={enonceLatex}
