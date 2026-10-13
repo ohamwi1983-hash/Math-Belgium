@@ -184,6 +184,7 @@ function EcranCourant({
         <EtapeReconnaissanceFonctionDerivee
           key={cleEcran}
           exercice={exercice}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -202,6 +203,7 @@ function EcranCourant({
             key={cleEcran}
             exercice={exercice}
             typeRetenu={typeRetenu}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             niveauAide={etat.niveauAide}
@@ -218,6 +220,7 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           typeRetenu={typeRetenu}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -239,6 +242,7 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           typeRetenu={etat.typeRetenu as TypeDerivee}
+          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
