@@ -137,6 +137,10 @@ export function App6gen5() {
           <EtapeApparierGraphiqueCyclo
             key={etat.indexExercice}
             exercice={exercice}
+            // Écran unique par exercice (pas de notion de `phase` ici, voir `6gen5`
+            // REFONTE COMPLÈTE ci-dessus) : chaque montage de ce composant EST le premier
+            // (et seul) écran de l'exercice — constante, pas besoin de `useRef`.
+            estPremierEcran={true}
             aideNiveau1={texteAideNiveau1(exercice)}
             aideNiveau2={texteAideNiveau2(exercice)}
             tentativesUtilisees={tentativesUtilisees}

@@ -104,6 +104,7 @@ export function App6gen36() {
     : null;
 
   const ecranCommun = {
+    estPremierEcran,
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
     etatActuel: null,

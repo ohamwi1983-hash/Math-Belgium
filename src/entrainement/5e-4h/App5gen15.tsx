@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteGeometrique } from "./generateurs5e/suitesGeometriques";
 import type { FamilleSuiteGeometriqueId } from "./generateurs5e/suitesGeometriques";
@@ -373,6 +373,14 @@ export function App5gen15() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -405,6 +413,7 @@ export function App5gen15() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase}
+                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -422,6 +431,7 @@ export function App5gen15() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase}
+                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -439,6 +449,7 @@ export function App5gen15() {
                 <EtapeTrouverQ
                   key={cleEcran}
                   exercice={exercice}
+                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -457,6 +468,7 @@ export function App5gen15() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase as "sommeInfinie" | "sommeInfinieB1" | "sommeInfinieB2"}
+                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -474,6 +486,7 @@ export function App5gen15() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase as "poserEquationAlgebrique" | "poserEquationRangN"}
+                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}

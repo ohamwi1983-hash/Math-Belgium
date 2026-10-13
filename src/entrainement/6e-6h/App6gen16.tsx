@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDeriveeLogarithme } from "./generateurs6e/domaineDeriveeLogarithme";
 import {
@@ -110,6 +110,13 @@ export function App6gen16() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
   const consigneG = consigneGenerale(exercice);
   const donnees = blocDonnees(exercice);
   const etatAct = etatActuel(exercice, phase);
@@ -208,6 +215,7 @@ export function App6gen16() {
         {PHASES_DOMAINE.has(phase) && (
           <EtapeDomaineDomaineDeriveeLog
             key={phase}
+            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             consigneEcran={consigne}
@@ -226,6 +234,7 @@ export function App6gen16() {
         {PHASES_DEUX_CHAMPS.has(phase) && (
           <EtapeDeuxChampsDomaineDeriveeLog
             key={phase}
+            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             etatActuel={etatAct}
@@ -248,6 +257,7 @@ export function App6gen16() {
         {!PHASES_DOMAINE.has(phase) && !PHASES_DEUX_CHAMPS.has(phase) && (
           <EtapeChampDomaineDeriveeLog
             key={phase}
+            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             etatActuel={etatAct}

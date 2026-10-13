@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOptimisation } from "./generateurs5e/optimisationGeometrique/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -73,6 +73,14 @@ export function App5gen32() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const niveauAideMax = niveauAideMaxOptimisation();
 
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -104,6 +112,7 @@ export function App5gen32() {
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
             onValider={(reponses) => terminerEtape(soumettreReponseEcran(etat, reponses))}
             validation={validation}
+            estPremierEcran={estPremierEcran}
           />
         </div>
       </main>

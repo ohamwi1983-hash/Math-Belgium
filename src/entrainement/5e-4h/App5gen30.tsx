@@ -153,6 +153,7 @@ export function App5gen30() {
             terminerEtape={terminerEtape}
             setEtat={setEtat}
             validation={validation}
+            estPremierEcran={estPremierEcran}
           />
         </div>
       </main>
@@ -170,9 +171,10 @@ interface EcranProps {
   terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueDerivees) => void;
   setEtat: (etat: EtatSessionLectureGraphiqueDerivees) => void;
   validation: ValidationEtapeProps | null;
+  estPremierEcran: boolean;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation, estPremierEcran }: EcranProps) {
   const niveauAideMax = niveauAideMaxLectureGraphiqueDerivees();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -191,6 +193,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(textes) => terminerEtape(soumettreReponseAsymptotes(etat, textes))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleAsymptote(t, slots[i].cible))}
           validation={validation}
+          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -208,6 +211,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse))}
           validation={validation}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -234,6 +238,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             )
           }
           validation={validation}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -250,6 +255,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse))}
           validation={validation}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -276,6 +282,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             )
           }
           validation={validation}
+          estPremierEcran={estPremierEcran}
         />
       );
   }

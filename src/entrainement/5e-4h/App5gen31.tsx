@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudierFonction } from "./generateurs5e/etudierFonction/index";
@@ -86,6 +86,14 @@ export function App5gen31() {
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
 
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -113,6 +121,7 @@ export function App5gen31() {
               cleEcran={cleEcran}
               terminerEtape={terminerEtape}
               setEtat={setEtat}
+              estPremierEcran={estPremierEcran}
             />
           )}
           {dernierBilan && (
@@ -141,9 +150,10 @@ interface EcranProps {
   cleEcran: string;
   terminerEtape: (nouvelEtat: EtatSessionEtudierFonction) => void;
   setEtat: (etat: EtatSessionEtudierFonction) => void;
+  estPremierEcran: boolean;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, estPremierEcran }: EcranProps) {
   const niveauAideMax = niveauAideMaxEtudierFonction();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -159,6 +169,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponse: EnsembleReelGuide) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -174,6 +185,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponses) => terminerEtape(soumettreReponseLimites(etat, reponses))}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -191,6 +203,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseCalculerFPrime(etat, texte))}
           diagnostiquer={(t) => diagnostiquerCalculerFPrime(t, exercice)}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -206,6 +219,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse))}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -223,6 +237,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onActiverAide={onActiverAide}
           onValider={(texte) => terminerEtape(soumettreReponseCalculerFSeconde(etat, texte))}
           diagnostiquer={(t) => diagnostiquerCalculerFSeconde(t, exercice)}
+          estPremierEcran={estPremierEcran}
         />
       );
 
@@ -238,11 +253,19 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
           onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse))}
+          estPremierEcran={estPremierEcran}
         />
       );
 
     case "recap":
-      return <EtapeRecapitulatifEtudierFonction key={cleEcran} exercice={exercice} onContinuer={() => setEtat(avancerRecap(etat))} />;
+      return (
+        <EtapeRecapitulatifEtudierFonction
+          key={cleEcran}
+          exercice={exercice}
+          estPremierEcran={estPremierEcran}
+          onContinuer={() => setEtat(avancerRecap(etat))}
+        />
+      );
 
     case "graphique": {
       const points = pointsClesEtudierFonction(exercice);

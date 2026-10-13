@@ -64,6 +64,14 @@ export function App6gen48() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
   // la réponse EXACTE attendue à chaque écran depuis les vrais paramètres tirés, jamais en
@@ -117,6 +125,7 @@ export function App6gen48() {
           // longueur) reste collé à l'ancien exercice.
           key={`${etat.generationId}-${phase}`}
           {...aideCommun}
+          estPremierEcran={estPremierEcran}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
           etatActuel={null}

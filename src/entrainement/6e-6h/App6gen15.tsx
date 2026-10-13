@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInequationLogarithmique } from "./generateurs6e/inequationsLogarithmiques";
 import {
@@ -74,6 +74,13 @@ export function App6gen15() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -106,6 +113,7 @@ export function App6gen15() {
         {phase === "aCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -123,6 +131,7 @@ export function App6gen15() {
             {phase === "aResoudre" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -141,6 +150,7 @@ export function App6gen15() {
             {phase === "bCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -158,6 +168,7 @@ export function App6gen15() {
             {phase === "bResoudre" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -176,6 +187,7 @@ export function App6gen15() {
             {phase === "cCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -193,6 +205,7 @@ export function App6gen15() {
             {phase === "cCombiner" && (
               <EtapeChampSimpleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -211,6 +224,7 @@ export function App6gen15() {
             {phase === "cComparer" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -229,6 +243,7 @@ export function App6gen15() {
             {phase === "dCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -246,6 +261,7 @@ export function App6gen15() {
             {phase === "dReecrire" && (
               <EtapeChampSimpleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -264,6 +280,7 @@ export function App6gen15() {
             {phase === "dResoudreY" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -281,6 +298,7 @@ export function App6gen15() {
             {phase === "dConvertirX" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -299,6 +317,7 @@ export function App6gen15() {
             {phase === "eReconnaitre" && (
               <EtapeChoixDeuxIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 optionGauche={{ id: "vide", label: "∅ — CE incompatible, aucune solution" }}
@@ -318,6 +337,7 @@ export function App6gen15() {
             {phase === "fCE" && (
               <EtapeIntervalleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -335,6 +355,7 @@ export function App6gen15() {
             {phase === "fSimplifier" && (
               <EtapeChampSimpleIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}
@@ -353,6 +374,7 @@ export function App6gen15() {
             {phase === "fConclure" && (
               <EtapeDeuxCasIneqLog
                 key={phase}
+                estPremierEcran={estPremierEcran}
                 consigneEcran={consigne}
                 enonceLatex={enonceLatex}
                 etatActuel={null}

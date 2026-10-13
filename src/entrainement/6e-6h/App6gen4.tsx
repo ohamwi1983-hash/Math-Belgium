@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDeriveesCyclometriques } from "./generateurs6e/deriveesCyclometriques";
 import {
@@ -129,6 +129,16 @@ export function App6gen4() {
   }
 
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
@@ -198,6 +208,7 @@ export function App6gen4() {
           {etat.phase === "aDeriveeU" && exercice.famille === "A" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive u(x) seul."
                   fonctionLatex={formatFonctionALatex(exercice)}
                   aideNiveau1={{ texte: texteAideADeriveeUNiveau1(exercice), latex: null }}
@@ -215,6 +226,7 @@ export function App6gen4() {
               {etat.phase === "aDeriveeFinale" && exercice.famille === "A" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) — utilise le u(x) et le u'(x) corrects, simplifie si possible."
                   fonctionLatex={formatFonctionALatex(exercice)}
                   etatActuel={ligneEtatActuel("u(x) et u'(x), établis à l'étape précédente", texteAideADeriveeUNiveau2(exercice))}
@@ -234,6 +246,7 @@ export function App6gen4() {
               {etat.phase === "bDeriveeU" && exercice.famille === "B" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive u(x)."
                   fonctionLatex={formatFonctionBLatex(exercice)}
                   aideNiveau1={{ texte: texteAideBDeriveeUNiveau1(), latex: null }}
@@ -251,6 +264,7 @@ export function App6gen4() {
               {etat.phase === "bDeriveeArc" && exercice.famille === "B" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive arcfonction(v(x)) séparément."
                   fonctionLatex={formatFonctionBLatex(exercice)}
                   etatActuel={ligneEtatActuel("u'(x), établi à l'étape précédente", texteAideBDeriveeUNiveau2(exercice))}
@@ -269,6 +283,7 @@ export function App6gen4() {
               {etat.phase === "bDeriveeFinale" && exercice.famille === "B" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la règle du produit."
                   fonctionLatex={formatFonctionBLatex(exercice)}
                   etatActuel={[
@@ -291,6 +306,7 @@ export function App6gen4() {
               {etat.phase === "cNumerateur" && exercice.famille === "C" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive le numérateur."
                   fonctionLatex={formatFonctionCLatex(exercice)}
                   aideNiveau1={{ texte: texteAideCNumerateurNiveau1(), latex: null }}
@@ -308,6 +324,7 @@ export function App6gen4() {
               {etat.phase === "cDenominateur" && exercice.famille === "C" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive le dénominateur."
                   fonctionLatex={formatFonctionCLatex(exercice)}
                   etatActuel={ligneEtatActuel("N'(x), établi à l'étape précédente", texteAideCNumerateurNiveau2(exercice))}
@@ -326,6 +343,7 @@ export function App6gen4() {
               {etat.phase === "cDeriveeFinale" && exercice.famille === "C" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la formule du quotient."
                   fonctionLatex={formatFonctionCLatex(exercice)}
                   etatActuel={[
@@ -348,6 +366,7 @@ export function App6gen4() {
               {etat.phase === "dNumerateur" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive le numérateur."
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   aideNiveau1={{ texte: texteAideDNumerateurNiveau1(), latex: null }}
@@ -365,6 +384,7 @@ export function App6gen4() {
               {etat.phase === "dDenominateur" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive le dénominateur."
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   etatActuel={ligneEtatActuel("N'(x), établi à l'étape précédente", texteAideDNumerateurNiveau2(exercice))}
@@ -383,6 +403,7 @@ export function App6gen4() {
               {etat.phase === "dBrut" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la formule du quotient — résultat BRUT, ne simplifie pas encore."
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   etatActuel={[
@@ -404,6 +425,7 @@ export function App6gen4() {
               {etat.phase === "dSimplifiee" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Simplifie le résultat précédent grâce à l'identité arcsin(u)+arccos(u)=π/2."
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   etatActuel={[
@@ -427,6 +449,7 @@ export function App6gen4() {
               {etat.phase === "eDeriveeInterne" && exercice.famille === "E" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive l'arcfonction interne complète."
                   fonctionLatex={formatFonctionELatex(exercice)}
                   aideNiveau1={{ texte: texteAideEDeriveeInterneNiveau1(), latex: null }}
@@ -444,6 +467,7 @@ export function App6gen4() {
               {etat.phase === "eDeriveeFinale" && exercice.famille === "E" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x) via la chaîne extérieure."
                   fonctionLatex={formatFonctionELatex(exercice)}
                   etatActuel={ligneEtatActuel("w'(x), établi à l'étape précédente", texteAideEDeriveeInterneNiveau2(exercice))}
@@ -463,6 +487,7 @@ export function App6gen4() {
               {etat.phase === "fBrute" && exercice.famille === "F" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Dérive f(x) via la chaîne standard — résultat brut accepté."
                   fonctionLatex={formatFonctionFLatex(exercice)}
                   aideNiveau1={{ texte: texteAideFBruteNiveau1(), latex: null }}
@@ -480,6 +505,7 @@ export function App6gen4() {
               {etat.phase === "fSimplifiee" && exercice.famille === "F" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Donne la forme finale simplifiée via l'identité trigonométrique adéquate."
                   fonctionLatex={formatFonctionFLatex(exercice)}
                   etatActuel={ligneEtatActuel("f'(x) BRUT, établi à l'étape précédente", texteAideFBruteNiveau2(exercice))}
@@ -499,6 +525,7 @@ export function App6gen4() {
               {etat.phase === "gDeriveeInterne" && exercice.famille === "G" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={exercice.sousCas === "h" ? "Dérive v(x)." : "Dérive la fraction interne u(x)."}
                   fonctionLatex={formatFonctionGLatex(exercice)}
                   aideNiveau1={{ texte: texteAideGDeriveeInterneNiveau1(exercice), latex: null }}
@@ -516,6 +543,7 @@ export function App6gen4() {
               {etat.phase === "gDeriveeFinale" && exercice.famille === "G" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran="Assemble f'(x)."
                   fonctionLatex={formatFonctionGLatex(exercice)}
                   etatActuel={ligneEtatActuel(
