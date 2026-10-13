@@ -9,6 +9,8 @@ import { EtapeCentreEquationCercle } from "./components/EtapeCentreEquationCercl
 import { EtapeEquationEquationCercle } from "./components/EtapeEquationEquationCercle";
 import { EtapeRayonEquationCercle } from "./components/EtapeRayonEquationCercle";
 import { Katex } from "./components/Katex";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifEquationCercle } from "./ui/recapitulatifEquationCercle";
 import { formatEquationAttendueLatex, formatEtatActuelCentreLatex } from "./ui/formatEquationCercle";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -63,6 +65,7 @@ export function AppEquationCercle() {
   }
 
   const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifEquationCercle(etat);
 
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
    * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
@@ -112,6 +115,7 @@ export function AppEquationCercle() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "centre" ? (
           <EtapeCentreEquationCercle
             exercice={exercice}

@@ -3,10 +3,9 @@ import type { ExerciceOptimisationModelisation } from "../core/optimisation.type
 import { diagnostiquerDomaine } from "../moteur/verificationOptimisation";
 import type { ReponseDomaine } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_DOMAINE } from "../moteur/sessionOptimisation";
-import { consigneDomaine, formatFonctionDeveloppeeLatex, segmentsPhraseEnonce, texteAideDomaineNiveau1, texteAideDomaineNiveau2, texteAideDomaineNiveau3 } from "../ui/formatOptimisation";
+import { consigneDomaine, segmentsPhraseEnonce, texteAideDomaineNiveau1, texteAideDomaineNiveau2, texteAideDomaineNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
@@ -51,7 +50,6 @@ export function EtapeDomaineOptimisation({ exercice, estPremierEcran, tentatives
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatFonctionDeveloppeeLatex(exercice.fonction, exercice.contexte.labelVariable)} />
       <p className="prompt-text">{consigneDomaine(exercice)}</p>
       <div className="field-row">
         <div className="field field-inline">

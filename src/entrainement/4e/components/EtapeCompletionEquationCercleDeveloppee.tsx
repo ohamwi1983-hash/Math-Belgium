@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationCercleDeveloppee";
-import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, TEXTE_AIDE_COMPLETION_NIVEAU1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex, formatEtatActuelRegroupementLatex } from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, TEXTE_AIDE_COMPLETION_NIVEAU1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -26,8 +25,10 @@ interface Props {
 }
 
 /**
- * Écran 2 — énoncé toujours affiché, "état actuel" rappelle le regroupement CONFIRMÉ à l'écran 1
- * (jamais resaisi). Champ de texte libre, vérifié par équivalence algébrique à 2 variables
+ * Écran 2 — énoncé toujours affiché, le regroupement CONFIRMÉ à l'écran 1 (jamais resaisi)
+ * apparaît désormais dans le récapitulatif accumulé en haut de carte
+ * (`RecapitulatifPanel`/`AppEquationCercleDeveloppee`), plus ici en isolation. Champ de texte
+ * libre, vérifié par équivalence algébrique à 2 variables
  * (`diagnostiquerCompletionCarre` — cible IDENTIQUE à l'écran 1, voir l'en-tête de
  * `verificationEquationCercleDeveloppee.ts`).
  */
@@ -51,7 +52,6 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, estPremierEc
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelRegroupementLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_COMPLETION}</p>
 
       <div className="field">

@@ -3,10 +3,9 @@ import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_RAYON } from "../moteur/sessionEquationCercle";
 import { diagnostiquerRayon } from "../moteur/verificationEquationCercle";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { CONSIGNE_GENERALE_EQUATION_CERCLE, CONSIGNE_RAYON, PLACEHOLDER_RAYON, formatAideRayonNiveau2Latex, formatEtatActuelCentreLatex, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
+import { CONSIGNE_GENERALE_EQUATION_CERCLE, CONSIGNE_RAYON, PLACEHOLDER_RAYON, formatAideRayonNiveau2Latex, texteAideRayonNiveau1, texteAideRayonNiveau2 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,8 +27,9 @@ interface Props {
 }
 
 /**
- * Écran 2 — le centre étant déjà confirmé (donc plus un secret), le graphe le garde marqué en
- * permanence ; l'aide de niveau 2 ajoute EN PLUS le segment pointillé centre→point marqué
+ * Écran 2 — le centre étant déjà confirmé (donc plus un secret, rappelé dans le récapitulatif
+ * accumulé en haut de carte — `RecapitulatifPanel`/`AppEquationCercle`), le graphe le garde
+ * marqué en permanence ; l'aide de niveau 2 ajoute EN PLUS le segment pointillé centre→point marqué
  * (`afficherRayon`), avec — pour `rayon_indirect` seulement — la formule de Pythagore substituée
  * mais jamais résolue.
  */
@@ -55,7 +55,6 @@ export function EtapeRayonEquationCercle({ exercice, estPremierEcran, tentatives
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
         blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre afficherRayon={niveauAide >= 2} />}
       />
-      <EtatActuelPanel latex={formatEtatActuelCentreLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_RAYON}</p>
 
       <div className="field field-inline">

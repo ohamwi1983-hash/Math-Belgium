@@ -3,10 +3,9 @@ import type { ExerciceConstructionDroite } from "../core/constructionDroite.type
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_TRACE } from "../moteur/sessionConstructionDroite";
 import { pointCorrespondAUneCible } from "../moteur/verificationConstructionDroite";
-import { CONSIGNE_TRACE, consigneGeneraleTrace, formatEnonceLatex, formatEtatActuelPointsLatex, texteAideTraceNiveau1 } from "../ui/formatConstructionDroite";
+import { CONSIGNE_TRACE, consigneGeneraleTrace, formatEnonceLatex, texteAideTraceNiveau1 } from "../ui/formatConstructionDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConstructionDroiteGraph } from "./ConstructionDroiteGraph";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -35,9 +34,10 @@ const MARQUEUR2_INITIAL: [number, number] = [1, 0];
 /**
  * Écran 2 — placement, par glissement CRANTÉ, des 2 points confirmés (ou révélés) à l'écran 1.
  * `cible1`/`cible2` ne sont JAMAIS affichés numériquement sur le graphe (`ConstructionDroiteGraph`
- * ne rend que les 2 marqueurs déplaçables) — ils apparaissent en revanche dans le bloc "État
- * actuel" en toutes lettres, puisqu'ils viennent d'être validés par l'élève lui-même à l'écran
- * précédent (ou révélés après épuisement), jamais une donnée cachée.
+ * ne rend que les 2 marqueurs déplaçables) — ils apparaissent en revanche dans le récapitulatif
+ * "Ce qu'on sait déjà" (`RecapitulatifPanel`, câblé par `AppConstructionDroite.tsx`) en toutes
+ * lettres, puisqu'ils viennent d'être validés par l'élève lui-même à l'écran précédent (ou
+ * révélés après épuisement), jamais une donnée cachée.
  */
 export function EtapeTraceConstructionDroite({ exercice, estPremierEcran, cible1, cible2, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [marqueur1, setMarqueur1] = useState<[number, number]>(MARQUEUR1_INITIAL);
@@ -61,7 +61,6 @@ export function EtapeTraceConstructionDroite({ exercice, estPremierEcran, cible1
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelPointsLatex(cible1, cible2)} label="Points trouvés" />
       <p className="prompt-text">{CONSIGNE_TRACE}</p>
 
       <ConstructionDroiteGraph

@@ -5,10 +5,9 @@ import type { ReponseEquation } from "../moteur/typesRelationsDroites";
 import { diagnostiquerEquationCartesienne, diagnostiquerEquationParametrique } from "../moteur/verificationRelationsDroites";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION, consigneEquation, formatAideEquationNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, formatEtatActuelVecteurChercheLatex, segmentsAideEquationNiveau1 } from "../ui/formatRelationsDroites";
+import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_EQUATION, consigneEquation, formatAideEquationNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideEquationNiveau1 } from "../ui/formatRelationsDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -79,7 +78,6 @@ export function EtapeEquationRelationsDroites({ exercice, estPremierEcran, tenta
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelVecteurChercheLatex(exercice)} />
       <p className="prompt-text">{consigneEquation(exercice)}</p>
 
       {cartesienne ? (

@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceEquationParabole } from "../core/equationParabole.types";
 import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionEquationParabole";
 import { diagnostiquerEquation } from "../moteur/verificationEquationParabole";
-import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_PARABOLE, PLACEHOLDER_EQUATION_HORIZONTAL, PLACEHOLDER_EQUATION_VERTICAL, formatAideEquationNiveau2Latex, formatFoyerLatex, formatSommetLatex, segmentsAideEquationNiveau1 } from "../ui/formatEquationParabole";
+import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_PARABOLE, PLACEHOLDER_EQUATION_HORIZONTAL, PLACEHOLDER_EQUATION_VERTICAL, formatAideEquationNiveau2Latex, segmentsAideEquationNiveau1 } from "../ui/formatEquationParabole";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationParaboleGraph } from "./EquationParaboleGraph";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -29,7 +28,8 @@ interface Props {
 
 /** Écran 2 (dernier, toujours terminal) — champ texte libre, réutilise directement
  * `diagnostiquerEquation` (`moteur/verificationEquationParabole.ts`, moteur d'égalité algébrique à
- * 2 variables déjà partagé). "État actuel" rappelle S et F CONFIRMÉS à l'écran 1. */
+ * 2 variables déjà partagé). S et F CONFIRMÉS à l'écran 1 sont rappelés dans le récapitulatif
+ * accumulé en haut de carte (`RecapitulatifPanel`/`AppEquationParabole`), plus ici en isolation. */
 export function EtapeEquationEquationParabole({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
@@ -46,7 +46,6 @@ export function EtapeEquationEquationParabole({ exercice, estPremierEcran, tenta
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_PARABOLE}
         blocDonnees={<EquationParaboleGraph exercice={exercice} afficherSommet afficherVecteurP={niveauAide >= 1} />}
       />
-      <EtatActuelPanel latex={`S = ${formatSommetLatex(exercice.sommet)} \\quad F = ${formatFoyerLatex(exercice.foyer)}`} />
       <p className="prompt-text">{CONSIGNE_EQUATION}</p>
 
       <div className="field field-inline">

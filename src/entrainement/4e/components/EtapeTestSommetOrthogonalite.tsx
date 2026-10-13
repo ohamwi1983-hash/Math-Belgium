@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangle, Sommet } from "../core/orthogonalite.types";
 import { diagnostiquerTestSommetTriangle } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_PIEGE_B_EQUATION, LATEX_PIEGE_B_SEUL, LATEX_PIEGE_C_EQUATION_1, LATEX_PIEGE_C_EQUATION_2, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_CRITERE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, TEXTE_AIDE_PIEGE_B_APRES, TEXTE_AIDE_PIEGE_B_AVANT, TEXTE_AIDE_PIEGE_B_ENTRE, TEXTE_AIDE_PIEGE_C_APRES, TEXTE_AIDE_PIEGE_C_AVANT, TEXTE_AIDE_PIEGE_C_ENTRE, consigneGlobaleOrthogonalite, etatActuelTestSommet, formatTermesEnonceTriangleLatex, formuleSubstitueeSommetTriangleLatex } from "../ui/formatOrthogonalite";
+import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_PIEGE_B_EQUATION, LATEX_PIEGE_B_SEUL, LATEX_PIEGE_C_EQUATION_1, LATEX_PIEGE_C_EQUATION_2, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_CRITERE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, TEXTE_AIDE_PIEGE_B_APRES, TEXTE_AIDE_PIEGE_B_AVANT, TEXTE_AIDE_PIEGE_B_ENTRE, TEXTE_AIDE_PIEGE_C_APRES, TEXTE_AIDE_PIEGE_C_AVANT, TEXTE_AIDE_PIEGE_C_ENTRE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleLatex, formuleSubstitueeSommetTriangleLatex } from "../ui/formatOrthogonalite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -68,9 +67,11 @@ function Piege({ sommet }: { sommet: Sommet }) {
  *
  * `promptgen25modificationscompletes.md` : consigne globale (jusque-là absente de cet écran, seul
  * écran de la variante à ne pas l'avoir) ajoutée + bloc de données redondant (points A/B/C, "bloc
- * fitter" via `formatTermesEnonceTriangleLatex`) — le bloc "état actuel" reste distinct, inchangé
- * dans son contenu (seulement son rendu interne passé de `\qquad` à `\begin{gathered}`, voir
- * `ui/formatOrthogonalite.ts`).
+ * fitter" via `formatTermesEnonceTriangleLatex`).
+ *
+ * Ancien bloc "état actuel" (vecteurs concernés par ce test, `etatActuelTestSommet`) retiré — son
+ * contenu alimente maintenant le récapitulatif "Ce qu'on sait déjà" (`ui/recapitulatifOrthogonalite.ts`),
+ * affiché en haut de `AppOrthogonalite.tsx` plutôt que sur ce seul écran.
  */
 export function EtapeTestSommetOrthogonalite({ exercice, estPremierEcran, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -94,7 +95,6 @@ export function EtapeTestSommetOrthogonalite({ exercice, estPremierEcran, sommet
           </div>
         }
       />
-      <EtatActuelPanel latex={etatActuelTestSommet(exercice, sommet)} />
       <p className="prompt-text">
         Ce triangle est-il rectangle en {labelSommet(exercice, sommet)} ? Calcule le critère d'orthogonalité correspondant.
       </p>

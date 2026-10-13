@@ -9,6 +9,8 @@ import { EtapePointsConstructionDroite } from "./components/EtapePointsConstruct
 import { EtapeTraceConstructionDroite } from "./components/EtapeTraceConstructionDroite";
 import { Katex } from "./components/Katex";
 import { formatEnonceLatex, formatEtatActuelPointsLatex } from "./ui/formatConstructionDroite";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifConstructionDroite } from "./ui/recapitulatifConstructionDroite";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -56,6 +58,7 @@ export function AppConstructionDroite() {
   }
 
   const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifConstructionDroite(etat);
 
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
    * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
@@ -103,6 +106,7 @@ export function AppConstructionDroite() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "points" ? (
           <EtapePointsConstructionDroite
             exercice={exercice}

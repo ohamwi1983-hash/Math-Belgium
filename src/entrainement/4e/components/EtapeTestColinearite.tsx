@@ -3,10 +3,9 @@ import type { ExerciceColinearPoints, ExerciceColinearVecteurs } from "../core/c
 import { diagnostiquerCritereTest } from "../moteur/verificationColinearite";
 import type { ReponseTest } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_TEST } from "../moteur/sessionColinearite";
-import { LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ALIGNEMENT_POINTS, QUESTION_COLINEARITE_VECTEURS_APRES, QUESTION_COLINEARITE_VECTEURS_AVANT, QUESTION_COLINEARITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, etatActuelTestPoints, formatEnonceLatex, formatTermesEnoncePointsLatex, formuleSubstitueeTestLatex } from "../ui/formatColinearite";
+import { LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, LIBELLES_OUI_NON, PLACEHOLDER_CRITERE, QUESTION_ALIGNEMENT_POINTS, QUESTION_COLINEARITE_VECTEURS_APRES, QUESTION_COLINEARITE_VECTEURS_AVANT, QUESTION_COLINEARITE_VECTEURS_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, formatEnonceLatex, formatTermesEnoncePointsLatex, formuleSubstitueeTestLatex } from "../ui/formatColinearite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -43,8 +42,11 @@ interface Props {
  *
  * `promptgen24modificationscompletes.md` : bloc de données de "points" passé en "bloc fitter"
  * (`formatTermesEnoncePointsLatex`, un fragment par point A/B/C) — "vecteurs" garde
- * `formatEnonceLatex` (2 vecteurs seulement, aucun risque de coupure). État actuel de "points"
- * (`etatActuelTestPoints`) déjà empilé verticalement, inchangé par ce prompt.
+ * `formatEnonceLatex` (2 vecteurs seulement, aucun risque de coupure).
+ *
+ * Ancien bloc "état actuel" de "points" (`etatActuelTestPoints`, les vecteurs AB/AC confirmés à
+ * l'écran précédent) retiré — son contenu alimente maintenant le récapitulatif "Ce qu'on sait
+ * déjà" (`ui/recapitulatifColinearite.ts`), affiché en haut de `AppColinearite.tsx`.
  */
 export function EtapeTestColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteCritere, setTexteCritere] = useState("");
@@ -77,7 +79,6 @@ export function EtapeTestColinearite({ exercice, estPremierEcran, tentativesUtil
           )
         }
       />
-      {estPoints && exercice.variante === "points" && <EtatActuelPanel latex={etatActuelTestPoints(exercice)} />}
       <p className="prompt-text">Calcule le critère de colinéarité, puis conclus.</p>
 
       <div className="field field-inline">

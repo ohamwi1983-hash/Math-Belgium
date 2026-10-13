@@ -3,11 +3,10 @@ import type { ExerciceDispersion } from "../core/dispersion.types";
 import type { ReponseVarianceEcartType } from "../moteur/verificationDispersion";
 import { diagnostiquerVarianceEcartType } from "../moteur/verificationDispersion";
 import { NIVEAU_AIDE_MAX_VARIANCE_ECART_TYPE } from "../moteur/sessionDispersion";
-import { LABEL_ECART_TYPE, LABEL_VARIANCE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, formatEtatActuelTableauLatex, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
+import { LABEL_ECART_TYPE, LABEL_VARIANCE, PLACEHOLDER_ECART_TYPE, PLACEHOLDER_VARIANCE, consigneEcartType, consigneVariance, texteAideVarianceEcartTypeNiveau1, texteAideVarianceEcartTypeNiveau2 } from "../ui/formatDispersion";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceDispersion } from "./EnonceDispersion";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -30,7 +29,9 @@ interface Props {
  * Écran 2 — "Variance et écart-type" : 2 champs indépendants sur le MÊME écran (spec), soumis
  * ensemble en une seule tentative (tout ou rien) — σ déduit de la variance déjà arrondie (cascade,
  * `core/dispersion.types.ts`), jamais resaisie/redérivée depuis le ratio brut. Les 2 sommes
- * CONFIRMÉES à l'écran 1 sont rappelées via `EtatActuelPanel`, toujours "=" (entiers exacts).
+ * CONFIRMÉES à l'écran 1 sont rappelées dans le récapitulatif "Ce qu'on sait déjà"
+ * (`RecapitulatifPanel`, câblé par `AppDispersion.tsx`/`AppExerciceSynthese.tsx`), toujours "="
+ * (entiers exacts).
  */
 export function EtapeVarianceEcartTypeDispersion({
   exercice,
@@ -55,7 +56,6 @@ export function EtapeVarianceEcartTypeDispersion({
   return (
     <div>
       <EnonceDispersion exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelTableauLatex(exercice)} label="Sommes confirmées" />
 
       <p className="prompt-text">
         {consigneV.avant}

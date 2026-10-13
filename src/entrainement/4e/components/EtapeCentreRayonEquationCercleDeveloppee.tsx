@@ -4,9 +4,8 @@ import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDev
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, TEXTE_AIDE_CENTRE_RAYON_NIVEAU1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, formatEtatActuelCompletionLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, TEXTE_AIDE_CENTRE_RAYON_NIVEAU1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -29,8 +28,10 @@ interface Props {
 }
 
 /**
- * Écran 3 (dernier, toujours terminal) — "état actuel" rappelle la forme complétée CONFIRMÉE à
- * l'écran 2. Centre : 2 champs numériques, statut à 3 valeurs classique. Rayon : champ de texte
+ * Écran 3 (dernier, toujours terminal) — la forme complétée CONFIRMÉE à l'écran 2 (et le
+ * regroupement de l'écran 1) apparaissent désormais dans le récapitulatif accumulé en haut de
+ * carte (`RecapitulatifPanel`/`AppEquationCercleDeveloppee`), plus ici en isolation. Centre : 2
+ * champs numériques, statut à 3 valeurs classique. Rayon : champ de texte
  * libre, parsé symboliquement (couvre les deux variantes de façon uniforme, jamais confondu avec
  * r² — le piège central de l'exercice).
  */
@@ -61,7 +62,6 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, estPremierE
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelCompletionLatex(exercice)} />
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneCentreRayon(exercice)} />
       </p>

@@ -2,11 +2,10 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerPoserEquationInequation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION } from "../moteur/sessionEquationInequationSecondDegre";
-import { consignePoserEquationInequation, formatDonneesConfirmeesLatex, texteAidePoserEquationInequationNiveau1, texteAidePoserEquationInequationNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { consignePoserEquationInequation, texteAidePoserEquationInequationNiveau1, texteAidePoserEquationInequationNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
@@ -43,7 +42,6 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, estPremierEc
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesConfirmeesLatex(exercice)} />
       <p className="prompt-text">{consignePoserEquationInequation(exercice)}</p>
       <div className="field">
         <label className="field-label" htmlFor="equation-inequation-poser">

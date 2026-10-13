@@ -2,11 +2,10 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { verifierInterpretation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionEquationInequationSecondDegre";
-import { consigneInterpretation, formatDonneesFinalesLatex, texteAideInterpretationNiveau1 } from "../ui/formatEquationInequationSecondDegre";
+import { consigneInterpretation, texteAideInterpretationNiveau1 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -40,7 +39,6 @@ export function EtapeInterpretationEquationInequationSecondDegre({ exercice, est
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesFinalesLatex(exercice)} />
       <p className="prompt-text">{consigneInterpretation()}</p>
 
       <div className="options-grid">

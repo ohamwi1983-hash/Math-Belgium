@@ -15,6 +15,8 @@ import {
   formatEtatActuelVecteurChercheLatex,
   formatEtatActuelVecteurReferenceLatex,
 } from "./ui/formatRelationsDroites";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifRelationsDroites } from "./ui/recapitulatifRelationsDroites";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -75,6 +77,7 @@ export function AppRelationsDroites() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const recapitulatif = calculerRecapitulatifRelationsDroites(etat);
 
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
    * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
@@ -124,6 +127,7 @@ export function AppRelationsDroites() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "extraction" ? (
           <EtapeExtractionRelationsDroites
             exercice={exercice}

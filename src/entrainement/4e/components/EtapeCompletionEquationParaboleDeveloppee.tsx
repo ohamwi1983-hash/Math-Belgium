@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceEquationParaboleDeveloppee } from "../core/equationParaboleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationParaboleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationParaboleDeveloppee";
-import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, formatRegroupementLatex, segmentsAideCompletionNiveau1, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
+import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, formatEquationDeveloppeeLatex, segmentsAideCompletionNiveau1, texteAideCompletionNiveau2 } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -28,8 +27,9 @@ interface Props {
 }
 
 /**
- * Écran 2 — énoncé toujours affiché, "état actuel" rappelle le regroupement CONFIRMÉ à l'écran 1.
- * Champ de texte libre, vérifié par équivalence algébrique à 2 variables
+ * Écran 2 — énoncé toujours affiché, le regroupement CONFIRMÉ à l'écran 1 apparaît désormais dans
+ * le récapitulatif accumulé en haut de carte (`RecapitulatifPanel`/`AppEquationParaboleDeveloppee`),
+ * plus ici en isolation. Champ de texte libre, vérifié par équivalence algébrique à 2 variables
  * (`diagnostiquerCompletionCarre` — cible IDENTIQUE à l'écran 1, voir l'en-tête de
  * `verificationEquationParaboleDeveloppee.ts`).
  */
@@ -53,7 +53,6 @@ export function EtapeCompletionEquationParaboleDeveloppee({ exercice, estPremier
           </div>
         }
       />
-      <EtatActuelPanel latex={formatRegroupementLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_COMPLETION}</p>
 
       <ApercuExpressionLatex texte={texte} />

@@ -4,10 +4,9 @@ import type { ReponsePossibiliteCoefficients } from "../moteur/typesEquationDroi
 import { diagnostiquerPossibiliteCoefficients } from "../moteur/verificationEquationDroite";
 import { NIVEAU_AIDE_MAX_POSSIBILITE_COEFFICIENTS } from "../moteur/sessionEquationDroite";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { formatAideNiveau2PossibiliteCoefficientsLatex, formatEnonceLatex, formatEtatActuelPointVecteurLatex, latexGabaritPossibiliteCoefficients, segmentsConsignePossibiliteCoefficients } from "../ui/formatEquationDroite";
+import { formatAideNiveau2PossibiliteCoefficientsLatex, formatEnonceLatex, latexGabaritPossibiliteCoefficients, segmentsConsignePossibiliteCoefficients } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -71,7 +70,6 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, estPremie
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelPointVecteurLatex(exercice)} />
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsignePossibiliteCoefficients(exercice)} />
       </p>

@@ -8,6 +8,8 @@ import type { EtatSessionEquationParabole, PhaseEquationParabole } from "./moteu
 import { EtapeEquationEquationParabole } from "./components/EtapeEquationEquationParabole";
 import { EtapeSommetFoyerEquationParabole } from "./components/EtapeSommetFoyerEquationParabole";
 import { Katex } from "./components/Katex";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifEquationParabole } from "./ui/recapitulatifEquationParabole";
 import { formatEquationAttendueLatex, formatFoyerLatex, formatSommetLatex } from "./ui/formatEquationParabole";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -64,6 +66,7 @@ export function AppEquationParabole() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const recapitulatif = calculerRecapitulatifEquationParabole(etat);
 
   const premierePhaseRef = useRef(phase);
   const dernierExerciceRef = useRef(exercice);
@@ -108,6 +111,7 @@ export function AppEquationParabole() {
 
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           {phase === "sommetFoyer" ? (
             <EtapeSommetFoyerEquationParabole
               key={phase}

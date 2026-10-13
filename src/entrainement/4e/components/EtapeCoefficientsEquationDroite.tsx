@@ -9,11 +9,10 @@ import {
 } from "../moteur/verificationEquationDroite";
 import type { ReponseCoefficients } from "../moteur/typesEquationDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LATEX_GABARIT_FORME, consigneCoefficients, formatAideCoefficientsNiveau2Latex, formatEnonceLatex, formatEtatActuelPointVecteurLatex } from "../ui/formatEquationDroite";
+import { LATEX_GABARIT_FORME, consigneCoefficients, formatAideCoefficientsNiveau2Latex, formatEnonceLatex } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -97,7 +96,6 @@ export function EtapeCoefficientsEquationDroite({ exercice, estPremierEcran, ten
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelPointVecteurLatex(exercice)} />
       <p className="prompt-text">{consigneCoefficients(exercice)}</p>
 
       {estParametrique ? (

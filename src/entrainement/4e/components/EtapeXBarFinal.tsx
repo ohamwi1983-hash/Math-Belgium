@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersXBar, ExerciceBienaymeTchebychevNombreVersXBar } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerXBar } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LABEL_XBAR, PRECISION_UNITE, type ValeurEtatActuel, formatEtatActuelCombineLatex, kEtatActuel, pourcentAttendu0EtatActuel, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { LABEL_XBAR, PRECISION_UNITE, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,12 +27,9 @@ interface Props {
 
 const MAX = 2;
 
-function pourcentAttendu0Pour(exercice: Exercice): ValeurEtatActuel | null {
-  return exercice.variante === "nombreVersXBar" ? pourcentAttendu0EtatActuel(exercice) : null;
-}
-
-/** Rôle "x̄ retrouvé" (v6XBar, v8XBar) — dernier écran, arrondi standard (pas de piège). Rappelle k
- * (et le pourcentage écran 0 pour V8). */
+/** Rôle "x̄ retrouvé" (v6XBar, v8XBar) — dernier écran, arrondi standard (pas de piège). k (et le
+ * pourcentage écran 0 pour V8) sont listés dans le récapitulatif "Ce qu'on sait déjà" au niveau de
+ * l'App. */
 export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
@@ -42,7 +38,6 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
   return (
     <div>
       <EnonceBienaymeTchebychev exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelCombineLatex(pourcentAttendu0Pour(exercice), kEtatActuel(exercice))} />
       <p className="prompt-text">
         Quelle est la moyenne <Katex expression={LABEL_XBAR} /> (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
       </p>

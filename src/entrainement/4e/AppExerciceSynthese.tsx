@@ -64,6 +64,8 @@ import {
 import { formatCentresAttendusTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
 import { formatBtIntervalleAttenduTexte, formatBtPourcentAttenduTexte } from "./ui/formatExerciceSynthese";
 import { SegmentsInline } from "./components/SegmentsInline";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifExerciceSynthese } from "./ui/recapitulatifExerciceSynthese";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -248,6 +250,7 @@ export function AppExerciceSynthese() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const recapitulatif = calculerRecapitulatifExerciceSynthese(etat);
 
   const validation = enAttente
     ? {
@@ -275,6 +278,7 @@ export function AppExerciceSynthese() {
         </div>
 
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           {PHASES_CALCULATRICE.has(phase) && <CalculatriceScientifique />}
           {phase === "centres" && exercice.variante === "classes" ? (
             <EtapeCentresMoyennePonderee

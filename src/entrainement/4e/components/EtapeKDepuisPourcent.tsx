@@ -9,10 +9,9 @@ import type {
 } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LABEL_K, PRECISION_K, type ValeurEtatActuel, formatEtatActuelCombineLatex, pourcentAttendu0EtatActuel, texteAideKDepuisPourcentNiveau1, texteAideKDepuisPourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { LABEL_K, PRECISION_K, texteAideKDepuisPourcentNiveau1, texteAideKDepuisPourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -58,35 +57,20 @@ function pourcentAffichePour(exercice: Exercice): number {
   }
 }
 
-/** `null` pour V2/V5/V6 (pourcentage déjà visible dans l'énoncé, rien à rappeler) — la valeur
- * CONFIRMÉE `pourcentAttendu0` pour V4/V7/V8 (bloc "état actuel"). */
-function pourcentAttendu0Pour(exercice: Exercice): ValeurEtatActuel | null {
-  switch (exercice.variante) {
-    case "nombreVersIntervalle":
-    case "nombreVersSigma":
-    case "nombreVersXBar":
-      return pourcentAttendu0EtatActuel(exercice);
-    default:
-      return null;
-  }
-}
-
 /** Rôle "k depuis un pourcentage donné" (v2K, v4K, v5K, v6K, v7K, v8K) — le pourcentage est soit une
- * DONNÉE directe de l'énoncé (V2/V5/V6, `pourcentDonne`, déjà affiché dans l'énoncé, aucun bloc "état
- * actuel" nécessaire), soit une valeur CONFIRMÉE à l'écran précédent (V4/V7/V8, `pourcentAttendu0`,
- * rappelée via `EtatActuelPanel`). */
+ * DONNÉE directe de l'énoncé (V2/V5/V6, `pourcentDonne`, déjà affiché dans l'énoncé), soit une valeur
+ * CONFIRMÉE à l'écran précédent (V4/V7/V8, `pourcentAttendu0`, listée dans le récapitulatif "Ce
+ * qu'on sait déjà" au niveau de l'App plutôt que rappelée ici). */
 export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet && tentativesUtilisees > 0 ? diagnostiquerK(exercice, texte) : undefined;
 
-  const pourcentAttendu0 = pourcentAttendu0Pour(exercice);
   const pourcentAffiche = pourcentAffichePour(exercice);
 
   return (
     <div>
       <EnonceBienaymeTchebychev exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelCombineLatex(pourcentAttendu0, null)} />
       <p className="prompt-text">
         Détermine <Katex expression={LABEL_K} /> pour ce pourcentage minimal ({PRECISION_K}).
       </p>

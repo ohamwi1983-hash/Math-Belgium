@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevNombreVersIntervalle, ExerciceBienaymeTchebychevPourcentVersIntervalle } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerIntervalleAttendu } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PRECISION_UNITE, type ValeurEtatActuel, formatEtatActuelCombineLatex, kEtatActuel, pourcentAttendu0EtatActuel, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
+import { PRECISION_UNITE, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,10 +27,6 @@ interface Props {
 
 const MAX = 1;
 
-function pourcentAttendu0Pour(exercice: Exercice): ValeurEtatActuel | null {
-  return exercice.variante === "nombreVersIntervalle" ? pourcentAttendu0EtatActuel(exercice) : null;
-}
-
 /** `parse_error` prioritaire si l'un des deux champs échoue au parsing, sinon un statut générique
  * "not_equivalent" (le message affiché est identique pour tout ce qui n'est pas `parse_error`). */
 function statutPrioritaire(statut: { borneInf: string; borneSup: string } | undefined): "parse_error" | "not_equivalent" | undefined {
@@ -53,7 +48,6 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <EnonceBienaymeTchebychev exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelCombineLatex(pourcentAttendu0Pour(exercice), kEtatActuel(exercice))} />
       <p className="prompt-text">
         Quel est l'intervalle garanti (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
       </p>

@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerNombre } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PRECISION_UNITE, formatEtatActuelCombineLatex, kEtatActuel, pourcentAttenduEtatActuel } from "../ui/formatBienaymeTchebychev";
+import { PRECISION_UNITE } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -31,7 +30,6 @@ export function EtapeNombreFinal({ exercice, tentativesUtilisees, tentativesMax,
   return (
     <div>
       <EnonceBienaymeTchebychev exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelCombineLatex(pourcentAttenduEtatActuel(exercice), kEtatActuel(exercice))} />
       <p className="prompt-text">Quel est le nombre minimal d'individus garanti ? ({PRECISION_UNITE})</p>
 
       <div className="field field-inline">

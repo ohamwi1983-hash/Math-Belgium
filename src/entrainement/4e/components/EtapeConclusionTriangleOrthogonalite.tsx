@@ -2,8 +2,7 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangle, Sommet } from "../core/orthogonalite.types";
 import type { ReponseConclusionTriangle } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { LIBELLES_OUI_NON, QUESTION_SOMMET_RECTANGLE, QUESTION_TRIANGLE_RECTANGLE, TEXTE_AIDE_CONCLUSION_TRIANGLE, consigneGlobaleOrthogonalite, etatActuelConclusionTriangle, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
-import { EtatActuelPanel } from "./EtatActuelPanel";
+import { LIBELLES_OUI_NON, QUESTION_SOMMET_RECTANGLE, QUESTION_TRIANGLE_RECTANGLE, TEXTE_AIDE_CONCLUSION_TRIANGLE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleLatex } from "../ui/formatOrthogonalite";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -42,10 +41,12 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangle, sommet: Sommet): s
  * Aide à 1 niveau : rappel qu'un seul des 3 tests peut donner 0 pour un triangle non dégénéré.
  *
  * `promptgen25modificationscompletes.md` : bloc de données (points A/B/C) passé en "bloc fitter"
- * (`formatTermesEnonceTriangleLatex`) + NOUVEAU bloc "état actuel" (`etatActuelConclusionTriangle`,
- * les 3 critères d'orthogonalité déjà validés aux 3 écrans précédents) — jusque-là manquant : le
- * seul bloc violet visible sur cet écran n'affichait que les coordonnées de départ (le bloc de
- * données), jamais un récapitulatif des critères déjà calculés.
+ * (`formatTermesEnonceTriangleLatex`).
+ *
+ * Ancien bloc "état actuel" (`etatActuelConclusionTriangle`, les 3 critères d'orthogonalité déjà
+ * validés aux 3 écrans précédents) retiré — son contenu est maintenant porté individuellement par
+ * les entrées `testSommetA/B/C` du récapitulatif "Ce qu'on sait déjà"
+ * (`ui/recapitulatifOrthogonalite.ts`), affiché en haut de `AppOrthogonalite.tsx`.
  */
 export function EtapeConclusionTriangleOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
@@ -67,7 +68,6 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, estPremierEcran
           </div>
         }
       />
-      <EtatActuelPanel latex={etatActuelConclusionTriangle(exercice)} />
       <p className="prompt-text">{QUESTION_TRIANGLE_RECTANGLE}</p>
 
       <div className="options-grid-compact">

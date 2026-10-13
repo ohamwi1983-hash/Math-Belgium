@@ -26,6 +26,8 @@ import {
   formatEtatActuelPointVecteurLatex,
 } from "./ui/formatEquationDroite";
 import { Katex } from "./components/Katex";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifEquationDroite } from "./ui/recapitulatifEquationDroite";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -113,6 +115,7 @@ export function AppEquationDroite() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const recapitulatif = calculerRecapitulatifEquationDroite(etat);
 
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
    * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
@@ -175,6 +178,7 @@ export function AppEquationDroite() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "extraction" ? (
           <EtapeExtractionEquationDroite
             exercice={exercice}

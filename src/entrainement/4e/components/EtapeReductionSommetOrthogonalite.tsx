@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { ExerciceOrthogonaliteTriangleParametre, Sommet } from "../core/orthogonalite.types";
 import { diagnostiquerReductionSommet } from "../moteur/verificationOrthogonalite";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesOrthogonalite";
-import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_PIEGE_B_EQUATION, LATEX_PIEGE_B_SEUL, LATEX_PIEGE_C_EQUATION_1, LATEX_PIEGE_C_EQUATION_2, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, TEXTE_AIDE_PIEGE_B_APRES, TEXTE_AIDE_PIEGE_B_AVANT, TEXTE_AIDE_PIEGE_B_ENTRE, TEXTE_AIDE_PIEGE_C_APRES, TEXTE_AIDE_PIEGE_C_AVANT, TEXTE_AIDE_PIEGE_C_ENTRE, consigneGlobaleOrthogonalite, etatActuelReductionSommet, formatTermesEnonceTriangleParametreLatex, formuleSubstitueeSommetTriangleParametreLatex } from "../ui/formatOrthogonalite";
+import { LATEX_FORMULE_ORTHOGONALITE_VECTORIELLE, LATEX_PIEGE_B_EQUATION, LATEX_PIEGE_B_SEUL, LATEX_PIEGE_C_EQUATION_1, LATEX_PIEGE_C_EQUATION_2, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_ORTHOGONALITE_APRES, RAPPEL_VECTORIEL_ORTHOGONALITE_AVANT, RAPPEL_VECTORIEL_ORTHOGONALITE_ENTRE, RAPPEL_VECTORIEL_ORTHOGONALITE_FIN, TEXTE_AIDE_PIEGE_B_APRES, TEXTE_AIDE_PIEGE_B_AVANT, TEXTE_AIDE_PIEGE_B_ENTRE, TEXTE_AIDE_PIEGE_C_APRES, TEXTE_AIDE_PIEGE_C_AVANT, TEXTE_AIDE_PIEGE_C_ENTRE, consigneGlobaleOrthogonalite, formatTermesEnonceTriangleParametreLatex, formuleSubstitueeSommetTriangleParametreLatex } from "../ui/formatOrthogonalite";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -60,14 +59,16 @@ function Piege({ sommet }: { sommet: Sommet }) {
  * sommet fixe, quadratique pour les 2 sommets mobiles — voir `core/orthogonalite.types.ts` pour la
  * justification géométrique complète) — `promptcorrectionsgenerateur25complet.md`, points 5-6.
  *
- * Bloc "État actuel" (vecteurs concernés par ce test, notation matricielle, point 5) + aide
- * progressive à 2 niveaux reformulée en notation vectorielle générique (point 7, même formulation
- * que l'écran "test du sommet" de la variante 3) — conserve le rappel du piège BA⃗=-AB⃗/CA⃗=-AC⃗ et
- * CB⃗=-BC⃗ pour B/C, déjà prévu à la création.
+ * Aide progressive à 2 niveaux reformulée en notation vectorielle générique (point 7, même
+ * formulation que l'écran "test du sommet" de la variante 3) — conserve le rappel du piège
+ * BA⃗=-AB⃗/CA⃗=-AC⃗ et CB⃗=-BC⃗ pour B/C, déjà prévu à la création.
  *
  * `promptgen25modificationscompletes.md` : consigne globale ET bloc de données redondant (points
- * A/B/C, "bloc fitter" via `formatTermesEnonceTriangleParametreLatex`) ajoutés — jusque-là tous
- * deux absents de cet écran (seul le bloc "état actuel" y était affiché).
+ * A/B/C, "bloc fitter" via `formatTermesEnonceTriangleParametreLatex`) ajoutés.
+ *
+ * Ancien bloc "état actuel" (vecteurs concernés par ce test, `etatActuelReductionSommet`) retiré —
+ * son contenu alimente maintenant le récapitulatif "Ce qu'on sait déjà"
+ * (`ui/recapitulatifOrthogonalite.ts`), affiché en haut de `AppOrthogonalite.tsx`.
  */
 export function EtapeReductionSommetOrthogonalite({ exercice, estPremierEcran, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -89,7 +90,6 @@ export function EtapeReductionSommetOrthogonalite({ exercice, estPremierEcran, s
           </div>
         }
       />
-      <EtatActuelPanel latex={etatActuelReductionSommet(exercice, sommet)} />
       <p className="prompt-text">Réduis le critère d'orthogonalité du sommet {labelSommet(exercice, sommet)} à une équation.</p>
 
       <div className="field field-inline">

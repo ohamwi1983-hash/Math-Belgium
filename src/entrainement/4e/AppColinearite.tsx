@@ -23,6 +23,8 @@ import { EtapeReductionColinearite } from "./components/EtapeReductionColinearit
 import { EtapeReductionAvecXColinearite } from "./components/EtapeReductionAvecXColinearite";
 import { EtapeResolutionColinearite } from "./components/EtapeResolutionColinearite";
 import { EtapeResolutionAvecXColinearite } from "./components/EtapeResolutionAvecXColinearite";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifColinearite } from "./ui/recapitulatifColinearite";
 import { conclusionAttendue, critereReel } from "./moteur/verificationColinearite";
 import { formatComposantesLinMatriceLatex, formatComposantesMatriceLatex, formatEquationReduiteLatex, LIBELLES_OUI_NON } from "./ui/formatColinearite";
 import { Katex } from "./components/Katex";
@@ -172,6 +174,7 @@ export function AppColinearite() {
     premierePhaseRef.current = phase;
   }
   const estPremierEcran = phase === premierePhaseRef.current;
+  const recapitulatif = calculerRecapitulatifColinearite(etat);
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -203,6 +206,7 @@ export function AppColinearite() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "constructionVecteurs" && exercice.variante === "points" ? (
           <EtapeConstructionVecteursColinearite
             exercice={exercice}

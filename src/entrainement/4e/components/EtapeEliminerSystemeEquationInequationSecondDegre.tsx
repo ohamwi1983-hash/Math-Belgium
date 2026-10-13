@@ -2,11 +2,10 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerEliminationSysteme } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_ELIMINER_SYSTEME } from "../moteur/sessionEquationInequationSecondDegre";
-import { consigneEliminerSysteme, formatSystemeConfirmeLatex, texteAideEliminerSystemeNiveau1, texteAideEliminerSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { consigneEliminerSysteme, texteAideEliminerSystemeNiveau1, texteAideEliminerSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
@@ -42,7 +41,6 @@ export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, es
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatSystemeConfirmeLatex(exercice)} label="Système" />
       <p className="prompt-text">{consigneEliminerSysteme()}</p>
       <div className="field">
         <label className="field-label" htmlFor="equation-inequation-eliminer-systeme">

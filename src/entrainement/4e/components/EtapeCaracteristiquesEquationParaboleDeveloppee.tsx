@@ -4,9 +4,8 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionEquationParab
 import { diagnostiquerDirectrice, diagnostiquerFoyer, diagnostiquerP, diagnostiquerSommet } from "../moteur/verificationEquationParaboleDeveloppee";
 import type { ReponseEcranCaracteristiques } from "../moteur/typesEquationParaboleDeveloppee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { CONSIGNE_CARACTERISTIQUES, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_DIRECTRICE_HORIZONTAL, PLACEHOLDER_DIRECTRICE_VERTICAL, PLACEHOLDER_P, formatAideCaracteristiquesNiveau1Latex, formatAideCaracteristiquesNiveau2Latex, formatCompletionLatex, formatEquationDeveloppeeLatex } from "../ui/formatEquationParaboleDeveloppee";
+import { CONSIGNE_CARACTERISTIQUES, CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE, PLACEHOLDER_COORDONNEE, PLACEHOLDER_DIRECTRICE_HORIZONTAL, PLACEHOLDER_DIRECTRICE_VERTICAL, PLACEHOLDER_P, formatAideCaracteristiquesNiveau1Latex, formatAideCaracteristiquesNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationParaboleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,8 +27,10 @@ interface Props {
 }
 
 /**
- * Écran 3 (dernier, toujours terminal) — "état actuel" rappelle la forme complétée CONFIRMÉE à
- * l'écran 2. S/F : statut à 3 valeurs classique, 2 champs numériques chacun. p : 1 champ numérique
+ * Écran 3 (dernier, toujours terminal) — la forme complétée CONFIRMÉE à l'écran 2 (et le
+ * regroupement de l'écran 1) apparaissent désormais dans le récapitulatif accumulé en haut de
+ * carte (`RecapitulatifPanel`/`AppEquationParaboleDeveloppee`), plus ici en isolation. S/F :
+ * statut à 3 valeurs classique, 2 champs numériques chacun. p : 1 champ numérique
  * signé. Directrice : texte libre, gère les 2 orientations uniformément
  * (`diagnostiquerDirectrice`). Chaque champ diagnostiqué indépendamment pour isoler le piège
  * central (F et directrice échangés en cas d'erreur de signe sur p).
@@ -80,7 +81,6 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, estP
           </div>
         }
       />
-      <EtatActuelPanel latex={formatCompletionLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_CARACTERISTIQUES}</p>
 
       <div className="field-row">

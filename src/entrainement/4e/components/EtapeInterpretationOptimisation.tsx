@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { verifierInterpretation } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_INTERPRETATION } from "../moteur/sessionOptimisation";
-import { consigneInterpretation, formatDonneesFinalesLatex, segmentsPhraseEnonce, texteAideInterpretationNiveau1 } from "../ui/formatOptimisation";
+import { consigneInterpretation, segmentsPhraseEnonce, texteAideInterpretationNiveau1 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -40,7 +39,6 @@ export function EtapeInterpretationOptimisation({ exercice, estPremierEcran, ten
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesFinalesLatex(exercice)} label="Données" />
       <p className="prompt-text">{consigneInterpretation()}</p>
 
       <div className="options-grid">

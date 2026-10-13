@@ -48,7 +48,8 @@ import {
 } from "./generateurs/caracteristiquesAlgebriques";
 import type { FamilleReference } from "./core/fonctionsReference.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
-import { calculerEtatActuelCaracteristiquesAlgebriques } from "./ui/etatActuelCaracteristiquesAlgebriques";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifCaracteristiquesAlgebriques } from "./ui/recapitulatifCaracteristiquesAlgebriques";
 import { EtapeReglagesCaracteristiquesAlgebriques } from "./components/EtapeReglagesCaracteristiquesAlgebriques";
 import { EtapeOrdonneeAlgebrique } from "./components/EtapeOrdonneeAlgebrique";
 import { EtapeCE } from "./components/EtapeCE";
@@ -396,6 +397,8 @@ export function AppCaracteristiquesAlgebriques() {
       }
     : null;
 
+  const recapitulatif = calculerRecapitulatifCaracteristiquesAlgebriques(etat);
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -418,6 +421,7 @@ export function AppCaracteristiquesAlgebriques() {
           </div>
         </div>
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           {etat.phase === "ordonnee" ? (
             <EtapeOrdonneeAlgebrique
               exercice={etat.exerciceCourant}
@@ -453,7 +457,6 @@ export function AppCaracteristiquesAlgebriques() {
           ) : etat.phase === "separation" ? (
             <EtapeSeparation
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: ReponseSeparation) => terminerEtape(soumettreReponseSeparation(etat, reponse))}
@@ -462,7 +465,6 @@ export function AppCaracteristiquesAlgebriques() {
           ) : etat.phase === "debarrasser" ? (
             <EtapeDebarrasser
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: string) => terminerEtape(soumettreReponseDebarrasser(etat, reponse))}
@@ -471,7 +473,6 @@ export function AppCaracteristiquesAlgebriques() {
           ) : etat.phase === "validite" && necessiteValidite(etat.exerciceCourant) ? (
             <EtapeConditionValidite
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: ReponseCondition) => terminerEtape(soumettreReponseValidite(etat, reponse))}
@@ -480,7 +481,6 @@ export function AppCaracteristiquesAlgebriques() {
           ) : etat.phase === "regroupe" && necessiteRegroupe(etat.exerciceCourant) ? (
             <EtapeRegroupe
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: string) => terminerEtape(soumettreReponseRegroupe(etat, reponse))}
@@ -491,7 +491,6 @@ export function AppCaracteristiquesAlgebriques() {
             etat.exerciceCourant.famille === "valeur_absolue" ? (
             <EtapeResolutionBranches
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: ReponseResolutionBranches) => terminerEtape(soumettreReponseResolutionBranches(etat, reponse))}
@@ -501,7 +500,6 @@ export function AppCaracteristiquesAlgebriques() {
             <EtapeValidationSolution
               key={etat.scoresValidationSolutionExercice.length}
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               index={etat.scoresValidationSolutionExercice.length}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
@@ -511,7 +509,6 @@ export function AppCaracteristiquesAlgebriques() {
           ) : (
             <EtapeZerosAlgebrique
               exercice={etat.exerciceCourant}
-              etatActuel={calculerEtatActuelCaracteristiquesAlgebriques(etat)}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: ReponseZerosCaracteristiques) => terminerEtape(soumettreReponseZeros(etat, reponse))}

@@ -4,13 +4,12 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_DISTANCE_PQ } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerDistance } from "../moteur/verificationDistanceDroite";
-import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_DISTANCE_PQ, FORMULE_GENERALE_DISTANCE_PQ_LATEX, LABEL_DISTANCE_PQ, PLACEHOLDER_DISTANCE_PQ, calculerEtatActuelDistanceDroite, formatAideDistancePQNiveau2Latex } from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, COULEUR_Q, CONSIGNE_DISTANCE_PQ, FORMULE_GENERALE_DISTANCE_PQ_LATEX, LABEL_DISTANCE_PQ, PLACEHOLDER_DISTANCE_PQ, formatAideDistancePQNiveau2Latex } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -60,8 +59,6 @@ export function EtapeDistancePQDistanceDroite({ exercice, estPremierEcran, point
       : [{ droite: droiteCible, label: "d", couleur: COULEUR_D }];
   lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
 
-  const etatActuel = calculerEtatActuelDistanceDroite({ variante: exercice.variante, point, droiteCible, bAttendue, qAttendu });
-
   return (
     <div>
       <EnTeteExercice
@@ -80,7 +77,6 @@ export function EtapeDistancePQDistanceDroite({ exercice, estPremierEcran, point
           </>
         }
       />
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">{CONSIGNE_DISTANCE_PQ}</p>
 
       <div className="field field-inline">

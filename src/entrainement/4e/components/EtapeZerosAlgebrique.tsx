@@ -3,7 +3,6 @@ import type { ExerciceCaracteristiquesAlgebriques, ReponseZerosCaracteristiques 
 import { diagnostiquerExpressionNumerique, parserExpressionNumerique } from "../moteur/verificationCaracteristiquesAlgebriques";
 import { INSTRUCTION_ZEROS, formatEquationRechercheZerosLatex, placeholderExpressionNumerique } from "../ui/formatCaracteristiquesAlgebriques";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -12,7 +11,6 @@ type Choix = "aucun" | "auMoinsUn";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
-  etatActuel: string | null;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseZerosCaracteristiques) => void;
@@ -34,14 +32,14 @@ interface Props {
  * (`EtapeOrdonneeAlgebrique.tsx`), lui, a réellement besoin de cette flexibilité, `racine_carree`/
  * `racine_cubique` pouvant y produire une vraie valeur irrationnelle. Placeholder adapté
  * DYNAMIQUEMENT à la famille réellement générée (`placeholderExpressionNumerique`,
- * `prompt-corrections-caracteristiquesalgebriques.md`, point 1). `etatActuel` rappelle la forme
- * confirmée la plus récente (équation isolée, les deux équations séparées niveau 1 `valeur_absolue`/
- * `carre`, l'équation isolée + "débarrassée" niveau 1 pour les 4 autres familles, les deux
- * équations de branche + conditions niveau 2 `valeur_absolue`, ou l'équation isolée + regroupée
- * niveau 2 pour `inverse`/`racine_carree`/`racine_cubique` — voir
- * `calculerEtatActuelCaracteristiquesAlgebriques`).
+ * `prompt-corrections-caracteristiquesalgebriques.md`, point 1). Les étapes déjà confirmées
+ * (équation isolée, séparation/débarrasser niveau 1, validité/regroupe/résolution des branches
+ * niveau 2...) ne sont plus rappelées ici via un bloc "état actuel" isolé : elles apparaissent
+ * désormais dans le récapitulatif "Ce qu'on sait déjà" (`RecapitulatifPanel`,
+ * `calculerRecapitulatifCaracteristiquesAlgebriques`) affiché en haut de chaque écran par
+ * `AppCaracteristiquesAlgebriques.tsx`.
  */
-export function EtapeZerosAlgebrique({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -81,7 +79,6 @@ export function EtapeZerosAlgebrique({ exercice, etatActuel, tentativesUtilisees
       <div className="equation-box">
         <Katex expression={formatEquationRechercheZerosLatex(exercice)} block />
       </div>
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">{INSTRUCTION_ZEROS}</p>
       <div className="options-grid">
         <button type="button" className={choix === "aucun" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucun")}>

@@ -2,11 +2,10 @@ import { useState } from "react";
 import type { ExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import { diagnostiquerResoudre } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_RESOUDRE } from "../moteur/sessionEquationInequationSecondDegre";
-import { consigneResoudre, formatDonneesAvecEquationLatex, texteAideResoudreNiveau1, texteAideResoudreNiveau2 } from "../ui/formatEquationInequationSecondDegre";
+import { consigneResoudre, texteAideResoudreNiveau1, texteAideResoudreNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
@@ -46,7 +45,6 @@ export function EtapeResoudreEquationInequationSecondDegre({ exercice, estPremie
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesAvecEquationLatex(exercice)} />
       <p className="prompt-text">{consigneResoudre()}</p>
 
       <div className="field-row">

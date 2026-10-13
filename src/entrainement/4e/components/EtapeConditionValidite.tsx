@@ -8,14 +8,12 @@ import {
   expressionConditionValiditeLatex,
   formatEquationNiveau1Latex,
 } from "../ui/formatCaracteristiquesAlgebriques";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceNiveau2RacineCarree | ExerciceNiveau2ValeurAbsolue;
-  etatActuel: string | null;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseCondition) => void;
@@ -51,7 +49,7 @@ const SYMBOLES: SymboleConditionSimple[] = ["≥", "≤"];
  * change (`construireConditionValiditeSimple` produit exactement le même `Morceau` demi-droite
  * qu'avant).
  */
-export function EtapeConditionValidite({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeConditionValidite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [symbole, setSymbole] = useState<SymboleConditionSimple | null>(null);
   const [valeurTexte, setValeurTexte] = useState("");
 
@@ -65,7 +63,6 @@ export function EtapeConditionValidite({ exercice, etatActuel, tentativesUtilise
       <div className="equation-box">
         <Katex expression={formatEquationNiveau1Latex(exercice)} block />
       </div>
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">{TRANSITION_CONDITION_VALIDITE}</p>
       <p className="prompt-text">
         Établis la condition pour que <Katex expression={expressionConditionValiditeLatex(exercice)} /> ≥ 0.

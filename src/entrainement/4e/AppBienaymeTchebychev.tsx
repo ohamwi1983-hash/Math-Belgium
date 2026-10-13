@@ -37,6 +37,8 @@ import { EtapeNombreFinal } from "./components/EtapeNombreFinal";
 import { EtapePourcentDepuisNombre } from "./components/EtapePourcentDepuisNombre";
 import { EtapeSigmaFinal } from "./components/EtapeSigmaFinal";
 import { EtapeXBarFinal } from "./components/EtapeXBarFinal";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifBienaymeTchebychev } from "./ui/recapitulatifBienaymeTchebychev";
 import {
   formatIntervalleAttenduTexte,
   formatKAttenduTexte,
@@ -195,6 +197,7 @@ export function AppBienaymeTchebychev() {
   }
 
   const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifBienaymeTchebychev(etat);
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -226,6 +229,7 @@ export function AppBienaymeTchebychev() {
 
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           <CalculatriceScientifique />
           {etat.phase === "v1K" && exercice.variante === "intervalleVersPourcent" ? (
             <EtapeKDepuisIntervalle

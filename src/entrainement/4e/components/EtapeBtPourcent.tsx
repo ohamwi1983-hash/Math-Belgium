@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtPourcent } from "../moteur/verificationExerciceSynthese";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { consigneBtPourcent, formatEnonceTexte, formatEtatActuelIntervalleBTLatex, texteAideBtPourcentNiveau1 } from "../ui/formatExerciceSynthese";
+import { consigneBtPourcent, formatEnonceTexte, texteAideBtPourcentNiveau1 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,7 +27,8 @@ const MAX = 1;
 /**
  * Écran "btPourcent" (dernier écran de la séquence, "gen37 adaptée") — un seul champ, le
  * pourcentage minimal garanti $1-1/k^2$, toujours exactement 75 pour $k=2$. L'intervalle CONFIRMÉ
- * à l'écran précédent est rappelé via `EtatActuelPanel`, jamais resaisi.
+ * à l'écran précédent est rappelé dans le récapitulatif "Ce qu'on sait déjà" (`RecapitulatifPanel`,
+ * câblé par `AppExerciceSynthese.tsx`), jamais resaisi.
  */
 export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -40,7 +40,6 @@ export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, 
       <div className="equation-box">
         <p className="prompt-text">{formatEnonceTexte(exercice)}</p>
       </div>
-      <EtatActuelPanel latex={formatEtatActuelIntervalleBTLatex(exercice)} />
       <p className="prompt-text">{consigneBtPourcent()}</p>
 
       <div className="field field-inline">

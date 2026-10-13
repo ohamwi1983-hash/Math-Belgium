@@ -3,10 +3,9 @@ import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { diagnostiquerSommet } from "../moteur/verificationOptimisation";
 import type { ReponseSommet } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_SOMMET } from "../moteur/sessionOptimisation";
-import { consigneSommet, contexteLabelX, contexteLabelY, formatDonneesConfirmeesLatex, segmentsPhraseEnonce, texteAideSommetNiveau1, texteAideSommetNiveau2 } from "../ui/formatOptimisation";
+import { consigneSommet, contexteLabelX, contexteLabelY, segmentsPhraseEnonce, texteAideSommetNiveau1, texteAideSommetNiveau2 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -29,8 +28,9 @@ interface Props {
 
 /**
  * Écran commun aux 2 variantes — calcule le sommet de la parabole. Première étape de la variante
- * `fonctionDonnee` (fonction ET domaine déjà fournis, voir `EtatActuelPanel`) ; pour `modelisation`,
- * fonction/domaine viennent d'être confirmés aux écrans précédents.
+ * `fonctionDonnee` (fonction ET domaine déjà fournis) ; pour `modelisation`, fonction/domaine
+ * viennent d'être confirmés aux écrans précédents (récapitulés par `RecapitulatifPanel`, voir
+ * `AppOptimisation.tsx`, plutôt que par un bloc "état actuel" isolé ici).
  *
  * **Labels de champs = nom concret de la grandeur/variable, REMPLACEMENT COMPLET** (`prompt-
  * restructuration-architecture-modelisation.md`, point 1 — jamais $x_S$/$y_S$ nus, jamais un ajout
@@ -67,7 +67,6 @@ export function EtapeSommetOptimisation({ exercice, estPremierEcran, tentativesU
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesConfirmeesLatex(exercice)} label="Données" />
       <p className="prompt-text">{consigneSommet(exercice)}</p>
       <div className="field">
         <label className="field-label" htmlFor="optimisation-sommet-x">

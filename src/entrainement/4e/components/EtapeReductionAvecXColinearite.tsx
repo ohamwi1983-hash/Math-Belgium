@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { ExerciceColinearPointsParametre } from "../core/colinearite.types";
 import { diagnostiquerReductionAvecX } from "../moteur/verificationColinearite";
 import { NIVEAU_AIDE_MAX_REDUCTION_AVEC_X } from "../moteur/sessionColinearite";
-import { CONSIGNE_REDUCTION_AVEC_X, LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, etatActuelReductionAvecX, formatTermesEnoncePointsParametreLatex, formuleSubstitueeReductionLatex } from "../ui/formatColinearite";
+import { CONSIGNE_REDUCTION_AVEC_X, LATEX_FORMULE_COLINEARITE_VECTORIELLE, LATEX_VEC_U, LATEX_VEC_V, PLACEHOLDER_EQUATION_REDUITE, RAPPEL_VECTORIEL_COLINEARITE_APRES, RAPPEL_VECTORIEL_COLINEARITE_AVANT, RAPPEL_VECTORIEL_COLINEARITE_ENTRE, RAPPEL_VECTORIEL_COLINEARITE_FIN, consigneGlobaleColinearite, formatTermesEnoncePointsParametreLatex, formuleSubstitueeReductionLatex } from "../ui/formatColinearite";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -31,14 +30,16 @@ interface Props {
  * l'équation réduite complète (`αx+β=0`, ou toute forme équivalente), vérification symbolique
  * (`diagnostiquerReductionAvecX`, réutilise `diagnostiquerFormeCanonique`).
  *
- * Bloc "État actuel" (AB/AC déjà confirmés à l'écran précédent, notation matricielle) + consigne
- * globale persistante + aide progressive à 2 niveaux : niveau 1, rappel VECTORIEL générique (u/v,
- * jamais lié aux vrais noms AB/AC de l'exercice) ; niveau 2, la formule substituée avec les valeurs
- * réelles (non développée).
+ * Consigne globale persistante + aide progressive à 2 niveaux : niveau 1, rappel VECTORIEL
+ * générique (u/v, jamais lié aux vrais noms AB/AC de l'exercice) ; niveau 2, la formule substituée
+ * avec les valeurs réelles (non développée).
  *
  * `promptgen24modificationscompletes.md` : bloc de données (points A/B/C) passé en "bloc fitter"
- * (`formatTermesEnoncePointsParametreLatex`) — l'état actuel (`etatActuelReductionAvecX`) reçoit le
- * même correctif directement dans `formatColinearite.ts` (`\begin{gathered}`, jamais `\qquad`).
+ * (`formatTermesEnoncePointsParametreLatex`).
+ *
+ * Ancien bloc "état actuel" (AB/AC déjà confirmés à l'écran précédent, `etatActuelReductionAvecX`)
+ * retiré — son contenu alimente maintenant le récapitulatif "Ce qu'on sait déjà"
+ * (`ui/recapitulatifColinearite.ts`), affiché en haut de `AppColinearite.tsx`.
  */
 export function EtapeReductionAvecXColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -60,7 +61,6 @@ export function EtapeReductionAvecXColinearite({ exercice, estPremierEcran, tent
           </div>
         }
       />
-      <EtatActuelPanel latex={etatActuelReductionAvecX(exercice)} />
       <p className="prompt-text">{CONSIGNE_REDUCTION_AVEC_X}</p>
 
       <div className="field field-inline">

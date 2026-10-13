@@ -4,10 +4,9 @@ import { NIVEAU_AIDE_MAX_CONSTRUCTION } from "../moteur/sessionRelationsDroites"
 import { diagnostiquerConstruction } from "../moteur/verificationRelationsDroites";
 import type { ReponseVecteur } from "../moteur/verificationRelationsDroites";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_COMPOSANTE, consigneConstruction, formatAideConstructionNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, formatEtatActuelVecteurReferenceLatex, segmentsAideConstructionNiveau1 } from "../ui/formatRelationsDroites";
+import { PLACEHOLDER_COMPOSANTE, consigneConstruction, formatAideConstructionNiveau2Latex, formatDonneesRechercheeLatex, formatEnonceLatex, segmentsAideConstructionNiveau1 } from "../ui/formatRelationsDroites";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleRelationsDroites } from "./ConsigneGeneraleRelationsDroites";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -60,7 +59,6 @@ export function EtapeConstructionRelationsDroites({ exercice, estPremierEcran, t
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelVecteurReferenceLatex(exercice)} />
       <p className="prompt-text">{consigneConstruction(exercice)}</p>
 
       <div className="field-row">

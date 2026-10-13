@@ -8,14 +8,12 @@ import {
   formatFractionLatex,
   formatValeurExacteLatex,
 } from "../ui/formatCaracteristiquesAlgebriques";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceNiveau2RacineCarree | ExerciceNiveau2ValeurAbsolue;
-  etatActuel: string | null;
   index: number;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -54,7 +52,7 @@ function solutionEtCondition(exercice: ExerciceNiveau2RacineCarree | ExerciceNiv
  * navigateur avant correctif, même principe que `formatFractionSigneeLatex`/`ResultatPanel.tsx`, qui
  * mélangent déjà texte brut et fragment `<Katex>` séparé plutôt qu'un unique appel monolithique).
  */
-export function EtapeValidationSolution({ exercice, etatActuel, index, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeValidationSolution({ exercice, index, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const { racineLatex, conditionLatex } = solutionEtCondition(exercice, index);
   const [choix, setChoix] = useState<boolean | null>(null);
   const erronee = tentativesUtilisees > 0;
@@ -64,7 +62,6 @@ export function EtapeValidationSolution({ exercice, etatActuel, index, tentative
       <div className="equation-box">
         <Katex expression={formatEquationRechercheZerosLatex(exercice)} block />
       </div>
-      <EtatActuelPanel latex={etatActuel} />
       <div className="equation-box">
         <Katex expression={`x = ${racineLatex}`} block />
       </div>

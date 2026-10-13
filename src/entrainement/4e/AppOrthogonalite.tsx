@@ -26,6 +26,8 @@ import { EtapeConclusionTriangleOrthogonalite } from "./components/EtapeConclusi
 import { EtapeConstructionAvecXOrthogonalite } from "./components/EtapeConstructionAvecXOrthogonalite";
 import { EtapeReductionSommetOrthogonalite } from "./components/EtapeReductionSommetOrthogonalite";
 import { EtapeIdentificationResolutionOrthogonalite } from "./components/EtapeIdentificationResolutionOrthogonalite";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifOrthogonalite } from "./ui/recapitulatifOrthogonalite";
 import { Katex } from "./components/Katex";
 import { conclusionAttendueTest, conclusionAttendueTriangle, conclusionAttendueTriangleParametre, critereReelTest } from "./moteur/verificationOrthogonalite";
 import {
@@ -147,6 +149,7 @@ export function AppOrthogonalite() {
     premierePhaseRef.current = phase;
   }
   const estPremierEcran = phase === premierePhaseRef.current;
+  const recapitulatif = calculerRecapitulatifOrthogonalite(etat);
 
   const reponseAttendue =
     phase === "test" && exercice.variante === "test" ? (
@@ -228,6 +231,7 @@ export function AppOrthogonalite() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {phase === "test" && exercice.variante === "test" ? (
           <EtapeTestOrthogonalite
             key={phase}

@@ -16,6 +16,8 @@ import { EtapeCentreRayonEquationCercleDeveloppee } from "./components/EtapeCent
 import { EtapeCompletionEquationCercleDeveloppee } from "./components/EtapeCompletionEquationCercleDeveloppee";
 import { EtapeRegroupementEquationCercleDeveloppee } from "./components/EtapeRegroupementEquationCercleDeveloppee";
 import { Katex } from "./components/Katex";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifEquationCercleDeveloppee } from "./ui/recapitulatifEquationCercleDeveloppee";
 import { formatCentreAttenduLatex, formatCompletionLatex, formatRayonAttenduLatex, formatRegroupementLatex } from "./ui/formatEquationCercleDeveloppee";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -70,6 +72,7 @@ export function AppEquationCercleDeveloppee() {
   }
 
   const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifEquationCercleDeveloppee(etat);
 
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
    * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
@@ -122,6 +125,7 @@ export function AppEquationCercleDeveloppee() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "centreRayon" && exercice.variante === "irrationnel" && <CalculatriceScientifique />}
         {etat.phase === "regroupement" ? (
           <EtapeRegroupementEquationCercleDeveloppee

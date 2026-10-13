@@ -4,13 +4,12 @@ import type { DroiteImplicite } from "../core/droite.types";
 import type { Point } from "../core/vecteur.types";
 import { NIVEAU_AIDE_MAX_EQUATION_B } from "../moteur/sessionDistanceDroite";
 import { diagnostiquerEquationB } from "../moteur/verificationDistanceDroite";
-import { COULEUR_B, COULEUR_D, COULEUR_P, LABEL_CHAMP_EQUATION_B, PLACEHOLDER_EQUATION, calculerEtatActuelDistanceDroite, formatAideEquationBNiveau2Latex, segmentsAideEquationBNiveau1, segmentsConsigneEquationB } from "../ui/formatDistanceDroite";
+import { COULEUR_B, COULEUR_D, COULEUR_P, LABEL_CHAMP_EQUATION_B, PLACEHOLDER_EQUATION, formatAideEquationBNiveau2Latex, segmentsAideEquationBNiveau1, segmentsConsigneEquationB } from "../ui/formatDistanceDroite";
 import type { LigneAffichee } from "../ui/distanceDroiteGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleDistanceDroite } from "./ConsigneGeneraleDistanceDroite";
 import { DistanceDroiteGraph } from "./DistanceDroiteGraph";
 import { DonneesDistanceDroite } from "./DonneesDistanceDroite";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -60,8 +59,6 @@ export function EtapeEquationBDistanceDroite({ exercice, estPremierEcran, point,
       : [{ droite: droiteCible, label: "d", couleur: COULEUR_D }];
   if (niveauAide >= 1) lignes.push({ droite: bAttendue, label: "b", couleur: COULEUR_B });
 
-  const etatActuel = calculerEtatActuelDistanceDroite({ variante: exercice.variante, point, droiteCible: null, bAttendue: null, qAttendu: null });
-
   return (
     <div>
       <EnTeteExercice
@@ -74,7 +71,6 @@ export function EtapeEquationBDistanceDroite({ exercice, estPremierEcran, point,
           </>
         }
       />
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneEquationB()} />
       </p>

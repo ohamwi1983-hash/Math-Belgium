@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersNombre, ExerciceBienaymeTchebychevIntervalleVersPourcent } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerPourcent } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { formatEtatActuelCombineLatex, kEtatActuel, precisionPourcentFinal, texteAidePourcentNiveau1, texteAidePourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { precisionPourcentFinal, texteAidePourcentNiveau1, texteAidePourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -40,7 +39,6 @@ export function EtapePourcentFinal({ exercice, tentativesUtilisees, tentativesMa
   return (
     <div>
       <EnonceBienaymeTchebychev exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelCombineLatex(null, kEtatActuel(exercice))} />
       <p className="prompt-text">Quel est le pourcentage minimal garanti ? ({precisionPourcentFinal(exercice.variante)})</p>
 
       <div className="field field-inline">

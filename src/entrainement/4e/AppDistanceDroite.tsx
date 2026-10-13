@@ -19,6 +19,8 @@ import { EtapeEquationBDistanceDroite } from "./components/EtapeEquationBDistanc
 import { EtapeIntersectionQDistanceDroite } from "./components/EtapeIntersectionQDistanceDroite";
 import { Katex } from "./components/Katex";
 import { formatEquationImpliciteLatex, formatPointLatex } from "./ui/formatEquationDroite";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifDistanceDroite } from "./ui/recapitulatifDistanceDroite";
 import { formatAideDistancePQNiveau2Latex, formatAideIntersectionQNiveau2Latex, formatDistanceAttendueLatex, formatEnonceLatex } from "./ui/formatDistanceDroite";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -77,6 +79,7 @@ export function AppDistanceDroite() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const recapitulatif = calculerRecapitulatifDistanceDroite(etat);
 
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
    * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
@@ -138,6 +141,7 @@ export function AppDistanceDroite() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "distancePQ" && <CalculatriceScientifique />}
         {etat.phase === "choixPoint" && exercice.variante === "paralleles" ? (
           <EtapeChoixPointDistanceDroite

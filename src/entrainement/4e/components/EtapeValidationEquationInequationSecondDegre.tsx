@@ -3,11 +3,10 @@ import type { ExerciceEquationInequationSecondDegre } from "../core/equationIneq
 import type { ReponseIntervalle } from "../moteur/verificationEquationInequationSecondDegre";
 import { diagnostiquerValidationInequation, verifierValidationEquation } from "../moteur/verificationEquationInequationSecondDegre";
 import { NIVEAU_AIDE_MAX_VALIDATION } from "../moteur/sessionEquationInequationSecondDegre";
-import { consigneValidation, formatDonneesAvecResolutionLatex, texteAideValidationNiveau1, texteAideValidationNiveau2, texteAideValidationNiveau3 } from "../ui/formatEquationInequationSecondDegre";
+import { consigneValidation, texteAideValidationNiveau1, texteAideValidationNiveau2, texteAideValidationNiveau3 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
@@ -123,7 +122,6 @@ function EcranValidationEquation({ exercice, estPremierEcran, candidates, apresE
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesAvecResolutionLatex(exercice)} />
       <p className="prompt-text">{consigneValidation(exercice)}</p>
 
       {candidates.map((x, index) => {
@@ -204,7 +202,6 @@ function EcranValidationInequation({ exercice, estPremierEcran, apresEchec, tent
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesAvecResolutionLatex(exercice)} />
       <p className="prompt-text">{consigneValidation(exercice)}</p>
 
       <div className="field-row">

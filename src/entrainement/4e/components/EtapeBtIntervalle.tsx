@@ -3,9 +3,8 @@ import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtIntervalle } from "../moteur/verificationExerciceSynthese";
 import type { ReponseIntervalle } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { consigneBtIntervalle, formatEnonceTexte, formatEtatActuelXBarSigmaLatex, texteAideBtIntervalleNiveau1, texteAideBtIntervalleNiveau2 } from "../ui/formatExerciceSynthese";
+import { consigneBtIntervalle, formatEnonceTexte, texteAideBtIntervalleNiveau1, texteAideBtIntervalleNiveau2 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -37,8 +36,9 @@ function statutPrioritaire(statut: { borneInf: string; borneSup: string } | unde
 /**
  * Écran "btIntervalle" — "gen37 adaptée" (`kBT` toujours fixé à 2, jamais résolu) : l'élève calcule
  * l'intervalle $[\bar{x}-k\sigma\,;\,\bar{x}+k\sigma]$ à partir des $\bar{x}$/$\sigma$ déjà
- * CONFIRMÉS aux écrans "quotient"/"varianceEcartType" (rappelés via `EtatActuelPanel`, jamais
- * resaisis). 2 champs indépendants (isole une erreur de signe sur une seule borne).
+ * CONFIRMÉS aux écrans "quotient"/"varianceEcartType" (rappelés dans le récapitulatif "Ce qu'on
+ * sait déjà", `RecapitulatifPanel`, câblé par `AppExerciceSynthese.tsx` — jamais resaisis). 2
+ * champs indépendants (isole une erreur de signe sur une seule borne).
  */
 export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [borneInf, setBorneInf] = useState("");
@@ -51,7 +51,6 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
       <div className="equation-box">
         <p className="prompt-text">{formatEnonceTexte(exercice)}</p>
       </div>
-      <EtatActuelPanel latex={formatEtatActuelXBarSigmaLatex(exercice)} />
       <p className="prompt-text">{consigneBtIntervalle(exercice)}</p>
 
       <div className="field-row">

@@ -25,6 +25,8 @@ import {
 } from "./generateurs/equationInequationSecondDegre";
 import type { FamilleEquationInequationSecondDegre, VarianteEquationInequationSecondDegre } from "./core/equationInequationSecondDegre.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifEquationInequationSecondDegre } from "./ui/recapitulatifEquationInequationSecondDegre";
 import { EtapePoserSystemeEquationInequationSecondDegre } from "./components/EtapePoserSystemeEquationInequationSecondDegre";
 import { EtapeEliminerSystemeEquationInequationSecondDegre } from "./components/EtapeEliminerSystemeEquationInequationSecondDegre";
 import { EtapeIdentificationOptimisation } from "./components/EtapeIdentificationOptimisation";
@@ -147,6 +149,8 @@ export function AppEquationInequationSecondDegre() {
   const phase = etat.phase;
   const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
 
+  const recapitulatif = calculerRecapitulatifEquationInequationSecondDegre(etat);
+
   /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
    * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
   const premierePhaseRef = useRef(phase);
@@ -210,6 +214,7 @@ export function AppEquationInequationSecondDegre() {
         </div>
 
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           <QuestionFinale question={exercice.questionFinale} />
           {etat.phase === "poserSysteme" ? (
             <EtapePoserSystemeEquationInequationSecondDegre

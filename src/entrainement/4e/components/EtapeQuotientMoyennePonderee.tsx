@@ -3,11 +3,10 @@ import type { ExerciceMoyennePonderee } from "../core/moyennePonderee.types";
 import type { ReponseQuotient } from "../moteur/verificationMoyennePonderee";
 import { diagnostiquerQuotient } from "../moteur/verificationMoyennePonderee";
 import { NIVEAU_AIDE_MAX_QUOTIENT } from "../moteur/sessionMoyennePonderee";
-import { LABEL_MOYENNE_BARRE, PLACEHOLDER_QUOTIENT, consigneQuotient, formatEtatActuelSommesLatex, texteAideQuotientNiveau1 } from "../ui/formatMoyennePonderee";
+import { LABEL_MOYENNE_BARRE, PLACEHOLDER_QUOTIENT, consigneQuotient, texteAideQuotientNiveau1 } from "../ui/formatMoyennePonderee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceMoyennePonderee } from "./EnonceMoyennePonderee";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -29,9 +28,9 @@ interface Props {
 /**
  * Écran "quotient" (commun aux 2 variantes) — toujours la phase terminale, pour les 2 variantes
  * (depuis le retrait de l'écran "conceptuel", `promptgen32modifications.md`, point 5). Les deux
- * sommes CONFIRMÉES à l'écran "sommes" sont rappelées via `EtatActuelPanel`, sur 2 lignes séparées
- * (jamais resaisies ici, toujours la vraie valeur) ; un seul champ pour la moyenne $\bar{x}$
- * elle-même.
+ * sommes CONFIRMÉES à l'écran "sommes" sont rappelées dans le récapitulatif "Ce qu'on sait déjà"
+ * (`RecapitulatifPanel`, câblé par `AppMoyennePonderee.tsx`/`AppExerciceSynthese.tsx` — jamais
+ * resaisies ici, toujours la vraie valeur) ; un seul champ pour la moyenne $\bar{x}$ elle-même.
  */
 export function EtapeQuotientMoyennePonderee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -45,7 +44,6 @@ export function EtapeQuotientMoyennePonderee({ exercice, tentativesUtilisees, te
   return (
     <div>
       <EnonceMoyennePonderee exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelSommesLatex(exercice)} label="Sommes confirmées" />
       <p className="prompt-text">
         {consigne.avant}
         <Katex expression={consigne.latex} />

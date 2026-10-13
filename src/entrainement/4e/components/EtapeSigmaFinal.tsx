@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceBienaymeTchebychevIntervalleVersSigma, ExerciceBienaymeTchebychevNombreVersSigma } from "../core/bienaymeTchebychev.types";
 import { diagnostiquerSigma } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { LABEL_SIGMA, PRECISION_UNITE, type ValeurEtatActuel, formatEtatActuelCombineLatex, kEtatActuel, pourcentAttendu0EtatActuel, texteAideSigmaNiveau1, texteAideSigmaNiveau2 } from "../ui/formatBienaymeTchebychev";
+import { LABEL_SIGMA, PRECISION_UNITE, texteAideSigmaNiveau1, texteAideSigmaNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -28,12 +27,9 @@ interface Props {
 
 const MAX = 2;
 
-function pourcentAttendu0Pour(exercice: Exercice): ValeurEtatActuel | null {
-  return exercice.variante === "nombreVersSigma" ? pourcentAttendu0EtatActuel(exercice) : null;
-}
-
-/** Rôle "σ retrouvé" (v5Sigma, v7Sigma) — dernier écran, arrondi standard (pas de piège). Rappelle k
- * (et le pourcentage écran 0 pour V7). */
+/** Rôle "σ retrouvé" (v5Sigma, v7Sigma) — dernier écran, arrondi standard (pas de piège). k (et le
+ * pourcentage écran 0 pour V7) sont listés dans le récapitulatif "Ce qu'on sait déjà" au niveau de
+ * l'App. */
 export function EtapeSigmaFinal({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
@@ -42,7 +38,6 @@ export function EtapeSigmaFinal({ exercice, tentativesUtilisees, tentativesMax, 
   return (
     <div>
       <EnonceBienaymeTchebychev exercice={exercice} />
-      <EtatActuelPanel latex={formatEtatActuelCombineLatex(pourcentAttendu0Pour(exercice), kEtatActuel(exercice))} />
       <p className="prompt-text">
         Quel est l'écart-type <Katex expression={LABEL_SIGMA} /> (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
       </p>

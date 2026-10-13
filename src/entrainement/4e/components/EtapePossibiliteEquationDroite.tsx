@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ExerciceEquationDroite } from "../core/equationDroite.types";
-import { consignePossibilite, formatEnonceLatex, formatEtatActuelPointVecteurLatex } from "../ui/formatEquationDroite";
+import { consignePossibilite, formatEnonceLatex } from "../ui/formatEquationDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneGeneraleEquationDroite } from "./ConsigneGeneraleEquationDroite";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -45,7 +44,6 @@ export function EtapePossibiliteEquationDroite({ exercice, estPremierEcran, tent
           </div>
         }
       />
-      <EtatActuelPanel latex={formatEtatActuelPointVecteurLatex(exercice)} />
       <p className="prompt-text">{consignePossibilite(exercice)}</p>
 
       <div className="options-grid-compact">

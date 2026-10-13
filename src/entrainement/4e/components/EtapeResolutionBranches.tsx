@@ -7,14 +7,12 @@ import {
   formatConditionTexte,
   formatEquationRechercheZerosLatex,
 } from "../ui/formatCaracteristiquesAlgebriques";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceNiveau2ValeurAbsolue;
-  etatActuel: string | null;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseResolutionBranches) => void;
@@ -38,7 +36,7 @@ interface Props {
  * ordinaire ne peut rendre du KaTeX), jamais "branche 1"/"branche 2", un texte générique qui ne
  * disait rien de la condition effectivement en jeu.
  */
-export function EtapeResolutionBranches({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeResolutionBranches({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [racine1, setRacine1] = useState("");
   const [racine2, setRacine2] = useState("");
   const v1 = parserNombreOuFraction(racine1);
@@ -53,7 +51,6 @@ export function EtapeResolutionBranches({ exercice, etatActuel, tentativesUtilis
       <div className="equation-box">
         <Katex expression={formatEquationRechercheZerosLatex(exercice)} block />
       </div>
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">Résous chacune des deux conditions ci-dessous (arrondi au centième accepté si besoin).</p>
       <div className="equation-box">
         <Katex

@@ -3,10 +3,9 @@ import type { ExerciceOptimisation } from "../core/optimisation.types";
 import { diagnostiquerDecision } from "../moteur/verificationOptimisation";
 import type { ReponseDecision } from "../moteur/verificationOptimisation";
 import { NIVEAU_AIDE_MAX_DECISION } from "../moteur/sessionOptimisation";
-import { consigneDecision, contexteLabelX, contexteLabelY, formatDonneesAvecSommetLatex, segmentsPhraseEnonce, texteAideDecisionNiveau1, texteAideDecisionNiveau2, texteAideDecisionNiveau3 } from "../ui/formatOptimisation";
+import { consigneDecision, contexteLabelX, contexteLabelY, segmentsPhraseEnonce, texteAideDecisionNiveau1, texteAideDecisionNiveau2, texteAideDecisionNiveau3 } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EnTeteExercice } from "./EnTeteExercice";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { QuestionFinale } from "./QuestionFinale";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -63,7 +62,6 @@ export function EtapeDecisionOptimisation({ exercice, estPremierEcran, tentative
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />
-      <EtatActuelPanel latex={formatDonneesAvecSommetLatex(exercice)} label="Données" />
       <p className="prompt-text">{consigneDecision(exercice)}</p>
 
       <div className="options-grid-compact">

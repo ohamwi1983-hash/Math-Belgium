@@ -15,6 +15,8 @@ import { EtapeCaracteristiquesEquationParaboleDeveloppee } from "./components/Et
 import { EtapeCompletionEquationParaboleDeveloppee } from "./components/EtapeCompletionEquationParaboleDeveloppee";
 import { EtapeRegroupementEquationParaboleDeveloppee } from "./components/EtapeRegroupementEquationParaboleDeveloppee";
 import { Katex } from "./components/Katex";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifEquationParaboleDeveloppee } from "./ui/recapitulatifEquationParaboleDeveloppee";
 import { formatCompletionLatex, formatDirectriceLatex, formatFoyerLatex, formatRegroupementLatex, formatSommetLatex } from "./ui/formatEquationParaboleDeveloppee";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -76,6 +78,7 @@ export function AppEquationParaboleDeveloppee() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const recapitulatif = calculerRecapitulatifEquationParaboleDeveloppee(etat);
 
   const premierePhaseRef = useRef(phase);
   const dernierExerciceRef = useRef(exercice);
@@ -130,6 +133,7 @@ export function AppEquationParaboleDeveloppee() {
 
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           {phase === "regroupement" ? (
             <EtapeRegroupementEquationParaboleDeveloppee
               key={phase}

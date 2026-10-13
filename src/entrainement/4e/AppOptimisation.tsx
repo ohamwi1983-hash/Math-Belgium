@@ -13,6 +13,8 @@ import {
 } from "./moteur/sessionOptimisation";
 import type { EtatSessionOptimisation, PhaseOptimisation } from "./moteur/typesOptimisation";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceOptimisation } from "./generateurs/optimisation";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifOptimisation } from "./ui/recapitulatifOptimisation";
 import { EtapeIdentificationOptimisation } from "./components/EtapeIdentificationOptimisation";
 import { EtapeContrainteEtGrandeurOptimisation } from "./components/EtapeContrainteEtGrandeurOptimisation";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -115,6 +117,8 @@ export function AppOptimisation() {
 
   const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
 
+  const recapitulatif = calculerRecapitulatifOptimisation(etat);
+
   const reponseAttendue =
     phase === "contrainteEtGrandeur" && exercice.variante === "modelisation" ? (
       <>
@@ -165,6 +169,7 @@ export function AppOptimisation() {
 
       <main className="card">
         <div className="card-body">
+          <RecapitulatifPanel entrees={recapitulatif} />
           {phase === "identification" && exercice.variante === "modelisation" ? (
             <EtapeIdentificationOptimisation
               key={phase}

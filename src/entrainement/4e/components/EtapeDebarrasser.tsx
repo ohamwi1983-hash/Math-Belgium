@@ -3,14 +3,12 @@ import type { ExerciceCaracteristiquesAlgebriques } from "../core/caracteristiqu
 import { diagnostiquerDebarrasserNiveau1 } from "../moteur/verificationCaracteristiquesAlgebriques";
 import { formatEquationRechercheZerosLatex, instructionDebarrasser } from "../ui/formatCaracteristiquesAlgebriques";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
-  etatActuel: string | null;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: string) => void;
@@ -25,10 +23,12 @@ interface Props {
  * `racine_carree`/`racine_cubique`/`cube` uniquement (miroir de `EtapeSeparation.tsx` pour les 2
  * autres familles, voir `necessiteDebarrasser`). Un seul champ libre, l'instruction adaptée à
  * l'opération réellement nécessaire (`instructionDebarrasser`) — jamais un texte générique.
- * `etatActuel` rappelle l'équation isolée confirmée à l'étape précédente (voir
- * `calculerEtatActuelCaracteristiquesAlgebriques`).
+ * L'équation isolée confirmée à l'étape précédente n'est plus rappelée ici via un bloc "état
+ * actuel" isolé : elle apparaît désormais dans le récapitulatif "Ce qu'on sait déjà"
+ * (`RecapitulatifPanel`, `calculerRecapitulatifCaracteristiquesAlgebriques`) affiché en haut de
+ * chaque écran par `AppCaracteristiquesAlgebriques.tsx`.
  */
-export function EtapeDebarrasser({ exercice, etatActuel, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeDebarrasser({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut =
@@ -40,7 +40,6 @@ export function EtapeDebarrasser({ exercice, etatActuel, tentativesUtilisees, te
       <div className="equation-box">
         <Katex expression={formatEquationRechercheZerosLatex(exercice)} block />
       </div>
-      <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">{instructionDebarrasser(exercice.famille)}</p>
       <div className="field field-inline">
         <input

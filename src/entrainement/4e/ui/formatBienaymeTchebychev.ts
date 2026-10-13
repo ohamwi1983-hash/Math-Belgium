@@ -22,9 +22,9 @@
  * **Règle d'affichage transversale** (`promptgen37refonte.md`) : l'énoncé de départ (contexte +
  * question) reste affiché sur TOUS les écrans d'une variante — `formatEnonceSegments` en est
  * l'unique source, consommée par `EnonceBienaymeTchebychev.tsx` (composant partagé, monté par les 8
- * composants d'écran). Chaque écran affiche EN PLUS les résultats déjà validés aux écrans
- * précédents (via `EtatActuelPanel`, jamais resaisis) — voir les fonctions `formatEtatActuelXxxLatex`
- * ci-dessous.
+ * composants d'écran). Les résultats déjà validés aux écrans précédents sont listés dans le
+ * récapitulatif "Ce qu'on sait déjà" (`ui/recapitulatifBienaymeTchebychev.ts`, jamais resaisis) —
+ * voir les fonctions `formatEtatActuelXxxLatex` ci-dessous.
  *
  * **Piège conceptuel central, ciblé explicitement par au moins une aide de chaque variante** : c'est
  * une borne INFÉRIEURE garantie ("au moins"), jamais une valeur exacte.
@@ -313,8 +313,9 @@ function borneSupValeurExacte(exercice: { xBar: number; kAttendu: number; sigma:
 }
 
 // ============================================================================
-// "État actuel" — résultats déjà validés, rappelés (jamais resaisis) sur les écrans suivants d'une
-// même variante, via `EtatActuelPanel`.
+// Formatage des valeurs déjà validées — consommé par le récapitulatif "Ce qu'on sait déjà"
+// (`ui/recapitulatifBienaymeTchebychev.ts`) pour rappeler, sans les resaisir, les résultats
+// confirmés aux écrans précédents d'une même variante.
 // ============================================================================
 
 export function formatEtatActuelKLatex(v: ValeurEtatActuel): string {
@@ -323,19 +324,6 @@ export function formatEtatActuelKLatex(v: ValeurEtatActuel): string {
 
 export function formatEtatActuelPourcentLatex(v: ValeurEtatActuel): string {
   return `\\text{\\% minimal} ${v.exact ? "=" : "\\approx"} ${formatNombreLatex(v.valeur)}\\,\\%`;
-}
-
-/** Combine 0, 1 ou 2 résultats déjà confirmés (pourcentage écran 0, k) en un seul bloc "état actuel"
- * — `null` si aucun des deux n'est fourni (première écran de la variante), une seule ligne si un
- * seul, empilé sur 2 lignes (`\begin{gathered}`, jamais côte à côte) si les deux — même précaution
- * de débordement horizontal déjà rencontrée ailleurs dans le projet (ex. "Médiane"). */
-export function formatEtatActuelCombineLatex(pourcent: ValeurEtatActuel | null, k: ValeurEtatActuel | null): string | null {
-  const lignes: string[] = [];
-  if (pourcent !== null) lignes.push(formatEtatActuelPourcentLatex(pourcent));
-  if (k !== null) lignes.push(formatEtatActuelKLatex(k));
-  if (lignes.length === 0) return null;
-  if (lignes.length === 1) return lignes[0];
-  return `\\begin{gathered}${lignes.join("\\\\")}\\end{gathered}`;
 }
 
 // ============================================================================

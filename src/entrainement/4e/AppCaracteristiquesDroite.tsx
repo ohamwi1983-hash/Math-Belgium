@@ -8,6 +8,8 @@ import type { EtatSessionCaracteristiquesDroite, PhaseCaracteristiquesDroite } f
 import { EtapeCaracteristiquesDroite } from "./components/EtapeCaracteristiquesDroite";
 import { EtapeExtractionCaracteristiquesDroite } from "./components/EtapeExtractionCaracteristiquesDroite";
 import { Katex } from "./components/Katex";
+import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { calculerRecapitulatifCaracteristiquesDroite } from "./ui/recapitulatifCaracteristiquesDroite";
 import { formatCaracteristiquesAttenduesLatex, formatEtatActuelPointVecteurLatex } from "./ui/formatCaracteristiquesDroite";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -63,6 +65,7 @@ export function AppCaracteristiquesDroite() {
   }
 
   const exercice = etat.exerciceCourant;
+  const recapitulatif = calculerRecapitulatifCaracteristiquesDroite(etat);
 
   const validation = enAttente
     ? {
@@ -93,6 +96,7 @@ export function AppCaracteristiquesDroite() {
 
       <main className="card">
         <div className="card-body">
+        <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "extraction" ? (
           <EtapeExtractionCaracteristiquesDroite
             exercice={exercice}

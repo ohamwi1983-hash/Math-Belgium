@@ -2,10 +2,9 @@ import { useState } from "react";
 import type { ExerciceEquationCercle } from "../core/equationCercle.types";
 import { NIVEAU_AIDE_MAX_EQUATION } from "../moteur/sessionEquationCercle";
 import { diagnostiquerEquationExercice } from "../moteur/verificationEquationCercle";
-import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_CERCLE, LATEX_GABARIT_EQUATION, PLACEHOLDER_EQUATION, TEXTE_AIDE_EQUATION_NIVEAU1, formatEtatActuelCentreRayonLatex } from "../ui/formatEquationCercle";
+import { CONSIGNE_EQUATION, CONSIGNE_GENERALE_EQUATION_CERCLE, LATEX_GABARIT_EQUATION, PLACEHOLDER_EQUATION, TEXTE_AIDE_EQUATION_NIVEAU1 } from "../ui/formatEquationCercle";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { EquationCercleGraph } from "./EquationCercleGraph";
-import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -30,7 +29,8 @@ interface Props {
  * Écran 3 (dernier, toujours terminal) — champ texte libre, réutilise directement
  * `diagnostiquerEquationExercice` (`moteur/verificationEquationCercle.ts`, moteur d'égalité
  * algébrique à 2 variables déjà partagé). Un seul niveau d'aide : le gabarit général, jamais
- * substitué avec les vraies valeurs (elles sont déjà rappelées dans le bloc "État actuel").
+ * substitué avec les vraies valeurs (elles sont déjà rappelées dans le récapitulatif accumulé en
+ * haut de carte — `RecapitulatifPanel`/`AppEquationCercle`).
  */
 export function EtapeEquationEquationCercle({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -48,7 +48,6 @@ export function EtapeEquationEquationCercle({ exercice, estPremierEcran, tentati
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
         blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre afficherRayon />}
       />
-      <EtatActuelPanel latex={formatEtatActuelCentreRayonLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_EQUATION}</p>
 
       <div className="field field-inline">
