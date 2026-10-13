@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLectureGraphiqueDerivees } from "./generateurs5e/lectureGraphiqueDerivees";
@@ -115,6 +115,14 @@ export function App5gen30() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
+
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
 
   const validation = enAttente
     ? {

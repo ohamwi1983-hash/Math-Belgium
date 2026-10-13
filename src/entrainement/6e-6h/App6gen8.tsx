@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import {
   CATALOGUE_FAMILLES,
@@ -72,6 +72,18 @@ export function App6gen8() {
   }
 
   const exercice = etat.exerciceCourant;
+
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
+   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
+   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
+
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   // Inclut `indexExercice` dans la clé — la phase seule peut rester identique entre 2 exercices
@@ -114,6 +126,7 @@ export function App6gen8() {
           {etat.phase === "derivee" && (
             <EtapeDeriveeGraphExpo
               key={cle}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigneEcranDerivee()}
               fonctionLatex={formatFonctionLatex(exercice)}
               etatActuel={null}
@@ -133,6 +146,7 @@ export function App6gen8() {
           {etat.phase === "selection" && (
             <EtapeSelectionGraphiqueDeriveeExpo
               key={cle}
+              estPremierEcran={estPremierEcran}
               exercice={exercice}
               etatActuel={null}
               aideNiveau1={aideSelectionNiveau1(exercice)}

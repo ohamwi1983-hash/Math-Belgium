@@ -6,6 +6,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelPanel } from "./EtatActuelPanel";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -19,6 +20,7 @@ export interface EtatActuelLigne {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   equationLatex: string;
   /** Absent (ou vide) sur l'écran 1 d'une famille ; sinon 1-2 lignes dérivées de l'exercice/des
@@ -43,6 +45,7 @@ interface Props {
  * "isolerCible" et "resoudreLineaire" (structurellement identiques : consigne + équation + champ
  * + aide à 2 niveaux). `App6gen3.tsx` doit le rendre avec `key={phase}`. */
 export function EtapeChampEquationCyclo({
+  estPremierEcran,
   consigneEcran,
   equationLatex,
   etatActuel = [],
@@ -67,10 +70,15 @@ export function EtapeChampEquationCyclo({
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={equationLatex} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={equationLatex} />
+          </div>
+        }
+      />
       {etatActuel.map((ligne) => (
         <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
       ))}

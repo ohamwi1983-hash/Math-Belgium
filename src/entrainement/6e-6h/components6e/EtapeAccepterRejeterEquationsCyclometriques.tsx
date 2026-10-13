@@ -15,9 +15,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 import { Katex } from "../components/Katex";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationsCyclometriques;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +36,7 @@ interface Props {
  * déjà trié par x croissant — exactement ce qui est affiché ici, dans le même ordre). 2 boutons par
  * ligne en grille 2 colonnes (`.options-grid-compact`), `null` tant qu'aucun choix n'a été fait pour
  * cette ligne — jamais présélectionné. */
-export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [decisions, setDecisions] = useState<(boolean | null)[]>(() => exercice.candidats.map(() => null));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = decisions.every((d) => d !== null);
@@ -50,10 +52,15 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationOriginaleLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationOriginaleLatex(exercice)} />
+          </div>
+        }
+      />
       <EtatActuelPanel label="CE établie à l'étape 1" latex={formatEnsembleReelLatex(exercice.ce, MAX_DEN)} />
       {exercice.variante === "arcfonctionsDifferentes" && (
         <EtatActuelPanel label="Condition de compatibilité des codomaines (étape 2)" latex={formatEnsembleReelLatex(exercice.conditionParasite, MAX_DEN)} />

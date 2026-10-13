@@ -4,6 +4,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatEquationsExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -11,6 +12,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -33,7 +35,7 @@ interface Props {
  * `etatActuel` reste toujours `null` ici (dEcran est le PREMIER et unique écran de la famille D,
  * rien à rappeler) — le prop est câblé pour rester conforme au patron de la plateforme, jamais
  * pour afficher quoi que ce soit sur cet écran précis. */
-export function EtapeReconnaitreImpossibleEquExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReconnaitreImpossibleEquExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -44,10 +46,15 @@ export function EtapeReconnaitreImpossibleEquExpo({ consigneEcran, enonceLatex, 
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

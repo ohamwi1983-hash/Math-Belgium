@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInequationExponentielle } from "./generateurs6e/inequationsExponentielles";
 import {
@@ -74,6 +74,13 @@ export function App6gen10() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -115,6 +122,7 @@ export function App6gen10() {
           {phase === "aReconnaitre" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -133,6 +141,7 @@ export function App6gen10() {
               {phase === "aResoudre" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -191,6 +200,7 @@ export function App6gen10() {
               {phase === "ckRegrouper" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -248,6 +258,7 @@ export function App6gen10() {
               {phase === "dConstantResoudre" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -266,6 +277,7 @@ export function App6gen10() {
               {phase === "dVariableSigne1" && (
                 <EtapeSigneUnZeroIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -283,6 +295,7 @@ export function App6gen10() {
               {phase === "dVariableSigne2" && (
                 <EtapeSigneUnZeroIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -300,6 +313,7 @@ export function App6gen10() {
               {phase === "dVariableTableau" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -318,6 +332,7 @@ export function App6gen10() {
               {phase === "eRegrouper" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
@@ -336,6 +351,7 @@ export function App6gen10() {
               {phase === "eResoudre" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
+                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   etatActuel={null}

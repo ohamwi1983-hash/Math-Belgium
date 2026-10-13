@@ -4,6 +4,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -16,6 +17,7 @@ interface Option {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
@@ -44,7 +46,7 @@ interface Props {
  * PARAMÉTRÉS par l'appelant (`optionGauche`/`optionDroite`) — chaque famille pose une question
  * différente, jamais le même texte de bouton. `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, etatActuel, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixDeuxIneqExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -55,10 +57,15 @@ export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, etatActuel,
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

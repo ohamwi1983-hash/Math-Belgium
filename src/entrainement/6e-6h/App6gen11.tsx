@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionExponentielle } from "./generateurs6e/etudeFonctionExponentielle";
 import {
@@ -90,6 +90,13 @@ export function App6gen11() {
   }
 
   const exercice = etat.exerciceCourant;
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
 
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
@@ -136,6 +143,7 @@ export function App6gen11() {
           {etat.phase === "domaine" && (
                 <EtapeDomaineEtudeFonction
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aideDomaineNiveau1(exercice)}
                   aideNiveau2={aideDomaineNiveau2(exercice)}
@@ -152,6 +160,7 @@ export function App6gen11() {
               {etat.phase === "limites" && exercice.famille === "B" && (
                 <EtapeLimitesQuatre
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneLimites(exercice)}
                   labels={directionLabels(exercice)}
@@ -189,6 +198,7 @@ export function App6gen11() {
               {etat.phase === "asymptotes" && exercice.famille === "B" && (
                 <EtapeAsymptotesB
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   p={exercice.p}
                   etatActuel={null}
@@ -206,6 +216,7 @@ export function App6gen11() {
               {etat.phase === "asymptotes" && exercice.famille !== "B" && (
                 <EtapeAsymptotesDeux
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   consigneEcran={consigneAsymptotes(exercice)}
                   labels={directionLabels(exercice)}
@@ -242,6 +253,7 @@ export function App6gen11() {
               {etat.phase === "concavite" && (
                 <EtapeConcavite
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   enonceLatex={enonceLatex}
                   etatActuel={null}
                   aideNiveau1={aideConcaviteNiveau1(exercice)}
@@ -259,6 +271,7 @@ export function App6gen11() {
               {etat.phase === "graphique" && (
                 <EtapeSelectionGraphiqueEtudeFonction
                   key={cle}
+                  estPremierEcran={estPremierEcran}
                   exercice={exercice}
                   etatActuel={null}
                   aideNiveau1={aideGraphiqueNiveau1(exercice)}

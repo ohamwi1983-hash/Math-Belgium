@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { OrientationParabole } from "./core/equationParabole.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationParaboleDeveloppee } from "./generateurs/equationParaboleDeveloppee";
@@ -77,6 +77,14 @@ export function AppEquationParaboleDeveloppee() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -126,6 +134,7 @@ export function AppEquationParaboleDeveloppee() {
             <EtapeRegroupementEquationParaboleDeveloppee
               key={phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideRegroupement}
@@ -137,6 +146,7 @@ export function AppEquationParaboleDeveloppee() {
             <EtapeCompletionEquationParaboleDeveloppee
               key={phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCompletion}
@@ -148,6 +158,7 @@ export function AppEquationParaboleDeveloppee() {
             <EtapeCaracteristiquesEquationParaboleDeveloppee
               key={phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCaracteristiques}

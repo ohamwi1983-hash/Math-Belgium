@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
 import type { IdVarianteProbabilitesEnsembles } from "./generateurs6e/probabilitesEnsembles";
@@ -59,6 +59,14 @@ export function App6gen30() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1, même garde que
   // `SelecteurVarianteDev`) : expose l'exercice tiré tel quel sur `window` — permet à la
   // vérification Playwright (build de production) de reconstruire la réponse EXACTE attendue à
@@ -92,6 +100,7 @@ export function App6gen30() {
     : null;
 
   const propsCommun = {
+    estPremierEcran,
     consigneGenerale: consigneGenerale(exercice),
     blocDonnees: blocDonnees(exercice),
     etatActuel: null,

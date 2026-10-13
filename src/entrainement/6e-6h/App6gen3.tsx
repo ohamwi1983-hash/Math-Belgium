@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationsCyclometriques } from "./generateurs6e/equationsCyclometriques";
 import type { IdVarianteDev } from "./generateurs6e/equationsCyclometriques";
@@ -121,6 +121,15 @@ export function App6gen3() {
   }
 
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
+
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
 
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
@@ -177,6 +186,7 @@ export function App6gen3() {
             <EtapeCEEquationsCyclometriques
               key={etat.phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={niveauAide}
@@ -191,6 +201,7 @@ export function App6gen3() {
             <EtapeConditionEquationsCyclometriques
               key={etat.phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={niveauAide}
@@ -223,6 +234,7 @@ export function App6gen3() {
           {etat.phase === "solutions" && (
             <EtapeListeSolutionsCyclo
               key={etat.phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran="Cette équation a-t-elle des solutions ? Si oui, liste-les TOUTES (sans encore tenir compte de la CE)."
               equationLatex={formatEquationOriginaleLatex(exercice)}
               etatActuel={etatActuelAvantSolutions(exercice)}

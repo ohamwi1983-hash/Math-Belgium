@@ -4,6 +4,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -11,6 +12,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -31,16 +33,21 @@ interface Props {
 /** Écran "gOrdre1" (`6gen6`, famille G, instance unique) — QCM booléen "un développement à
  * l'ordre 1 suffit-il à conclure ?" (Oui/Non), voir la note de conception dans
  * `core6e/limitesExponentielles.types.ts`. `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeOrdre1G({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeOrdre1G({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

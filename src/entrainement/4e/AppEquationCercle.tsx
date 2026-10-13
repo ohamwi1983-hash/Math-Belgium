@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercle } from "./generateurs/equationCercle";
 import type { VarianteEquationCercle } from "./core/equationCercle.types";
@@ -64,6 +64,17 @@ export function AppEquationCercle() {
 
   const exercice = etat.exerciceCourant;
 
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
+   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
+   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
+  const premierePhaseRef = useRef(etat.phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = etat.phase;
+  }
+  const estPremierEcran = etat.phase === premierePhaseRef.current;
+
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionEquationCercle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationCercle)));
@@ -104,6 +115,7 @@ export function AppEquationCercle() {
         {etat.phase === "centre" ? (
           <EtapeCentreEquationCercle
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentre}
@@ -114,6 +126,7 @@ export function AppEquationCercle() {
         ) : etat.phase === "rayon" ? (
           <EtapeRayonEquationCercle
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideRayon}
@@ -124,6 +137,7 @@ export function AppEquationCercle() {
         ) : (
           <EtapeEquationEquationCercle
             exercice={exercice}
+            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideEquation}

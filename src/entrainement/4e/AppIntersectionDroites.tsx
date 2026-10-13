@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionIntersectionDroites, soumettreReponseDiagnostic, soumettreReponsePoint } from "./moteur/sessionIntersectionDroites";
 import type { EtatSessionIntersectionDroites, PhaseIntersectionDroites } from "./moteur/typesIntersectionDroites";
@@ -72,6 +72,14 @@ export function AppIntersectionDroites() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -105,6 +113,7 @@ export function AppIntersectionDroites() {
             <EtapeDiagnosticIntersectionDroites
               key={phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDiagnostic}
@@ -116,6 +125,7 @@ export function AppIntersectionDroites() {
             <EtapePointIntersectionDroites
               key={phase}
               exercice={exercice}
+              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAidePoint}

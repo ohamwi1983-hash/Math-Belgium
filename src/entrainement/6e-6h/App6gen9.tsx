@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEquationExponentielle } from "./generateurs6e/equationsExponentielles";
 import {
@@ -79,6 +79,18 @@ export function App6gen9() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
+
+  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
+   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
+   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
+  const premierePhaseRef = useRef(phase);
+  const dernierExerciceRef = useRef(exercice);
+  if (dernierExerciceRef.current !== exercice) {
+    dernierExerciceRef.current = exercice;
+    premierePhaseRef.current = phase;
+  }
+  const estPremierEcran = phase === premierePhaseRef.current;
+
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -126,6 +138,7 @@ export function App6gen9() {
           {phase === "aEcran1" && (
             <EtapeChampEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -144,6 +157,7 @@ export function App6gen9() {
           {phase === "aEcran2" && exercice.famille === "A" && exercice.sousType !== "A3" && (
             <EtapeChampEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -162,6 +176,7 @@ export function App6gen9() {
           {phase === "aEcran2" && exercice.famille === "A" && exercice.sousType === "A3" && (
             <EtapeListeEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -183,6 +198,7 @@ export function App6gen9() {
           {phase === "bEcran1" && (
             <EtapeChampEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -201,6 +217,7 @@ export function App6gen9() {
           {phase === "bEcran2" && (
             <EtapeValeurOuVideEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -220,6 +237,7 @@ export function App6gen9() {
           {phase === "cEcran1" && (
             <EtapeChampEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -238,6 +256,7 @@ export function App6gen9() {
           {phase === "cEcran2" && (
             <EtapeListeEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -258,6 +277,7 @@ export function App6gen9() {
           {phase === "cEcran3" && (
             <EtapeListeEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}
@@ -280,6 +300,7 @@ export function App6gen9() {
           {phase === "dEcran" && (
             <EtapeReconnaitreImpossibleEquExpo
               key={phase}
+              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={null}

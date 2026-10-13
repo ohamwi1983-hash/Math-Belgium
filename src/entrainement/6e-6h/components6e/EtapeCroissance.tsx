@@ -6,6 +6,7 @@ import { CONSIGNE_GENERALE, consigneCroissance } from "../ui6e/formatEtudeFoncti
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -20,6 +21,7 @@ const OPTIONS: { id: ReponseCroissance["type"]; label: string; requiertPosition:
 ];
 
 interface Props {
+  estPremierEcran: boolean;
   enonceLatex: string;
   etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
@@ -41,7 +43,7 @@ interface Props {
  * `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. `etatActuel` rappelle le domaine, les
  * limites ET les asymptotes CONFIRMÉS aux 3 écrans précédents (voir `ui6e/
  * formatEtudeFonctionExponentielle.ts::etatActuel`). */
-export function EtapeCroissance({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCroissance({ estPremierEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<ReponseCroissance["type"] | null>(null);
   const [position, setPosition] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -56,10 +58,15 @@ export function EtapeCroissance({ enonceLatex, etatActuel, aideNiveau1, aideNive
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

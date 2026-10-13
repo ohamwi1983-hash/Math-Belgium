@@ -59,6 +59,9 @@ export function App6gen2() {
   }
 
   const exercice = etat.exerciceCourant;
+  // Écran unique par exercice (pas de notion de "phase" ici, voir commentaire de tête) → c'est
+  // toujours le premier (et seul) écran de l'exercice en cours.
+  const estPremierEcran = true;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
@@ -82,6 +85,7 @@ export function App6gen2() {
         <div className="card-body">
           <EtapeFonctionsCyclometriques
             key={etat.indexExercice}
+            estPremierEcran={estPremierEcran}
             exercice={exercice}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
