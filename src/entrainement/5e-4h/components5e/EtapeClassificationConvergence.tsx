@@ -8,9 +8,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceConvergenceSuite;
+  estPremierEcran: boolean;
   phase: "classificationArithmetique" | "classificationGeometrique" | "classifierQuelconque";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -43,6 +45,7 @@ interface Props {
  * boutons dont 1 révèle un champ numérique — "Converge vers une autre valeur"). */
 export function EtapeClassificationConvergence({
   exercice,
+  estPremierEcran,
   phase,
   tentativesUtilisees,
   tentativesMax,
@@ -74,12 +77,17 @@ export function EtapeClassificationConvergence({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase as PhaseConvergenceSuite)}</p>
 
       <div className={options.length > 4 ? "options-liste-longue" : "options-grid-compact"}>

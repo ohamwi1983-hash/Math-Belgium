@@ -4,6 +4,7 @@ import type { IssueSimplificationG } from "../core6e/equationsExpLog.types";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -12,6 +13,7 @@ interface AideAvecLatex {
 
 interface Props {
   consigneGenerale: string;
+  estPremierEcran: boolean;
   blocDonnees: string[];
   etatActuel: string[] | null;
   consigneEcran: string;
@@ -39,7 +41,7 @@ const OPTIONS: { id: IssueSimplificationG; label: string }[] = [
  * l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary`, convention CLAUDE.md). Même
  * patron que `EtapeChoixOuiNonExpoProblemes.tsx` (6gen12), étendu à 3 options plutôt que 2.
  * `App6gen14.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeStatutGEquationsExpLog({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeStatutGEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IssueSimplificationG | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -50,14 +52,19 @@ export function EtapeStatutGEquationsExpLog({ consigneGenerale, blocDonnees, eta
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

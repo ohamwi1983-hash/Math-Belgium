@@ -11,9 +11,11 @@ import { LectureGraphiqueDroiteGraph } from "./LectureGraphiqueDroiteGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDroite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +37,7 @@ const PLACEHOLDER_TEXTE_Y = "ex : y=1-t×2";
  * colinéaire à la référence, jamais un couple exact imposé — même mécanisme que "Équation d'une
  * droite", réutilisé tel quel).
  */
-export function EtapeLectureParametrique({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeLectureParametrique({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
 
@@ -51,8 +53,13 @@ export function EtapeLectureParametrique({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <p className="prompt-text">{consigneGeneraleLecture(exercice)}</p>
-      <LectureGraphiqueDroiteGraph exercice={exercice} pointsSurlignes={niveauAide >= 2 ? pointsAideExemple(exercice) : []} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGeneraleLecture(exercice)}
+        blocDonnees={
+          <LectureGraphiqueDroiteGraph exercice={exercice} pointsSurlignes={niveauAide >= 2 ? pointsAideExemple(exercice) : []} />
+        }
+      />
       <p className="prompt-text">{consigneLecture(exercice)}</p>
 
       <div className="field">

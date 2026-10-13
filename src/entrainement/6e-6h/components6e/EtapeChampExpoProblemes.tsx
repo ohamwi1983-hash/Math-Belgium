@@ -6,6 +6,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -15,6 +16,7 @@ interface AideAvecLatex {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
   etatActuel: string[] | null;
   consigneEcran: string;
@@ -42,7 +44,7 @@ interface Props {
  * CLAUDE.md : consigne générale → bloc données → bloc "état actuel" → bloc de travail, toujours cet
  * ordre. `App6gen12.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
  */
-export function EtapeChampExpoProblemes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampExpoProblemes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
@@ -54,14 +56,19 @@ export function EtapeChampExpoProblemes({ consigneGenerale, blocDonnees, etatAct
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

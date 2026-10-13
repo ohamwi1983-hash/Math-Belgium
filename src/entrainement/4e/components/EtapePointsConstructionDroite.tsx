@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
  * APPARTENANCE à la droite (`diagnostiquerPoints`), jamais par égalité à une paire pré-déterminée —
  * n'importe quel couple de points entiers valides est accepté.
  */
-export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapePointsConstructionDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x1, setX1] = useState("");
   const [y1, setY1] = useState("");
   const [x2, setX2] = useState("");
@@ -63,10 +65,15 @@ export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <p className="prompt-text">{consigneGeneraleTrace(exercice)}</p>
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGeneraleTrace(exercice)}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceLatex(exercice)} />
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePoints(exercice)}</p>
 
       {champs.map((paire) => (

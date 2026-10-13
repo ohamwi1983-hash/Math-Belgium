@@ -9,9 +9,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
  * (`diagnostiquerCompletionCarre` — cible IDENTIQUE à l'écran 1, voir l'en-tête de
  * `verificationEquationCercleDeveloppee.ts`).
  */
-export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCompletionEquationCercleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -40,10 +42,15 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUt
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_CENTRE_RAYON}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelRegroupementLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_COMPLETION}</p>
 

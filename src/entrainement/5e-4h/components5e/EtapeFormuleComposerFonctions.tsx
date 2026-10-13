@@ -8,6 +8,7 @@ import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerificationFormuleSimplifiee } from "../moteur5e/verificationComposerFonctions";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 /** Message dédié pour `correct_non_simplifie` (2e palier, `verificationComposerFonctions.ts`) —
  * jamais confondu avec le message générique "Incorrect" (`formatMessageErreur`, `ui/messageErreur.ts`,
@@ -17,6 +18,7 @@ import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonc
 const MESSAGE_CORRECT_NON_SIMPLIFIE = "Ta réponse est mathématiquement correcte, mais elle n'est pas encore simplifiée au maximum — développe/réduis l'expression avant de valider.";
 
 interface Props {
+  estPremierEcran: boolean;
   /** Consigne SPÉCIFIQUE à cet écran (ex. "Écris l'expression de (f∘g)(x)...") — rendue APRÈS le
    * bloc "état actuel" (A.9, ordre standard : consigne générale → données → état actuel → question
    * spécifique), jamais avant. */
@@ -65,7 +67,7 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
 
 /** Écran à champ de texte libre, réutilisé pour "fRondG" ET "gRondF" (même structure, seuls le
  * texte de consigne/placeholder/aide diffèrent selon l'appelant). */
-export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, diagnostiquer, validation}: Props) {
+export function EtapeFormuleComposerFonctions({ estPremierEcran, consigne, donnees, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerificationFormuleSimplifiee | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -89,8 +91,7 @@ export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, 
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_COMPOSER_FONCTIONS}</p>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_COMPOSER_FONCTIONS} blocDonnees={donnees} />
       {termesEtatActuel !== undefined && <EtatActuelComposerFonctions termes={termesEtatActuel} />}
       <p className="prompt-text">{consigne}</p>
       <ApercuExpressionLatex texte={texte} />

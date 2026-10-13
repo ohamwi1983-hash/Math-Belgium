@@ -24,17 +24,22 @@ interface Props {
 /** Écran "domaine" — UNIQUEMENT `rationnelleAvecCE` (domaine=ℝ sinon, écran sauté). Réutilise
  * DIRECTEMENT `EnsembleReelGuideBuilder` (Couche B↔B partagée 5e/6e), jamais réimplémenté.
  * Calculatrice ABSENTE (question symbolique/structurelle). */
-export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeDomaineEtudeLocale({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_LOCALE}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
       <p className="prompt-text">{consigneEcranEtudeLocale("domaine")}</p>
       <EnsembleReelGuideBuilder

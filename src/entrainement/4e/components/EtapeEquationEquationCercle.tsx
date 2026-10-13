@@ -10,9 +10,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercle;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +32,7 @@ interface Props {
  * algébrique à 2 variables déjà partagé). Un seul niveau d'aide : le gabarit général, jamais
  * substitué avec les vraies valeurs (elles sont déjà rappelées dans le bloc "État actuel").
  */
-export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationEquationCercle({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -41,8 +43,11 @@ export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_CERCLE}</p>
-      <EquationCercleGraph exercice={exercice} afficherCentre afficherRayon />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
+        blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre afficherRayon />}
+      />
       <EtatActuelPanel latex={formatEtatActuelCentreRayonLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_EQUATION}</p>
 

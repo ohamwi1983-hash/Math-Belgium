@@ -11,9 +11,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercle;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * (`afficherRayon`), avec — pour `rayon_indirect` seulement — la formule de Pythagore substituée
  * mais jamais résolue.
  */
-export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeRayonEquationCercle({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [rayon, setRayon] = useState("");
 
   const complet = rayon.trim() !== "";
@@ -48,8 +50,11 @@ export function EtapeRayonEquationCercle({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_CERCLE}</p>
-      <EquationCercleGraph exercice={exercice} afficherCentre afficherRayon={niveauAide >= 2} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
+        blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre afficherRayon={niveauAide >= 2} />}
+      />
       <EtatActuelPanel latex={formatEtatActuelCentreLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_RAYON}</p>
 

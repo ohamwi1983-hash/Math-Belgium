@@ -12,9 +12,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +34,7 @@ interface Props {
  * libre, parsé symboliquement (couvre les deux variantes de façon uniforme, jamais confondu avec
  * r² — le piège central de l'exercice).
  */
-export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
   const [rayon, setRayon] = useState("");
@@ -50,10 +52,15 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_CENTRE_RAYON}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatEtatActuelCompletionLatex(exercice)} />
       <p className="prompt-text">
         <RenduFragments fragments={segmentsConsigneCentreRayon(exercice)} />

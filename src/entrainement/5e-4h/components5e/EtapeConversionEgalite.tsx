@@ -7,11 +7,13 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceEgaliteExpressions;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +30,7 @@ interface Props {
 
 /** Écran 1 (famille "egalite") — convertir UN membre pour aligner les 2 côtés sur la même fonction,
  * champ de texte libre. */
-export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeConversionEgalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -43,10 +45,15 @@ export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box">
-        <Katex expression={formatEnonceEgaliteLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEnonceEgaliteLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_CONVERSION_EGALITE}</p>
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : cos(pi/2-x-pi/4)" />

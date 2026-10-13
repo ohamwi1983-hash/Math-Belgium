@@ -6,6 +6,7 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -13,6 +14,7 @@ import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatTermesD
 
 interface Props {
   exercice: ExerciceEtudeLocale;
+  estPremierEcran: boolean;
   phase: "extremums" | "inflexions";
   labels: string[];
   placeholders: string[];
@@ -43,6 +45,7 @@ interface Props {
  */
 export function EtapeChampsNumeriquesEtudeLocale({
   exercice,
+  estPremierEcran,
   phase,
   labels,
   placeholders,
@@ -80,12 +83,17 @@ export function EtapeChampsNumeriquesEtudeLocale({
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_LOCALE}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
       <EtatActuelEtudeLocale exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigne}</p>

@@ -6,9 +6,11 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
+  estPremierEcran: boolean;
   blocDonnees: string[];
   etatActuel: string[] | null;
   consigneEcran: string;
@@ -33,7 +35,7 @@ interface Props {
  * "champs"/"choix", l'app affiche l'erreur générique standard (le statut détaillé de l'inéquation
  * n'apporte rien de plus qu'un "correct"/"incorrect" côté élève). `App6gen33.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -44,16 +46,21 @@ export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, blocDon
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      {blocDonnees.length > 0 && (
-        <div className="equation-box">
-          <div className="equation-box-donnees">
-            {blocDonnees.map((frag, i) => (
-              <Katex key={i} expression={frag} block />
-            ))}
-          </div>
-        </div>
-      )}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          blocDonnees.length > 0 ? (
+            <div className="equation-box">
+              <div className="equation-box-donnees">
+                {blocDonnees.map((frag, i) => (
+                  <Katex key={i} expression={frag} block />
+                ))}
+              </div>
+            </div>
+          ) : null
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

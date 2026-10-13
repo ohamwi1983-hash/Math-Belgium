@@ -6,6 +6,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -15,6 +16,7 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
+  estPremierEcran: boolean;
   /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
   etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
@@ -36,7 +38,7 @@ interface Props {
  * un champ numérique (le zéro) + un choix binaire (le sens du changement de signe, lu de gauche à
  * droite). `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [zeroTexte, setZeroTexte] = useState("");
   const [sens, setSens] = useState<DirectionSigne | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -49,10 +51,15 @@ export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, etatActue
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

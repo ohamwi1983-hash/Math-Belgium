@@ -11,9 +11,11 @@ import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +34,7 @@ interface Props {
  * (`diagnostiquerDirectrice`). Chaque champ diagnostiqué indépendamment pour isoler le piège
  * central (F et directrice échangés en cas d'erreur de signe sur p).
  */
-export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [sx, setSx] = useState("");
   const [sy, setSy] = useState("");
   const [fx, setFx] = useState("");
@@ -69,10 +71,15 @@ export function EtapeCaracteristiquesEquationParaboleDeveloppee({ exercice, tent
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationDeveloppeeLatex(exercice)} block />
+          </div>
+        }
+      />
       <EtatActuelPanel latex={formatCompletionLatex(exercice)} />
       <p className="prompt-text">{CONSIGNE_CARACTERISTIQUES}</p>
 

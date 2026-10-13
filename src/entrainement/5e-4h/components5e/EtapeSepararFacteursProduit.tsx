@@ -10,9 +10,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceProduitFacteurs;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
 
 /** Écran "séparer en 2 équations" (famille "produit") — EXACTEMENT 2 champs (un produit à 2
  * facteurs, jamais add-as-needed), ordre indifférent côté vérification. */
-export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSepararFacteursProduit({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [ligne1, setLigne1] = useState("");
   const [ligne2, setLigne2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -48,12 +50,17 @@ export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box equation-box-termes">
-        {decouperEquationLongueLatex(formatEnonceProduitLatex(exercice)).map((morceau, i) => (
-          <Katex key={i} expression={morceau} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {decouperEquationLongueLatex(formatEnonceProduitLatex(exercice)).map((morceau, i) => (
+              <Katex key={i} expression={morceau} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_SEPARER_FACTEURS}</p>
       <ApercuExpressionLatex texte={ligne1} label="Équation 1" />
       <div className="field field-inline">

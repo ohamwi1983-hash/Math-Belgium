@@ -6,10 +6,12 @@ import type { AideAvecLatex, OptionChoix } from "../ui6e/formatProbabilitesProbl
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   options: OptionChoix[];
@@ -33,7 +35,7 @@ interface Props {
  * générateur à l'utiliser : famille F écran 3, variante "verifierAffirmation" (vrai/faux). Choix
  * véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary` (réservé à
  * "Valider", CLAUDE.md). `App6gen33.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && choixId !== null ? diagnostiquer(choixId) : null;
@@ -45,16 +47,21 @@ export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees,
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      {blocDonnees.length > 0 && (
-        <div className="equation-box">
-          <div className="equation-box-donnees">
-            {blocDonnees.map((frag, i) => (
-              <Katex key={i} expression={frag} block />
-            ))}
-          </div>
-        </div>
-      )}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          blocDonnees.length > 0 ? (
+            <div className="equation-box">
+              <div className="equation-box-donnees">
+                {blocDonnees.map((frag, i) => (
+                  <Katex key={i} expression={frag} block />
+                ))}
+              </div>
+            </div>
+          ) : null
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

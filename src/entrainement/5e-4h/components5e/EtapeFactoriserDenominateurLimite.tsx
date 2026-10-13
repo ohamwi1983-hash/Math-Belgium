@@ -8,9 +8,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLimite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
  * le factorise lui-même), vérifié par ÉQUIVALENCE ALGÉBRIQUE (même composant que côté 4e), jamais
  * add-as-needed. `diagnostiquerFacteurs` (moteur, inchangée) reste appelée avec un tableau à 1
  * élément. */
-export function EtapeFactoriserDenominateurLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeFactoriserDenominateurLimite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -46,10 +48,15 @@ export function EtapeFactoriserDenominateurLimite({ exercice, tentativesUtilisee
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        <Katex expression={formatBlocDonneesLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            <Katex expression={formatBlocDonneesLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, "factoriserDenominateur")}</p>
 
       <ApercuExpressionLatex texte={texte} />

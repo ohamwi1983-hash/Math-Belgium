@@ -8,6 +8,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -15,6 +16,7 @@ type PhasePoserEquation = "poserEquationAlgebrique" | "poserEquationRangN";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
+  estPremierEcran: boolean;
   phase: PhasePoserEquation;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -35,7 +37,7 @@ interface Props {
  * "poserEquationRangN" (famille "algebriqueRangN") — REFONTE `prompt5gen15refontefamillesbonus.md`,
  * miroir direct de `EtapePoserEquation.tsx` (5gen14) : UN SEUL champ texte libre où l'élève tape
  * l'équation COMPLÈTE, "=" inclus (ex. `5x-47=-x+16-x+19` ou `12*2^(n-1)=768`). */
-export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapePoserEquationGeometrique({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,12 +60,17 @@ export function EtapePoserEquationGeometrique({ exercice, phase, tentativesUtili
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase as PhaseSuiteGeometrique)}</p>
       {valeurLatexPoserEquation !== null && <Katex expression={valeurLatexPoserEquation} block />}
       <ApercuExpressionLatex texte={texte} />

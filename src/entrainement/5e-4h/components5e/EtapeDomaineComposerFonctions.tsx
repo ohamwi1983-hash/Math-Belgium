@@ -5,8 +5,10 @@ import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   /** Consigne SPÉCIFIQUE à cet écran — rendue APRÈS le bloc "état actuel" (A.9). */
   consigne: string;
   /** Bloc "données" persistant (`DonneesComposerFonctions`, f(x)/g(x)) — rendu juste APRÈS la
@@ -46,12 +48,11 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
 
 /** Écran guidé, réutilisé pour "domFRondG" ET "domGRondF" — même builder que 5gen1
  * (`EnsembleReelGuideBuilder`), seuls consigne/aides diffèrent selon l'appelant. */
-export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu, attendu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation }: Props) {
+export function EtapeDomaineComposerFonctions({ estPremierEcran, consigne, donnees, prefixApercu, attendu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_COMPOSER_FONCTIONS}</p>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_COMPOSER_FONCTIONS} blocDonnees={donnees} />
       {termesEtatActuel !== undefined && <EtatActuelComposerFonctions termes={termesEtatActuel} />}
       <p className="prompt-text">{consigne}</p>
       <EnsembleReelGuideBuilder

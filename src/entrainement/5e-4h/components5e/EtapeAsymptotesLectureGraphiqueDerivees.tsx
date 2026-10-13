@@ -9,12 +9,14 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +36,7 @@ interface Props {
  * graphe 5gen22 — la donnée affichée doit rester la MÊME sur tous les écrans de ce générateur.
  * Jamais un composant importé tel quel : `EtapeEquationsAsymptotes` est câblé en dur sur l'ancien
  * graphe et sur `ExerciceLectureGraphiqueLimites`, incompatible avec ce besoin. */
-export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const slots = listeAsymptotes(exercice.asymptotique);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   useEffect(() => {
@@ -64,8 +66,11 @@ export function EtapeAsymptotesLectureGraphiqueDerivees({ exercice, tentativesUt
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <LectureGraphiqueDeriveesGraph exercice={exercice} surlignage={surlignage} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} surlignage={surlignage} />}
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <p className="prompt-text">{consigneEcran("asymptotes")}</p>
       {slots.map((slot, i) => (

@@ -6,6 +6,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -15,6 +16,7 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;

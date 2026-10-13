@@ -7,11 +7,13 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceAsymptoteOblique;
+  estPremierEcran: boolean;
   phase: "ecrireFormeDeveloppee" | "calculerCoefficientA" | "calculerCoefficientB" | "conclureEquationAsymptote";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -33,7 +35,7 @@ interface Props {
  * variante "viaLimites" affichent, en plus de la consigne, la formule LaTeX de la limite à calculer
  * (`formatFormulePhaseLatex`) — mode DISPLAY (`block`) obligatoire, notation de limite déjà corrigée
  * sur 5gen20. */
-export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreAsymptote({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -50,12 +52,17 @@ export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees,
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {formule !== "" && (
         <div className="equation-box">

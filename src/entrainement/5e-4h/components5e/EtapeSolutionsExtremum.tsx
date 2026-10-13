@@ -16,9 +16,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceExtremumsSinusoide;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -40,7 +42,7 @@ interface Props {
  * cercle vide restait visible avant ce correctif) — l'aide 2 le fait alors apparaître avec le
  * PREMIER point placé à titre d'exemple seulement. Régime toujours "exact" (5gen11 n'a jamais de
  * régime décimal). */
-export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSolutionsExtremum({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -71,12 +73,17 @@ export function EtapeSolutionsExtremum({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EXTREMUMS}</p>
-      <div className="equation-box equation-box-termes">
-        {decouperEquationLongueLatex(formatFonctionSourceLatex(exercice)).map((morceau, i) => (
-          <Katex key={i} expression={morceau} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EXTREMUMS}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {decouperEquationLongueLatex(formatFonctionSourceLatex(exercice)).map((morceau, i) => (
+              <Katex key={i} expression={morceau} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{TEXTE_CONSIGNE_SOLUTIONS}</p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (

@@ -7,8 +7,10 @@ import { LIBELLE_RELATION_C } from "../ui6e/formatRacinesNiemes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -35,7 +37,7 @@ interface Props {
  * des boutons — synchronisé avec `diagnostiquerCEcran1`, qui compare directement l'identifiant
  * choisi à `"correct"`.
  */
-export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixRelationRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IdRelationRacineUnite | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -46,14 +48,19 @@ export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees,
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

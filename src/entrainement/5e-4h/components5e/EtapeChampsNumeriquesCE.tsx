@@ -10,9 +10,11 @@ import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomique;
+  estPremierEcran: boolean;
   ecran: EcranContexteEconomique;
   labels: string[];
   placeholders: string[];
@@ -39,6 +41,7 @@ interface Props {
  * approchée du bonus). Même patron que `EtapeChampsNumeriquesEtudeLocale.tsx` (5gen29). */
 export function EtapeChampsNumeriquesCE({
   exercice,
+  estPremierEcran,
   ecran,
   labels,
   placeholders,
@@ -77,12 +80,17 @@ export function EtapeChampsNumeriquesCE({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <p className="prompt-text">{consigne}</p>
       {labels.map((label, i) => (

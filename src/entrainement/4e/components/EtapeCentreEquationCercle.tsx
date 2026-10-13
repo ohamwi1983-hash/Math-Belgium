@@ -10,9 +10,11 @@ import { EquationCercleGraph } from "./EquationCercleGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercle;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * tracé. L'aide de niveau 2 marque le centre EN COULEUR sur le graphe lui-même
  * (`afficherCentre`), jamais un texte donnant les coordonnées.
  */
-export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCentreEquationCercle({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -47,8 +49,11 @@ export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_CERCLE}</p>
-      <EquationCercleGraph exercice={exercice} afficherCentre={niveauAide >= 2} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
+        blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre={niveauAide >= 2} />}
+      />
       <p className="prompt-text">{CONSIGNE_CENTRE}</p>
 
       <div className="field-row">

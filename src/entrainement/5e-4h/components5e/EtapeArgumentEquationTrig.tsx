@@ -11,9 +11,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationTrig;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -36,7 +38,7 @@ interface Props {
  * uniquement, jamais tan — D.1, même patron que `EtapeCEDomaineDefinition.tsx`). Calculatrice
  * scientifique affichée UNIQUEMENT en régime "decimal" (D.1 — jamais pour une valeur d'angle
  * particulier, régime "exact"). */
-export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeArgumentEquationTrig({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const gateActif = exercice.fonction !== "tan";
   const [choixAucuneSolution, setChoixAucuneSolution] = useState<boolean | null>(gateActif ? null : false);
   const [lignes, setLignes] = useState<string[]>([""]);
@@ -65,10 +67,15 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationEnonceLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationEnonceLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">
         {formatQuestionArgumentTexte(exercice.fonction)} <Katex expression={exercice.k.latex} /> ?
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}

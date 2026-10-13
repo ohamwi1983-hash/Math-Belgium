@@ -7,9 +7,11 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationTrig;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +30,7 @@ interface Props {
  * nombre de branches déjà confirmées à l'écran 1 (connu avec certitude à ce stade). D.2 : AUCUNE
  * aide sur cet écran (`niveauAideMaxEquationTrig` plafonne cette phase à 0, voir
  * `moteur5e/sessionEquationTrig.ts`) — le bouton et le bloc d'aide sont donc entièrement absents. */
-export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeIsolerXEquationTrig({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, exercice.branchesU.length) }, () => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -52,10 +54,15 @@ export function EtapeIsolerXEquationTrig({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationEnonceLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationEnonceLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">
         Résous ces équations ci-dessus et donne les valeurs de x.
         {exercice.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}

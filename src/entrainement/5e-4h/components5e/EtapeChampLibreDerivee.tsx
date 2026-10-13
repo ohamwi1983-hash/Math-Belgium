@@ -9,9 +9,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDefinitionDerivee;
+  estPremierEcran: boolean;
   ecran: Extract<EcranDefinitionDerivee, "quotient" | "limite">;
   labelChamp: string;
   placeholder: string;
@@ -36,7 +38,7 @@ interface Props {
  * Question spécifique rendue en 3 morceaux (`texteAvant`/`latex`/`texteApres`,
  * `questionSpecifiqueEcran`) — le fragment central passe par `<Katex>` (fraction/limite empilée,
  * jamais un texte plat avec crochets). */
-export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreDerivee({ exercice, estPremierEcran, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -53,12 +55,17 @@ export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholde
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">
         {question.texteAvant} {question.latex && <Katex expression={question.latex} />} {question.texteApres}
       </p>

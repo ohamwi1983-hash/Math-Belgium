@@ -6,6 +6,7 @@ import { QuestionFinale } from "../components/QuestionFinale";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelEtudeLocale } from "./EtatActuelEtudeLocale";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -22,6 +23,7 @@ import {
 
 interface Props {
   exercice: ExerciceEtudeLocale;
+  estPremierEcran: boolean;
   phase: "resoudreFPrime" | "resoudreFSeconde";
   /** Ajoutée à la fin de la consigne d'écran si non nulle — voir CLAUDE.md, "Annonce de précision =
    * tolérance réellement vérifiée". */
@@ -51,6 +53,7 @@ interface Props {
  * portant `.contenu-conditionnel` (espacement bouton → contenu conditionnel, CLAUDE.md). */
 export function EtapeZerosDeriveeEtudeLocale({
   exercice,
+  estPremierEcran,
   phase,
   precisionAnnoncee,
   tentativesUtilisees,
@@ -96,12 +99,17 @@ export function EtapeZerosDeriveeEtudeLocale({
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_LOCALE}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
       <EtatActuelEtudeLocale exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigne}</p>

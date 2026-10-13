@@ -4,6 +4,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 const LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -13,6 +14,7 @@ type ChoixLigne = number | "aucune" | null;
 
 interface Props {
   nombreItems: number;
+  estPremierEcran: boolean;
   /** Rendu riche de l'élément numéroté `index` (0-based) — graphique Mafs, KaTeX, ou texte. */
   renderItem: (index: number) => ReactNode;
   /** Rendu riche du candidat lettré `index` (0-based). */
@@ -52,6 +54,7 @@ interface Props {
  */
 export function ComposantAssociation({
   nombreItems,
+  estPremierEcran,
   renderItem,
   renderCandidat,
   consigneGenerale,
@@ -85,15 +88,20 @@ export function ComposantAssociation({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="association-candidats-grid">
-        {lettres.map((lettre, j) => (
-          <div key={lettre} className="association-candidat">
-            <p className="field-label field-label-minuscule">{lettre}</p>
-            {renderCandidat(j)}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="association-candidats-grid">
+            {lettres.map((lettre, j) => (
+              <div key={lettre} className="association-candidat">
+                <p className="field-label field-label-minuscule">{lettre}</p>
+                {renderCandidat(j)}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        }
+      />
       <p className="prompt-text">{consigne}</p>
       {Array.from({ length: nombreItems }, (_, i) => (
         <div key={i} className="association-item-ligne">

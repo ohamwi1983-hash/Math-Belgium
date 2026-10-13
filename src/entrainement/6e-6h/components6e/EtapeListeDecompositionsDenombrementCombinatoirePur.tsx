@@ -7,6 +7,7 @@ import { SEPARATEUR_LISTES_D } from "../moteur6e/verificationDenombrementCombina
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -14,6 +15,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -77,7 +79,7 @@ function ListeUneSomme({ sommeCible, lignes, onModifier, onAjouter, onRetirer, m
  * générique (`soumettreReponseEcran(etat, valeurs: string[])`, format uniforme quel que soit
  * l'écran). `App6gen46.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeDecompositionsDenombrementCombinatoirePur({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeDecompositionsDenombrementCombinatoirePur({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignesS1, setLignesS1] = useState<string[]>([""]);
   const [lignesS2, setLignesS2] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -96,14 +98,19 @@ export function EtapeListeDecompositionsDenombrementCombinatoirePur({ consigneGe
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

@@ -6,8 +6,10 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatGraphiqueDeriveeLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   fonctionLatex: string;
   placeholder: string;
@@ -30,6 +32,7 @@ interface Props {
  * (`moteur6e/equivalenceExponentielle.ts`). `App6gen20.tsx` doit rendre ce composant avec une `key`
  * qui change entre 2 exercices, sinon le champ garderait la saisie de l'exercice précédent. */
 export function EtapeChampGraphiqueDeriveeLogarithme({
+  estPremierEcran,
   consigneEcran,
   fonctionLatex,
   placeholder,
@@ -53,10 +56,15 @@ export function EtapeChampGraphiqueDeriveeLogarithme({
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={fonctionLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={fonctionLatex} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

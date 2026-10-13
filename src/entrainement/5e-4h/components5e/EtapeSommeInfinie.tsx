@@ -7,11 +7,13 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
+  estPremierEcran: boolean;
   phase: "sommeInfinie" | "sommeInfinieB1" | "sommeInfinieB2";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -30,7 +32,7 @@ interface Props {
 /** Écran "sommeInfinie"/B1/B2 — choix Existe/N'existe pas PUIS, si "Existe", la valeur — piège
  * central : |q|<1 STRICTEMENT (q=1 ou q=-1 répondent tous deux "n'existe pas", contrairement à la
  * convergence de la suite elle-même). */
-export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSommeInfinie({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [valeur, setValeur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -49,12 +51,17 @@ export function EtapeSommeInfinie({ exercice, phase, tentativesUtilisees, tentat
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
 
       <div className="options-grid-compact">

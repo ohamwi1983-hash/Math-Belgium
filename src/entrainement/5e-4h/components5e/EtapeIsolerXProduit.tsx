@@ -10,9 +10,11 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceProduitFacteurs;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   /** D.2 (E.1) — aide plafonnée à 0 sur cet écran (retirée entièrement) ; les 3 props ci-dessous
@@ -37,7 +39,7 @@ interface Props {
  * n'en a aucune — bug de softlock trouvé par vérification Playwright de bout en bout : ce cas
  * n'a AUCUNE réponse possible, `diagnostiquerIsolerX` exigeant 0 ligne, jamais 1). D.2 (E.1) :
  * AUCUNE aide sur cet écran (`niveauAideMaxEquationTrig` plafonne cette phase à 0). */
-export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeIsolerXProduit({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const facteur1NecessiteLignes = exercice.facteur1.branchesU.length > 0;
   const facteur2NecessiteLignes = exercice.facteur2.branchesU.length > 0;
   const [lignes1, setLignes1] = useState<string[]>(() => Array.from({ length: exercice.facteur1.branchesU.length }, () => ""));
@@ -59,12 +61,17 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box equation-box-termes">
-        {decouperEquationLongueLatex(formatEnonceProduitLatex(exercice)).map((morceau, i) => (
-          <Katex key={i} expression={morceau} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box equation-box-termes">
+            {decouperEquationLongueLatex(formatEnonceProduitLatex(exercice)).map((morceau, i) => (
+              <Katex key={i} expression={morceau} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">Résous ces équations ci-dessus et donne les valeurs de x.</p>
 
       <p className="prompt-text">

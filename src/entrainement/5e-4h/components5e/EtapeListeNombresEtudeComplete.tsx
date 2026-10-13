@@ -8,9 +8,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +30,7 @@ interface Props {
  * même patron que `EtapeListerIntervalles.tsx`/5gen9. Seul écran restant utilisant ce composant
  * depuis la refonte `prompt5gen24refontecomplete.md` (l'ancien écran "classification" est remplacé
  * par `EtapeAVEtudeComplete.tsx`, avec son propre gate "Pas de AV"/"Au moins une AV"). */
-export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeNombresEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -53,8 +55,11 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_ETUDE_COMPLETE}</p>
-      <BlocDonneesEtudeComplete exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
+        blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
+      />
       <p className="prompt-text">{consignePhase(exercice, "domaine")}</p>
       {valeurs.map((v, i) => (
         <div key={i} className="field-row">

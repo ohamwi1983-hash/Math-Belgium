@@ -4,6 +4,7 @@ import type { AideAvecLatex } from "../ui6e/formatEquationsComplexes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Option {
   id: string;
@@ -13,6 +14,7 @@ interface Option {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   options: Option[];
@@ -37,7 +39,7 @@ interface Props {
  * CLAUDE.md), mirroir `EtapeChoixAffixesRacines.tsx` (6gen35). `App6gen36.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeChoixEquationsComplexes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixEquationsComplexes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -48,14 +50,19 @@ export function EtapeChoixEquationsComplexes({ consigneGenerale, blocDonnees, et
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

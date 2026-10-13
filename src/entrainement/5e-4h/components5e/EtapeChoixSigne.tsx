@@ -5,6 +5,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Champ {
   /** Étiquette au-dessus du groupe de 2 boutons — vide pour un champ unique (bilatéral). */
@@ -13,6 +14,7 @@ interface Champ {
 
 interface Props {
   exercice: ExerciceLimite;
+  estPremierEcran: boolean;
   phase: "evaluerLimiteFinale";
   champs: Champ[];
   /** ["+","−"] pour un signe fini, ["+∞","−∞"] pour une conclusion infinie. */
@@ -35,7 +37,7 @@ interface Props {
 
 /** Écran à choix de signe — 1 groupe de 2 boutons (`.options-grid-compact`), réutilisé par
  * "evaluerLimiteFinale" quand la limite est infinie (famille "limiteInfini"). */
-export function EtapeChoixSigne({ exercice, phase, champs, options, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChoixSigne({ exercice, estPremierEcran, phase, champs, options, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choix, setChoix] = useState<(1 | -1 | null)[]>(champs.map(() => null));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = choix.every((c) => c !== null);
@@ -53,10 +55,15 @@ export function EtapeChoixSigne({ exercice, phase, champs, options, tentativesUt
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        <Katex expression={formatBlocDonneesLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            <Katex expression={formatBlocDonneesLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {champs.map((champ, i) => (
         <div key={i}>

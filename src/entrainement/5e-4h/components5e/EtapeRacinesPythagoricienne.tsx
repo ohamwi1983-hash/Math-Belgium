@@ -6,11 +6,13 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExercicePythagoricienne;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +34,7 @@ interface Props {
  * cette même valeur) — elle REMPLIT donc déjà le rôle du bloc "état actuel" pour cet écran, même
  * principe que "le bloc violet réinterprété comme état actuel" déjà établi ailleurs sur la
  * plateforme (ex. gen24/25, 4e) — un second bloc identique en dessous serait un pur doublon. */
-export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesPythagoricienne({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [t1, setT1] = useState("");
   const [t2, setT2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -53,10 +55,15 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
-      <div className="equation-box">
-        <Katex expression={formatPolynomeCibleLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatPolynomeCibleLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{CONSIGNE_RACINES_PYTHAGORICIENNE}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

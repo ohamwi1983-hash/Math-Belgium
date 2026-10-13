@@ -6,8 +6,10 @@ import type { AideAvecLatex, ChampDef, TableauAffichage } from "../ui6e/formatIn
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   tableauDonnees: TableauAffichage | null;
@@ -69,7 +71,7 @@ function TableAffichage({ tableau }: { tableau: TableauAffichage }) {
  * conservée à l'identique. AUCUN écran à choix dans ce générateur (voir en-tête de
  * `ui6e/formatIndependanceBayes.ts`) — un seul composant écran suffit, jamais de variante "choix".
  * `App6gen32.tsx` doit le rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
-export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, tableauDonnees, etatActuel, tableauEtatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsIndependanceBayes({ estPremierEcran, consigneGenerale, blocDonnees, tableauDonnees, etatActuel, tableauEtatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -86,15 +88,22 @@ export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, ta
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
-      {tableauDonnees && <TableAffichage tableau={tableauDonnees} />}
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <>
+            <div className="equation-box">
+              <div className="equation-box-donnees">
+                {blocDonnees.map((frag, i) => (
+                  <Katex key={i} expression={frag} block />
+                ))}
+              </div>
+            </div>
+            {tableauDonnees && <TableAffichage tableau={tableauDonnees} />}
+          </>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

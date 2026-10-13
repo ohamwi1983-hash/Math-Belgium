@@ -9,9 +9,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLimite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +29,7 @@ interface Props {
 
 /** Écran "termeDominant" (famille "limiteInfini" uniquement) — 2 champs symboliques FIXES (jamais
  * add-as-needed, toujours exactement 1 terme dominant par polynôme), vérifiés INDÉPENDAMMENT. */
-export function EtapeTermeDominant({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTermeDominant({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [numerateur, setNumerateur] = useState("");
   const [denominateur, setDenominateur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -49,10 +51,15 @@ export function EtapeTermeDominant({ exercice, tentativesUtilisees, tentativesMa
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        <Katex expression={formatBlocDonneesLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            <Katex expression={formatBlocDonneesLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, "termeDominant")}</p>
       <ApercuExpressionLatex texte={numerateur} />
       <div className="field field-inline">

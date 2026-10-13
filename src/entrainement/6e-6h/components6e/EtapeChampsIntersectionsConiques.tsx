@@ -7,8 +7,10 @@ import type { AideAvecLatex, ChampDef } from "../ui6e/formatIntersectionsConique
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -43,7 +45,7 @@ const MAX_LIGNES_DEFAUT = 2;
  * d'intersection" pour le cas 0 solution — jamais des champs fixes (convention transversale
  * CLAUDE.md, "interface de saisie flexible").
  */
-export function EtapeChampsIntersectionsConiques({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsIntersectionsConiques({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const champListe = champs.length === 1 && champs[0].type === "liste" ? champs[0] : null;
 
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
@@ -72,14 +74,19 @@ export function EtapeChampsIntersectionsConiques({ consigneGenerale, blocDonnees
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

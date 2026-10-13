@@ -5,6 +5,7 @@ import { consigneGenerale, consignePhase, formatBlocDonneesLatex } from "../ui5e
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 const OPTIONS_CONCLURE: { id: string; label: string }[] = [
   { id: "-1", label: "−∞" },
@@ -18,6 +19,7 @@ function idVersChoix(id: string): ReponseConclureLimite {
 
 interface Props {
   exercice: ExerciceLimite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (choix: ReponseConclureLimite) => void;
@@ -28,17 +30,22 @@ interface Props {
  * à 3 options (−∞/+∞/∄, jamais des boutons), à partir des 2 limites unilatérales déjà trouvées à
  * l'écran précédent. AUCUNE aide sur cet écran (spécifié explicitement — jamais de `BoutonAide` ici,
  * contrairement à tous les autres écrans de la plateforme qui en ont systématiquement un). */
-export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees, tentativesMax, onValider, validation }: Props) {
+export function EtapeConclureLimiteInfiniePoint({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation }: Props) {
   const [choixId, setChoixId] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = choixId !== "";
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        <Katex expression={formatBlocDonneesLatex(exercice)} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            <Katex expression={formatBlocDonneesLatex(exercice)} block />
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, "conclureLimite")}</p>
       <span className="select-souligne-wrap">
         <select className="ce-select" aria-label="Conclusion de la limite" value={choixId} onChange={(e) => setChoixId(e.target.value)} disabled={!!validation}>

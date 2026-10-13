@@ -8,11 +8,13 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceAsymptoteOblique;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +30,7 @@ interface Props {
 
 /** Écran "diviserEuclidienne" (variante "divisionEuclidienne" uniquement) — 1 champ symbolique
  * (quotient Q(x)) + 1 champ numérique (reste R(x)), vérifiés INDÉPENDAMMENT. */
-export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeDiviserEuclidienne({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [quotient, setQuotient] = useState("");
   const [reste, setReste] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -50,12 +52,17 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{consignePhase(exercice, "diviserEuclidienne")}</p>
       <ApercuExpressionLatex texte={quotient} label="Q(x)=" />
       <div className="field field-inline">

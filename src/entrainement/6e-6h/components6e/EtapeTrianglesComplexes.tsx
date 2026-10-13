@@ -7,6 +7,7 @@ import type { AideAvecLatex, ChampDef, ChoixDef } from "../ui6e/formatTrianglesC
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 /** Vrai si le placeholder NE représente PAS un simple nombre isolé (entier/décimal, signe
  * optionnel) — distingue une longueur/angle toujours réel-entier (ex. "AB =", "OA =", placeholder
@@ -21,6 +22,7 @@ function champEstCompose(placeholder?: string): boolean {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   etatActuel: string[] | null;
   consigneEcran: string;
   champs: ChampDef[];
@@ -55,7 +57,7 @@ interface Props {
  * choix (s'il existe) occupe TOUJOURS le DERNIER slot du tableau, convention partagée avec
  * `moteur6e/verificationTrianglesComplexes.ts` (`diagnostiquerCEcran2`, `valeurs[3]`).
  */
-export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, champs, choix, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, estPremierEcran, etatActuel, consigneEcran, champs, choix, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeursTexte, setValeursTexte] = useState<string[]>(() => champs.map(() => ""));
   const [choixSelectionne, setChoixSelectionne] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;

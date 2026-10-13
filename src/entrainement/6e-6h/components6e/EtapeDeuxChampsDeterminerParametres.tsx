@@ -8,8 +8,10 @@ import type { ReponseDeuxChamps } from "../moteur6e/verificationDeterminerParame
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
+  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -40,6 +42,7 @@ interface Props {
  * `App6gen18.tsx` doit le rendre avec `key={phase}`.
  */
 export function EtapeDeuxChampsDeterminerParametres({
+  estPremierEcran,
   consigneGenerale,
   blocDonnees,
   etatActuel,
@@ -71,14 +74,19 @@ export function EtapeDeuxChampsDeterminerParametres({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

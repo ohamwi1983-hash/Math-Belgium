@@ -6,6 +6,7 @@ import type { AideAvecLatex } from "../ui6e/formatDeriveesCyclometriques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 
 interface EtatActuelLigne {
@@ -14,6 +15,7 @@ interface EtatActuelLigne {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   fonctionLatex: string;
   /** Absent (ou vide) sur le 1er écran d'une famille ; sinon 1-2 lignes dérivées de l'exercice/des
@@ -39,6 +41,7 @@ interface Props {
  * sont structurellement identiques : consigne générale + bloc f(x) redondant + consigne d'écran +
  * champ + aide à 2 niveaux. `App6gen4.tsx` doit le rendre avec `key={phase}`. */
 export function EtapeChampDeriveeCyclo({
+  estPremierEcran,
   consigneEcran,
   fonctionLatex,
   etatActuel = [],
@@ -63,10 +66,15 @@ export function EtapeChampDeriveeCyclo({
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={fonctionLatex} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={fonctionLatex} />
+          </div>
+        }
+      />
       {etatActuel.map((ligne) => (
         <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
       ))}

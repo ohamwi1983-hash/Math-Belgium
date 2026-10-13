@@ -11,9 +11,11 @@ import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParabole;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +30,7 @@ interface Props {
 /** Écran 2 (dernier, toujours terminal) — champ texte libre, réutilise directement
  * `diagnostiquerEquation` (`moteur/verificationEquationParabole.ts`, moteur d'égalité algébrique à
  * 2 variables déjà partagé). "État actuel" rappelle S et F CONFIRMÉS à l'écran 1. */
-export function EtapeEquationEquationParabole({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationEquationParabole({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -39,8 +41,11 @@ export function EtapeEquationEquationParabole({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_PARABOLE}</p>
-      <EquationParaboleGraph exercice={exercice} afficherSommet afficherVecteurP={niveauAide >= 1} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE_EQUATION_PARABOLE}
+        blocDonnees={<EquationParaboleGraph exercice={exercice} afficherSommet afficherVecteurP={niveauAide >= 1} />}
+      />
       <EtatActuelPanel latex={`S = ${formatSommetLatex(exercice.sommet)} \\quad F = ${formatFoyerLatex(exercice.foyer)}`} />
       <p className="prompt-text">{CONSIGNE_EQUATION}</p>
 

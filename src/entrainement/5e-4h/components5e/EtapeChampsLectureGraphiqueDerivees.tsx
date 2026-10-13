@@ -10,9 +10,11 @@ import { EtatActuelLectureGraphiqueDerivees } from "./EtatActuelLectureGraphique
 import { LectureGraphiqueDeriveesGraph } from "./LectureGraphiqueDeriveesGraph";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { consigneEcran, consigneGenerale, questionFinale } from "../ui5e/formatLectureGraphiqueDerivees";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
+  estPremierEcran: boolean;
   phase: "extremums" | "inflexions";
   labels: string[];
   placeholders: string[];
@@ -45,6 +47,7 @@ interface Props {
  */
 export function EtapeChampsLectureGraphiqueDerivees({
   exercice,
+  estPremierEcran,
   phase,
   labels,
   placeholders,
@@ -85,8 +88,11 @@ export function EtapeChampsLectureGraphiqueDerivees({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <LectureGraphiqueDeriveesGraph exercice={exercice} surlignage={surlignage} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} surlignage={surlignage} />}
+      />
       <QuestionFinale question={questionFinale(exercice)} />
       <EtatActuelLectureGraphiqueDerivees exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigne}</p>

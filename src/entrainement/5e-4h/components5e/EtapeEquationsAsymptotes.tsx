@@ -8,9 +8,11 @@ import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (textes: string[]) => void;
@@ -24,7 +26,7 @@ interface Props {
 /** Écran "nommerAsymptotes" — une équation par asymptote RÉELLEMENT présente (jamais un champ pour
  * un type absent du tirage) : x=... par AV, y=... par AH (1 ou 2 champs selon égalité en ±∞), y=...
  * par AO (expression symbolique ax+b). Pas d'aide : pure lecture graphique. */
-export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeEquationsAsymptotes({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const slots = listeAsymptotes(exercice);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -47,8 +49,11 @@ export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <LectureGraphiqueLimitesGraph exercice={exercice} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale()}
+        blocDonnees={<LectureGraphiqueLimitesGraph exercice={exercice} />}
+      />
       <p className="prompt-text">{consignePhase("nommerAsymptotes")}</p>
       {slots.map((slot, i) => (
         <div key={i} className="field field-inline">

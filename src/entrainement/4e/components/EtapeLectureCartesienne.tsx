@@ -9,9 +9,11 @@ import { LectureGraphiqueDroiteGraph } from "./LectureGraphiqueDroiteGraph";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDroite;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +31,7 @@ interface Props {
  * acceptée, vérifiée par `diagnostiquerCartesienne` (normalisation implicite + proportionnalité,
  * jamais une comparaison de chaîne).
  */
-export function EtapeLectureCartesienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeLectureCartesienne({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const apresEchec = tentativesUtilisees > 0;
@@ -38,8 +40,13 @@ export function EtapeLectureCartesienne({ exercice, tentativesUtilisees, tentati
 
   return (
     <div>
-      <p className="prompt-text">{consigneGeneraleLecture(exercice)}</p>
-      <LectureGraphiqueDroiteGraph exercice={exercice} pointsSurlignes={niveauAide >= 2 ? pointsAideExemple(exercice) : []} />
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGeneraleLecture(exercice)}
+        blocDonnees={
+          <LectureGraphiqueDroiteGraph exercice={exercice} pointsSurlignes={niveauAide >= 2 ? pointsAideExemple(exercice) : []} />
+        }
+      />
       <p className="prompt-text">{consigneLecture(exercice)}</p>
 
       <div className="field field-inline">

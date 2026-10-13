@@ -6,6 +6,7 @@ import { CONSIGNE_GENERALE, consigneAsymptotesB } from "../ui6e/formatEtudeFonct
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -13,6 +14,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   enonceLatex: string;
   p: number;
   etatActuel: string[] | null;

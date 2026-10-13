@@ -8,11 +8,13 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceTangenteDoubleTangence;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +33,7 @@ interface Props {
  * variante ne fournit jamais f'(x)) et l'équation de la tangente (symbolique, "y="). UNE SEULE
  * tentative combinée (1 bouton Valider) — même patron 2-champs que `EtapeDevelopperDerivee.tsx`
  * (5gen26). Calculatrice PRÉSENTE (substitution numérique dans un polynôme de degré 4). */
-export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTangenteEnP({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [fPrimeP, setFPrimeP] = useState("");
   const [tangente, setTangente] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -54,12 +56,17 @@ export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax,
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale(exercice)}
+        blocDonnees={
+          <div className="equation-box equation-box-donnees">
+            {formatTermesDonneesLatex(exercice).map((frag, i) => (
+              <Katex key={i} expression={frag} />
+            ))}
+          </div>
+        }
+      />
       <p className="prompt-text">{question.texteAvant}</p>
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">

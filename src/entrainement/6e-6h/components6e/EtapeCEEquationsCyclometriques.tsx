@@ -7,9 +7,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { Katex } from "../components/Katex";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationsCyclometriques;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -24,7 +26,7 @@ interface Props {
 
 /** Écran 1 — condition d'existence (CE), commune aux 4 variantes de `6gen3` (REFONTE). Construction
  * guidée via `EnsembleReelGuideBuilder` (module partagé avec 6gen1, réutilisé TEL QUEL). */
-export function EtapeCEEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCEEquationsCyclometriques({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [ce, setCe] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -37,10 +39,15 @@ export function EtapeCEEquationsCyclometriques({ exercice, tentativesUtilisees, 
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatEquationOriginaleLatex(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatEquationOriginaleLatex(exercice)} />
+          </div>
+        }
+      />
       <p className="prompt-text">Établis la condition d'existence (CE) de x∈[intervalle] pour cette équation.</p>
       <EnsembleReelGuideBuilder onChange={setCe} label="x\in" erronee={montrerErreurs} />
       {!validation && (

@@ -6,6 +6,7 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -13,6 +14,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
@@ -39,7 +41,7 @@ interface Props {
  * composant partagé `EnsembleReelGuideBuilder` que 6gen1/6gen3/6gen7. `App6gen10.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeIntervalleIneqExpo({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntervalleIneqExpo({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -50,10 +52,15 @@ export function EtapeIntervalleIneqExpo({ consigneEcran, enonceLatex, etatActuel
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

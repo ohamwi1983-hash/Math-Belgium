@@ -17,10 +17,12 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { EtatActuelPanel } from "./EtatActuelPanel";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
+  estPremierEcran: boolean;
   /** Branche mémorisée par la Couche B à la clôture de l'écran précédent (voir en-tête de
    * `moteur6e/typesInjectiviteFonctions.ts`) — détermine la bonne closure de réciproque. */
   coteChoisi: CoteBranche;
@@ -42,7 +44,7 @@ interface Props {
 
 /** Écran 3 — champ libre "f⁻¹(x)=", label à gauche. `App6gen1.tsx` rend ce composant avec
  * `key={phase}`. */
-export function EtapeReciproqueInjectiviteFonctions({ exercice, coteChoisi, intervalleConfirme, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReciproqueInjectiviteFonctions({ exercice, estPremierEcran, coteChoisi, intervalleConfirme, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquerReciproque(exercice, coteChoisi, texte) : null;
@@ -57,10 +59,15 @@ export function EtapeReciproqueInjectiviteFonctions({ exercice, coteChoisi, inte
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={formatFLatexAffichage(exercice)} />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={formatFLatexAffichage(exercice)} />
+          </div>
+        }
+      />
       {lignesEtatActuel.map((ligne) => (
         <EtatActuelPanel key={ligne.label} label={ligne.label} latex={ligne.latex} />
       ))}

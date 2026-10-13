@@ -6,9 +6,11 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CONSIGNE_GENERALE_DOMAINE_DEFINITION, calculerAideGrilleDomf, formatTermesEtatActuelCELatex } from "../ui5e/formatDomaineDefinition";
 import { Katex } from "../components/Katex";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDomaineDefinition;
+  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -25,7 +27,7 @@ interface Props {
  * : la CE déjà écrite, enrichi du tableau de signes déjà complété pour "fractionSousRacine" (point
  * 6) — seule famille avec une aide sur cet écran (surlignage vert des cases pertinentes, repris du
  * gen6 4e). */
-export function EtapeDomfDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation }: Props) {
+export function EtapeDomfDomaineDefinition({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
   const termesEtatActuel = formatTermesEtatActuelCELatex(exercice);
   const aFractionSousRacine = exercice.famille === "fractionSousRacine" && !exercice.aucuneCE;
@@ -33,8 +35,7 @@ export function EtapeDomfDomaineDefinition({ exercice, tentativesUtilisees, tent
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_DOMAINE_DEFINITION}</p>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
       <div className="etat-actuel-box etat-actuel-box-termes">
         {termesEtatActuel.map((t, i) => (
           <Katex key={i} expression={t} />

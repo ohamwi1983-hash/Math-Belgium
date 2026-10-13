@@ -4,9 +4,11 @@ import type { AideAvecLatex, OptionQcm } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
+  estPremierEcran: boolean;
   blocDonnees: string[];
   etatActuel: string[] | null;
   consigneEcran: string;
@@ -33,7 +35,7 @@ interface Props {
  * sur le même écran (`EtapeConclusionC.tsx`). Boutons `.btn.toggle-active`, JAMAIS `.btn-primary`
  * (réservé à "Valider", convention CLAUDE.md). `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeQcmComplexesAvances({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -44,14 +46,19 @@ export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, etatAc
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} block />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} block />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

@@ -6,10 +6,12 @@ import type { AideAvecLatex } from "../ui6e/formatDeterminerParametresLogarithme
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
+  estPremierEcran: boolean;
   /** `null` — jamais rendu — sur le premier écran de chaque famille (rien à rappeler). */
   etatActuel: string[] | null;
   consigneEcran: string;
@@ -38,6 +40,7 @@ interface Props {
 export function EtapeChampDeterminerParametres({
   consigneGenerale,
   blocDonnees,
+  estPremierEcran,
   etatActuel,
   consigneEcran,
   placeholder,
@@ -63,14 +66,19 @@ export function EtapeChampDeterminerParametres({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale}</p>
-      <div className="equation-box">
-        <div className="equation-box-donnees">
-          {blocDonnees.map((frag, i) => (
-            <Katex key={i} expression={frag} />
-          ))}
-        </div>
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={consigneGenerale}
+        blocDonnees={
+          <div className="equation-box">
+            <div className="equation-box-donnees">
+              {blocDonnees.map((frag, i) => (
+                <Katex key={i} expression={frag} />
+              ))}
+            </div>
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">

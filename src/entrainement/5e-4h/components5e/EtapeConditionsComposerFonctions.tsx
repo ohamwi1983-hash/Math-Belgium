@@ -8,6 +8,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { CONSIGNE_GENERALE_COMPOSER_FONCTIONS } from "../ui5e/formatComposerFonctions";
 
 const OPTIONS_COMPARATEUR: { id: ComparateurSeuil; texte: string }[] = [
@@ -25,6 +26,7 @@ interface Ligne {
 
 interface Props {
   dir: CompositionDirigee;
+  estPremierEcran: boolean;
   consigne: string;
   /** Bloc "données" persistant (f(x)/g(x)) — rendu juste APRÈS la consigne (A.9). */
   donnees: ReactNode;
@@ -61,7 +63,7 @@ function EtatActuelComposerFonctions({ termes }: { termes: string[] }) {
  * de 5gen1 (`EtapeCEDomaineDefinition.tsx`), réutilisant les mêmes classes CSS
  * (`.ce-ligne-champs`/`.ce-slot-latex`/`.ce-select`).
  */
-export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation}: Props) {
+export function EtapeConditionsComposerFonctions({ dir, estPremierEcran, consigne, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, texteAideNiveau1, latexAideNiveau2, termesEtatActuel, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<Ligne[]>(() => dir.conditions.map(() => ({ comparateur: null, seuil: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -89,8 +91,7 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_COMPOSER_FONCTIONS}</p>
-      {donnees}
+      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_COMPOSER_FONCTIONS} blocDonnees={donnees} />
       {termesEtatActuel !== undefined && <EtatActuelComposerFonctions termes={termesEtatActuel} />}
       <p className="prompt-text">{consigne}</p>
       {lignes.map((ligne, i) => (

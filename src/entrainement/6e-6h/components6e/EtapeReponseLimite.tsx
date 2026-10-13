@@ -6,6 +6,7 @@ import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 
 interface AideAvecLatex {
   texte: string;
@@ -17,6 +18,7 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
+  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -47,7 +49,7 @@ interface Props {
  * `EtapeFacteursC`, qui réutilise le même jeu de boutons en interne). `App6gen6.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeReponseLimite({ consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReponseLimite({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<ReponseLimite["type"] | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -60,10 +62,15 @@ export function EtapeReponseLimite({ consigneEcran, enonceLatex, etatActuel, opt
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE}</p>
-      <div className="equation-box">
-        <Katex expression={enonceLatex} block />
-      </div>
+      <EnTeteExercice
+        estPremierEcran={estPremierEcran}
+        consigneGenerale={CONSIGNE_GENERALE}
+        blocDonnees={
+          <div className="equation-box">
+            <Katex expression={enonceLatex} block />
+          </div>
+        }
+      />
       {etatActuel && (
         <div className="etat-actuel-box">
           <div className="etat-actuel-box-termes">
