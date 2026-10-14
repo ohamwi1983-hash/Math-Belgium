@@ -6,6 +6,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAnglesAss
 import type { IdVarianteAnglesAssocies } from "./core/anglesAssocies.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeAnglesAssocies } from "./components/EtapeAnglesAssocies";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine la valeur demandée à l'aide des angles associés.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -76,6 +79,7 @@ export function AppAnglesAssocies() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeAnglesAssocies
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
