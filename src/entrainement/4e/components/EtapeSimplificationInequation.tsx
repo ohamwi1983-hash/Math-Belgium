@@ -1,8 +1,5 @@
 import { useState } from "react";
-import type { ExerciceInequation } from "../core/inequation.types";
-import { Katex } from "./Katex";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
-import { formatInequationLatex } from "../ui/formatInequation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -10,7 +7,6 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
-  exercice: ExerciceInequation;
   tentativesUtilisees: number;
   tentativesMax: number;
   diagnostiquer: (valeur: string) => StatutVerification;
@@ -34,7 +30,6 @@ interface Props {
  * "<="), ">","≥" (ou ">=")) suivi de "0".
  */
 export function EtapeSimplificationInequation({
-  exercice,
   tentativesUtilisees,
   tentativesMax,
   diagnostiquer,
@@ -47,9 +42,6 @@ export function EtapeSimplificationInequation({
 
   return (
     <div>
-      <div className="equation-box">
-        <Katex expression={formatInequationLatex(exercice.enonce, exercice.symbole)} block />
-      </div>
       <p className="prompt-text">Simplifie cette inéquation au maximum (coefficients entiers, sans facteur commun).</p>
       <ApercuExpressionLatex texte={reponse} label="Inéquation simplifiée =" />
       <div className="field">

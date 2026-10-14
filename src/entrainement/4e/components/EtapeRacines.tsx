@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceInequation, ReponseRacines } from "../core/inequation.types";
 import { Katex } from "./Katex";
-import { formatEquationAssocieeLatex, formatInequationLatex } from "../ui/formatInequation";
+import { formatEquationAssocieeLatex } from "../ui/formatInequation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -70,9 +70,6 @@ export function EtapeRacines({ exercice, tentativesUtilisees, tentativesMax, onV
 
   return (
     <div>
-      <div className="equation-box">
-        <Katex expression={formatInequationLatex(exercice.enonce, exercice.symbole)} block />
-      </div>
       <p className="prompt-text">Combien cette équation a-t-elle de solutions ?</p>
       <div className="equation-box">
         <Katex expression={formatEquationAssocieeLatex(exercice.enonce)} block />

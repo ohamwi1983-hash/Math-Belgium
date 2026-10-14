@@ -1,7 +1,5 @@
 import { useState } from "react";
 import type { ExerciceInequation, SigneA } from "../core/inequation.types";
-import { Katex } from "./Katex";
-import { formatInequationLatex } from "../ui/formatInequation";
 import { calculerCroquisAvecRacinesVraies } from "../ui/parabolaSketch";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
@@ -35,9 +33,6 @@ export function EtapeSigneA({ exercice, tentativesUtilisees, tentativesMax, reca
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatInequationLatex(exercice.enonce, exercice.symbole)} block />
-      </div>
       <p className="prompt-text">Quel est le signe de a ?</p>
       <div className="options-grid-compact">
         <button type="button" className={signe === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigne("+")}>

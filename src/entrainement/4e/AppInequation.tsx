@@ -18,6 +18,8 @@ import { EtapeSigneA } from "./components/EtapeSigneA";
 import { EtapeInequation } from "./components/EtapeInequation";
 import { EtapeSimplificationInequation } from "./components/EtapeSimplificationInequation";
 import { formatSolutionEnsemble } from "./ui/formatSolutionEnsemble";
+import { formatInequationLatex } from "./ui/formatInequation";
+import { Katex } from "./components/Katex";
 import { calculerRecapitulatifInequation } from "./ui/recapitulatifInequation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -145,10 +147,16 @@ export function AppInequation() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatInequationLatex(exercice.enonce, exercice.symbole)} block />
+              </div>
+            }
+          />
           {etat.phase === "simplification" ? (
             <EtapeSimplificationInequation
-              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}

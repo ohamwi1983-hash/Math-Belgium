@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { ExerciceInequation, SolutionEnsemble } from "../core/inequation.types";
 import { Katex } from "./Katex";
-import { formatInequationLatex } from "../ui/formatInequation";
 import { MorceauIntervalleInput } from "./MorceauIntervalleInput";
 import { construireMorceau, etatMorceauInitial } from "../ui/morceauIntervalle";
 import type { EtatMorceau } from "../ui/morceauIntervalle";
@@ -110,9 +109,6 @@ export function EtapeInequation({
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
       <ParabolaSketch croquis={croquisVrai} couleurs={croquisColore} />
-      <div className="equation-box">
-        <Katex expression={formatInequationLatex(exercice.enonce, exercice.symbole)} block />
-      </div>
       {termesApercu !== null && (
         <div className="apercu-box apercu-box-termes">
           {termesApercu.map((terme, i) => (
