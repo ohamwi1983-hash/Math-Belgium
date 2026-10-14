@@ -6,6 +6,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePointVect
 import type { VariantePointVectoriel } from "./core/pointVectoriel.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapePointVectoriel } from "./components/EtapePointVectoriel";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine les coordonnées de ce point à partir de la relation vectorielle.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -80,6 +83,7 @@ export function AppPointVectoriel() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapePointVectoriel
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
