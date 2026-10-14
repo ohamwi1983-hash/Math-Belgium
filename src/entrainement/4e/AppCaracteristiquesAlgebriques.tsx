@@ -77,6 +77,9 @@ import {
 import { formatFractionIrreductible } from "./ui/formatFraction";
 import { formatDomaineLatex } from "./ui/apercuDomaine";
 import type { EtatMorceauFraction } from "./ui/morceauFraction";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Étudie les caractéristiques algébriques de cette fonction de référence.";
 
 const NOMBRE_EXERCICES_ALEATOIRE = 5;
 
@@ -421,6 +424,7 @@ export function AppCaracteristiquesAlgebriques() {
           </div>
         </div>
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
           {etat.phase === "ordonnee" ? (
             <EtapeOrdonneeAlgebrique
