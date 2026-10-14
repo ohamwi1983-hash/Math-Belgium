@@ -27,9 +27,18 @@ import {
 } from "./moteur5e/verificationVitessePosition";
 import { EtapeChampVitessePosition } from "./components5e/EtapeChampVitessePosition";
 import { EtapeResoudreVitessePosition } from "./components5e/EtapeResoudreVitessePosition";
-import { formatReponseAttenduePhaseLatex } from "./ui5e/formatVitessePosition";
+import {
+  formatReponseAttenduePhaseLatex,
+  formatTermesDonneesLatex,
+  phraseEnonce,
+  questionFinale,
+  segmentsEnonce,
+} from "./ui5e/formatVitessePosition";
 import { calculerRecapitulatifVitessePosition } from "./ui5e/recapitulatifVitessePosition";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
+import { SegmentsInline } from "./components/SegmentsInline";
+import { QuestionFinale } from "./components/QuestionFinale";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { Katex } from "./components/Katex";
@@ -114,6 +123,19 @@ export function App5gen35() {
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice
+            consigneGenerale={<SegmentsInline segments={segmentsEnonce(phraseEnonce(exercice))} />}
+            blocDonnees={
+              <>
+                <div className="equation-box equation-box-donnees">
+                  {formatTermesDonneesLatex(exercice).map((frag, i) => (
+                    <Katex key={i} expression={frag} />
+                  ))}
+                </div>
+                <QuestionFinale question={questionFinale(exercice)} />
+              </>
+            }
+          />
           <RecapitulatifPanel entrees={calculerRecapitulatifVitessePosition(etat)} />
           <EcranCourant
             exercice={exercice}

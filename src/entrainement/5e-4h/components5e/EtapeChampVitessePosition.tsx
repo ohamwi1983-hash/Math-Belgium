@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import type { EcranVitessePosition } from "../moteur5e/typesVitessePosition";
 import { consigneEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
-import { EnonceVitessePosition } from "./EnonceVitessePosition";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -68,7 +67,6 @@ export function EtapeChampVitessePosition({
 
   return (
     <div>
-      <EnonceVitessePosition exercice={exercice} />
       <p className="prompt-text">{consigneEcran(exercice, ecran)}</p>
       <ApercuExpressionLatex texte={texte} label={labelChamp} />
       <div className="field field-inline">
