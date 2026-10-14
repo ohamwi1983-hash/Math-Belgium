@@ -14,6 +14,9 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuadrantVR } from "./components/EtapeQuadrantVR";
 import { EtapeAnglePremierQuadrantVR } from "./components/EtapeAnglePremierQuadrantVR";
 import { EtapeValeursExactesVR } from "./components/EtapeValeursExactesVR";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine les valeurs trigonométriques remarquables de cet angle.";
 import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifValeursRemarquables } from "./ui/recapitulatifValeursRemarquables";
@@ -124,6 +127,7 @@ export function AppValeursRemarquables() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "quadrant" ? (
             <EtapeQuadrantVR
               exercice={exercice}
