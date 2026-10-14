@@ -6,6 +6,9 @@ import { genererExerciceTransformationGraphique } from "./generateurs/transforma
 import { EtapeTransformationExercice } from "./components/EtapeTransformationExercice";
 import { formatEquationTransformationLatex } from "./ui/formatTransformationsGraphiques";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette parabole.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -85,6 +88,7 @@ export function AppTransformationsGraphiques() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeTransformationExercice
             exercice={exercice}
             tentativesEquation={etat.etapeEquation.tentativesUtilisees}
