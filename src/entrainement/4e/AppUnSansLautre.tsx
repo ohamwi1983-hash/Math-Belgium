@@ -14,6 +14,9 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeCarreUnSansLautre } from "./components/EtapeCarreUnSansLautre";
 import { EtapeValeurSigneeUnSansLautre } from "./components/EtapeValeurSigneeUnSansLautre";
 import { EtapeTangenteUnSansLautre } from "./components/EtapeTangenteUnSansLautre";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Retrouve sin, cos ou tan à partir de l'autre.";
 import { Katex } from "./components/Katex";
 import { formatCarreCibleLatex, formatValeurCibleSimplifieeLatex, formatValeurTangenteSimplifieeLatex } from "./ui/formatUnSansLautre";
 
@@ -110,6 +113,7 @@ export function AppUnSansLautre() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "carre" ? (
             <EtapeCarreUnSansLautre
               exercice={exercice}
