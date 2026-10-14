@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceUnSansLautre } from "../core/unSansLautre.types";
 import { Katex } from "./Katex";
-import { formatCarreLatex, formatIntervalleLatex, formatValeurConnueLatex, PLACEHOLDER_CARRE } from "../ui/formatUnSansLautre";
+import { formatCarreLatex, PLACEHOLDER_CARRE } from "../ui/formatUnSansLautre";
 import { diagnostiquerCarre } from "../moteur/verificationUnSansLautre";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumeriqueRacine, gererKeyDownNumeriqueRacine } from "../ui/bloquerSaisieNonNumeriqueRacine";
@@ -19,8 +19,8 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Première étape (toujours la même, jamais d'écran "énoncé" séparé) : le bloc énoncé (valeur
- * donnée + intervalle sur θ) est affiché ici et persiste, complété, sur les 2 écrans suivants. */
+/** Première étape (toujours la même, jamais d'écran "énoncé" séparé). La valeur donnée + intervalle
+ * sur θ sont affichées une seule fois dans l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees). */
 export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
 
@@ -29,10 +29,6 @@ export function EtapeCarreUnSansLautre({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <div className="equation-box">
-        <Katex expression={formatValeurConnueLatex(exercice)} block />
-        <Katex expression={formatIntervalleLatex(exercice)} block />
-      </div>
       <p className="prompt-text">
         Quelle est la valeur de <Katex expression={formatCarreLatex(exercice.fonctionCible)} /> ? (forme exacte ou
         décimale arrondie au centième)

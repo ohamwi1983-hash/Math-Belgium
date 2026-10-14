@@ -5,9 +5,7 @@ import {
   formatCarreCibleLatex,
   formatCarreLatex,
   formatFonctionCibleLatex,
-  formatIntervalleLatex,
   formatSigneCibleLatex,
-  formatValeurConnueLatex,
   libelleQuadrantUnSansLautre,
   PLACEHOLDER_VALEUR_SIGNEE,
 } from "../ui/formatUnSansLautre";
@@ -28,8 +26,10 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Deuxième étape — le bloc contexte reprend l'énoncé ET le résultat confirmé de l'écran 1 (le
- * carré cible, toujours dérivé directement de l'exercice — jamais la saisie de l'élève). */
+/** Deuxième étape — l'énoncé (valeur donnée + intervalle sur θ) est affiché une seule fois dans
+ * l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees) ; le bloc local ne garde que le résultat
+ * confirmé de l'écran 1 (le carré cible, toujours dérivé directement de l'exercice — jamais la
+ * saisie de l'élève). */
 export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
 
@@ -39,8 +39,6 @@ export function EtapeValeurSigneeUnSansLautre({ exercice, tentativesUtilisees, t
   return (
     <div>
       <div className="equation-box">
-        <Katex expression={formatValeurConnueLatex(exercice)} block />
-        <Katex expression={formatIntervalleLatex(exercice)} block />
         <Katex expression={`${formatCarreLatex(exercice.fonctionCible)} = ${formatCarreCibleLatex(exercice)}`} block />
       </div>
       <p className="prompt-text">

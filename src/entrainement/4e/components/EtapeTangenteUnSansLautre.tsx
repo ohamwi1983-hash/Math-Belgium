@@ -5,9 +5,7 @@ import {
   formatCarreCibleLatex,
   formatCarreLatex,
   formatFonctionCibleLatex,
-  formatIntervalleLatex,
   formatValeurCibleSimplifieeLatex,
-  formatValeurConnueLatex,
   PLACEHOLDER_TANGENTE,
 } from "../ui/formatUnSansLautre";
 import { diagnostiquerTangente } from "../moteur/verificationUnSansLautre";
@@ -27,8 +25,9 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Troisième et dernière étape — le bloc contexte reprend l'énoncé ET les deux résultats
- * confirmés précédents (carré, puis valeur signée). */
+/** Troisième et dernière étape — l'énoncé (valeur donnée + intervalle sur θ) est affiché une seule
+ * fois dans l'en-tête de l'exercice (`EnTeteExercice`, blocDonnees) ; le bloc local ne garde que
+ * les deux résultats confirmés précédents (carré, puis valeur signée). */
 export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tentativesMax, aideActivee, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
 
@@ -38,8 +37,6 @@ export function EtapeTangenteUnSansLautre({ exercice, tentativesUtilisees, tenta
   return (
     <div>
       <div className="equation-box">
-        <Katex expression={formatValeurConnueLatex(exercice)} block />
-        <Katex expression={formatIntervalleLatex(exercice)} block />
         <Katex expression={`${formatCarreLatex(exercice.fonctionCible)} = ${formatCarreCibleLatex(exercice)}`} block />
         <Katex expression={`${formatFonctionCibleLatex(exercice)} = ${formatValeurCibleSimplifieeLatex(exercice)}`} block />
       </div>

@@ -18,7 +18,13 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Retrouve sin, cos ou tan à partir de l'autre.";
 import { Katex } from "./components/Katex";
-import { formatCarreCibleLatex, formatValeurCibleSimplifieeLatex, formatValeurTangenteSimplifieeLatex } from "./ui/formatUnSansLautre";
+import {
+  formatCarreCibleLatex,
+  formatIntervalleLatex,
+  formatValeurCibleSimplifieeLatex,
+  formatValeurConnueLatex,
+  formatValeurTangenteSimplifieeLatex,
+} from "./ui/formatUnSansLautre";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -113,7 +119,15 @@ export function AppUnSansLautre() {
 
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatValeurConnueLatex(exercice)} block />
+                <Katex expression={formatIntervalleLatex(exercice)} block />
+              </div>
+            }
+          />
           {etat.phase === "carre" ? (
             <EtapeCarreUnSansLautre
               exercice={exercice}
