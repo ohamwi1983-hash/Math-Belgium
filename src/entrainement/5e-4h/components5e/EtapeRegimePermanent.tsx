@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceSuiteRecurrenteAffine } from "../core5e/suiteRecurrenteAffine.types";
-import { consigneGenerale, consigneRegimePermanent, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
+import { consigneRegimePermanent, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -43,7 +43,6 @@ export function EtapeRegimePermanent({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
       <p className="prompt-text">{consigneRegimePermanent(exercice)}</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn ${existe === false ? "toggle-active" : ""}`} onClick={() => setExiste(false)}>

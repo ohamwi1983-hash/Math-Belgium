@@ -26,7 +26,8 @@ import { EtapePoserRecurrence } from "./components5e/EtapePoserRecurrence";
 import { EtapeRegimePermanent } from "./components5e/EtapeRegimePermanent";
 import { EtapeTermesSuccessifs } from "./components5e/EtapeTermesSuccessifs";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteRecurrenteAffine";
+import { consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui5e/formatSuiteRecurrenteAffine";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
 import { calculerRecapitulatifSuiteRecurrenteAffine } from "./ui5e/recapitulatifSuiteRecurrenteAffine";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -115,6 +116,7 @@ export function App5gen19() {
       <SelecteurVarianteDev options={OPTIONS_REGIME} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={consigneGenerale(exercice)} blocDonnees={null} />
           <RecapitulatifPanel entrees={calculerRecapitulatifSuiteRecurrenteAffine(etat)} />
           <>
               {etat.phase === "poserRecurrence" && (

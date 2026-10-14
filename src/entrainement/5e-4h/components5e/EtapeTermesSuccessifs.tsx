@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceSuiteRecurrenteAffine } from "../core5e/suiteRecurrenteAffine.types";
-import { consigneGenerale, consigneTermesSuccessifs, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
+import { consigneTermesSuccessifs, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -47,7 +47,6 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
       <p className="prompt-text">{consigneTermesSuccessifs(exercice)}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

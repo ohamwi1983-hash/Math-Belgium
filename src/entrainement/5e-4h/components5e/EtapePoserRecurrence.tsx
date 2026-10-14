@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExerciceSuiteRecurrenteAffine } from "../core5e/suiteRecurrenteAffine.types";
-import { consigneGenerale, consignePoserRecurrence, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
+import { consignePoserRecurrence, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatSuiteRecurrenteAffine";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -43,7 +43,6 @@ export function EtapePoserRecurrence({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
       <p className="prompt-text">{consignePoserRecurrence(exercice)}</p>
       <ApercuExpressionLatex texte={texte} label={`${exercice.variableGrandeur}_n+1 =`} />
       <div className="field field-inline">
