@@ -5,6 +5,9 @@ import type { EtatSessionConstructionVectorielle } from "./moteur/typesConstruct
 import { genererExerciceConstructionVectorielle } from "./generateurs/constructionVectorielle";
 import { EtapeConstructionVectorielle } from "./components/EtapeConstructionVectorielle";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Construis ce vecteur sur la figure.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -77,6 +80,7 @@ export function AppConstructionVectorielle() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeConstructionVectorielle
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
