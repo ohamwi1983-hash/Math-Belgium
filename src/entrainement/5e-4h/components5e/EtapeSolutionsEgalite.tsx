@@ -7,6 +7,7 @@ import { CercleTrigEquationSketch } from "./CercleTrigEquationSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -44,7 +45,7 @@ export function EtapeSolutionsEgalite({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
+      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
       <p className="prompt-text">{CONSIGNE_SOLUTIONS_EGALITE}</p>
       {niveauAide >= 2 && <CercleTrigEquationSketch points={pointsAffiches} regime="exact" />}
       {lignes.map((ligne, i) => (

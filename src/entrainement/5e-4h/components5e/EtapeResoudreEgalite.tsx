@@ -11,6 +11,7 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -49,7 +50,7 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
+      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
       <p className="prompt-text">{CONSIGNE_RESOUDRE_EGALITE}</p>
       {lignes.map((ligne, i) => (
         <div key={i}>

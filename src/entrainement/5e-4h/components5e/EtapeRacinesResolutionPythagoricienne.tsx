@@ -7,6 +7,7 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
+import { EnTeteExercice } from "./EnTeteExercice";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
@@ -60,7 +61,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
 
   return (
     <div>
-      <p className="prompt-text">{CONSIGNE_GENERALE_EQUATION_TRIG}</p>
+      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
       <p className="prompt-text">{CONSIGNE_RACINES_RESOLUTION}</p>
 
       <p className="prompt-text">Racine t = {formatT(exercice.racine1.t)} :</p>
