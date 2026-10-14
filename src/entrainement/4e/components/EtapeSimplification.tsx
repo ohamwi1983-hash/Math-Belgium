@@ -33,6 +33,13 @@ interface Props {
    */
   enonceFixe?: string;
   /**
+   * Masque le bloc "énoncé" local (enonceFixe / expressionAffichee / FractionHeader) —
+   * absent/false par défaut : comportement historique inchangé. `true` : l'appelant affiche déjà
+   * cette donnée de façon centralisée (`EnTeteExercice`, blocDonnees) et ce bloc serait redondant
+   * ici.
+   */
+  masquerBlocDonnees?: boolean;
+  /**
    * Statut à 3 valeurs (convention CLAUDE.md) — les deux champs (numérateur/dénominateur saisis)
    * sont diagnostiqués ensemble par `diagnostiquerSimplification` (verificationSimplification.ts),
    * un échec de parsing sur l'un OU l'autre étant prioritaire (prompt-generateurs123vague2.md,
@@ -56,6 +63,7 @@ export function EtapeSimplification({
   expressionAffichee,
   question,
   enonceFixe,
+  masquerBlocDonnees = false,
   diagnostiquer,
   aideActivee,
   onActiverAide,
@@ -92,9 +100,11 @@ export function EtapeSimplification({
       <RecapitulatifPanel entrees={recapitulatif} />
       {enonceFixe !== undefined ? (
         <>
-          <div className="equation-box">
-            <Katex expression={enonceFixe} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={enonceFixe} block />
+            </div>
+          )}
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
               <Katex expression={expressionAffichee} block />
@@ -102,15 +112,17 @@ export function EtapeSimplification({
           )}
         </>
       ) : (
-        <>
-          {expressionAffichee !== undefined ? (
-            <div className="equation-box">
-              <Katex expression={expressionAffichee} block />
-            </div>
-          ) : (
-            <FractionHeader exercice={exercice as ExerciceSimplification} />
-          )}
-        </>
+        !masquerBlocDonnees && (
+          <>
+            {expressionAffichee !== undefined ? (
+              <div className="equation-box">
+                <Katex expression={expressionAffichee} block />
+              </div>
+            ) : (
+              <FractionHeader exercice={exercice as ExerciceSimplification} />
+            )}
+          </>
+        )
       )}
       <p className="prompt-text">{question ?? "Simplifie la fraction."}</p>
       {dernierApercuValide !== null && (

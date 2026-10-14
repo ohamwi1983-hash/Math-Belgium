@@ -33,6 +33,13 @@ interface Props {
    */
   enonceFixe?: string;
   /**
+   * Masque le bloc "énoncé" local (enonceFixe / expressionAffichee / FractionHeader) —
+   * absent/false par défaut : comportement historique inchangé. `true` : l'appelant affiche déjà
+   * cette donnée de façon centralisée (`EnTeteExercice`, blocDonnees) et ce bloc serait redondant
+   * ici.
+   */
+  masquerBlocDonnees?: boolean;
+  /**
    * Remplace le libellé par défaut du bouton "aucune valeur" ("Pas de CE") — ex: "Pas de racine"
    * pour l'écran "Racine du numérateur" de l'exercice "Inéquations rationnelles"
    * (promptcorrectionsgenerateurs76complement.md, point 2.1 : "CE" ne désigne jamais une racine du
@@ -67,6 +74,7 @@ export function EtapeCEDirecte({
   question,
   label,
   enonceFixe,
+  masquerBlocDonnees = false,
   libellePasDe = "Pas de CE",
   libelleAuMoins = "Au moins une CE",
   onValider,
@@ -89,9 +97,11 @@ export function EtapeCEDirecte({
       <RecapitulatifPanel entrees={recapitulatif} />
       {enonceFixe !== undefined ? (
         <>
-          <div className="equation-box">
-            <Katex expression={enonceFixe} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={enonceFixe} block />
+            </div>
+          )}
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
               <Katex expression={expressionAffichee} block />
@@ -99,11 +109,13 @@ export function EtapeCEDirecte({
           )}
         </>
       ) : expressionAffichee !== undefined ? (
-        <div className="equation-box">
-          <Katex expression={expressionAffichee} block />
-        </div>
+        !masquerBlocDonnees && (
+          <div className="equation-box">
+            <Katex expression={expressionAffichee} block />
+          </div>
+        )
       ) : (
-        <FractionHeader exercice={exercice as ExerciceSimplification} />
+        !masquerBlocDonnees && <FractionHeader exercice={exercice as ExerciceSimplification} />
       )}
       <p className="prompt-text">{question ?? "Quelle est la condition d'existence ?"}</p>
       <div className="options-grid">

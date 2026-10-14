@@ -11,7 +11,6 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   fractions: FractionAReduire[];
-  expressionAffichee: string;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
@@ -42,7 +41,6 @@ const LABEL_COTE: Record<"gauche" | "droite", string> = {
  */
 export function EtapeSimplifierFractions({
   fractions,
-  expressionAffichee,
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
@@ -67,9 +65,6 @@ export function EtapeSimplifierFractions({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={expressionAffichee} block />
-      </div>
       <p className="prompt-text">
         {fractions.length > 1
           ? "Ces deux fractions sont réductibles. Simplifie-les."

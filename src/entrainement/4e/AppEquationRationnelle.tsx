@@ -183,15 +183,6 @@ function calculerSegmentsProgression(etat: EtatSessionEquationRationnelle): Etat
   });
 }
 
-/**
- * Écrans qui affichent déjà l'équation rationnelle complète comme contenu principal
- * (`expressionAffichee`) — le rappel supplémentaire de promptgenerateur4vague2.md, point 1, n'y
- * ajouterait qu'un doublon visuel. Tous les autres écrans (sauf "ce", le tout premier de la
- * séquence, où l'énoncé est déjà l'unique contenu affiché) en ont besoin : ils ne montrent sinon
- * que le fragment sur lequel porte l'étape (N(x)=..., D(x)=..., l'équation isolée seule...).
- */
-const PHASES_SANS_RAPPEL_SUPPLEMENTAIRE = new Set<PhaseEquationRationnelle>(["ce", "simplifier", "isolement", "simplifierFraction"]);
-
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
@@ -400,18 +391,21 @@ export function AppEquationRationnelle() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
-          {!PHASES_SANS_RAPPEL_SUPPLEMENTAIRE.has(etat.phase) && (
-            <div className="equation-box">
-              <Katex expression={formatRappelEquationRationnelle(etat.exerciceCourant, etat.phase)} block />
-            </div>
-          )}
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatRappelEquationRationnelle(etat.exerciceCourant, etat.phase)} block />
+              </div>
+            }
+          />
           {etat.phase === "ce" && etat.exerciceCourant.ce.length === 1 ? (
             <EtapeCEDirecte
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              masquerBlocDonnees
               question={QUESTION_CE}
               onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]))}
               validation={validation}
@@ -428,6 +422,7 @@ export function AppEquationRationnelle() {
               placeholderPrefixe="CE"
               prefixeChamp="x \neq"
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              masquerBlocDonnees
               question={QUESTION_CE}
               texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
               aideActivee={etat.aideCeUtilisee}
@@ -438,7 +433,6 @@ export function AppEquationRationnelle() {
           ) : etat.phase === "simplifier" ? (
             <EtapeSimplifierFractions
               fractions={etat.exerciceCourant.fractionsSimplifiables}
-              expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
@@ -515,6 +509,7 @@ export function AppEquationRationnelle() {
           ) : etat.phase === "simplifierFraction" ? (
             <EtapeSimplification
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
+              masquerBlocDonnees
               question="Simplifie la fraction ci-dessus."
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
@@ -539,6 +534,7 @@ export function AppEquationRationnelle() {
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEquationRationnelleLatexApresSimplification(etat.exerciceCourant)}
+              masquerBlocDonnees
               diagnostiquer={(v) => diagnostiquerIsolement(etat.exerciceCourant.equationIsolee, v)}
               texteAide="Multiplie chaque terme par le dénominateur commun pour éliminer les fractions, puis regroupe."
               aideActivee={etat.aideIsolementUtilisee}
