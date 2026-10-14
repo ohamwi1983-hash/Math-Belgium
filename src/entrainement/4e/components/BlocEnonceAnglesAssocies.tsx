@@ -7,10 +7,11 @@ interface Props {
 }
 
 /**
- * Bloc "énoncé" fixe (`promptcorrectionsgenerateur17structure.md`, section 1) — reproduit à
- * l'identique sur les 2 ou 3 écrans de l'exercice, extrait en composant partagé plutôt que dupliqué
- * 3 fois : "Sachant que" / bloc 1 (valeurs approchées de l'angle de base) / "Déterminer sans
- * utiliser de calculatrice" / bloc 2 (expression demandée).
+ * Bloc "énoncé" (`promptcorrectionsgenerateur17structure.md`, section 1) — "Sachant que" / bloc 1
+ * (valeurs approchées de l'angle de base) / "Déterminer sans utiliser de calculatrice" / bloc 2
+ * (expression demandée). Extrait en composant séparé pour la lisibilité de `EtapeAnglesAssocies`,
+ * son seul appelant depuis la refonte à écran unique (`promptgen17refontecomplete.md`) — plus de
+ * duplication entre écrans à éviter ici.
  */
 export function BlocEnonceAnglesAssocies({ exercice }: Props) {
   return (
