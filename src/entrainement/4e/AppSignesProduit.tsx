@@ -48,6 +48,9 @@ import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE } from "./ui/categorieLabels";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
 import { formatFormeFactoriseeDepuisRacines } from "./ui/formatEquation";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Étudie le signe de ce produit de facteurs.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -340,6 +343,7 @@ export function AppSignesProduit() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "racineLineaire" && facteurCourant?.type === "lineaire" ? (
             <EtapeRacineLineaire
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
