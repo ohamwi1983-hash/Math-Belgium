@@ -3,7 +3,6 @@ import type { CelluleSinCos, CelluleTan, ExerciceValeursRemarquables, ReponseVal
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
-import { formatEnonceCercleTrigLatex } from "../ui/formatValeursRemarquables";
 import {
   celluleSinCosErronee,
   celluleTanErronee,
@@ -74,9 +73,6 @@ export function EtapeValeursExactesVR({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
-      </div>
       <p className="prompt-text">Donne la valeur exacte de sin(θ), cos(θ) et tan(θ).</p>
 
       <div className="grille-signes-scroll">

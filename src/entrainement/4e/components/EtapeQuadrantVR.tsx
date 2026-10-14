@@ -3,8 +3,6 @@ import type { ExerciceValeursRemarquables } from "../core/valeursRemarquables.ty
 import type { Quadrant } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { Katex } from "./Katex";
-import { formatEnonceCercleTrigLatex } from "../ui/formatValeursRemarquables";
 import { AideReductionCercleTrig } from "./AideReductionCercleTrig";
 import { CercleQuadrantSelecteur } from "./CercleQuadrantSelecteur";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -38,9 +36,6 @@ export function EtapeQuadrantVR({ exercice, tentativesUtilisees, tentativesMax, 
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
-      </div>
       <p className="prompt-text">Dans quel quadrant ou sur quel axe se trouve cet angle ?</p>
 
       <CercleQuadrantSelecteur selection={selection} onSelectionner={setSelection} />

@@ -18,6 +18,7 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Détermine les valeurs trigonométriques remarquables de cet angle.";
 import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
+import { formatEnonceCercleTrigLatex } from "./ui/formatValeursRemarquables";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifValeursRemarquables } from "./ui/recapitulatifValeursRemarquables";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -127,7 +128,14 @@ export function AppValeursRemarquables() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
+              </div>
+            }
+          />
           {etat.phase === "quadrant" ? (
             <EtapeQuadrantVR
               exercice={exercice}
