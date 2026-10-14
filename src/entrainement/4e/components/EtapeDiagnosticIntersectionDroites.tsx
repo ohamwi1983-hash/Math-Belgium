@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +30,7 @@ const OPTIONS: ConclusionIntersectionDroites[] = ["secantes", "paralleles_distin
  * `EtapeClassificationPositionDroitePlan.tsx`. Aide DIFFÉRENCIÉE selon la combinaison de formes
  * d'entrée des deux droites (`promptgen48modifications.md`, point 3).
  */
-export function EtapeDiagnosticIntersectionDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDiagnosticIntersectionDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<ConclusionIntersectionDroites | null>(null);
   const max = NIVEAU_AIDE_MAX_DIAGNOSTIC;
   const erronee = tentativesUtilisees > 0;
@@ -40,7 +39,6 @@ export function EtapeDiagnosticIntersectionDroites({ exercice, estPremierEcran, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_INTERSECTION}
         blocDonnees={
           <div className="equation-box">

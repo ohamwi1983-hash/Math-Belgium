@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRacinesNiemes } from "./generateurs6e/racinesNiemes";
 import type { IdVarianteRacinesNiemes } from "./generateurs6e/racinesNiemes";
@@ -62,14 +62,6 @@ export function App6gen39() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
   // la réponse EXACTE attendue à chaque écran depuis les vrais paramètres tirés, jamais en
@@ -119,7 +111,6 @@ export function App6gen39() {
         {estEcranChoix && (
           <EtapeChoixRelationRacinesNiemes
             key={phase}
-            estPremierEcran={estPremierEcran}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -134,7 +125,6 @@ export function App6gen39() {
         {estEcranListe && (
           <EtapeListeRacinesNiemes
             key={phase}
-            estPremierEcran={estPremierEcran}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}
@@ -151,7 +141,6 @@ export function App6gen39() {
         {!estEcranChoix && !estEcranListe && (
           <EtapeChampsRacinesNiemes
             key={phase}
-            estPremierEcran={estPremierEcran}
             {...aideCommun}
             consigneGenerale={consigneGenerale(exercice)}
             blocDonnees={blocDonnees(exercice)}

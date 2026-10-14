@@ -16,7 +16,6 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -36,7 +35,7 @@ interface Props {
  * un champ numérique (le zéro) + un choix binaire (le sens du changement de signe, lu de gauche à
  * droite). `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [zeroTexte, setZeroTexte] = useState("");
   const [sens, setSens] = useState<DirectionSigne | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -50,7 +49,6 @@ export function EtapeSigneUnZeroIneqExpo({ consigneEcran, enonceLatex, estPremie
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

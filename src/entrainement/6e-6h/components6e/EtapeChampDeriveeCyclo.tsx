@@ -9,7 +9,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   fonctionLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -31,7 +30,6 @@ interface Props {
  * sont structurellement identiques : consigne générale + bloc f(x) redondant + consigne d'écran +
  * champ + aide à 2 niveaux. `App6gen4.tsx` doit le rendre avec `key={phase}`. */
 export function EtapeChampDeriveeCyclo({
-  estPremierEcran,
   consigneEcran,
   fonctionLatex,
   aideNiveau1,
@@ -56,7 +54,6 @@ export function EtapeChampDeriveeCyclo({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

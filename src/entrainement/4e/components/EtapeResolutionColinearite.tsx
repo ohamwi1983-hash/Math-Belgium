@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (valeur: number) => void;
@@ -38,7 +37,7 @@ interface Props {
  * structurel de son propre rendu (structure miroir de `EtapeResolutionParametreOrthogonalite.tsx`,
  * générateur 25).
  */
-export function EtapeResolutionColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeResolutionColinearite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const valeur = Number(texte.replace(",", "."));
@@ -49,7 +48,6 @@ export function EtapeResolutionColinearite({ exercice, estPremierEcran, tentativ
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box">

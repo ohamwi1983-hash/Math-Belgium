@@ -16,7 +16,6 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
-  estPremierEcran: boolean;
   etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -37,7 +36,7 @@ interface Props {
  * `App6gen7.tsx` doit le rendre avec `key={phase}`. `etatActuel` reste toujours `null` ici — le
  * domaine est TOUJOURS le premier écran de sa famille (voir `ui6e/formatDomaineDeriveeExponentielles.ts::etatActuel`)
  * — la prop est acceptée pour uniformité avec les 2 autres écrans génériques du même générateur. */
-export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -49,7 +48,6 @@ export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, estPrem
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

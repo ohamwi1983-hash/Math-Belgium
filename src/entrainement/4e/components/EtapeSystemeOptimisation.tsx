@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -37,7 +36,7 @@ interface Props {
  * vérification que l'ancien écran "construction" (`diagnostiquerSysteme`, alias direct — voir
  * `verificationOptimisation.ts`).
  */
-export function EtapeSystemeOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSystemeOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerSysteme(exercice, texte) : undefined;
@@ -45,7 +44,6 @@ export function EtapeSystemeOptimisation({ exercice, estPremierEcran, tentatives
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

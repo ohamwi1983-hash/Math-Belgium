@@ -22,7 +22,6 @@ function champEstCompose(placeholder?: string): boolean {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -48,7 +47,7 @@ interface Props {
  * (1), fEcran3 (2). Structure d'écran imposée par CLAUDE.md (consigne générale → bloc données →
  * bloc de travail) conservée à l'identique. `App6gen36.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -66,7 +65,6 @@ export function EtapeChampsEquationsComplexes({ consigneGenerale, blocDonnees, e
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

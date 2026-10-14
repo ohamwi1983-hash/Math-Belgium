@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationsCyclometriques;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +25,7 @@ interface Props {
 
 /** Écran 1 — condition d'existence (CE), commune aux 4 variantes de `6gen3` (REFONTE). Construction
  * guidée via `EnsembleReelGuideBuilder` (module partagé avec 6gen1, réutilisé TEL QUEL). */
-export function EtapeCEEquationsCyclometriques({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCEEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [ce, setCe] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -40,7 +39,6 @@ export function EtapeCEEquationsCyclometriques({ exercice, estPremierEcran, tent
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

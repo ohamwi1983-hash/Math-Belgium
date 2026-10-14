@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLogarithmesProblemes } from "./generateurs6e/logarithmesProblemes";
 import {
@@ -106,13 +106,6 @@ export function App6gen22() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
@@ -138,7 +131,6 @@ export function App6gen22() {
     : null;
 
   const propsChampCommun = {
-    estPremierEcran,
     consigneGenerale: consigneG,
     blocDonnees: donnees,
     consigneEcran: consigne,
@@ -190,7 +182,6 @@ export function App6gen22() {
         {phase === "aEcran3" && exercice.famille === "A" && exercice.sousType === "resoudreT" && exercice.variante === "fenetre" && (
           <EtapeDeuxValeursLogProblemes
             key={phase}
-            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             consigneEcran={consigne}
@@ -237,7 +228,6 @@ export function App6gen22() {
         {phase === "eEcran1" && exercice.famille === "E" && (
           <EtapeDeuxValeursLogProblemes
             key={phase}
-            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             consigneEcran={consigne}
@@ -265,7 +255,6 @@ export function App6gen22() {
         {phase === "gEcran1" && exercice.famille === "G" && (
           <EtapeDeuxValeursLogProblemes
             key={phase}
-            estPremierEcran={estPremierEcran}
             consigneGenerale={consigneG}
             blocDonnees={donnees}
             consigneEcran={consigne}

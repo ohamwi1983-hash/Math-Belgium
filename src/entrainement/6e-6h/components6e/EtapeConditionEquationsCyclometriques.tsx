@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceArcfonctionsDifferentes;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
  * conditionParasite`) — DISTINCTE de la CE de domaine posée à l'écran précédent (`exercice.ce`,
  * déjà listée dans le récapitulatif "Ce qu'on sait déjà"), et c'est ELLE qui permettra de rejeter les racines parasites à
  * l'écran final. Réutilise `EnsembleReelGuideBuilder` TEL QUEL, exactement comme l'écran "ce". */
-export function EtapeConditionEquationsCyclometriques({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [condition, setCondition] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -42,7 +41,6 @@ export function EtapeConditionEquationsCyclometriques({ exercice, estPremierEcra
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

@@ -9,7 +9,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onChoisir: (choix: VarianteApplicationPhysique) => void;
@@ -27,14 +26,13 @@ const OPTIONS: { valeur: VarianteApplicationPhysique; libelle: string }[] = [
 /** Première étape, toujours la même : contexte narratif + schéma, affichés ici et persistants sur
  * les 3 écrans suivants (jamais d'écran "énoncé" séparé sans question, même leçon déjà établie
  * ailleurs dans le projet — voir CLAUDE.md). */
-export function EtapeModelisationApplicationPhysique({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
+export function EtapeModelisationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
   const [choix, setChoix] = useState<VarianteApplicationPhysique | null>(null);
   const erronee = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={formatEnonceApplicationPhysique(exercice)}
         blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
       />

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ExerciceColinearite } from "./core/colinearite.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -163,17 +163,7 @@ export function AppColinearite() {
   }
 
   const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
   const recapitulatif = calculerRecapitulatifColinearite(etat);
 
   function onGenererDev(varianteId: string) {
@@ -210,7 +200,6 @@ export function AppColinearite() {
         {etat.phase === "constructionVecteurs" && exercice.variante === "points" ? (
           <EtapeConstructionVecteursColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideConstruction}
@@ -221,7 +210,6 @@ export function AppColinearite() {
         ) : etat.phase === "constructionAvecX" && exercice.variante === "pointsParametre" ? (
           <EtapeConstructionAvecXColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideConstruction}
@@ -232,7 +220,6 @@ export function AppColinearite() {
         ) : etat.phase === "reduction" && exercice.variante === "parametre" ? (
           <EtapeReductionColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideReduction}
@@ -243,7 +230,6 @@ export function AppColinearite() {
         ) : etat.phase === "resolution" && exercice.variante === "parametre" ? (
           <EtapeResolutionColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onValider={(valeur) => terminerEtape(soumettreReponseResolution(etat, valeur))}
@@ -252,7 +238,6 @@ export function AppColinearite() {
         ) : etat.phase === "reductionAvecX" && exercice.variante === "pointsParametre" ? (
           <EtapeReductionAvecXColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideReduction}
@@ -263,7 +248,6 @@ export function AppColinearite() {
         ) : etat.phase === "resolutionAvecX" && exercice.variante === "pointsParametre" ? (
           <EtapeResolutionAvecXColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onValider={(valeur) => terminerEtape(soumettreReponseResolutionAvecX(etat, valeur))}
@@ -272,7 +256,6 @@ export function AppColinearite() {
         ) : (exercice.variante === "vecteurs" || exercice.variante === "points") && etat.phase === "test" ? (
           <EtapeTestColinearite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideTest}

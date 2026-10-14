@@ -13,7 +13,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +26,7 @@ interface Props {
 
 /** Écran commun aux 2 variantes, toujours TERMINAL — QCM, choisir la phrase de conclusion correcte
  * parmi `exercice.optionsInterpretation` (ordre déjà mélangé à la génération, jamais retrié). */
-export function EtapeInterpretationOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
@@ -35,7 +34,6 @@ export function EtapeInterpretationOptimisation({ exercice, estPremierEcran, ten
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

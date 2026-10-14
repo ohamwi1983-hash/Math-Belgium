@@ -14,7 +14,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceProduitFacteurs;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +30,7 @@ interface Props {
 
 /** Écran "pré-1" (famille "produit", sous-cas "nonFactoree" uniquement) — factoriser T²-k₂T=0 par
  * mise en évidence, champ de texte libre. */
-export function EtapePrefacteurProduit({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -47,7 +46,6 @@ export function EtapePrefacteurProduit({ exercice, estPremierEcran, tentativesUt
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box equation-box-termes">

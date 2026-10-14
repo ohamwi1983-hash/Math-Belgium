@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -140,15 +140,6 @@ export function AppOrthogonalite() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
   const recapitulatif = calculerRecapitulatifOrthogonalite(etat);
 
   const reponseAttendue =
@@ -236,7 +227,6 @@ export function AppOrthogonalite() {
           <EtapeTestOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -248,7 +238,6 @@ export function AppOrthogonalite() {
           <EtapeReductionParametreOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -260,7 +249,6 @@ export function AppOrthogonalite() {
           <EtapeResolutionParametreOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onValider={(valeur) => terminerEtape(soumettreReponseResolutionParametre(etat, valeur))}
@@ -270,7 +258,6 @@ export function AppOrthogonalite() {
           <EtapeConstructionTriangleOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -282,7 +269,6 @@ export function AppOrthogonalite() {
           <EtapeTestSommetOrthogonalite
             key="A"
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             sommet="A"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -295,7 +281,6 @@ export function AppOrthogonalite() {
           <EtapeTestSommetOrthogonalite
             key="B"
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             sommet="B"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -308,7 +293,6 @@ export function AppOrthogonalite() {
           <EtapeTestSommetOrthogonalite
             key="C"
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             sommet="C"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -321,7 +305,6 @@ export function AppOrthogonalite() {
           <EtapeConclusionTriangleOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -333,7 +316,6 @@ export function AppOrthogonalite() {
           <EtapeConstructionAvecXOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -345,7 +327,6 @@ export function AppOrthogonalite() {
           <EtapeReductionSommetOrthogonalite
             key="A"
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             sommet="A"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -358,7 +339,6 @@ export function AppOrthogonalite() {
           <EtapeReductionSommetOrthogonalite
             key="B"
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             sommet="B"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -371,7 +351,6 @@ export function AppOrthogonalite() {
           <EtapeReductionSommetOrthogonalite
             key="C"
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             sommet="C"
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
@@ -384,7 +363,6 @@ export function AppOrthogonalite() {
           <EtapeIdentificationResolutionOrthogonalite
             key={phase}
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onValider={(reponse) => terminerEtape(soumettreReponseIdentificationResolution(etat, reponse))}

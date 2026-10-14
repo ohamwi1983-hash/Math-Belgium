@@ -12,7 +12,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -35,7 +34,7 @@ interface Props {
 /** Écran GÉNÉRIQUE add-as-needed (0 à 2 valeurs numériques) — réutilisé par aEcran2 (A3), cEcran2,
  * cEcran3 — même patron que `EtapeListeSolutionsCyclo.tsx` (6gen3). `App6gen9.tsx` doit le rendre
  * avec `key={phase}`. */
-export function EtapeListeEquExpo({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, placeholder, labelAjout, labelAucune, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeEquExpo({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, placeholder, labelAjout, labelAucune, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [aucune, setAucune] = useState(false);
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,7 +57,6 @@ export function EtapeListeEquExpo({ estPremierEcran, consigneEcran, enonceLatex,
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

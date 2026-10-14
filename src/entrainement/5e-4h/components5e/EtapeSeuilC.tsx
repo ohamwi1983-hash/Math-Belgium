@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
-  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données -> question, jamais l'inverse). */
   donnees: ReactNode;
@@ -27,7 +26,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeSeuilC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeSeuilC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [valeur, setValeur] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const valeurErronee = montrerErreurs && valeur.trim() !== "" && diagnostiquerSeuilC(exercice, Number(valeur.replace(",", "."))) !== "correct";
@@ -40,7 +39,6 @@ export function EtapeSeuilC({ exercice, estPremierEcran, donnees, tentativesUtil
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneContexteC()}
         blocDonnees={
           <>

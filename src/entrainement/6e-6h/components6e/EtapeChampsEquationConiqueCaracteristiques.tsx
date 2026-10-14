@@ -10,7 +10,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -43,7 +42,7 @@ interface Props {
  * bloc données → état actuel → bloc de travail) conservée à l'identique. À rendre avec `key={phase}`
  * par `App6gen59.tsx` parent.
  */
-export function EtapeChampsEquationConiqueCaracteristiques({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEquationConiqueCaracteristiques({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -61,7 +60,6 @@ export function EtapeChampsEquationConiqueCaracteristiques({ estPremierEcran, co
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

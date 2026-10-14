@@ -18,7 +18,6 @@ import { TableauEtudeLocaleRecap } from "./TableauEtudeLocaleRecap";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
-  estPremierEcran: boolean;
   onContinuer: () => void;
 }
 
@@ -33,7 +32,7 @@ interface Props {
  * erreur sur ce qui est réellement vrai à chaque zone. Aucune vérification ici (bouton "Continuer"
  * simple, jamais un `Valider`).
  */
-export function EtapeRecapitulatifEtudierFonction({ exercice, estPremierEcran, onContinuer }: Props) {
+export function EtapeRecapitulatifEtudierFonction({ exercice, onContinuer }: Props) {
   const attenduFPrime = tableauFPrimeAttendu(exercice);
   const attenduFSeconde = tableauFSecondeAttendu(exercice);
   const enteteFPrime = formatEnteteColonnesTableauEtudierFonction(exercice, attenduFPrime.colonnes, "fprime");
@@ -43,7 +42,6 @@ export function EtapeRecapitulatifEtudierFonction({ exercice, estPremierEcran, o
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

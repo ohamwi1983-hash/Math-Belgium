@@ -14,7 +14,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +27,7 @@ interface Props {
 
 /** Écran commun aux 2 variantes, toujours TERMINAL — QCM, choisir la phrase de conclusion correcte
  * parmi `exercice.optionsInterpretation` (ordre déjà mélangé à la génération, jamais retrié). */
-export function EtapeInterpretationTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
@@ -45,7 +44,6 @@ export function EtapeInterpretationTriangleLies({ exercice, estPremierEcran, ten
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={exercice.contexte}
         blocDonnees={
           <>

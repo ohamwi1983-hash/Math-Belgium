@@ -14,7 +14,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceTangenteDoubleTangence;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -33,7 +32,7 @@ interface Props {
  * variante ne fournit jamais f'(x)) et l'équation de la tangente (symbolique, "y="). UNE SEULE
  * tentative combinée (1 bouton Valider) — même patron 2-champs que `EtapeDevelopperDerivee.tsx`
  * (5gen26). Calculatrice PRÉSENTE (substitution numérique dans un polynôme de degré 4). */
-export function EtapeTangenteEnP({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [fPrimeP, setFPrimeP] = useState("");
   const [tangente, setTangente] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -57,7 +56,6 @@ export function EtapeTangenteEnP({ exercice, estPremierEcran, tentativesUtilisee
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

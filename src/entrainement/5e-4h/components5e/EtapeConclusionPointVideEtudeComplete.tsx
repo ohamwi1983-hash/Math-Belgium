@@ -11,7 +11,6 @@ import type { ReponseConclusionPointVide } from "../moteur5e/sessionEtudeComplet
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +27,7 @@ interface Props {
  * compact` + `.btn.toggle-active`, même patron que `EtapeConfirmationCoherence.tsx`) : le point est-il
  * une AV ? appartient-il au domaine de f ? Réponse TOUJOURS "Non" aux deux pour un vrai point vide —
  * l'écran existe pour casser la croyance qu'une limite finie signifierait un point du domaine. */
-export function EtapeConclusionPointVideEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [estAV, setEstAV] = useState<boolean | null>(null);
   const [appartientDomaine, setAppartientDomaine] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -43,7 +42,6 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, estPremierEcra
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
       />

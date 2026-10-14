@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   options: OptionChoix[];
   aideNiveau1: AideAvecLatex;
@@ -34,7 +33,7 @@ interface Props {
  * générateur à l'utiliser : famille F écran 3, variante "verifierAffirmation" (vrai/faux). Choix
  * véritable présenté à l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary` (réservé à
  * "Valider", CLAUDE.md). `App6gen33.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && choixId !== null ? diagnostiquer(choixId) : null;
@@ -47,7 +46,6 @@ export function EtapeChoixProbabilitesProblemes({ consigneGenerale, blocDonnees,
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           blocDonnees.length > 0 ? (

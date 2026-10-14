@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   /** Expression logarithmique DEMANDÉE (KaTeX) — rattachée visuellement à la consigne générale
    * (même patron que `expressionLatex` de `EtapeChampCycloSimple.tsx`, 6gen2), affichée AVANT le
@@ -48,7 +47,6 @@ interface Props {
  * chaque écran).
  */
 export function EtapeProprieteLogarithme({
-  estPremierEcran,
   consigneGenerale,
   expressionLatex,
   blocDonnees,
@@ -77,7 +75,6 @@ export function EtapeProprieteLogarithme({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <>

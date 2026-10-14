@@ -10,7 +10,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
@@ -25,7 +24,7 @@ interface Props {
  * troisième nombre brut (déjà obtenus aux 2 étapes précédentes), mais la direction cardinale
  * réelle vers laquelle elle pointe (Nord toujours pris comme référence, simplification
  * documentée — voir `core/applicationPhysique.types.ts`). */
-export function EtapeInterpretationApplicationPhysique({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
+export function EtapeInterpretationApplicationPhysique({ exercice, tentativesUtilisees, tentativesMax, recapitulatif, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const erronee = tentativesUtilisees > 0;
 
@@ -33,7 +32,6 @@ export function EtapeInterpretationApplicationPhysique({ exercice, estPremierEcr
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={formatEnonceApplicationPhysique(exercice)}
         blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
       />

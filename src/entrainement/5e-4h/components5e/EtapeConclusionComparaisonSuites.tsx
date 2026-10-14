@@ -12,7 +12,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceComparaisonSuites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +33,6 @@ interface Props {
  * (année/mois) — les 2 doivent être corrects (piège explicite de la spec : oublier de traduire). */
 export function EtapeConclusionComparaisonSuites({
   exercice,
-  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -67,7 +65,6 @@ export function EtapeConclusionComparaisonSuites({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={<EtatActuelComparaisonSuites exercice={exercice} />}
       />

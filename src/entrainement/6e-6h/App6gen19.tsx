@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHyperboliques } from "./generateurs6e/hyperboliques";
 import {
@@ -88,13 +88,6 @@ export function App6gen19() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
   const donnees = blocDonnees(exercice);
   const etatAct = etatActuel(exercice, phase);
   const consigne = consigneEcran(exercice, phase);
@@ -165,7 +158,6 @@ export function App6gen19() {
         {phase === "aParite" && (
               <EtapeStatutPariteHyperboliques
                 key={phase}
-                estPremierEcran={estPremierEcran}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 consigneEcran={consigne}
@@ -184,7 +176,6 @@ export function App6gen19() {
             {phase === "bValeurs" && (
               <EtapeListeValeursHyperboliques
                 key={phase}
-                estPremierEcran={estPremierEcran}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 etatActuel={etatAct}
@@ -206,7 +197,6 @@ export function App6gen19() {
             {phase === "dLimites" && (
               <EtapeLimitesHyperboliquesD
                 key={phase}
-                estPremierEcran={estPremierEcran}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 etatActuel={etatAct}
@@ -226,7 +216,6 @@ export function App6gen19() {
             {phase !== "aParite" && phase !== "bValeurs" && phase !== "dLimites" && (
               <EtapeChampHyperboliques
                 key={phase}
-                estPremierEcran={estPremierEcran}
                 consigneGenerale={CONSIGNE_GENERALE}
                 blocDonnees={donnees}
                 etatActuel={etatAct}

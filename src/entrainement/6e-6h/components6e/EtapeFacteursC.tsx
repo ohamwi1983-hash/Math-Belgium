@@ -19,7 +19,6 @@ const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", mo
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -52,7 +51,7 @@ function GroupeBoutons({ label, valeur, erreur, onChange }: { label: string; val
 /** Écran "cFacteurs" (`6gen6`, famille C) — 2 sous-réponses catégorielles indépendantes (limite de
  * chaque facteur), combinées derrière UN SEUL bouton "Valider" (spec : "Champ : 2 valeurs").
  * `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeFacteursC({ consigneEcran, enonceLatex, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFacteursC({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [facteur1, setFacteur1] = useState<OptionCategorielle | null>(null);
   const [facteur2, setFacteur2] = useState<OptionCategorielle | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -67,7 +66,6 @@ export function EtapeFacteursC({ consigneEcran, enonceLatex, estPremierEcran, ai
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

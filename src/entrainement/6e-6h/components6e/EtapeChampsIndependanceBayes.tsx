@@ -9,7 +9,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   tableauDonnees: TableauAffichage | null;
@@ -69,7 +68,7 @@ function TableAffichage({ tableau }: { tableau: TableauAffichage }) {
  * générateur (voir en-tête de
  * `ui6e/formatIndependanceBayes.ts`) — un seul composant écran suffit, jamais de variante "choix".
  * `App6gen32.tsx` doit le rendre avec `key={phase}` (remet les champs à vide à chaque écran). */
-export function EtapeChampsIndependanceBayes({ estPremierEcran, consigneGenerale, blocDonnees, tableauDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, tableauDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -87,7 +86,6 @@ export function EtapeChampsIndependanceBayes({ estPremierEcran, consigneGenerale
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <>

@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceTangenteHorizontale;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +33,7 @@ interface Props {
  * dynamiques : 1 champ → "x=" ; 2+ champs → "x_1=","x_2=",... Vérifiée comme un ENSEMBLE, ordre
  * indifférent (`verifierRacinesHorizontale`, longueur mismatch déjà gérée génériquement). Calculatrice
  * PRÉSENTE (résolution/vérification numérique). */
-export function EtapeRacinesTangente({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -64,7 +63,6 @@ export function EtapeRacinesTangente({ exercice, estPremierEcran, tentativesUtil
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

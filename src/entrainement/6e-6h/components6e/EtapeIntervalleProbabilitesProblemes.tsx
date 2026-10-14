@@ -10,7 +10,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
@@ -34,7 +33,7 @@ interface Props {
  * "champs"/"choix", l'app affiche l'erreur générique standard (le statut détaillé de l'inéquation
  * n'apporte rien de plus qu'un "correct"/"incorrect" côté élève). `App6gen33.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -46,7 +45,6 @@ export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, estPrem
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           blocDonnees.length > 0 ? (

@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +31,7 @@ interface Props {
  * (`diagnostiquerCompletionCarre` — cible IDENTIQUE à l'écran 1, voir l'en-tête de
  * `verificationEquationCercleDeveloppee.ts`).
  */
-export function EtapeCompletionEquationCercleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -44,7 +43,6 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, estPremierEc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
         blocDonnees={
           <div className="equation-box">

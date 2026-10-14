@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceConvergenceSuite;
-  estPremierEcran: boolean;
   phase: "classificationArithmetique" | "classificationGeometrique" | "classifierQuelconque";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -45,7 +44,6 @@ interface Props {
  * boutons dont 1 révèle un champ numérique — "Converge vers une autre valeur"). */
 export function EtapeClassificationConvergence({
   exercice,
-  estPremierEcran,
   phase,
   tentativesUtilisees,
   tentativesMax,
@@ -78,7 +76,6 @@ export function EtapeClassificationConvergence({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

@@ -13,7 +13,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceEgaliteExpressions;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 
 /** Écran 1 (famille "egalite") — convertir UN membre pour aligner les 2 côtés sur la même fonction,
  * champ de texte libre. */
-export function EtapeConversionEgalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeConversionEgalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -46,7 +45,6 @@ export function EtapeConversionEgalite({ exercice, estPremierEcran, tentativesUt
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box">

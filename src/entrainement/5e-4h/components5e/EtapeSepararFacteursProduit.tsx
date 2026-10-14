@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceProduitFacteurs;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +30,7 @@ interface Props {
 
 /** Écran "séparer en 2 équations" (famille "produit") — EXACTEMENT 2 champs (un produit à 2
  * facteurs, jamais add-as-needed), ordre indifférent côté vérification. */
-export function EtapeSepararFacteursProduit({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSepararFacteursProduit({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [ligne1, setLigne1] = useState("");
   const [ligne2, setLigne2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -51,7 +50,6 @@ export function EtapeSepararFacteursProduit({ exercice, estPremierEcran, tentati
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box equation-box-termes">

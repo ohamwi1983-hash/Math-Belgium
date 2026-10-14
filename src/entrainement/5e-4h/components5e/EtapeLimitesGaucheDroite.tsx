@@ -15,7 +15,6 @@ const OPTIONS_SIGNE_INFINI: { id: "1" | "-1"; label: string }[] = [
 
 interface Props {
   exercice: ExerciceLimite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * EXPOSANT, `x\to a^-`/`x\to a^+` — `formatLabelLimiteGaucheLatex`/`formatLabelLimiteDroiteLatex`),
  * réponse par VRAI combobox natif (`<select>.ce-select`, jamais des boutons). Aide à 2 niveaux :
  * niveau 1 = méthode (signes numérateur/dénominateur), niveau 2 = exemple DIFFÉRENT de l'exercice. */
-export function EtapeLimitesGaucheDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [gauche, setGauche] = useState<1 | -1 | null>(null);
   const [droite, setDroite] = useState<1 | -1 | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -75,7 +74,6 @@ export function EtapeLimitesGaucheDroite({ exercice, estPremierEcran, tentatives
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

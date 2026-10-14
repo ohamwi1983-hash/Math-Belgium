@@ -20,7 +20,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
-  estPremierEcran: boolean;
   phase: PhaseSuiteGeometrique;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -50,7 +49,6 @@ function labelsPourPhase(exercice: ExerciceSuiteGeometrique, phase: PhaseSuiteGe
  * selon la famille/le sous-cas, labels LaTeX également — voir `labelsCalculerTermesAlgebrique`). */
 export function EtapeTermesMultiplesSuiteGeometrique({
   exercice,
-  estPremierEcran,
   phase,
   tentativesUtilisees,
   tentativesMax,
@@ -84,7 +82,6 @@ export function EtapeTermesMultiplesSuiteGeometrique({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { construireAvecFonction, genererExerciceExtremumsSinusoide } from "./generateurs5e/extremumsSinusoide";
 import type { FonctionExtremum } from "./core5e/extremumsSinusoide.types";
@@ -84,14 +84,6 @@ export function App5gen11() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const [equationSubstitueeAttendue, brancheXAttendue] = formatTermesEtatActuelExtremums(exercice, "solutions");
 
   const validation = enAttente
@@ -126,7 +118,6 @@ export function App5gen11() {
               key={etat.phase}
               exercice={exercice}
               phase={etat.phase}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -147,7 +138,6 @@ export function App5gen11() {
             <EtapeSolutionsExtremum
               key={etat.phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}

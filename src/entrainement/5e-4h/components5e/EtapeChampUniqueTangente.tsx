@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceTangente;
-  estPremierEcran: boolean;
   phase: EcranTangente;
   labelChamp: string;
   placeholder: string;
@@ -40,7 +39,6 @@ interface Props {
  * gardant la réponse précédente) — même patron que `EtapeChampLibreDerivee.tsx` (5gen26). */
 export function EtapeChampUniqueTangente({
   exercice,
-  estPremierEcran,
   phase,
   labelChamp,
   placeholder,
@@ -71,7 +69,6 @@ export function EtapeChampUniqueTangente({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

@@ -22,7 +22,6 @@ function champEstCompose(placeholder?: string): boolean {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   champs: ChampDef[];
   choix: ChoixDef[];
@@ -56,7 +55,7 @@ interface Props {
  * choix (s'il existe) occupe TOUJOURS le DERNIER slot du tableau, convention partagée avec
  * `moteur6e/verificationTrianglesComplexes.ts` (`diagnostiquerCEcran2`, `valeurs[3]`).
  */
-export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, champs, choix, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consigneEcran, champs, choix, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeursTexte, setValeursTexte] = useState<string[]>(() => champs.map(() => ""));
   const [choixSelectionne, setChoixSelectionne] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -82,7 +81,6 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, estPrem
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

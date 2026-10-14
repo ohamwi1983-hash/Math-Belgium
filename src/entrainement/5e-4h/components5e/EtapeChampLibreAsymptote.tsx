@@ -13,7 +13,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceAsymptoteOblique;
-  estPremierEcran: boolean;
   phase: "ecrireFormeDeveloppee" | "calculerCoefficientA" | "calculerCoefficientB" | "conclureEquationAsymptote";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -35,7 +34,7 @@ interface Props {
  * variante "viaLimites" affichent, en plus de la consigne, la formule LaTeX de la limite à calculer
  * (`formatFormulePhaseLatex`) — mode DISPLAY (`block`) obligatoire, notation de limite déjà corrigée
  * sur 5gen20. */
-export function EtapeChampLibreAsymptote({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreAsymptote({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -53,7 +52,6 @@ export function EtapeChampLibreAsymptote({ exercice, estPremierEcran, phase, ten
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

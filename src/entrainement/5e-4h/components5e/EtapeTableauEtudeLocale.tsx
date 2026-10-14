@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeLocale;
-  estPremierEcran: boolean;
   phase: "tableauFPrime" | "tableauFSeconde";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -25,7 +24,7 @@ interface Props {
 /** Écrans "tableauFPrime"/"tableauFSeconde" — tableau de signes étendu (`TableauEtudeLocaleBuilder`),
  * racines/exclusions déjà pré-placées en en-tête (résolues à l'écran précédent). Calculatrice
  * ABSENTE (question purement structurelle/qualitative). */
-export function EtapeTableauEtudeLocale({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = formatEnteteColonnesTableau(exercice, attendu.colonnes, mode);
@@ -33,7 +32,6 @@ export function EtapeTableauEtudeLocale({ exercice, estPremierEcran, phase, tent
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

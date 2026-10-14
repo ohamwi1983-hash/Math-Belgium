@@ -145,7 +145,6 @@ export function App5gen25() {
         <div className="card-body">
           <ComposantAssociation
             key={cleEcran}
-            estPremierEcran
             nombreItems={nombreElementsAssociation(exercice)}
             renderItem={renderItem}
             renderCandidat={renderCandidat}

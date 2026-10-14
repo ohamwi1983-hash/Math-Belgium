@@ -16,7 +16,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   labels: DirectionLabel[];
@@ -44,7 +43,7 @@ const VIDE: EtatLimiteLocal = { statut: null, texte: "" };
  * indépendante — l'écran le plus dense du générateur, spec explicite. `App6gen11.tsx` doit le
  * rendre avec `key={indexExercice}`.
  */
-export function EtapeLimitesQuatre({ estPremierEcran, enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [pointPlus, setPointPlus] = useState<EtatLimiteLocal>(VIDE);
   const [pointMoins, setPointMoins] = useState<EtatLimiteLocal>(VIDE);
   const [plusInfini, setPlusInfini] = useState<EtatLimiteLocal>(VIDE);
@@ -69,7 +68,6 @@ export function EtapeLimitesQuatre({ estPremierEcran, enonceLatex, consigneEcran
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

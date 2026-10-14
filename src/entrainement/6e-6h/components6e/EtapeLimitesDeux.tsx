@@ -49,7 +49,6 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   labels: DirectionLabel[];
@@ -71,7 +70,7 @@ interface Props {
  * pour la famille B (4 directions, l'écran le plus dense). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. Le domaine confirmé à l'écran précédent est listé dans le récapitulatif
  * "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeLimitesDeux({ estPremierEcran, enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [plusInfini, setPlusInfini] = useState<EtatLocal>({ statut: null, texte: "" });
   const [moinsInfini, setMoinsInfini] = useState<EtatLocal>({ statut: null, texte: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -89,7 +88,6 @@ export function EtapeLimitesDeux({ estPremierEcran, enonceLatex, consigneEcran, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

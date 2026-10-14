@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLimite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * add-as-needed (mécanique abandonnée). `ReponseFactoriser.numerateur/denominateur` restent des
  * `string[]` côté moteur (`diagnostiquerFacteurs` inchangée) — ce composant leur passe simplement un
  * tableau à 1 élément. */
-export function EtapeFactoriserLimite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [numerateur, setNumerateur] = useState("");
   const [denominateur, setDenominateur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -58,7 +57,6 @@ export function EtapeFactoriserLimite({ exercice, estPremierEcran, tentativesUti
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

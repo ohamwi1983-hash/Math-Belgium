@@ -20,7 +20,6 @@ const OPTIONS: { id: ReponseConcavite["type"]; label: string; requiertPosition: 
 ];
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -42,7 +41,7 @@ interface Props {
  * fois". `App6gen11.tsx` doit le rendre avec `key={indexExercice}`. Le domaine, les limites, les
  * asymptotes et la croissance confirmés aux 4 écrans précédents sont listés dans le récapitulatif
  * "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeConcavite({ estPremierEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConcavite({ enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [type, setType] = useState<ReponseConcavite["type"] | null>(null);
   const [position, setPosition] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,7 +57,6 @@ export function EtapeConcavite({ estPremierEcran, enonceLatex, aideNiveau1, aide
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

@@ -10,7 +10,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -44,7 +43,7 @@ const MAX_LIGNES_DEFAUT = 2;
  * d'intersection" pour le cas 0 solution — jamais des champs fixes (convention transversale
  * CLAUDE.md, "interface de saisie flexible").
  */
-export function EtapeChampsIntersectionsConiques({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsIntersectionsConiques({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const champListe = champs.length === 1 && champs[0].type === "liste" ? champs[0] : null;
 
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
@@ -74,7 +73,6 @@ export function EtapeChampsIntersectionsConiques({ estPremierEcran, consigneGene
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

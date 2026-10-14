@@ -18,7 +18,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
-  estPremierEcran: boolean;
   point: Point;
   droiteCible: DroiteImplicite;
   bAttendue: DroiteImplicite;
@@ -42,7 +41,7 @@ interface Props {
  * éléments (droite(s), P, b, Q) sont désormais CONFIRMÉS : toujours affichés sur le graphe, sans
  * conditionner à un niveau d'aide.
  */
-export function EtapeDistancePQDistanceDroite({ exercice, estPremierEcran, point, droiteCible, bAttendue, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDistancePQDistanceDroite({ exercice, point, droiteCible, bAttendue, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
 
@@ -62,7 +61,6 @@ export function EtapeDistancePQDistanceDroite({ exercice, estPremierEcran, point
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleDistanceDroite exercice={exercice} />}
         blocDonnees={
           <>

@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (textes: string[]) => void;
@@ -26,7 +25,7 @@ interface Props {
 /** Écran "completerLimites" — un champ par comportement RÉELLEMENT visible sur le graphique (2 à 6
  * selon le tirage), chaque champ accepte une valeur finie OU ±∞. Pas d'aide : pure lecture
  * graphique, rien à expliquer ou rappeler. */
-export function EtapeComportementsLimites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeComportementsLimites({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const slots = listeComportements(exercice);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -50,7 +49,6 @@ export function EtapeComportementsLimites({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={<LectureGraphiqueLimitesGraph exercice={exercice} />}
       />

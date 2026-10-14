@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   etatActuel: string[] | null;
@@ -40,7 +39,7 @@ interface Props {
  * reste toujours `null` ici — "cFacteurs"/"dND" sont le 2e écran, immédiatement après le domaine (une
  * tâche indépendante, jamais rappelée) — la prop est acceptée pour uniformité avec les 2 autres
  * écrans génériques du même générateur. */
-export function EtapeDeuxChampsDomaineDerivee({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, labelA, labelB, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etatActuel, labelA, labelB, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -53,7 +52,6 @@ export function EtapeDeuxChampsDomaineDerivee({ estPremierEcran, consigneEcran, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

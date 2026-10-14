@@ -19,7 +19,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceParametresSinusoideGraphique;
-  estPremierEcran: boolean;
   phase: PhaseParametresSinusoideGraphique;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -49,7 +48,7 @@ interface Props {
  * (`App5gen9.tsx`, `ui5e/recapitulatifParametresSinusoideGraphique.ts`), plus l'ancien bloc "état
  * actuel" local (`EtatActuelParametresSinusoideGraphique`, retiré ici — doublon visuel).
  */
-export function EtapeParametreSinusoideGraphique({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -65,7 +64,6 @@ export function EtapeParametreSinusoideGraphique({ exercice, estPremierEcran, ph
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={<SinusoideGraph exercice={exercice} phase={phase} niveauAide={niveauAide} />}
       />

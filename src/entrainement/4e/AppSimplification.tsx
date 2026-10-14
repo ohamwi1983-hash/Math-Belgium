@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { Exercice } from "./core/generateur.types";
 import type { PolynomeLineaire } from "./core/simplification.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -250,16 +250,6 @@ export function AppSimplification() {
   const { tentativesMax } = etat.reglages;
   const exercice = etat.exerciceCourant;
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -353,7 +343,7 @@ export function AppSimplification() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<FractionHeader exercice={exercice} />} />
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<FractionHeader exercice={exercice} />} />
           {etat.phase === "denomReduction" ? (
             <>
               <EtapeReductionCoefficients

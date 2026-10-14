@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import type { IdVarianteTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
@@ -63,14 +63,6 @@ export function App6gen41() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   // Calculatrice flottante — SEUL écran du générateur avec un vrai calcul décimal/irrationnel
   // (famille B écran 4, angles via loi des cosinus : arccos d'un ratio décimal, réponse ATTENDUE en
   // DEGRÉS, tolérance 0.1° — `moteur6e/verificationTrianglesComplexes.ts`) — mirroir `App6gen9.tsx`
@@ -124,7 +116,6 @@ export function App6gen41() {
         <RecapitulatifPanel entrees={calculerRecapitulatifTrianglesComplexes(etat)} />
         <EtapeTrianglesComplexes
           key={phase}
-          estPremierEcran={estPremierEcran}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNombresComplexes } from "./generateurs6e/nombresComplexes";
 import type { IdVarianteNombresComplexes } from "./generateurs6e/nombresComplexes";
@@ -60,14 +60,6 @@ export function App6gen34() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
   // la réponse EXACTE attendue à chaque écran depuis les vrais paramètres tirés, jamais en
@@ -113,7 +105,6 @@ export function App6gen34() {
         <RecapitulatifPanel entrees={calculerRecapitulatifNombresComplexes(etat)} />
         <EtapeChampsNombresComplexes
           key={phase}
-          estPremierEcran={estPremierEcran}
           {...aideCommun}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}

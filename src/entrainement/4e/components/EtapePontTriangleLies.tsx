@@ -16,7 +16,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 
 /** Écran 1, commun aux 3 configurations — résoudre le triangle "pont". `cotePartage`/`anglePartage`
  * n'ont qu'un seul côté transféré à trouver ; `sommetPartage` demande 3 valeurs (angle + 2 côtés). */
-export function EtapePontTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, onValiderSommetPartage, validation }: Props) {
+export function EtapePontTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, onValiderSommetPartage, validation }: Props) {
   const [texte, setTexte] = useState("");
   const [texteAngle, setTexteAngle] = useState("");
   const [texteCote1, setTexteCote1] = useState("");
@@ -50,7 +49,6 @@ export function EtapePontTriangleLies({ exercice, estPremierEcran, tentativesUti
     return (
       <div>
         <EnTeteExercice
-          estPremierEcran={estPremierEcran}
           consigneGenerale={exercice.contexte}
           blocDonnees={
             <>
@@ -141,7 +139,6 @@ export function EtapePontTriangleLies({ exercice, estPremierEcran, tentativesUti
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={exercice.contexte}
         blocDonnees={
           <>

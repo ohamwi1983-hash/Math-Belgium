@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExercicePythagore;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +30,7 @@ const SOMMETS: ("A" | "B" | "C")[] = ["A", "B", "C"];
  * 2 niveaux : la relation de Pythagore
  * pour chaque sommet (niveau 1), puis substituée avec un "?" à la place du signe "=" (niveau 2).
  */
-export function EtapeTestPythagore({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeTestPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<"A" | "B" | "C" | null>(null);
   const complet = choix !== null;
   const max = NIVEAU_AIDE_MAX.testPythagore;
@@ -39,7 +38,6 @@ export function EtapeTestPythagore({ exercice, estPremierEcran, tentativesUtilis
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_PYTHAGORE}
         blocDonnees={
           <div className="equation-box equation-box-termes">

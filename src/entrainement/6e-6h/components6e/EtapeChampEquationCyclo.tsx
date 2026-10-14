@@ -13,7 +13,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   equationLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -35,7 +34,6 @@ interface Props {
  * "isolerCible" et "resoudreLineaire" (structurellement identiques : consigne + équation + champ
  * + aide à 2 niveaux). `App6gen3.tsx` doit le rendre avec `key={phase}`. */
 export function EtapeChampEquationCyclo({
-  estPremierEcran,
   consigneEcran,
   equationLatex,
   aideNiveau1,
@@ -60,7 +58,6 @@ export function EtapeChampEquationCyclo({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

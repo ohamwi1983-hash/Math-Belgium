@@ -10,7 +10,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationDroite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: "possible" | "impossible") => void;
@@ -30,13 +29,12 @@ interface Props {
  * 3) : l'ancienne aide révélait directement possible/impossible plutôt que d'orienter la réflexion
  * — retirée sans remplacement, même patron que "Colinéarité"/"Orthogonalité" écrans "resolution".
  */
-export function EtapePossibiliteEquationDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapePossibiliteEquationDroite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<"possible" | "impossible" | null>(null);
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleEquationDroite exercice={exercice} />}
         blocDonnees={
           <div className="equation-box">

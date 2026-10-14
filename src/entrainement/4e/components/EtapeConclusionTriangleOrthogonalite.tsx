@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangle;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -48,7 +47,7 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangle, sommet: Sommet): s
  * les entrées `testSommetA/B/C` du récapitulatif "Ce qu'on sait déjà"
  * (`ui/recapitulatifOrthogonalite.ts`), affiché en haut de `AppOrthogonalite.tsx`.
  */
-export function EtapeConclusionTriangleOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionTriangleOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
   const [sommet, setSommet] = useState<Sommet | null>(null);
   const max = NIVEAU_AIDE_MAX.conclusionTriangle;
@@ -58,7 +57,6 @@ export function EtapeConclusionTriangleOrthogonalite({ exercice, estPremierEcran
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

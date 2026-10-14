@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistance;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +26,7 @@ interface Props {
  * un champ de texte libre pour `dist(A,B)` (label reformulé, fraction/irrationnel irréductible
  * acceptés — `promptgen26refontecomplete.md`, Partie F). Aide à 2 niveaux, texte seul.
  */
-export function EtapeCalculDistance({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeCalculDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX.calculDistance;
   const complet = texte.trim() !== "";
@@ -38,7 +37,6 @@ export function EtapeCalculDistance({ exercice, estPremierEcran, tentativesUtili
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_DISTANCE}
         blocDonnees={
           <div className="equation-box equation-box-termes">

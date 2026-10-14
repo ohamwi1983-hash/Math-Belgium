@@ -17,7 +17,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceScenarioC;
-  estPremierEcran: boolean;
   /** Bloc "données" persistant (contexte du scénario C) — rendu AVANT la question spécifique de
    * l'écran (convention transversale : données/graphe → question, jamais l'inverse). */
   donnees: ReactNode;
@@ -33,7 +32,7 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-export function EtapeLectureC({ exercice, estPremierEcran, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [cf, setCf] = useState("");
   const [cv, setCv] = useState("");
   const [cp, setCp] = useState("");
@@ -53,7 +52,6 @@ export function EtapeLectureC({ exercice, estPremierEcran, donnees, tentativesUt
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneContexteC()}
         blocDonnees={
           <>

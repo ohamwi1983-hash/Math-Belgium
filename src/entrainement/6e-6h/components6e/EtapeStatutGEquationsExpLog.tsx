@@ -13,7 +13,6 @@ interface AideAvecLatex {
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
@@ -40,7 +39,7 @@ const OPTIONS: { id: IssueSimplificationG; label: string }[] = [
  * l'élève ⟹ boutons `.btn.toggle-active`, JAMAIS `.btn-primary`, convention CLAUDE.md). Même
  * patron que `EtapeChoixOuiNonExpoProblemes.tsx` (6gen12), étendu à 3 options plutôt que 2.
  * `App6gen14.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeStatutGEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeStatutGEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IssueSimplificationG | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -52,7 +51,6 @@ export function EtapeStatutGEquationsExpLog({ consigneGenerale, estPremierEcran,
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

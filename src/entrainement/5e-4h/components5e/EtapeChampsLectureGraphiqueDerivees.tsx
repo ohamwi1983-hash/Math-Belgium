@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueDerivees;
-  estPremierEcran: boolean;
   phase: "extremums" | "inflexions";
   labels: string[];
   placeholders: string[];
@@ -46,7 +45,6 @@ interface Props {
  */
 export function EtapeChampsLectureGraphiqueDerivees({
   exercice,
-  estPremierEcran,
   phase,
   labels,
   placeholders,
@@ -88,7 +86,6 @@ export function EtapeChampsLectureGraphiqueDerivees({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={<LectureGraphiqueDeriveesGraph exercice={exercice} surlignage={surlignage} />}
       />

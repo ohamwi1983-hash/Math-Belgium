@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLectureGraphiqueLimites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (textes: string[]) => void;
@@ -26,7 +25,7 @@ interface Props {
 /** Écran "nommerAsymptotes" — une équation par asymptote RÉELLEMENT présente (jamais un champ pour
  * un type absent du tirage) : x=... par AV, y=... par AH (1 ou 2 champs selon égalité en ±∞), y=...
  * par AO (expression symbolique ax+b). Pas d'aide : pure lecture graphique. */
-export function EtapeEquationsAsymptotes({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
+export function EtapeEquationsAsymptotes({ exercice, tentativesUtilisees, tentativesMax, onValider, diagnostiquer, validation}: Props) {
   const slots = listeAsymptotes(exercice);
   const [valeurs, setValeurs] = useState<string[]>(() => Array(slots.length).fill(""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -50,7 +49,6 @@ export function EtapeEquationsAsymptotes({ exercice, estPremierEcran, tentatives
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={<LectureGraphiqueLimitesGraph exercice={exercice} />}
       />

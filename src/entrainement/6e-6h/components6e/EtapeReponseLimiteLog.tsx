@@ -18,7 +18,6 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   /** `null` sur le tout premier écran de chaque famille (rien à rappeler) — voir
@@ -51,7 +50,7 @@ interface Props {
  * et C-conclure. `App6gen17.tsx` doit le rendre avec `key={phase}`. Même patron que
  * `EtapeReponseLimite.tsx` (6gen6).
  */
-export function EtapeReponseLimiteLog({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<ReponseLimiteLog["type"] | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -65,7 +64,6 @@ export function EtapeReponseLimiteLog({ estPremierEcran, consigneEcran, enonceLa
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -36,7 +35,7 @@ interface Props {
  *
  * Pas de bloc "État actuel" ici : "réduction" est toujours la première étape de cette variante.
  */
-export function EtapeReductionParametreOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeReductionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX.reductionParametre;
 
@@ -47,7 +46,6 @@ export function EtapeReductionParametreOrthogonalite({ exercice, estPremierEcran
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box">

@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
@@ -57,7 +56,7 @@ function champComporteCalcul(placeholder: string | undefined): boolean {
   return true;
 }
 
-export function EtapeChampsBinomialeSequenceOrdonnee({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsBinomialeSequenceOrdonnee({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -75,7 +74,6 @@ export function EtapeChampsBinomialeSequenceOrdonnee({ consigneGenerale, blocDon
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

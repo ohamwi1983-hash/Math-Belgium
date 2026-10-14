@@ -14,7 +14,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceAsymptoteOblique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 
 /** Écran "diviserEuclidienne" (variante "divisionEuclidienne" uniquement) — 1 champ symbolique
  * (quotient Q(x)) + 1 champ numérique (reste R(x)), vérifiés INDÉPENDAMMENT. */
-export function EtapeDiviserEuclidienne({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [quotient, setQuotient] = useState("");
   const [reste, setReste] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -53,7 +52,6 @@ export function EtapeDiviserEuclidienne({ exercice, estPremierEcran, tentativesU
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

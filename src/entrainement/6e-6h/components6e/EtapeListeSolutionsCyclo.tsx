@@ -15,7 +15,6 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   equationLatex: string;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   placeholder: string;
@@ -39,7 +38,6 @@ interface Props {
 export function EtapeListeSolutionsCyclo({
   consigneEcran,
   equationLatex,
-  estPremierEcran,
   aideNiveau1,
   aideNiveau2,
   placeholder,
@@ -75,7 +73,6 @@ export function EtapeListeSolutionsCyclo({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

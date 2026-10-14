@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearPoints;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -43,7 +42,7 @@ interface Props {
  * (`formatTermesEnoncePointsLatex`, un fragment KaTeX par point) — jamais un unique `\quad`-joined,
  * qui ne retourne jamais à la ligne sur mobile étroit.
  */
-export function EtapeConstructionVecteursColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -72,7 +71,6 @@ export function EtapeConstructionVecteursColinearite({ exercice, estPremierEcran
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

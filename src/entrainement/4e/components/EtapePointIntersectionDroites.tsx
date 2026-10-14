@@ -15,7 +15,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIntersectionDroites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +33,7 @@ interface Props {
  * INDÉPENDAMMENT selon son propre statut (`diagnostiquerPoint`), pour isoler le piège "s'arrêter à
  * t sans réinjecter" (param_cart) et "confondre t et s" (param_param).
  */
-export function EtapePointIntersectionDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapePointIntersectionDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [t, setT] = useState("");
   const [s, setS] = useState("");
   const [x, setX] = useState("");
@@ -61,7 +60,6 @@ export function EtapePointIntersectionDroites({ exercice, estPremierEcran, tenta
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_INTERSECTION}
         blocDonnees={
           <div className="equation-box">

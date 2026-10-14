@@ -16,7 +16,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 
 /** Écran 2, `anglePartage` uniquement — l'angle utile (différence des 2 visées) et l'angle déduit
  * de l'hypothèse annexe, les 2 angles qui ferment le triangle cible. */
-export function EtapeAnglesTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeAnglesTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [utile, setUtile] = useState("");
   const [hypothese, setHypothese] = useState("");
   const complet = utile.trim() !== "" && hypothese.trim() !== "";
@@ -41,7 +40,6 @@ export function EtapeAnglesTriangleLies({ exercice, estPremierEcran, tentativesU
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={exercice.contexte}
         blocDonnees={
           <>

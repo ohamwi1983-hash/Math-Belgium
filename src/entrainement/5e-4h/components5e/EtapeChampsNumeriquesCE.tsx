@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomique;
-  estPremierEcran: boolean;
   ecran: EcranContexteEconomique;
   labels: string[];
   placeholders: string[];
@@ -41,7 +40,6 @@ interface Props {
  * approchée du bonus). Même patron que `EtapeChampsNumeriquesEtudeLocale.tsx` (5gen29). */
 export function EtapeChampsNumeriquesCE({
   exercice,
-  estPremierEcran,
   ecran,
   labels,
   placeholders,
@@ -81,7 +79,6 @@ export function EtapeChampsNumeriquesCE({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

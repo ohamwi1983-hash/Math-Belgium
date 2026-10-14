@@ -16,7 +16,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceTriangleLies;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 
 /** Écran 2, `sommetPartage` uniquement — les 2 côtés du triangle cible, chacun obtenu en
  * soustrayant la distance déjà parcourue au côté correspondant du triangle pont. */
-export function EtapeSoustractionTriangleLies({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSoustractionTriangleLies({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [cote1, setCote1] = useState("");
   const [cote2, setCote2] = useState("");
   const complet = cote1.trim() !== "" && cote2.trim() !== "";
@@ -42,7 +41,6 @@ export function EtapeSoustractionTriangleLies({ exercice, estPremierEcran, tenta
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={exercice.contexte}
         blocDonnees={
           <>

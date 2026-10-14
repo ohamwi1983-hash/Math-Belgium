@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceConstructionDroite;
-  estPremierEcran: boolean;
   cible1: Point;
   cible2: Point;
   tentativesUtilisees: number;
@@ -39,7 +38,7 @@ const MARQUEUR2_INITIAL: [number, number] = [1, 0];
  * lettres, puisqu'ils viennent d'être validés par l'élève lui-même à l'écran précédent (ou
  * révélés après épuisement), jamais une donnée cachée.
  */
-export function EtapeTraceConstructionDroite({ exercice, estPremierEcran, cible1, cible2, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTraceConstructionDroite({ exercice, cible1, cible2, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [marqueur1, setMarqueur1] = useState<[number, number]>(MARQUEUR1_INITIAL);
   const [marqueur2, setMarqueur2] = useState<[number, number]>(MARQUEUR2_INITIAL);
 
@@ -53,7 +52,6 @@ export function EtapeTraceConstructionDroite({ exercice, estPremierEcran, cible1
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGeneraleTrace(exercice)}
         blocDonnees={
           <div className="equation-box">

@@ -8,7 +8,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   options: OptionQcm[];
@@ -34,7 +33,7 @@ interface Props {
  * sur le même écran (`EtapeConclusionC.tsx`). Boutons `.btn.toggle-active`, JAMAIS `.btn-primary`
  * (réservé à "Valider", convention CLAUDE.md). `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeQcmComplexesAvances({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -46,7 +45,6 @@ export function EtapeQcmComplexesAvances({ consigneGenerale, estPremierEcran, bl
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

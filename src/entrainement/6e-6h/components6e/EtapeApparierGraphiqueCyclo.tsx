@@ -92,7 +92,6 @@ function ChampExtremum({
 
 interface Props {
   exercice: ExerciceGraphiquesCyclometriques;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -117,7 +116,7 @@ interface Props {
  * à 7 sous-réponses). Chaque sous-réponse est diagnostiquée INDÉPENDAMMENT (`diagnostiquerEcranUnique`)
  * pour le surlignage rouge — jamais une tentative fausse sur un champ confondue avec une autre.
  */
-export function EtapeApparierGraphiqueCyclo({ exercice, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeApparierGraphiqueCyclo({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lettre, setLettre] = useState<number | null>(null);
   const [ordonnee, setOrdonnee] = useState<EtatExtremum>(EXTREMUM_VIDE);
   const [domf, setDomf] = useState<EnsembleReelGuide | null>(null);
@@ -161,7 +160,6 @@ export function EtapeApparierGraphiqueCyclo({ exercice, estPremierEcran, aideNiv
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

@@ -23,7 +23,6 @@ function champEstCompose(champ: ChampDef): boolean {
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   champs: ChampDef[];
@@ -50,7 +49,7 @@ interface Props {
  * données → état actuel → bloc de travail) conservée à l'identique. `App6gen37.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeChampsFormeTrigonometrique({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsFormeTrigonometrique({ consigneGenerale, blocDonnees, consigneEcran, champs, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(() => champs.map(() => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -68,7 +67,6 @@ export function EtapeChampsFormeTrigonometrique({ consigneGenerale, estPremierEc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

@@ -9,7 +9,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -42,7 +41,7 @@ const OPTIONS: { id: SigneLimiteHyperbolique; latex: string }[] = [
  * 6gen6, qui réutilise en interne le même jeu de boutons 2 fois). `App6gen19.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeLimitesHyperboliquesD({ estPremierEcran, consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [plusInfini, setPlusInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const [moinsInfini, setMoinsInfini] = useState<SigneLimiteHyperbolique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -56,7 +55,6 @@ export function EtapeLimitesHyperboliquesD({ estPremierEcran, consigneGenerale, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

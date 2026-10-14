@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRelationsDroites } from "./generateurs/relationsDroites";
 import type { VarianteRelationsDroites } from "./core/relationsDroites.types";
@@ -76,18 +76,7 @@ export function AppRelationsDroites() {
   }
 
   const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
   const recapitulatif = calculerRecapitulatifRelationsDroites(etat);
-
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
 
   const reponseAttendue =
     etat.phase === "extraction" ? (
@@ -131,7 +120,6 @@ export function AppRelationsDroites() {
         {etat.phase === "extraction" ? (
           <EtapeExtractionRelationsDroites
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideExtraction}
@@ -142,7 +130,6 @@ export function AppRelationsDroites() {
         ) : etat.phase === "construction" ? (
           <EtapeConstructionRelationsDroites
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideConstruction}
@@ -153,7 +140,6 @@ export function AppRelationsDroites() {
         ) : (
           <EtapeEquationRelationsDroites
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideEquation}

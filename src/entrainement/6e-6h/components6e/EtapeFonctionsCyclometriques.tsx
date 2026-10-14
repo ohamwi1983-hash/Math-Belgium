@@ -12,7 +12,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   exercice: ExerciceFonctionsCyclometriques;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -36,7 +35,7 @@ interface Props {
  * "Valider" présent y compris pour la partie à choix. Pas de bloc "état actuel" : écran UNIQUE, rien
  * à dériver d'un écran précédent (voir `moteur6e/typesFonctionsCyclometriques.ts`).
  */
-export function EtapeFonctionsCyclometriques({ estPremierEcran, exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -54,7 +53,6 @@ export function EtapeFonctionsCyclometriques({ estPremierEcran, exercice, tentat
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

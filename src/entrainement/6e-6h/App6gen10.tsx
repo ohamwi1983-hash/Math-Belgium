@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInequationExponentielle } from "./generateurs6e/inequationsExponentielles";
 import {
@@ -74,13 +74,6 @@ export function App6gen10() {
 
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
   const enonceLatex = formatEnonceLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -122,7 +115,6 @@ export function App6gen10() {
           {phase === "aReconnaitre" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   placeholder="ex : 3, -2, 1/2..."
@@ -140,7 +132,6 @@ export function App6gen10() {
               {phase === "aResoudre" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -158,7 +149,6 @@ export function App6gen10() {
               {phase === "bReconnaitre" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   optionGauche={{ id: "existe", label: "Il existe une solution" }}
@@ -178,7 +168,6 @@ export function App6gen10() {
               {phase === "cfReconnaitre" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
@@ -198,7 +187,6 @@ export function App6gen10() {
               {phase === "ckRegrouper" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   placeholder="ex : (2/9)^(x^2+5)<=1"
@@ -216,7 +204,6 @@ export function App6gen10() {
               {phase === "ckConclure" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   optionGauche={{ id: "reel", label: "Vraie pour tout x réel (ℝ)" }}
@@ -236,7 +223,6 @@ export function App6gen10() {
               {phase === "dConstantSigne" && (
                 <EtapeChoixDeuxIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   optionGauche={{ id: "positif", label: "Toujours positif" }}
@@ -255,7 +241,6 @@ export function App6gen10() {
               {phase === "dConstantResoudre" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -273,7 +258,6 @@ export function App6gen10() {
               {phase === "dVariableSigne1" && (
                 <EtapeSigneUnZeroIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -290,7 +274,6 @@ export function App6gen10() {
               {phase === "dVariableSigne2" && (
                 <EtapeSigneUnZeroIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -307,7 +290,6 @@ export function App6gen10() {
               {phase === "dVariableTableau" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}
@@ -325,7 +307,6 @@ export function App6gen10() {
               {phase === "eRegrouper" && (
                 <EtapeChampSimpleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   placeholder="ex : (2/5)^x<1"
@@ -343,7 +324,6 @@ export function App6gen10() {
               {phase === "eResoudre" && (
                 <EtapeIntervalleIneqExpo
                   key={phase}
-                  estPremierEcran={estPremierEcran}
                   consigneEcran={consigne}
                   enonceLatex={enonceLatex}
                   aideNiveau1={aide1}

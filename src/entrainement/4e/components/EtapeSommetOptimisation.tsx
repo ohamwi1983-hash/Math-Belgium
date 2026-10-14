@@ -14,7 +14,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -42,7 +41,7 @@ interface Props {
  * textes d'aide contiennent leur propre notation à underscore ($x_S$...) rendue via
  * `<SegmentsInline>`, jamais en texte brut (point 2 du même prompt).
  */
-export function EtapeSommetOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSommetOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
   const complet = x.trim() !== "" && y.trim() !== "";
@@ -63,7 +62,6 @@ export function EtapeSommetOptimisation({ exercice, estPremierEcran, tentativesU
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceExtensionsBinomialeNormaleBayes } from "./generateurs6e/extensionsBinomialeNormaleBayes";
 import type { IdVarianteExtensionsBinomialeNormaleBayes } from "./generateurs6e/extensionsBinomialeNormaleBayes";
@@ -64,14 +64,6 @@ export function App6gen52() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   // Hook DEV-ONLY (jamais en dehors de import.meta.env.DEV/?dev=1) : expose l'exercice tiré tel
   // quel sur `window` — permet à la vérification Playwright (build de production) de reconstruire
   // la réponse EXACTE attendue à chaque écran depuis les vrais paramètres tirés, jamais en
@@ -122,7 +114,6 @@ export function App6gen52() {
           // `typesExtensionsBinomialeNormaleBayes.ts`, `generationId`).
           key={`${etat.generationId}-${phase}`}
           {...aideCommun}
-          estPremierEcran={estPremierEcran}
           consigneGenerale={consigneGenerale(exercice)}
           blocDonnees={blocDonnees(exercice)}
           consigneEcran={consigneEcran(exercice, phase)}

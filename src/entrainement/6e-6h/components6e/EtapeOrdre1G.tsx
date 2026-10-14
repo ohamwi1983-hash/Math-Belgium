@@ -12,7 +12,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -32,14 +31,13 @@ interface Props {
 /** Écran "gOrdre1" (`6gen6`, famille G, instance unique) — QCM booléen "un développement à
  * l'ordre 1 suffit-il à conclure ?" (Oui/Non), voir la note de conception dans
  * `core6e/limitesExponentielles.types.ts`. `App6gen6.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeOrdre1G({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeOrdre1G({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

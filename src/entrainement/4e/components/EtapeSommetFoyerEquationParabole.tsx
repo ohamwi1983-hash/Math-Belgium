@@ -15,7 +15,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParabole;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
 
 /** Écran 1 (première étape, sans état actuel — rien à rappeler avant elle) — 4 champs numériques,
  * lecture directe sur le graphe, statut à 3 valeurs classique. */
-export function EtapeSommetFoyerEquationParabole({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeSommetFoyerEquationParabole({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [sx, setSx] = useState("");
   const [sy, setSy] = useState("");
   const [fx, setFx] = useState("");
@@ -48,7 +47,6 @@ export function EtapeSommetFoyerEquationParabole({ exercice, estPremierEcran, te
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_PARABOLE}
         blocDonnees={<EquationParaboleGraph exercice={exercice} afficherSommet={niveauAide >= 2} />}
       />

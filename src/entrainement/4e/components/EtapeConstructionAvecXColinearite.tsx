@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -78,7 +77,7 @@ function ChampSymbolique({
  * `promptgen24modificationscompletes.md` : bloc de données (points A/B/C) passé en "bloc fitter"
  * (`formatTermesEnoncePointsParametreLatex`, un fragment KaTeX par point).
  */
-export function EtapeConstructionAvecXColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -98,7 +97,6 @@ export function EtapeConstructionAvecXColinearite({ exercice, estPremierEcran, t
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

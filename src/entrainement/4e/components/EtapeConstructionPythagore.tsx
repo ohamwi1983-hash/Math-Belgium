@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExercicePythagore;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
  * champs numériques (composantes de AB⃗, AC⃗, BC⃗), soumis en une seule tentative, aide à 2 niveaux
  * limitée à $\vec{AB}$, graphe supprimé.
  */
-export function EtapeConstructionPythagore({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeConstructionPythagore({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -75,7 +74,6 @@ export function EtapeConstructionPythagore({ exercice, estPremierEcran, tentativ
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_PYTHAGORE}
         blocDonnees={
           <div className="equation-box equation-box-termes">

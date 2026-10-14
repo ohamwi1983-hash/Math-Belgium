@@ -8,7 +8,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -39,7 +38,7 @@ interface Props {
  * propre famille C pour ta propre famille B", point 6 des clarifications de la spec).
  * `App6gen26.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeRacinesCalculAires({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, nombreInitial, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeRacinesCalculAires({ consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, nombreInitial, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: nombreInitial }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -62,7 +61,6 @@ export function EtapeRacinesCalculAires({ estPremierEcran, consigneGenerale, blo
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

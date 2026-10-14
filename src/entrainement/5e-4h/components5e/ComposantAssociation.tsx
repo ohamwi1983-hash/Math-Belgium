@@ -14,7 +14,6 @@ type ChoixLigne = number | "aucune" | null;
 
 interface Props {
   nombreItems: number;
-  estPremierEcran: boolean;
   /** Rendu riche de l'élément numéroté `index` (0-based) — graphique Mafs, KaTeX, ou texte. */
   renderItem: (index: number) => ReactNode;
   /** Rendu riche du candidat lettré `index` (0-based). */
@@ -54,7 +53,6 @@ interface Props {
  */
 export function ComposantAssociation({
   nombreItems,
-  estPremierEcran,
   renderItem,
   renderCandidat,
   consigneGenerale,
@@ -89,7 +87,6 @@ export function ComposantAssociation({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="association-candidats-grid">

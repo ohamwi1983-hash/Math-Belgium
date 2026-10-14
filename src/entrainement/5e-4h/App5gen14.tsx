@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceSuiteArithmetique } from "./generateurs5e/suitesArithmetiques";
 import type { FamilleSuiteArithmetiqueId } from "./generateurs5e/suitesArithmetiques";
@@ -236,14 +236,6 @@ export function App5gen14() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -279,7 +271,6 @@ export function App5gen14() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase as PhaseChampSimple}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -318,7 +309,6 @@ export function App5gen14() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase as PhaseTermesMultiples}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -338,7 +328,6 @@ export function App5gen14() {
                 <EtapeCoherenceJugement
                   key={cleEcran}
                   exercice={exercice}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -354,7 +343,6 @@ export function App5gen14() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase as PhasePoserEquation}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}

@@ -22,7 +22,6 @@ function nouvelleSession(theme: VarianteQuizProbabilites): EtatSessionQuizProbab
   return demarrerSessionQuizProbabilites(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
 }
 
-
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que 6gen64/6gen65/6gen66/
  * 6gen67/6gen68. Le panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais

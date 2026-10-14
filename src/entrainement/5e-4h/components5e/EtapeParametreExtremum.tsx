@@ -20,7 +20,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceExtremumsSinusoide;
-  estPremierEcran: boolean;
   phase: "poserEquation" | "isolerX";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -51,7 +50,7 @@ interface Props {
  * `moteur5e/sessionExtremumsSinusoide.ts::niveauAideMaxExtremums`). A.2 : `is-erronee` recalculé à
  * chaque frappe après un premier échec, réutilisant `diagnostiquer` (déjà un statut à 3 valeurs).
  */
-export function EtapeParametreExtremum({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -68,7 +67,6 @@ export function EtapeParametreExtremum({ exercice, estPremierEcran, phase, tenta
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EXTREMUMS}
         blocDonnees={
           <div className="equation-box equation-box-termes">

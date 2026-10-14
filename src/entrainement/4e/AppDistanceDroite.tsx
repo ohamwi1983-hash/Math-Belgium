@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDistanceDroite } from "./generateurs/distanceDroite";
 import type { VarianteDistanceDroite } from "./core/distanceDroite.types";
@@ -78,18 +78,7 @@ export function AppDistanceDroite() {
   }
 
   const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
   const recapitulatif = calculerRecapitulatifDistanceDroite(etat);
-
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -146,7 +135,6 @@ export function AppDistanceDroite() {
         {etat.phase === "choixPoint" && exercice.variante === "paralleles" ? (
           <EtapeChoixPointDistanceDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideChoixPoint}
@@ -157,7 +145,6 @@ export function AppDistanceDroite() {
         ) : etat.phase === "equationB" && etat.point !== null && etat.droiteCible !== null && etat.bAttendue !== null ? (
           <EtapeEquationBDistanceDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             point={etat.point}
             droiteCible={etat.droiteCible}
             bAttendue={etat.bAttendue}
@@ -171,7 +158,6 @@ export function AppDistanceDroite() {
         ) : etat.phase === "intersectionQ" && etat.point !== null && etat.bAttendue !== null && etat.droiteCible !== null && etat.qAttendu !== null ? (
           <EtapeIntersectionQDistanceDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             point={etat.point}
             bAttendue={etat.bAttendue}
             droiteCible={etat.droiteCible}
@@ -189,7 +175,6 @@ export function AppDistanceDroite() {
             return (
               <EtapeDistancePQDistanceDroite
                 exercice={exercice}
-                estPremierEcran={estPremierEcran}
                 point={point}
                 droiteCible={droiteCible}
                 bAttendue={bAttendue}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideNorme,
@@ -108,18 +108,7 @@ export function AppApplicationPhysique() {
   }
 
   const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
   const { v1, resultante, normeResultante } = notationVecteursApplicationPhysique(exercice.contexte);
-
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
 
   const validation = enAttente
     ? {
@@ -158,7 +147,6 @@ export function AppApplicationPhysique() {
         {etat.phase === "modelisation" ? (
           <EtapeModelisationApplicationPhysique
             exercice={etat.exerciceCourant}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onChoisir={(choix) => terminerEtape(soumettreReponseModelisation(etat, choix))}
@@ -167,7 +155,6 @@ export function AppApplicationPhysique() {
         ) : etat.phase === "norme" ? (
           <EtapeNormeApplicationPhysique
             exercice={etat.exerciceCourant}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideNorme}
@@ -179,7 +166,6 @@ export function AppApplicationPhysique() {
         ) : etat.phase === "deviation" ? (
           <EtapeDeviationApplicationPhysique
             exercice={etat.exerciceCourant}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
@@ -189,7 +175,6 @@ export function AppApplicationPhysique() {
         ) : (
           <EtapeInterpretationApplicationPhysique
             exercice={etat.exerciceCourant}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}

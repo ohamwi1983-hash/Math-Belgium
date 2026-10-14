@@ -22,7 +22,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -45,7 +44,7 @@ interface Props {
  * intervalle) : le composant choisit quelle paire afficher selon `ouiNon` (jamais les deux en même
  * temps).
  */
-export function EtapeInjectiveInjectiviteFonctions({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [ouiNon, setOuiNon] = useState<boolean | null>(null);
   const [intervalle, setIntervalle] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<ReponseInjective | null>(null);
@@ -65,7 +64,6 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, estPremierEcran, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

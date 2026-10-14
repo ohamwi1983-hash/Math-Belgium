@@ -9,7 +9,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLimite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +31,7 @@ const ID_INDETERMINEE = "indeterminee";
  * état local). "Nombre réel ℝ" fait apparaître un champ de réponse DIRECTEMENT sous LUI (avant "L'infini
  * ∞"), sur ce même écran — classification et valeur numérique en un seul geste, aucun écran
  * supplémentaire pour cette famille. */
-export function EtapeReconnaissanceLimite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReconnaissanceLimite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [principal, setPrincipal] = useState<string | null>(null);
   const [sousChoix, setSousChoix] = useState<string | null>(null);
   const [valeur, setValeur] = useState("");
@@ -61,7 +60,6 @@ export function EtapeReconnaissanceLimite({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

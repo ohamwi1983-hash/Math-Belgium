@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import type { CompositionDirigee, ExerciceComposerFonctions, SensComposition } from "./core5e/composerFonctions.types";
 import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
@@ -163,14 +163,6 @@ export function App5gen3() {
   const recapitulatif = calculerRecapitulatifComposerFonctions(etat);
   const dir = directionCourante(etat);
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -207,7 +199,6 @@ export function App5gen3() {
               onValider={(texte) => terminerEtape(soumettreReponseFormule(etat, texte))}
               diagnostiquer={(texte) => diagnostiquerFormuleDirectionSimplifiee(dir, texte)}
               validation={validation}
-              estPremierEcran={estPremierEcran}
             />
           )}
           {etat.phase.startsWith("conditions") && (
@@ -225,7 +216,6 @@ export function App5gen3() {
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideConditionsNiveau2(dir) : null}
               onValider={(reponse) => terminerEtape(soumettreReponseConditions(etat, reponse))}
               validation={validation}
-              estPremierEcran={estPremierEcran}
             />
           )}
           {etat.phase.startsWith("c1") && (
@@ -244,7 +234,6 @@ export function App5gen3() {
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideC1Niveau2(dir) : null}
               onValider={(reponse) => terminerEtape(soumettreReponseC1(etat, reponse))}
               validation={validation}
-              estPremierEcran={estPremierEcran}
             />
           )}
           {etat.phase.startsWith("c2") && (
@@ -263,7 +252,6 @@ export function App5gen3() {
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideC2Niveau2(dir) : null}
               onValider={(reponse) => terminerEtape(soumettreReponseC2(etat, reponse))}
               validation={validation}
-              estPremierEcran={estPremierEcran}
             />
           )}
           {etat.phase.startsWith("domaine") && (
@@ -282,7 +270,6 @@ export function App5gen3() {
               latexAideNiveau2={etat.niveauAide >= 2 ? latexAideDomaineNiveau2(dir) : null}
               onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
               validation={validation}
-              estPremierEcran={estPremierEcran}
             />
           )}
         </div>

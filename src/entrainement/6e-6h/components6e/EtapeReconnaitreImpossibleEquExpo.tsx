@@ -12,7 +12,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -31,7 +30,7 @@ interface Props {
 
 /** Écran unique de la famille D — pure reconnaissance, AUCUN champ numérique (la réponse correcte
  * est toujours "∅", jamais une valeur à calculer). `App6gen9.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeReconnaitreImpossibleEquExpo({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReconnaitreImpossibleEquExpo({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<boolean | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -43,7 +42,6 @@ export function EtapeReconnaitreImpossibleEquExpo({ estPremierEcran, consigneEcr
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

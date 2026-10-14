@@ -14,7 +14,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +26,7 @@ interface Props {
 }
 
 /** Écran 7, TOUJOURS terminal — QCM, phrase de conclusion correcte parmi 4 options mélangées. */
-export function EtapeInterpretationEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeInterpretationEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<number | null>(null);
   const apresEchec = tentativesUtilisees > 0;
   const erronee = apresEchec && choix !== null && !verifierInterpretation(exercice, choix);
@@ -35,7 +34,6 @@ export function EtapeInterpretationEquationInequationSecondDegre({ exercice, est
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />

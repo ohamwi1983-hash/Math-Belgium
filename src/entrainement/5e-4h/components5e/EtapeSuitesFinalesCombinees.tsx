@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceSuitesCombinees;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 
 /** Écran bespoke à 2 GROUPES de 3 champs (suite arithmétique 6,y,z puis suite géométrique y,x,z) —
  * seul écran de 5gen17 qui ne rentre pas dans le patron "liste plate" générique. */
-export function EtapeSuitesFinalesCombinees({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
+export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
   const [arithmetique, setArithmetique] = useState<string[]>(["6", "", ""]);
   const [geometrique, setGeometrique] = useState<string[]>(["", "", ""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -53,7 +52,6 @@ export function EtapeSuitesFinalesCombinees({ exercice, estPremierEcran, tentati
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

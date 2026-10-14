@@ -15,7 +15,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercleDeveloppee;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * libre, parsé symboliquement (couvre les deux variantes de façon uniforme, jamais confondu avec
  * r² — le piège central de l'exercice).
  */
-export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
   const [rayon, setRayon] = useState("");
@@ -54,7 +53,6 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, estPremierE
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_CENTRE_RAYON}
         blocDonnees={
           <div className="equation-box">

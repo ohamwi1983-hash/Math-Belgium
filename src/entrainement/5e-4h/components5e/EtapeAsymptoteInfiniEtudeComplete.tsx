@@ -12,7 +12,6 @@ import type { ReponseAsymptoteInfini, ReponseBlocAsymptote } from "../moteur5e/s
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -92,7 +91,7 @@ function BlocDirection({
 
 /** Écran "asymptoteInfini" — 2 blocs indépendants "vers −∞"/"vers +∞", TOUJOURS vérifiés contre la
  * même cible (voir `moteur5e/sessionEtudeComplete.ts`). */
-export function EtapeAsymptoteInfiniEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [moins, setMoins] = useState<EtatBloc>({ choix: null, valeur: "" });
   const [plus, setPlus] = useState<EtatBloc>({ choix: null, valeur: "" });
   const montrerErreurs = tentativesUtilisees > 0;
@@ -110,7 +109,6 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, estPremierEcran, t
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
       />

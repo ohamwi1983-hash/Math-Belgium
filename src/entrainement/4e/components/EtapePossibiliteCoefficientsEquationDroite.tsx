@@ -16,7 +16,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationDroite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -45,7 +44,7 @@ function placeholderEquation(exercice: ExerciceEquationDroite, choix: "possible"
  * `diagnostiquerPossibiliteCoefficients`, qui accepte n'importe quelle représentation valide de la
  * droite (`diagnostiquerEquationDroiteLibre`) quel que soit le choix, jamais un format imposé.
  */
-export function EtapePossibiliteCoefficientsEquationDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapePossibiliteCoefficientsEquationDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<"possible" | "impossible" | null>(null);
   const [texte, setTexte] = useState("");
 
@@ -62,7 +61,6 @@ export function EtapePossibiliteCoefficientsEquationDroite({ exercice, estPremie
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleEquationDroite exercice={exercice} />}
         blocDonnees={
           <div className="equation-box">

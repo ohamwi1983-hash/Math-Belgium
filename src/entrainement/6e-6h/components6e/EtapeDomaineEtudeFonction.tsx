@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -36,14 +35,13 @@ interface Props {
  * `etatActuel` ici — c'est TOUJOURS le premier écran de la séquence (`ui6e/
  * formatEtudeFonctionExponentielle.ts::etatActuel` renvoie `null` pour la phase "domaine"), rien à
  * rappeler ; les 5 autres écrans de ce générateur reçoivent bien ce bloc. */
-export function EtapeDomaineEtudeFonction({ estPremierEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineEtudeFonction({ enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -37,7 +36,6 @@ interface Props {
  */
 export function EtapeContrainteEtGrandeurOptimisation({
   exercice,
-  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -63,7 +61,6 @@ export function EtapeContrainteEtGrandeurOptimisation({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

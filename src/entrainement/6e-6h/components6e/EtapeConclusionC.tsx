@@ -7,7 +7,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -36,7 +35,7 @@ interface Props {
  * reciproqueId]` soumis à `onValider` — voir `moteur6e/verificationComplexesAvances.ts`,
  * `diagnostiquerCEcran3`. `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeConclusionC({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, optionsStatut, optionsReciproque, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeConclusionC({ consigneGenerale, blocDonnees, consigneEcran, optionsStatut, optionsReciproque, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<string | null>(null);
   const [reciproque, setReciproque] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -50,7 +49,6 @@ export function EtapeConclusionC({ estPremierEcran, consigneGenerale, blocDonnee
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

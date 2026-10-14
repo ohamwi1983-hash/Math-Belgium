@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConstructionDroite } from "./generateurs/constructionDroite";
 import type { VarianteConstructionDroite } from "./core/constructionDroite.types";
@@ -60,17 +60,6 @@ export function AppConstructionDroite() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifConstructionDroite(etat);
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
-   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
-   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionConstructionDroite(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteConstructionDroite)));
@@ -110,7 +99,6 @@ export function AppConstructionDroite() {
         {etat.phase === "points" ? (
           <EtapePointsConstructionDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAidePoints}
@@ -121,7 +109,6 @@ export function AppConstructionDroite() {
         ) : etat.cible1 !== null && etat.cible2 !== null ? (
           <EtapeTraceConstructionDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             cible1={etat.cible1}
             cible2={etat.cible2}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}

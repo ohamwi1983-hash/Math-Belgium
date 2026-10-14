@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -39,7 +38,7 @@ interface Props {
  * composant partagé `EnsembleReelGuideBuilder` que 6gen1/6gen3/6gen7. `App6gen10.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeIntervalleIneqExpo({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntervalleIneqExpo({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -51,7 +50,6 @@ export function EtapeIntervalleIneqExpo({ estPremierEcran, consigneEcran, enonce
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

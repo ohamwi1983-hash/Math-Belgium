@@ -12,7 +12,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -43,7 +42,7 @@ interface Props {
  * plus d'une solution, toujours exactement 2 (racines d'une équation du second degré). `App6gen25.tsx`
  * doit le rendre avec `key={phase}`.
  */
-export function EtapeResoudreMIntegralesDefinies({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeResoudreMIntegralesDefinies({ consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -66,7 +65,6 @@ export function EtapeResoudreMIntegralesDefinies({ estPremierEcran, consigneGene
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomiqueB;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -27,7 +26,7 @@ interface Props {
 /** Écran "tableauSigneBenefice" — tableau de signes SIMPLE (une seule racine à traiter, x_opt déjà
  * confirmé à l'écran précédent) : 2 zones seulement, jamais le tableau étendu de 5gen29 (racines
  * multiples/CE) — voir la tâche, "composant simple à concevoir". */
-export function EtapeTableauSigneBenefice({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeTableauSigneBenefice({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [zoneAvant, setZoneAvant] = useState<1 | -1 | null>(null);
   const [zoneApres, setZoneApres] = useState<1 | -1 | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -41,7 +40,6 @@ export function EtapeTableauSigneBenefice({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

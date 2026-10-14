@@ -76,7 +76,6 @@ function ComboboxTexte({
 
 interface Props {
   exercice: ExerciceDomaineDefinition;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -109,7 +108,7 @@ interface Props {
  * — même principe que `EtapeCE.tsx`, où "Pas de CE" ne fait que choisir l'option, l'élève doit
  * ensuite cliquer "Valider" comme pour toute autre réponse.
  */
-export function EtapeCEDomaineDefinition({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation}: Props) {
+export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, donnees, onValider, validation}: Props) {
   const slots: SlotCE[] = exercice.famille === "pasDeCE" ? [] : exercice.slots;
   const pasDeSlotReel = slots.length === 0;
   const options = optionsSlots(slots);
@@ -154,7 +153,7 @@ export function EtapeCEDomaineDefinition({ exercice, estPremierEcran, tentatives
 
   return (
     <div>
-      <EnTeteExercice estPremierEcran={estPremierEcran} consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
+      <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_DOMAINE_DEFINITION} blocDonnees={donnees} />
       <p className="prompt-text">Cette fonction a-t-elle une condition d'existence ?</p>
       <div className="options-grid">
         <button type="button" className={aBesoinDeCE === false ? "btn toggle-active" : "btn"} onClick={() => setABesoinDeCE(false)}>

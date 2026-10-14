@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceIsocele;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
  * ($\|\vec{AB}\|=$, remplace l'ancien "AB="). Aide à 2 niveaux, limitée à $\vec{AB}$ —
  * `promptgen26refontecomplete.md`, Partie D.
  */
-export function EtapeCalculIsocele({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeCalculIsocele({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [ab, setAb] = useState("");
   const [ac, setAc] = useState("");
   const [bc, setBc] = useState("");
@@ -46,7 +45,6 @@ export function EtapeCalculIsocele({ exercice, estPremierEcran, tentativesUtilis
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ISOCELE}
         blocDonnees={
           <div className="equation-box equation-box-termes">

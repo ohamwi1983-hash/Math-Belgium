@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
 
 /** Écran 0b (`voieSysteme` uniquement) — relation LINÉAIRE obtenue en soustrayant les 2 équations du
  * système (élimination du terme croisé `xy`). */
-export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerEliminationSysteme(exercice, texte) : undefined;
@@ -37,7 +36,6 @@ export function EtapeEliminerSystemeEquationInequationSecondDegre({ exercice, es
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />

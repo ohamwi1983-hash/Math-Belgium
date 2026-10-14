@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeComplete } from "./generateurs5e/etudeComplete/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -132,14 +132,6 @@ export function App5gen24() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -164,7 +156,6 @@ export function App5gen24() {
             exercice={exercice}
             phase={phase}
             etat={etat}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -182,7 +173,6 @@ interface EcranProps {
   exercice: ExerciceEtudeComplete;
   phase: PhaseEtudeComplete;
   etat: EtatSessionEtudeComplete;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -195,7 +185,6 @@ function EcranCourant({
   exercice,
   phase,
   etat,
-  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   cleEcran,
@@ -215,7 +204,6 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           phase={phase}
-          estPremierEcran={estPremierEcran}
           labels={["f(x) ="]}
           placeholders={["ex : (3x+1)/(x-2)"]}
           {...propsCommunes}
@@ -233,7 +221,6 @@ function EcranCourant({
       <EtapeListeNombresEtudeComplete
         key={cleEcran}
         exercice={exercice}
-        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(v) => terminerEtape(soumettreReponseDomaine(etat, v))}
         diagnostiquer={(v) => diagnostiquerEnsembleNombres(v, cibles)}
@@ -246,7 +233,6 @@ function EcranCourant({
       <EtapeTypeLimiteEtudeComplete
         key={cleEcran}
         exercice={exercice}
-        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(choix) => terminerEtape(soumettreReponseTypeLimite(etat, choix))}
         diagnostiquer={(choix) => exercice.exclusions.map((e, i) => verifierTypeLimite(choix[i], e.type === "pointVide"))}
@@ -262,7 +248,6 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
-        estPremierEcran={estPremierEcran}
         labels={["f(x) ="]}
         placeholders={["ex : (3x+1)/(x-2)"]}
         {...propsCommunes}
@@ -280,7 +265,6 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
-        estPremierEcran={estPremierEcran}
         labels={[formatLabelLimiteFLatex(point?.position as number)]}
         labelsLatex
         placeholders={["ex : 2.5"]}
@@ -296,7 +280,6 @@ function EcranCourant({
       <EtapeConclusionPointVideEtudeComplete
         key={cleEcran}
         exercice={exercice}
-        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponsePointVideConclusion(etat, reponse))}
       />
@@ -312,7 +295,6 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
-        estPremierEcran={estPremierEcran}
         labels={[formatLabelLimiteGaucheLatex(excl.position), formatLabelLimiteDroiteLatex(excl.position)]}
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
@@ -329,7 +311,6 @@ function EcranCourant({
       <EtapeAVEtudeComplete
         key={cleEcran}
         exercice={exercice}
-        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponseAV(etat, reponse))}
         diagnostiquer={(v) => diagnostiquerEnsembleEquationsAV(v, cibles)}
@@ -354,7 +335,6 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
-        estPremierEcran={estPremierEcran}
         labels={[formatLabelLimiteFLatex("moins-infini"), formatLabelLimiteFLatex("plus-infini")]}
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
@@ -384,7 +364,6 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
-        estPremierEcran={estPremierEcran}
         labels={[formatLabelCoefDirecteurLatex("moins-infini"), formatLabelCoefDirecteurLatex("plus-infini")]}
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
@@ -411,7 +390,6 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         phase={phase}
-        estPremierEcran={estPremierEcran}
         labels={bornes.map((borne) => formatLabelCoefBLatex(borne, a))}
         labelsLatex
         placeholders={bornes.map(() => "ex : 2, -3/2, +inf, -inf")}
@@ -437,7 +415,6 @@ function EcranCourant({
       <EtapeAsymptoteInfiniEtudeComplete
         key={cleEcran}
         exercice={exercice}
-        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponseAsymptoteInfini(etat, reponse))}
         diagnostiquer={(reponse) => ({ moins: blocCorrect(reponse.moins), plus: blocCorrect(reponse.plus) })}
@@ -451,7 +428,6 @@ function EcranCourant({
       <EtapeCasSpecialEtudeComplete
         key={cleEcran}
         exercice={exercice}
-        estPremierEcran={estPremierEcran}
         {...propsCommunes}
         onValider={(reponse) => terminerEtape(soumettreReponseCasSpecial(etat, reponse))}
         diagnostiquer={(reponse) => diagnostiquerCasSpecial(reponse, x, y)}

@@ -15,7 +15,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -78,7 +77,7 @@ function ListeUneSomme({ sommeCible, lignes, onModifier, onAjouter, onRetirer, m
  * générique (`soumettreReponseEcran(etat, valeurs: string[])`, format uniforme quel que soit
  * l'écran). `App6gen46.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeDecompositionsDenombrementCombinatoirePur({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeDecompositionsDenombrementCombinatoirePur({ consigneGenerale, blocDonnees, consigneEcran, s1, s2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignesS1, setLignesS1] = useState<string[]>([""]);
   const [lignesS2, setLignesS2] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -98,7 +97,6 @@ export function EtapeListeDecompositionsDenombrementCombinatoirePur({ estPremier
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

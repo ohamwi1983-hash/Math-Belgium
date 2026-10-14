@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParabole;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
  * `diagnostiquerEquation` (`moteur/verificationEquationParabole.ts`, moteur d'égalité algébrique à
  * 2 variables déjà partagé). S et F CONFIRMÉS à l'écran 1 sont rappelés dans le récapitulatif
  * accumulé en haut de carte (`RecapitulatifPanel`/`AppEquationParabole`), plus ici en isolation. */
-export function EtapeEquationEquationParabole({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationEquationParabole({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -42,7 +41,6 @@ export function EtapeEquationEquationParabole({ exercice, estPremierEcran, tenta
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_PARABOLE}
         blocDonnees={<EquationParaboleGraph exercice={exercice} afficherSommet afficherVecteurP={niveauAide >= 1} />}
       />

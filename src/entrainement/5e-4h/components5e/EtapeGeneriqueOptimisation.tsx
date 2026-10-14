@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOptimisation;
-  estPremierEcran: boolean;
   phase: EcranOptimisation;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -35,7 +34,7 @@ interface Props {
  * comme UNE SEULE tentative combinée (même patron que `EtapeSubstituerTangente.tsx`, 5gen28).
  * Calculatrice affichée dès qu'AU MOINS un champ texte de l'écran la demande.
  */
-export function EtapeGeneriqueOptimisation({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeGeneriqueOptimisation({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const champs = champsEcran(exercice, phase);
   const [reponses, setReponses] = useState<Record<string, string>>(() => Object.fromEntries(champs.map((c) => [c.id, ""])));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -61,7 +60,6 @@ export function EtapeGeneriqueOptimisation({ exercice, estPremierEcran, phase, t
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

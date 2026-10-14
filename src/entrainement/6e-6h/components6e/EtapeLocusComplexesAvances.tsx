@@ -12,7 +12,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -50,7 +49,7 @@ const NOMBRE_MAX_ANGLES = 2;
  * `moteur6e/verificationComplexesAvances.ts`, `diagnostiquerBEcran2`. `App6gen42.tsx` doit le rendre
  * avec `key={phase}`.
  */
-export function EtapeLocusComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, demandePoleExclu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, demandePoleExclu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [nature, setNature] = useState<NatureLieu | null>(null);
   const [point1, setPoint1] = useState("");
   const [point2, setPoint2] = useState("");
@@ -94,7 +93,6 @@ export function EtapeLocusComplexesAvances({ estPremierEcran, consigneGenerale, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

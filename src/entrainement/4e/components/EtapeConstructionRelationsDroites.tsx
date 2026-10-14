@@ -16,7 +16,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -33,7 +32,7 @@ interface Props {
  * (selon `exercice.critere`) au vecteur de référence déjà confirmé à l'écran 1. Vérifiée par
  * `diagnostiquerConstruction` (colinéarité ou orthogonalité, jamais un couple exact imposé).
  */
-export function EtapeConstructionRelationsDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionRelationsDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -50,7 +49,6 @@ export function EtapeConstructionRelationsDroites({ exercice, estPremierEcran, t
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleRelationsDroites exercice={exercice} />}
         blocDonnees={
           <div className="equation-box">

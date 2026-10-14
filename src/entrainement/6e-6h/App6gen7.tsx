@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import {
   CATALOGUE_FAMILLES,
@@ -90,17 +90,6 @@ export function App6gen7() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
-   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
-   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const enonceLatex = formatFonctionLatex(exercice);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
@@ -171,7 +160,6 @@ export function App6gen7() {
           {phasesDomaine.has(phase) && (
             <EtapeDomaineDomaineDerivee
               key={phase}
-              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}
@@ -190,7 +178,6 @@ export function App6gen7() {
           {phasesDeuxChamps.has(phase) && (
             <EtapeDeuxChampsDomaineDerivee
               key={phase}
-              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}
@@ -213,7 +200,6 @@ export function App6gen7() {
           {phasesChampUnique.has(phase) && (
             <EtapeChampDomaineDerivee
               key={phase}
-              estPremierEcran={estPremierEcran}
               consigneEcran={consigne}
               enonceLatex={enonceLatex}
               etatActuel={etatActuelEcran}

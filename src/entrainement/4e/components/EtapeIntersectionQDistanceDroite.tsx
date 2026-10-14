@@ -20,7 +20,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
-  estPremierEcran: boolean;
   point: Point;
   bAttendue: DroiteImplicite;
   droiteCible: DroiteImplicite;
@@ -46,7 +45,7 @@ interface Props {
  * point 13, `promptgen47modifications.md`), jamais le filtrage numérique-strict qui bloquerait le
  * caractère "/". `Q` n'apparaît sur le graphe illustratif QUE via l'aide niveau 1 (point 10).
  */
-export function EtapeIntersectionQDistanceDroite({ exercice, estPremierEcran, point, bAttendue, droiteCible, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeIntersectionQDistanceDroite({ exercice, point, bAttendue, droiteCible, qAttendu, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -74,7 +73,6 @@ export function EtapeIntersectionQDistanceDroite({ exercice, estPremierEcran, po
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleDistanceDroite exercice={exercice} />}
         blocDonnees={
           <>

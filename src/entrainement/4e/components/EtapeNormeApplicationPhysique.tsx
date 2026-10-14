@@ -22,7 +22,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceApplicationPhysique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -43,7 +42,6 @@ interface Props {
  * avoir une aide (2 niveaux, `promptgen29modificationscompletes.md`, point 4.3). */
 export function EtapeNormeApplicationPhysique({
   exercice,
-  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   niveauAide,
@@ -64,7 +62,6 @@ export function EtapeNormeApplicationPhysique({
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={formatEnonceApplicationPhysique(exercice)}
         blocDonnees={<SchemaApplicationPhysique exercice={exercice} />}
       />

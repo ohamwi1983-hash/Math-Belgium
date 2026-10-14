@@ -9,7 +9,6 @@ import { GrapheOptionEtudeFonctionLog } from "./GrapheOptionEtudeFonctionLog";
 
 interface Props {
   exercice: ExerciceEtudeLogNonE;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -25,13 +24,12 @@ interface Props {
  * propre à ce générateur ; le corps du QCM (4 graphiques lettrés A→D empilés, non cliquables, + 4
  * boutons de choix texte séparés + Valider) est délégué à `EtapeSelectionGraphiqueQCM`, partagé
  * avec 6gen5/6gen8/6gen11/6gen20. */
-export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBox(exercice);
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

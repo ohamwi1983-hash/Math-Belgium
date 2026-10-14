@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceContexteEconomique;
-  estPremierEcran: boolean;
   ecran: EcranContexteEconomique;
   /** 1 champ (la plupart des écrans) ou 2 (écran "marginales" — C'_T et R'_T ensemble). */
   labels: string[];
@@ -39,7 +38,7 @@ interface Props {
  * N champs pour couvrir l'écran "marginales" (2 champs) sans dupliquer un composant à 1 champ.
  * Calculatrice PRÉSENTE sur tout écran (convention explicite de ce générateur — contrairement à
  * 5gen26/27/28, purement symboliques, où elle est absente). */
-export function EtapeChampsLibresCE({ exercice, estPremierEcran, ecran, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsLibresCE({ exercice, ecran, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const nb = labels.length;
   const [valeurs, setValeurs] = useState<string[]>(() => new Array(nb).fill(""));
   useEffect(() => {
@@ -64,7 +63,6 @@ export function EtapeChampsLibresCE({ exercice, estPremierEcran, ecran, labels, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

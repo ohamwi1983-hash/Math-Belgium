@@ -12,7 +12,6 @@ interface AideAvecLatex {
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   placeholder: string;
@@ -40,7 +39,7 @@ interface Props {
  * "aucune valeur" ici, contrairement à `EtapeListeEquExpo` — la famille C écran 3 a toujours au
  * moins 1 temps demandé).
  */
-export function EtapeListeExpoProblemes({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeExpoProblemes({ consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -63,7 +62,6 @@ export function EtapeListeExpoProblemes({ consigneGenerale, estPremierEcran, blo
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

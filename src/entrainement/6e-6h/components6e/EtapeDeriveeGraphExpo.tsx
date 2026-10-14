@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneEcran: string;
   fonctionLatex: string;
-  estPremierEcran: boolean;
   rappelDomaine: string | null;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -33,7 +32,7 @@ interface Props {
  * (famille D seule, "x≠0") est TOUJOURS affiché, jamais gagné par une aide. `App6gen8.tsx` doit
  * rendre ce composant avec une `key` qui change entre 2 exercices (même si la phase reste
  * "derivee"), sinon le champ garderait la saisie de l'exercice précédent. */
-export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, estPremierEcran, rappelDomaine, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, rappelDomaine, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -45,7 +44,6 @@ export function EtapeDeriveeGraphExpo({ consigneEcran, fonctionLatex, estPremier
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

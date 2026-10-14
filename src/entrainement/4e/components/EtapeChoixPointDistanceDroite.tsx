@@ -16,7 +16,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistanceParalleles;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +31,7 @@ interface Props {
  * que "Construction graphique — tracer une droite depuis son équation" (écran "points"). Rien
  * n'est encore confirmé à ce stade (pas de bloc "état actuel").
  */
-export function EtapeChoixPointDistanceDroite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeChoixPointDistanceDroite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -49,7 +48,6 @@ export function EtapeChoixPointDistanceDroite({ exercice, estPremierEcran, tenta
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleDistanceDroite exercice={exercice} />}
         blocDonnees={
           <>

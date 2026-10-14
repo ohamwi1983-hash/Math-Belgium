@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistance;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
  * une seule tentative. Aide à 2 niveaux (formule générale non substituée, puis substituée) —
  * `promptgen26refontecomplete.md`, Partie F : graphe supprimé (chevauchement de labels).
  */
-export function EtapeConstructionDistance({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeConstructionDistance({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const max = NIVEAU_AIDE_MAX.constructionDistance;
@@ -45,7 +44,6 @@ export function EtapeConstructionDistance({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_DISTANCE}
         blocDonnees={
           <div className="equation-box equation-box-termes">

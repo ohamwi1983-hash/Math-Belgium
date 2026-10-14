@@ -18,7 +18,6 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   /** Sous-ensemble des 3 boutons catégoriels pertinents pour CET écran (voir la note de
@@ -48,7 +47,7 @@ interface Props {
  * `EtapeFacteursC`, qui réutilise le même jeu de boutons en interne). `App6gen6.tsx` doit le
  * rendre avec `key={phase}`.
  */
-export function EtapeReponseLimite({ estPremierEcran, consigneEcran, enonceLatex, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReponseLimite({ consigneEcran, enonceLatex, optionsCategorielles, autoriserValeurLibre, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [statut, setStatut] = useState<ReponseLimite["type"] | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -62,7 +61,6 @@ export function EtapeReponseLimite({ estPremierEcran, consigneEcran, enonceLatex
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

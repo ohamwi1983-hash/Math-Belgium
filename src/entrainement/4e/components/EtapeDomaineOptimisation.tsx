@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -28,7 +27,7 @@ interface Props {
 }
 
 /** Écran 3 (`modelisation` uniquement) — déterminer le domaine de validité de la variable. */
-export function EtapeDomaineOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [inf, setInf] = useState("");
   const [sup, setSup] = useState("");
   const complet = inf.trim() !== "" && sup.trim() !== "";
@@ -46,7 +45,6 @@ export function EtapeDomaineOptimisation({ exercice, estPremierEcran, tentatives
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

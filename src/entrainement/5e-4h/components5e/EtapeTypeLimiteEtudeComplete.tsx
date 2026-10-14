@@ -13,7 +13,6 @@ type Choix = "infini" | "pointVide";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 /** Écran "typeLimite" (2e écran du pipeline) — UN combobox natif par exclusion, classification
  * ∞ (vraie asymptote verticale) vs 0/0 (point vide), label empilé `\lim_{x\to r} f(x)=` au-dessus de
  * chaque combobox. */
-export function EtapeTypeLimiteEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choix, setChoix] = useState<(Choix | null)[]>(exercice.exclusions.map(() => null));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = choix.every((c) => c !== null);
@@ -47,7 +46,6 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, estPremierEcran, tentat
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
       />

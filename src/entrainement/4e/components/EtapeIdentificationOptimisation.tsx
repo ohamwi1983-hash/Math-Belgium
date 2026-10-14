@@ -12,7 +12,6 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
   exercice: ExerciceOptimisationModelisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseIdentification) => void;
@@ -30,7 +29,7 @@ interface Props {
  * écran entièrement sinon, jamais rendu vide. Pas d'aide sur cet écran (vérification par sélection,
  * même convention que "interpretation") — voir `NIVEAU_AIDE_MAX_IDENTIFICATION=0`.
  */
-export function EtapeIdentificationOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeIdentificationOptimisation({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const identification = exercice.identificationXY;
   const [indexX, setIndexX] = useState<number | null>(null);
   const [indexY, setIndexY] = useState<number | null>(null);
@@ -46,7 +45,6 @@ export function EtapeIdentificationOptimisation({ exercice, estPremierEcran, ten
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

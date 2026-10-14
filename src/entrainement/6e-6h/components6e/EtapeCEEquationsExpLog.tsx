@@ -13,7 +13,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -38,7 +37,7 @@ interface Props {
  * `consigneGenerale`/`blocDonnees` en props plutôt que résolus en interne (`6gen14` réutilise ce
  * SEUL composant pour 3 familles différentes). `App6gen14.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeCEEquationsExpLog({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCEEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -50,7 +49,6 @@ export function EtapeCEEquationsExpLog({ estPremierEcran, consigneGenerale, bloc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

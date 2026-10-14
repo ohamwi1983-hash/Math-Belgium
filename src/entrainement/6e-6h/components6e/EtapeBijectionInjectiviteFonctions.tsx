@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceInjectiviteFonctions;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * sur TOUS les écrans, y compris les écrans à choix). Un seul palier d'aide sur cet écran (complément
  * ciblé — voir `moteur6e/sessionInjectiviteFonctions.ts::NIVEAU_AIDE_MAX`).
  */
-export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeBijectionInjectiviteFonctions({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState<EnsembleReelGuide | null>(null);
   const [y, setY] = useState<EnsembleReelGuide | null>(null);
   const [derniereReponse, setDerniereReponse] = useState<ReponseBijection | null>(null);
@@ -54,7 +53,6 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, estPremierEcran, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

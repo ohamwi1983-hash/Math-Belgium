@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercle;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -33,7 +32,7 @@ interface Props {
  * tracé. L'aide de niveau 2 marque le centre EN COULEUR sur le graphe lui-même
  * (`afficherCentre`), jamais un texte donnant les coordonnées.
  */
-export function EtapeCentreEquationCercle({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeCentreEquationCercle({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [x, setX] = useState("");
   const [y, setY] = useState("");
 
@@ -50,7 +49,6 @@ export function EtapeCentreEquationCercle({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
         blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre={niveauAide >= 2} />}
       />

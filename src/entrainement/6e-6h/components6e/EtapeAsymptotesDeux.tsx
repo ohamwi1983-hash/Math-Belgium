@@ -39,7 +39,6 @@ function GroupeAsymptote({ label, etat, erreur, onChange }: { label: string; eta
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   labels: DirectionLabel[];
@@ -64,7 +63,7 @@ interface Props {
  * `core6e/etudeFonctionExponentielle.types.ts`). `App6gen11.tsx` doit le rendre avec
  * `key={indexExercice}`. Le domaine et les limites confirmés aux 2 écrans précédents sont listés
  * dans le récapitulatif "Ce qu'on sait déjà" (`ui6e/recapitulatifEtudeFonctionExponentielle.ts`). */
-export function EtapeAsymptotesDeux({ estPremierEcran, enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeAsymptotesDeux({ enonceLatex, consigneEcran, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const VIDE: ReponseAsymptoteDirection = { existe: false, texte: "" };
   const [plusInfini, setPlusInfini] = useState<ReponseAsymptoteDirection & { touche?: boolean }>({ ...VIDE });
   const [moinsInfini, setMoinsInfini] = useState<ReponseAsymptoteDirection & { touche?: boolean }>({ ...VIDE });
@@ -84,7 +83,6 @@ export function EtapeAsymptotesDeux({ estPremierEcran, enonceLatex, consigneEcra
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

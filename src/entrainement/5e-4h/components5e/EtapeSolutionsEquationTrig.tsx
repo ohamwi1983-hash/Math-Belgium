@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationTrig;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +30,7 @@ interface Props {
 /** Écran 3 (absent si `exercice.aucuneSolution`) — lister les solutions distinctes dans [0;2π[.
  * Add-as-needed, cercle trigonométrique VIDE tant que l'aide 2 n'est pas activée (jamais donner la
  * réponse en avance) — l'aide 2 y place alors le PREMIER point à titre d'exemple seulement. */
-export function EtapeSolutionsEquationTrig({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeSolutionsEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -58,7 +57,6 @@ export function EtapeSolutionsEquationTrig({ exercice, estPremierEcran, tentativ
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box">

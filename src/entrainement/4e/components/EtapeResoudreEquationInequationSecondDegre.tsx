@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
 
 /** Écran 5 — résoudre algébriquement (2 valeurs, ordre indifférent : les 2 racines pour `equation`,
  * les 2 bornes de l'intervalle BRUT pour `inequation`). */
-export function EtapeResoudreEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeResoudreEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [valeurs, setValeurs] = useState<[string, string]>(["", ""]);
   const complet = valeurs.every((v) => v.trim() !== "");
   const statut = complet ? diagnostiquerResoudre(exercice, valeurs) : undefined;
@@ -41,7 +40,6 @@ export function EtapeResoudreEquationInequationSecondDegre({ exercice, estPremie
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />

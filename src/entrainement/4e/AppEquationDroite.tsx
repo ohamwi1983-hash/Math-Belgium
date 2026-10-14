@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ExerciceEquationDroite } from "./core/equationDroite.types";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationDroite } from "./generateurs/equationDroite";
@@ -114,18 +114,7 @@ export function AppEquationDroite() {
   }
 
   const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
   const recapitulatif = calculerRecapitulatifEquationDroite(etat);
-
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -182,7 +171,6 @@ export function AppEquationDroite() {
         {etat.phase === "extraction" ? (
           <EtapeExtractionEquationDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideExtraction}
@@ -193,7 +181,6 @@ export function AppEquationDroite() {
         ) : etat.phase === "possibilite" ? (
           <EtapePossibiliteEquationDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             onValider={(reponse) => terminerEtape(soumettreReponsePossibilite(etat, reponse))}
@@ -202,7 +189,6 @@ export function AppEquationDroite() {
         ) : etat.phase === "possibiliteCoefficients" ? (
           <EtapePossibiliteCoefficientsEquationDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAidePossibiliteCoefficients}
@@ -213,7 +199,6 @@ export function AppEquationDroite() {
         ) : (
           <EtapeCoefficientsEquationDroite
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCoefficients}

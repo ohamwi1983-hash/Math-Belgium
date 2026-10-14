@@ -10,7 +10,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceSuiteClassique;
-  estPremierEcran: boolean;
   phase: PhaseSuiteClassique;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -25,7 +24,7 @@ interface Props {
 }
 
 /** Écran de choix multiple (QCM) — réutilisé par 6 des 26 phases de 5gen17. */
-export function EtapeQCMClassique({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeQCMClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const options = optionsQCM(exercice, phase);
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -39,7 +38,6 @@ export function EtapeQCMClassique({ exercice, estPremierEcran, phase, tentatives
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

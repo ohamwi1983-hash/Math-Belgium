@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -41,7 +40,7 @@ interface Props {
  * lignes (largement suffisant : la cible n'a jamais plus de 2 valeurs, la marge sert seulement à
  * corriger une saisie sans tout effacer). `App6gen35.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => ["", ""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(lignes) : null;
@@ -65,7 +64,6 @@ export function EtapeRacinesAffixesRacines({ consigneGenerale, blocDonnees, estP
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

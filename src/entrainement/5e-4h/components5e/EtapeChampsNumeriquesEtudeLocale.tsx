@@ -13,7 +13,6 @@ import { CONSIGNE_GENERALE_ETUDE_LOCALE, consigneEcranEtudeLocale, formatTermesD
 
 interface Props {
   exercice: ExerciceEtudeLocale;
-  estPremierEcran: boolean;
   phase: "extremums" | "inflexions";
   labels: string[];
   placeholders: string[];
@@ -44,7 +43,6 @@ interface Props {
  */
 export function EtapeChampsNumeriquesEtudeLocale({
   exercice,
-  estPremierEcran,
   phase,
   labels,
   placeholders,
@@ -83,7 +81,6 @@ export function EtapeChampsNumeriquesEtudeLocale({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

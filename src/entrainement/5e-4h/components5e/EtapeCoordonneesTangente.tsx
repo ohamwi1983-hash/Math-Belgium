@@ -13,7 +13,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceTangenteHorizontale;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * `prompt5gen28variantesabc.md`. Labels dynamiques "Point :" (1 point) / "Point 1 :","Point 2 :"...
  * (plusieurs). Vérifiée comme un ENSEMBLE, ordre indifférent (`verifierCoordonneesHorizontale`).
  * Calculatrice PRÉSENTE (calcul de l'ordonnée f(x)). */
-export function EtapeCoordonneesTangente({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCoordonneesTangente({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [points, setPoints] = useState<PointSaisi[]>([{ x: "", y: "" }]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -70,7 +69,6 @@ export function EtapeCoordonneesTangente({ exercice, estPremierEcran, tentatives
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

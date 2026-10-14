@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   placeholder: string;
@@ -35,7 +34,7 @@ interface Props {
 /** Écran "existe/n'existe pas" (famille B, écran 2) — même patron que 5gen4/6gen3
  * (`EtapeAppliquerArcFonctionsCyclometriques.tsx`) : le toggle gate le champ numérique, jamais une
  * variante de "faux" en cas de "n'existe pas". `App6gen9.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeValeurOuVideEquExpo({ estPremierEcran, consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeValeurOuVideEquExpo({ consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [existe, setExiste] = useState<boolean | null>(null);
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -49,7 +48,6 @@ export function EtapeValeurOuVideEquExpo({ estPremierEcran, consigneEcran, enonc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

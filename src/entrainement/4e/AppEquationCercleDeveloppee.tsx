@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationCercleDeveloppee } from "./generateurs/equationCercleDeveloppee";
 import type { VarianteEquationCercleDeveloppee } from "./core/equationCercleDeveloppee.types";
@@ -74,17 +74,6 @@ export function AppEquationCercleDeveloppee() {
   const exercice = etat.exerciceCourant;
   const recapitulatif = calculerRecapitulatifEquationCercleDeveloppee(etat);
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (change de
-   * valeur quand un nouvel exercice est tiré, jamais au fil des écrans d'un même exercice) — voir
-   * `EnTeteExercice.tsx`, option 1B ("plein puis compact"). */
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationCercleDeveloppee)));
@@ -130,7 +119,6 @@ export function AppEquationCercleDeveloppee() {
         {etat.phase === "regroupement" ? (
           <EtapeRegroupementEquationCercleDeveloppee
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideRegroupement}
@@ -141,7 +129,6 @@ export function AppEquationCercleDeveloppee() {
         ) : etat.phase === "completion" ? (
           <EtapeCompletionEquationCercleDeveloppee
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCompletion}
@@ -152,7 +139,6 @@ export function AppEquationCercleDeveloppee() {
         ) : (
           <EtapeCentreRayonEquationCercleDeveloppee
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideCentreRayon}

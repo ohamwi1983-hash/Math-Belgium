@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearVecteurs | ExerciceColinearPoints;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -48,7 +47,7 @@ interface Props {
  * l'écran précédent) retiré — son contenu alimente maintenant le récapitulatif "Ce qu'on sait
  * déjà" (`ui/recapitulatifColinearite.ts`), affiché en haut de `AppColinearite.tsx`.
  */
-export function EtapeTestColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texteCritere, setTexteCritere] = useState("");
   const [conclusionAlignement, setConclusionAlignement] = useState<boolean | null>(null);
   const [conclusionColinearite, setConclusionColinearite] = useState<boolean | null>(null);
@@ -63,7 +62,6 @@ export function EtapeTestColinearite({ exercice, estPremierEcran, tentativesUtil
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           estPoints && exercice.variante === "points" ? (

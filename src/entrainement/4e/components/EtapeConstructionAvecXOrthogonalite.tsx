@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -79,7 +78,7 @@ function ChampSymbolique({
  * (`formatTermesEnonceTriangleParametreLatex`) pour ne jamais couper/déborder un point symbolique
  * potentiellement long (ex. "C(3x-15;x-6)") sur mobile.
  */
-export function EtapeConstructionAvecXOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeConstructionAvecXOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [abX, setAbX] = useState("");
   const [abY, setAbY] = useState("");
   const [acX, setAcX] = useState("");
@@ -102,7 +101,6 @@ export function EtapeConstructionAvecXOrthogonalite({ exercice, estPremierEcran,
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

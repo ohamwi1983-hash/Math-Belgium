@@ -14,7 +14,6 @@ interface AideAvecLatex {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   /** Libellés LaTeX des 2 champs (ex. "f(1)=", "f(3)=") — ORDONNÉS, jamais interchangeables
    * (contrairement à la famille C écran 3, add-as-needed) : chaque champ est étiqueté par son
@@ -38,7 +37,7 @@ interface Props {
 /** Écran GÉNÉRIQUE à 2 champs numériques FIXES, un par temps demandé — famille G écran 1
  * uniquement (2 valeurs déjà `f(tEval1)`/`f(tEval2)`, jamais une taille variable — pas de pattern
  * add-as-needed ici, contrairement à `EtapeListeExpoProblemes.tsx`). */
-export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, consigneEcran, labelChamp1, labelChamp2, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte1, setTexte1] = useState("");
   const [texte2, setTexte2] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -52,7 +51,6 @@ export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, e
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

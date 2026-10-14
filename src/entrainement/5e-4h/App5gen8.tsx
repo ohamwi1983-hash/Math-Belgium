@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FORMES, construireAvecFormeId, genererExerciceParametresSinusoide } from "./generateurs5e/parametresSinusoide";
 import type { ExerciceParametresSinusoide, FormeAffichageSinusoide } from "./core5e/parametresSinusoide.types";
@@ -118,14 +118,6 @@ export function App5gen8() {
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -158,7 +150,6 @@ export function App5gen8() {
             onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoide(etat, texte))}
             diagnostiquer={(texte) => diagnostiquerValeurSinusoide(texte, cibleActuellePourDiagnostic(exercice, etat.phase))}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         </div>
       </main>

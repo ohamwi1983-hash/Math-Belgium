@@ -9,7 +9,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -47,11 +46,10 @@ const MAX_LIGNES_LISTE = 4;
  * historique de 6gen43, donc `.field-inline` (qui force `white-space:nowrap` et déborde sur mobile)
  * est banni ici sans exception, y compris pour les champs courts.
  */
-export function EtapeChampsPointsDroitesRemarquablesTriangle({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
+export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale, blocDonnees, consigneEcran, definition, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation }: Props) {
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

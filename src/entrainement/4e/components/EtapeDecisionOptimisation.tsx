@@ -14,7 +14,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceOptimisation;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * architecture-modelisation.md`, points 1-2) : `x_{opt}`/`valeur_{optimale}` REMPLACÉS par le nom
  * concret, aide rendue via `<SegmentsInline>` pour toute notation à underscore.
  */
-export function EtapeDecisionOptimisation({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeDecisionOptimisation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [dansDomaine, setDansDomaine] = useState<boolean | null>(null);
   const [x, setX] = useState("");
   const [y, setY] = useState("");
@@ -58,7 +57,6 @@ export function EtapeDecisionOptimisation({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.contexte.questionFinale} />}
       />

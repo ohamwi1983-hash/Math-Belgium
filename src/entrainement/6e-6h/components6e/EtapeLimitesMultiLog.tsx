@@ -49,7 +49,6 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   /** Rappel du domaine confirmé à l'écran précédent (consigne : "aux bornes de SON DOMAINE") — voir
@@ -74,7 +73,7 @@ interface Props {
  * `ui6e/formatEtudeFonctionLogarithme.ts::directionLabelsLimites`) — UN SEUL composant générique,
  * jamais un par arité (contrairement à `6gen11` qui avait `EtapeLimitesDeux`/`EtapeLimitesQuatre`
  * séparés). `App6gen21.tsx` doit le rendre avec `key={indexExercice}`. */
-export function EtapeLimitesMultiLog({ estPremierEcran, enonceLatex, consigneEcran, etatActuel, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, labels, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [etats, setEtats] = useState<EtatLocal[]>(() => labels.map(() => ({ statut: null, texte: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -96,7 +95,6 @@ export function EtapeLimitesMultiLog({ estPremierEcran, enonceLatex, consigneEcr
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

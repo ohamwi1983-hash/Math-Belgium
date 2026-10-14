@@ -14,7 +14,6 @@ interface Option {
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   options: Option[];
   aideNiveau1: AideAvecLatex;
@@ -38,7 +37,7 @@ interface Props {
  * CLAUDE.md), mirroir `EtapeChoixAffixesRacines.tsx` (6gen35). `App6gen36.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeChoixEquationsComplexes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixEquationsComplexes({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -50,7 +49,6 @@ export function EtapeChoixEquationsComplexes({ consigneGenerale, blocDonnees, es
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

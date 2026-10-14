@@ -10,7 +10,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   options: OptionChoix[];
@@ -38,7 +37,7 @@ interface Props {
  * `.btn-primary` (réservé à "Valider", convention CLAUDE.md). Même structure d'écran (consigne
  * générale → bloc données → bloc de travail) que `EtapeChampsProbabilitesEnsembles`.
  * `App6gen30.tsx` doit le rendre avec `key={phase}` (remet le choix à zéro à chaque écran). */
-export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, blocDonnees, consigneEcran, options, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [choixId, setChoixId] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && choixId !== null ? diagnostiquer(choixId) : null;
@@ -51,7 +50,6 @@ export function EtapeChoixProbabilitesEnsembles({ consigneGenerale, estPremierEc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

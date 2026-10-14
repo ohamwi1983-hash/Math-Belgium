@@ -15,7 +15,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeComplete;
-  estPremierEcran: boolean;
   phase: PhaseEtudeComplete;
   labels: string[];
   placeholders: string[];
@@ -40,7 +39,7 @@ interface Props {
  * (1 champ), "AH"/"AO" (1 champ), "casSpecial" (2 champs), "constructionInverse" (1 champ).
  * Calculatrice TOUJOURS présente (contextes réalistes, arithmétique non triviale), sauf sur l'écran
  * "domaine"/"classification" (purement symbolique, gérés par `EtapeListeNombresEtudeComplete`). */
-export function EtapeChampsEtudeComplete({ exercice, estPremierEcran, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders, labelsLatex, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>(labels.map(() => ""));
   const [dernierStatuts, setDernierStatuts] = useState<StatutVerification[] | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -63,7 +62,6 @@ export function EtapeChampsEtudeComplete({ exercice, estPremierEcran, phase, lab
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={estBonus ? CONSIGNE_GENERALE_CONSTRUCTION_INVERSE : CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={
           <>

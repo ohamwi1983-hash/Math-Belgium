@@ -7,7 +7,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -40,7 +39,7 @@ interface Props {
  * `EtapeRacinesAffixesRacines.tsx`/6gen35 pour ce même chapitre). Croix rouge `×` pour retirer une
  * ligne, jamais un bouton texte "Retirer". `App6gen42.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeComplexesAvances({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeComplexesAvances({ consigneGenerale, blocDonnees, consigneEcran, nombreMaxLignes, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: Math.max(1, nombreMaxLignes) }, () => ""));
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -63,7 +62,6 @@ export function EtapeListeComplexesAvances({ estPremierEcran, consigneGenerale, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

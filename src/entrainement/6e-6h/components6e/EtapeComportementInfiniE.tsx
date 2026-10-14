@@ -37,7 +37,6 @@ function GroupeDirection({ label, valeur, erreur, onChange }: { label: string; v
 
 interface Props {
   enonceLatex: string;
-  estPremierEcran: boolean;
   /** Rappel du domaine déjà confirmé à l'écran précédent — voir
    * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
   etatActuel: string[];
@@ -60,7 +59,7 @@ interface Props {
  * catégoriel à 2 statuts par direction ({@link StatutLimiteQualitatif}) — aucune vérification
  * d'expression/intervalle nécessaire (comparaison catégorielle pure). `App6gen21.tsx` doit le
  * rendre avec `key={indexExercice}`. */
-export function EtapeComportementInfiniE({ enonceLatex, estPremierEcran, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeComportementInfiniE({ enonceLatex, etatActuel, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [moinsInfini, setMoinsInfini] = useState<StatutLimiteQualitatif | null>(null);
   const [plusInfini, setPlusInfini] = useState<StatutLimiteQualitatif | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -74,7 +73,6 @@ export function EtapeComportementInfiniE({ enonceLatex, estPremierEcran, etatAct
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

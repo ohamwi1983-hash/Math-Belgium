@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
 
 /** Écran 4 — traduire le seuil de l'énoncé (`exercice.k`, jamais mentionné dans la phrase narrative)
  * en équation/inéquation `f(x) [=/>/<] k`. */
-export function EtapePoserEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut = complet ? diagnostiquerPoserEquationInequation(exercice, texte) : undefined;
@@ -38,7 +37,6 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, estPremierEc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />

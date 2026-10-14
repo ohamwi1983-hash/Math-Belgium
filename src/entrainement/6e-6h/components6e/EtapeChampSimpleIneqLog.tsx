@@ -12,7 +12,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   placeholder: string;
@@ -35,7 +34,7 @@ interface Props {
  * seul log), dReecrire (poser y=log_base(x)) et fSimplifier (carré parfait). `App6gen15.tsx` doit
  * le rendre avec `key={phase}`.
  */
-export function EtapeChampSimpleIneqLog({ estPremierEcran, consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChampSimpleIneqLog({ consigneEcran, enonceLatex, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -47,7 +46,6 @@ export function EtapeChampSimpleIneqLog({ estPremierEcran, consigneEcran, enonce
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

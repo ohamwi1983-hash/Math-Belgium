@@ -13,7 +13,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -42,7 +41,7 @@ interface Props {
  * `EtapeChampExpoProblemes.tsx` (6gen12) — duplication délibérée, convention de ce chantier (chaque
  * générateur garde ses propres composants d'écran génériques).
  */
-export function EtapeChampLogProblemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampLogProblemes({ consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
@@ -55,7 +54,6 @@ export function EtapeChampLogProblemes({ estPremierEcran, consigneGenerale, bloc
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

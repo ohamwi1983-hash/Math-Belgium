@@ -20,7 +20,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseIdentificationResolution) => void;
@@ -62,7 +61,7 @@ function labelSommet(exercice: ExerciceOrthogonaliteTriangleParametre, sommet: S
  * (`formatTermesEnonceTriangleParametreLatex`) — le bloc des 3 équations réduites reste inchangé
  * (déjà un `<div>` par sommet, aucun risque de coupure).
  */
-export function EtapeIdentificationResolutionOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [estRectangle, setEstRectangle] = useState<boolean | null>(null);
   const [sommet, setSommet] = useState<Sommet | null>(null);
   const [texteX, setTexteX] = useState("");
@@ -80,7 +79,6 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, estPremie
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeLocale;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -24,13 +23,12 @@ interface Props {
 /** Écran "domaine" — UNIQUEMENT `rationnelleAvecCE` (domaine=ℝ sinon, écran sauté). Réutilise
  * DIRECTEMENT `EnsembleReelGuideBuilder` (Couche B↔B partagée 5e/6e), jamais réimplémenté.
  * Calculatrice ABSENTE (question symbolique/structurelle). */
-export function EtapeDomaineEtudeLocale({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_LOCALE}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

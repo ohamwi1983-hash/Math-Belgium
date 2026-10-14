@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -36,7 +35,7 @@ interface Props {
  * "prive_points" d'`EnsembleReelGuideBuilder.tsx` (croix rouge `×` pour retirer, jamais un bouton
  * texte "Retirer" — CLAUDE.md), adaptée en écran autonome (son propre bouton "Valider"/aide, pas un
  * sous-composant remonté par `onChange`). `App6gen33.tsx` doit le rendre avec `key={phase}`. */
-export function EtapeListeConfigurationsProbabilitesProblemes({ consigneGenerale, blocDonnees, estPremierEcran, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeConfigurationsProbabilitesProblemes({ consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs ? diagnostiquer(valeurs) : null;
@@ -54,7 +53,6 @@ export function EtapeListeConfigurationsProbabilitesProblemes({ consigneGenerale
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           blocDonnees.length > 0 ? (

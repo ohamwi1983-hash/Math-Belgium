@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -43,7 +42,7 @@ interface Props {
  * ordre. `App6gen14.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran)
  * — même patron que `EtapeChampExpoProblemes.tsx` (6gen12).
  */
-export function EtapeChampEquationsExpLog({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const dernierStatut = montrerErreurs && diagnostiquer ? diagnostiquer(texte) : null;
@@ -56,7 +55,6 @@ export function EtapeChampEquationsExpLog({ estPremierEcran, consigneGenerale, b
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

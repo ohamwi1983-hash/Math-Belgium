@@ -13,7 +13,6 @@ interface AideAvecLatex {
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   consigneEcran: string;
   placeholder: string;
@@ -41,7 +40,7 @@ interface Props {
  * `EtapeListeExpoProblemes.tsx` (6gen12, croix rouge), les 2 mécaniques réunies ici. `App6gen14.tsx`
  * doit le rendre avec `key={phase}`.
  */
-export function EtapeListeEquationsExpLog({ consigneGenerale, estPremierEcran, blocDonnees, consigneEcran, placeholder, labelAjout, labelAucune, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeEquationsExpLog({ consigneGenerale, blocDonnees, consigneEcran, placeholder, labelAjout, labelAucune, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [aucune, setAucune] = useState(false);
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -68,7 +67,6 @@ export function EtapeListeEquationsExpLog({ consigneGenerale, estPremierEcran, b
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

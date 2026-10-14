@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceAsymptoteOblique } from "./generateurs5e/asymptoteOblique";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -92,14 +92,6 @@ export function App5gen21() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -124,7 +116,6 @@ export function App5gen21() {
             exercice={exercice}
             phase={phase}
             etat={etat}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -142,7 +133,6 @@ interface EcranProps {
   exercice: ExerciceAsymptoteOblique;
   phase: PhaseAsymptoteOblique;
   etat: EtatSessionAsymptoteOblique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -155,7 +145,6 @@ function EcranCourant({
   exercice,
   phase,
   etat,
-  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   cleEcran,
@@ -173,7 +162,6 @@ function EcranCourant({
         <EtapeDiviserEuclidienne
           key={cleEcran}
           exercice={exercice}
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -194,7 +182,6 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           phase="ecrireFormeDeveloppee"
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -213,7 +200,6 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           phase="calculerCoefficientA"
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -232,7 +218,6 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           phase="calculerCoefficientB"
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -251,7 +236,6 @@ function EcranCourant({
           key={cleEcran}
           exercice={exercice}
           phase="conclureEquationAsymptote"
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}

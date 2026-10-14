@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -24,13 +23,12 @@ interface Props {
 /** Écran "domaine" — uniquement présent si le domaine est restreint (voir
  * `moteur5e/typesEtudierFonction.ts`). Réutilise DIRECTEMENT `EnsembleReelGuideBuilder`, exactement
  * comme 5gen29 (`EtapeDomaineEtudeLocale.tsx`). Calculatrice ABSENTE (question structurelle). */
-export function EtapeDomaineEtudierFonction({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

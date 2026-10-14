@@ -9,7 +9,6 @@ import { GrapheOptionDeriveeLogarithme } from "./GrapheOptionDeriveeLogarithme";
 
 interface Props {
   exercice: ExerciceGraphiqueDeriveeLogarithme;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -24,13 +23,12 @@ interface Props {
 /** Écran "selection" (les 3 familles, `6gen20`) — en-tête propre à ce générateur ; le corps du QCM
  * (4 graphiques lettrés A→D empilés, non cliquables, + 4 boutons de choix texte séparés + Valider)
  * est délégué à `EtapeSelectionGraphiqueQCM`, partagé avec 6gen5/6gen8/6gen11/6gen21. */
-export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeSelectionGraphiqueDeriveeLogarithme({ exercice, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const viewBox = calculerViewBoxGraphique(exercice);
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

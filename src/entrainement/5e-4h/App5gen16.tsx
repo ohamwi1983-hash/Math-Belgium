@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceConvergenceSuite } from "./generateurs5e/convergenceSuites";
 import type { VarianteConvergenceSuite } from "./core5e/convergenceSuites.types";
@@ -99,14 +99,6 @@ export function App5gen16() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -133,7 +125,6 @@ export function App5gen16() {
                   key={cleEcran}
                   exercice={exercice}
                   phase="classificationArithmetique"
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -149,7 +140,6 @@ export function App5gen16() {
                   key={cleEcran}
                   exercice={exercice}
                   phase="classificationGeometrique"
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -164,7 +154,6 @@ export function App5gen16() {
                 <EtapeDiviserQuelconque
                   key={cleEcran}
                   exercice={exercice}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -181,7 +170,6 @@ export function App5gen16() {
                   key={cleEcran}
                   exercice={exercice}
                   phase="classifierQuelconque"
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}

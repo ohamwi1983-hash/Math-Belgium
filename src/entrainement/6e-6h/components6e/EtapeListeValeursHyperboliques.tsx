@@ -9,7 +9,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   consigneGenerale: string;
-  estPremierEcran: boolean;
   blocDonnees: string[];
   etatActuel: string[] | null;
   consigneEcran: string;
@@ -37,7 +36,7 @@ interface Props {
  * CLAUDE.md), aucune gate "Pas de solution" ici (toujours au moins 1 valeur pour cette famille).
  * `App6gen19.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeValeursHyperboliques({ consigneGenerale, estPremierEcran, blocDonnees, etatActuel, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, etatActuel, consigneEcran, placeholder, labelAjout, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>([""]);
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = lignes.length > 0 && lignes.every((l) => l.trim() !== "");
@@ -60,7 +59,6 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, estPremierEcr
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

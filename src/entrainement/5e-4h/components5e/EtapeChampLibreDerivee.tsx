@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDefinitionDerivee;
-  estPremierEcran: boolean;
   ecran: Extract<EcranDefinitionDerivee, "quotient" | "limite">;
   labelChamp: string;
   placeholder: string;
@@ -38,7 +37,7 @@ interface Props {
  * Question spécifique rendue en 3 morceaux (`texteAvant`/`latex`/`texteApres`,
  * `questionSpecifiqueEcran`) — le fragment central passe par `<Katex>` (fraction/limite empilée,
  * jamais un texte plat avec crochets). */
-export function EtapeChampLibreDerivee({ exercice, estPremierEcran, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreDerivee({ exercice, ecran, labelChamp, placeholder, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -56,7 +55,6 @@ export function EtapeChampLibreDerivee({ exercice, estPremierEcran, ecran, label
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

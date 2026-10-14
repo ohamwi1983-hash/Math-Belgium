@@ -15,7 +15,6 @@ interface AideAvecLatex {
 interface Props {
   consigneEcran: string;
   enonceLatex: string;
-  estPremierEcran: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -40,14 +39,13 @@ const OPTIONS: { id: CategorieFI; label: string }[] = [
  * `6gen6`) — classer la forme (0/0, ∞/∞, ou aucune FI) avant d'appliquer la règle, pour éviter le
  * piège classique "appliquer L'Hôpital sans vérifier la forme". `App6gen6.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeFormeFI({ consigneEcran, enonceLatex, estPremierEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeFormeFI({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<CategorieFI | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

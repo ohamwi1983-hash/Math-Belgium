@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 type TypeTransformationB = "translation" | "similitude";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -42,7 +41,7 @@ interface Props {
  * `moteur6e/verificationTransformationsPlan.ts`, `diagnostiquerBEcran2`, pour le statut combiné.
  * `App6gen40.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeTypeParametresTransformationsPlan({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTypeParametresTransformationsPlan({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [type, setType] = useState<TypeTransformationB | null>(null);
   const [vecteur, setVecteur] = useState("");
   const [rapport, setRapport] = useState("");
@@ -65,7 +64,6 @@ export function EtapeTypeParametresTransformationsPlan({ estPremierEcran, consig
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

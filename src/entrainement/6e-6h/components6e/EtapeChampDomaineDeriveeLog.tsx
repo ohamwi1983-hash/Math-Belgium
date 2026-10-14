@@ -10,7 +10,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   /** `null` — jamais rendu — quand cet écran ne dépend d'aucun écran précédent. */
@@ -41,7 +40,6 @@ interface Props {
  * `App6gen16.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
  */
 export function EtapeChampDomaineDeriveeLog({
-  estPremierEcran,
   consigneGenerale,
   blocDonnees,
   etatActuel,
@@ -70,7 +68,6 @@ export function EtapeChampDomaineDeriveeLog({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

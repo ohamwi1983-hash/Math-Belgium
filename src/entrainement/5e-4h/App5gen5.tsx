@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceProblemeContexte } from "./core5e/problemesContexte.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
@@ -394,21 +394,9 @@ export function App5gen5() {
   }
 
   const exercice = etat.exerciceCourant;
-  const phase = etat.phase;
   const niveauAideMax = niveauAideMaxPhase(etat.phase);
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
-
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact") — utilisé uniquement par les écrans du
-   * scénario C (seuls à avoir été unifiés via `EnTeteExercice` pour l'instant). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
 
   const validation = enAttente
     ? {
@@ -604,7 +592,6 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "lecture" && (
             <EtapeLectureC
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               donnees={<div className="equation-box">{consigneContexteC()}</div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
@@ -619,7 +606,6 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "coutMoyen" && (
             <EtapeCoutMoyenC
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               donnees={<div className="equation-box">{consigneContexteC()}</div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
@@ -634,7 +620,6 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "reconnaissance" && (
             <EtapeReconnaissanceC
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               donnees={<div className="equation-box">{consigneContexteC()}</div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
@@ -648,7 +633,6 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "benefice" && (
             <EtapeBeneficeC
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               donnees={<div className="equation-box">{consigneContexteC()}</div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
@@ -665,7 +649,6 @@ export function App5gen5() {
           {exercice.scenario === "C" && etat.phase === "seuil" && (
             <EtapeSeuilC
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               donnees={<div className="equation-box">{consigneContexteC()}</div>}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}

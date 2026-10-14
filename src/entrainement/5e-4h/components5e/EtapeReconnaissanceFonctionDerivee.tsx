@@ -9,7 +9,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceFonctionDerivee;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -26,7 +25,7 @@ interface Props {
  * (aucun champ libre, aucun statut à 3 valeurs nécessaire ici — même esprit que
  * `EtapeChoixSigne.tsx`, 5gen20). Correction câblée directement sur `exercice.typesAcceptes`
  * (jamais une seule valeur figée : l'item ambigu accepte 2 réponses). */
-export function EtapeReconnaissanceFonctionDerivee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeReconnaissanceFonctionDerivee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<TypeDerivee | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   const apresEchec = tentativesUtilisees > 0;
@@ -41,7 +40,6 @@ export function EtapeReconnaissanceFonctionDerivee({ exercice, estPremierEcran, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

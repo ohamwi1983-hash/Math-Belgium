@@ -12,7 +12,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExercicePythagoricienne;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -34,7 +33,7 @@ interface Props {
  * cette même valeur) — elle REMPLIT donc déjà le rôle du bloc "état actuel" pour cet écran, même
  * principe que "le bloc violet réinterprété comme état actuel" déjà établi ailleurs sur la
  * plateforme (ex. gen24/25, 4e) — un second bloc identique en dessous serait un pur doublon. */
-export function EtapeRacinesPythagoricienne({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [t1, setT1] = useState("");
   const [t2, setT2] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -56,7 +55,6 @@ export function EtapeRacinesPythagoricienne({ exercice, estPremierEcran, tentati
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box">

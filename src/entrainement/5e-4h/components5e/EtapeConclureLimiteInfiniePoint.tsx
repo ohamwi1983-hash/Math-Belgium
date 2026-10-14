@@ -19,7 +19,6 @@ function idVersChoix(id: string): ReponseConclureLimite {
 
 interface Props {
   exercice: ExerciceLimite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (choix: ReponseConclureLimite) => void;
@@ -30,7 +29,7 @@ interface Props {
  * à 3 options (−∞/+∞/∄, jamais des boutons), à partir des 2 limites unilatérales déjà trouvées à
  * l'écran précédent. AUCUNE aide sur cet écran (spécifié explicitement — jamais de `BoutonAide` ici,
  * contrairement à tous les autres écrans de la plateforme qui en ont systématiquement un). */
-export function EtapeConclureLimiteInfiniePoint({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation }: Props) {
+export function EtapeConclureLimiteInfiniePoint({ exercice, tentativesUtilisees, tentativesMax, onValider, validation }: Props) {
   const [choixId, setChoixId] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
   const complet = choixId !== "";
@@ -38,7 +37,6 @@ export function EtapeConclureLimiteInfiniePoint({ exercice, estPremierEcran, ten
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

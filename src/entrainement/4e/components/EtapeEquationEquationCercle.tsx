@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationCercle;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -32,7 +31,7 @@ interface Props {
  * substitué avec les vraies valeurs (elles sont déjà rappelées dans le récapitulatif accumulé en
  * haut de carte — `RecapitulatifPanel`/`AppEquationCercle`).
  */
-export function EtapeEquationEquationCercle({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationEquationCercle({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -44,7 +43,6 @@ export function EtapeEquationEquationCercle({ exercice, estPremierEcran, tentati
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_CERCLE}
         blocDonnees={<EquationCercleGraph exercice={exercice} afficherCentre afficherRayon />}
       />

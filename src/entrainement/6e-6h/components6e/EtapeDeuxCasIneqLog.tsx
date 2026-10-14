@@ -16,7 +16,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -55,7 +54,7 @@ function versReponse(etat: EtatCas): ReponseCasBaseLog | null {
  * d'intervalle révélé dans un conteneur `.contenu-conditionnel` uniquement après le choix
  * "Un intervalle". `App6gen15.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeDeuxCasIneqLog({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDeuxCasIneqLog({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [casSuperieur, setCasSuperieur] = useState<EtatCas>(CAS_VIDE);
   const [casInferieur, setCasInferieur] = useState<EtatCas>(CAS_VIDE);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -101,7 +100,6 @@ export function EtapeDeuxCasIneqLog({ estPremierEcran, consigneEcran, enonceLate
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

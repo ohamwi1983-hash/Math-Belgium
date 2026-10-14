@@ -11,7 +11,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceSuiteGeometrique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -36,7 +35,7 @@ const MAX_VALEURS = 2;
  * mathématiquement impossible sous la nouvelle construction et le bouton "aucune solution" a été
  * retiré : il n'aurait plus jamais pu être la bonne réponse, un mode qui n'était plus qu'un piège
  * dégénéré plutôt qu'un vrai cas pédagogique). */
-export function EtapeTrouverQ({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
+export function EtapeTrouverQ({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -62,7 +61,6 @@ export function EtapeTrouverQ({ exercice, estPremierEcran, tentativesUtilisees, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

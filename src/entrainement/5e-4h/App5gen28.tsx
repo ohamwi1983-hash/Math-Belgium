@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import type { ExerciceTangenteDoubleTangence, ExerciceTangenteHorizontale, ExerciceTangentePointDonne } from "./core5e/tangentes.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTangente } from "./generateurs5e/tangentes/index";
@@ -103,14 +103,6 @@ export function App5gen28() {
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation: ValidationEtapeProps | null = enAttente
     ? {
         revele: enAttente.revele,
@@ -141,7 +133,6 @@ export function App5gen28() {
             terminerEtape={terminerEtape}
             setEtat={setEtat}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         </div>
       </main>
@@ -159,10 +150,9 @@ interface EcranProps {
   terminerEtape: (nouvelEtat: EtatSessionTangente) => void;
   setEtat: (etat: EtatSessionTangente) => void;
   validation: ValidationEtapeProps | null;
-  estPremierEcran: boolean;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation, estPremierEcran }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxTangentes();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -181,7 +171,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponse) => terminerEtape(soumettreReponseSubstituer(etat, reponse))}
           diagnostiquer={(r) => ({ fA: diagnostiquerFAPointDonne(r.fA, ex), fPrimeA: diagnostiquerFPrimeAPointDonne(r.fPrimeA, ex) })}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -204,7 +193,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(texte) => terminerEtape(soumettreReponseTangentePointDonne(etat, texte))}
           diagnostiquer={(t) => diagnostiquerEquationTangentePointDonne(t, ex)}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -223,7 +211,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponses) => terminerEtape(soumettreReponseResoudre(etat, reponses))}
           diagnostiquer={(t) => diagnostiquerRacineChamp(t, ex)}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -242,7 +229,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponses) => terminerEtape(soumettreReponseCoordonnees(etat, reponses))}
           diagnostiquer={(point) => diagnostiquerCoordonneeChamp(point, ex)}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -261,7 +247,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(reponse) => terminerEtape(soumettreReponseTangenteEnP(etat, reponse))}
           diagnostiquer={(r) => ({ fPrimeP: diagnostiquerFPrimeP(r.fPrimeP, ex), tangente: diagnostiquerEquationTangenteP(r.tangente, ex) })}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -284,7 +269,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(texte) => terminerEtape(soumettreReponseTrouverQ(etat, texte))}
           diagnostiquer={(t) => diagnostiquerQ(t, ex)}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -307,7 +291,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(texte) => terminerEtape(soumettreReponseVerifierPente(etat, texte))}
           diagnostiquer={(t) => diagnostiquerFPrimeQ(t, ex)}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }

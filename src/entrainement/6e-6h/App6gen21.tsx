@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./generateurs6e/etudeFonctionLogarithme";
 import {
@@ -58,7 +58,6 @@ function nouvelleSession(): EtatSessionEtudeFonctionLogarithme {
   return demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, genererExerciceEtudeFonctionLogarithme);
 }
 
-
 /** `forcerPresence` de l'écran asymptotes, par famille (voir `core6e/etudeFonctionLogarithme.types.ts`
  * pour la justification : B et C ont toujours une asymptote dans chaque direction listée, A et D
  * laissent l'élève choisir). */
@@ -109,13 +108,6 @@ export function App6gen21() {
   }
 
   const exercice = etat.exerciceCourant;
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
   const tentativesUtilisees = etat.etapeCourante.tentativesUtilisees;
   const tentativesMax = etat.reglages.tentativesMax;
   const niveauAide = etat.niveauAide;
@@ -155,7 +147,6 @@ export function App6gen21() {
         {etat.phase === "domaine" && (
               <EtapeDomaineEtudeFonctionLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneDomaine(exercice)}
                 aideNiveau1={aideDomaineNiveau1(exercice)}
@@ -173,7 +164,6 @@ export function App6gen21() {
             {etat.phase === "limites" && exercice.famille !== "E" && (
               <EtapeLimitesMultiLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneLimites(exercice)}
                 etatActuel={[]}
@@ -193,7 +183,6 @@ export function App6gen21() {
             {etat.phase === "asymptotes" && exercice.famille !== "E" && (
               <EtapeAsymptotesMultiLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneAsymptotes(exercice)}
                 etatActuel={[]}
@@ -214,7 +203,6 @@ export function App6gen21() {
             {etat.phase === "croissance" && exercice.famille === "C" && (
               <EtapeCroissanceGrilleCLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneCroissance(exercice)}
                 etatActuel={[]}
@@ -233,7 +221,6 @@ export function App6gen21() {
             {etat.phase === "croissance" && (exercice.famille === "A" || exercice.famille === "B" || exercice.famille === "D") && (
               <EtapeCroissanceStandardLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 consigneEcran={consigneCroissance(exercice)}
                 etatActuel={[]}
@@ -252,7 +239,6 @@ export function App6gen21() {
             {etat.phase === "concavite" && exercice.famille !== "E" && (
               <EtapeConcaviteLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 etatActuel={[]}
                 aideNiveau1={aideConcaviteNiveau1(exercice)}
@@ -270,7 +256,6 @@ export function App6gen21() {
             {etat.phase === "graphique" && exercice.famille !== "E" && (
               <EtapeSelectionGraphiqueEtudeFonctionLog
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 exercice={exercice}
                 aideNiveau1={aideGraphiqueNiveau1(exercice)}
                 aideNiveau2={aideGraphiqueNiveau2(exercice)}
@@ -287,7 +272,6 @@ export function App6gen21() {
             {etat.phase === "comportementInfini" && exercice.famille === "E" && (
               <EtapeComportementInfiniE
                 key={cle}
-                estPremierEcran={estPremierEcran}
                 enonceLatex={enonceLatex}
                 etatActuel={[]}
                 aideNiveau1={aideComportementInfiniNiveau1()}

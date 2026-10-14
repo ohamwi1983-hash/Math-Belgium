@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLectureGraphiqueLimites } from "./generateurs5e/lectureGraphiqueLimites";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -76,14 +76,6 @@ export function App5gen22() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -120,7 +112,6 @@ export function App5gen22() {
             exercice={exercice}
             phase={phase}
             etat={etat}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={tentativesUtilisees}
             tentativesMax={tentativesMax}
             cleEcran={cleEcran}
@@ -137,7 +128,6 @@ interface EcranProps {
   exercice: ExerciceLectureGraphiqueLimites;
   phase: PhaseLectureGraphiqueLimites;
   etat: EtatSessionLectureGraphiqueLimites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
@@ -149,7 +139,6 @@ function EcranCourant({
   exercice,
   phase,
   etat,
-  estPremierEcran,
   tentativesUtilisees,
   tentativesMax,
   cleEcran,
@@ -163,7 +152,6 @@ function EcranCourant({
         <EtapeComportementsLimites
           key={cleEcran}
           exercice={exercice}
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           onValider={(textes) => terminerEtape(soumettreReponseCompleterLimites(etat, textes))}
@@ -179,7 +167,6 @@ function EcranCourant({
         <EtapeEquationsAsymptotes
           key={cleEcran}
           exercice={exercice}
-          estPremierEcran={estPremierEcran}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           onValider={(textes) => terminerEtape(soumettreReponseNommerAsymptotes(etat, textes))}

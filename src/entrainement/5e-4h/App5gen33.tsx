@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceContexteEconomique } from "./generateurs5e/contexteEconomique/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -112,14 +112,6 @@ export function App5gen33() {
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -156,7 +148,6 @@ export function App5gen33() {
             terminerEtape={terminerEtape}
             setEtat={setEtat}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         </div>
       </main>
@@ -174,10 +165,9 @@ interface EcranProps {
   terminerEtape: (nouvelEtat: EtatSessionContexteEconomique) => void;
   setEtat: (etat: EtatSessionContexteEconomique) => void;
   validation: ValidationEtapeProps | null;
-  estPremierEcran: boolean;
 }
 
-function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation, estPremierEcran }: EcranProps) {
+function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMax, cleEcran, terminerEtape, setEtat, validation }: EcranProps) {
   const niveauAideMax = niveauAideMaxContexteEconomique();
   const onActiverAide = () => setEtat(activerAideSuivante(etat));
 
@@ -200,7 +190,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseCoutMarginalDiscret(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerCoutMarginalDiscret(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "deriveeSymbolique":
@@ -219,7 +208,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseDeriveeSymbolique(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerDeriveeSymboliqueA(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "deriveeValeur":
@@ -239,7 +227,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseDeriveeValeur(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerDeriveeValeur(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "comparaisonEcart":
@@ -259,7 +246,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseComparaisonEcart(etat, { ecartAbsolu: r[0], ecartPourcent: r[1] }))}
             diagnostiquer={(r) => [diagnostiquerEcartAbsolu(r[0], exercice), diagnostiquerEcartPourcent(r[1], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "extremum":
@@ -275,7 +261,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseExtremum(etat, r))}
             diagnostiquerPosition={(t) => diagnostiquerPositionExtremumParmiCibles(t, exercice)}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       default:
@@ -301,7 +286,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseRecetteTotale(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerRecetteTotale(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "marginales":
@@ -320,7 +304,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseMarginales(etat, { coutMarginal: r[0], recetteMarginale: r[1] }))}
             diagnostiquer={(r) => [diagnostiquerCoutMarginalB(r[0], exercice), diagnostiquerRecetteMarginale(r[1], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "resoudreEgaliteMarginales":
@@ -336,7 +319,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseEgaliteMarginales(etat, r))}
             diagnostiquerRacine={(t) => diagnostiquerRacineMarginale(t, exercice)}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "beneficeFormule":
@@ -355,7 +337,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseBeneficeFormule(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerBeneficeFormule(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "beneficeDerivee":
@@ -374,7 +355,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseBeneficeDerivee(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerBeneficeDerivee(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "tableauSigneBenefice":
@@ -389,7 +369,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseTableauSigneBenefice(etat, r))}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "confirmationCoherence":
@@ -404,7 +383,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onActiverAide={onActiverAide}
             onValider={(r) => terminerEtape(soumettreReponseConfirmationCoherence(etat, r))}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       case "beneficeMaximum":
@@ -424,7 +402,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
             onValider={(r) => terminerEtape(soumettreReponseBeneficeMaximum(etat, r[0]))}
             diagnostiquer={(r) => [diagnostiquerBeneficeMaximum(r[0], exercice)]}
             validation={validation}
-            estPremierEcran={estPremierEcran}
           />
         );
       default:
@@ -450,7 +427,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(r) => terminerEtape(soumettreReponsePoserEquationReduite(etat, r[0]))}
           diagnostiquer={(r) => [diagnostiquerEquationReduite(r[0], exercice)]}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     case "iteration0":
@@ -473,7 +449,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(r) => terminerEtape(soumettreReponseIteration(etat, r))}
           diagnostiquerMilieu={(t) => diagnostiquerMilieuIteration(t, it.milieu)}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     }
@@ -494,7 +469,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           onValider={(r) => terminerEtape(soumettreReponseRacineApprochee(etat, r[0]))}
           diagnostiquer={(r) => [diagnostiquerRacineApprochee(r[0], exercice)]}
           validation={validation}
-          estPremierEcran={estPremierEcran}
         />
       );
     default:

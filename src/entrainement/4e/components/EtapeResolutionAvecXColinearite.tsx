@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (valeur: number) => void;
@@ -31,7 +30,7 @@ interface Props {
  * le générateur 26 "Norme d'un vecteur et distance entre 2 points" : un écran à `max=0` n'affiche
  * jamais de bouton, jamais un bouton perpétuellement désactivé).
  */
-export function EtapeResolutionAvecXColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeResolutionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const valeur = Number(texte.replace(",", "."));
@@ -42,7 +41,6 @@ export function EtapeResolutionAvecXColinearite({ exercice, estPremierEcran, ten
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box">

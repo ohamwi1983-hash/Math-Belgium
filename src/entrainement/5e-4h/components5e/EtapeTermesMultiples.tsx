@@ -15,7 +15,6 @@ type PhaseTermesMultiples = "termesProches" | "calculerTermesAlgebrique";
 
 interface Props {
   exercice: ExerciceSuiteArithmetique;
-  estPremierEcran: boolean;
   phase: PhaseTermesMultiples;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -60,7 +59,7 @@ function ciblesPourPhase(exercice: ExerciceSuiteArithmetique, phase: PhaseTermes
 /** Écran à PLUSIEURS champs numériques FIXES (jamais add-as-needed — le nombre de termes demandés
  * est toujours connu à l'avance) — réutilisé par "termesProches" (4 indices déjà donnés dans le
  * bloc de données) et "termesConsecutifsMoyenne" (3 termes, labels génériques "1er/2e/3e"). */
-export function EtapeTermesMultiples({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTermesMultiples({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const labels = labelsPourPhase(exercice, phase);
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -85,7 +84,6 @@ export function EtapeTermesMultiples({ exercice, estPremierEcran, phase, tentati
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

@@ -15,7 +15,6 @@ import { BoutonAide } from "./BoutonAide";
 
 interface Props {
   exercice: ExerciceEquationInequationSecondDegre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
 
 /** Écran 0a (`voieSysteme` uniquement) — poser les 2 équations du système (situation réelle
  * `x·y=M`, situation hypothétique `(x+a)(y-b)=M`). */
-export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [reel, setReel] = useState("");
   const [hypothetique, setHypothetique] = useState("");
   const complet = reel.trim() !== "" && hypothetique.trim() !== "";
@@ -39,7 +38,6 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, estPr
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />

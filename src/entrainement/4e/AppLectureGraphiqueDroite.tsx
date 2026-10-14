@@ -63,7 +63,6 @@ export function AppLectureGraphiqueDroite() {
 
   // Mono-écran (voir commentaire plus haut) : chaque exercice n'a qu'un seul écran, qui est donc
   // toujours son premier (et unique) écran.
-  const estPremierEcran = true;
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -93,7 +92,6 @@ export function AppLectureGraphiqueDroite() {
         {exercice.variante === "cartesienne" ? (
           <EtapeLectureCartesienne
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}
@@ -104,7 +102,6 @@ export function AppLectureGraphiqueDroite() {
         ) : (
           <EtapeLectureParametrique
             exercice={exercice}
-            estPremierEcran={estPremierEcran}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAide}

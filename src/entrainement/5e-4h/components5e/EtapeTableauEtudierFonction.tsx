@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
-  estPremierEcran: boolean;
   phase: "tableauFPrime" | "tableauFSeconde";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -27,7 +26,7 @@ interface Props {
  * dépendance à `ExerciceEtudeLocale`), racines/exclusions déjà connues à la génération (pré-placées
  * en en-tête, jamais résolues par l'élève dans CE générateur — voir tête de fichier de
  * `typesEtudierFonction.ts`). Calculatrice ABSENTE (question structurelle). */
-export function EtapeTableauEtudierFonction({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
+export function EtapeTableauEtudierFonction({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation }: Props) {
   const mode = phase === "tableauFPrime" ? "fprime" : "fseconde";
   const attendu = mode === "fprime" ? tableauFPrimeAttendu(exercice) : tableauFSecondeAttendu(exercice);
   const enteteColonnes = formatEnteteColonnesTableauEtudierFonction(exercice, attendu.colonnes, mode);
@@ -35,7 +34,6 @@ export function EtapeTableauEtudierFonction({ exercice, estPremierEcran, phase, 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

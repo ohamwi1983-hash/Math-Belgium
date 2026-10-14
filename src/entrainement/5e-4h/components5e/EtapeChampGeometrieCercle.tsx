@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceGeometrieCercle;
-  estPremierEcran: boolean;
   phase: PhaseGeometrieCercle;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -43,7 +42,7 @@ interface Props {
  * `texte` local garde la réponse de l'écran précédent). Consigne générale + bloc de données
  * redondants sur chaque écran (convention transversale de la plateforme).
  */
-export function EtapeChampGeometrieCercle({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -62,7 +61,6 @@ export function EtapeChampGeometrieCercle({ exercice, estPremierEcran, phase, te
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

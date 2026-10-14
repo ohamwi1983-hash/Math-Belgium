@@ -15,7 +15,6 @@ interface Ligne {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -48,7 +47,7 @@ interface Props {
  * mirroir `EtapeRacinesAffixesRacines.tsx`, 6gen35). `App6gen39.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeListeRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, nAttendu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consigneEcran, nAttendu, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<Ligne[]>(() => Array.from({ length: nAttendu }, () => ({ re: "", im: "" })));
   const montrerErreurs = tentativesUtilisees > 0;
   const aplati = lignes.flatMap((l) => [l.re, l.im]);
@@ -74,7 +73,6 @@ export function EtapeListeRacinesNiemes({ estPremierEcran, consigneGenerale, blo
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

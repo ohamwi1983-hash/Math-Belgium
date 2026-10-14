@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   /** Rappel de domaine + limites + asymptotes déjà confirmés — voir
@@ -40,7 +39,7 @@ interface Props {
  * ℝ\{-k,k}), délimitées par -k, 0, k, plus la position du maximum local (toujours 0, mais vérifiée
  * comme les autres, jamais présupposée côté écran). `App6gen21.tsx` doit le rendre avec
  * `key={indexExercice}`. */
-export function EtapeCroissanceGrilleCLog({ estPremierEcran, enonceLatex, consigneEcran, etatActuel, k, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActuel, k, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [signes, setSignes] = useState<(SigneCroissance | null)[]>([null, null, null, null]);
   const [positionMax, setPositionMax] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -60,7 +59,6 @@ export function EtapeCroissanceGrilleCLog({ estPremierEcran, enonceLatex, consig
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

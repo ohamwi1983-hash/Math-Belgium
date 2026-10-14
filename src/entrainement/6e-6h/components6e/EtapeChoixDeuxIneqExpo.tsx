@@ -17,7 +17,6 @@ interface Option {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   optionGauche: Option;
@@ -44,7 +43,7 @@ interface Props {
  * PARAMÉTRÉS par l'appelant (`optionGauche`/`optionDroite`) — chaque famille pose une question
  * différente, jamais le même texte de bouton. `App6gen10.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeChoixDeuxIneqExpo({ estPremierEcran, consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauche, optionDroite, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<string | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -56,7 +55,6 @@ export function EtapeChoixDeuxIneqExpo({ estPremierEcran, consigneEcran, enonceL
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

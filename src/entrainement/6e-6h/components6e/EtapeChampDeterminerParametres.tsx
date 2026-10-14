@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 interface Props {
   consigneGenerale: string;
   blocDonnees: string[];
-  estPremierEcran: boolean;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -38,7 +37,6 @@ interface Props {
 export function EtapeChampDeterminerParametres({
   consigneGenerale,
   blocDonnees,
-  estPremierEcran,
   consigneEcran,
   placeholder,
   aideNiveau1,
@@ -64,7 +62,6 @@ export function EtapeChampDeterminerParametres({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

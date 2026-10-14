@@ -16,7 +16,6 @@ interface AideAvecLatex {
 const OPTIONS: CategorieCroissance[] = ["log", "polynome", "exponentielle"];
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
@@ -53,7 +52,7 @@ function GroupeCategorie({ label, valeur, erreur, onChange }: { label: string; v
  * combinées derrière UN SEUL bouton "Valider" (spec : "Champ : description du terme dominant de
  * chaque côté"). Même patron que `EtapeFacteursC.tsx` (6gen6). `App6gen17.tsx` doit le rendre avec
  * `key={phase}`. */
-export function EtapeDominanceA({ estPremierEcran, consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [numerateur, setNumerateur] = useState<CategorieCroissance | null>(null);
   const [denominateur, setDenominateur] = useState<CategorieCroissance | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -66,7 +65,6 @@ export function EtapeDominanceA({ estPremierEcran, consigneEcran, enonceLatex, a
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

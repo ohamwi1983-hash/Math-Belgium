@@ -11,7 +11,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   etatActuel: string[] | null;
@@ -40,7 +39,6 @@ interface Props {
  * `key={phase}`.
  */
 export function EtapeDeuxChampsDomaineDeriveeLog({
-  estPremierEcran,
   consigneGenerale,
   blocDonnees,
   etatActuel,
@@ -71,7 +69,6 @@ export function EtapeDeuxChampsDomaineDeriveeLog({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

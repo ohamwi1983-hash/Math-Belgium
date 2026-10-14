@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_SCENARIOS, construireAvecScenarioId, genererExerciceSuiteClassique } from "./generateurs5e/suitesClassiques";
 import type {
@@ -365,14 +365,6 @@ export function App5gen17() {
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
   const phase = etat.phase;
 
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -399,7 +391,6 @@ export function App5gen17() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -417,7 +408,6 @@ export function App5gen17() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -436,7 +426,6 @@ export function App5gen17() {
                   key={cleEcran}
                   exercice={exercice}
                   phase={phase}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}
@@ -451,7 +440,6 @@ export function App5gen17() {
                 <EtapeSuitesFinalesCombinees
                   key={cleEcran}
                   exercice={exercice}
-                  estPremierEcran={estPremierEcran}
                   tentativesUtilisees={tentativesUtilisees}
                   tentativesMax={tentativesMax}
                   niveauAide={etat.niveauAide}

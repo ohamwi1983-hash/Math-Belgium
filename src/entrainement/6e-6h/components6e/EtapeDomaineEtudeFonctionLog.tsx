@@ -14,7 +14,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   enonceLatex: string;
   consigneEcran: string;
   aideNiveau1: AideAvecLatex;
@@ -34,14 +33,13 @@ interface Props {
 /** Écran "domaine" (1er écran, toutes familles A-E) — construction guidée via
  * `EnsembleReelGuideBuilder` (module partagé avec 6gen1/6gen3/6gen7/6gen11). `App6gen21.tsx` doit
  * le rendre avec `key={indexExercice}`. */
-export function EtapeDomaineEtudeFonctionLog({ estPremierEcran, enonceLatex, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeDomaineEtudeFonctionLog({ enonceLatex, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [reponse, setReponse] = useState<EnsembleReelGuide | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

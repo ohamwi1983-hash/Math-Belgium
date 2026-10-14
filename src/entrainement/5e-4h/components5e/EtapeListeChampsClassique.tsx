@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceSuiteClassique;
-  estPremierEcran: boolean;
   phase: PhaseSuiteClassique;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -32,7 +31,7 @@ interface Props {
 
 /** Écran à PLUSIEURS champs numériques FIXES (jamais add-as-needed) — réutilisé par 10 des 26
  * phases de 5gen17 (2 à 10 champs selon la phase, `labelsListe` détermine le nombre et la casse). */
-export function EtapeListeChampsClassique({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
+export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, diagnostiquerChamp, validation}: Props) {
   const { labels, enLatex } = labelsListe(phase);
   const [valeurs, setValeurs] = useState<string[]>(() => labels.map(() => ""));
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -57,7 +56,6 @@ export function EtapeListeChampsClassique({ exercice, estPremierEcran, phase, te
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale(exercice)}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

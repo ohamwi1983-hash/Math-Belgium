@@ -14,7 +14,6 @@ import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -36,7 +35,7 @@ interface Props {
  * même convention 4e que les coordonnées d'un point — `EtapeCoordonneesRelationVectorielle.tsx`),
  * jamais empilés verticalement comme le rendait `EtapeChampsEtudeComplete` générique.
  */
-export function EtapeCasSpecialEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texteX, setTexteX] = useState("");
   const [texteY, setTexteY] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -52,7 +51,6 @@ export function EtapeCasSpecialEtudeComplete({ exercice, estPremierEcran, tentat
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
       />

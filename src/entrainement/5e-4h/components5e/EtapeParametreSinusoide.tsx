@@ -21,7 +21,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceParametresSinusoide;
-  estPremierEcran: boolean;
   phase: PhaseParametresSinusoide;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -48,7 +47,7 @@ interface Props {
  * `ui5e/recapitulatifParametresSinusoide.ts`), plus l'ancien bloc "état actuel" local
  * (`EtatActuelParametresSinusoide`, retiré ici — doublon visuel).
  */
-export function EtapeParametreSinusoide({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -64,7 +63,6 @@ export function EtapeParametreSinusoide({ exercice, estPremierEcran, phase, tent
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-termes">

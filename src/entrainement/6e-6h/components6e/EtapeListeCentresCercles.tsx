@@ -12,7 +12,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -45,7 +44,7 @@ const MAX_LIGNES = 5;
  * (`soumettreReponseEcran(etat, valeurs: string[])`). `App6gen55.tsx` doit le rendre avec
  * `key={phase}`.
  */
-export function EtapeListeCentresCercles({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeCentresCercles({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [centres, setCentres] = useState<string[]>([""]);
   const [rayon, setRayon] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
@@ -65,7 +64,6 @@ export function EtapeListeCentresCercles({ estPremierEcran, consigneGenerale, bl
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

@@ -10,7 +10,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -44,7 +43,7 @@ interface Props {
  * "Retirer"), jusqu'à `nombreCible+2` lignes (marge pour corriger une saisie sans tout effacer).
  * `App6gen36.tsx` doit le rendre avec `key={phase}`.
  */
-export function EtapeListeEquationsComplexes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, nombreCible, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeListeEquationsComplexes({ consigneGenerale, blocDonnees, consigneEcran, nombreCible, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [lignes, setLignes] = useState<string[]>(() => Array.from({ length: nombreCible }, () => ""));
   const maxLignes = nombreCible + 2;
   const montrerErreurs = tentativesUtilisees > 0;
@@ -69,7 +68,6 @@ export function EtapeListeEquationsComplexes({ estPremierEcran, consigneGenerale
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

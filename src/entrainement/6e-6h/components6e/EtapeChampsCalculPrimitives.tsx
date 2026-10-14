@@ -10,7 +10,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -42,7 +41,6 @@ interface Props {
  * écran).
  */
 export function EtapeChampsCalculPrimitives({
-  estPremierEcran,
   consigneGenerale,
   blocDonnees,
   consigneEcran,
@@ -75,7 +73,6 @@ export function EtapeChampsCalculPrimitives({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

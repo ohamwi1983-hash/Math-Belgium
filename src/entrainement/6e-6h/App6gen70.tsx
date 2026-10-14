@@ -22,7 +22,6 @@ function nouvelleSession(theme: VarianteQuizCombinatoire): EtatSessionQuizCombin
   return demarrerSessionQuizCombinatoire(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
 }
 
-
 /** Contrairement à la plupart des générateurs, le thème (variante) n'est pas tiré au hasard : c'est
  * l'ÉLÈVE qui le choisit sur un écran d'accueil dédié — même principe que 6gen64/65/66/67/68/69. Le
  * panneau dev (`SelecteurVarianteDev`) reste réservé au développement, jamais visible sur l'écran

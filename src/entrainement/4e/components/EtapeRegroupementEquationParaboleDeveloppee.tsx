@@ -14,7 +14,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationParaboleDeveloppee;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -31,7 +30,7 @@ interface Props {
  * développée) reste affiché, fixe, sur les 3 écrans. Champ de texte libre, vérifié par équivalence
  * algébrique à 2 variables (`diagnostiquerRegroupement`).
  */
-export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -43,7 +42,6 @@ export function EtapeRegroupementEquationParaboleDeveloppee({ exercice, estPremi
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_CARACTERISTIQUES_PARABOLE}
         blocDonnees={
           <div className="equation-box">

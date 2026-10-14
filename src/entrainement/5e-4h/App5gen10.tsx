@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type {
   ExerciceEgaliteExpressions,
@@ -249,14 +249,6 @@ export function App5gen10() {
   const tentativesMax = etat.reglages.tentativesMax;
   const cleEcran = `${etat.indexExercice}-${etat.phase}`;
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -287,7 +279,6 @@ export function App5gen10() {
             <EtapeReconnaissanceEquationTrig
               key={cleEcran}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix))}
@@ -299,7 +290,6 @@ export function App5gen10() {
             <EtapeArgumentEquationTrig
               key={cleEcran}
               exercice={commeDirecte(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -314,7 +304,6 @@ export function App5gen10() {
             <EtapeIsolerXEquationTrig
               key={cleEcran}
               exercice={commeDirecte(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -329,7 +318,6 @@ export function App5gen10() {
             <EtapeSolutionsEquationTrig
               key={cleEcran}
               exercice={commeDirecte(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -345,7 +333,6 @@ export function App5gen10() {
             <EtapePrefacteurProduit
               key={cleEcran}
               exercice={commeProduit(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -360,7 +347,6 @@ export function App5gen10() {
             <EtapeSepararFacteursProduit
               key={cleEcran}
               exercice={commeProduit(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -375,7 +361,6 @@ export function App5gen10() {
             <EtapeArgumentProduit
               key={cleEcran}
               exercice={commeProduit(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -390,7 +375,6 @@ export function App5gen10() {
             <EtapeIsolerXProduit
               key={cleEcran}
               exercice={commeProduit(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -405,7 +389,6 @@ export function App5gen10() {
             <EtapeSolutionsProduit
               key={cleEcran}
               exercice={commeProduit(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -421,7 +404,6 @@ export function App5gen10() {
             <EtapeConversionPythagoricienne
               key={cleEcran}
               exercice={commePythagoricienne(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -436,7 +418,6 @@ export function App5gen10() {
             <EtapeRacinesPythagoricienne
               key={cleEcran}
               exercice={commePythagoricienne(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}
@@ -480,7 +461,6 @@ export function App5gen10() {
             <EtapeConversionEgalite
               key={cleEcran}
               exercice={commeEgalite(exercice)}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               niveauAide={etat.niveauAide}

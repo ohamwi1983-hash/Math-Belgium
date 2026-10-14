@@ -11,7 +11,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (valeur: number) => void;
@@ -35,7 +34,7 @@ interface Props {
  * validée à l'écran précédent) devient conceptuellement le bloc "état actuel", aucun changement
  * structurel de son propre rendu.
  */
-export function EtapeResolutionParametreOrthogonalite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeResolutionParametreOrthogonalite({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const valeur = Number(texte.replace(",", "."));
   const complet = texte.trim() !== "";
@@ -45,7 +44,6 @@ export function EtapeResolutionParametreOrthogonalite({ exercice, estPremierEcra
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box">

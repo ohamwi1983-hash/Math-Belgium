@@ -13,7 +13,6 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  estPremierEcran: boolean;
   consigneEcran: string;
   enonceLatex: string;
   /** `null` sur le tout premier écran de chaque famille (rien à rappeler) — voir
@@ -37,7 +36,7 @@ interface Props {
 /** Écran GÉNÉRIQUE à un seul champ texte libre (`6gen17`) — réutilisé par tous les écrans à
  * réponse en expression/valeur libre (B×2, D×3, E×3). `App6gen17.tsx` doit le rendre avec
  * `key={phase}`. Même patron que `EtapeChampLimiteExpo.tsx` (6gen6). */
-export function EtapeChampLimiteLog({ estPremierEcran, consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChampLimiteLog({ consigneEcran, enonceLatex, etatActuel, placeholder, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -49,7 +48,6 @@ export function EtapeChampLimiteLog({ estPremierEcran, consigneEcran, enonceLate
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE}
         blocDonnees={
           <div className="equation-box">

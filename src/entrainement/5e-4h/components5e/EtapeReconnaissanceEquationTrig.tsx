@@ -10,7 +10,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationTrigonometrique;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (choix: FamilleEquationTrigonometrique) => void;
@@ -24,13 +23,12 @@ interface Props {
  * (`.options-grid-compact` + `.btn.toggle-active`, même convention que le reste de la plateforme)
  * suivi d'un bouton "Valider" persistant — jamais d'auto-soumission au clic. Aucune aide sur cet
  * écran (question de reconnaissance, jamais assistée). */
-export function EtapeReconnaissanceEquationTrig({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeReconnaissanceEquationTrig({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<FamilleEquationTrigonometrique | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box equation-box-termes">

@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceFonctionDerivee;
-  estPremierEcran: boolean;
   typeRetenu: TypeDerivee;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -31,7 +30,7 @@ interface Props {
  * (5gen26) mais réécrit localement : le type `ExerciceDefinitionDerivee`/`PhaseDefinitionDerivee`
  * de ce composant est propre à 5gen26, jamais élargi pour un autre générateur. Jamais de
  * calculatrice : générateur purement symbolique/exact. */
-export function EtapeCalculerFonctionDerivee({ exercice, estPremierEcran, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeCalculerFonctionDerivee({ exercice, typeRetenu, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -48,7 +47,6 @@ export function EtapeCalculerFonctionDerivee({ exercice, estPremierEcran, typeRe
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLimite;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +28,7 @@ interface Props {
 
 /** Écran "termeDominant" (famille "limiteInfini" uniquement) — 2 champs symboliques FIXES (jamais
  * add-as-needed, toujours exactement 1 terme dominant par polynôme), vérifiés INDÉPENDAMMENT. */
-export function EtapeTermeDominant({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeTermeDominant({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [numerateur, setNumerateur] = useState("");
   const [denominateur, setDenominateur] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -52,7 +51,6 @@ export function EtapeTermeDominant({ exercice, estPremierEcran, tentativesUtilis
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

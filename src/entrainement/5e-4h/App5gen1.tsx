@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ExerciceDomaineDefinition, FamilleDomaineDefinition } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
@@ -109,14 +109,6 @@ export function App5gen1() {
 
   const exercice: ExerciceDomaineDefinition = etat.exerciceCourant;
 
-  const premierePhaseRef = useRef(etat.phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = etat.phase;
-  }
-  const estPremierEcran = etat.phase === premierePhaseRef.current;
-
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -147,7 +139,6 @@ export function App5gen1() {
             <EtapeCEDomaineDefinition
               key={generationExercice}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideCE}
@@ -166,7 +157,6 @@ export function App5gen1() {
             <EtapeResolutionDomaineDefinition
               key={generationExercice}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               donnees={
@@ -182,7 +172,6 @@ export function App5gen1() {
             <EtapeDomfDomaineDefinition
               key={generationExercice}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDomf}

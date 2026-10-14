@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceLimite;
-  estPremierEcran: boolean;
   phase: "simplifierEvaluer" | "simplifierLimiteRef" | "evaluerLimiteFinale";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -34,7 +33,7 @@ interface Props {
  * selon que le champ attend un nombre/une fraction ou une expression symbolique — fourni par
  * l'appelant, `App5gen20.tsx`, qui connaît le sous-cas réel). `key={phase}` obligatoire côté appelant
  * (React réutiliserait sinon la même instance entre deux écrans, gardant la réponse précédente). */
-export function EtapeChampLibreLimite({ exercice, estPremierEcran, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
+export function EtapeChampLibreLimite({ exercice, phase, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, placeholder, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -51,7 +50,6 @@ export function EtapeChampLibreLimite({ exercice, estPremierEcran, phase, tentat
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale()}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

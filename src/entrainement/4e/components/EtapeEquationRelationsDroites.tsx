@@ -17,7 +17,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceRelationsDroites;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -35,7 +34,7 @@ interface Props {
  * par `exercice.formeSortie` : champ texte libre pour "cartesienne" (même style qu'"Lecture
  * graphique — équation d'une droite"), 4 champs numériques bloqués pour "parametrique".
  */
-export function EtapeEquationRelationsDroites({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationRelationsDroites({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const cartesienne = exercice.formeSortie === "cartesienne";
 
   const [texte, setTexte] = useState("");
@@ -69,7 +68,6 @@ export function EtapeEquationRelationsDroites({ exercice, estPremierEcran, tenta
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleRelationsDroites exercice={exercice} />}
         blocDonnees={
           <div className="equation-box">

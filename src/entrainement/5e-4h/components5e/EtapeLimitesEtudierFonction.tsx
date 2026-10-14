@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudierFonction;
-  estPremierEcran: boolean;
   phase: "limites";
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -37,7 +36,7 @@ function slotEstDeTypeSigne(slot: SlotLimiteEtudierFonction): boolean {
  * `diagnostiquerQuotient` (5gen20/5gen21, réutilisés tels quels côté moteur). Calculatrice ABSENTE
  * (les 4 familles sont purement algébriques, comportement aux bornes déductible sans calcul décimal
  * à la main). */
-export function EtapeLimitesEtudierFonction({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const slots = listeSlotsLimites(exercice);
   const n = slots.length;
   const [valeurs, setValeurs] = useState<ValeurReponseSlotLimite[]>(() => Array(n).fill(null));
@@ -68,7 +67,6 @@ export function EtapeLimitesEtudierFonction({ exercice, estPremierEcran, tentati
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDIER_FONCTION}
         blocDonnees={
           <div className="equation-box equation-box-donnees">

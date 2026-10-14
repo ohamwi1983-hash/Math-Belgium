@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceOrthogonaliteTriangleParametre;
-  estPremierEcran: boolean;
   sommet: Sommet;
   tentativesUtilisees: number;
   tentativesMax: number;
@@ -70,7 +69,7 @@ function Piege({ sommet }: { sommet: Sommet }) {
  * son contenu alimente maintenant le récapitulatif "Ce qu'on sait déjà"
  * (`ui/recapitulatifOrthogonalite.ts`), affiché en haut de `AppOrthogonalite.tsx`.
  */
-export function EtapeReductionSommetOrthogonalite({ exercice, estPremierEcran, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeReductionSommetOrthogonalite({ exercice, sommet, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX[PHASE_PAR_SOMMET[sommet]];
   const complet = texte.trim() !== "";
@@ -80,7 +79,6 @@ export function EtapeReductionSommetOrthogonalite({ exercice, estPremierEcran, s
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

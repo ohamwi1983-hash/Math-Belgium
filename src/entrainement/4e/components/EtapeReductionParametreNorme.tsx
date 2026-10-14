@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceParametreNorme;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
  * $x_{\vec v}$/$y_{\vec v}$ (niveau 1), puis substituée avec les valeurs réelles, non résolue
  * (niveau 2).
  */
-export function EtapeReductionParametreNorme({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
+export function EtapeReductionParametreNorme({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const max = NIVEAU_AIDE_MAX.reductionParametreNorme;
   const complet = texte.trim() !== "";
@@ -41,7 +40,6 @@ export function EtapeReductionParametreNorme({ exercice, estPremierEcran, tentat
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<RenduFragments fragments={segmentsConsigneParametre(exercice)} />}
         blocDonnees={
           <div className="equation-box equation-box-termes">

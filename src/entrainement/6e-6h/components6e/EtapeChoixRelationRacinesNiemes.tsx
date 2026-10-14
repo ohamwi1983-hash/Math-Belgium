@@ -10,7 +10,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -36,7 +35,7 @@ interface Props {
  * des boutons — synchronisé avec `diagnostiquerCEcran1`, qui compare directement l'identifiant
  * choisi à `"correct"`.
  */
-export function EtapeChoixRelationRacinesNiemes({ estPremierEcran, consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
+export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<IdRelationRacineUnite | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
 
@@ -48,7 +47,6 @@ export function EtapeChoixRelationRacinesNiemes({ estPremierEcran, consigneGener
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

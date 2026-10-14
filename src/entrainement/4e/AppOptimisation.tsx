@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -105,16 +105,6 @@ export function AppOptimisation() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
-  /** `estPremierEcran` : vrai uniquement sur le premier écran vu pour CET `exercice` (voir
-   * `EnTeteExercice.tsx`, option 1B "plein puis compact"). */
-  const premierePhaseRef = useRef(phase);
-  const dernierExerciceRef = useRef(exercice);
-  if (dernierExerciceRef.current !== exercice) {
-    dernierExerciceRef.current = exercice;
-    premierePhaseRef.current = phase;
-  }
-  const estPremierEcran = phase === premierePhaseRef.current;
-
   const optionCorrecte = exercice.optionsInterpretation.find((option) => option.correcte);
 
   const recapitulatif = calculerRecapitulatifOptimisation(etat);
@@ -174,7 +164,6 @@ export function AppOptimisation() {
             <EtapeIdentificationOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
@@ -184,7 +173,6 @@ export function AppOptimisation() {
             <EtapeContrainteEtGrandeurOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideContrainteEtGrandeur}
@@ -196,7 +184,6 @@ export function AppOptimisation() {
             <EtapeSystemeOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSysteme}
@@ -208,7 +195,6 @@ export function AppOptimisation() {
             <EtapeDomaineOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDomaine}
@@ -220,7 +206,6 @@ export function AppOptimisation() {
             <EtapeSommetOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideSommet}
@@ -232,7 +217,6 @@ export function AppOptimisation() {
             <EtapeDecisionOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDecision}
@@ -244,7 +228,6 @@ export function AppOptimisation() {
             <EtapeInterpretationOptimisation
               key={phase}
               exercice={exercice}
-              estPremierEcran={estPremierEcran}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideInterpretation}

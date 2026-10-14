@@ -15,7 +15,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEquationTrig;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -38,7 +37,7 @@ interface Props {
  * uniquement, jamais tan — D.1, même patron que `EtapeCEDomaineDefinition.tsx`). Calculatrice
  * scientifique affichée UNIQUEMENT en régime "decimal" (D.1 — jamais pour une valeur d'angle
  * particulier, régime "exact"). */
-export function EtapeArgumentEquationTrig({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const gateActif = exercice.fonction !== "tan";
   const [choixAucuneSolution, setChoixAucuneSolution] = useState<boolean | null>(gateActif ? null : false);
   const [lignes, setLignes] = useState<string[]>([""]);
@@ -68,7 +67,6 @@ export function EtapeArgumentEquationTrig({ exercice, estPremierEcran, tentative
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG}
         blocDonnees={
           <div className="equation-box">

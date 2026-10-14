@@ -13,7 +13,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceEtudeCompletePipeline;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -30,7 +29,7 @@ interface Props {
 /** Écran "av" — gate "Pas de AV"/"Au moins une AV" (`.options-grid` + `.btn.toggle-active`, même
  * patron que `EtapeCEDomaineDefinition.tsx`) puis, si "Au moins une AV", liste add-as-needed des
  * équations (une valeur numérique par ligne, jamais les points vides — simplifiés). */
-export function EtapeAVEtudeComplete({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [auMoinsUneAV, setAuMoinsUneAV] = useState<boolean | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
@@ -61,7 +60,6 @@ export function EtapeAVEtudeComplete({ exercice, estPremierEcran, tentativesUtil
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={CONSIGNE_GENERALE_ETUDE_COMPLETE}
         blocDonnees={<BlocDonneesEtudeComplete exercice={exercice} />}
       />

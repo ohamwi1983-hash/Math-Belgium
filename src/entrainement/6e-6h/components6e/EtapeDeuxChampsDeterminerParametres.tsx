@@ -11,7 +11,6 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  estPremierEcran: boolean;
   consigneGenerale: string;
   blocDonnees: string[];
   consigneEcran: string;
@@ -41,7 +40,6 @@ interface Props {
  * `App6gen18.tsx` doit le rendre avec `key={phase}`.
  */
 export function EtapeDeuxChampsDeterminerParametres({
-  estPremierEcran,
   consigneGenerale,
   blocDonnees,
   consigneEcran,
@@ -73,7 +71,6 @@ export function EtapeDeuxChampsDeterminerParametres({
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGenerale}
         blocDonnees={
           <div className="equation-box">

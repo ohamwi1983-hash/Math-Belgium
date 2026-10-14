@@ -12,7 +12,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceColinearPointsParametre;
-  estPremierEcran: boolean;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -41,7 +40,7 @@ interface Props {
  * retiré — son contenu alimente maintenant le récapitulatif "Ce qu'on sait déjà"
  * (`ui/recapitulatifColinearite.ts`), affiché en haut de `AppColinearite.tsx`.
  */
-export function EtapeReductionAvecXColinearite({ exercice, estPremierEcran, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeReductionAvecXColinearite({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
 
   const complet = texte.trim() !== "";
@@ -51,7 +50,6 @@ export function EtapeReductionAvecXColinearite({ exercice, estPremierEcran, tent
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={consigneGlobale}
         blocDonnees={
           <div className="equation-box equation-box-termes">

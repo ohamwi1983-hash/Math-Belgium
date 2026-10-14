@@ -19,7 +19,6 @@ import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
   exercice: ExerciceDistanceDroite;
-  estPremierEcran: boolean;
   point: Point;
   droiteCible: DroiteImplicite;
   bAttendue: DroiteImplicite;
@@ -42,7 +41,7 @@ interface Props {
  * équation d'une droite". `b` n'apparaît sur le graphe illustratif QUE via l'aide niveau 1
  * (`promptgen47modifications.md`, point 7) — jamais avant, pour ne pas donner la réponse.
  */
-export function EtapeEquationBDistanceDroite({ exercice, estPremierEcran, point, droiteCible, bAttendue, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
+export function EtapeEquationBDistanceDroite({ exercice, point, droiteCible, bAttendue, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
 
@@ -62,7 +61,6 @@ export function EtapeEquationBDistanceDroite({ exercice, estPremierEcran, point,
   return (
     <div>
       <EnTeteExercice
-        estPremierEcran={estPremierEcran}
         consigneGenerale={<ConsigneGeneraleDistanceDroite exercice={exercice} />}
         blocDonnees={
           <>
