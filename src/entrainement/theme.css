@@ -348,6 +348,42 @@
   cursor: pointer;
 }
 
+/* Bloc consigne générale + bloc de données, fusionnés et mis en évidence en un bandeau teinté
+ * (maquette "A — Bandeau teinté", choisie après présentation de 4 propositions) — pleine largeur de
+ * la carte (bleed sur le padding de `.card-body`, même technique que `.recap-panel` plus bas dans ce
+ * fichier), pour que l'élève distingue immédiatement ce qui est FIXE pour tout l'exercice de la
+ * question propre à l'écran courant (`.prompt-text:not(:has(~ .prompt-text))` ci-dessous, filet
+ * d'accent à gauche). Le texte/l'équation ne gagnent pas en largeur (padding horizontal égal à celui
+ * de `.card-body`, annulé puis réappliqué par les 2 règles ci-dessous) — seul le fond bleedé change. */
+.entrainement .entete-exercice {
+  margin: 4px 0 22px;
+  padding: 16px var(--card-body-padding) 18px;
+  background: var(--color-primary-bg);
+}
+
+.entrainement .card-body .entete-exercice {
+  margin-left: calc(-1 * var(--card-body-padding));
+  margin-right: calc(-1 * var(--card-body-padding));
+}
+
+/* Le dernier enfant direct (la consigne elle-même si `blocDonnees` est vide, sinon le bloc de
+ * données) ne doit pas ajouter sa propre marge basse au-dessus du padding bas du bandeau — sinon les
+ * deux s'additionnent (ex. 22px de `.equation-box` + 18px du bandeau). Générique plutôt que ciblé sur
+ * `.equation-box` : `blocDonnees` peut aussi être un tableau, un graphe Mafs, etc. */
+.entrainement .entete-exercice > *:last-child {
+  margin-bottom: 0;
+}
+
+.entrainement .entete-exercice-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin: 0 0 8px;
+}
+
 .entrainement .prompt-text {
   font-size: 14px;
   color: var(--color-text-muted);
@@ -374,6 +410,23 @@
   color: var(--color-text);
   padding-left: 12px;
   border-left: 3px solid var(--color-primary);
+}
+
+/* À l'intérieur du bandeau, la consigne générale reste discrète — c'est l'étiquette "Énoncé"
+ * (`.entete-exercice-label`) qui porte la mise en évidence, pas elle. Sans cette règle,
+ * `.prompt-text:not(:has(~ .prompt-text))` ci-dessus s'appliquerait AUSSI à elle (seul
+ * `.prompt-text` de `.entete-exercice` quand `blocDonnees` est vide — jamais un vrai sibling de la
+ * question spécifique, qui vit dans un autre conteneur), lui donnant à tort le même poids visuel que
+ * la question spécifique (bug préexistant trouvé en implémentant ce bandeau : c'était déjà le cas
+ * avant cette règle). Spécificité identique aux deux règles ci-dessus (3 classes) : placée APRÈS
+ * elles pour gagner sur l'ordre dans la cascade, plutôt qu'un `!important` ou une classe répétée. */
+.entrainement .entete-exercice .prompt-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  padding-left: 0;
+  border-left: none;
+  margin: 0;
 }
 
 .entrainement .options-grid {
