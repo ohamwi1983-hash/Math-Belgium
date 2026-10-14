@@ -1,8 +1,5 @@
 import { useState } from "react";
-import type { FacteurQuadratiqueIrreductible } from "../core/signesProduit.types";
 import type { SigneA } from "../core/inequation.types";
-import { Katex } from "./Katex";
-import { formatFacteurLatex } from "../ui/formatSignesProduit";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
@@ -10,16 +7,9 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
-  facteur: FacteurQuadratiqueIrreductible;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
-  /** Remplace l'encadré principal par défaut (le facteur seul) — l'inéquation complète (promptgenerateur5signesProduit.md, point 1). */
-  expressionAffichee?: string;
-  /** Version "bloc fitter" de `expressionAffichee` (`promptblocfittertousgenerateurs.md`) — un
-   * fragment KaTeX par facteur parenthésé plutôt qu'une seule chaîne. Prioritaire sur
-   * `expressionAffichee` quand fourni. */
-  expressionAfficheeTermes?: string[];
   /** Bloc "état actuel" isolant ce facteur — absent/null par défaut : rien de rendu. */
   etatActuel?: string | null;
   onValider: (reponse: SigneA) => void;
@@ -36,12 +26,9 @@ interface Props {
  * signes") mais sans croquis (pas de parabole unique ici, ce n'est qu'un facteur parmi d'autres).
  */
 export function EtapeSigneIrreductible({
-  facteur,
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  expressionAffichee,
-  expressionAfficheeTermes,
   etatActuel,
   onValider,
   validation,
@@ -51,17 +38,6 @@ export function EtapeSigneIrreductible({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      {expressionAfficheeTermes !== undefined ? (
-        <div className="equation-box equation-box-termes">
-          {expressionAfficheeTermes.map((terme, i) => (
-            <Katex key={i} expression={terme} />
-          ))}
-        </div>
-      ) : (
-        <div className="equation-box">
-          <Katex expression={expressionAffichee ?? formatFacteurLatex(facteur)} block />
-        </div>
-      )}
       <EtatActuelPanel latex={etatActuel ?? null} />
       <p className="prompt-text">Ce facteur est-il toujours positif ou toujours négatif ?</p>
       <div className="options-grid">

@@ -343,13 +343,21 @@ export function AppSignesProduit() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box equation-box-termes">
+                {expressionEnonceTermes.map((terme, i) => (
+                  <Katex key={i} expression={terme} />
+                ))}
+              </div>
+            }
+          />
           {etat.phase === "racineLineaire" && facteurCourant?.type === "lineaire" ? (
             <EtapeRacineLineaire
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              expressionAfficheeTermes={expressionEnonceTermes}
               etatActuel={etatActuel as string}
               onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine))}
               validation={validation}
@@ -362,6 +370,7 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
+              masquerBlocDonnees
               etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(facteurCourant.exercice, v)}
               aideActivee={etat.aideReductionFacteurUtilisee}
@@ -376,6 +385,7 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
+              masquerBlocDonnees
               etatActuel={etatActuel}
               options={OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE}
               question="Quelle est la méthode la plus rapide pour factoriser ce facteur ?"
@@ -389,6 +399,7 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
+              masquerBlocDonnees
               etatActuel={etatActuel}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(factorisable, v)}
               aideActivee={etat.aideFactorisationChamp1Utilisee}
@@ -408,6 +419,7 @@ export function AppSignesProduit() {
               placeholderPrefixe="racine"
               prefixeChamp="x ="
               expressionAfficheeTermes={expressionEnonceTermes}
+              masquerBlocDonnees
               etatActuel={etatActuel}
               aideActivee={etat.aideFactorisationChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp2(etat))}
@@ -421,6 +433,7 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAfficheeTermes={expressionEnonceTermes}
+              masquerBlocDonnees
               etatActuel={etatActuel}
               labelFactorisation="Forme factorisée"
               etapeFactorisationForcee
@@ -432,11 +445,9 @@ export function AppSignesProduit() {
             />
           ) : etat.phase === "signeIrreductible" && irreductibleCourant ? (
             <EtapeSigneIrreductible
-              facteur={irreductibleCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              expressionAfficheeTermes={expressionEnonceTermes}
               etatActuel={etatActuel}
               onValider={(reponse) => terminerEtape(soumettreReponseSigneIrreductible(etat, reponse))}
               validation={validation}

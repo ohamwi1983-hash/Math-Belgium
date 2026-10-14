@@ -57,6 +57,14 @@ interface Props {
    */
   enonceFixe?: string;
   /**
+   * Masque le bloc "énoncé" local (enonceFixe / expressionAfficheeTermes / expression par défaut) —
+   * absent/false par défaut : comportement historique inchangé. `true` : l'appelant affiche déjà
+   * cette donnée de façon centralisée (`EnTeteExercice`, blocDonnees) et ce bloc serait redondant
+   * ici. `EtatActuelPanel` et un `expressionAffichee` réellement distinct d'`enonceFixe` restent
+   * affichés — seul le bloc "fixe" disparaît.
+   */
+  masquerBlocDonnees?: boolean;
+  /**
    * Aide à sens unique (1 seul niveau, ×0,5 sur le score) — absente par défaut : aucun bouton
    * rendu (comportement historique inchangé pour les appelants qui ne fournissent pas
    * `onActiverAide`, ex. le générateur "Analyse d'une fonction du second degré" qui réutilise ce
@@ -101,6 +109,7 @@ export function EtapeRacinesFlexibles({
   etatActuel,
   etatActuelLabel,
   enonceFixe,
+  masquerBlocDonnees = false,
   aideActivee,
   onActiverAide,
   texteAide = "Une fois l'expression factorisée, chaque facteur égalé à 0 donne une racine.",
@@ -147,9 +156,11 @@ export function EtapeRacinesFlexibles({
       <RecapitulatifPanel entrees={recapitulatif} />
       {enonceFixe !== undefined ? (
         <>
-          <div className="equation-box">
-            <Katex expression={enonceFixe} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={enonceFixe} block />
+            </div>
+          )}
           <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
@@ -159,23 +170,27 @@ export function EtapeRacinesFlexibles({
         </>
       ) : expressionAfficheeTermes !== undefined ? (
         <>
-          <div className="equation-box equation-box-termes">
-            {expressionAfficheeTermes.map((terme, i) => (
-              <Katex key={i} expression={terme} />
-            ))}
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box equation-box-termes">
+              {expressionAfficheeTermes.map((terme, i) => (
+                <Katex key={i} expression={terme} />
+              ))}
+            </div>
+          )}
           <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
         </>
       ) : (
         <>
-          <div className="equation-box">
-            <Katex
-              expression={
-                expressionAffichee ?? formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage)
-              }
-              block
-            />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex
+                expression={
+                  expressionAffichee ?? formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage)
+                }
+                block
+              />
+            </div>
+          )}
           <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
         </>
       )}

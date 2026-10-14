@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { EtatActuelPanel } from "./EtatActuelPanel";
-import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -10,14 +9,6 @@ interface Props {
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
-  /** L'inéquation complète (encadré principal, toujours affichée — voir AppSignesProduit.tsx).
-   * Devenu optionnel avec l'ajout de `expressionAfficheeTermes` ci-dessous — au moins l'un des deux
-   * doit être fourni par l'appelant (garanti côté `AppSignesProduit.tsx`, seul consommateur). */
-  expressionAffichee?: string;
-  /** Version "bloc fitter" de `expressionAffichee` (`promptblocfittertousgenerateurs.md`) — un
-   * fragment KaTeX par facteur parenthésé plutôt qu'une seule chaîne, pour un retour à la ligne
-   * propre sur mobile étroit. Prioritaire sur `expressionAffichee` quand fourni. */
-  expressionAfficheeTermes?: string[];
   /** Le facteur linéaire isolé courant, ex. "3x + 3 = 0" (encadré "état actuel"). */
   etatActuel: string;
   onValider: (racine: number) => void;
@@ -41,8 +32,6 @@ export function EtapeRacineLineaire({
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
-  expressionAffichee,
-  expressionAfficheeTermes,
   etatActuel,
   onValider,
   validation,
@@ -55,17 +44,6 @@ export function EtapeRacineLineaire({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      {expressionAfficheeTermes !== undefined ? (
-        <div className="equation-box equation-box-termes">
-          {expressionAfficheeTermes.map((terme, i) => (
-            <Katex key={i} expression={terme} />
-          ))}
-        </div>
-      ) : (
-        <div className="equation-box">
-          <Katex expression={expressionAffichee ?? ""} block />
-        </div>
-      )}
       <EtatActuelPanel latex={etatActuel} />
       <p className="prompt-text">Quelle est la racine de ce facteur ?</p>
       <div className="field">

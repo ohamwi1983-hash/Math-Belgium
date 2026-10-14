@@ -59,6 +59,13 @@ interface Props {
    * réponse de la forme "k(...)" plutôt qu'un polynôme divisé par k.
    */
   variante?: "reduction" | "miseEnEvidence";
+  /**
+   * Masque le bloc "énoncé" local (expressionAfficheeTermes / formatPolynome par défaut) —
+   * absent/false par défaut : comportement historique inchangé. `true` : l'appelant affiche déjà
+   * cette donnée de façon centralisée (`EnTeteExercice`, blocDonnees) et ce bloc serait redondant
+   * ici. `EtatActuelPanel` reste affiché.
+   */
+  masquerBlocDonnees?: boolean;
   validation?: ValidationEtapeProps | null;
 }
 
@@ -90,6 +97,7 @@ export function EtapeReductionCoefficients({
   etatActuel,
   variante = "reduction",
   prefixeExpression,
+  masquerBlocDonnees = false,
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
@@ -99,20 +107,21 @@ export function EtapeReductionCoefficients({
   return (
     <div>
       {recapitulatif !== undefined && <RecapitulatifPanel entrees={recapitulatif} />}
-      {expressionAfficheeTermes !== undefined ? (
-        <div className="equation-box equation-box-termes">
-          {expressionAfficheeTermes.map((terme, i) => (
-            <Katex key={i} expression={terme} />
-          ))}
-        </div>
-      ) : (
-        <div className="equation-box">
-          <Katex
-            expression={prefixeExpression !== undefined ? `${prefixeExpression} = ${formatPolynome(exercice)}` : formatPolynome(exercice)}
-            block
-          />
-        </div>
-      )}
+      {!masquerBlocDonnees &&
+        (expressionAfficheeTermes !== undefined ? (
+          <div className="equation-box equation-box-termes">
+            {expressionAfficheeTermes.map((terme, i) => (
+              <Katex key={i} expression={terme} />
+            ))}
+          </div>
+        ) : (
+          <div className="equation-box">
+            <Katex
+              expression={prefixeExpression !== undefined ? `${prefixeExpression} = ${formatPolynome(exercice)}` : formatPolynome(exercice)}
+              block
+            />
+          </div>
+        ))}
       {etatActuel !== undefined && <EtatActuelPanel latex={etatActuel} />}
       <p className="prompt-text">
         {variante === "miseEnEvidence"
