@@ -10,7 +10,7 @@ import { EtapeExtractionCaracteristiquesDroite } from "./components/EtapeExtract
 import { Katex } from "./components/Katex";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifCaracteristiquesDroite } from "./ui/recapitulatifCaracteristiquesDroite";
-import { formatCaracteristiquesAttenduesLatex, formatEtatActuelPointVecteurLatex } from "./ui/formatCaracteristiquesDroite";
+import { formatCaracteristiquesAttenduesLatex, formatEnonceLatex, formatEtatActuelPointVecteurLatex } from "./ui/formatCaracteristiquesDroite";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Détermine les caractéristiques de cette droite.";
@@ -99,7 +99,14 @@ export function AppCaracteristiquesDroite() {
 
       <main className="card">
         <div className="card-body">
-        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+        <EnTeteExercice
+          consigneGenerale={CONSIGNE_GENERALE}
+          blocDonnees={
+            <div className="equation-box">
+              <Katex expression={formatEnonceLatex(exercice)} />
+            </div>
+          }
+        />
         <RecapitulatifPanel entrees={recapitulatif} />
         {etat.phase === "extraction" ? (
           <EtapeExtractionCaracteristiquesDroite

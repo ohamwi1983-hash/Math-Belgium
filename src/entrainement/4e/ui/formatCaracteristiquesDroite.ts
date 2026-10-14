@@ -53,11 +53,12 @@ export function formatDroiteEntreeLatex(exercice: ExerciceCaracteristiquesDroite
   }
 }
 
-/** Bloc énoncé fixe — la droite de départ, toujours affichée telle quelle sur les 2 écrans. Ce
- * qui sera demandé n'est plus embarqué dans cette même expression LaTeX (débordement mobile sur
- * la variante paramétrique, `\begin{cases}` déjà large + texte "(à déterminer : ...)" — correction
- * transversale chapitre 6, point 6) : cette information est déjà portée par la consigne dédiée de
- * chaque écran (`segmentsConsigneExtraction`/`segmentsConsigneCaracteristiques`), jamais perdue. */
+/** Bloc énoncé fixe — la droite de départ, affichée une seule fois dans le bloc de données de
+ * l'en-tête de l'exercice (jamais répétée écran par écran). Ce qui sera demandé n'est plus
+ * embarqué dans cette même expression LaTeX (débordement mobile sur la variante paramétrique,
+ * `\begin{cases}` déjà large + texte "(à déterminer : ...)" — correction transversale chapitre 6,
+ * point 6) : cette information est déjà portée par la consigne dédiée de chaque écran
+ * (`segmentsConsigneExtraction`/`segmentsConsigneCaracteristiques`), jamais perdue. */
 export function formatEnonceLatex(exercice: ExerciceCaracteristiquesDroite): string {
   return formatDroiteEntreeLatex(exercice);
 }
@@ -189,13 +190,14 @@ function fragmentsChampPrincipal(caracteristiqueDemandee: CaracteristiqueDemande
 }
 
 /** Consigne générale de l'écran 2 — adapte "Quel est.../Quelle est..." et le champ principal
- * (angle avec Ox, angle avec Oy, ou pente) selon `exercice.caracteristiqueDemandee`, suivie du
- * bloc de données (l'équation, déjà affichée juste en dessous par le composant) —
- * `promptgen46modifications.md`, point 2. Le détail "indique 'n'existe pas' si..." n'est plus
- * répété ici : les deux blocs Existe/N'existe pas de l'écran (point 3) le rendent déjà explicite. */
+ * (angle avec Ox, angle avec Oy, ou pente) selon `exercice.caracteristiqueDemandee`,
+ * `promptgen46modifications.md`, point 2. Le détail "indique 'n'existe pas' si..." n'est pas
+ * répété ici : les deux blocs Existe/N'existe pas de l'écran (point 3) le rendent déjà explicite.
+ * Se termine par "?" (pas par ": [équation]") — l'équation de la droite est affichée une seule
+ * fois, dans le bloc de données de l'en-tête de l'exercice, jamais répétée ici. */
 export function segmentsConsigneCaracteristiques(exercice: ExerciceCaracteristiquesDroite): FragmentConsigne[] {
   const prefixe = exercice.caracteristiqueDemandee === "pente" ? "Quelle est " : "Quel est ";
-  return [texte(prefixe), ...fragmentsChampPrincipal(exercice.caracteristiqueDemandee), texte(" et l'ordonnée à l'origine de la droite d'équation :")];
+  return [texte(prefixe), ...fragmentsChampPrincipal(exercice.caracteristiqueDemandee), texte(" et l'ordonnée à l'origine de cette droite ?")];
 }
 
 /** Question du bloc "pente" (écran 2, point 3) — n'apparaît que quand `caracteristiqueDemandee ===

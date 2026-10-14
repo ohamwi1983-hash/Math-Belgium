@@ -4,7 +4,7 @@ import { NIVEAU_AIDE_MAX_EXTRACTION } from "../moteur/sessionCaracteristiquesDro
 import { diagnostiquerExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseExtraction } from "../moteur/verificationCaracteristiquesDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, formatAideExtractionNiveau2Latex, formatEnonceLatex, segmentsAideExtractionNiveau1 } from "../ui/formatCaracteristiquesDroite";
+import { PLACEHOLDER_COMPOSANTE, PLACEHOLDER_COORDONNEE, formatAideExtractionNiveau2Latex, segmentsAideExtractionNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneExtractionCaracteristiquesDroite } from "./ConsigneExtractionCaracteristiquesDroite";
 import { Katex } from "./Katex";
@@ -63,9 +63,6 @@ export function EtapeExtractionCaracteristiquesDroite({ exercice, tentativesUtil
   return (
     <div>
       <ConsigneExtractionCaracteristiquesDroite exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
 
       {[champsPoint, champsVecteur].map((paire) => (
         <div key={paire[0]!.id} className="field-row">

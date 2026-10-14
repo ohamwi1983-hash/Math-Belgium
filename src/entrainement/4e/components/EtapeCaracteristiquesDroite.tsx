@@ -4,7 +4,7 @@ import { NIVEAU_AIDE_MAX_CARACTERISTIQUES } from "../moteur/sessionCaracteristiq
 import { cibleChampPrincipal, diagnostiquerCaracteristiques, diagnostiquerChamp } from "../moteur/verificationCaracteristiquesDroite";
 import type { ReponseCaracteristiques, ReponseChamp } from "../moteur/verificationCaracteristiquesDroite";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { PLACEHOLDER_ANGLE, PLACEHOLDER_ORDONNEE, PLACEHOLDER_PENTE, QUESTION_ORDONNEE, QUESTION_PENTE, formatAideCaracteristiquesNiveau2Latex, formatEnonceLatex, segmentsAideCaracteristiquesNiveau1 } from "../ui/formatCaracteristiquesDroite";
+import { PLACEHOLDER_ANGLE, PLACEHOLDER_ORDONNEE, PLACEHOLDER_PENTE, QUESTION_ORDONNEE, QUESTION_PENTE, formatAideCaracteristiquesNiveau2Latex, segmentsAideCaracteristiquesNiveau1 } from "../ui/formatCaracteristiquesDroite";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ConsigneCaracteristiquesDroiteEcran2 } from "./ConsigneCaracteristiquesDroiteEcran2";
 import { Katex } from "./Katex";
@@ -84,9 +84,6 @@ export function EtapeCaracteristiquesDroite({ exercice, tentativesUtilisees, ten
   return (
     <div>
       <ConsigneCaracteristiquesDroiteEcran2 exercice={exercice} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceLatex(exercice)} />
-      </div>
 
       {estAngle ? (
         <div className="field">
