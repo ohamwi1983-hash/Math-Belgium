@@ -1,8 +1,5 @@
 import { useState } from "react";
-import type { Exercice } from "../core/generateur.types";
-import { Katex } from "./Katex";
 import { ApercuExpressionLatex } from "./ApercuExpressionLatex";
-import { formatEnonceAffichage } from "../ui/formatEquation";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -10,7 +7,6 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 
 interface Props {
-  exercice: Exercice;
   tentativesUtilisees: number;
   tentativesMax: number;
   diagnostiquer: (valeur: string) => StatutVerification;
@@ -31,7 +27,6 @@ interface Props {
  * totalement différent) pour ne pas créer de collision de nom entre deux générateurs indépendants.
  */
 export function EtapeSimplificationCoefficients({
-  exercice,
   tentativesUtilisees,
   tentativesMax,
   diagnostiquer,
@@ -41,13 +36,9 @@ export function EtapeSimplificationCoefficients({
   validation,
 }: Props) {
   const [reponse, setReponse] = useState("");
-  const expression = formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel);
 
   return (
     <div>
-      <div className="equation-box">
-        <Katex expression={expression} block />
-      </div>
       <p className="prompt-text">Simplifie cette équation au maximum (coefficients entiers, sans facteur commun).</p>
       <ApercuExpressionLatex texte={reponse} label="Équation simplifiée :" />
       <div className="field">

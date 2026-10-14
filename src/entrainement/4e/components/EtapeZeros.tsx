@@ -26,6 +26,12 @@ interface Props {
    * bug utilisateur du 26/09, voir historique).
    */
   enonceFixe?: string;
+  /**
+   * Masque le bloc "énoncé" local — absent/false par défaut : comportement historique inchangé.
+   * `true` : l'appelant affiche déjà cette donnée de façon centralisée (`EnTeteExercice`,
+   * blocDonnees) et ce bloc serait redondant ici.
+   */
+  masquerBlocDonnees?: boolean;
   aideActivee: boolean;
   onActiverAide: () => void;
   onValider: (reponse: ReponseZeros) => void;
@@ -48,6 +54,7 @@ export function EtapeZeros({
   tentativesMax,
   recapitulatif,
   enonceFixe,
+  masquerBlocDonnees = false,
   aideActivee,
   onActiverAide,
   onValider,
@@ -109,15 +116,17 @@ export function EtapeZeros({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex
-          expression={
-            enonceFixe ??
-            formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel)
-          }
-          block
-        />
-      </div>
+      {!masquerBlocDonnees && (
+        <div className="equation-box">
+          <Katex
+            expression={
+              enonceFixe ??
+              formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel)
+            }
+            block
+          />
+        </div>
+      )}
       <p className="prompt-text">Quelles sont les solutions de cette équation ?</p>
       <div className="options-grid">
         <button type="button" className={choix === "aucun" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucun")}>

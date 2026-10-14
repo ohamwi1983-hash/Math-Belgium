@@ -41,6 +41,13 @@ interface Props {
    */
   enonceFixe?: string;
   /**
+   * Masque le bloc "énoncé" local (enonceFixe / expression par défaut) — absent/false par défaut :
+   * comportement historique inchangé. `true` : l'appelant affiche déjà cette donnée de façon
+   * centralisée (`EnTeteExercice`, blocDonnees) et ce bloc serait redondant ici. Un `expressionAffichee`
+   * réellement distinct d'`enonceFixe` reste affiché — seul le bloc "fixe" disparaît.
+   */
+  masquerBlocDonnees?: boolean;
+  /**
    * Statut à 3 valeurs (convention CLAUDE.md) — fournit le diagnostic correspondant à ce champ
    * (`diagnostiquerIsolement`). Absent par défaut : message générique inchangé, comme avant
    * l'introduction de ce statut (prompt-generateurs123vague2.md, générateur 1, point 3).
@@ -67,6 +74,7 @@ export function EtapeIsolement({
   question,
   label,
   enonceFixe,
+  masquerBlocDonnees = false,
   diagnostiquer,
   aideActivee,
   onActiverAide,
@@ -89,9 +97,11 @@ export function EtapeIsolement({
       <RecapitulatifPanel entrees={recapitulatif ?? []} />
       {enonceFixe !== undefined ? (
         <>
-          <div className="equation-box">
-            <Katex expression={enonceFixe} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={enonceFixe} block />
+            </div>
+          )}
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
               <Katex expression={expressionAffichee} block />
@@ -100,9 +110,11 @@ export function EtapeIsolement({
         </>
       ) : (
         <>
-          <div className="equation-box">
-            <Katex expression={expressionParDefaut()} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={expressionParDefaut()} block />
+            </div>
+          )}
         </>
       )}
       <p className="prompt-text">{question ?? "Réécris cette équation sous la forme ax² + bx + c = 0."}</p>

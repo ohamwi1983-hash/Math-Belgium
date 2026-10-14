@@ -199,11 +199,17 @@ export function AppMethodeRapide() {
       <main className="card">
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={enonceFixe} block />
+              </div>
+            }
+          />
           {phase === "simplification" ? (
             <EtapeSimplificationCoefficients
               key={phase}
-              exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
@@ -217,6 +223,7 @@ export function AppMethodeRapide() {
               key={phase}
               exercice={exercice}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -233,6 +240,7 @@ export function AppMethodeRapide() {
               key={phase}
               exercice={exercice}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -247,6 +255,7 @@ export function AppMethodeRapide() {
               key={phase}
               exercice={exercice}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -258,6 +267,7 @@ export function AppMethodeRapide() {
               key={phase}
               exercice={exercice}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -272,6 +282,7 @@ export function AppMethodeRapide() {
               key={phase}
               exercice={exercice}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}

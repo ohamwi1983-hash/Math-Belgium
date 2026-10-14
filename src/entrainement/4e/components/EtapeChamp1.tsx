@@ -45,6 +45,14 @@ interface Props {
    */
   enonceFixe?: string;
   /**
+   * Masque le bloc "énoncé" local (enonceFixe / expressionAfficheeTermes / expression par défaut) —
+   * absent/false par défaut : comportement historique inchangé. `true` : l'appelant affiche déjà
+   * cette donnée de façon centralisée (`EnTeteExercice`, blocDonnees) et ce bloc serait redondant
+   * ici. `EtatActuelPanel` et un `expressionAffichee` réellement distinct d'`enonceFixe` restent
+   * affichés — seul le bloc "fixe" disparaît.
+   */
+  masquerBlocDonnees?: boolean;
+  /**
    * Statut à 3 valeurs (convention CLAUDE.md) — fournit le diagnostic correspondant au champ
    * verifié pour CE contexte d'appel précis (`diagnostiquerChampPrincipal` ou
    * `diagnostiquerFactorisationCasGeneral` selon l'étape, voire un diagnostic propre à un autre
@@ -98,6 +106,7 @@ export function EtapeChamp1({
   etatActuel,
   etatActuelLabel,
   enonceFixe,
+  masquerBlocDonnees = false,
   diagnostiquer,
   aideActivee,
   onActiverAide,
@@ -127,9 +136,11 @@ export function EtapeChamp1({
       <RecapitulatifPanel entrees={recapitulatif} />
       {enonceFixe !== undefined ? (
         <>
-          <div className="equation-box">
-            <Katex expression={enonceFixe} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={enonceFixe} block />
+            </div>
+          )}
           <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
           {expressionAffichee !== undefined && expressionAffichee !== enonceFixe && (
             <div className="equation-box">
@@ -139,18 +150,22 @@ export function EtapeChamp1({
         </>
       ) : expressionAfficheeTermes !== undefined ? (
         <>
-          <div className="equation-box equation-box-termes">
-            {expressionAfficheeTermes.map((terme, i) => (
-              <Katex key={i} expression={terme} />
-            ))}
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box equation-box-termes">
+              {expressionAfficheeTermes.map((terme, i) => (
+                <Katex key={i} expression={terme} />
+              ))}
+            </div>
+          )}
           <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
         </>
       ) : (
         <>
-          <div className="equation-box">
-            <Katex expression={expressionParDefaut} block />
-          </div>
+          {!masquerBlocDonnees && (
+            <div className="equation-box">
+              <Katex expression={expressionParDefaut} block />
+            </div>
+          )}
           <EtatActuelPanel latex={etatActuel ?? null} label={etatActuelLabel} />
         </>
       )}
