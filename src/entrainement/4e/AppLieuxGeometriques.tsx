@@ -16,12 +16,15 @@ import { EtapeIdentificationLieuxGeometriques } from "./components/EtapeIdentifi
 import { EtapeResolutionLieuxGeometriques } from "./components/EtapeResolutionLieuxGeometriques";
 import { Katex } from "./components/Katex";
 import { RenduFragments } from "./components/RenduFragments";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 import {
   formatEquationLieuLatex,
   segmentsDescriptionLieu,
   texteNombrePointsAttendu,
   texteReponseResolutionAttendue,
 } from "./ui/formatLieuxGeometriques";
+
+const CONSIGNE_GENERALE = "Détermine l'intersection de ces lieux géométriques.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -128,6 +131,7 @@ export function AppLieuxGeometriques() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {phase === "identification" ? (
           <EtapeIdentificationLieuxGeometriques
             key={phase}
