@@ -12,6 +12,9 @@ import { formatEquationReduiteLatex, formatResultatLatex, formatVecteurColonneLa
 import { calculerRecapitulatifCombinaisonVecteurs } from "./ui/recapitulatifCombinaisonVecteurs";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Calcule les composantes de cette combinaison linéaire de vecteurs.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -115,6 +118,7 @@ export function AppCombinaisonVecteurs() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {etat.phase === "simplification" ? (
           <EtapeSimplificationCombinaisonVecteurs
             exercice={exercice}
