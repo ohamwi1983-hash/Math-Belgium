@@ -18,6 +18,9 @@ import { libelleDonneeManquante, valeurAffichageDonneeManquante } from "./ui/for
 import { valeurAire } from "./moteur/verificationTriangleQuelconque";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Résous ce triangle quelconque.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -118,6 +121,7 @@ export function AppTriangleQuelconque() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <CalculatriceScientifique />
           {etat.phase === "donneeManquante" ? (
             <EtapeDonneeManquante
