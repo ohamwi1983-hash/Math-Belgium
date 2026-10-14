@@ -12,6 +12,9 @@ import {
 import type { EtatSessionConstructionParabole } from "./moteur/typesConstructionParabole";
 import { EtapeConstructionParabole } from "./components/EtapeConstructionParabole";
 import { EtapeTraceParabole } from "./components/EtapeTraceParabole";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Construis cette parabole au compas et à l'équerre.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -99,6 +102,7 @@ export function AppConstructionParabole() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {etat.phase === "construction" ? (
           <EtapeConstructionParabole
             key={etat.iterationCourante}
