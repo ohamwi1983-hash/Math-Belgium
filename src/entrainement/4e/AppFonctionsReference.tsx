@@ -16,6 +16,9 @@ import { EtapeFonctionsReferenceExercice } from "./components/EtapeFonctionsRefe
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette fonction de référence.";
 
 const NOMBRE_EXERCICES_ALEATOIRE = 5;
 
@@ -198,6 +201,7 @@ export function AppFonctionsReference() {
         </div>
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFonction
               exercice={etat.exerciceCourant}
