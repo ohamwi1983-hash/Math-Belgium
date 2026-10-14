@@ -90,6 +90,7 @@ import {
 } from "./moteur/verificationInequationRationnelle";
 import { EtapeCEDirecte } from "./components/EtapeCEDirecte";
 import { EtapeIsolement } from "./components/EtapeIsolement";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 import { EtapeRacinesFlexibles } from "./components/EtapeRacinesFlexibles";
 import { EtapeReconnaissance } from "./components/EtapeReconnaissance";
 import { EtapeChamp1 } from "./components/EtapeChamp1";
@@ -149,6 +150,8 @@ function numerateurFacteurCommun(exercice: ExerciceInequationRationnelleFacteurC
   if (estPolynomeLineaire(n)) throw new Error("numerateurFacteurCommun : attendu un P2");
   return n;
 }
+
+const CONSIGNE_GENERALE = "Résous cette inéquation rationnelle.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -705,6 +708,7 @@ export function AppInequationRationnelle() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "isoler" && exerciceNiveau2 ? (
             <EtapeIsolement
               key="isoler"
