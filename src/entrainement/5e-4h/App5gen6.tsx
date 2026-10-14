@@ -22,6 +22,9 @@ import { EtapeConversionArcSecteur } from "./components5e/EtapeConversionArcSect
 import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur";
 import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex } from "./ui5e/formatArcsSecteurs";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Calcule la longueur de cet arc ou l'aire de ce secteur.";
 import { calculerRecapitulatifArcSecteur } from "./ui5e/recapitulatifArcSecteur";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -122,6 +125,7 @@ export function App5gen6() {
       <SelecteurVarianteDev options={OPTIONS_MODE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <RecapitulatifPanel entrees={calculerRecapitulatifArcSecteur(etat)} />
           {exercice.mode === "deuxVersTrois" && (
             <EtapeQuantiteArcSecteur
