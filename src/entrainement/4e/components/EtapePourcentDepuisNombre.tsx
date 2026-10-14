@@ -8,7 +8,6 @@ import { diagnostiquerPourcentDepuisNombre } from "../moteur/verificationBienaym
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PRECISION_POURCENT_INTERMEDIAIRE } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -35,7 +34,6 @@ export function EtapePourcentDepuisNombre({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">Quel est le pourcentage minimal correspondant à ce nombre d'individus ? ({PRECISION_POURCENT_INTERMEDIAIRE})</p>
 
       <div className="field field-inline">

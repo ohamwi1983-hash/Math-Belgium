@@ -7,7 +7,6 @@ import { LABEL_Q1, LABEL_Q2, LABEL_Q3, LABEL_X_MAX, LABEL_X_MIN, segmentsAideLec
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
-import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -48,7 +47,6 @@ export function EtapeLecture({ exercice, tentativesUtilisees, tentativesMax, niv
 
   return (
     <div>
-      <EnonceBoiteMoustaches exercice={exercice} />
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneLecture(exercice)} />
       </p>

@@ -4,7 +4,6 @@ import { diagnostiquerXBar } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { LABEL_XBAR, PRECISION_UNITE, texteAideXBarNiveau1, texteAideXBarNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -37,7 +36,6 @@ export function EtapeXBarFinal({ exercice, tentativesUtilisees, tentativesMax, n
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">
         Quelle est la moyenne <Katex expression={LABEL_XBAR} /> (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
       </p>

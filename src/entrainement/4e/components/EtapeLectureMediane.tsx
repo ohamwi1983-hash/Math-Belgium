@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_LECTURE_MEDIANE, NIVEAU_AIDE_MAX_LECTURE_Q1, NIVEAU_AID
 import { PLACEHOLDER_LECTURE, consigneLecture, formatFormuleInterpolationLatex, labelChampLecture, pointsEncadresLecture, polygonePoints, texteAideLectureNiveau1, texteAideLectureNiveau2, texteAideLectureNiveau3 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceMediane } from "./EnonceMediane";
 import { LectureQuartileGraph } from "./LectureQuartileGraph";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
@@ -65,7 +64,6 @@ export function EtapeLectureMediane({ exercice, parametre, tentativesUtilisees, 
 
   return (
     <div>
-      <EnonceMediane exercice={exercice} />
       <p className="prompt-text">{consigneLecture(exercice, parametre)}</p>
 
       <LectureQuartileGraph points={polygonePoints(exercice)} pointsEncadres={niveauAide >= 3 ? pointsEncadresLecture(exercice, parametre) : undefined} />

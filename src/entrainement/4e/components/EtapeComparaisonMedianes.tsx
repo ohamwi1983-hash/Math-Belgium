@@ -5,7 +5,6 @@ import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
 import { segmentsAideComparaisonMediane, segmentsConsigneComparaisonMedianes } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
-import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -37,7 +36,6 @@ export function EtapeComparaisonMedianes({ exercice, tentativesUtilisees, tentat
 
   return (
     <div>
-      <EnonceBoiteMoustaches exercice={exercice} />
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneComparaisonMedianes()} />
       </p>

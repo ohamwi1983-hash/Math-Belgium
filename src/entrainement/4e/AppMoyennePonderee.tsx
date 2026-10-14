@@ -16,8 +16,9 @@ import { EtapeCentresMoyennePonderee } from "./components/EtapeCentresMoyennePon
 import { EtapeSommesMoyennePonderee } from "./components/EtapeSommesMoyennePonderee";
 import { EtapeQuotientMoyennePonderee } from "./components/EtapeQuotientMoyennePonderee";
 import { SegmentsInline } from "./components/SegmentsInline";
-import { formatCentresAttendusTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
+import { formatCentresAttendusTexte, formatEnonceTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 import { calculerRecapitulatifMoyennePonderee } from "./ui/recapitulatifMoyennePonderee";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -117,6 +118,7 @@ export function AppMoyennePonderee() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
           {phase === "quotient" && !enAttente && <CalculatriceScientifique />}
           {phase === "centres" && exercice.variante === "classes" ? (

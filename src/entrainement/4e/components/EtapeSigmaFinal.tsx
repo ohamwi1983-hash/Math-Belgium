@@ -4,7 +4,6 @@ import { diagnostiquerSigma } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { LABEL_SIGMA, PRECISION_UNITE, texteAideSigmaNiveau1, texteAideSigmaNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -37,7 +36,6 @@ export function EtapeSigmaFinal({ exercice, tentativesUtilisees, tentativesMax, 
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">
         Quel est l'écart-type <Katex expression={LABEL_SIGMA} /> (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
       </p>

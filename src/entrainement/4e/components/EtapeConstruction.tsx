@@ -5,7 +5,6 @@ import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
 import { formatTermesCinqNombresLatex, segmentsAideConstructionNiveau1, segmentsAideConstructionNiveau2, segmentsConsigneConstruction } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
-import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -68,7 +67,6 @@ export function EtapeConstruction({ exercice, tentativesUtilisees, tentativesMax
 
   return (
     <div>
-      <EnonceBoiteMoustaches exercice={exercice} />
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneConstruction(exercice)} />
       </p>

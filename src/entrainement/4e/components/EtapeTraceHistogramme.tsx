@@ -5,7 +5,6 @@ import { evaluerTrace } from "../moteur/verificationHistogramme";
 import { NIVEAU_AIDE_MAX_TRACE } from "../moteur/sessionHistogramme";
 import { CONSIGNE_TRACE, LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, formatClasseTexte, texteAideTraceNiveau1 } from "../ui/formatHistogramme";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceHistogramme } from "./EnonceHistogramme";
 import { HistogrammeGraph } from "./HistogrammeGraph";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -59,7 +58,6 @@ export function EtapeTraceHistogramme({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <EnonceHistogramme exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_TRACE}</p>
 
       <div className="transformation-entete">

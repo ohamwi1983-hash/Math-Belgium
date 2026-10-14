@@ -3,7 +3,7 @@ import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtIntervalle } from "../moteur/verificationExerciceSynthese";
 import type { ReponseIntervalle } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { consigneBtIntervalle, formatEnonceTexte, texteAideBtIntervalleNiveau1, texteAideBtIntervalleNiveau2 } from "../ui/formatExerciceSynthese";
+import { consigneBtIntervalle, texteAideBtIntervalleNiveau1, texteAideBtIntervalleNiveau2 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -48,9 +48,6 @@ export function EtapeBtIntervalle({ exercice, tentativesUtilisees, tentativesMax
 
   return (
     <div>
-      <div className="equation-box">
-        <p className="prompt-text">{formatEnonceTexte(exercice)}</p>
-      </div>
       <p className="prompt-text">{consigneBtIntervalle(exercice)}</p>
 
       <div className="field-row">

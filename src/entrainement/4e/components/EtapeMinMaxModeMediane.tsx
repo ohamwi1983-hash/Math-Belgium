@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_MIN_MAX_MODE } from "../moteur/sessionMediane";
 import { LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_MAX, PLACEHOLDER_MIN, consigneMinMaxMode, texteAideMinMaxModeNiveau1, texteAideMinMaxModeNiveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -59,7 +58,6 @@ export function EtapeMinMaxModeMediane({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <EnonceMediane exercice={exercice} />
       <p className="prompt-text">{consigneMinMaxMode(exercice)}</p>
 
       <div className="tf-table-scroll">

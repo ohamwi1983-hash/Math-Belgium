@@ -4,7 +4,6 @@ import { diagnostiquerPourcent } from "../moteur/verificationBienaymeTchebychev"
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { precisionPourcentFinal, texteAidePourcentNiveau1, texteAidePourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -38,7 +37,6 @@ export function EtapePourcentFinal({ exercice, tentativesUtilisees, tentativesMa
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">Quel est le pourcentage minimal garanti ? ({precisionPourcentFinal(exercice.variante)})</p>
 
       <div className="field field-inline">

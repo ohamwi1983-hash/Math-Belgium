@@ -25,9 +25,11 @@ import { EtapePolygoneMediane } from "./components/EtapePolygoneMediane";
 import { EtapeLectureMediane } from "./components/EtapeLectureMediane";
 import { EtapeSyntheseMediane } from "./components/EtapeSyntheseMediane";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 import {
   LABEL_X_MAX,
   LABEL_X_MIN,
+  formatEnonceTexte,
   formatLectureAttendueTexte,
   formatMedianeAttendueTexte,
   formatMinMaxModeAttendueTexte,
@@ -166,6 +168,7 @@ export function AppMediane() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           {phase === "mediane" && exercice.variante === "discrete" ? (
             <EtapeMedianeDiscrete
               key={phase}

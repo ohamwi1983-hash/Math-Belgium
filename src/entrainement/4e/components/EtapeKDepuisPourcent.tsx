@@ -11,7 +11,6 @@ import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { LABEL_K, PRECISION_K, texteAideKDepuisPourcentNiveau1, texteAideKDepuisPourcentNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -70,7 +69,6 @@ export function EtapeKDepuisPourcent({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">
         Détermine <Katex expression={LABEL_K} /> pour ce pourcentage minimal ({PRECISION_K}).
       </p>

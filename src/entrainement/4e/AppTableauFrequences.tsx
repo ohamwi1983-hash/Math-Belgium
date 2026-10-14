@@ -15,11 +15,13 @@ import { EtapeFrequencesTableauFrequences } from "./components/EtapeFrequencesTa
 import { EtapeCumulesTableauFrequences } from "./components/EtapeCumulesTableauFrequences";
 import { EtapeFrequencesCumuleesTableauFrequences } from "./components/EtapeFrequencesCumuleesTableauFrequences";
 import {
+  formatEnonceTexte,
   formatTableCumulesTexte,
   formatTableFrequencesCumuleesTexte,
   formatTableFrequencesTexte,
   formatTableIdentificationTexte,
 } from "./ui/formatTableauFrequences";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -114,6 +116,7 @@ export function AppTableauFrequences() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           {etat.phase === "identification" ? (
             <EtapeIdentificationTableauFrequences
               exercice={exercice}

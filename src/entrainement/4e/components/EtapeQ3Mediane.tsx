@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_Q3 } from "../moteur/sessionMediane";
 import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_Q3, LABEL_VALEUR_XI, PLACEHOLDER_Q3, PLACEHOLDER_SEUIL, consigneQ3, surlignageSeuilTable, texteAideQ3Niveau1, texteAideQ3Niveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -42,7 +41,6 @@ export function EtapeQ3Mediane({ exercice, tentativesUtilisees, tentativesMax, n
 
   return (
     <div>
-      <EnonceMediane exercice={exercice} />
       <p className="prompt-text">{consigneQ3(exercice)}</p>
 
       <div className="tf-table-scroll">

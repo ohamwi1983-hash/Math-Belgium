@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionTableauFrequences";
 import { CONSIGNE_FREQUENCES, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, LABEL_VALEUR_XI, PLACEHOLDER_FREQUENCE, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatTableauFrequences";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceTableauFrequences } from "./EnonceTableauFrequences";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -53,7 +52,6 @@ export function EtapeFrequencesTableauFrequences({ exercice, tentativesUtilisees
 
   return (
     <div>
-      <EnonceTableauFrequences exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_FREQUENCES}</p>
 
       <div className="tf-table-scroll">

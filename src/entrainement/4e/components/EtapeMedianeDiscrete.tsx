@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_MEDIANE } from "../moteur/sessionMediane";
 import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_MEDIANE_Q2, LABEL_VALEUR_XI, PLACEHOLDER_MEDIANE, PLACEHOLDER_SEUIL, consigneMedianeDiscrete, surlignageSeuilTable, texteAideMedianeNiveau1, texteAideMedianeNiveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceMediane } from "./EnonceMediane";
 import { Katex } from "./Katex";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -47,7 +46,6 @@ export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <EnonceMediane exercice={exercice} />
       <p className="prompt-text">{consigneMedianeDiscrete(exercice)}</p>
 
       <div className="tf-table-scroll">

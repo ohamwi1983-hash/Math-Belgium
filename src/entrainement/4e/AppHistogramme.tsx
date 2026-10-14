@@ -14,7 +14,8 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeClassementHistogramme } from "./components/EtapeClassementHistogramme";
 import { EtapeFrequencesHistogramme } from "./components/EtapeFrequencesHistogramme";
 import { EtapeTraceHistogramme } from "./components/EtapeTraceHistogramme";
-import { formatClassementAttenduTexte, formatFrequencesAttenduesTexte, formatTraceAttendueTexte } from "./ui/formatHistogramme";
+import { formatClassementAttenduTexte, formatEnonceTexte, formatFrequencesAttenduesTexte, formatTraceAttendueTexte } from "./ui/formatHistogramme";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -112,6 +113,7 @@ export function AppHistogramme() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           {phase === "classement" ? (
             <EtapeClassementHistogramme
               key={phase}

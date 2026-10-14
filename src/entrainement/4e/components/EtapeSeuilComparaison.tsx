@@ -6,7 +6,6 @@ import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSais
 import { segmentsAideSeuilNiveau1, segmentsAideSeuilNiveau2, segmentsConsigneSeuil } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
-import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -36,7 +35,6 @@ export function EtapeSeuilComparaison({ exercice, question, tentativesUtilisees,
 
   return (
     <div>
-      <EnonceComparaisonSeries exercice={exercice} />
       <DonneesComparaisonSeries exercice={exercice} />
 
       <p className="prompt-text">

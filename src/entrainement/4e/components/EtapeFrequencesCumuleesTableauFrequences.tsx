@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_FREQUENCES_CUMULEES } from "../moteur/sessionTableauFre
 import { CONSIGNE_FREQUENCES_CUMULEES, LABEL_FREQUENCE_CUMULEE_PHI_I, LABEL_FREQUENCE_FI, LABEL_VALEUR_XI, PLACEHOLDER_FREQUENCE_CUMULEE, frequencesCumuleesRevelees, texteAideFrequencesCumuleesNiveau1 } from "../ui/formatTableauFrequences";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceTableauFrequences } from "./EnonceTableauFrequences";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -67,7 +66,6 @@ export function EtapeFrequencesCumuleesTableauFrequences({
 
   return (
     <div>
-      <EnonceTableauFrequences exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_FREQUENCES_CUMULEES}</p>
 
       <div className="tf-table-scroll">

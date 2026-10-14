@@ -62,10 +62,11 @@ import {
   LABEL_X_MIN,
 } from "./ui/formatMediane";
 import { formatCentresAttendusTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
-import { formatBtIntervalleAttenduTexte, formatBtPourcentAttenduTexte } from "./ui/formatExerciceSynthese";
+import { formatBtIntervalleAttenduTexte, formatBtPourcentAttenduTexte, formatEnonceTexte } from "./ui/formatExerciceSynthese";
 import { SegmentsInline } from "./components/SegmentsInline";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifExerciceSynthese } from "./ui/recapitulatifExerciceSynthese";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -278,6 +279,7 @@ export function AppExerciceSynthese() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
           {PHASES_CALCULATRICE.has(phase) && <CalculatriceScientifique />}
           {phase === "centres" && exercice.variante === "classes" ? (

@@ -5,7 +5,6 @@ import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
 import { segmentsAideComparaisonDispersion, segmentsConsigneComparaisonDispersions } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
-import { EnonceBoiteMoustaches } from "./EnonceBoiteMoustaches";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -36,7 +35,6 @@ export function EtapeComparaisonDispersions({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <EnonceBoiteMoustaches exercice={exercice} />
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneComparaisonDispersions()} />
       </p>

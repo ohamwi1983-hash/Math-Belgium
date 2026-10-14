@@ -4,7 +4,6 @@ import { diagnostiquerK } from "../moteur/verificationBienaymeTchebychev";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { LABEL_K, PRECISION_K, texteAideKDepuisIntervalleNiveau1, texteAideKDepuisIntervalleNiveau2 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -36,7 +35,6 @@ export function EtapeKDepuisIntervalle({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">
         Détermine <Katex expression={LABEL_K} /> pour cet intervalle ({PRECISION_K}).
       </p>

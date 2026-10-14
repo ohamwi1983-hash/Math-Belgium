@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_QUOTIENT } from "../moteur/sessionMoyennePonderee";
 import { LABEL_MOYENNE_BARRE, PLACEHOLDER_QUOTIENT, consigneQuotient, texteAideQuotientNiveau1 } from "../ui/formatMoyennePonderee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceMoyennePonderee } from "./EnonceMoyennePonderee";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -43,7 +42,6 @@ export function EtapeQuotientMoyennePonderee({ exercice, tentativesUtilisees, te
 
   return (
     <div>
-      <EnonceMoyennePonderee exercice={exercice} />
       <p className="prompt-text">
         {consigne.avant}
         <Katex expression={consigne.latex} />

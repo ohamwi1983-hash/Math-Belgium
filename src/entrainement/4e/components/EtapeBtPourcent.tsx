@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceSynthese } from "../core/exerciceSynthese.types";
 import { diagnostiquerBtPourcent } from "../moteur/verificationExerciceSynthese";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { consigneBtPourcent, formatEnonceTexte, texteAideBtPourcentNiveau1 } from "../ui/formatExerciceSynthese";
+import { consigneBtPourcent, texteAideBtPourcentNiveau1 } from "../ui/formatExerciceSynthese";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -37,9 +37,6 @@ export function EtapeBtPourcent({ exercice, tentativesUtilisees, tentativesMax, 
 
   return (
     <div>
-      <div className="equation-box">
-        <p className="prompt-text">{formatEnonceTexte(exercice)}</p>
-      </div>
       <p className="prompt-text">{consigneBtPourcent()}</p>
 
       <div className="field field-inline">

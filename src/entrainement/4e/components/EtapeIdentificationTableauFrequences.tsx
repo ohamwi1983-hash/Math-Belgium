@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_IDENTIFICATION } from "../moteur/sessionTableauFrequenc
 import { LABEL_EFFECTIF_NI, LABEL_VALEUR_XI, PLACEHOLDER_EFFECTIF, PLACEHOLDER_VALEUR, consigneIdentification, ligneExemple, texteAideIdentificationNiveau1, texteAideIdentificationNiveau2 } from "../ui/formatTableauFrequences";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceTableauFrequences } from "./EnonceTableauFrequences";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -84,7 +83,6 @@ export function EtapeIdentificationTableauFrequences({ exercice, tentativesUtili
 
   return (
     <div>
-      <EnonceTableauFrequences exercice={exercice} />
       <div className="tf-liste-brute">
         {exercice.donneesBrutes.map((v, i) => (
           <button

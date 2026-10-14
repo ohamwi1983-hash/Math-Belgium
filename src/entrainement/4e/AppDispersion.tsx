@@ -12,9 +12,15 @@ import { CalculatriceScientifique } from "./components/CalculatriceScientifique"
 import { EtapeTableauDispersion } from "./components/EtapeTableauDispersion";
 import { EtapeVarianceEcartTypeDispersion } from "./components/EtapeVarianceEcartTypeDispersion";
 import { SegmentsInline } from "./components/SegmentsInline";
-import { formatEcartTypeAttendueTexte, formatTableauAttenduTexte, formatVarianceAttendueTexte } from "./ui/formatDispersion";
+import {
+  formatEcartTypeAttendueTexte,
+  formatEnonceSegments,
+  formatTableauAttenduTexte,
+  formatVarianceAttendueTexte,
+} from "./ui/formatDispersion";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifDispersion } from "./ui/recapitulatifDispersion";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -96,6 +102,7 @@ export function AppDispersion() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={<SegmentsInline segments={formatEnonceSegments(exercice)} />} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
           {etat.phase === "varianceEcartType" && <CalculatriceScientifique />}
           {etat.phase === "tableau" ? (

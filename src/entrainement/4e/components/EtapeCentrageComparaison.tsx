@@ -5,7 +5,6 @@ import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { segmentsAideCentrageNiveau1, segmentsAideCentrageNiveau2, segmentsConsigneCentrage } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
-import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -35,7 +34,6 @@ export function EtapeCentrageComparaison({ exercice, question, tentativesUtilise
 
   return (
     <div>
-      <EnonceComparaisonSeries exercice={exercice} />
       <DonneesComparaisonSeries exercice={exercice} />
 
       <p className="prompt-text">

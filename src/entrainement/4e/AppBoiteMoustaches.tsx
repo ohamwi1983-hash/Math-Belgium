@@ -19,10 +19,12 @@ import { EtapeComparaisonDispersions } from "./components/EtapeComparaisonDisper
 import { Katex } from "./components/Katex";
 import { SegmentsInline } from "./components/SegmentsInline";
 import {
+  formatEnonceTexte,
   formatTermesCinqNombresLatex,
   segmentsComparaisonDispersionsAttendue,
   segmentsComparaisonMedianesAttendue,
 } from "./ui/formatBoiteMoustaches";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -129,6 +131,7 @@ export function AppBoiteMoustaches() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
           {exercice.variante === "construction" ? (
             <EtapeConstruction
               exercice={exercice}

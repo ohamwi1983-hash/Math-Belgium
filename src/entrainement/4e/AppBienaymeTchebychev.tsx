@@ -40,6 +40,7 @@ import { EtapeXBarFinal } from "./components/EtapeXBarFinal";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifBienaymeTchebychev } from "./ui/recapitulatifBienaymeTchebychev";
 import {
+  formatEnonceSegments,
   formatIntervalleAttenduTexte,
   formatKAttenduTexte,
   formatNombreAttenduTexte,
@@ -48,6 +49,8 @@ import {
   formatSigmaAttenduTexte,
   formatXBarAttenduTexte,
 } from "./ui/formatBienaymeTchebychev";
+import { SegmentsInline } from "./components/SegmentsInline";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -229,6 +232,7 @@ export function AppBienaymeTchebychev() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={<SegmentsInline segments={formatEnonceSegments(exercice)} />} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
           <CalculatriceScientifique />
           {etat.phase === "v1K" && exercice.variante === "intervalleVersPourcent" ? (

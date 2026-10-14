@@ -5,7 +5,6 @@ import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { segmentsAideInterpretationNiveau1, segmentsAideInterpretationNiveau2, segmentsConsigneInterpretation } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
-import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -36,7 +35,6 @@ export function EtapeInterpretationComparaison({ exercice, question, tentativesU
 
   return (
     <div>
-      <EnonceComparaisonSeries exercice={exercice} />
       <DonneesComparaisonSeries exercice={exercice} />
 
       <p className="prompt-text">

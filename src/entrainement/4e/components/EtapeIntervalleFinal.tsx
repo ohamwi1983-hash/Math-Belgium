@@ -4,7 +4,6 @@ import { diagnostiquerIntervalleAttendu } from "../moteur/verificationBienaymeTc
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PRECISION_UNITE, texteAideIntervalleFinalNiveau1 } from "../ui/formatBienaymeTchebychev";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceBienaymeTchebychev } from "./EnonceBienaymeTchebychev";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -47,7 +46,6 @@ export function EtapeIntervalleFinal({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <EnonceBienaymeTchebychev exercice={exercice} />
       <p className="prompt-text">
         Quel est l'intervalle garanti (en {exercice.contexte.unite}) ? ({PRECISION_UNITE})
       </p>

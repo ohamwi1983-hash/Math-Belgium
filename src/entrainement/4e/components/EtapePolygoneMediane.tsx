@@ -5,7 +5,6 @@ import { evaluerPolygone } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_POLYGONE } from "../moteur/sessionMediane";
 import { CONSIGNE_POLYGONE, LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, formatClasseTexte, texteAidePolygoneNiveau1 } from "../ui/formatMediane";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceMediane } from "./EnonceMediane";
 import { PolygoneEffectifsGraph } from "./PolygoneEffectifsGraph";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -62,7 +61,6 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
 
   return (
     <div>
-      <EnonceMediane exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_POLYGONE}</p>
 
       <div className="tf-table-scroll">

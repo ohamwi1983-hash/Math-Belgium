@@ -6,7 +6,6 @@ import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { OPTIONS_ARGUMENT_DISPERSION, segmentsAideDispersionNiveau1, segmentsAideDispersionNiveau2, segmentsConsigneDispersion } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
-import { EnonceComparaisonSeries } from "./EnonceComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -50,7 +49,6 @@ export function EtapeDispersionComparaison({ exercice, question, tentativesUtili
 
   return (
     <div>
-      <EnonceComparaisonSeries exercice={exercice} />
       <DonneesComparaisonSeries exercice={exercice} />
 
       <p className="prompt-text">

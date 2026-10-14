@@ -6,7 +6,6 @@ import { NIVEAU_AIDE_MAX_FREQUENCES } from "../moteur/sessionHistogramme";
 import { CONSIGNE_FREQUENCES, LABEL_CLASSE_XI, LABEL_EFFECTIF_NI, LABEL_FREQUENCE_FI, PLACEHOLDER_FREQUENCE_CLASSE, formatClasseTexte, texteAideFrequencesNiveau1, texteAideFrequencesNiveau2 } from "../ui/formatHistogramme";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { EnonceHistogramme } from "./EnonceHistogramme";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -51,7 +50,6 @@ export function EtapeFrequencesHistogramme({ exercice, tentativesUtilisees, tent
 
   return (
     <div>
-      <EnonceHistogramme exercice={exercice} />
       <p className="prompt-text">{CONSIGNE_FREQUENCES}</p>
 
       <div className="tf-table-scroll">
