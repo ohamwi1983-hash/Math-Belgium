@@ -41,6 +41,9 @@ import { formatEnonceLatex } from "./ui/formatEquation";
 import { formatFonctionColoreeLatex } from "./ui/formatAnalyseFonction";
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL } from "./ui/categorieLabels";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Étudie cette fonction du second degré.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -202,6 +205,7 @@ export function AppAnalyseFonction() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "coefficients" ? (
             <EtapeCoefficients
               exercice={etat.exerciceCourant}
