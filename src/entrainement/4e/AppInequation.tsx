@@ -21,6 +21,9 @@ import { formatSolutionEnsemble } from "./ui/formatSolutionEnsemble";
 import { calculerRecapitulatifInequation } from "./ui/recapitulatifInequation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine le signe de ce trinôme du second degré.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -142,6 +145,7 @@ export function AppInequation() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "simplification" ? (
             <EtapeSimplificationInequation
               exercice={exercice}
