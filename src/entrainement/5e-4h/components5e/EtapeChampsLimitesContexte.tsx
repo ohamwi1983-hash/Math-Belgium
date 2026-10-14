@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceLimitesContexte } from "../core5e/limitesContexte.types";
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
-import { consigneGenerale, consignePhase, formatContexteTexte, formatTermesDonneesLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -74,13 +74,6 @@ export function EtapeChampsLimitesContexte({
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <p className="prompt-text">{formatContexteTexte(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {labels.map((label, i) => (
         <div key={i} className={`field champ-reponse-latex${champsEtroits?.[i] ?? true ? " champ-reponse-latex-etroit" : ""}`}>

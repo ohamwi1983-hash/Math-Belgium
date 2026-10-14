@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ExercicePopulation } from "../core5e/limitesContexte.types";
-import { consigneGenerale, consignePhase, formatContexteTexte, formatTermesDonneesLatex, labelsChampsLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { consignePhase, labelsChampsLatex, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
 import type { ReponseEvaluerSeuil, StatutEvaluerSeuil } from "../moteur5e/verificationLimitesContexte";
 import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -45,13 +45,6 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale()}</p>
-      <p className="prompt-text">{formatContexteTexte(exercice)}</p>
-      <div className="equation-box equation-box-donnees">
-        {formatTermesDonneesLatex(exercice).map((frag, i) => (
-          <Katex key={i} expression={frag} />
-        ))}
-      </div>
       <p className="prompt-text">{consignePhase(exercice, "evaluerSeuil")}</p>
 
       <div className="field champ-reponse-latex champ-reponse-latex-etroit">

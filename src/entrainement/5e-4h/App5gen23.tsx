@@ -1,7 +1,16 @@
 import { useState } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLimitesContexte } from "./generateurs5e/limitesContexte";
-import { estPhaseQCM, formatReponseAttendueTexte, formatReponseAttenduePhaseLatex, labelsChampsLatex } from "./ui5e/formatLimitesContexte";
+import {
+  consigneGenerale,
+  estPhaseQCM,
+  formatContexteTexte,
+  formatReponseAttendueTexte,
+  formatReponseAttenduePhaseLatex,
+  formatTermesDonneesLatex,
+  labelsChampsLatex,
+} from "./ui5e/formatLimitesContexte";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
 import {
   activerAideSuivante,
@@ -127,6 +136,22 @@ export function App5gen23() {
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice
+            consigneGenerale={
+              <>
+                {consigneGenerale()}
+                <br />
+                {formatContexteTexte(exercice)}
+              </>
+            }
+            blocDonnees={
+              <div className="equation-box equation-box-donnees">
+                {formatTermesDonneesLatex(exercice).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </div>
+            }
+          />
           <RecapitulatifPanel entrees={calculerRecapitulatifLimitesContexte(etat)} />
           <EcranCourant
             exercice={exercice}
