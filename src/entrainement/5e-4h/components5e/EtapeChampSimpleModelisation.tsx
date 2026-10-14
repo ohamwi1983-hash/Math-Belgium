@@ -4,7 +4,6 @@ import type { PhaseModelisationSinusoide } from "../moteur5e/typesModelisationSi
 import { consignePhase, labelPhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -65,7 +64,6 @@ export function EtapeChampSimpleModelisation({ exercice, phase, tentativesUtilis
 
   return (
     <div>
-      <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       <ApercuExpressionLatex texte={texte} label={labelPhase(phase)} />
       <div className="field field-inline">

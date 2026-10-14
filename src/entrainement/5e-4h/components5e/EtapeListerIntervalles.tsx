@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinusoide.types";
 import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { Katex } from "../components/Katex";
-import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -56,7 +55,6 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
 
   return (
     <div>
-      <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, "listerIntervallesInequation")}</p>
       {paires.map(([inf, sup], i) => (
         <div key={i} className="field-row">

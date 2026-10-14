@@ -4,7 +4,6 @@ import type { ReponseResolution } from "../moteur5e/sessionModelisationSinusoide
 import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -54,7 +53,6 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
 
   return (
     <div>
-      <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, "resolution")}</p>
       <div className="field-row">
         <div>

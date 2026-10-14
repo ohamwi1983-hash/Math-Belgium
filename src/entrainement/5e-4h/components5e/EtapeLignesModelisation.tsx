@@ -3,7 +3,6 @@ import type { ExerciceModelisationSinusoide } from "../core5e/modelisationSinuso
 import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -64,7 +63,6 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
 
   return (
     <div>
-      <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, phase)}</p>
       {lignes.map((ligne, i) => (
         <div key={i}>

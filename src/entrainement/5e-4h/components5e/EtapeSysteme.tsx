@@ -4,7 +4,6 @@ import type { ReponseSysteme } from "../moteur5e/sessionModelisationSinusoide";
 import { arrondiPrecis, consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -60,7 +59,6 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
 
   return (
     <div>
-      <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, "systeme")}</p>
       <ApercuExpressionLatex texte={equation1} />
       <div className="field">

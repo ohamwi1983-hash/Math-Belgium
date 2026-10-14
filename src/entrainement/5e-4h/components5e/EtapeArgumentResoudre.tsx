@@ -4,7 +4,6 @@ import type { ReponseArgumentResoudre } from "../moteur5e/verificationModelisati
 import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatModelisationSinusoide";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import { BlocDonneesModelisation } from "./BlocDonneesModelisation";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -66,7 +65,6 @@ export function EtapeArgumentResoudre({ exercice, tentativesUtilisees, tentative
 
   return (
     <div>
-      <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, "argumentResoudre")}</p>
       <div className="options-grid">
         <button type="button" className={choixAucunAngle === true ? "btn toggle-active" : "btn"} onClick={() => setChoixAucunAngle(true)}>

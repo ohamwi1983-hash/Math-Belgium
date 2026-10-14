@@ -85,10 +85,17 @@ import { EtapeListerIntervalles } from "./components5e/EtapeListerIntervalles";
 import { EtapeResolution } from "./components5e/EtapeResolution";
 import { EtapeSysteme } from "./components5e/EtapeSysteme";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { formatTermesReponseAttendueModelisationSinusoide } from "./ui5e/formatModelisationSinusoide";
+import {
+  consigneGeneralePartie1,
+  consigneGeneralePartie2,
+  formatTermesDonneesConstructionLatex,
+  formatTermesDonneesSeuilLatex,
+  formatTermesReponseAttendueModelisationSinusoide,
+} from "./ui5e/formatModelisationSinusoide";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatifModelisationSinusoide } from "./ui5e/recapitulatifModelisationSinusoide";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 
@@ -318,6 +325,41 @@ export function App5gen13() {
       <SelecteurVarianteDev options={OPTIONS_TECHNIQUE_PHASE2} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice
+            consigneGenerale={consigneGeneralePartie1(exercice)}
+            blocDonnees={
+              <>
+                <div className="equation-box equation-box-donnees">
+                  {formatTermesDonneesConstructionLatex(exercice).map((frag, i) => (
+                    <Katex key={i} expression={frag} />
+                  ))}
+                </div>
+                {formatTermesDonneesSeuilLatex(exercice).length > 0 && (
+                  <>
+                    {consigneGeneralePartie2(exercice) !== null && (
+                      // Jamais fusionnée dans consigneGenerale (voir formatModelisationSinusoide.ts,
+                      // "jamais fusionnée dans la 1re phrase") : reste un <p> séparé juste au-dessus
+                      // de son propre bloc de données. Style de base réappliqué en dur pour
+                      // neutraliser la règle CSS .prompt-text:not(:has(~ .prompt-text)) (le filet
+                      // + gras réservés à LA question d'action de l'écran, jamais à ce 2e rappel de
+                      // contexte — voir theme.css).
+                      <p
+                        className="prompt-text"
+                        style={{ fontSize: 14, fontWeight: 400, color: "var(--color-text-muted)", paddingLeft: 0, borderLeft: "none" }}
+                      >
+                        {consigneGeneralePartie2(exercice)}
+                      </p>
+                    )}
+                    <div className="equation-box equation-box-donnees">
+                      {formatTermesDonneesSeuilLatex(exercice).map((frag, i) => (
+                        <Katex key={i} expression={frag} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            }
+          />
           <RecapitulatifPanel entrees={calculerRecapitulatifModelisationSinusoide(etat)} />
           <>
               {PHASES_CHAMP_SIMPLE.has(phase) && (
