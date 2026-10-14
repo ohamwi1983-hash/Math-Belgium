@@ -21,6 +21,9 @@ import { calculerRecapitulatifCercleTrigonometrique } from "./ui/recapitulatifCe
 import { necessiteReduction } from "./moteur/verificationCercleTrigonometrique";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Place et lis des valeurs sur le cercle trigonométrique.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -147,6 +150,7 @@ export function AppCercleTrigonometrique() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "reduction" ? (
             <EtapeReductionCercleTrig
               exercice={etat.exerciceCourant}
