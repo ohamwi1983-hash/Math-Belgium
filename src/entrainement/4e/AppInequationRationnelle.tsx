@@ -708,7 +708,14 @@ export function AppInequationRationnelle() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={enonceFixe} block />
+              </div>
+            }
+          />
           {etat.phase === "isoler" && exerciceNiveau2 ? (
             <EtapeIsolement
               key="isoler"
@@ -716,6 +723,7 @@ export function AppInequationRationnelle() {
               question="Réécris cette inéquation avec 0 au membre de droite."
               label="Inéquation isolée"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -732,6 +740,7 @@ export function AppInequationRationnelle() {
               question="Réécris cette inéquation avec 0 au membre de droite."
               label="Inéquation isolée"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -748,6 +757,7 @@ export function AppInequationRationnelle() {
               question="Réécris cette inéquation avec 0 au membre de droite."
               label="Inéquation isolée"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -764,6 +774,7 @@ export function AppInequationRationnelle() {
               question="Réécris cette inéquation avec 0 au membre de droite."
               label="Inéquation isolée"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -780,6 +791,7 @@ export function AppInequationRationnelle() {
               question="Réécris cette inéquation avec 0 au membre de droite."
               label="Inéquation isolée"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -796,6 +808,7 @@ export function AppInequationRationnelle() {
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu ?"
               label={`Numérateur (dénominateur inchangé : ${formatLineaireDeveloppe(exerciceNiveau2.denominateur.k, exerciceNiveau2.denominateur.p)})`}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -812,6 +825,7 @@ export function AppInequationRationnelle() {
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
               label={`Numérateur (dénominateur inchangé : ${formatLineaireDeveloppe(exerciceNiveau3.denominateur.k, exerciceNiveau3.denominateur.p)})`}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -828,6 +842,7 @@ export function AppInequationRationnelle() {
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
               label={`Numérateur (dénominateur inchangé : (${formatLineaireDeveloppe(exerciceNiveau4.denominateurGauche.k, exerciceNiveau4.denominateurGauche.p)})(${formatLineaireDeveloppe(exerciceNiveau4.denominateurDroit.k, exerciceNiveau4.denominateurDroit.p)}))`}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -844,6 +859,7 @@ export function AppInequationRationnelle() {
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
               label={`Numérateur (dénominateur inchangé : (${formatLineaireDeveloppe(exerciceDenominateurCarre.denominateur.k, exerciceDenominateurCarre.denominateur.p)})²)`}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -860,6 +876,7 @@ export function AppInequationRationnelle() {
               question="Combine cette expression en une seule fraction. Quel est le numérateur obtenu (développé) ?"
               label={`Numérateur (dénominateur inchangé : ${formatMembreGauche(exerciceSansFacteurCommun.denominateur.enonce)})`}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -890,6 +907,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={formatEquationDenominateur(exerciceSansFacteurCommun.denominateur)}
               question="Quelle est la méthode la plus rapide pour factoriser ce dénominateur ?"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -902,6 +920,7 @@ export function AppInequationRationnelle() {
               exercice={exerciceSansFacteurCommun.denominateur}
               expressionAffichee={formatEquationDenominateur(exerciceSansFacteurCommun.denominateur)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -917,6 +936,7 @@ export function AppInequationRationnelle() {
               exercice={exerciceSansFacteurCommun.denominateur}
               expressionAffichee={formatEquationDenominateur(exerciceSansFacteurCommun.denominateur)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -939,6 +959,7 @@ export function AppInequationRationnelle() {
               placeholderPrefixe="CE"
               prefixeChamp="x \neq"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -953,6 +974,7 @@ export function AppInequationRationnelle() {
               key="ce"
               expressionAffichee={formatEnonceCubiqueLatex(exerciceCubique)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -966,6 +988,7 @@ export function AppInequationRationnelle() {
               question="Mets x en évidence dans ce numérateur."
               label="Factorisation"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -981,6 +1004,7 @@ export function AppInequationRationnelle() {
               key="ce"
               expressionAffichee={formatEnonceCombineNiveau3Latex(exerciceNiveau3)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -992,6 +1016,7 @@ export function AppInequationRationnelle() {
               key="ce"
               expressionAffichee={formatEnonceCombineDenominateurCarreLatex(exerciceDenominateurCarre)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1009,6 +1034,7 @@ export function AppInequationRationnelle() {
               placeholderPrefixe="CE"
               prefixeChamp="x \neq"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1029,6 +1055,7 @@ export function AppInequationRationnelle() {
               placeholderPrefixe="CE"
               prefixeChamp="x \neq"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1061,6 +1088,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={formatEquationDenominateur(denominateurFacteurCommun(exerciceFacteurCommun))}
               question="Quelle est la méthode la plus rapide pour factoriser ce dénominateur ?"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1073,6 +1101,7 @@ export function AppInequationRationnelle() {
               exercice={denominateurFacteurCommun(exerciceFacteurCommun)}
               expressionAffichee={formatEquationDenominateur(denominateurFacteurCommun(exerciceFacteurCommun))}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1089,6 +1118,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={formatEquationDenominateur(denominateurFacteurCommun(exerciceFacteurCommun))}
               prefixeChamp="x ="
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1103,6 +1133,7 @@ export function AppInequationRationnelle() {
               exercice={denominateurFacteurCommun(exerciceFacteurCommun)}
               expressionAffichee={formatEquationDenominateur(denominateurFacteurCommun(exerciceFacteurCommun))}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1137,6 +1168,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={formatEquationNumerateur(numerateurFacteurCommun(exerciceFacteurCommun))}
               question="Quelle est la méthode la plus rapide pour factoriser ce numérateur ?"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1149,6 +1181,7 @@ export function AppInequationRationnelle() {
               exercice={numerateurFacteurCommun(exerciceFacteurCommun)}
               expressionAffichee={formatEquationNumerateur(numerateurFacteurCommun(exerciceFacteurCommun))}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1165,6 +1198,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={formatEquationNumerateur(numerateurFacteurCommun(exerciceFacteurCommun))}
               prefixeChamp="x ="
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1179,6 +1213,7 @@ export function AppInequationRationnelle() {
               exercice={numerateurFacteurCommun(exerciceFacteurCommun)}
               expressionAffichee={formatEquationNumerateur(numerateurFacteurCommun(exerciceFacteurCommun))}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1195,6 +1230,7 @@ export function AppInequationRationnelle() {
               key="simplifierFraction"
               expressionAffichee={formatEnonceFacteurCommunLatex(exerciceFacteurCommun)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1209,6 +1245,7 @@ export function AppInequationRationnelle() {
               key="ce"
               expressionAffichee={formatEnonceInequationRationnelleLatex(exerciceNumerateurLineaire)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1224,6 +1261,7 @@ export function AppInequationRationnelle() {
               libellePasDe="Pas de racine"
               libelleAuMoins="Au moins une racine"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1252,6 +1290,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={blocNumerateurQuadratique(exerciceNumerateurQuadratique)}
               question="Quelle est la méthode la plus rapide pour factoriser ce numérateur ?"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1265,6 +1304,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={blocNumerateurQuadratique(exerciceNumerateurQuadratique)}
               labelFactorisation="Factorise le numérateur"
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1281,6 +1321,7 @@ export function AppInequationRationnelle() {
               expressionAffichee={blocNumerateurQuadratique(exerciceNumerateurQuadratique)}
               prefixeChamp="x ="
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
@@ -1295,6 +1336,7 @@ export function AppInequationRationnelle() {
               exercice={exerciceNumerateurQuadratique.numerateur}
               expressionAffichee={blocNumerateurQuadratique(exerciceNumerateurQuadratique)}
               enonceFixe={enonceFixe}
+              masquerBlocDonnees
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}

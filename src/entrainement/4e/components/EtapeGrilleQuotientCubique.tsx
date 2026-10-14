@@ -4,7 +4,6 @@ import type { ValeurCellule } from "../core/signesProduit.types";
 import { Katex } from "./Katex";
 import {
   formatEnonceCubiqueFactoriseLatex,
-  formatEnonceCubiqueLatex,
   formatLigneDenominateurLabel,
   formatLigneNumerateurNiveau3Label,
 } from "../ui/formatInequationRationnelle";
@@ -110,9 +109,6 @@ export function EtapeGrilleQuotientCubique({ exercice, tentativesUtilisees, tent
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceCubiqueLatex(exercice)} block />
-      </div>
       <div className="equation-box">
         <Katex expression={formatEnonceCubiqueFactoriseLatex(exercice)} block />
       </div>

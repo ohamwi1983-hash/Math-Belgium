@@ -7,7 +7,6 @@ import {
   formatEnonceCombineNiveau3Latex,
   formatEnonceCombineNiveau4Latex,
   formatEnonceCombineSansFacteurCommunLatex,
-  formatEnonceCubiqueLatex,
   formatEnonceFacteurCommunSimplifieLatex,
   formatEnonceInequationRationnelleLatex,
 } from "../ui/formatInequationRationnelle";
@@ -126,26 +125,26 @@ export function EtapeIntervalleQuotient({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex
-          expression={
-            exercice.niveau === "niveau3"
-              ? formatEnonceCombineNiveau3Latex(exercice)
-              : exercice.niveau === "niveau4"
-                ? formatEnonceCombineNiveau4Latex(exercice)
-                : exercice.niveau === "denominateurCarre"
-                  ? formatEnonceCombineDenominateurCarreLatex(exercice)
-                  : exercice.niveau === "facteurCommun"
-                    ? formatEnonceFacteurCommunSimplifieLatex(exercice)
-                    : exercice.niveau === "sansFacteurCommun"
-                      ? formatEnonceCombineSansFacteurCommunLatex(exercice)
-                      : exercice.niveau === "cubique"
-                        ? formatEnonceCubiqueLatex(exercice)
+      {exercice.niveau !== "niveau1" && exercice.niveau !== "cubique" && (
+        <div className="equation-box">
+          <Katex
+            expression={
+              exercice.niveau === "niveau3"
+                ? formatEnonceCombineNiveau3Latex(exercice)
+                : exercice.niveau === "niveau4"
+                  ? formatEnonceCombineNiveau4Latex(exercice)
+                  : exercice.niveau === "denominateurCarre"
+                    ? formatEnonceCombineDenominateurCarreLatex(exercice)
+                    : exercice.niveau === "facteurCommun"
+                      ? formatEnonceFacteurCommunSimplifieLatex(exercice)
+                      : exercice.niveau === "sansFacteurCommun"
+                        ? formatEnonceCombineSansFacteurCommunLatex(exercice)
                         : formatEnonceInequationRationnelleLatex(exercice)
-          }
-          block
-        />
-      </div>
+            }
+            block
+          />
+        </div>
+      )}
       {exercice.niveau === "niveau3" ? (
         <TableauSignesQuotientNiveau3Recap exercice={exercice} highlight={highlight} />
       ) : exercice.niveau === "niveau4" ? (

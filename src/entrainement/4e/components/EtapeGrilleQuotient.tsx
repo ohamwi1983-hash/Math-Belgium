@@ -75,9 +75,14 @@ export function EtapeGrilleQuotient({ exercice, tentativesUtilisees, tentativesM
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceInequationRationnelleLatex(exercice)} block />
-      </div>
+      {/* niveau1 : identique à l'énoncé de départ (déjà affiché dans l'en-tête de l'exercice,
+          jamais répété ici). niveau2 : forme combinée (numérateur déjà combiné), distincte de
+          l'énoncé de départ (qui montre numerateurAvantCombinaison) — reste affichée. */}
+      {exercice.niveau === "niveau2" && (
+        <div className="equation-box">
+          <Katex expression={formatEnonceInequationRationnelleLatex(exercice)} block />
+        </div>
+      )}
       <div className="equation-box">
         <Katex expression={formatEnonceInequationRationnelleFactoriseLatex(exercice)} block />
       </div>
