@@ -9,9 +9,10 @@ interface Props {
 /**
  * Bloc "énoncé" (`promptcorrectionsgenerateur17structure.md`, section 1) — "Sachant que" / bloc 1
  * (valeurs approchées de l'angle de base) / "Déterminer sans utiliser de calculatrice" / bloc 2
- * (expression demandée). Extrait en composant séparé pour la lisibilité de `EtapeAnglesAssocies`,
- * son seul appelant depuis la refonte à écran unique (`promptgen17refontecomplete.md`) — plus de
- * duplication entre écrans à éviter ici.
+ * (expression demandée). Extrait en composant séparé pour la lisibilité — passé en `blocDonnees` à
+ * `EnTeteExercice` par `AppAnglesAssocies`, son seul appelant (il vivait auparavant hors du bandeau,
+ * rendu directement par `EtapeAnglesAssocies` : bug corrigé, il échappait au fond teinté et à la
+ * mise en cohérence typographique avec la question spécifique).
  */
 export function BlocEnonceAnglesAssocies({ exercice }: Props) {
   return (

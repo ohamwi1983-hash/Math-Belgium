@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { ExerciceAnglesAssocies } from "../core/anglesAssocies.types";
-import { BlocEnonceAnglesAssocies } from "./BlocEnonceAnglesAssocies";
 import { CercleTrigTrajetBase } from "./CercleTrigTrajetBase";
 import { calculerAideCercleAnglesAssocies, fonctionCible, texteLabelQuestion } from "../ui/cercleAnglesAssociesAide";
 import { CENTRE_CERCLE_TRIG, HAUTEUR_CERCLE_TRIG, RAYON_CERCLE_TRIG } from "../ui/cercleTrigGeometrie";
@@ -67,7 +66,6 @@ export function EtapeAnglesAssocies({ exercice, tentativesUtilisees, tentativesM
 
   return (
     <div>
-      <BlocEnonceAnglesAssocies exercice={exercice} />
       <div className="field">
         <label className="field-label" htmlFor="angles-associes-valeur-finale">
           Réponse

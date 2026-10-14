@@ -7,6 +7,7 @@ import type { IdVarianteAnglesAssocies } from "./core/anglesAssocies.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeAnglesAssocies } from "./components/EtapeAnglesAssocies";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { BlocEnonceAnglesAssocies } from "./components/BlocEnonceAnglesAssocies";
 
 const CONSIGNE_GENERALE = "Détermine la valeur demandée à l'aide des angles associés.";
 
@@ -79,7 +80,7 @@ export function AppAnglesAssocies() {
 
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<BlocEnonceAnglesAssocies exercice={exercice} />} />
           <EtapeAnglesAssocies
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}

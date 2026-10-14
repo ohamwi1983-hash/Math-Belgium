@@ -412,18 +412,20 @@
   border-left: 3px solid var(--color-primary);
 }
 
-/* À l'intérieur du bandeau, la consigne générale reste discrète — c'est l'étiquette "Énoncé"
- * (`.entete-exercice-label`) qui porte la mise en évidence, pas elle. Sans cette règle,
- * `.prompt-text:not(:has(~ .prompt-text))` ci-dessus s'appliquerait AUSSI à elle (seul
- * `.prompt-text` de `.entete-exercice` quand `blocDonnees` est vide — jamais un vrai sibling de la
- * question spécifique, qui vit dans un autre conteneur), lui donnant à tort le même poids visuel que
- * la question spécifique (bug préexistant trouvé en implémentant ce bandeau : c'était déjà le cas
- * avant cette règle). Spécificité identique aux deux règles ci-dessus (3 classes) : placée APRÈS
- * elles pour gagner sur l'ordre dans la cascade, plutôt qu'un `!important` ou une classe répétée. */
+/* La consigne générale et les intitulés de données à l'intérieur du bandeau (ex. "Sachant que" /
+ * "Déterminer..." dans `BlocEnonceAnglesAssocies`) reprennent la même police que la question
+ * spécifique (taille/graisse) — seul le filet d'accent à gauche reste réservé à la question
+ * spécifique pour la distinguer, le fond teinté du bandeau et l'étiquette "ÉNONCÉ" suffisant déjà à
+ * signaler que ce texte est fixe pour tout l'exercice. Sans cette règle,
+ * `.prompt-text:not(:has(~ .prompt-text))` plus haut s'appliquerait AUSSI à elle (seul `.prompt-text`
+ * de `.entete-exercice` quand `blocDonnees` est vide — jamais un vrai sibling de la question
+ * spécifique, qui vit dans un autre conteneur) et lui donnerait en plus le filet d'accent. Spécificité
+ * identique aux deux règles ci-dessus (3 classes) : placée APRÈS elles pour gagner sur l'ordre dans la
+ * cascade, plutôt qu'un `!important` ou une classe répétée. */
 .entrainement .entete-exercice .prompt-text {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--color-text-muted);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
   padding-left: 0;
   border-left: none;
   margin: 0;
