@@ -8,6 +8,9 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuelAngle } from "./components/EtapeQuelAngle";
 import { Katex } from "./components/Katex";
 import { formatTermesSolutionsLatex } from "./ui/formatQuelAngle";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Trouve la mesure de cet angle.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -85,6 +88,7 @@ export function AppQuelAngle() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeQuelAngle
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
