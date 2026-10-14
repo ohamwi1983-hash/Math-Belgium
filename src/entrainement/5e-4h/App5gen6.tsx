@@ -20,7 +20,7 @@ import { quantitesManquantes } from "./moteur5e/typesArcsSecteurs";
 import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteurs";
 import { EtapeConversionArcSecteur } from "./components5e/EtapeConversionArcSecteur";
 import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur";
-import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex } from "./ui5e/formatArcsSecteurs";
+import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex, segmentsDonneesConnues } from "./ui5e/formatArcsSecteurs";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
 
@@ -125,7 +125,18 @@ export function App5gen6() {
       <SelecteurVarianteDev options={OPTIONS_MODE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              exercice.mode === "deuxVersTrois" ? (
+                <div className="equation-box equation-box-donnees">
+                  {segmentsDonneesConnues(exercice, exercice.connues).map((s, i) => (
+                    <Katex key={i} expression={s} />
+                  ))}
+                </div>
+              ) : null
+            }
+          />
           <RecapitulatifPanel entrees={calculerRecapitulatifArcSecteur(etat)} />
           {exercice.mode === "deuxVersTrois" && (
             <EtapeQuantiteArcSecteur
