@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ExercicePositionDroitePlan, ReponseJustificationPositionDroitePlan } from "../core/positionDroitePlan.types";
 import { NIVEAU_AIDE_MAX_JUSTIFICATION } from "../moteur/sessionPositionDroitePlan";
-import { LIBELLE_CLASSIFICATION, consigneJustification, libelleCandidatSecante, libelleDroite, libellePlan, texteAideJustification } from "../ui/formatPositionDroitePlan";
+import { LIBELLE_CLASSIFICATION, consigneJustification, libelleCandidatSecante, texteAideJustification } from "../ui/formatPositionDroitePlan";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { Solide3DSketch } from "./Solide3DSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -57,12 +56,6 @@ export function EtapeJustificationPositionDroitePlan({ exercice, tentativesUtili
 
   return (
     <div>
-      <p className="prompt-text">
-        Étudie la position de la droite {libelleDroite(exercice)} par rapport au plan {libellePlan(exercice)}.
-      </p>
-
-      <Solide3DSketch solide={exercice.solide} plan={exercice.plan} droite={exercice.droite} />
-
       <div className="equation-box">
         <p>État actuel : la droite est {LIBELLE_CLASSIFICATION[exercice.classification].toLowerCase()}.</p>
       </div>

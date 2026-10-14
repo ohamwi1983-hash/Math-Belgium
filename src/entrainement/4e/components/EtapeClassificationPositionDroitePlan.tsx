@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ConclusionPositionDroitePlan, ExercicePositionDroitePlan } from "../core/positionDroitePlan.types";
 import { NIVEAU_AIDE_MAX_CLASSIFICATION } from "../moteur/sessionPositionDroitePlan";
-import { LIBELLE_CLASSIFICATION, TEXTE_AIDE_CLASSIFICATION_NIVEAU1, libelleDroite, libellePlan, texteAideClassificationNiveau2 } from "../ui/formatPositionDroitePlan";
+import { LIBELLE_CLASSIFICATION, TEXTE_AIDE_CLASSIFICATION_NIVEAU1, texteAideClassificationNiveau2 } from "../ui/formatPositionDroitePlan";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { Solide3DSketch } from "./Solide3DSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -36,12 +35,6 @@ export function EtapeClassificationPositionDroitePlan({ exercice, tentativesUtil
 
   return (
     <div>
-      <p className="prompt-text">
-        Étudie la position de la droite {libelleDroite(exercice)} par rapport au plan {libellePlan(exercice)}.
-      </p>
-
-      <Solide3DSketch solide={exercice.solide} plan={exercice.plan} droite={exercice.droite} />
-
       <p className="prompt-text">Que peux-tu dire de cette droite par rapport à ce plan ?</p>
       <div className="options-grid-compact">
         {OPTIONS.map((option) => (

@@ -9,8 +9,7 @@ import { EtapeClassificationPositionDroitePlan } from "./components/EtapeClassif
 import { EtapeJustificationPositionDroitePlan } from "./components/EtapeJustificationPositionDroitePlan";
 import { LIBELLE_CLASSIFICATION, libelleDroite, libellePlan, texteReponseJustificationAttendue } from "./ui/formatPositionDroitePlan";
 import { EnTeteExercice } from "./components/EnTeteExercice";
-
-const CONSIGNE_GENERALE = "Détermine la position de cette droite par rapport à ce plan.";
+import { Solide3DSketch } from "./components/Solide3DSketch";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -100,7 +99,14 @@ export function AppPositionDroitePlan() {
 
       <main className="card">
         <div className="card-body">
-        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+        <EnTeteExercice
+          consigneGenerale={
+            <>
+              Étudie la position de la droite {libelleDroite(exercice)} par rapport au plan {libellePlan(exercice)}.
+            </>
+          }
+          blocDonnees={<Solide3DSketch solide={exercice.solide} plan={exercice.plan} droite={exercice.droite} />}
+        />
         {phase === "classification" ? (
           <EtapeClassificationPositionDroitePlan
             key={phase}
