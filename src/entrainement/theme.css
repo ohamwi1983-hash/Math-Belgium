@@ -1057,13 +1057,69 @@
   background: var(--color-error);
 }
 
-/* Sélecteur de variante — panneau toujours visible (plus un outil de dev caché derrière ?dev=1,
- * voir le commentaire des 3 composants `SelecteurVarianteDev`), donc un vrai combobox soigné à
- * l'identique du reste de l'UI (`.card`/`.text-input`/`.btn-primary`), jamais le cadre pointillé
+/* Sélecteur de variante — replié par défaut derrière `.selecteur-variante-toggle` (voir le
+ * commentaire des 3 composants `SelecteurVarianteDev`), un vrai combobox soigné à l'identique du
+ * reste de l'UI (`.card`/`.text-input`/`.btn-primary`) une fois déplié, jamais le cadre pointillé
  * couleur avertissement qui signalait auparavant un outil de debug. Un seul bloc ici, partagé par
  * les 3 chantiers (4e/5e-4h/6e-6h) qui réutilisent tous exactement les mêmes classes. */
-.entrainement .selecteur-variante {
+.entrainement .selecteur-variante-bloc {
   margin-top: 18px;
+}
+
+/* Déclencheur à chevron — même technique de chevron pivoté que `.selecteur-variante-select-wrap`
+ * ci-dessous/`.select-souligne-wrap` plus haut, jamais une icône importée. */
+.entrainement .selecteur-variante-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.entrainement .selecteur-variante-toggle:hover {
+  color: var(--color-primary);
+}
+
+.entrainement .selecteur-variante-toggle-chevron {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-right: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.entrainement .selecteur-variante-toggle[aria-expanded="true"] .selecteur-variante-toggle-chevron {
+  transform: rotate(225deg);
+}
+
+/* `grid-template-rows: 0fr → 1fr` : anime la hauteur d'un contenu dont la hauteur finale n'est pas
+ * connue à l'avance (nombre de variantes variable), sans JS ni mesure de hauteur manuelle — truc
+ * standard, cf. `.selecteur-variante-reveal-inner` qui fournit l'`overflow: hidden` nécessaire. */
+.entrainement .selecteur-variante-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+}
+
+.entrainement .selecteur-variante-reveal.est-ouvert {
+  grid-template-rows: 1fr;
+}
+
+.entrainement .selecteur-variante-reveal-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.entrainement .selecteur-variante {
+  margin-top: 10px;
   padding: 16px 18px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
