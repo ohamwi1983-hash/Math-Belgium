@@ -4,7 +4,7 @@ import { diagnostiquerIdentification, diagnostiquerIdentificationLieu } from "..
 import type { ReponseIdentification, ReponseIdentificationLieu } from "../moteur/verificationLieuxGeometriques";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import { CONSIGNE_GENERALE_IDENTIFICATION, LIBELLE_TYPE_LIEU, SOUS_TITRE_CHAMPS_IDENTIFICATION, segmentsAideIdentificationNiveau1, segmentsAideIdentificationNiveau2, segmentsEnonce } from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_IDENTIFICATION, LIBELLE_TYPE_LIEU, SOUS_TITRE_CHAMPS_IDENTIFICATION, segmentsAideIdentificationNiveau1, segmentsAideIdentificationNiveau2 } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -237,11 +237,6 @@ export function EtapeIdentificationLieuxGeometriques({ exercice, tentativesUtili
 
   return (
     <div>
-      <div className="equation-box">
-        <p>
-          <RenduFragments fragments={segmentsEnonce(exercice)} />
-        </p>
-      </div>
       <p className="prompt-text">{CONSIGNE_GENERALE_IDENTIFICATION}</p>
 
       <ChampsLieuInput numero={1} champs={champs1} onChange={setChamps1} lieuReel={exercice.lieu1} apresEchec={apresEchec} />

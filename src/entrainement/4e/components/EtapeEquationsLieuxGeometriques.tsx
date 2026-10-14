@@ -3,7 +3,7 @@ import type { ExerciceLieuxGeometriques, Lieu } from "../core/lieuxGeometriques.
 import { diagnostiquerEquationLieu } from "../moteur/verificationLieuxGeometriques";
 import type { ReponseEquations } from "../moteur/verificationLieuxGeometriques";
 import { PLACEHOLDER_EQUATION } from "../ui/formatEquationCercle";
-import { CONSIGNE_GENERALE_EQUATIONS, formatEquationLieuLatex, latexGabaritGenerique, libelleChampEquation, segmentsDescriptionLieu, segmentsEnonce } from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_EQUATIONS, formatEquationLieuLatex, latexGabaritGenerique, libelleChampEquation, segmentsDescriptionLieu } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "./Katex";
@@ -79,11 +79,6 @@ export function EtapeEquationsLieuxGeometriques({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <div className="equation-box">
-        <p>
-          <RenduFragments fragments={segmentsEnonce(exercice)} />
-        </p>
-      </div>
       <p className="prompt-text">{CONSIGNE_GENERALE_EQUATIONS}</p>
 
       <BlocEquationLieu lieu={exercice.lieu1} id="lieux-geometriques-equation-lieu1" texte={texteLieu1} onChange={setTexteLieu1} statut={statutLieu1} />

@@ -20,6 +20,7 @@ import { EnTeteExercice } from "./components/EnTeteExercice";
 import {
   formatEquationLieuLatex,
   segmentsDescriptionLieu,
+  segmentsEnonce,
   texteNombrePointsAttendu,
   texteReponseResolutionAttendue,
 } from "./ui/formatLieuxGeometriques";
@@ -131,7 +132,16 @@ export function AppLieuxGeometriques() {
 
       <main className="card">
         <div className="card-body">
-        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+        <EnTeteExercice
+          consigneGenerale={CONSIGNE_GENERALE}
+          blocDonnees={
+            <div className="equation-box">
+              <p>
+                <RenduFragments fragments={segmentsEnonce(exercice)} />
+              </p>
+            </div>
+          }
+        />
         {phase === "identification" ? (
           <EtapeIdentificationLieuxGeometriques
             key={phase}

@@ -4,7 +4,7 @@ import { diagnostiquerResolution } from "../moteur/verificationLieuxGeometriques
 import type { ReponseResolutionLieuxGeometriques } from "../moteur/verificationLieuxGeometriques";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { PLACEHOLDER_COORDONNEE } from "../ui/formatEquationDroite";
-import { CONSIGNE_GENERALE_RESOLUTION, LIBELLE_AUCUN, LIBELLE_AU_MOINS_UN, formatEtatActuelSystemeLatex, formatQuadratiqueSubstitutionLatex, segmentsAideResolutionNiveau1, segmentsEnonce } from "../ui/formatLieuxGeometriques";
+import { CONSIGNE_GENERALE_RESOLUTION, LIBELLE_AUCUN, LIBELLE_AU_MOINS_UN, formatEtatActuelSystemeLatex, formatQuadratiqueSubstitutionLatex, segmentsAideResolutionNiveau1 } from "../ui/formatLieuxGeometriques";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -74,11 +74,6 @@ export function EtapeResolutionLieuxGeometriques({ exercice, tentativesUtilisees
 
   return (
     <div>
-      <div className="equation-box">
-        <p>
-          <RenduFragments fragments={segmentsEnonce(exercice)} />
-        </p>
-      </div>
       <p className="prompt-text">{CONSIGNE_GENERALE_RESOLUTION}</p>
       <div className="equation-box">
         <Katex expression={formatEtatActuelSystemeLatex(exercice)} block />
