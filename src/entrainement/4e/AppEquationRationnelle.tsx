@@ -62,6 +62,9 @@ import { libelleCategorie } from "./ui/categorieLabels";
 import { estSolutionUnique, formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Résous cette équation rationnelle.";
 
 const QUESTION_FACTORISATION = "Quelle est la méthode la plus rapide pour résoudre cette équation ?";
 const QUESTION_FACTORISATION_FRACTION = "Quelle est la méthode la plus rapide pour factoriser ce polynôme ?";
@@ -397,6 +400,7 @@ export function AppEquationRationnelle() {
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {!PHASES_SANS_RAPPEL_SUPPLEMENTAIRE.has(etat.phase) && (
             <div className="equation-box">
               <Katex expression={formatRappelEquationRationnelle(etat.exerciceCourant, etat.phase)} block />
