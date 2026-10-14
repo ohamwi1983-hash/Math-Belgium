@@ -24,6 +24,7 @@ import { EtapeConstanceCaracteristiques } from "./components/EtapeConstanceCarac
 import { EtapeOrdonneeCaracteristiques } from "./components/EtapeOrdonneeCaracteristiques";
 import { EtapeValeurCaracteristiques } from "./components/EtapeValeurCaracteristiques";
 import { EtapeAsymptotesCaracteristiques } from "./components/EtapeAsymptotesCaracteristiques";
+import { EnTeteExercice } from "./components/EnTeteExercice";
 import {
   constanceAttendueCaracteristiques,
   croissanceAttendueCaracteristiques,
@@ -34,6 +35,8 @@ import {
   existeValeurEnVCaracteristiques,
 } from "./moteur/verificationCaracteristiquesFonction";
 import type { PhaseCaracteristiquesFonction } from "./core/caracteristiquesFonction.types";
+
+const CONSIGNE_GENERALE = "Lis les caractéristiques de cette fonction sur son graphique.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -210,6 +213,7 @@ export function AppCaracteristiquesFonction() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "domaine" ? (
             <EtapeDomaineCaracteristiques
               exercice={etat.exerciceCourant}
