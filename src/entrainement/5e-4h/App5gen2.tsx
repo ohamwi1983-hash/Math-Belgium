@@ -18,6 +18,9 @@ import { diagnostiquerDecomposition } from "./moteur5e/verificationDecomposition
 import type { EtatSessionDecompositionFonction } from "./moteur5e/typesDecompositionFonction";
 import { EtapeDecompositionFonction } from "./components5e/EtapeDecompositionFonction";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Décompose cette fonction composée.";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -90,6 +93,7 @@ export function App5gen2() {
       <SelecteurVarianteDev options={OPTIONS_PROFONDEUR} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeDecompositionFonction
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
