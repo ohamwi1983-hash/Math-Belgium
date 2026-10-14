@@ -16,6 +16,9 @@ import { EtapeAuxiliaireFace } from "./components/EtapeAuxiliaireFace";
 import { EtapeAuxiliaireLignes } from "./components/EtapeAuxiliaireLignes";
 import { EtapeConclusionSectionPlaneSolide } from "./components/EtapeConclusionSectionPlaneSolide";
 import { EtapeSegmentDirect } from "./components/EtapeSegmentDirect";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine la section plane de ce solide.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -114,6 +117,7 @@ export function AppSectionPlaneSolide() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {etat.phase === "segmentDirect" ? (
           <EtapeSegmentDirect
             exercice={etat.exerciceCourant}
