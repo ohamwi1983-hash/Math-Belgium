@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { ExerciceExtremaBornes } from "../core5e/extremaBornes.types";
 import type { EcranExtremaBornes } from "../moteur5e/typesExtremaBornes";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { Katex } from "../components/Katex";
@@ -7,12 +6,10 @@ import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { CalculatriceScientifique } from "./CalculatriceScientifique";
-import { EnonceExtremaBornes } from "./EnonceExtremaBornes";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { consigneEcranExtremaBornes, texteAideNiveau1ExtremaBornes, texteAideNiveau2ExtremaBornes } from "../ui5e/formatExtremaBornes";
 
 interface Props {
-  exercice: ExerciceExtremaBornes;
   phase: EcranExtremaBornes;
   labels: string[];
   placeholders: string[];
@@ -38,7 +35,7 @@ interface Props {
  * resynchronisation dès le départ (voir CLAUDE.md : piège de troncature d'état déjà rencontré 2
  * fois cette semaine sur ce patron de composant à N champs). Calculatrice PRÉSENTE (valeur décimale
  * calculée à la main, même si toujours entière ici par construction — convention transversale). */
-export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeChampsNumeriquesExtremaBornes({ phase, labels, placeholders, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const nb = labels.length;
   const [valeurs, setValeurs] = useState<string[]>(() => new Array(nb).fill(""));
   useEffect(() => {
@@ -61,7 +58,6 @@ export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, pl
 
   return (
     <div>
-      <EnonceExtremaBornes exercice={exercice} phase={phase} />
       <p className="prompt-text">{consigneEcranExtremaBornes(phase)}</p>
       {labels.map((label, i) => (
         <div key={i} className="field field-inline">

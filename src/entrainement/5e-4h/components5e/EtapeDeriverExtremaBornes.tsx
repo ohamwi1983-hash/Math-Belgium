@@ -1,17 +1,14 @@
 import { useState } from "react";
-import type { ExerciceExtremaBornes } from "../core5e/extremaBornes.types";
 import { consigneEcranExtremaBornes, texteAideNiveau1ExtremaBornes, texteAideNiveau2ExtremaBornes } from "../ui5e/formatExtremaBornes";
 import { Katex } from "../components/Katex";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EnonceExtremaBornes } from "./EnonceExtremaBornes";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { StatutVerification } from "../moteur/statutVerification";
 
 interface Props {
-  exercice: ExerciceExtremaBornes;
   tentativesUtilisees: number;
   tentativesMax: number;
   niveauAide: number;
@@ -29,7 +26,7 @@ interface Props {
  * `EtapeCalculerFonctionDerivee.tsx` (5gen27) mais réécrit localement (contrat propre à ce
  * générateur). Jamais de calculatrice : f(t) est une fonction polynomiale à coefficients entiers,
  * dérivation purement symbolique/exacte. */
-export function EtapeDeriverExtremaBornes({ exercice, tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
+export function EtapeDeriverExtremaBornes({ tentativesUtilisees, tentativesMax, niveauAide, niveauAideMax, onActiverAide, onValider, diagnostiquer, validation}: Props) {
   const [texte, setTexte] = useState("");
   const [dernierStatut, setDernierStatut] = useState<StatutVerification | null>(null);
   const montrerErreurs = tentativesUtilisees > 0;
@@ -44,7 +41,6 @@ export function EtapeDeriverExtremaBornes({ exercice, tentativesUtilisees, tenta
 
   return (
     <div>
-      <EnonceExtremaBornes exercice={exercice} phase="deriver" />
       <p className="prompt-text">{consigneEcranExtremaBornes("deriver")}</p>
       <ApercuExpressionLatex texte={texte} label="f'(t)=" />
       <div className="field field-inline">

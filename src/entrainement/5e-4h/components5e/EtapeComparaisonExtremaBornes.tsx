@@ -7,7 +7,6 @@ import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EnonceExtremaBornes } from "./EnonceExtremaBornes";
 import { formatMessageErreur } from "../ui/messageErreur";
 
 interface Props {
@@ -60,7 +59,6 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <EnonceExtremaBornes exercice={exercice} phase="comparaison" />
       <p className="prompt-text">{consigneEcranExtremaBornes("comparaison")}</p>
 
       <p className="prompt-text">Quelle valeur est le MAXIMUM absolu de f sur [0;T] ?</p>

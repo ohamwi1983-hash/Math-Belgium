@@ -4,7 +4,6 @@ import { tableauFPrimeBorneAttendu } from "../moteur5e/verificationExtremaBornes
 import { consigneEcranExtremaBornes, texteAideNiveau1ExtremaBornes, texteAideNiveau2ExtremaBornes } from "../ui5e/formatExtremaBornes";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
-import { EnonceExtremaBornes } from "./EnonceExtremaBornes";
 import { TableauEtudeLocaleBuilder } from "./TableauEtudeLocaleBuilder";
 
 interface Props {
@@ -32,7 +31,6 @@ export function EtapeTableauFPrimeExtremaBornes({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <EnonceExtremaBornes exercice={exercice} phase="tableauFPrime" />
       <p className="prompt-text">{consigneEcranExtremaBornes("tableauFPrime")}</p>
       {niveauAide >= 1 && (
         <div className="aide-5e">

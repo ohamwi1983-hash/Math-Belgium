@@ -33,7 +33,19 @@ import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import { calculerRecapitulatifExtremaBornes } from "./ui5e/recapitulatifExtremaBornes";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
-import { formatReponseAttenduePhaseLatex, labelsChampsBornes, labelsChampsExtremums, placeholdersChampsBornes, placeholdersChampsExtremums } from "./ui5e/formatExtremaBornes";
+import {
+  consigneGeneraleExtremaBornes,
+  formatDomaineLatex,
+  formatFDeTLatex,
+  formatReponseAttenduePhaseLatex,
+  labelsChampsBornes,
+  labelsChampsExtremums,
+  placeholdersChampsBornes,
+  placeholdersChampsExtremums,
+  questionFinaleExtremaBornes,
+} from "./ui5e/formatExtremaBornes";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
+import { QuestionFinale } from "./components/QuestionFinale";
 import type { ReactNode } from "react";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -135,6 +147,18 @@ export function App5gen34() {
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice
+            consigneGenerale={consigneGeneraleExtremaBornes(exercice)}
+            blocDonnees={
+              <>
+                <div className="equation-box equation-box-donnees">
+                  <Katex expression={formatFDeTLatex(exercice)} />
+                  <Katex expression={formatDomaineLatex(exercice)} />
+                </div>
+                <QuestionFinale question={questionFinaleExtremaBornes()} />
+              </>
+            }
+          />
           <RecapitulatifPanel entrees={calculerRecapitulatifExtremaBornes(etat)} />
           <EcranCourant
             exercice={exercice}
@@ -174,7 +198,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       return (
         <EtapeDeriverExtremaBornes
           key={cleEcran}
-          exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
@@ -205,7 +228,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       return (
         <EtapeChampsNumeriquesExtremaBornes
           key={cleEcran}
-          exercice={exercice}
           phase="valeursExtremums"
           labels={labelsChampsExtremums(exercice)}
           placeholders={placeholdersChampsExtremums()}
@@ -224,7 +246,6 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
       return (
         <EtapeChampsNumeriquesExtremaBornes
           key={cleEcran}
-          exercice={exercice}
           phase="valeursBornes"
           labels={labelsChampsBornes(exercice)}
           placeholders={placeholdersChampsBornes()}
