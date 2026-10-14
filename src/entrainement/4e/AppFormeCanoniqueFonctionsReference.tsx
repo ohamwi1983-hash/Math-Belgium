@@ -33,6 +33,9 @@ import {
 } from "./ui/formatFormeCanoniqueFonctionsReference";
 import { libelleFamille } from "./ui/famillesReferenceLabels";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction de référence transformée.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -140,6 +143,7 @@ export function AppFormeCanoniqueFonctionsReference() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFormeCanoniqueFR
               exercice={exercice}
