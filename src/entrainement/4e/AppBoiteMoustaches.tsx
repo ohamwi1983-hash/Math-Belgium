@@ -16,6 +16,7 @@ import { EtapeConstruction } from "./components/EtapeConstruction";
 import { EtapeLecture } from "./components/EtapeLecture";
 import { EtapeComparaisonMedianes } from "./components/EtapeComparaisonMedianes";
 import { EtapeComparaisonDispersions } from "./components/EtapeComparaisonDispersions";
+import { BoiteMoustachesGraph } from "./components/BoiteMoustachesGraph";
 import { Katex } from "./components/Katex";
 import { SegmentsInline } from "./components/SegmentsInline";
 import {
@@ -131,7 +132,20 @@ export function AppBoiteMoustaches() {
         </div>
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={formatEnonceTexte(exercice)}
+            blocDonnees={
+              exercice.variante === "comparaison" ? (
+                <BoiteMoustachesGraph
+                  bornePlage={exercice.bornePlage}
+                  lignes={[
+                    { valeurs: exercice.serieA, label: "A" },
+                    { valeurs: exercice.serieB, label: "B" },
+                  ]}
+                />
+              ) : null
+            }
+          />
           {exercice.variante === "construction" ? (
             <EtapeConstruction
               exercice={exercice}

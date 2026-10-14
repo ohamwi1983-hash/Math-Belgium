@@ -4,7 +4,6 @@ import { verifierComparaisonMedianes } from "../moteur/verificationBoiteMoustach
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
 import { segmentsAideComparaisonMediane, segmentsConsigneComparaisonMedianes } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -39,14 +38,6 @@ export function EtapeComparaisonMedianes({ exercice, tentativesUtilisees, tentat
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneComparaisonMedianes()} />
       </p>
-
-      <BoiteMoustachesGraph
-        bornePlage={exercice.bornePlage}
-        lignes={[
-          { valeurs: exercice.serieA, label: "A" },
-          { valeurs: exercice.serieB, label: "B" },
-        ]}
-      />
 
       <div className="options-grid-compact">
         <button

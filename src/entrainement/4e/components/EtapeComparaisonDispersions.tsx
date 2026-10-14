@@ -4,7 +4,6 @@ import { verifierComparaisonDispersions } from "../moteur/verificationBoiteMoust
 import { niveauAideMaxPourPhase } from "../moteur/sessionBoiteMoustaches";
 import { segmentsAideComparaisonDispersion, segmentsConsigneComparaisonDispersions } from "../ui/formatBoiteMoustaches";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { BoiteMoustachesGraph } from "./BoiteMoustachesGraph";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -38,14 +37,6 @@ export function EtapeComparaisonDispersions({ exercice, tentativesUtilisees, ten
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneComparaisonDispersions()} />
       </p>
-
-      <BoiteMoustachesGraph
-        bornePlage={exercice.bornePlage}
-        lignes={[
-          { valeurs: exercice.serieA, label: "A" },
-          { valeurs: exercice.serieB, label: "B" },
-        ]}
-      />
 
       <div className="options-grid-compact">
         <button
