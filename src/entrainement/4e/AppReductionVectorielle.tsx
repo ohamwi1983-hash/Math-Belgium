@@ -6,6 +6,9 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceReduction
 import type { FigureReduction } from "./core/reductionVectorielle.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeReductionVectorielle } from "./components/EtapeReductionVectorielle";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Réduis cette somme de vecteurs à l'aide de la relation de Chasles.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -81,6 +84,7 @@ export function AppReductionVectorielle() {
 
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <EtapeReductionVectorielle
             exercice={exercice}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
