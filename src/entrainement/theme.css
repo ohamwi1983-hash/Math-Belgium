@@ -852,6 +852,16 @@
   margin-bottom: 6px;
 }
 
+/* Modifier pour les labels de champ dont le texte est une notation mathématique sensible à la
+ * casse (ex. "f(x) =", "x_AB =") — la majuscule automatique ci-dessus transforme "f(x) =" en
+ * "F(X) =", qui n'est plus le même symbole en maths (une fonction f et son antiderivée F, une
+ * variable x et une variable aléatoire X...). Utilisée dans ~209 écrans des 3 chantiers mais,
+ * comme `.options-grid-compact`/`.field-row`/`.field-row-wrap` plus haut dans ce fichier, jamais
+ * définie : le texte-transform de la règle ci-dessus s'appliquait donc malgré tout. */
+.entrainement .field-label-minuscule {
+  text-transform: none;
+}
+
 /* Option 2B retenue : combobox "soulignée", délibérément différente du `.text-input` encadré —
  * une affordance distincte dit "choisis dans une liste" plutôt que "tape une réponse" avant même
  * le tap. Nécessite un wrapper (`.select-souligne-wrap`) autour de chaque `<select>` concerné car
