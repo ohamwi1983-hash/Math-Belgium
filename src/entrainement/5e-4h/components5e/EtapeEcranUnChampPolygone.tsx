@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import type { PhasePolygonesArcsSecteurs } from "../moteur5e/typesPolygonesArcsSecteurs";
-import { consigneGenerale, consignePhase, latexAideNiveau2, surlignagePourPhase, texteAideNiveau1, texteAideNiveau3 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { consignePhase, latexAideNiveau2, surlignagePourPhase, texteAideNiveau1, texteAideNiveau3 } from "../ui5e/formatPolygonesArcsSecteurs";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -50,7 +50,6 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
       <p className="prompt-text">{consignePhase(phase)}</p>
       <PolygoneCercleSketch r={exercice.r} n={exercice.n} surlignage={surlignagePourPhase(exercice, phase)} />
       <ApercuExpressionLatex texte={texte} />

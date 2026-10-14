@@ -24,6 +24,7 @@ import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteu
 import { EtapeCercleEntier } from "./components5e/EtapeCercleEntier";
 import { EtapeEcranUnChampPolygone } from "./components5e/EtapeEcranUnChampPolygone";
 import {
+  consigneGenerale,
   formatAireTotaleAttendueLatex,
   formatArcElementaireAttendueLatex,
   formatArcMultiPasAttendueLatex,
@@ -32,6 +33,7 @@ import {
   formatSecteurMultiPasAttendueLatex,
 } from "./ui5e/formatPolygonesArcsSecteurs";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components5e/EnTeteExercice";
 import { calculerRecapitulatifPolygonesArcsSecteurs } from "./ui5e/recapitulatifPolygonesArcsSecteurs";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -185,6 +187,7 @@ export function App5gen7() {
       <SelecteurVarianteDev options={OPTIONS_PRESENCE} onGenerer={forcerVariante} />
       <main className="card">
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={consigneGenerale(exercice)} blocDonnees={null} />
           <RecapitulatifPanel entrees={calculerRecapitulatifPolygonesArcsSecteurs(etat)} />
           {etat.phase === "cercleEntier" ? (
             <EtapeCercleEntier

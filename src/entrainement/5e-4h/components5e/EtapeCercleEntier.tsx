@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExercicePolygonesArcsSecteurs } from "../core5e/polygonesArcsSecteurs.types";
 import { diagnostiquerAireCercleEntier, diagnostiquerCirconferenceCercleEntier, type ReponseCercleEntier } from "../moteur5e/verificationPolygonesArcsSecteurs";
-import { consigneGenerale, consignePhase, latexAideNiveau2, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
+import { consignePhase, latexAideNiveau2, texteAideNiveau1 } from "../ui5e/formatPolygonesArcsSecteurs";
 import { PolygoneCercleSketch } from "./PolygoneCercleSketch";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
@@ -47,7 +47,6 @@ export function EtapeCercleEntier({ exercice, tentativesUtilisees, tentativesMax
 
   return (
     <div>
-      <p className="prompt-text">{consigneGenerale(exercice)}</p>
       <p className="prompt-text">{consignePhase("cercleEntier")}</p>
       <PolygoneCercleSketch r={exercice.r} n={exercice.n} surlignage={null} />
       <ApercuExpressionLatex texte={circonference} label="Circonférence =" />
