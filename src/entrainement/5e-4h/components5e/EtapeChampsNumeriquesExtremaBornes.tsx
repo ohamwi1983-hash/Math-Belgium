@@ -78,6 +78,12 @@ export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, pl
         </div>
       ))}
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1ExtremaBornes(phase)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes(phase)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -92,12 +98,6 @@ export function EtapeChampsNumeriquesExtremaBornes({ exercice, phase, labels, pl
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes(phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes(phase)}</p>}
-        </div>
-      )}
     </div>
   );
 }

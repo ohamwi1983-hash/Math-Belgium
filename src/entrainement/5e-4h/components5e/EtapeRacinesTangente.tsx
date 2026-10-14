@@ -96,6 +96,12 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
         + Ajouter une solution
       </button>
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("resoudre")}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -110,12 +116,6 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("resoudre")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

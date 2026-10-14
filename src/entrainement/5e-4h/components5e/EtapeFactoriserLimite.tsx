@@ -90,6 +90,12 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
         />
       </div>
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "factoriser")}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -104,12 +110,6 @@ export function EtapeFactoriserLimite({ exercice, tentativesUtilisees, tentative
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "factoriser")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

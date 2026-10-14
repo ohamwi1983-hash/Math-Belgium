@@ -89,6 +89,12 @@ export function EtapeChampsLibresCE({ exercice, ecran, labels, placeholders, ten
         </div>
       ))}
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(ecran)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, ecran)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -103,12 +109,6 @@ export function EtapeChampsLibresCE({ exercice, ecran, labels, placeholders, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(ecran)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, ecran)}</p>}
-        </div>
-      )}
     </div>
   );
 }

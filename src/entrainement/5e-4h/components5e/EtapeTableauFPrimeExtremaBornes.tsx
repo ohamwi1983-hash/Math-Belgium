@@ -34,6 +34,12 @@ export function EtapeTableauFPrimeExtremaBornes({ exercice, tentativesUtilisees,
     <div>
       <EnonceExtremaBornes exercice={exercice} phase="tableauFPrime" />
       <p className="prompt-text">{consigneEcranExtremaBornes("tableauFPrime")}</p>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1ExtremaBornes("tableauFPrime")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("tableauFPrime")}</p>}
+        </div>
+      )}
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}
         enteteColonnes={enteteColonnes}
@@ -45,12 +51,6 @@ export function EtapeTableauFPrimeExtremaBornes({ exercice, tentativesUtilisees,
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         validation={validation}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes("tableauFPrime")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("tableauFPrime")}</p>}
-        </div>
-      )}
     </div>
   );
 }

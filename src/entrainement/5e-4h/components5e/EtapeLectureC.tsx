@@ -81,6 +81,11 @@ export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativ
           <input type="text" className={`text-input${ctErronee ? " is-erronee" : ""}`} value={ct} onChange={(e) => setCt(e.target.value.replace(/[^0-9.,-]/g, ""))} />
         </div>
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_LECTURE_C_1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -95,11 +100,6 @@ export function EtapeLectureC({ exercice, donnees, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_LECTURE_C_1}</p>
-        </div>
-      )}
     </div>
   );
 }

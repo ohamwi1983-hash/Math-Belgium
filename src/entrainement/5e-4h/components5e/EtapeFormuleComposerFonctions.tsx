@@ -101,6 +101,12 @@ export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, 
         onChange={(e) => setTexte(e.target.value)}
         placeholder={placeholder}
       />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1}</p>
+          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -115,12 +121,6 @@ export function EtapeFormuleComposerFonctions({ consigne, donnees, placeholder, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
-        </div>
-      )}
     </div>
   );
 }

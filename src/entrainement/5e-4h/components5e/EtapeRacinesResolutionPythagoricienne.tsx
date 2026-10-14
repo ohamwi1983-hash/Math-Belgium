@@ -125,6 +125,11 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
         </div>
       )}
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -139,11 +144,6 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_RACINES_RESOLUTION_NIVEAU1}</p>
-        </div>
-      )}
     </div>
   );
 }

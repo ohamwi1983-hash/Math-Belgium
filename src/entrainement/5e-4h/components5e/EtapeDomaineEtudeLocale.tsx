@@ -48,16 +48,16 @@ export function EtapeDomaineEtudeLocale({ exercice, tentativesUtilisees, tentati
         apresEchec={montrerErreurs}
         validation={validation}
       />
-      {!validation && montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
-      )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1EtudeLocale("domaine")}</p>
           {niveauAide >= 2 && <p>{texteAideNiveau2EtudeLocale("domaine")}</p>}
         </div>
+      )}
+      {!validation && montrerErreurs && (
+        <p className="alert-error" role="alert">
+          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+        </p>
       )}
     </div>
   );

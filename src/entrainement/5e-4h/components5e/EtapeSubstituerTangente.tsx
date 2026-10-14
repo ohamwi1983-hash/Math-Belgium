@@ -90,6 +90,12 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
         />
       </div>
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("substituer")}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -104,12 +110,6 @@ export function EtapeSubstituerTangente({ exercice, tentativesUtilisees, tentati
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("substituer")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

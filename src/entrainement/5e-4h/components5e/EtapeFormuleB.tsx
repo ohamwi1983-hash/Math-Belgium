@@ -55,6 +55,12 @@ export function EtapeFormuleB({ exercice, donnees, aRetenu, bRetenu, tentativesU
         <label className="field-label field-label-minuscule">f(x) =</label>
         <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 3*x+7" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideFormuleB1()}</p>
+          <Katex expression={latexFormuleFB(exercice.modele)} block />
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -69,12 +75,6 @@ export function EtapeFormuleB({ exercice, donnees, aRetenu, bRetenu, tentativesU
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideFormuleB1()}</p>
-          <Katex expression={latexFormuleFB(exercice.modele)} block />
-        </div>
-      )}
     </div>
   );
 }

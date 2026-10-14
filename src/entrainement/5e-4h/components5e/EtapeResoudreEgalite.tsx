@@ -73,6 +73,12 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
       <button type="button" className="btn" onClick={() => setLignes((arr) => [...arr, ""])}>
         + Ajouter une série
       </button>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideResoudreEgaliteNiveau1(exercice)}</p>
+          {niveauAide >= 2 && aide2.map((formule, i) => <Katex key={i} expression={formule} block />)}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -87,12 +93,6 @@ export function EtapeResoudreEgalite({ exercice, tentativesUtilisees, tentatives
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideResoudreEgaliteNiveau1(exercice)}</p>
-          {niveauAide >= 2 && aide2.map((formule, i) => <Katex key={i} expression={formule} block />)}
-        </div>
-      )}
     </div>
   );
 }

@@ -72,6 +72,12 @@ export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees
           <input type="text" className={`text-input${champErronee(i) ? " is-erronee" : ""}`} value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
         </div>
       ))}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, phase)} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -86,12 +92,6 @@ export function EtapeListeChampsClassique({ exercice, phase, tentativesUtilisees
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, phase)} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

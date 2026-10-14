@@ -209,6 +209,12 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
           </button>
         </div>
       )}
+      {niveauAide >= 1 && textesAide.length > 0 && (
+        <div className="aide-5e">
+          <p>{textesAide[0]}</p>
+          {niveauAide >= 2 && textesAide.length > 1 && <p>{textesAide[1]}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -223,12 +229,6 @@ export function EtapeCEDomaineDefinition({ exercice, tentativesUtilisees, tentat
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && textesAide.length > 0 && (
-        <div className="aide-5e">
-          <p>{textesAide[0]}</p>
-          {niveauAide >= 2 && textesAide.length > 1 && <p>{textesAide[1]}</p>}
-        </div>
-      )}
     </div>
   );
 }

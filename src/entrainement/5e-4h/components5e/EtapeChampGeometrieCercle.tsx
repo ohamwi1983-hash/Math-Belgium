@@ -76,6 +76,12 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
         <label className="field-label">{labelPhase(phase)}</label>
         <input type="text" className={`text-input${champErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 3,14" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(phase)}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -90,12 +96,6 @@ export function EtapeChampGeometrieCercle({ exercice, phase, tentativesUtilisees
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
     </div>
   );
 }

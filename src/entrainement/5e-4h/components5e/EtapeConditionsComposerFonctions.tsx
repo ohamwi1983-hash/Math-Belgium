@@ -119,6 +119,12 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
           />
         </div>
       ))}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1}</p>
+          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -133,12 +139,6 @@ export function EtapeConditionsComposerFonctions({ dir, consigne, donnees, tenta
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
-        </div>
-      )}
     </div>
   );
 }

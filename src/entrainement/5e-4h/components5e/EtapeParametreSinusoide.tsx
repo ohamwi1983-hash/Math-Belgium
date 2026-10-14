@@ -84,6 +84,12 @@ export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, 
           placeholder="ex : 3, pi/4, sqrt(2)..."
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(phase)}</p>
+          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -98,12 +104,6 @@ export function EtapeParametreSinusoide({ exercice, phase, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
     </div>
   );
 }

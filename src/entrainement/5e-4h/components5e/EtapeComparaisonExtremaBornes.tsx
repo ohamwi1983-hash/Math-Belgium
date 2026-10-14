@@ -81,6 +81,12 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
         ))}
       </div>
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1ExtremaBornes("comparaison")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("comparaison")}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -95,12 +101,6 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1ExtremaBornes("comparaison")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2ExtremaBornes("comparaison")}</p>}
-        </div>
-      )}
     </div>
   );
 }

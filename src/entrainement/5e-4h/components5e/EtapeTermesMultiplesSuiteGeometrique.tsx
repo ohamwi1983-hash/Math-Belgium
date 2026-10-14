@@ -101,6 +101,12 @@ export function EtapeTermesMultiplesSuiteGeometrique({
           </div>
         );
       })}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, phase)} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -115,12 +121,6 @@ export function EtapeTermesMultiplesSuiteGeometrique({
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, phase)} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

@@ -56,6 +56,18 @@ export function EtapeDomaineDomaineDeriveeLog({ consigneGenerale, blocDonnees, c
       />
       <p className="prompt-text">{consigneEcran}</p>
       <EnsembleReelGuideBuilder onChange={setReponse} label="domf =" />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{aideNiveau1.texte}</p>
+          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aideNiveau2.texte}</p>
+              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -70,18 +82,6 @@ export function EtapeDomaineDomaineDeriveeLog({ consigneGenerale, blocDonnees, c
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

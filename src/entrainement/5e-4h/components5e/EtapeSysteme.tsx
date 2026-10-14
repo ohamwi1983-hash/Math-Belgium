@@ -84,6 +84,12 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
           placeholder="ex : omega*7+phi=asin((-1-4)/5)"
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "systeme")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "systeme")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -98,12 +104,6 @@ export function EtapeSysteme({ exercice, tentativesUtilisees, tentativesMax, niv
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "systeme")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "systeme")} block />}
-        </div>
-      )}
     </div>
   );
 }

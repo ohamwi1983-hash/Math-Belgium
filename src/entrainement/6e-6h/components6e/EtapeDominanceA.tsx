@@ -75,6 +75,18 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
       <p className="prompt-text">{consigneEcran}</p>
       <GroupeCategorie label="Numérateur — terme dominant" valeur={numerateur} erreur={montrerErreurs} onChange={setNumerateur} />
       <GroupeCategorie label="Dénominateur — terme dominant" valeur={denominateur} erreur={montrerErreurs} onChange={setDenominateur} />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{aideNiveau1.texte}</p>
+          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aideNiveau2.texte}</p>
+              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -89,18 +101,6 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

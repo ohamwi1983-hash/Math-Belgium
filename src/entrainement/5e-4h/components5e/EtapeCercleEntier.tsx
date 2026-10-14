@@ -66,6 +66,12 @@ export function EtapeCercleEntier({ exercice, tentativesUtilisees, tentativesMax
         <label className="field-label field-label-minuscule">Aire =</label>
         <input type="text" className={`text-input${aireErronee ? " is-erronee" : ""}`} value={aire} onChange={(e) => setAire(e.target.value)} placeholder="ex : 4*pi" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1("cercleEntier")} block />
+          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, "cercleEntier")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -80,12 +86,6 @@ export function EtapeCercleEntier({ exercice, tentativesUtilisees, tentativesMax
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1("cercleEntier")} block />
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, "cercleEntier")} block />}
-        </div>
-      )}
     </div>
   );
 }

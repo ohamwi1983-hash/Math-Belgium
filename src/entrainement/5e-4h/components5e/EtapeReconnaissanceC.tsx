@@ -72,6 +72,11 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
         <label className="field-label field-label-minuscule">CP(x) =</label>
         <input type="text" className={`text-input${cpErronee ? " is-erronee" : ""}`} value={cp} onChange={(e) => setCp(e.target.value)} placeholder="ex : 2*x" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideReconnaissanceC1(exercice)}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -86,11 +91,6 @@ export function EtapeReconnaissanceC({ exercice, donnees, tentativesUtilisees, t
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideReconnaissanceC1(exercice)}</p>
-        </div>
-      )}
     </div>
   );
 }

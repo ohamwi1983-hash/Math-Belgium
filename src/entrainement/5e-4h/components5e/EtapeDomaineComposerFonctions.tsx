@@ -62,16 +62,16 @@ export function EtapeDomaineComposerFonctions({ consigne, donnees, prefixApercu,
         apresEchec={montrerErreurs}
         validation={validation}
       />
-      {!validation && montrerErreurs && (
-        <p className="alert-error" role="alert">
-          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-        </p>
-      )}
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1}</p>
           {niveauAide >= 2 && latexAideNiveau2 !== null && <Katex expression={latexAideNiveau2} block />}
         </div>
+      )}
+      {!validation && montrerErreurs && (
+        <p className="alert-error" role="alert">
+          Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+        </p>
       )}
     </div>
   );

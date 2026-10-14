@@ -80,6 +80,18 @@ export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiv
       <GroupeLimite label={labels[1].latex} etat={pointMoins} erreur={montrerErreurs} onChange={setPointMoins} />
       <GroupeLimite label={labels[2].latex} etat={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       <GroupeLimite label={labels[3].latex} etat={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{aideNiveau1.texte}</p>
+          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aideNiveau2.texte}</p>
+              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -94,18 +106,6 @@ export function EtapeLimitesQuatre({ enonceLatex, consigneEcran, labels, aideNiv
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

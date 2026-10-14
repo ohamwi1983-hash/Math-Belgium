@@ -71,6 +71,12 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtil
         </button>
       </div>
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "pointVideConclusion")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "pointVideConclusion")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -85,12 +91,6 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtil
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "pointVideConclusion")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "pointVideConclusion")} block />}
-        </div>
-      )}
     </div>
   );
 }

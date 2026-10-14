@@ -106,6 +106,11 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
           </div>
         </>
       )}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1Extremums(exercice.fonction)}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -120,11 +125,6 @@ export function EtapeParametreExtremum({ exercice, phase, tentativesUtilisees, t
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1Extremums(exercice.fonction)}</p>
-        </div>
-      )}
     </div>
   );
 }

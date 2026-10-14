@@ -95,6 +95,12 @@ export function EtapeChampUniqueTangente({
         />
       </div>
       {avecCalculatrice && <CalculatriceScientifique />}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(phase)}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -109,12 +115,6 @@ export function EtapeChampUniqueTangente({
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

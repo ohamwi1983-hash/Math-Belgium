@@ -61,6 +61,11 @@ export function EtapeConversionPythagoricienne({ exercice, tentativesUtilisees, 
         onChange={(e) => setTexte(e.target.value)}
         placeholder={`ex : 4*${exercice.fonctionCible}(x)^2+6*${exercice.fonctionCible}(x)-4`}
       />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_CONVERSION_NIVEAU1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -75,11 +80,6 @@ export function EtapeConversionPythagoricienne({ exercice, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_CONVERSION_NIVEAU1}</p>
-        </div>
-      )}
     </div>
   );
 }

@@ -69,6 +69,18 @@ export function EtapeChampLogProblemes({ consigneGenerale, blocDonnees, consigne
       <div className="field">
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{aideNiveau1.texte}</p>
+          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aideNiveau2.texte}</p>
+              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -83,18 +95,6 @@ export function EtapeChampLogProblemes({ consigneGenerale, blocDonnees, consigne
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

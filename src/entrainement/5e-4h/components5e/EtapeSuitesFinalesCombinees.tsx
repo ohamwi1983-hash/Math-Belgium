@@ -94,6 +94,11 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
         </div>
       ))}
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, "suitesFinalesCombinees")} block />
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -108,11 +113,6 @@ export function EtapeSuitesFinalesCombinees({ exercice, tentativesUtilisees, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "suitesFinalesCombinees")} block />
-        </div>
-      )}
     </div>
   );
 }

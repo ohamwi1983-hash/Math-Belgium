@@ -70,6 +70,12 @@ export function EtapeDiviserQuelconque({ exercice, tentativesUtilisees, tentativ
           placeholder="ex : (2+3/n)/(1-1/n)"
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, "diviserQuelconque")} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -84,12 +90,6 @@ export function EtapeDiviserQuelconque({ exercice, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "diviserQuelconque")} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

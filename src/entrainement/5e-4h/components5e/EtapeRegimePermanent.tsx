@@ -61,6 +61,12 @@ export function EtapeRegimePermanent({ exercice, tentativesUtilisees, tentatives
           <input type="text" className="text-input" value={L} onChange={(e) => setL(e.target.value)} />
         </div>
       )}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, "regimePermanent")} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -75,12 +81,6 @@ export function EtapeRegimePermanent({ exercice, tentativesUtilisees, tentatives
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "regimePermanent")} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

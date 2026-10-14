@@ -77,6 +77,18 @@ export function EtapeGeneralisationA({ exercice, donnees, tentativesUtilisees, t
         <label className="field-label field-label-minuscule">g(x) =</label>
         <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 2*pi*x^2" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_GENERALISATION_A_1}</p>
+          {niveauAide >= 2 && (
+            <>
+              <Katex expression={latexAideGeneralisationA2H()} block />
+              <Katex expression={latexAideGeneralisationA2F()} block />
+              <Katex expression={latexAideGeneralisationA2G()} block />
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -91,18 +103,6 @@ export function EtapeGeneralisationA({ exercice, donnees, tentativesUtilisees, t
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_GENERALISATION_A_1}</p>
-          {niveauAide >= 2 && (
-            <>
-              <Katex expression={latexAideGeneralisationA2H()} block />
-              <Katex expression={latexAideGeneralisationA2F()} block />
-              <Katex expression={latexAideGeneralisationA2G()} block />
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

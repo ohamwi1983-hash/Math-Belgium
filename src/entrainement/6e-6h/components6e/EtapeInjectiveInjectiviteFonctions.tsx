@@ -97,22 +97,6 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilise
         </div>
       )}
 
-      {!validation && (
-        <>
-        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
-        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
-          Valider
-        </button>
-
-        {montrerErreurs && !statut?.global && (
-          <p className="alert-error" role="alert">
-            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
-          </p>
-        )}
-        </>
-      )}
-      {validation && <ValidationEcran {...validation} />}
-
       {niveauAide >= 1 && ouiNon !== false && (
         <div className="aide-5e">
           <p>{texteAideOuiNonNiveau1(exercice)}</p>
@@ -128,7 +112,6 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilise
             })()}
         </div>
       )}
-
       {niveauAide >= 1 && ouiNon === false && (
         <div className="aide-5e">
           <p>{TEXTE_AIDE_INTERVALLE_NIVEAU1}</p>
@@ -144,6 +127,21 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilise
             })()}
         </div>
       )}
+      {!validation && (
+        <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
+        <button type="button" className="btn btn-primary" disabled={!complet} onClick={valider}>
+          Valider
+        </button>
+
+        {montrerErreurs && !statut?.global && (
+          <p className="alert-error" role="alert">
+            Incorrect — tentative {tentativesUtilisees}/{tentativesMax}, réessaie.
+          </p>
+        )}
+        </>
+      )}
+      {validation && <ValidationEcran {...validation} />}
     </div>
   );
 }

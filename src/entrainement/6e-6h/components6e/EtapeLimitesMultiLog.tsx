@@ -113,6 +113,18 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, l
       {labels.map((l, i) => (
         <GroupeLimite key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} onChange={(e) => majEtat(i, e)} />
       ))}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{aideNiveau1.texte}</p>
+          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aideNiveau2.texte}</p>
+              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -127,18 +139,6 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, l
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

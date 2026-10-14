@@ -97,6 +97,12 @@ export function EtapeChampsLimitesContexte({
         </div>
       ))}
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, phase)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, phase)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -111,12 +117,6 @@ export function EtapeChampsLimitesContexte({
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, phase)}</p>}
-        </div>
-      )}
     </div>
   );
 }

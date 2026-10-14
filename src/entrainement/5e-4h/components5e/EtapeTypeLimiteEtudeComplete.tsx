@@ -75,6 +75,12 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, te
         );
       })}
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "typeLimite")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "typeLimite")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -89,12 +95,6 @@ export function EtapeTypeLimiteEtudeComplete({ exercice, tentativesUtilisees, te
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "typeLimite")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "typeLimite")} block />}
-        </div>
-      )}
     </div>
   );
 }

@@ -72,6 +72,12 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
           </div>
         </div>
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "resolution")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "resolution")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -86,12 +92,6 @@ export function EtapeResolution({ exercice, tentativesUtilisees, tentativesMax, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "resolution")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "resolution")} block />}
-        </div>
-      )}
     </div>
   );
 }

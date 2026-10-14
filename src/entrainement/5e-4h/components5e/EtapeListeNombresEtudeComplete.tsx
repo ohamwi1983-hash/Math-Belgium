@@ -73,6 +73,12 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
       <button type="button" className="btn" onClick={ajouter}>
         + Ajouter une valeur exclue
       </button>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "domaine")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "domaine")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -87,12 +93,6 @@ export function EtapeListeNombresEtudeComplete({ exercice, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "domaine")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "domaine")} block />}
-        </div>
-      )}
     </div>
   );
 }

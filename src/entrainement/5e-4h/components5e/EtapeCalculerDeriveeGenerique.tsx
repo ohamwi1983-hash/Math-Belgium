@@ -81,6 +81,12 @@ export function EtapeCalculerDeriveeGenerique({ exercice, phase, labelChamp, ten
           placeholder="ex : 2*x+3"
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1EtudierFonction(ecran)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2EtudierFonction(ecran)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -95,12 +101,6 @@ export function EtapeCalculerDeriveeGenerique({ exercice, phase, labelChamp, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1EtudierFonction(ecran)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2EtudierFonction(ecran)}</p>}
-        </div>
-      )}
     </div>
   );
 }

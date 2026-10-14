@@ -57,6 +57,12 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
           <input type="text" className="text-input" value={valeurs[i]} onChange={(e) => modifier(i, e.target.value)} />
         </div>
       ))}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, "termesSuccessifs")} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -71,12 +77,6 @@ export function EtapeTermesSuccessifs({ exercice, tentativesUtilisees, tentative
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "termesSuccessifs")} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

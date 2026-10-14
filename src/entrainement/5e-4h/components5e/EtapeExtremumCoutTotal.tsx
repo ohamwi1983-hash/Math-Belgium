@@ -135,6 +135,12 @@ export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativ
       )}
 
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("extremum")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "extremum")}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -149,12 +155,6 @@ export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("extremum")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "extremum")}</p>}
-        </div>
-      )}
     </div>
   );
 }

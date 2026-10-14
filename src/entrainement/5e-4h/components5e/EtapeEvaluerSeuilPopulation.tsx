@@ -85,6 +85,12 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
       </div>
 
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "evaluerSeuil")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "evaluerSeuil")}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -99,12 +105,6 @@ export function EtapeEvaluerSeuilPopulation({ exercice, tentativesUtilisees, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "evaluerSeuil")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "evaluerSeuil")}</p>}
-        </div>
-      )}
     </div>
   );
 }

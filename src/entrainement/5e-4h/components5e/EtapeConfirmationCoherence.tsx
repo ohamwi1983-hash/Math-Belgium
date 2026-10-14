@@ -61,6 +61,12 @@ export function EtapeConfirmationCoherence({ exercice, tentativesUtilisees, tent
         </button>
       </div>
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("confirmationCoherence")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "confirmationCoherence")}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -75,12 +81,6 @@ export function EtapeConfirmationCoherence({ exercice, tentativesUtilisees, tent
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("confirmationCoherence")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "confirmationCoherence")}</p>}
-        </div>
-      )}
     </div>
   );
 }

@@ -116,6 +116,18 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
       <p className="prompt-text">{consigneEcran}</p>
       <GroupePartie config={partie1} etat={etat1} erreur={montrerErreurs} onChange={setEtat1} />
       <GroupePartie config={partie2} etat={etat2} erreur={montrerErreurs} onChange={setEtat2} />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{aideNiveau1.texte}</p>
+          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aideNiveau2.texte}</p>
+              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -130,18 +142,6 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{aideNiveau1.texte}</p>
-          {aideNiveau1.latex && <Katex expression={aideNiveau1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{aideNiveau2.texte}</p>
-              {aideNiveau2.latex && <Katex expression={aideNiveau2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

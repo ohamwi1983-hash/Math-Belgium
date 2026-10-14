@@ -88,6 +88,12 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
       <button type="button" className="btn" onClick={ajouterLigne}>
         {libelleAjout}
       </button>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, phase)}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -102,12 +108,6 @@ export function EtapeLignesModelisation({ exercice, phase, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
     </div>
   );
 }

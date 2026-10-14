@@ -84,6 +84,12 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
       <button type="button" className="btn" onClick={ajouterPaire}>
         + Ajouter un intervalle
       </button>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "listerIntervallesInequation")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "listerIntervallesInequation")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -98,12 +104,6 @@ export function EtapeListerIntervalles({ exercice, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "listerIntervallesInequation")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "listerIntervallesInequation")} block />}
-        </div>
-      )}
     </div>
   );
 }

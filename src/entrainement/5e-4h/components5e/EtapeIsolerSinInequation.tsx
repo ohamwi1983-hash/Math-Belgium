@@ -42,6 +42,12 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
     <div>
       <BlocDonneesModelisation exercice={exercice} />
       <p className="prompt-text">{consignePhase(exercice, "isolerSinInequation")}</p>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "isolerSinInequation")}</p>
+          {niveauAide >= 2 && question.casSpecial === null && <Katex expression={texteAideNiveau2(exercice, "isolerSinInequation")} block />}
+        </div>
+      )}
       {question.casSpecial !== null ? (
         <>
           <div className="options-grid">
@@ -114,12 +120,6 @@ export function EtapeIsolerSinInequation({ exercice, tentativesUtilisees, tentat
         </p>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "isolerSinInequation")}</p>
-          {niveauAide >= 2 && question.casSpecial === null && <Katex expression={texteAideNiveau2(exercice, "isolerSinInequation")} block />}
-        </div>
-      )}
     </div>
   );
 }

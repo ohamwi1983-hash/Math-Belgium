@@ -92,6 +92,12 @@ export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax,
         />
       </div>
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("tangenteEnP")}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -106,12 +112,6 @@ export function EtapeTangenteEnP({ exercice, tentativesUtilisees, tentativesMax,
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("tangenteEnP")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

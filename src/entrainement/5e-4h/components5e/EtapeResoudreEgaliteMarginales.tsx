@@ -86,6 +86,12 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
       </div>
 
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("resoudreEgaliteMarginales")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "resoudreEgaliteMarginales")}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -100,12 +106,6 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("resoudreEgaliteMarginales")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "resoudreEgaliteMarginales")}</p>}
-        </div>
-      )}
     </div>
   );
 }

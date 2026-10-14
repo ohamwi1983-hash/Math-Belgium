@@ -47,6 +47,11 @@ export function EtapeExtremumSimpleA({ exercice, donnees, tentativesUtilisees, t
           onChange={(e) => setValeur(e.target.value.replace(/[^0-9.,-]/g, ""))}
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideExtremumSimpleA1(exercice)}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -61,11 +66,6 @@ export function EtapeExtremumSimpleA({ exercice, donnees, tentativesUtilisees, t
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideExtremumSimpleA1(exercice)}</p>
-        </div>
-      )}
     </div>
   );
 }

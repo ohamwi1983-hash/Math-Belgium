@@ -54,6 +54,11 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
           <input type="text" className={`text-input${f2Erronee ? " is-erronee" : ""}`} value={f2} onChange={(e) => setF2(e.target.value.replace(/[^0-9.,-]/g, ""))} />
         </div>
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_EVALUATION_B_1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -68,11 +73,6 @@ export function EtapeEvaluationB({ exercice, donnees, aRetenu, bRetenu, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_EVALUATION_B_1}</p>
-        </div>
-      )}
     </div>
   );
 }

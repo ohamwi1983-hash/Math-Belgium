@@ -94,6 +94,12 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
           </div>
         </div>
       )}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(question)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(question)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -108,12 +114,6 @@ export function EtapeQuestionComposeeGraphique({ question, donnees, tentativesUt
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(question)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(question)}</p>}
-        </div>
-      )}
     </div>
   );
 }

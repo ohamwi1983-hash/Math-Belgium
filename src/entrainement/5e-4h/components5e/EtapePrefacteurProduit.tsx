@@ -58,6 +58,11 @@ export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativ
       <p className="prompt-text">{CONSIGNE_PREFACTEUR}</p>
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : tan(x)*(tan(x)-1/2)" />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_PREFACTEUR_NIVEAU1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -72,11 +77,6 @@ export function EtapePrefacteurProduit({ exercice, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_PREFACTEUR_NIVEAU1}</p>
-        </div>
-      )}
     </div>
   );
 }

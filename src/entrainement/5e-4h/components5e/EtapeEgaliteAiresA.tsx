@@ -48,6 +48,12 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
           onChange={(e) => setValeur(e.target.value.replace(/[^0-9.,-]/g, ""))}
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_EGALITE_AIRES_A_1}</p>
+          {niveauAide >= 2 && <Katex expression={latexAideEgaliteAiresA2(exercice)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -62,12 +68,6 @@ export function EtapeEgaliteAiresA({ exercice, donnees, tentativesUtilisees, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_EGALITE_AIRES_A_1}</p>
-          {niveauAide >= 2 && <Katex expression={latexAideEgaliteAiresA2(exercice)} block />}
-        </div>
-      )}
     </div>
   );
 }

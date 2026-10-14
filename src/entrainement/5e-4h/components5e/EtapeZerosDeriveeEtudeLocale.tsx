@@ -143,6 +143,12 @@ export function EtapeZerosDeriveeEtudeLocale({
         </div>
       )}
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1EtudeLocale(phase)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2EtudeLocale(phase)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -157,12 +163,6 @@ export function EtapeZerosDeriveeEtudeLocale({
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1EtudeLocale(phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2EtudeLocale(phase)}</p>}
-        </div>
-      )}
     </div>
   );
 }

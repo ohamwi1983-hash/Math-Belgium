@@ -48,6 +48,17 @@ export function EtapeCEEquationsCyclometriques({ exercice, tentativesUtilisees, 
       />
       <p className="prompt-text">Établis la condition d'existence (CE) de x∈[intervalle] pour cette équation.</p>
       <EnsembleReelGuideBuilder onChange={setCe} label="x\in" erronee={montrerErreurs} />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideCENiveau1(exercice)}</p>
+          {niveauAide >= 2 && aide2 && (
+            <>
+              <p>{aide2.texte}</p>
+              <Katex expression={aide2.latex} block />
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -62,17 +73,6 @@ export function EtapeCEEquationsCyclometriques({ exercice, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideCENiveau1(exercice)}</p>
-          {niveauAide >= 2 && aide2 && (
-            <>
-              <p>{aide2.texte}</p>
-              <Katex expression={aide2.latex} block />
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

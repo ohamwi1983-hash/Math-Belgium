@@ -147,6 +147,18 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
       <BlocFacteurArgument facteur={exercice.facteur1} numero={1} choix={choix1} setChoix={setChoix1} lignes={lignes1} setLignes={setLignes1} erronee={facteur1Erronee} />
       <BlocFacteurArgument facteur={exercice.facteur2} numero={2} choix={choix2} setChoix={setChoix2} lignes={lignes2} setLignes={setLignes2} erronee={facteur2Erronee} />
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>Facteur 1 — {texteAideArgumentNiveau1(exercice.facteur1.fonction)}</p>
+          <p>Facteur 2 — {texteAideArgumentNiveau1(exercice.facteur2.fonction)}</p>
+          {niveauAide >= 2 && (
+            <>
+              <p>Facteur 1 — {texteAideArgumentNiveau2(exercice.facteur1.fonction)}</p>
+              <p>Facteur 2 — {texteAideArgumentNiveau2(exercice.facteur2.fonction)}</p>
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -161,18 +173,6 @@ export function EtapeArgumentProduit({ exercice, tentativesUtilisees, tentatives
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>Facteur 1 — {texteAideArgumentNiveau1(exercice.facteur1.fonction)}</p>
-          <p>Facteur 2 — {texteAideArgumentNiveau1(exercice.facteur2.fonction)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>Facteur 1 — {texteAideArgumentNiveau2(exercice.facteur1.fonction)}</p>
-              <p>Facteur 2 — {texteAideArgumentNiveau2(exercice.facteur2.fonction)}</p>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

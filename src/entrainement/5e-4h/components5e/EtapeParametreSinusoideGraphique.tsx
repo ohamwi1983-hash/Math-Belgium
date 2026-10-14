@@ -79,6 +79,12 @@ export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUt
           placeholder="ex : 3, pi/4..."
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(phase)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2(phase)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -93,12 +99,6 @@ export function EtapeParametreSinusoideGraphique({ exercice, phase, tentativesUt
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(phase)}</p>}
-        </div>
-      )}
     </div>
   );
 }

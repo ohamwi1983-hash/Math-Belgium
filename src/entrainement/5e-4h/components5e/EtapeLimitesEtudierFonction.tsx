@@ -106,6 +106,12 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
           </div>
         );
       })}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1EtudierFonction("limites")}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2EtudierFonction("limites")}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -120,12 +126,6 @@ export function EtapeLimitesEtudierFonction({ exercice, tentativesUtilisees, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1EtudierFonction("limites")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2EtudierFonction("limites")}</p>}
-        </div>
-      )}
     </div>
   );
 }

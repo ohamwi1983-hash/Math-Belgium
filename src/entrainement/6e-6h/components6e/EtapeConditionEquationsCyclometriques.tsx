@@ -53,6 +53,17 @@ export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtil
         Établis cette condition supplémentaire sous forme de x∈[intervalle].
       </p>
       <EnsembleReelGuideBuilder onChange={setCondition} label="x\in" erronee={montrerErreurs} />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideConditionNiveau1(exercice)}</p>
+          {niveauAide >= 2 && (
+            <>
+              <p>{texteAideConditionNiveau2(exercice).texte}</p>
+              <Katex expression={texteAideConditionNiveau2(exercice).latex} block />
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -67,17 +78,6 @@ export function EtapeConditionEquationsCyclometriques({ exercice, tentativesUtil
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideConditionNiveau1(exercice)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{texteAideConditionNiveau2(exercice).texte}</p>
-              <Katex expression={texteAideConditionNiveau2(exercice).latex} block />
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

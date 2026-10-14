@@ -97,6 +97,12 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
         {comboboxSigne("limite-droite", droite, setDroite, correction !== null && !correction.droite)}
       </div>
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "limitesGaucheDroite")}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -111,12 +117,6 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "limitesGaucheDroite")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

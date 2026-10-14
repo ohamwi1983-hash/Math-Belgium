@@ -81,6 +81,18 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
           </div>
         </div>
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, phase)}</p>
+          {niveauAide >= 2 && phase === "resoudreUInequation" && (
+            <>
+              <Katex expression={texteAideNiveau2(exercice, phase)} block />
+              <CercleTrigEquationSketch points={[]} regime="decimal" arcOmbre={{ debut: question.borneInfU, fin: question.borneSupU }} />
+            </>
+          )}
+          {niveauAide >= 2 && phase === "isolerTInequation" && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -95,18 +107,6 @@ export function EtapeBornes({ exercice, phase, tentativesUtilisees, tentativesMa
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && phase === "resoudreUInequation" && (
-            <>
-              <Katex expression={texteAideNiveau2(exercice, phase)} block />
-              <CercleTrigEquationSketch points={[]} regime="decimal" arcOmbre={{ debut: question.borneInfU, fin: question.borneSupU }} />
-            </>
-          )}
-          {niveauAide >= 2 && phase === "isolerTInequation" && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
     </div>
   );
 }

@@ -41,6 +41,11 @@ export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativ
       />
       <QuestionFinale question={questionFinale(exercice)} />
       <p className="prompt-text">{consigneEcran(phase)}</p>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(phase)}</p>
+        </div>
+      )}
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}
         enteteColonnes={enteteColonnes}
@@ -52,11 +57,6 @@ export function EtapeTableauLectureGraphiqueDerivees({ exercice, phase, tentativ
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         validation={validation}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(phase)}</p>
-        </div>
-      )}
     </div>
   );
 }

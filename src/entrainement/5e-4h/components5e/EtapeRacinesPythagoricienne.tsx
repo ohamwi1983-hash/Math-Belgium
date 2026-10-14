@@ -75,6 +75,11 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
         </label>
         <input type="text" className={`text-input${champsErronee ? " is-erronee" : ""}`} value={t2} onChange={(e) => setT2(e.target.value)} placeholder="ex : -1" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_RACINES_NIVEAU1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -89,11 +94,6 @@ export function EtapeRacinesPythagoricienne({ exercice, tentativesUtilisees, ten
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_RACINES_NIVEAU1}</p>
-        </div>
-      )}
     </div>
   );
 }

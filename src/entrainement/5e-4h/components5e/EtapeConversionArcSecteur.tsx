@@ -49,6 +49,12 @@ export function EtapeConversionArcSecteur({ exercice, tentativesUtilisees, tenta
         <label className="field-label field-label-minuscule">{labelReponseConversion(exercice)}</label>
         <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 5*pi/6 ou 2.62" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={TEXTE_AIDE_CONVERSION_NIVEAU1} block />
+          {niveauAide >= 2 && <Katex expression={latexAideConversionNiveau2(exercice)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -63,12 +69,6 @@ export function EtapeConversionArcSecteur({ exercice, tentativesUtilisees, tenta
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={TEXTE_AIDE_CONVERSION_NIVEAU1} block />
-          {niveauAide >= 2 && <Katex expression={latexAideConversionNiveau2(exercice)} block />}
-        </div>
-      )}
     </div>
   );
 }

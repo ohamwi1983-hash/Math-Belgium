@@ -96,6 +96,12 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
           </button>
         </div>
       )}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "av")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "av")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -110,12 +116,6 @@ export function EtapeAVEtudeComplete({ exercice, tentativesUtilisees, tentatives
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "av")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "av")} block />}
-        </div>
-      )}
     </div>
   );
 }

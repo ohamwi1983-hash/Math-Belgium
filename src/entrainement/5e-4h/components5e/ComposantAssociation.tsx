@@ -126,6 +126,12 @@ export function ComposantAssociation({
           </span>
         </div>
       ))}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1}</p>
+          {niveauAide >= 2 && texteAideNiveau2 && <Katex expression={texteAideNiveau2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -140,12 +146,6 @@ export function ComposantAssociation({
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1}</p>
-          {niveauAide >= 2 && texteAideNiveau2 && <Katex expression={texteAideNiveau2} block />}
-        </div>
-      )}
     </div>
   );
 }

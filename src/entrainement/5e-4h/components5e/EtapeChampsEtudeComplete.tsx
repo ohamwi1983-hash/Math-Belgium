@@ -95,6 +95,12 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
         </div>
       ))}
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, phase)}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -109,12 +115,6 @@ export function EtapeChampsEtudeComplete({ exercice, phase, labels, placeholders
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, phase)} block />}
-        </div>
-      )}
     </div>
   );
 }

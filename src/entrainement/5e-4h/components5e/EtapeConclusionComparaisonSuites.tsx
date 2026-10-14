@@ -79,6 +79,12 @@ export function EtapeConclusionComparaisonSuites({
         <label className="field-label">{labelTraduction(exercice)}</label>
         <input type="text" className={`text-input${traductionErronee ? " is-erronee" : ""}`} value={traduction} onChange={(e) => setTraduction(e.target.value)} />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "conclusion")}</p>
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -93,12 +99,6 @@ export function EtapeConclusionComparaisonSuites({
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "conclusion")}</p>
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

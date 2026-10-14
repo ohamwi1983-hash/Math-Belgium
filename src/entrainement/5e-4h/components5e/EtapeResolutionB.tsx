@@ -51,6 +51,11 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
           <input type="text" className={`text-input${bErronee ? " is-erronee" : ""}`} value={b} onChange={(e) => setB(e.target.value.replace(/[^0-9.,-]/g, ""))} />
         </div>
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_RESOLUTION_B_1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -65,11 +70,6 @@ export function EtapeResolutionB({ exercice, donnees, tentativesUtilisees, tenta
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_RESOLUTION_B_1}</p>
-        </div>
-      )}
     </div>
   );
 }

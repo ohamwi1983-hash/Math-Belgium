@@ -52,6 +52,12 @@ export function EtapePoserRecurrence({ exercice, tentativesUtilisees, tentatives
         </label>
         <input type="text" className="text-input" value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 0.75*x+3" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(exercice, "poserRecurrence")} block />
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -66,12 +72,6 @@ export function EtapePoserRecurrence({ exercice, tentativesUtilisees, tentatives
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(exercice, "poserRecurrence")} block />
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

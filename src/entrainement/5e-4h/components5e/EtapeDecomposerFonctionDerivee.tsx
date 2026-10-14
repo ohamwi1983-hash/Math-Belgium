@@ -105,6 +105,12 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
           placeholder={placeholder2}
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1("decomposer", typeRetenu)}</p>
+          {niveauAide >= 2 && <p>{aide2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -119,12 +125,6 @@ export function EtapeDecomposerFonctionDerivee({ exercice, typeRetenu, tentative
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1("decomposer", typeRetenu)}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
-        </div>
-      )}
     </div>
   );
 }

@@ -61,6 +61,13 @@ export function EtapeSystemeB({ exercice, donnees, tentativesUtilisees, tentativ
         <label className="field-label">Équation pour x={exercice.point2.x} :</label>
         <input type="text" className={`text-input${equation2Erronee ? " is-erronee" : ""}`} value={equation2} onChange={(e) => setEquation2(e.target.value)} placeholder="ex : 56=a*7+b" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideSystemeB1()}</p>
+          <Katex expression={latexCoutTotalB(exercice.modele)} block />
+          {niveauAide >= 2 && <Katex expression={latexAideSystemeB2(exercice)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -75,13 +82,6 @@ export function EtapeSystemeB({ exercice, donnees, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideSystemeB1()}</p>
-          <Katex expression={latexCoutTotalB(exercice.modele)} block />
-          {niveauAide >= 2 && <Katex expression={latexAideSystemeB2(exercice)} block />}
-        </div>
-      )}
     </div>
   );
 }

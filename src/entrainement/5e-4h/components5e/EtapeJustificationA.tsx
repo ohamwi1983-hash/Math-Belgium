@@ -50,6 +50,11 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
         <label className="field-label field-label-minuscule">h ≈</label>
         <input type="text" className={`text-input${hErronee ? " is-erronee" : ""}`} value={h} onChange={(e) => setH(e.target.value.replace(/[^0-9.,-]/g, ""))} />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_JUSTIFICATION_A_1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -67,11 +72,6 @@ export function EtapeJustificationA({ exercice, donnees, xOptimalRetenu, tentati
       {aSoumis && (
         <div className="aide-5e">
           <p>{texteCorrectionJustificationA(exercice, xOptimalRetenu)}</p>
-        </div>
-      )}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_JUSTIFICATION_A_1}</p>
         </div>
       )}
     </div>

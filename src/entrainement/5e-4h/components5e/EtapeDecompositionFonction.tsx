@@ -91,6 +91,18 @@ export function EtapeDecompositionFonction({ exercice, tentativesUtilisees, tent
       <button type="button" className="btn" onClick={ajouterLigne}>
         + Ajouter une fonction
       </button>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_NIVEAU1}</p>
+          {niveauAide >= 2 && (
+            <p>
+              {texteAideNiveau2(exercice).avant}
+              <Katex expression={texteAideNiveau2(exercice).latex} />
+            </p>
+          )}
+          {niveauAide >= 3 && <p>{TEXTE_AIDE_NIVEAU3_AFFINE_FINALE}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -105,18 +117,6 @@ export function EtapeDecompositionFonction({ exercice, tentativesUtilisees, tent
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_NIVEAU1}</p>
-          {niveauAide >= 2 && (
-            <p>
-              {texteAideNiveau2(exercice).avant}
-              <Katex expression={texteAideNiveau2(exercice).latex} />
-            </p>
-          )}
-          {niveauAide >= 3 && <p>{TEXTE_AIDE_NIVEAU3_AFFINE_FINALE}</p>}
-        </div>
-      )}
     </div>
   );
 }

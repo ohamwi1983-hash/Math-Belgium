@@ -83,6 +83,12 @@ export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesU
           placeholder={placeholder}
         />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          {aide1EnLatex ? <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} block /> : <p>{texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)}</p>}
+          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -97,12 +103,6 @@ export function EtapeChampSimpleSuiteArithmetique({ exercice, phase, tentativesU
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          {aide1EnLatex ? <Katex expression={texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)} block /> : <p>{texteAideNiveau1(exercice, phase as PhaseSuiteArithmetique)}</p>}
-          {niveauAide >= 2 && aide2.length > 0 && <Katex expression={aide2} block />}
-        </div>
-      )}
     </div>
   );
 }

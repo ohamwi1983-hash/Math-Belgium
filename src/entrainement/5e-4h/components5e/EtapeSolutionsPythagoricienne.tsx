@@ -70,6 +70,12 @@ export function EtapeSolutionsPythagoricienne({ exercice, tentativesUtilisees, t
       <button type="button" className="btn" onClick={() => setLignes((arr) => [...arr, ""])}>
         + Ajouter une solution
       </button>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU1}</p>
+          {niveauAide >= 2 && <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -84,12 +90,6 @@ export function EtapeSolutionsPythagoricienne({ exercice, tentativesUtilisees, t
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_SOLUTIONS_NIVEAU2}</p>}
-        </div>
-      )}
     </div>
   );
 }

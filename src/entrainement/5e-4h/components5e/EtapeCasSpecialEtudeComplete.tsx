@@ -84,6 +84,12 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
         </div>
       </div>
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "casSpecial")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "casSpecial")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -98,12 +104,6 @@ export function EtapeCasSpecialEtudeComplete({ exercice, tentativesUtilisees, te
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "casSpecial")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "casSpecial")} block />}
-        </div>
-      )}
     </div>
   );
 }

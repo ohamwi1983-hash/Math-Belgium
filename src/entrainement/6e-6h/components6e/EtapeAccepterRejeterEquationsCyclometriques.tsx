@@ -81,6 +81,17 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
           </div>
         ))}
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideAcceptRejetNiveau1(exercice)}</p>
+          {niveauAide >= 2 && (
+            <>
+              <p>{texteAideAcceptRejetNiveau2(exercice).texte}</p>
+              <Katex expression={texteAideAcceptRejetNiveau2(exercice).latex} block />
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -95,17 +106,6 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideAcceptRejetNiveau1(exercice)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{texteAideAcceptRejetNiveau2(exercice).texte}</p>
-              <Katex expression={texteAideAcceptRejetNiveau2(exercice).latex} block />
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

@@ -76,6 +76,11 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, tentativesUtilise
         erroneeY={statut !== null && !statut.yCorrect}
       />
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_BIJECTION_NIVEAU1}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -92,11 +97,6 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, tentativesUtilise
       )}
       {validation && <ValidationEcran {...validation} />}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_BIJECTION_NIVEAU1}</p>
-        </div>
-      )}
     </div>
   );
 }

@@ -43,6 +43,12 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
       />
       <QuestionFinale question={questionFinaleEtudeLocale(exercice)} />
       <p className="prompt-text">{consigneEcranEtudeLocale(phase)}</p>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1EtudeLocale(phase)}</p>
+          {niveauAide >= 2 && <p>{texteAideNiveau2EtudeLocale(phase)}</p>}
+        </div>
+      )}
       <TableauEtudeLocaleBuilder
         colonnes={attendu.colonnes}
         enteteColonnes={enteteColonnes}
@@ -54,12 +60,6 @@ export function EtapeTableauEtudeLocale({ exercice, phase, tentativesUtilisees, 
         contenuAvantValider={<BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />}
         validation={validation}
       />
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1EtudeLocale(phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2EtudeLocale(phase)}</p>}
-        </div>
-      )}
     </div>
   );
 }

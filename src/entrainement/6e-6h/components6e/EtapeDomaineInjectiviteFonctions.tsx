@@ -55,6 +55,17 @@ export function EtapeDomaineInjectiviteFonctions({ exercice, tentativesUtilisees
 
       <EnsembleReelGuideBuilder onChange={setDomaine} label="domf =" erronee={montrerErreurs && !correct} />
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideDomaineNiveau1(exercice)}</p>
+          {niveauAide >= 2 && (
+            <>
+              <p>{aide2.texte}</p>
+              {aide2.latex && <Katex expression={aide2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -71,17 +82,6 @@ export function EtapeDomaineInjectiviteFonctions({ exercice, tentativesUtilisees
       )}
       {validation && <ValidationEcran {...validation} />}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideDomaineNiveau1(exercice)}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

@@ -67,6 +67,17 @@ export function EtapeReciproqueInjectiviteFonctions({ exercice, coteChoisi, tent
         />
       </div>
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_RECIPROQUE_NIVEAU1}</p>
+          {niveauAide >= 2 && (
+            <>
+              <p>{aide2.texte}</p>
+              {aide2.latex && <Katex expression={aide2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -83,17 +94,6 @@ export function EtapeReciproqueInjectiviteFonctions({ exercice, coteChoisi, tent
       )}
       {validation && <ValidationEcran {...validation} />}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_RECIPROQUE_NIVEAU1}</p>
-          {niveauAide >= 2 && (
-            <>
-              <p>{aide2.texte}</p>
-              {aide2.latex && <Katex expression={aide2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

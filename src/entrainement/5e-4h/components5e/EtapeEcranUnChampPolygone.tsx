@@ -55,6 +55,13 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
       <PolygoneCercleSketch r={exercice.r} n={exercice.n} surlignage={surlignagePourPhase(exercice, phase)} />
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 3*pi/4" />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <Katex expression={texteAideNiveau1(phase)} block />
+          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
+          {niveauAide >= 3 && aideNiveau3 !== null && <p>{aideNiveau3}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -69,13 +76,6 @@ export function EtapeEcranUnChampPolygone({ exercice, phase, tentativesUtilisees
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <Katex expression={texteAideNiveau1(phase)} block />
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2(exercice, phase)} block />}
-          {niveauAide >= 3 && aideNiveau3 !== null && <p>{aideNiveau3}</p>}
-        </div>
-      )}
     </div>
   );
 }

@@ -89,6 +89,12 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
           ))}
         </tbody>
       </table>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{TEXTE_AIDE_TABLEAU_A_1}</p>
+          {niveauAide >= 2 && <p>{TEXTE_AIDE_TABLEAU_A_2}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -103,12 +109,6 @@ export function EtapeTableauA({ exercice, donnees, tentativesUtilisees, tentativ
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{TEXTE_AIDE_TABLEAU_A_1}</p>
-          {niveauAide >= 2 && <p>{TEXTE_AIDE_TABLEAU_A_2}</p>}
-        </div>
-      )}
     </div>
   );
 }

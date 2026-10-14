@@ -115,6 +115,12 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
           </button>
         </div>
       )}
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideArgumentNiveau1(exercice.fonction)}</p>
+          {niveauAide >= 2 && <p>{texteAideArgumentNiveau2(exercice.fonction)}</p>}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -129,12 +135,6 @@ export function EtapeArgumentEquationTrig({ exercice, tentativesUtilisees, tenta
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideArgumentNiveau1(exercice.fonction)}</p>
-          {niveauAide >= 2 && <p>{texteAideArgumentNiveau2(exercice.fonction)}</p>}
-        </div>
-      )}
     </div>
   );
 }

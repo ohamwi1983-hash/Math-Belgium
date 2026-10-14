@@ -116,6 +116,12 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
       <BlocDirection titre="Vers −∞" etat={moins} setEtat={setMoins} erronee={correction !== null && !correction.moins} />
       <BlocDirection titre="Vers +∞" etat={plus} setEtat={setPlus} erronee={correction !== null && !correction.plus} />
       <CalculatriceScientifique />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideNiveau1(exercice, "asymptoteInfini")}</p>
+          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "asymptoteInfini")} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -130,12 +136,6 @@ export function EtapeAsymptoteInfiniEtudeComplete({ exercice, tentativesUtilisee
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideNiveau1(exercice, "asymptoteInfini")}</p>
-          {niveauAide >= 2 && <Katex expression={texteAideNiveau2(exercice, "asymptoteInfini")} block />}
-        </div>
-      )}
     </div>
   );
 }

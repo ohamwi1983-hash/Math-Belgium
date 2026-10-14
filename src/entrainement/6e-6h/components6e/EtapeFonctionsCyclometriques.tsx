@@ -93,6 +93,18 @@ export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, te
         </>
       )}
 
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{a1.texte}</p>
+          {a1.latex && <Katex expression={a1.latex} block />}
+          {niveauAide >= 2 && (
+            <>
+              <p>{a2.texte}</p>
+              {a2.latex && <Katex expression={a2.latex} block />}
+            </>
+          )}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -109,18 +121,6 @@ export function EtapeFonctionsCyclometriques({ exercice, tentativesUtilisees, te
       )}
       {validation && <ValidationEcran {...validation} />}
 
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{a1.texte}</p>
-          {a1.latex && <Katex expression={a1.latex} block />}
-          {niveauAide >= 2 && (
-            <>
-              <p>{a2.texte}</p>
-              {a2.latex && <Katex expression={a2.latex} block />}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

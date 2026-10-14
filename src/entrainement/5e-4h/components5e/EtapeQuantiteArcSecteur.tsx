@@ -62,6 +62,15 @@ export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, 
       <p className="prompt-text">{consigneQuantite(phase)}</p>
       <ApercuExpressionLatex texte={texte} />
       <input type="text" className={`text-input${texteErronee ? " is-erronee" : ""}`} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="ex : 5*pi/6 ou 2.62" />
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>Formule(s) disponible(s) :</p>
+          {texteAideNiveau1ArcSecteur(phase, connues).map((latex, i) => (
+            <Katex key={i} expression={latex} block />
+          ))}
+          {niveauAide >= 2 && <Katex expression={latexAideNiveau2ArcSecteur(exercice, phase, connues)} block />}
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -76,15 +85,6 @@ export function EtapeQuantiteArcSecteur({ exercice, phase, tentativesUtilisees, 
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>Formule(s) disponible(s) :</p>
-          {texteAideNiveau1ArcSecteur(phase, connues).map((latex, i) => (
-            <Katex key={i} expression={latex} block />
-          ))}
-          {niveauAide >= 2 && <Katex expression={latexAideNiveau2ArcSecteur(exercice, phase, connues)} block />}
-        </div>
-      )}
     </div>
   );
 }

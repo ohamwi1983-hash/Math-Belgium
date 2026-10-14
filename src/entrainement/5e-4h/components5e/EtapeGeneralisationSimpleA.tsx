@@ -56,6 +56,11 @@ export function EtapeGeneralisationSimpleA({ exercice, donnees, tentativesUtilis
         <label className="field-label field-label-minuscule">g(x) =</label>
         <input type="text" className={`text-input${gErronee ? " is-erronee" : ""}`} value={g} onChange={(e) => setG(e.target.value)} placeholder="ex : 10/x" />
       </div>
+      {niveauAide >= 1 && (
+        <div className="aide-5e">
+          <p>{texteAideGeneralisationSimpleA1(exercice)}</p>
+        </div>
+      )}
       {!validation && (
         <>
         <BoutonAide niveauAide={niveauAide} niveauAideMax={niveauAideMax} onActiverAide={onActiverAide} />
@@ -70,11 +75,6 @@ export function EtapeGeneralisationSimpleA({ exercice, donnees, tentativesUtilis
         </>
       )}
       {validation && <ValidationEcran {...validation} />}
-      {niveauAide >= 1 && (
-        <div className="aide-5e">
-          <p>{texteAideGeneralisationSimpleA1(exercice)}</p>
-        </div>
-      )}
     </div>
   );
 }
