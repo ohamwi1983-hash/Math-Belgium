@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import type { ReglagesFamillesFonctionReference } from "./core/fonctionsReference.types";
+import type { ReglagesFamillesFonctionReference, ReponseCurseursFonctionReference } from "./core/fonctionsReference.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionFonctionReference, soumettreChoixFamille, soumettreReponse } from "./moteur/sessionFonctionsReference";
 import type { EtatSessionFonctionReference } from "./moteur/typesFonctionsReference";
@@ -17,10 +17,15 @@ import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { MafsGraphFonctionsReference } from "./components/MafsGraphFonctionsReference";
 
 const CONSIGNE_GENERALE = "Étudie les transformations graphiques de cette fonction de référence.";
 
 const NOMBRE_EXERCICES_ALEATOIRE = 5;
+
+/** Valeurs par défaut des 6 curseurs + 2 toggles (écran "exercice") — jamais déjà corrects (même
+ * principe que partout ailleurs dans le projet). */
+const CURSEURS_INITIAUX: ReponseCurseursFonctionReference = { th: 0, tv: 0, ch: 1, eh: 1, ev: 1, cv: 1, sox: false, soy: false };
 
 const REGLAGES_BASE = {
   tentativesMax: 3,
@@ -117,6 +122,18 @@ export function AppFonctionsReference() {
   const [etat, setEtat] = useState<EtatSessionFonctionReference | null>(null);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
 
+  /** Curseurs de l'écran "exercice", remontés ici (plutôt que locaux à `EtapeFonctionsReferenceExercice`)
+   * pour rester visibles au moment de calculer `blocDonnees` (`live`, courbe manipulable affichée
+   * uniquement si l'aide est activée). Reset explicite à chaque changement de phase — même
+   * comportement que l'ancien `useState` local, remonté à chaque nouvelle occurrence de l'écran
+   * "exercice" (après "reconnaissance", jamais en restant sur "exercice" après un essai raté). */
+  const [curseurs, setCurseurs] = useState<ReponseCurseursFonctionReference>(CURSEURS_INITIAUX);
+  const [phasePourCurseurs, setPhasePourCurseurs] = useState(etat?.phase ?? null);
+  if (etat && phasePourCurseurs !== etat.phase) {
+    setPhasePourCurseurs(etat.phase);
+    setCurseurs(CURSEURS_INITIAUX);
+  }
+
   function commencerSession(reglages: ReglagesFamillesFonctionReference) {
     setReglagesFamilles(reglages);
     setEtat(demarrer(reglages));
@@ -179,6 +196,13 @@ export function AppFonctionsReference() {
       }
     : null;
 
+  /** Bloc de données centralisé (`EnTeteExercice`) — la courbe cible (`cible={etat.exerciceCourant}`)
+   * est identique sur les 2 écrans. `live` (courbe manipulable par les curseurs ci-dessus) ne
+   * s'affiche que sur l'écran "exercice" et seulement une fois l'aide activée — `null` sinon,
+   * identique au comportement d'avant sur l'écran "reconnaissance" (pas de prop `live`). */
+  const live = etat.phase === "exercice" && etat.aideUtilisee ? { ...etat.exerciceCourant, ...curseurs } : null;
+  const blocDonnees = <MafsGraphFonctionsReference cible={etat.exerciceCourant} live={live} />;
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -201,10 +225,9 @@ export function AppFonctionsReference() {
         </div>
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={blocDonnees} />
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFonction
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeReconnaissance.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onChoisir={(choix) => terminerEtape(soumettreChoixFamille(etat, choix))}
@@ -220,6 +243,8 @@ export function AppFonctionsReference() {
               equationFermee={etat.etapeEquation.terminee}
               curseursFermee={etat.etapeCurseurs.terminee}
               aideActivee={etat.aideUtilisee}
+              curseurs={curseurs}
+              onChangeCurseurs={setCurseurs}
               onActiverAide={() => setEtat(activerAide(etat))}
               onValider={(reponse) => terminerEtape(soumettreReponse(etat, reponse))}
               validation={validation}

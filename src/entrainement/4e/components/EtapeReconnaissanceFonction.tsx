@@ -1,12 +1,10 @@
 import { useState } from "react";
-import type { ExerciceFonctionReference, FamilleReference } from "../core/fonctionsReference.types";
+import type { FamilleReference } from "../core/fonctionsReference.types";
 import { OPTIONS_FAMILLE } from "../ui/famillesReferenceLabels";
-import { MafsGraphFonctionsReference } from "./MafsGraphFonctionsReference";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
-  exercice: ExerciceFonctionReference;
   tentativesUtilisees: number;
   tentativesMax: number;
   onChoisir: (choix: FamilleReference) => void;
@@ -20,16 +18,17 @@ interface Props {
  * Étape 0 (spec section 3) : le graphe affiche uniquement la courbe cible transformée, sans
  * indication de famille — l'élève choisit parmi les 6. Aucun curseur ici (contrairement à l'écran
  * "exercice") : seule la reconnaissance de la forme est en jeu, notée avec le mécanisme habituel de
- * tentatives/pénalité (même principe que EtapeReconnaissance.tsx, exercice 1).
+ * tentatives/pénalité (même principe que EtapeReconnaissance.tsx, exercice 1). Le graphe (identique
+ * sur les 2 écrans de l'exercice) est centralisé dans `blocDonnees` (`EnTeteExercice`, voir
+ * `AppFonctionsReference`) — plus rendu ici.
  */
-export function EtapeReconnaissanceFonction({ exercice, tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
+export function EtapeReconnaissanceFonction({ tentativesUtilisees, tentativesMax, onChoisir, validation}: Props) {
   const [choix, setChoix] = useState<FamilleReference | null>(null);
   const erronee = tentativesUtilisees > 0;
 
   return (
     <div>
       <p className="prompt-text">Observe le graphe : à quelle fonction de référence appartient cette courbe ?</p>
-      <MafsGraphFonctionsReference cible={exercice} />
       <div className="options-grid">
         {OPTIONS_FAMILLE.map((option) => (
           <button

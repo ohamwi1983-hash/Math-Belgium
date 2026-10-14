@@ -8,7 +8,6 @@ import { diagnostiquerEquationFonctionReference, evaluerCurseursFonctionReferenc
 import { formatApercuEquation, placeholderEquation } from "../ui/formatFonctionsReference";
 import { formatMessageErreur } from "../ui/messageErreur";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
-import { MafsGraphFonctionsReference } from "./MafsGraphFonctionsReference";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -24,6 +23,8 @@ interface Props {
   equationFermee: boolean;
   curseursFermee: boolean;
   aideActivee: boolean;
+  curseurs: ReponseCurseursFonctionReference;
+  onChangeCurseurs: (curseurs: ReponseCurseursFonctionReference) => void;
   onActiverAide: () => void;
   onValider: (reponse: ReponseFonctionReference) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
@@ -53,7 +54,9 @@ const TERMINOLOGIE: { abbr: string; texte: string }[] = [
  * libre, un seul bouton "Valider" qui soumet les deux à la fois. Les deux notes
  * ("équation"/"curseurs") évoluent indépendamment côté moteur (voir sessionFonctionsReference.ts)
  * — même patron que EtapeTransformationExercice.tsx
- * (chapitre 1), étendu à 2 curseurs et 1 toggle supplémentaires.
+ * (chapitre 1), étendu à 2 curseurs et 1 toggle supplémentaires. `curseurs` est remonté à
+ * `AppFonctionsReference`, qui en dérive `live` (la courbe manipulable) pour le graphe centralisé
+ * dans `blocDonnees` — plus rendu localement ici.
  */
 export function EtapeFonctionsReferenceExercice({
   exercice,
@@ -64,26 +67,18 @@ export function EtapeFonctionsReferenceExercice({
   equationFermee,
   curseursFermee,
   aideActivee,
+  curseurs,
+  onChangeCurseurs,
   onActiverAide,
   onValider,
   validation,
 }: Props) {
-  const [th, setTh] = useState(0);
-  const [tv, setTv] = useState(0);
-  const [ch, setCh] = useState(1);
-  const [eh, setEh] = useState(1);
-  const [ev, setEv] = useState(1);
-  const [cv, setCv] = useState(1);
-  const [sox, setSox] = useState(false);
-  const [soy, setSoy] = useState(false);
+  const { th, tv, ch, eh, ev, cv, sox, soy } = curseurs;
   const [equation, setEquation] = useState("");
   const [terminologieOuverte, setTerminologieOuverte] = useState(false);
 
-  const curseurs: ReponseCurseursFonctionReference = { th, tv, ch, eh, ev, cv, sox, soy };
   const evaluation = evaluerCurseursFonctionReference(exercice, curseurs);
   const montrerErreursCurseurs = !curseursFermee && tentativesCurseurs > 0;
-
-  const live = aideActivee ? { ...exercice, ...curseurs } : null;
 
   const boutonValiderDesactive = !equationFermee && equation.trim() === "";
   const statutEquation =
@@ -99,8 +94,6 @@ export function EtapeFonctionsReferenceExercice({
       <p className="prompt-text">
         Retrouve, par lecture graphique, les paramètres de la transformation, puis écris l'équation complète.
       </p>
-
-      <MafsGraphFonctionsReference cible={exercice} live={live} />
 
       <div className="transformation-entete">
         <button
@@ -133,7 +126,7 @@ export function EtapeFonctionsReferenceExercice({
             step={1}
             value={th}
             disabled={curseursFermee}
-            onChange={(e) => setTh(Number(e.target.value))}
+            onChange={(e) => onChangeCurseurs({ ...curseurs, th: Number(e.target.value) })}
           />
         </label>
         <label className={classeCurseur(evaluation.tv)} htmlFor="curseur-tv">
@@ -146,7 +139,7 @@ export function EtapeFonctionsReferenceExercice({
             step={1}
             value={tv}
             disabled={curseursFermee}
-            onChange={(e) => setTv(Number(e.target.value))}
+            onChange={(e) => onChangeCurseurs({ ...curseurs, tv: Number(e.target.value) })}
           />
         </label>
       </div>
@@ -161,7 +154,7 @@ export function EtapeFonctionsReferenceExercice({
             step={1}
             value={ch}
             disabled={curseursFermee}
-            onChange={(e) => setCh(Number(e.target.value))}
+            onChange={(e) => onChangeCurseurs({ ...curseurs, ch: Number(e.target.value) })}
           />
         </label>
         <label className={classeCurseur(evaluation.eh)} htmlFor="curseur-eh">
@@ -174,7 +167,7 @@ export function EtapeFonctionsReferenceExercice({
             step={1}
             value={eh}
             disabled={curseursFermee}
-            onChange={(e) => setEh(Number(e.target.value))}
+            onChange={(e) => onChangeCurseurs({ ...curseurs, eh: Number(e.target.value) })}
           />
         </label>
       </div>
@@ -189,7 +182,7 @@ export function EtapeFonctionsReferenceExercice({
             step={1}
             value={ev}
             disabled={curseursFermee}
-            onChange={(e) => setEv(Number(e.target.value))}
+            onChange={(e) => onChangeCurseurs({ ...curseurs, ev: Number(e.target.value) })}
           />
         </label>
         <label className={classeCurseur(evaluation.cv)} htmlFor="curseur-cv">
@@ -202,16 +195,16 @@ export function EtapeFonctionsReferenceExercice({
             step={1}
             value={cv}
             disabled={curseursFermee}
-            onChange={(e) => setCv(Number(e.target.value))}
+            onChange={(e) => onChangeCurseurs({ ...curseurs, cv: Number(e.target.value) })}
           />
         </label>
       </div>
 
       <div className="curseur-row">
-        <button type="button" className={classeCurseur(evaluation.sox) + " btn"} disabled={curseursFermee} onClick={() => setSox((v) => !v)}>
+        <button type="button" className={classeCurseur(evaluation.sox) + " btn"} disabled={curseursFermee} onClick={() => onChangeCurseurs({ ...curseurs, sox: !sox })}>
           {sox ? "SOX : Oui" : "SOX : Non"}
         </button>
-        <button type="button" className={classeCurseur(evaluation.soy) + " btn"} disabled={curseursFermee} onClick={() => setSoy((v) => !v)}>
+        <button type="button" className={classeCurseur(evaluation.soy) + " btn"} disabled={curseursFermee} onClick={() => onChangeCurseurs({ ...curseurs, soy: !soy })}>
           {soy ? "SOY : Oui" : "SOY : Non"}
         </button>
       </div>
