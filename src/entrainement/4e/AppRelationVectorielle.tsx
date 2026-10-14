@@ -14,6 +14,9 @@ import { Katex } from "./components/Katex";
 import { calculerRecapitulatifRelationVectorielle } from "./ui/recapitulatifRelationVectorielle";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine les coordonnées de ce point à partir de la relation vectorielle.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -122,6 +125,7 @@ export function AppRelationVectorielle() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {exercice.variante === "translation" ? (
           <EtapeTranslationVectorielle
             exercice={exercice}
