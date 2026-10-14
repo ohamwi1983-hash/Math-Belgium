@@ -111,37 +111,39 @@ export function EtapeConstructionAvecXColinearite({ exercice, tentativesUtilisee
         <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} />.
       </p>
 
-      <div className="field-row">
-        <ChampSymbolique
-          id="colinearite-avecx-abx"
-          label={`x_{${exercice.labelA}${exercice.labelB}} =`}
-          valeur={abX}
-          onChange={setAbX}
-          erronee={evaluation !== null && evaluation.abX !== "correct"}
-        />
-        <ChampSymbolique
-          id="colinearite-avecx-aby"
-          label={`y_{${exercice.labelA}${exercice.labelB}} =`}
-          valeur={abY}
-          onChange={setAbY}
-          erronee={evaluation !== null && evaluation.abY !== "correct"}
-        />
-      </div>
-      <div className="field-row">
-        <ChampSymbolique
-          id="colinearite-avecx-acx"
-          label={`x_{${exercice.labelA}${exercice.labelC}} =`}
-          valeur={acX}
-          onChange={setAcX}
-          erronee={evaluation !== null && evaluation.acX !== "correct"}
-        />
-        <ChampSymbolique
-          id="colinearite-avecx-acy"
-          label={`y_{${exercice.labelA}${exercice.labelC}} =`}
-          valeur={acY}
-          onChange={setAcY}
-          erronee={evaluation !== null && evaluation.acY !== "correct"}
-        />
+      <div className="field-row-groupe">
+        <div className="field-row">
+          <ChampSymbolique
+            id="colinearite-avecx-abx"
+            label={`x_{${exercice.labelA}${exercice.labelB}} =`}
+            valeur={abX}
+            onChange={setAbX}
+            erronee={evaluation !== null && evaluation.abX !== "correct"}
+          />
+          <ChampSymbolique
+            id="colinearite-avecx-aby"
+            label={`y_{${exercice.labelA}${exercice.labelB}} =`}
+            valeur={abY}
+            onChange={setAbY}
+            erronee={evaluation !== null && evaluation.abY !== "correct"}
+          />
+        </div>
+        <div className="field-row">
+          <ChampSymbolique
+            id="colinearite-avecx-acx"
+            label={`x_{${exercice.labelA}${exercice.labelC}} =`}
+            valeur={acX}
+            onChange={setAcX}
+            erronee={evaluation !== null && evaluation.acX !== "correct"}
+          />
+          <ChampSymbolique
+            id="colinearite-avecx-acy"
+            label={`y_{${exercice.labelA}${exercice.labelC}} =`}
+            valeur={acY}
+            onChange={setAcY}
+            erronee={evaluation !== null && evaluation.acY !== "correct"}
+          />
+        </div>
       </div>
 
       {niveauAide > 0 && (

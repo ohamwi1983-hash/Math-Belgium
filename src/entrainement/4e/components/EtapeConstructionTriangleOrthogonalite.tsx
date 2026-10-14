@@ -102,17 +102,19 @@ export function EtapeConstructionTriangleOrthogonalite({ exercice, tentativesUti
         <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} /> et <Katex expression={`\\vec{${exercice.labelB}${exercice.labelC}}`} />.
       </p>
 
-      <div className="field-row">
-        {champ("orthogonalite-construction-abx", `x_{${exercice.labelA}${exercice.labelB}} =`, abX, setAbX, evaluation !== null && evaluation.abX !== "correct")}
-        {champ("orthogonalite-construction-aby", `y_{${exercice.labelA}${exercice.labelB}} =`, abY, setAbY, evaluation !== null && evaluation.abY !== "correct")}
-      </div>
-      <div className="field-row">
-        {champ("orthogonalite-construction-acx", `x_{${exercice.labelA}${exercice.labelC}} =`, acX, setAcX, evaluation !== null && evaluation.acX !== "correct")}
-        {champ("orthogonalite-construction-acy", `y_{${exercice.labelA}${exercice.labelC}} =`, acY, setAcY, evaluation !== null && evaluation.acY !== "correct")}
-      </div>
-      <div className="field-row">
-        {champ("orthogonalite-construction-bcx", `x_{${exercice.labelB}${exercice.labelC}} =`, bcX, setBcX, evaluation !== null && evaluation.bcX !== "correct")}
-        {champ("orthogonalite-construction-bcy", `y_{${exercice.labelB}${exercice.labelC}} =`, bcY, setBcY, evaluation !== null && evaluation.bcY !== "correct")}
+      <div className="field-row-groupe">
+        <div className="field-row">
+          {champ("orthogonalite-construction-abx", `x_{${exercice.labelA}${exercice.labelB}} =`, abX, setAbX, evaluation !== null && evaluation.abX !== "correct")}
+          {champ("orthogonalite-construction-aby", `y_{${exercice.labelA}${exercice.labelB}} =`, abY, setAbY, evaluation !== null && evaluation.abY !== "correct")}
+        </div>
+        <div className="field-row">
+          {champ("orthogonalite-construction-acx", `x_{${exercice.labelA}${exercice.labelC}} =`, acX, setAcX, evaluation !== null && evaluation.acX !== "correct")}
+          {champ("orthogonalite-construction-acy", `y_{${exercice.labelA}${exercice.labelC}} =`, acY, setAcY, evaluation !== null && evaluation.acY !== "correct")}
+        </div>
+        <div className="field-row">
+          {champ("orthogonalite-construction-bcx", `x_{${exercice.labelB}${exercice.labelC}} =`, bcX, setBcX, evaluation !== null && evaluation.bcX !== "correct")}
+          {champ("orthogonalite-construction-bcy", `y_{${exercice.labelB}${exercice.labelC}} =`, bcY, setBcY, evaluation !== null && evaluation.bcY !== "correct")}
+        </div>
       </div>
 
       {niveauAide > 0 && (

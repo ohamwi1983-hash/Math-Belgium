@@ -85,60 +85,62 @@ export function EtapeConstructionVecteursColinearite({ exercice, tentativesUtili
         <Katex expression={`\\vec{${exercice.labelA}${exercice.labelC}}`} />.
       </p>
 
-      <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-abx">
-            <Katex expression={`x_{${exercice.labelA}${exercice.labelB}} =`} />
-          </label>
-          <input
-            id="colinearite-construction-abx"
-            className={`text-input${abXErronee ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
-            value={abX}
-            onChange={(e) => setAbX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
-          />
+      <div className="field-row-groupe">
+        <div className="field-row">
+          <div className="field field-inline">
+            <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-abx">
+              <Katex expression={`x_{${exercice.labelA}${exercice.labelB}} =`} />
+            </label>
+            <input
+              id="colinearite-construction-abx"
+              className={`text-input${abXErronee ? " is-erronee" : ""}`}
+              placeholder={PLACEHOLDER_COMPOSANTE}
+              value={abX}
+              onChange={(e) => setAbX(filtrerSaisieNumerique(e.target.value))}
+              onKeyDown={gererKeyDownNumerique}
+            />
+          </div>
+          <div className="field field-inline">
+            <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-aby">
+              <Katex expression={`y_{${exercice.labelA}${exercice.labelB}} =`} />
+            </label>
+            <input
+              id="colinearite-construction-aby"
+              className={`text-input${abYErronee ? " is-erronee" : ""}`}
+              placeholder={PLACEHOLDER_COMPOSANTE}
+              value={abY}
+              onChange={(e) => setAbY(filtrerSaisieNumerique(e.target.value))}
+              onKeyDown={gererKeyDownNumerique}
+            />
+          </div>
         </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-aby">
-            <Katex expression={`y_{${exercice.labelA}${exercice.labelB}} =`} />
-          </label>
-          <input
-            id="colinearite-construction-aby"
-            className={`text-input${abYErronee ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
-            value={abY}
-            onChange={(e) => setAbY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
-          />
-        </div>
-      </div>
-      <div className="field-row">
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-acx">
-            <Katex expression={`x_{${exercice.labelA}${exercice.labelC}} =`} />
-          </label>
-          <input
-            id="colinearite-construction-acx"
-            className={`text-input${acXErronee ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
-            value={acX}
-            onChange={(e) => setAcX(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
-          />
-        </div>
-        <div className="field field-inline">
-          <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-acy">
-            <Katex expression={`y_{${exercice.labelA}${exercice.labelC}} =`} />
-          </label>
-          <input
-            id="colinearite-construction-acy"
-            className={`text-input${acYErronee ? " is-erronee" : ""}`}
-            placeholder={PLACEHOLDER_COMPOSANTE}
-            value={acY}
-            onChange={(e) => setAcY(filtrerSaisieNumerique(e.target.value))}
-            onKeyDown={gererKeyDownNumerique}
-          />
+        <div className="field-row">
+          <div className="field field-inline">
+            <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-acx">
+              <Katex expression={`x_{${exercice.labelA}${exercice.labelC}} =`} />
+            </label>
+            <input
+              id="colinearite-construction-acx"
+              className={`text-input${acXErronee ? " is-erronee" : ""}`}
+              placeholder={PLACEHOLDER_COMPOSANTE}
+              value={acX}
+              onChange={(e) => setAcX(filtrerSaisieNumerique(e.target.value))}
+              onKeyDown={gererKeyDownNumerique}
+            />
+          </div>
+          <div className="field field-inline">
+            <label className="field-label field-label-minuscule" htmlFor="colinearite-construction-acy">
+              <Katex expression={`y_{${exercice.labelA}${exercice.labelC}} =`} />
+            </label>
+            <input
+              id="colinearite-construction-acy"
+              className={`text-input${acYErronee ? " is-erronee" : ""}`}
+              placeholder={PLACEHOLDER_COMPOSANTE}
+              value={acY}
+              onChange={(e) => setAcY(filtrerSaisieNumerique(e.target.value))}
+              onKeyDown={gererKeyDownNumerique}
+            />
+          </div>
         </div>
       </div>
 

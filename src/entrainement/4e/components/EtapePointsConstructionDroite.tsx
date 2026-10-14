@@ -74,25 +74,27 @@ export function EtapePointsConstructionDroite({ exercice, tentativesUtilisees, t
       />
       <p className="prompt-text">{consignePoints(exercice)}</p>
 
-      {champs.map((paire) => (
-        <div key={paire[0]!.id} className="field-row">
-          {paire.map((champ) => (
-            <div key={champ.id} className="field field-inline">
-              <label className="field-label field-label-minuscule" htmlFor={`construction-droite-points-${champ.id}`}>
-                {champ.label}
-              </label>
-              <input
-                id={`construction-droite-points-${champ.id}`}
-                className={`text-input${erronee ? " is-erronee" : ""}`}
-                placeholder={PLACEHOLDER_COORDONNEE}
-                value={champ.valeur}
-                onChange={(e) => champ.setter(filtrerSaisieNumerique(e.target.value))}
-                onKeyDown={gererKeyDownNumerique}
-              />
-            </div>
-          ))}
-        </div>
-      ))}
+      <div className="field-row-groupe">
+        {champs.map((paire) => (
+          <div key={paire[0]!.id} className="field-row">
+            {paire.map((champ) => (
+              <div key={champ.id} className="field field-inline">
+                <label className="field-label field-label-minuscule" htmlFor={`construction-droite-points-${champ.id}`}>
+                  {champ.label}
+                </label>
+                <input
+                  id={`construction-droite-points-${champ.id}`}
+                  className={`text-input${erronee ? " is-erronee" : ""}`}
+                  placeholder={PLACEHOLDER_COORDONNEE}
+                  value={champ.valeur}
+                  onChange={(e) => champ.setter(filtrerSaisieNumerique(e.target.value))}
+                  onKeyDown={gererKeyDownNumerique}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">

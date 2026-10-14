@@ -932,6 +932,57 @@
   flex: 1;
 }
 
+/* `.field-row`/`.field-row-wrap` : alignent côte à côte 2 à 4 champs numériques (coordonnées d'un
+ * point, composantes d'un vecteur, bornes...) — utilisées dans ~127 écrans des 3 chantiers, mais
+ * sans jamais recevoir leur propre règle (comme `.options-grid-compact` avant son correctif plus
+ * haut dans ce fichier) : un commentaire affirmait même à tort que `.field-row-wrap` était "déjà
+ * établi ailleurs sur la plateforme". Les deux retombaient donc en flux bloc normal (un champ par
+ * ligne) au lieu de s'aligner. `> *` plutôt que `> .field, > .field-inline` : certains écrans
+ * glissent un wrapper intermédiaire (ex. aperçu LaTeX + champ) comme enfant direct. */
+.entrainement .field-row {
+  display: flex;
+  gap: 10px 14px;
+}
+
+.entrainement .field-row > * {
+  flex: 1 1 120px;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* Nombre de champs variable selon l'exercice (2 à 4, surtout en 6e-6h) : autorise le retour à la
+ * ligne plutôt que d'écraser chaque champ sur un petit écran. */
+.entrainement .field-row-wrap {
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .entrainement .field-row > * {
+    flex: 0 1 160px;
+  }
+}
+
+/* Regroupement optionnel de plusieurs `.field-row` représentant des items parallèles (ex. "Point
+ * 1"/"Point 2", ou les 2 composantes d'un vecteur dans 2 lignes distinctes) — empilés sur mobile
+ * (comportement par défaut), 2 colonnes dès que la carte a la place. Opt-in : n'affecte aucun
+ * `.field-row` existant qui ne l'utilise pas. */
+.entrainement .field-row-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .entrainement .field-row-groupe {
+    flex-direction: row;
+    gap: 28px;
+  }
+  .entrainement .field-row-groupe > * {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .entrainement .champ-reponse-latex .text-input {
   flex: 1 1 160px;
   min-width: 160px;
