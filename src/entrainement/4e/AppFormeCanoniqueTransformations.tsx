@@ -14,6 +14,9 @@ import { EtapeTh } from "./components/EtapeTh";
 import { EtapeEvCvSox } from "./components/EtapeEvCvSox";
 import { EtapeTv } from "./components/EtapeTv";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction du second degré.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -110,6 +113,7 @@ export function AppFormeCanoniqueTransformations() {
         </div>
 
         <div className="card-body">
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           {etat.phase === "canonique" ? (
             <EtapeCanonique
               exercice={exercice}
