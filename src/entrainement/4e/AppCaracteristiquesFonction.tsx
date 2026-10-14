@@ -25,6 +25,7 @@ import { EtapeOrdonneeCaracteristiques } from "./components/EtapeOrdonneeCaracte
 import { EtapeValeurCaracteristiques } from "./components/EtapeValeurCaracteristiques";
 import { EtapeAsymptotesCaracteristiques } from "./components/EtapeAsymptotesCaracteristiques";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { MafsGraphCaracteristiquesFonction } from "./components/MafsGraphCaracteristiquesFonction";
 import {
   constanceAttendueCaracteristiques,
   croissanceAttendueCaracteristiques,
@@ -35,6 +36,9 @@ import {
   existeValeurEnVCaracteristiques,
 } from "./moteur/verificationCaracteristiquesFonction";
 import type { PhaseCaracteristiquesFonction } from "./core/caracteristiquesFonction.types";
+import { etatListeInitiale } from "./ui/listeMorceaux";
+import type { EtatListeMorceaux } from "./ui/listeMorceaux";
+import { morceauxCompletsPourSurlignage } from "./ui/surlignageCaracteristiques";
 
 const CONSIGNE_GENERALE = "Lis les caractéristiques de cette fonction sur son graphique.";
 
@@ -80,6 +84,10 @@ interface TransitionEnAttente {
   etatSuivant: EtatSessionCaracteristiquesFonction;
   revele: boolean;
 }
+
+/** Phases dont la réponse se construit via `ListeMorceauxInput` — seules celles-ci surlignent le
+ * graphe en temps réel (`blocDonnees`, voir plus bas) à partir de la construction en cours. */
+const PHASES_AVEC_LISTE = new Set<PhaseCaracteristiquesFonction>(["domaine", "croissance", "decroissance", "constance"]);
 
 const LIBELLE_PHASE: Record<PhaseCaracteristiquesFonction, string> = {
   domaine: "Domaine de définition",
@@ -161,6 +169,25 @@ export function AppCaracteristiquesFonction() {
 
   const exercice = etat.exerciceCourant;
 
+  /** Bloc de données centralisé (`EnTeteExercice`) — le graphique Mafs était redessiné à l'identique
+   * (même `exercice`) sur les 8 écrans (`MafsGraphCaracteristiquesFonction.tsx`, doc : "affiché en
+   * permanence sur les 8 écrans, sans variation"). Le surlignage, lui, dépend de la construction en
+   * cours via `ListeMorceauxInput` sur 4 des 8 écrans (domaine/croissance/decroissance/constance) —
+   * son état (`liste`) est donc remonté ici plutôt que local à chaque Etape, pour rester visible au
+   * moment de calculer `blocDonnees`. Reset explicite à chaque changement de phase (plutôt qu'un
+   * montage/démontage de composant comme avant) : même comportement que l'ancien `useState` local,
+   * qui se réinitialisait à chaque remontage d'un nouvel Etape. */
+  const [liste, setListe] = useState<EtatListeMorceaux>(etatListeInitiale());
+  const [phasePourListe, setPhasePourListe] = useState(etat.phase);
+  if (phasePourListe !== etat.phase) {
+    setPhasePourListe(etat.phase);
+    setListe(etatListeInitiale());
+  }
+
+  const blocDonnees = (
+    <MafsGraphCaracteristiquesFonction exercice={exercice} surlignage={PHASES_AVEC_LISTE.has(etat.phase) ? morceauxCompletsPourSurlignage(liste) : undefined} />
+  );
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -213,18 +240,18 @@ export function AppCaracteristiquesFonction() {
 
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={blocDonnees} />
           {etat.phase === "domaine" ? (
             <EtapeDomaineCaracteristiques
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              liste={liste}
+              onChangeListe={setListe}
               onValider={validerDomaine}
               validation={validation}
             />
           ) : etat.phase === "zeros" ? (
             <EtapeZerosCaracteristiques
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={validerZeros}
@@ -232,25 +259,28 @@ export function AppCaracteristiquesFonction() {
             />
           ) : etat.phase === "croissance" ? (
             <EtapeCroissanceCaracteristiques
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              liste={liste}
+              onChangeListe={setListe}
               onValider={validerCroissance}
               validation={validation}
             />
           ) : etat.phase === "decroissance" ? (
             <EtapeDecroissanceCaracteristiques
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              liste={liste}
+              onChangeListe={setListe}
               onValider={validerDecroissance}
               validation={validation}
             />
           ) : etat.phase === "constance" ? (
             <EtapeConstanceCaracteristiques
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              liste={liste}
+              onChangeListe={setListe}
               onValider={validerConstance}
               validation={validation}
             />

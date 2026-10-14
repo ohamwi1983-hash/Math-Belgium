@@ -1,14 +1,12 @@
 import { useState } from "react";
-import type { ExerciceCaracteristiquesFonction, ReponseZerosCaracteristiques } from "../core/caracteristiquesFonction.types";
+import type { ReponseZerosCaracteristiques } from "../core/caracteristiquesFonction.types";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 type Choix = "aucun" | "auMoinsUn";
 
 interface Props {
-  exercice: ExerciceCaracteristiquesFonction;
   tentativesUtilisees: number;
   tentativesMax: number;
   onValider: (reponse: ReponseZerosCaracteristiques) => void;
@@ -22,9 +20,11 @@ interface Props {
  * Étape "zéros" (question b, refonte point 2) : le nombre de zéros est désormais détecté
  * dynamiquement à la génération (0 à 5 selon l'exercice) — choix binaire "aucun zéro"/"au moins
  * un zéro", puis une liste extensible de champs libres (bouton "+") si "au moins un" — jamais
- * fixé à deux champs z1/z2 comme avant la refonte.
+ * fixé à deux champs z1/z2 comme avant la refonte. Le graphe (identique sur les 8 écrans de
+ * l'exercice) est centralisé dans `blocDonnees` (`EnTeteExercice`, voir `AppCaracteristiquesFonction`)
+ * — plus rendu ici.
  */
-export function EtapeZerosCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeZerosCaracteristiques({ tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -60,7 +60,6 @@ export function EtapeZerosCaracteristiques({ exercice, tentativesUtilisees, tent
 
   return (
     <div>
-      <MafsGraphCaracteristiquesFonction exercice={exercice} />
       <p className="prompt-text">Quels sont les zéros de cette fonction ?</p>
       <div className="options-grid">
         <button type="button" className={choix === "aucun" ? "btn toggle-active" : "btn"} onClick={() => choisir("aucun")}>

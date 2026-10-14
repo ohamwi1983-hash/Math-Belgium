@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceCaracteristiquesFonction, ReponseExistence } from "../core/caracteristiquesFonction.types";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { verifierValeurEnVCaracteristiques } from "../moteur/verificationCaracteristiquesFonction";
-import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -24,7 +23,9 @@ interface Props {
  * zone 3 — réponse "n'existe pas"), soit l'abscisse partagée de la discontinuité (cercle plein,
  * b5, refonte 3 correction 2 — réponse la valeur réelle) ; jamais une zone "simple" quelconque
  * comme avant la refonte. Même principe binaire que l'ordonnée à l'origine — l'élève doit d'abord
- * déterminer si la valeur existe avant, le cas échéant, de la lire sur le graphique.
+ * déterminer si la valeur existe avant, le cas échéant, de la lire sur le graphique. Le graphe
+ * (identique sur les 8 écrans de l'exercice) est centralisé dans `blocDonnees` (`EnTeteExercice`,
+ * voir `AppCaracteristiquesFonction`) — plus rendu ici.
  */
 export function EtapeValeurCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
@@ -47,7 +48,6 @@ export function EtapeValeurCaracteristiques({ exercice, tentativesUtilisees, ten
 
   return (
     <div>
-      <MafsGraphCaracteristiquesFonction exercice={exercice} />
       <p className="prompt-text">
         La fonction est-elle définie en x = {exercice.v} ? Si oui, quelle est sa valeur ? (arrondi au centième accepté si besoin)
       </p>

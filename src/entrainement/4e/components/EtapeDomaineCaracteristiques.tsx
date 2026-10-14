@@ -1,17 +1,15 @@
-import { useState } from "react";
-import type { ExerciceCaracteristiquesFonction } from "../core/caracteristiquesFonction.types";
 import type { Morceau } from "../core/inequation.types";
-import { construireListe, etatListeInitiale } from "../ui/listeMorceaux";
-import { morceauxCompletsPourSurlignage } from "../ui/surlignageCaracteristiques";
+import { construireListe } from "../ui/listeMorceaux";
+import type { EtatListeMorceaux } from "../ui/listeMorceaux";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
-import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
-  exercice: ExerciceCaracteristiquesFonction;
   tentativesUtilisees: number;
   tentativesMax: number;
+  liste: EtatListeMorceaux;
+  onChangeListe: (etat: EtatListeMorceaux) => void;
   onValider: (reponse: Morceau[]) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -25,18 +23,17 @@ interface Props {
  * déjà nativement ℝ, un intervalle, une union de plusieurs morceaux). Refonte 3, correction 1 :
  * l'élève construit désormais le domaine LUI-MÊME tel qu'il est (les morceaux où la fonction est
  * réellement définie), jamais son complémentaire — plus aucun texte d'habillage "ℝ \ (...)"
- * autour de la question, ni l'indication qui l'accompagnait. Surlignage en temps réel (refonte 2,
- * correction 3) sur le graphique.
+ * autour de la question, ni l'indication qui l'accompagnait. `liste` (état de la construction) est
+ * remonté à `AppCaracteristiquesFonction`, qui en dérive le surlignage en temps réel du graphe
+ * centralisé dans `blocDonnees` — plus rendu localement ici.
  */
-export function EtapeDomaineCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
-  const [liste, setListe] = useState(etatListeInitiale());
+export function EtapeDomaineCaracteristiques({ tentativesUtilisees, tentativesMax, liste, onChangeListe, onValider, validation}: Props) {
   const reponse = construireListe(liste);
 
   return (
     <div>
-      <MafsGraphCaracteristiquesFonction exercice={exercice} surlignage={morceauxCompletsPourSurlignage(liste)} />
       <p className="prompt-text">Quel est le domaine de définition de cette fonction ?</p>
-      <ListeMorceauxInput etat={liste} onChange={setListe} />
+      <ListeMorceauxInput etat={liste} onChange={onChangeListe} />
       {!validation && (
         <>
         <button

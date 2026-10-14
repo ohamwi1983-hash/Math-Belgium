@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceCaracteristiquesFonction, ReponseExistence } from "../core/caracteristiquesFonction.types";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { verifierOrdonneeCaracteristiques } from "../moteur/verificationCaracteristiquesFonction";
-import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
@@ -22,7 +21,9 @@ interface Props {
 /**
  * Étape "ordonnée à l'origine" (question d, refonte point 6) : le domaine pouvant désormais
  * exclure un intervalle contenant x=0, l'ordonnée à l'origine peut ne pas exister — choix binaire
- * "pas d'ordonnée à l'origine"/"il y en a une", champ numérique seulement dans le second cas.
+ * "pas d'ordonnée à l'origine"/"il y en a une", champ numérique seulement dans le second cas. Le
+ * graphe (identique sur les 8 écrans de l'exercice) est centralisé dans `blocDonnees`
+ * (`EnTeteExercice`, voir `AppCaracteristiquesFonction`) — plus rendu ici.
  */
 export function EtapeOrdonneeCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
@@ -45,7 +46,6 @@ export function EtapeOrdonneeCaracteristiques({ exercice, tentativesUtilisees, t
 
   return (
     <div>
-      <MafsGraphCaracteristiquesFonction exercice={exercice} />
       <p className="prompt-text">Quelle est l'ordonnée à l'origine de cette fonction ? (arrondi au centième accepté si besoin)</p>
       <div className="options-grid">
         <button type="button" className={choix === "nExistePas" ? "btn toggle-active" : "btn"} onClick={() => choisir("nExistePas")}>

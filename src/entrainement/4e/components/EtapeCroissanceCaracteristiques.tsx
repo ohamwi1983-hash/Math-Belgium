@@ -1,17 +1,15 @@
-import { useState } from "react";
-import type { ExerciceCaracteristiquesFonction } from "../core/caracteristiquesFonction.types";
 import type { Morceau } from "../core/inequation.types";
-import { construireListe, etatListeInitiale } from "../ui/listeMorceaux";
-import { morceauxCompletsPourSurlignage } from "../ui/surlignageCaracteristiques";
+import { construireListe } from "../ui/listeMorceaux";
+import type { EtatListeMorceaux } from "../ui/listeMorceaux";
 import { ListeMorceauxInput } from "./ListeMorceauxInput";
-import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
-  exercice: ExerciceCaracteristiquesFonction;
   tentativesUtilisees: number;
   tentativesMax: number;
+  liste: EtatListeMorceaux;
+  onChangeListe: (etat: EtatListeMorceaux) => void;
   onValider: (reponse: Morceau[]) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -23,18 +21,16 @@ interface Props {
  * Étape "intervalles de croissance stricte" (refonte 2, correction 7 — nouvelle question) : même
  * construction à liste extensible que la décroissance (bouton "+"), le nombre réel de morceaux
  * étant dynamique (3 si k>0, 5 si k<0 — voir croissanceAttendueCaracteristiques) plutôt que
- * supposé fixe. Surlignage en temps réel (correction 3) sur le graphique, mis à jour à chaque
- * interaction avec la liste.
+ * supposé fixe. `liste` est remontée à `AppCaracteristiquesFonction`, qui en dérive le surlignage
+ * en temps réel du graphe centralisé dans `blocDonnees` — plus rendu localement ici.
  */
-export function EtapeCroissanceCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
-  const [liste, setListe] = useState(etatListeInitiale());
+export function EtapeCroissanceCaracteristiques({ tentativesUtilisees, tentativesMax, liste, onChangeListe, onValider, validation}: Props) {
   const reponse = construireListe(liste);
 
   return (
     <div>
-      <MafsGraphCaracteristiquesFonction exercice={exercice} surlignage={morceauxCompletsPourSurlignage(liste)} />
       <p className="prompt-text">Sur quels intervalles cette fonction est-elle strictement croissante ?</p>
-      <ListeMorceauxInput etat={liste} onChange={setListe} />
+      <ListeMorceauxInput etat={liste} onChange={onChangeListe} />
       {!validation && (
         <>
         <button

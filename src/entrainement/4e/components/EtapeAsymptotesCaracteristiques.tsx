@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { ExerciceCaracteristiquesFonction, ReponseAsymptotesCaracteristiques } from "../core/caracteristiquesFonction.types";
 import { diagnostiquerAsymptotesCaracteristiques } from "../moteur/verificationCaracteristiquesFonction";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { MafsGraphCaracteristiquesFonction } from "./MafsGraphCaracteristiquesFonction";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -23,7 +22,9 @@ interface Props {
  * (horizontale) et "AV ≡" (verticale), chacun suivi d'un champ libre où l'élève écrit l'équation
  * complète ("y=3", "x=7"). Label et champ sur la MÊME ligne (`field-inline`, déjà utilisée par
  * "Transformations graphiques"/`f(x) =`) — contrairement à "Axe de symétrie AS ≡" (Analyse d'une
- * fonction), qui reste un `.field` empilé, jamais mis à jour à l'identique ici.
+ * fonction), qui reste un `.field` empilé, jamais mis à jour à l'identique ici. Le graphe
+ * (identique sur les 8 écrans de l'exercice) est centralisé dans `blocDonnees` (`EnTeteExercice`,
+ * voir `AppCaracteristiquesFonction`) — plus rendu ici.
  */
 export function EtapeAsymptotesCaracteristiques({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
   const [ahTexte, setAhTexte] = useState("");
@@ -33,7 +34,6 @@ export function EtapeAsymptotesCaracteristiques({ exercice, tentativesUtilisees,
 
   return (
     <div>
-      <MafsGraphCaracteristiquesFonction exercice={exercice} />
       <p className="prompt-text">Donne les équations des deux asymptotes (arrondi au centième accepté si besoin).</p>
       <div className="field field-inline">
         <label className="field-label" htmlFor="caract-ah">
