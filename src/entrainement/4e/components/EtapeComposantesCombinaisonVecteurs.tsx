@@ -3,7 +3,7 @@ import type { ExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.ty
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { diagnostiquerComposantes, diagnostiquerX, diagnostiquerY } from "../moteur/verificationCombinaisonVecteurs";
 import { NIVEAU_AIDE_MAX_COMPOSANTES } from "../moteur/sessionCombinaisonVecteurs";
-import { formatLabelXLatex, formatLabelYLatex, formatResultatLatex, formatSommeAxesLatex, formatSubstitutionLatex, formatTermesDonneesLatex } from "../ui/formatCombinaisonVecteurs";
+import { formatLabelXLatex, formatLabelYLatex, formatResultatLatex, formatSommeAxesLatex, formatSubstitutionLatex } from "../ui/formatCombinaisonVecteurs";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -37,10 +37,9 @@ interface Props {
  * sommée), puis la somme des composantes x d'un côté et des composantes y de l'autre, séparément —
  * jamais le résultat final combiné avant validation.
  *
- * `promptmodificationsgenerateur22.md`, point 2 : bloc de données (vecteurs libres + points)
- * répété sur cet écran (jusque-là absent, seul le `RecapitulatifPanel` — la forme réduite déjà
- * confirmée à l'écran 1 — y était affiché), en "bloc fitter" (`formatTermesDonneesLatex`), au-dessus
- * du récapitulatif.
+ * Bloc de données (vecteurs libres + points) affiché une seule fois dans l'en-tête de l'exercice
+ * (`EnTeteExercice`, blocDonnees) — jamais répété ici : seul le `RecapitulatifPanel` (la forme
+ * réduite déjà confirmée à l'écran 1) reste propre à cet écran.
  */
 export function EtapeComposantesCombinaisonVecteurs({
   exercice,
@@ -68,11 +67,6 @@ export function EtapeComposantesCombinaisonVecteurs({
 
   return (
     <div>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesLatex(exercice).map((terme, i) => (
-          <Katex key={i} expression={terme} />
-        ))}
-      </div>
       <RecapitulatifPanel entrees={recapitulatif} />
       <p className="prompt-text">
         Calcule les composantes de <Katex expression={formatResultatLatex(exercice)} />.

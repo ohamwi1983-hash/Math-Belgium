@@ -8,7 +8,7 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSimplificationCombinaisonVecteurs } from "./components/EtapeSimplificationCombinaisonVecteurs";
 import { EtapeComposantesCombinaisonVecteurs } from "./components/EtapeComposantesCombinaisonVecteurs";
 import { Katex } from "./components/Katex";
-import { formatEquationReduiteLatex, formatResultatLatex, formatVecteurColonneLatex } from "./ui/formatCombinaisonVecteurs";
+import { formatEquationReduiteLatex, formatResultatLatex, formatTermesDonneesLatex, formatVecteurColonneLatex } from "./ui/formatCombinaisonVecteurs";
 import { calculerRecapitulatifCombinaisonVecteurs } from "./ui/recapitulatifCombinaisonVecteurs";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
@@ -118,7 +118,16 @@ export function AppCombinaisonVecteurs() {
 
       <main className="card">
         <div className="card-body">
-        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+        <EnTeteExercice
+          consigneGenerale={CONSIGNE_GENERALE}
+          blocDonnees={
+            <div className="equation-box equation-box-termes">
+              {formatTermesDonneesLatex(exercice).map((terme, i) => (
+                <Katex key={i} expression={terme} />
+              ))}
+            </div>
+          }
+        />
         {etat.phase === "simplification" ? (
           <EtapeSimplificationCombinaisonVecteurs
             exercice={exercice}

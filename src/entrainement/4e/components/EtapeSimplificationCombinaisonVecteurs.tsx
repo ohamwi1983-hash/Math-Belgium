@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ExerciceCombinaisonVecteurs } from "../core/combinaisonVecteurs.types";
 import { diagnostiquerSimplification } from "../moteur/verificationCombinaisonVecteurs";
 import { NIVEAU_AIDE_MAX_SIMPLIFICATION } from "../moteur/sessionCombinaisonVecteurs";
-import { formatConvertiLatex, formatDistribueLatex, formatResultatLatex, formatTermesDonneesLatex, formatTermesExpressionLatex, idsConcernesRegroupementLatex, placeholderReduction, vecteursPresentsLatex } from "../ui/formatCombinaisonVecteurs";
+import { formatConvertiLatex, formatDistribueLatex, formatResultatLatex, formatTermesExpressionLatex, idsConcernesRegroupementLatex, placeholderReduction, vecteursPresentsLatex } from "../ui/formatCombinaisonVecteurs";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -38,10 +38,11 @@ interface Props {
  * conversion `\vec{BA}\to-\vec{AB}` elle-même — jamais le coefficient final avant le niveau 3, et
  * même alors pas encore regroupé (l'addition reste à faire).
  *
- * `promptmodificationsgenerateur22.md` : bloc de données (vecteurs libres + points) ET énoncé
- * passés en "bloc fitter" (`formatTermesDonneesLatex`/`formatTermesExpressionLatex`, un fragment
- * KaTeX par vecteur/point/groupe) — jamais un unique bloc `\quad`-joined qui ne retourne jamais à la
- * ligne sur mobile étroit.
+ * Le bloc de données (vecteurs libres + points) est affiché une seule fois dans l'en-tête de
+ * l'exercice (`EnTeteExercice`, blocDonnees), jamais ici. L'énoncé (l'expression à réduire) reste
+ * propre à cet écran, en "bloc fitter" (`formatTermesExpressionLatex`, un fragment KaTeX par
+ * vecteur/point/groupe) — jamais un unique bloc `\quad`-joined qui ne retourne jamais à la ligne sur
+ * mobile étroit.
  */
 export function EtapeSimplificationCombinaisonVecteurs({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
@@ -53,11 +54,6 @@ export function EtapeSimplificationCombinaisonVecteurs({ exercice, tentativesUti
 
   return (
     <div>
-      <div className="equation-box equation-box-termes">
-        {formatTermesDonneesLatex(exercice).map((terme, i) => (
-          <Katex key={i} expression={terme} />
-        ))}
-      </div>
       <p className="prompt-text">
         Calcule et réduis l'expression suivante en fonction des vecteurs{" "}
         {vecteursConsigne.map((latex, i) => (
