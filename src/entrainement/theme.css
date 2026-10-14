@@ -695,18 +695,39 @@
   border-left: 3px solid var(--color-tip);
   color: var(--color-text);
   font-size: 14px;
-  overflow-x: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+/* Le texte (et une éventuelle formule KaTeX en ligne) doit passer à la ligne plutôt que forcer un
+ * défilement horizontal du bloc sur petit écran — `overflow-x: auto` ci-dessus avant ce correctif
+ * masquait le symptôme (le texte débordait réellement, scrollable mais jamais lisible d'un coup sur
+ * téléphone) sans jamais le résoudre. `min-width: 0` lève la limite par défaut de flexbox (un enfant
+ * flex ne rétrécit jamais sous sa taille de contenu minimale) qui empêchait certains enfants — un
+ * fragment KaTeX notamment — de rétrécir jusqu'à cette largeur ; `overflow-wrap: anywhere` couvre en
+ * plus un mot brut trop long (ex. une formule tapée sans espaces, pas encore en KaTeX) qui n'aurait
+ * sinon aucun point de coupure. Les dessins SVG (`.cercle-trig-sketch`...) parfois présents dans ces
+ * blocs restent responsives par eux-mêmes (`width:100%; max-width:...`), donc jamais concernés. */
 .entrainement .aide-5e p,
 .entrainement .triangle-quelconque-aide p {
   margin: 0;
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.entrainement .aide-5e p > *,
+.entrainement .triangle-quelconque-aide p > * {
+  min-width: 0;
+}
+
+.entrainement .aide-5e .katex,
+.entrainement .triangle-quelconque-aide .katex {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .entrainement .aide-5e p:first-child::before,
