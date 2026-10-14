@@ -1,15 +1,12 @@
 import { useState } from "react";
-import type { ExerciceCercleTrigonometrique, Quadrant } from "../core/cercleTrigonometrique.types";
+import type { Quadrant } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { Katex } from "./Katex";
-import { formatEnonceCercleTrigLatex } from "../ui/formatCercleTrigonometrique";
 import { CercleQuadrantSelecteur } from "./CercleQuadrantSelecteur";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 
 interface Props {
-  exercice: ExerciceCercleTrigonometrique;
   tentativesUtilisees: number;
   tentativesMax: number;
   recapitulatif: EntreeRecapitulatif[];
@@ -31,7 +28,6 @@ interface Props {
  * la représentation visuelle de cet écran, rien à ajouter derrière un bouton "Aide" ici.
  */
 export function EtapeQuadrantCercleTrig({
-  exercice,
   tentativesUtilisees,
   tentativesMax,
   recapitulatif,
@@ -43,9 +39,6 @@ export function EtapeQuadrantCercleTrig({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
-      </div>
       <p className="prompt-text">Dans quel quadrant ou sur quel axe se trouve cet angle ?</p>
 
       <CercleQuadrantSelecteur selection={selection} onSelectionner={setSelection} />

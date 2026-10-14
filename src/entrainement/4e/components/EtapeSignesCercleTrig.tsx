@@ -3,7 +3,6 @@ import type { ExerciceCercleTrigonometrique, ReponseSignes, Signe, SigneTan } fr
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
-import { formatEnonceCercleTrigLatex } from "../ui/formatCercleTrigonometrique";
 import type { EtatCelluleSigne, EtatCelluleTan } from "../ui/cycleSigneCercleTrigonometrique";
 import { celluleSigneErronee, cyclerSigneSinCos, cyclerSigneTan } from "../ui/cycleSigneCercleTrigonometrique";
 import { AideSignesCercleTrig } from "./AideSignesCercleTrig";
@@ -75,9 +74,6 @@ export function EtapeSignesCercleTrig({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
-      </div>
       <p className="prompt-text">Quel est le signe de sin(θ), cos(θ) et tan(θ) ?</p>
 
       <div className="grille-signes-scroll">

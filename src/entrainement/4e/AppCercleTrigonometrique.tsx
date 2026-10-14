@@ -16,7 +16,8 @@ import { EtapeReductionCercleTrig } from "./components/EtapeReductionCercleTrig"
 import { EtapeQuadrantCercleTrig } from "./components/EtapeQuadrantCercleTrig";
 import { EtapeAnglePremierQuadrantCercleTrig } from "./components/EtapeAnglePremierQuadrantCercleTrig";
 import { EtapeSignesCercleTrig } from "./components/EtapeSignesCercleTrig";
-import { libelleQuadrant } from "./ui/formatCercleTrigonometrique";
+import { formatEnonceCercleTrigLatex, libelleQuadrant } from "./ui/formatCercleTrigonometrique";
+import { Katex } from "./components/Katex";
 import { calculerRecapitulatifCercleTrigonometrique } from "./ui/recapitulatifCercleTrigonometrique";
 import { necessiteReduction } from "./moteur/verificationCercleTrigonometrique";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -150,7 +151,14 @@ export function AppCercleTrigonometrique() {
 
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
+              </div>
+            }
+          />
           {etat.phase === "reduction" ? (
             <EtapeReductionCercleTrig
               exercice={etat.exerciceCourant}
@@ -164,7 +172,6 @@ export function AppCercleTrigonometrique() {
             />
           ) : etat.phase === "quadrant" ? (
             <EtapeQuadrantCercleTrig
-              exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}

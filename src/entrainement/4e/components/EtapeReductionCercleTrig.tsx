@@ -2,8 +2,6 @@ import { useState } from "react";
 import type { ExerciceCercleTrigonometrique } from "../core/cercleTrigonometrique.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { Katex } from "./Katex";
-import { formatEnonceCercleTrigLatex } from "../ui/formatCercleTrigonometrique";
 import { diagnostiquerReduction } from "../moteur/verificationCercleTrigonometrique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
@@ -45,9 +43,6 @@ export function EtapeReductionCercleTrig({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatEnonceCercleTrigLatex(exercice.angleDepart)} block />
-      </div>
       <p className="prompt-text">Quel est l'angle entre 0° et 360° qui donne le même point sur le cercle trigonométrique ?</p>
       <div className="field">
         <label className="field-label" htmlFor="cercle-trig-reduction">
