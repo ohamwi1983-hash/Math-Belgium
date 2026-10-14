@@ -38,7 +38,7 @@ import { calculerRecapitulatifAnalyseFonction } from "./ui/recapitulatifAnalyseF
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import { formatEnonceLatex } from "./ui/formatEquation";
-import { formatFonctionColoreeLatex } from "./ui/formatAnalyseFonction";
+import { formatFonctionColoreeLatex, formatFonctionOrdreLatex } from "./ui/formatAnalyseFonction";
 import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL } from "./ui/categorieLabels";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
@@ -205,7 +205,14 @@ export function AppAnalyseFonction() {
 
       <main className="card">
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
+          <EnTeteExercice
+            consigneGenerale={CONSIGNE_GENERALE}
+            blocDonnees={
+              <div className="equation-box">
+                <Katex expression={formatFonctionOrdreLatex(exercice.exercice.enonce, exercice.ordreTermes)} block />
+              </div>
+            }
+          />
           {etat.phase === "coefficients" ? (
             <EtapeCoefficients
               exercice={etat.exerciceCourant}

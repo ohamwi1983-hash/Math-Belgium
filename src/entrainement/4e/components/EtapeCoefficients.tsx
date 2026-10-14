@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceAnalyseFonction } from "../core/analyseFonction.types";
 import { Katex } from "./Katex";
-import { formatFonctionColoreeLatex, formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
+import { formatFonctionColoreeLatex } from "../ui/formatAnalyseFonction";
 import { diagnostiquerCoefficients } from "../moteur/verificationAnalyseFonction";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
@@ -47,9 +47,6 @@ export function EtapeCoefficients({
 
   return (
     <div>
-      <div className="equation-box">
-        <Katex expression={formatFonctionOrdreLatex(exercice.exercice.enonce, exercice.ordreTermes)} block />
-      </div>
       {aideActivee && (
         <div className="template-box">
           <Katex expression={formatFonctionColoreeLatex(exercice.exercice.enonce)} block />

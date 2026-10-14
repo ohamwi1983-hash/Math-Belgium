@@ -3,7 +3,7 @@ import type { ExerciceAnalyseFonction, ReponseAxeSommet } from "../core/analyseF
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
 import { Katex } from "./Katex";
-import { consigneAxeSommet, formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
+import { consigneAxeSommet } from "../ui/formatAnalyseFonction";
 import { calculerCourbeAxeSommet, calculerSketchAxeSommet } from "../ui/sketchAxeSommet";
 import { SketchAxeSommet } from "./SketchAxeSommet";
 import { diagnostiquerAxeSommet, parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
@@ -65,9 +65,6 @@ export function EtapeAxeSommet({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatifSansAllure} />
-      <div className="equation-box">
-        <Katex expression={formatFonctionOrdreLatex(exercice.exercice.enonce, exercice.ordreTermes)} block />
-      </div>
       <p className="prompt-text">{consigneAxeSommet()}</p>
       {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} />}
       <div className="field">

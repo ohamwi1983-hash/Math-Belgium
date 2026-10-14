@@ -3,7 +3,6 @@ import type { ExerciceAnalyseFonction, ValeurVariation } from "../core/analyseFo
 import type { ValeurCellule } from "../core/signesProduit.types";
 import type { ReponseGrilleSigneVariation } from "../moteur/verificationAnalyseFonction";
 import { Katex } from "./Katex";
-import { formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
 import { formatEnTeteSigneVariation } from "../ui/formatTableauSigneVariation";
 import { celluleEstErronee, cyclerValeurCellule } from "../ui/cycleValeurCellule";
 import { celluleVariationErronee, cyclerValeurVariation, ligneVariationEstComplete } from "../ui/cycleValeurVariation";
@@ -97,9 +96,6 @@ export function EtapeTableauSigneVariation({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatFonctionOrdreLatex(exercice.exercice.enonce, exercice.ordreTermes)} block />
-      </div>
       <p className="prompt-text">Complète le tableau de signe et de variation.</p>
 
       {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} marquesOx={marquesOx} />}

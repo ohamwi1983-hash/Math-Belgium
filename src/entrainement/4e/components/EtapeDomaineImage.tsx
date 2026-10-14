@@ -9,7 +9,6 @@ import { formatApercuSolution } from "../ui/apercuIntervalle";
 import { calculerCourbeAxeSommet, calculerSketchAxeSommet, calculerSurlignageImf } from "../ui/sketchAxeSommet";
 import { SketchAxeSommet } from "./SketchAxeSommet";
 import { Katex } from "./Katex";
-import { formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -61,9 +60,6 @@ export function EtapeDomaineImage({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatFonctionOrdreLatex(exercice.exercice.enonce, exercice.ordreTermes)} block />
-      </div>
       <p className="prompt-text">domf = ℝ</p>
       <p className="prompt-text">Quel est l'ensemble-image (imf) de cette fonction ?</p>
       {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} />}

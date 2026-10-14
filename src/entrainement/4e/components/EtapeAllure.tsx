@@ -2,8 +2,6 @@ import { useState } from "react";
 import type { ChoixAllure, ExerciceAnalyseFonction, SigneAllure, SigneProduitAB } from "../core/analyseFonction.types";
 import type { EntreeRecapitulatif } from "../ui/recapitulatif";
 import { RecapitulatifPanel } from "./RecapitulatifPanel";
-import { Katex } from "./Katex";
-import { formatFonctionOrdreLatex } from "../ui/formatAnalyseFonction";
 import { calculerAllureSketch } from "../ui/allureSketch";
 import { AllureSketch } from "./AllureSketch";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -31,9 +29,6 @@ export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, reca
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <div className="equation-box">
-        <Katex expression={formatFonctionOrdreLatex(exercice.exercice.enonce, exercice.ordreTermes)} block />
-      </div>
       <p className="prompt-text">Quel est le signe de a ?</p>
       <div className="options-grid-compact">
         <button type="button" className={signeA === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigneA("+")}>
