@@ -18,6 +18,9 @@ import { EtapeDirectionInconnue } from "./components/EtapeDirectionInconnue";
 import { EtapeDirectionOmbre } from "./components/EtapeDirectionOmbre";
 import { EtapePointOmbre } from "./components/EtapePointOmbre";
 import { EtapePointSimple } from "./components/EtapePointSimple";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine l'ombre de cet objet au soleil.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -108,6 +111,7 @@ export function AppOmbreSoleil() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {phase === "pointSimple" && exercice.variante === "simple" ? (
           <EtapePointSimple
             key={phase}
