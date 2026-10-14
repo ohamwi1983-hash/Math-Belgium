@@ -19,6 +19,7 @@ import { EtapeSeuilComparaison } from "./components/EtapeSeuilComparaison";
 import { SegmentsInline } from "./components/SegmentsInline";
 import { formatEnonceTexte, segmentsReponseAttendue } from "./ui/formatComparaisonSeries";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { DonneesComparaisonSeries } from "./components/DonneesComparaisonSeries";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -93,7 +94,7 @@ export function AppComparaisonSeries() {
       <main className="card">
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={<DonneesComparaisonSeries exercice={exercice} />} />
           {question.type === "centrage" ? (
             <EtapeCentrageComparaison
               exercice={exercice}

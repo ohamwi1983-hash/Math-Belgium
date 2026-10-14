@@ -5,7 +5,6 @@ import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { segmentsAideSeuilNiveau1, segmentsAideSeuilNiveau2, segmentsConsigneSeuil } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -26,7 +25,9 @@ interface Props {
 }
 
 /** Question "lecture à un seuil / tranche" — un seul champ numérique, statut à 3 valeurs (`correct`/
- * `not_equivalent`/`parse_error`). Compatible variantes "tableaux"/"graphique" uniquement. */
+ * `not_equivalent`/`parse_error`). Compatible variantes "tableaux"/"graphique" uniquement. Le bloc
+ * de données (identique sur les 4 types de question) est centralisé dans `blocDonnees`
+ * (`EnTeteExercice`, voir `AppComparaisonSeries`) — plus rendu ici. */
 export function EtapeSeuilComparaison({ exercice, question, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [texte, setTexte] = useState("");
   const maxAide = niveauAideMax();
@@ -35,8 +36,6 @@ export function EtapeSeuilComparaison({ exercice, question, tentativesUtilisees,
 
   return (
     <div>
-      <DonneesComparaisonSeries exercice={exercice} />
-
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneSeuil(question, exercice)} />
       </p>

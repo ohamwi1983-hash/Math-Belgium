@@ -5,7 +5,6 @@ import { verifierDispersion } from "../moteur/verificationComparaisonSeries";
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { OPTIONS_ARGUMENT_DISPERSION, segmentsAideDispersionNiveau1, segmentsAideDispersionNiveau2, segmentsConsigneDispersion } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -35,7 +34,9 @@ function basculer(liste: ArgumentDispersionOption[], id: ArgumentDispersionOptio
  * vocabulaire d'interface déjà établi ailleurs, `.options-grid-compact`/`toggle-active`) parmi 3
  * arguments — dont "Étendue", un DISTRACTEUR délibéré (le piège central de cette question, jamais
  * une réponse valide — voir `verifierDispersion`). Exactement `question.nombreArguments` doivent
- * être sélectionnés pour valider, ni plus ni moins.
+ * être sélectionnés pour valider, ni plus ni moins. Le bloc de données (identique sur les 4 types
+ * de question) est centralisé dans `blocDonnees` (`EnTeteExercice`, voir `AppComparaisonSeries`) —
+ * plus rendu ici.
  */
 export function EtapeDispersionComparaison({ exercice, question, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<"A" | "B" | null>(null);
@@ -49,8 +50,6 @@ export function EtapeDispersionComparaison({ exercice, question, tentativesUtili
 
   return (
     <div>
-      <DonneesComparaisonSeries exercice={exercice} />
-
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneDispersion(question)} />
       </p>

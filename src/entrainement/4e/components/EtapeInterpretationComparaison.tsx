@@ -4,7 +4,6 @@ import { verifierInterpretation } from "../moteur/verificationComparaisonSeries"
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { segmentsAideInterpretationNiveau1, segmentsAideInterpretationNiveau2, segmentsConsigneInterpretation } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -25,7 +24,9 @@ interface Props {
 }
 
 /** Question "interprétation contextuelle" — un profil narratif (dérivé des vraies stats de
- * `question.serieDecrite`, jamais deviné par l'élève) à associer à la bonne série. */
+ * `question.serieDecrite`, jamais deviné par l'élève) à associer à la bonne série. Le bloc de
+ * données (identique sur les 4 types de question) est centralisé dans `blocDonnees`
+ * (`EnTeteExercice`, voir `AppComparaisonSeries`) — plus rendu ici. */
 export function EtapeInterpretationComparaison({ exercice, question, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<"A" | "B" | null>(null);
   const maxAide = niveauAideMax();
@@ -35,8 +36,6 @@ export function EtapeInterpretationComparaison({ exercice, question, tentativesU
 
   return (
     <div>
-      <DonneesComparaisonSeries exercice={exercice} />
-
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneInterpretation(question, exercice)} />
       </p>

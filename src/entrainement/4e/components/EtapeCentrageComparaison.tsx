@@ -4,7 +4,6 @@ import { verifierCentrage } from "../moteur/verificationComparaisonSeries";
 import { niveauAideMax } from "../moteur/sessionComparaisonSeries";
 import { segmentsAideCentrageNiveau1, segmentsAideCentrageNiveau2, segmentsConsigneCentrage } from "../ui/formatComparaisonSeries";
 import { formatMessageErreur } from "../ui/messageErreur";
-import { DonneesComparaisonSeries } from "./DonneesComparaisonSeries";
 import { SegmentsInline } from "./SegmentsInline";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -24,7 +23,9 @@ interface Props {
   validation?: ValidationEtapeProps | null;
 }
 
-/** Question "centrage" — champ catégoriel A/B, jamais de statut à 3 valeurs (aucune saisie libre). */
+/** Question "centrage" — champ catégoriel A/B, jamais de statut à 3 valeurs (aucune saisie libre).
+ * Le bloc de données (identique sur les 4 types de question) est centralisé dans `blocDonnees`
+ * (`EnTeteExercice`, voir `AppComparaisonSeries`) — plus rendu ici. */
 export function EtapeCentrageComparaison({ exercice, question, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [choix, setChoix] = useState<"A" | "B" | null>(null);
   const maxAide = niveauAideMax();
@@ -34,8 +35,6 @@ export function EtapeCentrageComparaison({ exercice, question, tentativesUtilise
 
   return (
     <div>
-      <DonneesComparaisonSeries exercice={exercice} />
-
       <p className="prompt-text">
         <SegmentsInline segments={segmentsConsigneCentrage()} />
       </p>
