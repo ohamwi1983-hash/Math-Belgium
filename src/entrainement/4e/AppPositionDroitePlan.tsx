@@ -8,6 +8,9 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeClassificationPositionDroitePlan } from "./components/EtapeClassificationPositionDroitePlan";
 import { EtapeJustificationPositionDroitePlan } from "./components/EtapeJustificationPositionDroitePlan";
 import { LIBELLE_CLASSIFICATION, libelleDroite, libellePlan, texteReponseJustificationAttendue } from "./ui/formatPositionDroitePlan";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Détermine la position de cette droite par rapport à ce plan.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -97,6 +100,7 @@ export function AppPositionDroitePlan() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {phase === "classification" ? (
           <EtapeClassificationPositionDroitePlan
             key={phase}
