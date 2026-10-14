@@ -3,7 +3,7 @@ import type { ExerciceMedianeDiscrete } from "../core/mediane.types";
 import type { ReponseMediane } from "../moteur/verificationMediane";
 import { diagnostiquerMediane } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_MEDIANE } from "../moteur/sessionMediane";
-import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_MEDIANE_Q2, LABEL_VALEUR_XI, PLACEHOLDER_MEDIANE, PLACEHOLDER_SEUIL, consigneMedianeDiscrete, surlignageSeuilTable, texteAideMedianeNiveau1, texteAideMedianeNiveau2 } from "../ui/formatMediane";
+import { LABEL_MEDIANE_Q2, PLACEHOLDER_MEDIANE, PLACEHOLDER_SEUIL, consigneMedianeDiscrete, texteAideMedianeNiveau1, texteAideMedianeNiveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -32,7 +32,9 @@ interface Props {
  * lecture/application de la règle dans le tableau (spec). Surlignage du tableau à l'Aide 2 :
  * ligne entière (couleur + gras, `.md-table`) si le seuil tombe strictement entre deux effectifs
  * cumulés, valeur seule (jamais toute la ligne) si le seuil coïncide exactement avec un vi du
- * tableau (cas limite — ce n'est alors pas la ligne réponse).
+ * tableau (cas limite — ce n'est alors pas la ligne réponse). Le tableau lui-même (identique sur
+ * les écrans "mediane"/"q1"/"q3") est centralisé dans `blocDonnees` (`EnTeteExercice`, voir
+ * `AppMediane`/`AppExerciceSynthese`) — plus rendu ici.
  */
 export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [seuil, setSeuil] = useState("");
@@ -42,38 +44,10 @@ export function EtapeMedianeDiscrete({ exercice, tentativesUtilisees, tentatives
   const apresEchec = tentativesUtilisees > 0;
   const evaluation = apresEchec ? diagnostiquerMediane(exercice, { seuil, mediane }) : null;
   const statut = evaluation && (evaluation.seuil === "parse_error" || evaluation.mediane === "parse_error") ? "parse_error" : undefined;
-  const surlignage = niveauAide >= 2 ? surlignageSeuilTable(exercice, exercice.seuil, exercice.indexMediane) : null;
 
   return (
     <div>
       <p className="prompt-text">{consigneMedianeDiscrete(exercice)}</p>
-
-      <div className="tf-table-scroll">
-        <table className="tf-table md-table">
-          <thead>
-            <tr>
-              <th>
-                Valeur <Katex expression={LABEL_VALEUR_XI} />
-              </th>
-              <th>
-                Effectif <Katex expression={LABEL_EFFECTIF_NI} />
-              </th>
-              <th>
-                Effectif cumulé <Katex expression={LABEL_EFFECTIF_CUMULE_VI} />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {exercice.lignes.map((ligne, index) => (
-              <tr key={index} className={surlignage?.type === "ligne" && surlignage.index === index ? "is-surlignee" : undefined}>
-                <td>{ligne.valeur}</td>
-                <td>{ligne.effectif}</td>
-                <td className={surlignage?.type === "valeur" && surlignage.index === index ? "is-surlignee" : undefined}>{ligne.effectifCumule}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="mediane-seuil">

@@ -3,7 +3,7 @@ import type { ExerciceMedianeClasses } from "../core/mediane.types";
 import type { ReponseSynthese } from "../moteur/verificationMediane";
 import { diagnostiquerSynthese } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_SYNTHESE } from "../moteur/sessionMediane";
-import { LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, LABEL_X_MAX, LABEL_X_MIN, PLACEHOLDER_ETENDUE, PLACEHOLDER_MODE, PLACEHOLDER_XMAX, PLACEHOLDER_XMIN, TEXTE_AIDE_SYNTHESE_1_APRES, TEXTE_AIDE_SYNTHESE_1_AVANT, TEXTE_AIDE_SYNTHESE_1_ENTRE_1, TEXTE_AIDE_SYNTHESE_1_ENTRE_2, TEXTE_AIDE_SYNTHESE_1_ENTRE_3, consigneSynthese, formatClasseTexte, texteAideSyntheseNiveau2 } from "../ui/formatMediane";
+import { LABEL_X_MAX, LABEL_X_MIN, PLACEHOLDER_ETENDUE, PLACEHOLDER_MODE, PLACEHOLDER_XMAX, PLACEHOLDER_XMIN, TEXTE_AIDE_SYNTHESE_1_APRES, TEXTE_AIDE_SYNTHESE_1_AVANT, TEXTE_AIDE_SYNTHESE_1_ENTRE_1, TEXTE_AIDE_SYNTHESE_1_ENTRE_2, TEXTE_AIDE_SYNTHESE_1_ENTRE_3, consigneSynthese, formatClasseTexte, texteAideSyntheseNiveau2 } from "../ui/formatMediane";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -30,7 +30,9 @@ interface Props {
  * étendue, tolérance EXACTE — jamais celle des 3 écrans de lecture graphique précédents), un champ
  * CATÉGORIEL "Classe modale" (un bouton par classe, même patron exact que `EtapeClasseModale.tsx`,
  * "Mode et classe modale") et un champ numérique "Mode" — vérifié INDÉPENDAMMENT du champ "Classe
- * modale" (jamais dérivé de sa saisie, voir `verificationMediane.ts`).
+ * modale" (jamais dérivé de sa saisie, voir `verificationMediane.ts`). Le tableau classes/effectifs
+ * (identique à l'écran "polygone") est centralisé dans `blocDonnees` (`EnTeteExercice`, voir
+ * `AppMediane`/`AppExerciceSynthese`) — plus rendu ici.
  */
 export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [xMin, setXMin] = useState("");
@@ -50,31 +52,6 @@ export function EtapeSyntheseMediane({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">{consigneSynthese(exercice)}</p>
-
-      <div className="tf-table-scroll">
-        <table className="tf-table">
-          <thead>
-            <tr>
-              <th>Classe</th>
-              <th>
-                Effectif <Katex expression={LABEL_EFFECTIF_NI} />
-              </th>
-              <th>
-                Effectif cumulé <Katex expression={LABEL_EFFECTIF_CUMULE_VI} />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {exercice.classes.map((classe, index) => (
-              <tr key={index}>
-                <td>{formatClasseTexte(exercice, index)}</td>
-                <td>{classe.effectif}</td>
-                <td>{classe.effectifCumule}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
 
       <div className="field-row">
         <div className="field field-inline">

@@ -26,6 +26,8 @@ import { EtapeLectureMediane } from "./components/EtapeLectureMediane";
 import { EtapeSyntheseMediane } from "./components/EtapeSyntheseMediane";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
+import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 import {
   LABEL_X_MAX,
   LABEL_X_MIN,
@@ -37,6 +39,7 @@ import {
   formatQ1AttendueTexte,
   formatQ3AttendueTexte,
   formatSyntheseAttendueTexte,
+  surlignageSeuilTable,
 } from "./ui/formatMediane";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -113,6 +116,29 @@ export function AppMediane() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  /** Bloc de données centralisé (`EnTeteExercice`) — le tableau valeurs/effectifs(/classes) est
+   * identique sur les écrans "mediane"/"q1"/"q3" (variante "discrete") et "polygone"/"synthese"
+   * (variante "classes"), chacun gardant son propre surlignage (seuil/index de sa propre
+   * question). "minMaxMode" (tableau sans colonne cumulée, sans surlignage) et "lectureQ1"/
+   * "lectureMediane"/"lectureQ3" (graphe, pas de tableau) restent hors de cette centralisation. */
+  const surlignageDiscrete =
+    exercice.variante !== "discrete"
+      ? null
+      : phase === "mediane"
+        ? (etat.niveauAideMediane >= 2 ? surlignageSeuilTable(exercice, exercice.seuil, exercice.indexMediane) : null)
+        : phase === "q1"
+          ? (etat.niveauAideQ1 >= 2 ? surlignageSeuilTable(exercice, exercice.seuilQ1, exercice.indexQ1) : null)
+          : phase === "q3"
+            ? (etat.niveauAideQ3 >= 2 ? surlignageSeuilTable(exercice, exercice.seuilQ3, exercice.indexQ3) : null)
+            : null;
+
+  const blocDonnees =
+    exercice.variante === "discrete" && (phase === "mediane" || phase === "q1" || phase === "q3") ? (
+      <TableEffectifsDiscrete exercice={exercice} surlignage={surlignageDiscrete} />
+    ) : exercice.variante === "classes" && (phase === "polygone" || phase === "synthese") ? (
+      <TableEffectifsClasses exercice={exercice} />
+    ) : null;
+
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
     setEtat(demarrerSessionMediane(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteMediane)));
@@ -168,7 +194,7 @@ export function AppMediane() {
         </div>
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={blocDonnees} />
           {phase === "mediane" && exercice.variante === "discrete" ? (
             <EtapeMedianeDiscrete
               key={phase}

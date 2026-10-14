@@ -3,10 +3,9 @@ import type { ExerciceMedianeClasses } from "../core/mediane.types";
 import type { PointPolygone } from "../moteur/verificationMediane";
 import { evaluerPolygone } from "../moteur/verificationMediane";
 import { NIVEAU_AIDE_MAX_POLYGONE } from "../moteur/sessionMediane";
-import { CONSIGNE_POLYGONE, LABEL_EFFECTIF_CUMULE_VI, LABEL_EFFECTIF_NI, formatClasseTexte, texteAidePolygoneNiveau1 } from "../ui/formatMediane";
+import { CONSIGNE_POLYGONE, texteAidePolygoneNiveau1 } from "../ui/formatMediane";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { PolygoneEffectifsGraph } from "./PolygoneEffectifsGraph";
-import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -42,7 +41,9 @@ function positionsDepart(exercice: ExerciceMedianeClasses): PointPolygone[] {
  * recalculé à chaque rendu dès `apresEchec`, jamais figé à la dernière validation) : un point
  * redevient bleu dès que l'élève le déplace vers la bonne position, avant toute nouvelle
  * validation — même principe que l'écran "construction" de "Boîte à moustaches". Toujours actif
- * ("Valider" jamais désactivé, les points ont toujours une position par défaut).
+ * ("Valider" jamais désactivé, les points ont toujours une position par défaut). Le tableau
+ * classes/effectifs (identique à l'écran "synthese") est centralisé dans `blocDonnees`
+ * (`EnTeteExercice`, voir `AppMediane`/`AppExerciceSynthese`) — plus rendu ici.
  */
 export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation}: Props) {
   const [points, setPoints] = useState<PointPolygone[]>(() => positionsDepart(exercice));
@@ -62,31 +63,6 @@ export function EtapePolygoneMediane({ exercice, tentativesUtilisees, tentatives
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_POLYGONE}</p>
-
-      <div className="tf-table-scroll">
-        <table className="tf-table">
-          <thead>
-            <tr>
-              <th>Classe</th>
-              <th>
-                Effectif <Katex expression={LABEL_EFFECTIF_NI} />
-              </th>
-              <th>
-                Effectif cumulé <Katex expression={LABEL_EFFECTIF_CUMULE_VI} />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {exercice.classes.map((classe, index) => (
-              <tr key={index}>
-                <td>{formatClasseTexte(exercice, index)}</td>
-                <td>{classe.effectif}</td>
-                <td>{classe.effectifCumule}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
 
       <PolygoneEffectifsGraph pointFixe={pointFixe} points={points} erronees={erronees} onDeplacerPoint={deplacerPoint} />
 

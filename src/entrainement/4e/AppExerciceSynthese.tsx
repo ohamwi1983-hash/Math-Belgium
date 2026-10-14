@@ -60,6 +60,7 @@ import {
   formatSyntheseAttendueTexte,
   LABEL_X_MAX,
   LABEL_X_MIN,
+  surlignageSeuilTable,
 } from "./ui/formatMediane";
 import { formatCentresAttendusTexte, formatSommesAttenduesTexte } from "./ui/formatMoyennePonderee";
 import { formatBtIntervalleAttenduTexte, formatBtPourcentAttenduTexte, formatEnonceTexte } from "./ui/formatExerciceSynthese";
@@ -67,6 +68,8 @@ import { SegmentsInline } from "./components/SegmentsInline";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifExerciceSynthese } from "./ui/recapitulatifExerciceSynthese";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
+import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -253,6 +256,30 @@ export function AppExerciceSynthese() {
   const phase = etat.phase;
   const recapitulatif = calculerRecapitulatifExerciceSynthese(etat);
 
+  /** Bloc de données centralisé (`EnTeteExercice`) — même tableau, même centralisation que dans
+   * `AppMediane` (voir son propre commentaire) ; `niveauAide` y est ici un champ unique partagé
+   * par toutes les phases (pas un champ par phase comme dans `AppMediane`). */
+  const medianeDiscrete = exercice.variante === "discrete" ? versMedianeDiscrete(exercice) : null;
+  const medianeClasses = exercice.variante === "classes" ? versMedianeClasses(exercice) : null;
+
+  const surlignageDiscrete =
+    !medianeDiscrete || etat.niveauAide < 2
+      ? null
+      : phase === "mediane"
+        ? surlignageSeuilTable(medianeDiscrete, medianeDiscrete.seuil, medianeDiscrete.indexMediane)
+        : phase === "q1"
+          ? surlignageSeuilTable(medianeDiscrete, medianeDiscrete.seuilQ1, medianeDiscrete.indexQ1)
+          : phase === "q3"
+            ? surlignageSeuilTable(medianeDiscrete, medianeDiscrete.seuilQ3, medianeDiscrete.indexQ3)
+            : null;
+
+  const blocDonnees =
+    medianeDiscrete && (phase === "mediane" || phase === "q1" || phase === "q3") ? (
+      <TableEffectifsDiscrete exercice={medianeDiscrete} surlignage={surlignageDiscrete} />
+    ) : medianeClasses && (phase === "polygone" || phase === "synthese") ? (
+      <TableEffectifsClasses exercice={medianeClasses} />
+    ) : null;
+
   const validation = enAttente
     ? {
         revele: enAttente.revele,
@@ -279,7 +306,7 @@ export function AppExerciceSynthese() {
         </div>
 
         <div className="card-body">
-          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />
+          <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={blocDonnees} />
           <RecapitulatifPanel entrees={recapitulatif} />
           {PHASES_CALCULATRICE.has(phase) && <CalculatriceScientifique />}
           {phase === "centres" && exercice.variante === "classes" ? (
