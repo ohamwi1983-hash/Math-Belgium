@@ -700,10 +700,13 @@
 
 /* "Ce qu'on sait déjà" (`RecapitulatifPanel.tsx`) — fond blanc/surface + bordure, même traitement
  * que `.selecteur-variante` (seule section de l'écran à mériter réellement une boîte propre : elle
- * résume un état PASSÉ, distinct visuellement de l'exercice en cours qui suit). */
+ * résume un état PASSÉ, distinct visuellement de l'exercice en cours qui suit). Padding latéral
+ * réduit (même principe que `.equation-box` : les valeurs du récap peuvent être des fractions
+ * aussi larges qu'une équation — chaque pixel gagné réduit d'autant le besoin de scroll
+ * horizontal de `.recap-corps`). */
 .entrainement .recap-panel {
   margin: 0 0 20px;
-  padding: 16px 18px;
+  padding: 14px 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
