@@ -8,6 +8,9 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeSelectionComparaison } from "./components/EtapeSelectionComparaison";
 import { EtapeEgaliteComparaison } from "./components/EtapeEgaliteComparaison";
 import { Katex } from "./components/Katex";
+import { EnTeteExercice } from "./components/EnTeteExercice";
+
+const CONSIGNE_GENERALE = "Compare visuellement ces vecteurs sur la figure.";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -114,6 +117,7 @@ export function AppComparaisonVecteurs() {
 
       <main className="card">
         <div className="card-body">
+        <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
         {etat.phase === "selection" ? (
           <EtapeSelectionComparaison
             exercice={etat.exerciceCourant}
