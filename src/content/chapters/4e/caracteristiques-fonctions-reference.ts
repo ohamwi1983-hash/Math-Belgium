@@ -679,6 +679,60 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Les 6 familles de référence',
+        formulas: [
+          { text: '$x^2$ (ℝ, paire) — $x^3$ (ℝ, impaire)' },
+          { text: '$\\sqrt{x}$ ($[0\\,;\\,{+\\infty}[$) — $\\sqrt[3]{x}$ (ℝ, impaire)' },
+          { text: '$1/x$ (ℝ \\ {0}, impaire) — $|x|$ (ℝ, paire)' },
+        ],
+      },
+      {
+        title: 'Parité',
+        formulas: [
+          { text: 'paire : $f(-a)=f(a)$ — symétrie d\'axe Oy' },
+          { text: 'impaire : $f(-a)=-f(a)$ — symétrie centrale (origine)' },
+        ],
+      },
+      {
+        title: 'Condition d\'existence (CE) par famille',
+        formulas: [
+          { text: 'racine carrée : $ax+b \\ge 0$', condition: 'sens inversé si $a<0$' },
+          { text: 'inverse : $ax+b \\neq 0$' },
+          { text: 'carrée, cube, racine cubique, valeur absolue : aucune CE' },
+        ],
+      },
+      {
+        title: 'Nombre de zéros de [famille](ax+b) = K',
+        formulas: [
+          { text: 'carrée / valeur absolue : $K<0$ → 0 zéro, $K>0$ → 2 zéros' },
+          { text: 'racine carrée : $K<0$ → 0 zéro, $K>0$ → 1 zéro' },
+          { text: 'cube / racine cubique / inverse : toujours exactement 1 zéro' },
+        ],
+      },
+      {
+        title: 'Formule unifiée des transformations',
+        formulas: [
+          { text: '$f(x) = SOX \\cdot \\dfrac{EV}{CV} \\cdot g\\left(SOY \\cdot \\dfrac{CH}{EH}\\cdot(x-TH)\\right)+TV$' },
+          { text: 'TH toujours soustrait, TV toujours ajouté' },
+          { text: 'point caractéristique toujours en $x=TH$' },
+        ],
+      },
+      {
+        title: 'Formes de départ à ramener à la forme canonique',
+        formulas: [
+          { text: 'carrée : $ax^2+bx+c$' },
+          { text: 'cube : $(a+bx)^3$' },
+          { text: 'racine carrée / cubique : $\\sqrt{ax+b}$ / $\\sqrt[3]{ax+b}$' },
+          { text: 'inverse : $\\dfrac{ax+b}{cx+d}$' },
+          { text: 'valeur absolue : $|ax+b|$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**6 familles** — carrée (x²), cube (x³), racine carrée (√x, domaine [0;+∞[), racine ' +

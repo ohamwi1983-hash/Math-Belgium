@@ -653,6 +653,34 @@ export const fonctionsComposees: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Domaine de définition (CE)',
+        formulas: [
+          { text: "CE — dénominateur $\\neq 0$" },
+          { text: "CE — radicande $\\ge 0$", condition: "racine d'indice pair seulement" },
+          { text: "racine d'indice impair, valeur absolue — toujours définies, aucune CE" },
+        ],
+      },
+      {
+        title: 'Composer deux fonctions',
+        formulas: [
+          { text: '$(f\\circ g)(x) = f(g(x))$', condition: 'g agit en premier, f en second' },
+          { text: '$(g\\circ f)(a) = g(f(a))$', condition: "lecture graphique : f d'abord, puis report sur g" },
+        ],
+      },
+      {
+        title: "Domaine d'une composée",
+        formulas: [
+          { text: '$x \\in \\operatorname{dom} g$', condition: 'condition 1' },
+          { text: '$g(x) \\in \\operatorname{dom} f$', condition: 'condition 2' },
+          { text: 'dom(f∘g) = intersection des deux conditions' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Domaine de définition** — repérer dénominateurs et racines paires, poser une condition par risque, combiner par intersection.',

@@ -1651,6 +1651,72 @@ export const analyseCombinatoire: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Factorielle, arrangements, combinaisons',
+        formulas: [
+          { text: '$n! = n \\times (n-1) \\times \\ldots \\times 1$', condition: '$0!=1$' },
+          { text: '$A_n^k = \\dfrac{n!}{(n-k)!}$', condition: 'choisir ET ordonner' },
+          { text: '$C_n^k = \\dfrac{n!}{k!(n-k)!} = \\dfrac{A_n^k}{k!}$', condition: 'choisir seulement' },
+          { text: '$C_n^k = C_n^{n-k}$' },
+        ],
+      },
+      {
+        title: 'Permutations',
+        formulas: [
+          { text: '$P_p = p!$', condition: 'tous les éléments utilisés, ordre compte' },
+          {
+            text: '$\\dfrac{n!}{n_1! \\times n_2! \\times \\ldots \\times n_k!}$',
+            condition: 'groupes nommés, ou éléments répétés',
+          },
+          { text: 'table : $(n-1)!$', condition: 'rotations équivalentes' },
+          { text: 'collier : $\\dfrac{(n-1)!}{2}$', condition: 'rotations ET réflexions équivalentes' },
+        ],
+      },
+      {
+        title: 'Avec répétition autorisée',
+        formulas: [
+          { text: '$B_n^p = n^p$', condition: 'ordre compte, répétition autorisée' },
+          { text: '$\\Gamma_n^p = C_{n+p-1}^p$', condition: 'ordre ne compte pas, répétition autorisée' },
+          { text: '$D(n) = \\dfrac{n(n-3)}{2}$', condition: "diagonales d'un polygone à $n$ côtés" },
+        ],
+      },
+      {
+        title: 'Choix combinés et contraintes',
+        formulas: [
+          { text: 'ET indépendant $\\Rightarrow$ multiplier' },
+          { text: 'OU exclusif $\\Rightarrow$ additionner' },
+          { text: 'exclusion : total $-$ (les deux ensemble)' },
+          { text: 'couple indissociable : (les deux ensemble) $+$ (les deux absents)' },
+        ],
+      },
+      {
+        title: 'Binôme de Newton et triangle de Pascal',
+        formulas: [
+          { text: '$(a+b)^n = \\displaystyle\\sum_{k=0}^{n} C_n^k \\, a^{n-k} b^k$' },
+          { text: '$T_{k+1} = C_n^k \\times a^{n-k} \\times b^k$', condition: 'terme général, rang $k+1$' },
+          { text: '$C_n^k = C_{n-1}^{k-1}+C_{n-1}^k$', condition: 'relation de Pascal' },
+          { text: '$\\displaystyle\\sum_{k=0}^{n} C_n^k = 2^n$' },
+          { text: '$(1+\\varepsilon)^n \\approx 1+n\\varepsilon$', condition: '$\\varepsilon$ petit' },
+        ],
+      },
+      {
+        title: 'Lois de probabilité',
+        formulas: [
+          {
+            text: '$P(k) = \\dfrac{C_K^k \\times C_{N-K}^{n-k}}{C_N^n}$',
+            condition: 'hypergéométrique — tirage SANS remise',
+          },
+          {
+            text: '$P(X=k) = C_n^k \\times p^k \\times (1-p)^{n-k}$',
+            condition: 'binomiale — épreuves indépendantes',
+          },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Notion', 'Point clé'],

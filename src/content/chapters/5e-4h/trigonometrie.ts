@@ -1248,6 +1248,53 @@ export const trigonometrie: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Radians et secteur circulaire',
+        formulas: [
+          { text: '$\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\dfrac{\\pi}{180}$' },
+          { text: '$s = r\\theta$', condition: "longueur d'arc — θ toujours en radians" },
+          { text: '$A = \\dfrac{1}{2}r^2\\theta$', condition: 'aire du secteur — θ toujours en radians' },
+        ],
+      },
+      {
+        title: 'Polygone régulier et segment circulaire',
+        formulas: [
+          { text: '$\\theta = \\dfrac{2\\pi}{n}$', condition: "angle au centre d'un côté, polygone régulier à n côtés" },
+          { text: '$A_{triangle} = \\dfrac{1}{2}r^2\\sin\\theta$', condition: 'triangle isocèle, deux côtés r, angle inclus θ' },
+          { text: '$A_{segment} = \\dfrac{1}{2}r^2(\\theta - \\sin\\theta)$', condition: 'secteur moins triangle' },
+          { text: '$c^2 = 2r^2(1-\\cos\\theta)$', condition: 'longueur de la corde — loi des cosinus' },
+        ],
+      },
+      {
+        title: "Paramètres d'une sinusoïde",
+        formulas: [
+          { text: '$A = \\dfrac{max-min}{2} \\quad b = \\dfrac{max+min}{2}$' },
+          { text: '$T = \\dfrac{2\\pi}{\\omega}$', condition: "jamais l'inverse de ω" },
+          { text: '$\\Phi = -\\dfrac{\\varphi}{\\omega}$', condition: 'décalage horizontal — à ne pas confondre avec φ' },
+        ],
+      },
+      {
+        title: "Extremums d'une sinusoïde (u = ωx+φ)",
+        formulas: [
+          { text: '$\\sin(u) = 1$', condition: 'maximums seuls — période $2\\pi$ en u' },
+          { text: '$\\sin(u) = -1$', condition: 'minimums seuls — période $2\\pi$ en u' },
+          { text: '$|\\sin(u)| = 1$', condition: 'tous les extremums réunis — période $\\pi$ en u' },
+        ],
+      },
+      {
+        title: 'Équations trigonométriques',
+        formulas: [
+          { text: '$\\sin x = t \\Rightarrow x=\\alpha+2k\\pi$ ou $x=(\\pi-\\alpha)+2k\\pi$' },
+          { text: '$\\cos x = t \\Rightarrow x=\\alpha+2k\\pi$ ou $x=-\\alpha+2k\\pi$' },
+          { text: '$\\tan x = t \\Rightarrow x=\\alpha+k\\pi$', condition: 'une seule famille de solutions' },
+          { text: '$|k|>1$ (sin/cos) — aucune solution' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Radian** — $\\text{angle}_{rad} = \\text{angle}_{deg} \\times \\pi/180$. Les ' +

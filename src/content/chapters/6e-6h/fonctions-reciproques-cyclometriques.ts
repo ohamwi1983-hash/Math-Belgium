@@ -1652,6 +1652,69 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Fonction réciproque',
+        formulas: [
+          {
+            text: '$\\text{dom}(f^{-1}) = \\text{Im}(f) \\quad \\text{Im}(f^{-1}) = \\text{dom}(f)$',
+          },
+          { text: '$(f^{-1})^{-1} = f$' },
+          {
+            text: "$(f^{-1})'(x) = \\dfrac{1}{f'(f^{-1}(x))}$",
+            condition: "si $f'(f^{-1}(x)) \\neq 0$",
+          },
+        ],
+      },
+      {
+        title: 'Restrictions bijectives de sin, cos, tan',
+        formulas: [
+          {
+            text: 'sin sur $[-\\pi/2;\\pi/2]$ $\\to$ arcsin',
+            condition: 'dom $[-1;1]$, image $[-\\pi/2;\\pi/2]$',
+          },
+          {
+            text: 'cos sur $[0;\\pi]$ $\\to$ arccos',
+            condition: 'dom $[-1;1]$, image $[0;\\pi]$',
+          },
+          {
+            text: 'tan sur $]-\\pi/2;\\pi/2[$ $\\to$ arctan',
+            condition: 'dom $\\mathbb{R}$, image $]-\\pi/2;\\pi/2[$, asymptotes $y=\\pm\\pi/2$',
+          },
+        ],
+      },
+      {
+        title: 'Identités et parité',
+        formulas: [
+          { text: '$\\arcsin(u) + \\arccos(u) = \\pi/2$', condition: 'pour tout $u \\in [-1;1]$' },
+          {
+            text: '$\\arcsin(-x) = -\\arcsin(x) \\quad \\arctan(-x) = -\\arctan(x)$',
+            condition: 'arcsin et arctan sont impaires',
+          },
+          { text: '$\\arccos(-x) = \\pi - \\arccos(x)$' },
+        ],
+      },
+      {
+        title: 'Équations cyclométriques',
+        formulas: [
+          { text: 'arcsin($u$), arccos($u$) existent', condition: 'ssi $u \\in [-1;1]$' },
+          { text: 'arctan($u$) existe', condition: 'pour tout $u \\in \\mathbb{R}$' },
+          { text: '$\\arcsin(A)=\\arcsin(B) \\iff A=B$', condition: 'si $A$, $B$ respectent la CE' },
+          { text: '$\\arccos(A)=\\arccos(B) \\iff A=B$', condition: 'si $A$, $B$ respectent la CE' },
+        ],
+      },
+      {
+        title: 'Dérivées des fonctions cyclométriques',
+        formulas: [
+          { text: "$\\arcsin(u)' = \\dfrac{u'}{\\sqrt{1-u^2}}$" },
+          { text: "$\\arccos(u)' = -\\dfrac{u'}{\\sqrt{1-u^2}}$" },
+          { text: "$\\arctan(u)' = \\dfrac{u'}{1+u^2}$" },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Fonction', 'Domaine', 'Image', 'Dérivée (en u)'],

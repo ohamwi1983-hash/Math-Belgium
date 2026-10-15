@@ -1113,6 +1113,84 @@ export const variablesAleatoires: ChapterContent = {
       ],
     },
   ],
+  formulaire: {
+    groups: [
+      {
+        title: 'Variable discrète — espérance, variance',
+        formulas: [
+          { text: '$F(x) = P(X \\le x)$' },
+          { text: '$E(X) = \\displaystyle\\sum_i x_i \\times P(X=x_i)$' },
+          { text: '$V(X) = E(X^2)-[E(X)]^2$' },
+          { text: '$\\sigma(X) = \\sqrt{V(X)}$' },
+        ],
+      },
+      {
+        title: 'Cas particuliers discrets',
+        formulas: [
+          { text: '$E(X) = nK/N$', condition: 'loi hypergéométrique' },
+          {
+            text: '$E(X) = \\dfrac{n+1}{2} \\quad V(X) = \\dfrac{n^2-1}{12}$',
+            condition: 'loi uniforme discrète',
+          },
+        ],
+      },
+      {
+        title: 'Loi binomiale',
+        formulas: [
+          { text: '$P(X=k) = C(n,k) \\times p^k \\times (1-p)^{n-k}$' },
+          { text: '$E(X) = np \\quad V(X) = np(1-p)$' },
+          {
+            text: '$n > \\dfrac{\\ln(1-\\text{seuil})}{\\ln(1-p)}$',
+            condition: 'plus petit $n$ pour « au moins 1 succès »',
+          },
+        ],
+      },
+      {
+        title: 'Variable continue, densité et loi uniforme',
+        formulas: [
+          { text: '$\\displaystyle\\int_u^v f(t)\\,dt = 1$' },
+          { text: '$P(a \\le X \\le b) = \\displaystyle\\int_a^b f(t)\\,dt$' },
+          {
+            text: '$P(c \\le X \\le d) = \\dfrac{d-c}{b-a}$',
+            condition: 'loi uniforme continue',
+          },
+          {
+            text: '$E(X) = \\dfrac{a+b}{2} \\quad V(X) = \\dfrac{(b-a)^2}{12}$',
+            condition: 'loi uniforme continue',
+          },
+        ],
+      },
+      {
+        title: 'Loi normale',
+        formulas: [
+          { text: '$Z = \\dfrac{X-\\mu}{\\sigma}$' },
+          { text: '$\\Phi(z) = P(Z \\le z)$' },
+          { text: '$\\Phi(-z) = 1-\\Phi(z)$' },
+          { text: '$x = \\mu + z \\times \\sigma$', condition: 'retour de $z$ vers $x$' },
+        ],
+      },
+      {
+        title: 'Bayes, probabilités totales et approximations',
+        formulas: [
+          { text: '$P_{totale} = \\displaystyle\\sum_i q_i \\times r_i$' },
+          { text: '$P(\\text{cat.}j \\mid \\text{critère}) = \\dfrac{q_j r_j}{P_{totale}}$' },
+          {
+            text: '$\\mu=np \\quad \\sigma=\\sqrt{np(1-p)}$',
+            condition: 'approx. normale — $n>30$, $0,3<p<0,7$',
+          },
+          {
+            text: '$P(X=k) = e^{-\\lambda}\\dfrac{\\lambda^k}{k!} \\quad E(X)=V(X)=\\lambda$',
+            condition: 'loi de Poisson',
+          },
+          {
+            text: '$\\lambda=np$',
+            condition: 'approx. Poisson — $n\\ge30$, $p\\le0,1$, $np\\le15$',
+          },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Notion', 'Point clé'],

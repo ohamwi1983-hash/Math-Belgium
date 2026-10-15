@@ -1206,6 +1206,55 @@ export const calculVectoriel: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Vecteur, composantes et norme',
+        formulas: [
+          { text: '$\\vec{AB}\\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$' },
+          { text: '$\\|\\vec{u}\\| = \\sqrt{x_u^2+y_u^2}$' },
+          { text: '$AB = \\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$' },
+        ],
+      },
+      {
+        title: 'Combiner des vecteurs',
+        formulas: [
+          { text: '$\\vec{u}+\\vec{v} = \\begin{pmatrix} x_u+x_v \\\\ y_u+y_v \\end{pmatrix}$' },
+          { text: '$k \\cdot \\vec{u} = \\begin{pmatrix} k \\cdot x_u \\\\ k \\cdot y_u \\end{pmatrix}$' },
+          { text: '$-\\vec{u} = (-1) \\cdot \\vec{u}$', condition: 'soustraire = ajouter l\'opposé' },
+        ],
+      },
+      {
+        title: 'Relation de Chasles',
+        formulas: [
+          { text: '$\\vec{AB} + \\vec{BC} = \\vec{AC}$', condition: 'chaîne fermée → vecteur nul' },
+        ],
+      },
+      {
+        title: 'Points liés à un vecteur',
+        formulas: [
+          { text: '$x_B=x_A+x_u$, $y_B=y_A+y_u$', condition: 'translation : B = A + u' },
+          { text: '$x_M=\\dfrac{x_A+x_B}{2}$, $y_M=\\dfrac{y_A+y_B}{2}$', condition: 'milieu M de [AB]' },
+          { text: '$\\vec{AM} = k \\cdot \\vec{AB}$', condition: 'k=1/2 → milieu, k=1 → B, k=0 → A' },
+        ],
+      },
+      {
+        title: 'Colinéarité et orthogonalité',
+        formulas: [
+          { text: '$x_u \\cdot y_v - y_u \\cdot x_v = 0$', condition: 'colinéaires (déterminant nul)' },
+          { text: '$x_u \\cdot x_v + y_u \\cdot y_v = 0$', condition: 'orthogonaux (produit scalaire nul)' },
+        ],
+      },
+      {
+        title: 'Résultante de deux vecteurs',
+        formulas: [
+          { text: '$R^2 = F_1^2+F_2^2+2 \\cdot F_1 \\cdot F_2 \\cdot \\cos\\theta$', condition: 'θ entre les deux vecteurs' },
+          { text: '$\\dfrac{\\sin(\\text{déviation})}{F_2} = \\dfrac{\\sin\\theta}{R}$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       'Vecteur — direction, sens, longueur. Composantes $\\vec{AB} = \\begin{pmatrix} x_B-x_A \\\\ y_B-y_A \\end{pmatrix}$, toujours indépendantes du point où tu le dessines.',

@@ -2343,6 +2343,75 @@ export const fonctionsLogarithmes: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Définition et propriétés immédiates',
+        formulas: [
+          { text: '$\\log_a(x) = y \\iff a^y = x$', condition: '$a>0$, $a \\neq 1$, $x>0$' },
+          { text: '$\\log_a(1) = 0 \\qquad \\log_a(a) = 1$' },
+          { text: '$\\log_a(a^r) = r \\qquad a^{\\log_a(x)} = x$' },
+        ],
+      },
+      {
+        title: 'Propriétés algébriques et changement de base',
+        formulas: [
+          { text: '$\\log_a(xy) = \\log_a(x) + \\log_a(y)$' },
+          { text: '$\\log_a(x/y) = \\log_a(x) - \\log_a(y)$' },
+          { text: '$\\log_a(x^r) = r \\cdot \\log_a(x)$' },
+          { text: '$\\log_a(x) = \\dfrac{\\ln(x)}{\\ln(a)}$', condition: 'changement de base' },
+        ],
+      },
+      {
+        title: 'Équations et inéquations logarithmiques',
+        formulas: [
+          { text: '$\\log_a(x) = \\log_a(y) \\iff x = y$', condition: '$x,y>0$' },
+          { text: '$\\log_a(u) \\le \\log_a(v) \\iff u \\le v$', condition: 'si $a>1$ — sens conservé' },
+          { text: '$\\log_a(u) \\le \\log_a(v) \\iff u \\ge v$', condition: 'si $0<a<1$ — sens inversé' },
+        ],
+      },
+      {
+        title: 'Dérivée et dérivation logarithmique',
+        formulas: [
+          { text: "$(\\ln(x))' = \\dfrac{1}{x}$" },
+          { text: "$(\\log_a(x))' = \\dfrac{1}{x \\cdot \\ln(a)}$" },
+          { text: "$(\\ln(u(x)))' = \\dfrac{u'(x)}{u(x)}$" },
+          {
+            text: "$((g(x))^{h(x)})' = \\left(h'(x)\\ln(g(x)) + \\dfrac{h(x)g'(x)}{g(x)}\\right)(g(x))^{h(x)}$",
+            condition: 'dérivation logarithmique, exposant variable',
+          },
+        ],
+      },
+      {
+        title: 'Limites et croissance comparée',
+        formulas: [
+          {
+            text: '$\\lim_{x \\to 0^+} \\log_a(x) = -\\infty \\quad \\lim_{x \\to +\\infty} \\log_a(x) = +\\infty$',
+            condition: 'si $a>1$',
+          },
+          {
+            text: '$\\lim_{x \\to 0^+} \\log_a(x) = +\\infty \\quad \\lim_{x \\to +\\infty} \\log_a(x) = -\\infty$',
+            condition: 'si $0<a<1$',
+          },
+          {
+            text: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{\\log_a(x)}{x^k} = 0$',
+            condition: 'pour $a>1$ et tout $k>0$',
+          },
+          { text: '$a^x > x^n > \\log_b(x)$', condition: 'pour $x$ assez grand, $a>1$, $b>1$, $n>0$' },
+        ],
+      },
+      {
+        title: 'Hyperboliques et modèles',
+        formulas: [
+          { text: '$\\text{ch}(x) = \\dfrac{e^x+e^{-x}}{2} \\qquad \\text{sh}(x) = \\dfrac{e^x-e^{-x}}{2}$' },
+          { text: '$\\text{ch}^2(x) - \\text{sh}^2(x) = 1$' },
+          { text: "$\\text{sh}'(x) = \\text{ch}(x) \\qquad \\text{ch}'(x) = \\text{sh}(x)$" },
+          { text: '$T = \\dfrac{\\ln(2)}{\\lambda}$', condition: 'demi-vie, pour $N(t)=N_0 e^{-\\lambda t}$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Propriété', 'Énoncé'],

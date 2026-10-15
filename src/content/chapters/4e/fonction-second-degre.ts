@@ -971,6 +971,56 @@ export const fonctionSecondDegre: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Coefficients et allure',
+        formulas: [
+          { text: '$a>0$ → minimum — $a<0$ → maximum' },
+          { text: '$|a|$ grand → parabole resserrée, $|a|$ proche de 0 → aplatie' },
+        ],
+      },
+      {
+        title: 'Sommet et axe de symétrie',
+        formulas: [
+          { text: '$x_S = -\\dfrac{b}{2a}$' },
+          { text: '$y_S = f(x_S)$' },
+          { text: 'axe de symétrie : $x = x_S$' },
+        ],
+      },
+      {
+        title: 'Domaine et image',
+        formulas: [
+          { text: '$\\operatorname{dom} f = \\mathbb{R}$' },
+          { text: '$\\operatorname{im} f = [y_S\\,;\\,{+\\infty}[$', condition: 'si $a>0$' },
+          { text: '$\\operatorname{im} f = ]{-\\infty}\\,;\\,y_S]$', condition: 'si $a<0$' },
+        ],
+      },
+      {
+        title: 'Zéros et signe',
+        formulas: [
+          { text: 'entre les zéros : signe opposé à $a$' },
+          { text: 'à l\'extérieur des zéros : signe de $a$' },
+        ],
+      },
+      {
+        title: 'Forme canonique et transformations',
+        formulas: [
+          { text: '$f(x)=a(x-x_S)^2+y_S$' },
+          { text: '$y=(x-p)^2+q$ — translation horizontale $p$, verticale $q$' },
+          { text: '$|a|>1$ étire, $0<|a|<1$ comprime ; $a<0$ retourne la courbe (SOX)' },
+        ],
+      },
+      {
+        title: 'Optimiser en contexte',
+        formulas: [
+          { text: 'optimum réel $=$ sommet', condition: 'si $x_S$ appartient au domaine de validité' },
+          { text: 'sinon, optimum réel à une borne du domaine de validité' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Coefficient a** — son signe donne le sens d\'ouverture (minimum ou maximum). Sa valeur ' +

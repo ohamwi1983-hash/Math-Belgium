@@ -824,6 +824,70 @@ export const statistiqueDescriptive: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Fréquences & effectifs',
+        formulas: [
+          { text: '$n_i$ = effectif de $x_i$, $n=\\Sigma n_i$' },
+          { text: '$f_i = n_i/n$', condition: 'souvent exprimée en %' },
+        ],
+      },
+      {
+        title: 'Moyenne pondérée',
+        formulas: [
+          { text: '$\\bar{x} = \\dfrac{\\Sigma(x_i \\cdot n_i)}{\\Sigma n_i}$' },
+          { text: '$x_i$ = centre de la classe', condition: 'données regroupées en classes' },
+        ],
+      },
+      {
+        title: 'Médiane, quartiles et mode',
+        formulas: [
+          {
+            text: 'seuils : $n/2$ (médiane), $n/4$ ($Q_1$), $3n/4$ ($Q_3$)',
+            condition: 'première valeur dont le cumulé dépasse strictement le seuil',
+          },
+          {
+            text:
+              '$\\text{valeur} = L + \\dfrac{\\text{seuil}-CF_{avant}}{n_{classe}} \\cdot ' +
+              '\\text{amplitude}$',
+            condition: 'interpolation linéaire, données en classes',
+          },
+          { text: 'mode = valeur (ou classe) de plus grand effectif' },
+        ],
+      },
+      {
+        title: 'Dispersion : variance et écart-type',
+        formulas: [
+          { text: '$\\text{étendue} = \\max - \\min$' },
+          {
+            text: '$V = \\dfrac{\\Sigma(x_i-\\bar{x})^2 \\cdot n_i}{n}$',
+            condition: 'division par $n$, jamais $n-1$',
+          },
+          {
+            text: '$\\text{écart-type} = \\sqrt{V}$',
+            condition: 'depuis la variance déjà arrondie à 2 décimales',
+          },
+        ],
+      },
+      {
+        title: 'Inégalité de Bienaymé-Tchebychev',
+        formulas: [
+          {
+            text:
+              'au moins $\\left(1-\\dfrac{1}{k^2}\\right)\\times 100\\%$ des valeurs dans ' +
+              '$[\\bar{x}-k\\sigma\\,;\\,\\bar{x}+k\\sigma]$',
+            condition: 'valable pour tout $k>1$',
+          },
+          {
+            text: '$k = \\sqrt{\\dfrac{100}{100-\\text{pourcentage}}}$',
+            condition: 'sens réciproque — à partir du pourcentage voulu',
+          },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Vocabulaire** — population, individu, caractère (discret ou continu), effectif nᵢ, ' +

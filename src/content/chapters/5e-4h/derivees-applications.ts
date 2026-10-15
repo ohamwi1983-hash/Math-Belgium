@@ -1392,6 +1392,68 @@ export const deriveesApplications: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Nombre dérivé & tangente',
+        formulas: [
+          { text: '$f\'(a) = \\displaystyle\\lim_{h \\to 0} \\dfrac{f(a+h)-f(a)}{h}$' },
+          { text: '$y = f(a) + f\'(a)(x-a)$', condition: 'équation de la tangente en x=a' },
+          { text: '$f\'(a) = 0$', condition: 'tangente horizontale en x=a' },
+        ],
+      },
+      {
+        title: 'Dérivées de référence',
+        formulas: [
+          {
+            text:
+              '$(x^n)\' = n x^{n-1} \\quad (\\sqrt{x})\' = \\dfrac{1}{2\\sqrt{x}} \\quad ' +
+              '(1/x)\' = -\\dfrac{1}{x^2}$',
+          },
+          {
+            text:
+              '$(\\sin x)\' = \\cos x \\quad (\\cos x)\' = -\\sin x \\quad ' +
+              '(\\tan x)\' = \\dfrac{1}{\\cos^2 x}$',
+          },
+          {
+            text:
+              '$(u^n)\' = n u^{n-1} u\' \\quad (\\sqrt{u})\' = \\dfrac{u\'}{2\\sqrt{u}} \\quad ' +
+              '(1/u)\' = -\\dfrac{u\'}{u^2}$',
+            condition: 'règle de la chaîne, cas usuels (u fonction de x)',
+          },
+        ],
+      },
+      {
+        title: 'Règles de calcul',
+        formulas: [
+          { text: '$(u+v)\' = u\'+v\'$' },
+          { text: '$(uv)\' = u\'v+uv\'$' },
+          { text: '$\\left(\\dfrac{u}{v}\\right)\' = \\dfrac{u\'v-uv\'}{v^2}$' },
+          { text: '$f(x)=g(u(x)) \\Rightarrow f\'(x) = u\'(x) \\cdot g\'(u(x))$' },
+        ],
+      },
+      {
+        title: 'Signe de f\' et de f\'\'',
+        formulas: [
+          { text: '$f\'(x) > 0$', condition: 'f croissante' },
+          { text: '$f\'(x) < 0$', condition: 'f décroissante' },
+          { text: '$f\'(a) = 0$ et f\' change de signe', condition: 'extremum local en a' },
+          { text: '$f\'\'(x) > 0$', condition: 'f convexe (bol)' },
+          { text: '$f\'\'(x) < 0$', condition: 'f concave (dôme)' },
+          { text: '$f\'\'(a) = 0$ et f\'\' change de signe', condition: 'point d\'inflexion en a' },
+        ],
+      },
+      {
+        title: 'Applications économiques et physiques',
+        formulas: [
+          { text: '$C\'(q)$', condition: 'coût marginal, en q unités' },
+          { text: '$R\'(x) = C\'(x)$', condition: 'bénéfice maximal — recette marginale = coût marginal' },
+          { text: '$v(t) = s\'(t) \\quad a(t) = v\'(t) = s\'\'(t)$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Définition de f\'(a)** — la limite du taux d\'accroissement [f(a+h)−f(a)]/h quand h→0 ' +

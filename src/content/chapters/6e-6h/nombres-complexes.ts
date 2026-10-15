@@ -1383,6 +1383,73 @@ export const nombresComplexes: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Forme algébrique',
+        formulas: [
+          { text: '$i^2=-1$' },
+          { text: '$\\bar{z}=a-bi$', condition: 'pour $z=a+bi$' },
+          { text: '$z+\\bar{z}=2a \\quad z\\cdot\\bar{z}=a^2+b^2$' },
+          { text: '$\\dfrac{1}{z} = \\dfrac{a-bi}{a^2+b^2}$', condition: 'pour $z=a+bi$ non nul' },
+        ],
+      },
+      {
+        title: 'Affixes et racine carrée',
+        formulas: [
+          { text: '$z_M = \\dfrac{z_A+z_B}{2} \\quad AB = |z_B-z_A|$' },
+          {
+            text: '$x^2-y^2=a \\quad 2xy=b \\quad x^2+y^2=\\sqrt{a^2+b^2}$',
+            condition: 'racine carrée $x+iy$ de $a+bi$ — toujours 2 solutions opposées',
+          },
+        ],
+      },
+      {
+        title: 'Équations dans ℂ',
+        formulas: [
+          {
+            text: '$z = \\dfrac{-b \\pm i\\sqrt{|\\Delta|}}{2a}$',
+            condition: 'si $\\Delta<0$ — 2 solutions complexes conjuguées',
+          },
+          {
+            text: '$u=z^2$',
+            condition: 'équation bicarrée $az^4+bz^2+c=0$ — chaque $u\\ne0$ donne 2 valeurs de $z$',
+          },
+        ],
+      },
+      {
+        title: 'Module, argument, forme trigonométrique',
+        formulas: [
+          { text: '$|z|=\\sqrt{a^2+b^2} \\quad z = r(\\cos\\theta+i\\sin\\theta) = re^{i\\theta}$' },
+          {
+            text: '$r_1e^{i\\theta_1} \\cdot r_2e^{i\\theta_2} = r_1r_2\\, e^{i(\\theta_1+\\theta_2)}$',
+            condition: 'quotient : modules divisés, arguments soustraits',
+          },
+        ],
+      },
+      {
+        title: 'Moivre et racines n-ièmes',
+        formulas: [
+          { text: '$(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta)+i\\sin(n\\theta)$' },
+          {
+            text: '$z_k = r^{1/n}\\cdot e^{i(\\theta+2k\\pi)/n}$',
+            condition: '$k=0,1,\\ldots,n-1$ — polygone régulier',
+          },
+        ],
+      },
+      {
+        title: 'Transformations et géométrie',
+        formulas: [
+          { text: '$z\' = z+b$', condition: 'translation' },
+          { text: '$z\' = e^{i\\theta}(z-z_0)+z_0$', condition: 'rotation de centre $\\Omega(z_0)$, angle $\\theta$' },
+          { text: '$z\' = az+b$', condition: 'similitude — centre $z_0 = b/(1-a)$ si $a\\ne1$' },
+          { text: '$\\dfrac{z_C-z_A}{z_B-z_A}$ réel $\\Rightarrow$ alignés, imaginaire pur $\\Rightarrow$ orthogonaux' },
+          { text: '$|z-a|=k \\Rightarrow$ cercle', condition: 'centre $A$, rayon $k$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Définition** — $i^2=-1$, $z=a+bi$, conjugué $\\bar{z}=a-bi$.',

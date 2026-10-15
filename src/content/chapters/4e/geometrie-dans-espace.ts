@@ -1089,6 +1089,45 @@ export const geometrieDansEspace: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Perspective cavalière',
+        formulas: [
+          { text: 'Axes $x$ et $z$ : conservés à l\'échelle réelle' },
+          { text: 'Axe $y$ (profondeur) : direction à 45°, longueur $\\times \\dfrac{1}{2}$' },
+        ],
+      },
+      {
+        title: 'Déterminer un plan',
+        formulas: [
+          { text: '3 points non alignés' },
+          { text: 'une droite + un point extérieur' },
+          { text: '2 droites sécantes' },
+          { text: '2 droites parallèles distinctes' },
+        ],
+      },
+      {
+        title: 'Critères de parallélisme',
+        formulas: [
+          { text: 'Unicité : par un point donné, une seule parallèle à une droite donnée' },
+          {
+            text: 'Droite ∥ plan : $d \\parallel \\alpha$',
+            condition: 'si $d \\parallel$ une droite de $\\alpha$',
+          },
+          { text: 'Plan ∥ plan : 2 droites sécantes de l\'un, chacune ∥ à une droite sécante de l\'autre' },
+        ],
+      },
+      {
+        title: 'Section plane d\'un solide',
+        formulas: [
+          { text: 'Chaque face traversée → exactement **2** sommets de la section' },
+          { text: 'Résultat : toujours un seul polygone fermé' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       'Perspective cavalière — x et z restent à l\'échelle réelle. y part en diagonale à 45°, ' +

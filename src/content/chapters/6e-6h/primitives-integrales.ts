@@ -1353,6 +1353,77 @@ export const primitivesIntegrales: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Primitives usuelles',
+        formulas: [
+          { text: '$\\int x^n dx = \\dfrac{x^{n+1}}{n+1} + C$', condition: '$n \\neq -1$' },
+          { text: '$\\int \\dfrac{1}{x} dx = \\ln|x| + C$' },
+          {
+            text: '$\\int e^x dx = e^x + C \\qquad \\int e^{kx} dx = \\dfrac{1}{k}e^{kx} + C$',
+            condition: '$k \\neq 0$ pour la seconde',
+          },
+          { text: '$\\int \\cos(x) dx = \\sin(x) + C \\qquad \\int \\sin(x) dx = -\\cos(x) + C$' },
+          {
+            text:
+              '$\\int \\dfrac{1}{1+x^2} dx = \\arctan(x) + C \\qquad ' +
+              '\\int \\dfrac{1}{\\sqrt{1-x^2}} dx = \\arcsin(x) + C$',
+          },
+        ],
+      },
+      {
+        title: 'Techniques de primitivation',
+        formulas: [
+          {
+            text:
+              '$u\'e^u \\to e^u + C \\qquad \\dfrac{u\'}{u} \\to \\ln|u| + C \\qquad ' +
+              'u\'u^n \\to \\dfrac{u^{n+1}}{n+1} + C$',
+            condition: 'reconnaître la forme u\'·f(u)',
+          },
+          { text: '$\\int f(x) \\cdot g\'(x) dx = f(x) \\cdot g(x) - \\int f\'(x) \\cdot g(x) dx$', condition: 'intégration par parties' },
+        ],
+      },
+      {
+        title: 'Primitive particulière',
+        formulas: [
+          { text: 'primitive générale : $F(x) + C$', condition: 'C ∈ ℝ — une infinité de primitives' },
+          { text: 'condition initiale : résoudre $F(x_0) + C = y_0$ en $C$' },
+        ],
+      },
+      {
+        title: 'Intégrale définie',
+        formulas: [
+          { text: '$\\int_a^b f(x) dx = F(b) - F(a)$', condition: 'théorème fondamental — F primitive quelconque de f' },
+          { text: '$\\int_a^a f(x) dx = 0 \\qquad \\int_a^b f(x) dx = -\\int_b^a f(x) dx$' },
+          { text: '$\\int_a^b f(x) dx = \\int_a^c f(x) dx + \\int_c^b f(x) dx$', condition: 'additivité' },
+          {
+            text:
+              '$\\int_a^b f(x) dx \\approx \\dfrac{\\Delta x}{2}[f(x_0)+f(x_n)+2(f(x_1)+\\ldots+f(x_{n-1}))]$',
+            condition: 'méthode des trapèzes',
+          },
+          { text: 'valeur moyenne $= \\dfrac{1}{b-a}\\int_a^b f(x) dx$' },
+        ],
+      },
+      {
+        title: 'Calcul d\'aires',
+        formulas: [
+          { text: 'aire $= \\int_a^b f(x) dx$', condition: 'si $f \\ge 0$ sur $[a;b]$' },
+          { text: 'aire $= -\\int_a^b f(x) dx$', condition: 'si $f \\le 0$ — sinon, découper aux racines' },
+          { text: 'aire entre deux courbes $= \\int_a^b (f(x)-g(x)) dx$', condition: '$f(x) \\ge g(x)$ sur $[a;b]$' },
+        ],
+      },
+      {
+        title: 'Volumes et longueur d\'arc',
+        formulas: [
+          { text: '$V = \\pi \\int_a^b [f(x)]^2 dx$', condition: 'méthode des disques' },
+          { text: '$V = \\pi \\int_a^b ([f(x)]^2 - [g(x)]^2) dx$', condition: 'méthode des rondelles — $f \\ge g \\ge 0$' },
+          { text: '$L = \\int_a^b \\sqrt{1+[f\'(x)]^2} dx$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Notion', 'Formule / méthode'],

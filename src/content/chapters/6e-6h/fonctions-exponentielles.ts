@@ -1721,6 +1721,58 @@ export const fonctionsExponentielles: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Puissances à exposants réels',
+        formulas: [
+          { text: '$a^r \\cdot a^s = a^{r+s} \\qquad \\dfrac{a^r}{a^s} = a^{r-s}$' },
+          { text: '$(a \\cdot b)^r = a^r \\cdot b^r \\qquad (a^r)^s = a^{r \\cdot s}$' },
+        ],
+      },
+      {
+        title: "Limites en l'infini",
+        formulas: [
+          { text: '$\\lim_{-\\infty} a^x = 0 \\quad \\lim_{+\\infty} a^x = +\\infty$', condition: 'si $a>1$' },
+          { text: '$\\lim_{-\\infty} a^x = +\\infty \\quad \\lim_{+\\infty} a^x = 0$', condition: 'si $0<a<1$' },
+          {
+            text: '$\\displaystyle\\lim_{x \\to +\\infty} \\dfrac{x^n}{a^x} = 0$',
+            condition: "pour $a>1$ et tout entier $n$ — l'exponentielle domine",
+          },
+        ],
+      },
+      {
+        title: 'Dérivée',
+        formulas: [
+          { text: "$(a^x)' = \\ln(a) \\cdot a^x$" },
+          { text: "$(e^x)' = e^x$", condition: 'seule fonction égale à sa propre dérivée' },
+          { text: "$(a^{g(x)})' = g'(x) \\cdot a^{g(x)} \\cdot \\ln(a)$", condition: 'règle de la chaîne' },
+        ],
+      },
+      {
+        title: 'Équation exponentielle',
+        formulas: [
+          { text: '$a^x = a^y \\iff x = y$', condition: '$a>0$, $a \\neq 1$' },
+          { text: 'substitution $t = a^x$', condition: 'toujours $t>0$ — rejette toute racine $t \\le 0$' },
+        ],
+      },
+      {
+        title: 'Inéquation exponentielle',
+        formulas: [
+          { text: '$a^x \\le a^y \\iff x \\le y$', condition: 'si $a>1$ — sens conservé' },
+          { text: '$a^x \\le a^y \\iff x \\ge y$', condition: 'si $0<a<1$ — sens inversé' },
+        ],
+      },
+      {
+        title: 'Modèles de croissance',
+        formulas: [
+          { text: '$Q(t) = Q_0 \\cdot r^t$', condition: '$r>1$ croissance, $0<r<1$ décroissance' },
+          { text: '$p(t) = 1 - e^{-kt}$', condition: 'modèle de saturation, tend vers 1' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Base', 'lim en −∞', 'lim en +∞', 'Dérivée'],

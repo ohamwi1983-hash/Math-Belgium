@@ -1310,6 +1310,63 @@ export const geometrieAnalytiquePlane: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Droite : les 4 formes',
+        formulas: [
+          { text: '$a \\cdot x + b \\cdot y + c = 0$', condition: 'implicite — toujours possible' },
+          { text: '$y = m \\cdot x + p$', condition: 'explicite en y — impossible si verticale' },
+          { text: '$x = n \\cdot y + q$', condition: 'explicite en x — impossible si horizontale' },
+          {
+            text: '$\\begin{cases} x = x_0+t \\cdot \\alpha \\\\ y = y_0+t \\cdot \\beta \\end{cases}$',
+            condition: 'paramétrique — toujours possible',
+          },
+        ],
+      },
+      {
+        title: 'Pente et angles',
+        formulas: [
+          { text: '$m = \\tan\\theta$', condition: '$\\theta \\in [0°;180°[$' },
+          { text: '$\\theta_{Oy} = 90° - \\theta_{Ox}$' },
+        ],
+      },
+      {
+        title: 'Parallèles et perpendiculaires',
+        formulas: [
+          {
+            text: '$a \\cdot b\' - b \\cdot a\' = 0$',
+            condition: 'parallèles (déterminant nul) — ou $m=m\'$',
+          },
+          {
+            text: '$a \\cdot a\' + b \\cdot b\' = 0$',
+            condition: 'perpendiculaires (produit scalaire nul) — ou $m \\cdot m\' = -1$',
+          },
+        ],
+      },
+      {
+        title: 'Distance à une droite particulière',
+        formulas: [
+          { text: '$|x_P - k|$', condition: 'distance de P à la verticale x = k' },
+          { text: '$|y_P - k|$', condition: 'distance de P à l\'horizontale y = k' },
+        ],
+      },
+      {
+        title: 'Cercle',
+        formulas: [
+          { text: '$(x-x_0)^2+(y-y_0)^2=r^2$', condition: 'centre $(x_0;y_0)$, rayon r' },
+        ],
+      },
+      {
+        title: 'Parabole',
+        formulas: [
+          { text: '$(x-x_S)^2=2p(y-y_S)$', condition: 'axe vertical — $p=2(y_F-y_S)$' },
+          { text: '$(y-y_S)^2=2p(x-x_S)$', condition: 'axe horizontal — $p=2(x_F-x_S)$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       'Droite — un point + un vecteur directeur, c\'est la seule vérité géométrique. 4 formes ' +

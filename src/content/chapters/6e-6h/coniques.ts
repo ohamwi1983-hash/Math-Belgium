@@ -1347,6 +1347,98 @@ export const coniques: ChapterContent = {
       ],
     },
   ],
+  formulaire: {
+    groups: [
+      {
+        title: 'Parabole',
+        formulas: [
+          { text: '$p = \\text{dist}(F;d)$', condition: 'F = foyer, d = directrice' },
+          { text: '$y^2=2px$', condition: "foyer $F(p/2;0)$, directrice $d\\equiv x=-p/2$, sommet à l'origine" },
+          {
+            text: '$y^2=\\pm2px \\qquad x^2=\\pm2py$',
+            condition: "le carré donne l'axe focal, le signe le sens d'ouverture",
+          },
+        ],
+      },
+      {
+        title: 'Ellipse',
+        formulas: [
+          { text: "$|PF|+|PF'|=2a$", condition: "$|FF'|=2c$ ; existe ssi $a>c$" },
+          {
+            text: '$\\dfrac{x^2}{a^2}+\\dfrac{y^2}{b^2}=1$',
+            condition: "$b^2=a^2-c^2$ ; sommets $(\\pm a;0)$, $(0;\\pm b)$ ; foyers $(\\pm c;0)$",
+          },
+          { text: '$c=0 \\implies b=a \\implies x^2+y^2=a^2$', condition: 'cercle = ellipse à foyers confondus' },
+        ],
+      },
+      {
+        title: 'Hyperbole',
+        formulas: [
+          { text: "$\\big||PF|-|PF'|\\big|=2a$", condition: "$|FF'|=2c$ ; existe ssi $c>a$ ; 2 branches" },
+          {
+            text: '$\\dfrac{x^2}{a^2}-\\dfrac{y^2}{b^2}=1$',
+            condition: '$b^2=c^2-a^2$ ; sommets $(\\pm a;0)$ ; asymptotes $y=\\pm(b/a)x$',
+          },
+          {
+            text: '$c=a\\sqrt{2} \\implies x^2-y^2=a^2$',
+            condition: 'hyperbole équilatère, asymptotes perpendiculaires $y=\\pm x$ ; sur ses asymptotes : $xy=k$',
+          },
+        ],
+      },
+      {
+        title: 'Excentricité, foyers et directrices',
+        formulas: [
+          { text: '$e = c/a$' },
+          {
+            text: '$\\dfrac{\\text{dist}(P;F)}{\\text{dist}(P;d)} = e$',
+            condition: '$e<1$ ellipse, $e=1$ parabole, $e>1$ hyperbole ; cercle : $e=0$, sans directrice',
+          },
+          { text: '$x=\\pm a^2/c$', condition: "directrices d'une conique centrée (ellipse ou hyperbole)" },
+          {
+            text: '$mx^2+ny^2+qxy+rx+sy+t=0$',
+            condition: "équation générale ; réduction par translation possible seulement sans terme en $xy$",
+          },
+        ],
+      },
+      {
+        title: 'Rayons focaux et aire du triangle focal',
+        formulas: [
+          {
+            text: "$|PF'| = \\dfrac{2a}{k+1} \\qquad |PF| = \\dfrac{2ak}{k+1}$",
+            condition: "à partir du rapport $k=|PF|/|PF'|$",
+          },
+          {
+            text: "$\\cos(\\widehat{FPF'}) = \\dfrac{|PF|^2+|PF'|^2-4c^2}{2|PF||PF'|}$",
+            condition: '$c^2=a^2-b^2$ (loi des cosinus)',
+          },
+          { text: "$\\text{aire} = \\dfrac{1}{2}|PF||PF'|\\sin(\\widehat{FPF'})$" },
+        ],
+      },
+      {
+        title: 'Intersection, tangentes et réflexion',
+        formulas: [
+          {
+            text: 'substituer la droite dans la conique → équation du 2e degré',
+            condition: '$\\Delta>0$ sécante, $\\Delta=0$ tangente, $\\Delta<0$ extérieure',
+          },
+          {
+            text: '$f\'(x_P) = -\\dfrac{b^2x_P}{a^2y_P}$',
+            condition: "pente de la tangente par la dérivée (ellipse) — signe opposé pour l'hyperbole",
+          },
+          {
+            text: '$\\dfrac{xx_P}{a^2} \\pm \\dfrac{yy_P}{b^2} = 1$',
+            condition: 'forme dédoublée — ellipse (+), hyperbole (−)',
+          },
+          { text: '$yy_P=p(x+x_P)$', condition: 'tangente à la parabole $y^2=2px$ en $P$' },
+          {
+            text: "$PF$ et $PF'$ font des angles égaux avec la tangente en $P$",
+            condition: "propriété optique de l'ellipse/hyperbole — rayon issu d'un foyer passe par l'autre",
+          },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Notion', 'Point clé'],

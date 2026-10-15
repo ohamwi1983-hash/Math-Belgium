@@ -967,6 +967,51 @@ export const suites: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Suite arithmétique',
+        formulas: [
+          { text: '$u_n = u_1 + (n-1)r$' },
+          { text: '$S_n = \\dfrac{n(u_1+u_n)}{2}$' },
+          { text: '$u_n = \\dfrac{u_{n-1}+u_{n+1}}{2}$', condition: 'moyenne arithmétique — pour $n \\ge 2$' },
+        ],
+      },
+      {
+        title: 'Suite géométrique',
+        formulas: [
+          { text: '$u_n = u_1 \\times q^{n-1}$' },
+          { text: '$S_n = u_1 \\times \\dfrac{1-q^n}{1-q}$', condition: '$q \\neq 1$' },
+          { text: '$u_n = \\sqrt{u_{n-1} \\times u_{n+1}}$', condition: 'moyenne géométrique — pour $n \\ge 2$' },
+        ],
+      },
+      {
+        title: 'Limites (arithmétique et géométrique)',
+        formulas: [
+          { text: '$r>0 \\Rightarrow \\lim u_n = +\\infty$', condition: '$r<0$ donne $-\\infty$, $r=0$ donne $u_1$' },
+          { text: '$|q|<1 \\Rightarrow \\lim u_n = 0$' },
+          { text: '$q>1 \\Rightarrow \\lim u_n = \\pm\\infty$', condition: 'signe de $u_1$' },
+          { text: "$q \\le -1$ — la limite n'existe pas", condition: "oscille, ne diverge jamais vers l'infini" },
+        ],
+      },
+      {
+        title: 'Suite quelconque P(n)/Q(n)',
+        formulas: [
+          { text: 'degré(P) < degré(Q) $\\Rightarrow \\lim u_n = 0$' },
+          { text: 'degré(P) = degré(Q) → limite = rapport des coefficients dominants' },
+          { text: 'degré(P) > degré(Q) $\\Rightarrow \\lim u_n = \\pm\\infty$' },
+        ],
+      },
+      {
+        title: 'Suite récurrente affine',
+        formulas: [
+          { text: '$u_{n+1} = a \\times u_n + b$' },
+          { text: '$L = \\dfrac{b}{1-a}$', condition: 'régime permanent — seulement si $|a|<1$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Suite arithmétique** — $u_n = u_1 + (n-1)r$. Croissante si $r>0$, décroissante si ' +

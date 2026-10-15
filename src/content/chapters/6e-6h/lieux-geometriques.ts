@@ -1507,6 +1507,68 @@ export const lieuxGeometriques: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Droites',
+        formulas: [
+          { text: '$ax+by+c=0$', condition: 'forme implicite — jamais $y=mx+p$' },
+          { text: '$m = -a/b$', condition: 'pente, si $b\\neq0$' },
+          { text: '$a_1b_2-a_2b_1=0$', condition: 'parallèles — ou $m_1=m_2$' },
+          { text: '$a_1a_2+b_1b_2=0$', condition: 'perpendiculaires — ou $m_1 \\cdot m_2=-1$' },
+          { text: '$dist(P;d) = \\dfrac{|ax_P+by_P+c|}{\\sqrt{a^2+b^2}}$' },
+        ],
+      },
+      {
+        title: 'Points remarquables du triangle',
+        formulas: [
+          { text: "$A = B'+C'-A'$", condition: 'sommet retrouvé à partir des 3 milieux (et permutations)' },
+          { text: '$\\dfrac{AI}{IC} = \\dfrac{AB}{BC}$', condition: "bissectrice issue de B, coupant $[AC]$ en I" },
+          { text: '$I = \\dfrac{BC\\times A + AB\\times C}{AB+BC}$' },
+          { text: "$Q = 2H-P$", condition: "symétrique de P par rapport à une droite, H = pied de la perpendiculaire" },
+          { text: 'incentre $= \\dfrac{aA+bB+cC}{a+b+c}$', condition: 'a, b, c = côtés opposés aux sommets A, B, C' },
+          {
+            text: '$|K+Mt| = 2k \\iff K+Mt=2k$ ou $K+Mt=-2k$',
+            condition: "aire variable, un sommet parcourant une droite — toujours 2 solutions",
+          },
+        ],
+      },
+      {
+        title: 'Cercles',
+        formulas: [
+          { text: '$x^2+y^2+Dx+Ey+F=0$', condition: 'forme générale' },
+          { text: 'centre $=\\left(-\\dfrac{D}{2};-\\dfrac{E}{2}\\right) \\quad$ rayon $=\\sqrt{\\dfrac{D^2}{4}+\\dfrac{E^2}{4}-F}$' },
+          {
+            text: '$PT = \\sqrt{OP^2-r^2}$',
+            condition: "longueur d'une tangente depuis P extérieur au cercle de centre O, rayon r",
+          },
+        ],
+      },
+      {
+        title: 'Lieux à seuil et valeur absolue',
+        formulas: [
+          { text: '$|x-p|+|y-q|=k$', condition: 'losange de sommets $(p\\pm k;q)$ et $(p;q\\pm k)$' },
+          { text: '$|x-p|-|y-q|=k$', condition: '4 demi-droites — lieu non borné' },
+          {
+            text: '$PA^2+PB^2 = 2\\,PM^2+\\dfrac{AB^2}{2}$',
+            condition: 'M = milieu de $[AB]$ — seuil $AB^2/2$ : cercle, point, ou vide',
+          },
+          { text: '$PA^2 = k\\cdot PB^2$', condition: "cercle d'Apollonius si $k\\neq1$, médiatrice de $[AB]$ si $k=1$" },
+        ],
+      },
+      {
+        title: 'Lieu paramétrique',
+        formulas: [
+          {
+            text: '$x=f(t), \\ y=g(t)$',
+            condition: "élimine t grâce à une identité entre f et g (ex. $\\cos^2t+\\sin^2t=1$)",
+          },
+          { text: '$x^{2/3}+y^{2/3}=1$', condition: "astroïde — issue de $x=\\cos^3\\lambda,\\ y=\\sin^3\\lambda$" },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Notion', 'Point clé'],

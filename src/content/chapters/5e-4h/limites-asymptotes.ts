@@ -965,6 +965,52 @@ export const limitesAsymptotes: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Limites de référence',
+        formulas: [
+          { text: '$\\lim_{x\\to+\\infty} x^n = +\\infty$', condition: 'en −∞ : +∞ si n pair, −∞ si n impair' },
+          { text: '$\\lim_{x\\to\\pm\\infty} 1/x = 0$' },
+          { text: '$\\lim_{x\\to 0^+} 1/x = +\\infty \\quad \\lim_{x\\to 0^-} 1/x = -\\infty$' },
+        ],
+      },
+      {
+        title: 'Formes indéterminées',
+        formulas: [
+          { text: '0/0 — factoriser le facteur commun, puis simplifier' },
+          { text: '∞/∞ — mettre en évidence le terme de plus haut degré, au numérateur et au dénominateur' },
+          { text: '∞−∞ — terme dominant (polynômes) ou expression conjuguée (racines)' },
+        ],
+      },
+      {
+        title: 'Définir une asymptote',
+        formulas: [
+          { text: 'AV : $x=a$', condition: '$\\lim_{x\\to a^-} f(x)=\\pm\\infty$ ou $\\lim_{x\\to a^+} f(x)=\\pm\\infty$' },
+          { text: 'AH : $y=b$', condition: '$\\lim_{x\\to\\pm\\infty} f(x)=b$' },
+          { text: 'AO : $y=ax+b$', condition: '$\\lim_{x\\to\\pm\\infty} [f(x)-(ax+b)]=0$' },
+        ],
+      },
+      {
+        title: 'Asymptote oblique — calcul de a et b',
+        formulas: [
+          { text: '$a = \\lim_{x\\to\\pm\\infty} \\dfrac{f(x)}{x}$' },
+          { text: '$b = \\lim_{x\\to\\pm\\infty} [f(x)-ax]$' },
+          { text: "le reste de la division euclidienne ne fait jamais partie de l'asymptote" },
+        ],
+      },
+      {
+        title: 'Degré ↔ asymptote (N/D rationnelle)',
+        formulas: [
+          { text: 'deg(N) < deg(D)', condition: '$y=0$' },
+          { text: 'deg(N) = deg(D)', condition: 'AH, $b$ = rapport des coefficients dominants' },
+          { text: 'deg(N) = deg(D)+1', condition: 'asymptote oblique' },
+          { text: 'deg(N) ≥ deg(D)+2', condition: 'aucune asymptote de cette forme' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Limites et formes indéterminées** — 0/0 se lève par factorisation et simplification ' +

@@ -946,6 +946,105 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Cercle trigonométrique',
+        formulas: [
+          { text: '$M(\\theta)=(\\cos\\theta\\,;\\,\\sin\\theta)$', condition: 'cercle de rayon 1' },
+          {
+            text:
+              'quadrant I : $\\theta$ — quadrant II : $180°-\\theta$ — quadrant III : ' +
+              '$\\theta-180°$ — quadrant IV : $360°-\\theta$',
+            condition: 'angle du premier quadrant',
+          },
+          {
+            text: 'I : $(+,+,+)$ — II : $(+,-,-)$ — III : $(-,-,+)$ — IV : $(-,+,-)$',
+            condition: 'signes de $(\\sin\\theta,\\cos\\theta,\\tan\\theta)$ par quadrant',
+          },
+        ],
+      },
+      {
+        title: 'Identité fondamentale & tangente',
+        formulas: [
+          { text: '$\\cos^2\\theta + \\sin^2\\theta = 1$' },
+          { text: '$\\tan\\theta = \\dfrac{\\sin\\theta}{\\cos\\theta}$' },
+        ],
+      },
+      {
+        title: 'Valeurs remarquables',
+        formulas: [
+          {
+            text:
+              '$\\sin 0°=0,\\ \\sin 30°=\\tfrac12,\\ \\sin 45°=\\tfrac{\\sqrt2}{2},\\ ' +
+              '\\sin 60°=\\tfrac{\\sqrt3}{2},\\ \\sin 90°=1$',
+          },
+          { text: '$\\cos\\theta$ : mêmes 5 valeurs, dans l\'ordre inverse' },
+          {
+            text: '$\\tan 30°=\\tfrac{\\sqrt3}{3},\\ \\tan 45°=1,\\ \\tan 60°=\\sqrt3$',
+            condition: '$\\tan 90°$ indéfinie',
+          },
+        ],
+      },
+      {
+        title: 'Angles associés',
+        formulas: [
+          {
+            text: '$\\sin(90°-\\theta)=\\cos\\theta,\\ \\cos(90°-\\theta)=\\sin\\theta$',
+            condition: 'complémentaire',
+          },
+          {
+            text: '$\\sin(180°-\\theta)=\\sin\\theta,\\ \\cos(180°-\\theta)=-\\cos\\theta$',
+            condition: 'supplémentaire',
+          },
+          {
+            text: '$\\sin(180°+\\theta)=-\\sin\\theta,\\ \\cos(180°+\\theta)=-\\cos\\theta$',
+            condition: 'anti-supplémentaire',
+          },
+          {
+            text: '$\\sin(-\\theta)=-\\sin\\theta,\\ \\cos(-\\theta)=\\cos\\theta$',
+            condition: 'opposé',
+          },
+        ],
+      },
+      {
+        title: 'Équations trigonométriques',
+        formulas: [
+          {
+            text: '$\\sin\\alpha=k$',
+            condition:
+              'solutions $\\alpha_0$ et $180°-\\alpha_0$ si $k>0$ — $180°+\\alpha_0$ et ' +
+              '$360°-\\alpha_0$ si $k<0$',
+          },
+          {
+            text: '$\\cos\\alpha=k$',
+            condition:
+              'solutions $\\alpha_0$ et $360°-\\alpha_0$ si $k>0$ — $180°-\\alpha_0$ et ' +
+              '$180°+\\alpha_0$ si $k<0$',
+          },
+          {
+            text: '$\\tan\\alpha=k$',
+            condition: 'solutions $\\alpha_0$ et $\\alpha_0+180°$, toujours',
+          },
+        ],
+      },
+      {
+        title: 'Triangle quelconque',
+        formulas: [
+          {
+            text: '$\\dfrac{a}{\\sin\\hat A}=\\dfrac{b}{\\sin\\hat B}=\\dfrac{c}{\\sin\\hat C}$',
+            condition: 'loi des sinus — AAS ou SSA',
+          },
+          {
+            text: '$a^2=b^2+c^2-2bc\\cos\\hat A$',
+            condition: 'loi des cosinus (Al-Kashi) — SAS ou SSS',
+          },
+          { text: '$\\text{Aire}=\\dfrac12\\,bc\\sin\\hat A$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Cercle trigonométrique** — M(θ) = (cos θ ; sin θ), rayon 1. Le quadrant donne le ' +

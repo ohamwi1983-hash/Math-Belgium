@@ -949,6 +949,67 @@ export const probabilites: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Probabilités et ensembles',
+        formulas: [
+          { text: '$0 \\le P(A) \\le 1$' },
+          {
+            text: '(cas favorables) / (cas possibles)',
+            condition: 'seulement en équiprobabilité',
+          },
+          { text: '$P(\\bar{A}) = 1-P(A)$' },
+          { text: '$P(A \\cup B) = P(A)+P(B)-P(A \\cap B)$' },
+          {
+            text: '$P(\\bar{A} \\cap \\bar{B}) = 1-P(A \\cup B)$',
+            condition: 'jamais $1-P(A)-P(B)$',
+          },
+        ],
+      },
+      {
+        title: 'Arbres, chemins et dénombrement',
+        formulas: [
+          { text: 'probabilité d\'un chemin = produit des probabilités des branches' },
+          { text: 'probabilité d\'un événement = somme des probabilités de ses chemins' },
+          { text: '$n! = n \\times (n-1) \\times \\ldots \\times 1$' },
+          { text: '$D(n) \\neq n!$', condition: 'dérangement — aucun objet à sa place' },
+        ],
+      },
+      {
+        title: 'Conditionnement et indépendance',
+        formulas: [
+          { text: '$P(A|B) = \\dfrac{P(A \\cap B)}{P(B)}$' },
+          {
+            text: '$P(A \\cap B) = P(A) \\times P(B)$',
+            condition: '$A$, $B$ indépendants',
+          },
+          { text: 'incompatible ($P(A \\cap B)=0$) ⇒ jamais indépendant' },
+        ],
+      },
+      {
+        title: 'Probabilités totales et Bayes',
+        formulas: [
+          {
+            text: '$P(A) = \\displaystyle\\sum_i P(A|B_i) \\times P(B_i)$',
+            condition: 'sur une partition de $\\Omega$',
+          },
+          { text: '$P(A|B) = \\dfrac{P(B|A) \\times P(A)}{P(B)}$' },
+        ],
+      },
+      {
+        title: 'Épreuves répétées (loi binomiale)',
+        formulas: [
+          {
+            text: '$P(X=k) = N_k \\times p^k(1-p)^{n-k}$',
+            condition: '$N_k$ = nombre de chemins à $k$ succès',
+          },
+          { text: '$P(\\text{au moins 1 succès}) = 1-(1-p)^n$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     table: {
       headers: ['Notion', 'Point clé'],
