@@ -89,7 +89,7 @@ function etatActuelA(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): s
 function aideNiveau1A(phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "aEcran1") return { texte: "Rappel : la 2e personne doit éviter 1 jour déjà pris par la 1re, la 3e doit en éviter 2 (ceux des 2 premières), etc.", latex: null };
   if (phase === "aEcran2") return { texte: "Multiplie simplement les facteurs entre eux.", latex: null };
-  return { texte: "Rappel : P(au moins un cas contraire) = 1 − P(aucun cas, càd tous différents).", latex: null };
+  return { texte: "Rappel : P(au moins un cas contraire) = 1 − P(aucun cas, càd tous différents).", latex: "P(\\text{au moins un cas contraire})=1-P(\\text{aucun cas})" };
 }
 function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "aEcran1") return { texte: "Les deux premiers facteurs (les suivants suivent le même principe) :", latex: `\\dfrac{364}{365}\\quad\\dfrac{363}{365}` };
@@ -131,9 +131,9 @@ function etatActuelB(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): s
   return [...formule, `P(\\text{exactement }${ex.k}\\text{ succès})=${formatDecimalVirgule(probExactementKBinomiale(ex.n, ex.p, ex.k))}`];
 }
 function aideNiveau1B(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Rappel : il existe PLUSIEURS façons d'obtenir exactement k succès parmi n épreuves — le coefficient binomial C(n,k) compte ces façons. L'oublier revient à ne compter qu'UNE seule configuration.", latex: null };
+  if (phase === "bEcran1") return { texte: "Rappel : il existe PLUSIEURS façons d'obtenir exactement k succès parmi n épreuves — le coefficient binomial C(n,k) compte ces façons. L'oublier revient à ne compter qu'UNE seule configuration.", latex: "C(n,k)" };
   if (phase === "bEcran2") return { texte: "Remplace n, k, p par leurs valeurs dans la formule ci-dessus (état actuel), puis calcule.", latex: null };
-  return { texte: "Une somme de plusieurs termes P(exactement i succès), ou un complément à 1, selon ce qui est le plus rapide à calculer.", latex: null };
+  return { texte: "Une somme de plusieurs termes P(exactement i succès), ou un complément à 1, selon ce qui est le plus rapide à calculer.", latex: "P(\\text{exactement }i\\text{ succès})" };
 }
 function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "bEcran1") return { texte: "La formule complète (coefficient à calculer toi-même) :", latex: "C(n,k)\\cdot p^{k}\\cdot(1-p)^{n-k}" };
@@ -220,7 +220,7 @@ function etatActuelD(ex: ExerciceFamilleD, phase: PhaseProbabilitesProblemes): s
   return [0, 1, 2].map((z) => `\\text{${ex.contexte.labelZones[z]}}=${coeffAireZone(ex.r, z)}\\pi`);
 }
 function aideNiveau1D(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "Aire d'un disque de rayon r : πr². Aire d'un anneau : aire du grand disque MOINS aire du petit disque.", latex: null };
+  if (phase === "dEcran1") return { texte: "Aire d'un disque de rayon r : πr². Aire d'un anneau : aire du grand disque MOINS aire du petit disque.", latex: "\\pi r^{2}" };
   return { texte: "Probabilité = aire de la zone concernée / aire totale (le plus grand disque).", latex: null };
 }
 function aideNiveau2D(ex: ExerciceFamilleD, phase: PhaseProbabilitesProblemes): AideAvecLatex {
@@ -287,12 +287,12 @@ function etatActuelEMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesPro
   return [...depart, ...arbre];
 }
 function aideNiveau1EMixte(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eMixteEcran1") return { texte: "P(c₁) est une proportion GLOBALE (sur tous les cas). P(E|c₁) et P(E|c₂) sont des proportions LIMITÉES à un sous-groupe (« si on se limite à... »).", latex: null };
-  if (phase === "eMixteEcran2") return { texte: "Chaque branche finale = P(cause) × P(effet ou son contraire | cette cause).", latex: null };
+  if (phase === "eMixteEcran1") return { texte: "P(c₁) est une proportion GLOBALE (sur tous les cas). P(E|c₁) et P(E|c₂) sont des proportions LIMITÉES à un sous-groupe (« si on se limite à... »).", latex: "P(c_1)\\quad P(E|c_1)\\quad P(E|c_2)" };
+  if (phase === "eMixteEcran2") return { texte: "Chaque branche finale = P(cause) × P(effet ou son contraire | cette cause).", latex: "P(\\text{cause})\\cdot P(\\text{effet ou son contraire}\\mid\\text{cette cause})" };
   return { texte: "Rappel de la formule de Bayes :", latex: "P(\\text{cause}|\\text{effet})=\\dfrac{P(\\text{effet}|\\text{cause})\\cdot P(\\text{cause})}{P(\\text{effet})}" };
 }
 function aideNiveau2EMixte(ex: ExerciceFamilleEMixte, phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eMixteEcran1") return { texte: "L'information globale (sans condition) correspond toujours à P(c₁) — identifie-la en premier.", latex: null };
+  if (phase === "eMixteEcran1") return { texte: "L'information globale (sans condition) correspond toujours à P(c₁) — identifie-la en premier.", latex: "P(c_1)" };
   if (phase === "eMixteEcran2") return { texte: "Une branche complète (les 3 autres suivent le même principe) :", latex: `P(c_1\\cap E)=${formatDecimalCourt(ex.base.p)}\\times ${formatDecimalCourt(ex.base.q1)}` };
   const [b1, b2] = branchesArbreC(ex.base);
   const pEffet = probabiliteEffetC(ex.base);
@@ -334,9 +334,9 @@ function etatActuelEParam(ex: ExerciceFamilleEParametrique, phase: PhaseProbabil
   return [...expressions, `P(x)=\\dfrac{${ex.a}x}{${ex.a}x+${ex.b}(1-x)}`];
 }
 function aideNiveau1EParam(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "eParamEcran1") return { texte: "P(malade)=x, P(test+|malade)=a, P(test+|non malade)=b (a,b donnés). Utilise la formule des probabilités totales pour P(test+).", latex: null };
+  if (phase === "eParamEcran1") return { texte: "P(malade)=x, P(test+|malade)=a, P(test+|non malade)=b (a,b donnés). Utilise la formule des probabilités totales pour P(test+).", latex: "P(\\text{malade})=x,\\ P(\\text{test}+\\mid\\text{malade})=a,\\ P(\\text{test}+\\mid\\text{non malade})=b" };
   if (phase === "eParamEcran2") return { texte: "Rappel de la formule de Bayes appliquée avec x symbolique à la place d'une valeur numérique :", latex: "P(x)=\\dfrac{P(\\text{malade}\\cap\\text{test}+)}{P(\\text{test}+)}" };
-  return { texte: "Multiplie les deux membres par le dénominateur (toujours positif sur ]0;1[), puis isole x.", latex: null };
+  return { texte: "Multiplie les deux membres par le dénominateur (toujours positif sur ]0;1[), puis isole x.", latex: "x\\in\\,]0;1[" };
 }
 function aideNiveau2EParam(ex: ExerciceFamilleEParametrique, phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "eParamEcran1") return { texte: "Deuxième expression, structure donnée (calcul non fait) :", latex: `${ex.a}\\cdot x+${ex.b}\\cdot(1-x)` };
@@ -402,7 +402,7 @@ function etatActuelF(ex: ExerciceFamilleF, phase: PhaseProbabilitesProblemes): s
   return [...formule, `\\text{Fiabilité}=${formatDecimalVirgule(valeurConfigurationF(ex.p, ex.configuration, ex.positionMixte))}`];
 }
 function aideNiveau1F(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "Série : produit des probabilités. Parallèle : 1 moins le produit des probabilités de PANNE (1−pᵢ).", latex: null };
+  if (phase === "fEcran1") return { texte: "Série : produit des probabilités. Parallèle : 1 moins le produit des probabilités de PANNE (1−pᵢ).", latex: "1-p_i" };
   if (phase === "fEcran2") return { texte: "Remplace chaque probabilité par sa valeur dans la formule ci-dessus (état actuel), puis calcule.", latex: null };
   return { texte: "Recalcule la fiabilité correcte, compare-la à la valeur affirmée.", latex: null };
 }
@@ -437,13 +437,13 @@ function champsGDerang(phase: PhaseProbabilitesProblemes): ChampDef[] {
   return [{ label: labels[phase] ?? "Probabilité =", placeholder: `ex : 0,25 ${ANNONCE_TOLERANCE}` }];
 }
 function aideNiveau1GDerang(phase: PhaseProbabilitesProblemes): AideAvecLatex {
-  if (phase === "gDerangEcran1") return { texte: "P(une position fixée) = 1/n. P(deux positions fixées) = (n-2)!/n!.", latex: null };
-  if (phase === "gDerangEcran2") return { texte: "Un seul arrangement, parmi n!, est entièrement correct.", latex: null };
-  if (phase === "gDerangEcran3") return { texte: "Choisis quelles k positions sont correctes (C(n,k) façons), PUIS les n-k positions restantes doivent former un dérangement complet.", latex: null };
-  return { texte: "Utilise directement la table des dérangements D(n).", latex: null };
+  if (phase === "gDerangEcran1") return { texte: "P(une position fixée) = 1/n. P(deux positions fixées) = (n-2)!/n!.", latex: "P(\\text{une position fixée})=\\dfrac{1}{n}\\qquad P(\\text{deux positions fixées})=\\dfrac{(n-2)!}{n!}" };
+  if (phase === "gDerangEcran2") return { texte: "Un seul arrangement, parmi n!, est entièrement correct.", latex: "n!" };
+  if (phase === "gDerangEcran3") return { texte: "Choisis quelles k positions sont correctes (C(n,k) façons), PUIS les n-k positions restantes doivent former un dérangement complet.", latex: "C(n,k)" };
+  return { texte: "Utilise directement la table des dérangements D(n).", latex: "D(n)" };
 }
 function aideNiveau2GDerang(): AideAvecLatex {
-  return { texte: "Table des dérangements : D(0)=1, D(1)=0, D(2)=1, D(3)=2, D(4)=9.", latex: null };
+  return { texte: "Table des dérangements : D(0)=1, D(1)=0, D(2)=1, D(3)=2, D(4)=9.", latex: "D(0)=1,\\ D(1)=0,\\ D(2)=1,\\ D(3)=2,\\ D(4)=9" };
 }
 
 function factorielleGDerang(n: number): number {
@@ -502,7 +502,7 @@ function aideNiveau1GMelange(phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "gMelangeEcran1") return { texte: "La somme des probabilités des 6 faces d'un dé vaut toujours 1.", latex: null };
   if (phase === "gMelangeEcran2") return { texte: "Isole p dans l'équation de l'étape précédente.", latex: null };
   if (phase === "gMelangeEcran3") return { texte: "Deux faces distinctes : additionne simplement leurs probabilités.", latex: null };
-  return { texte: "Probabilité totale = poids×P(objet1) + (1−poids)×P(objet2).", latex: null };
+  return { texte: "Probabilité totale = poids×P(objet1) + (1−poids)×P(objet2).", latex: "\\text{poids}\\times P(\\text{objet1})+(1-\\text{poids})\\times P(\\text{objet2})" };
 }
 function aideNiveau2GMelange(ex: ExerciceFamilleGMelange, phase: PhaseProbabilitesProblemes): AideAvecLatex {
   if (phase === "gMelangeEcran1") return { texte: "Équation attendue :", latex: "5p+a=1" };

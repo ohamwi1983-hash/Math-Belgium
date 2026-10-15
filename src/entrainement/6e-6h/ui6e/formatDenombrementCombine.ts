@@ -105,7 +105,7 @@ export function niveauAideMaxA(phase: PhaseDenombrementCombine): number {
 }
 
 export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Répartir n objets en groupes de tailles fixées (sans ordre à l'intérieur de chaque groupe) suit la formule multinomiale : n! divisé par le produit des factorielles de chaque taille.", latex: null };
+  return { texte: "Répartir n objets en groupes de tailles fixées (sans ordre à l'intérieur de chaque groupe) suit la formule multinomiale : n! divisé par le produit des factorielles de chaque taille.", latex: "\\dfrac{n!}{k_1!\\,k_2!\\,\\cdots\\,k_m!}" };
 }
 
 export function aideNiveau2A(e: ExerciceDenombCombA): AideAvecLatex {
@@ -254,7 +254,7 @@ export function niveauAideMaxC(phase: PhaseDenombrementCombine): number {
 export function aideNiveau1C(e: ExerciceDenombCombC, phase: PhaseDenombrementCombine): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
   if (e.sousType === "repetition") {
-    return { texte: "Choisir 2 valeurs avec répétition et sans ordre revient à choisir 2 éléments parmi n+1 (bijection classique), ou à séparer le cas des 2 valeurs identiques (n façons) de celui de 2 valeurs distinctes.", latex: null };
+    return { texte: "Choisir 2 valeurs avec répétition et sans ordre revient à choisir 2 éléments parmi n+1 (bijection classique), ou à séparer le cas des 2 valeurs identiques (n façons) de celui de 2 valeurs distinctes.", latex: "C_{n+1}^{2}" };
   }
   return { texte: "2 objets de couleurs différentes peuvent être distingués (discernables) ; 2 objets identiques, une fois le résultat obtenu, ne peuvent plus être distingués l'un de l'autre (indiscernables).", latex: null };
 }

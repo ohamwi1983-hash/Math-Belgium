@@ -352,7 +352,7 @@ export function aideNiveau2B(e: ExerciceLieuxB, phase: PhaseLieuxGeometriquesPar
     case "seuilCarre":
       return { texte: "Valeur du seuil déjà calculée (comparaison à k non faite) :", latex: `${e.seuil}` };
     case "apollonius":
-      return { texte: "Rappel : k=1 correspond exactement au cas où PA²=PB² (mêmes coefficients quadratiques que pour une droite) — comparaison à la valeur réelle de k non encore faite.", latex: null };
+      return { texte: "Rappel : k=1 correspond exactement au cas où PA²=PB² (mêmes coefficients quadratiques que pour une droite) — comparaison à la valeur réelle de k non encore faite.", latex: "k=1\\quad\\Leftrightarrow\\quad PA^{2}=PB^{2}" };
     default:
       return AUCUNE_AIDE;
   }
@@ -533,7 +533,7 @@ export function niveauAideMaxE(e: ExerciceLieuxE, phase: PhaseLieuxGeometriquesP
   return 0;
 }
 export function aideNiveau1E(phase: PhaseLieuxGeometriquesParametres): AideAvecLatex {
-  if (phase.endsWith("Ecran1")) return { texte: "Seules les configurations où les 2 références sont OPPOSÉES avec un écart minimal incompressible (parallèles, côtés opposés d'un carré) exigent un raisonnement par seuil ; les configurations CONCOURANTES (perpendiculaires, sécantes) donnent toujours une forme bien définie, quel que soit k>0.", latex: null };
+  if (phase.endsWith("Ecran1")) return { texte: "Seules les configurations où les 2 références sont OPPOSÉES avec un écart minimal incompressible (parallèles, côtés opposés d'un carré) exigent un raisonnement par seuil ; les configurations CONCOURANTES (perpendiculaires, sécantes) donnent toujours une forme bien définie, quel que soit k>0.", latex: "k>0" };
   return { texte: "Le seuil correspond à la valeur MINIMALE géométriquement atteignable de la somme (distance entre les 2 droites parallèles, ou côté du carré).", latex: null };
 }
 export function aideNiveau2E(e: ExerciceLieuxE, phase: PhaseLieuxGeometriquesParametres): AideAvecLatex {

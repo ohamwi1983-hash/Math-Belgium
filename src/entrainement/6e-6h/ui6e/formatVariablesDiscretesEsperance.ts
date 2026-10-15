@@ -318,7 +318,7 @@ export function niveauAideMaxC(phase: PhaseVariablesDiscretesEsperance): number 
 }
 
 export function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Rappel : E>0 signifie que le jeu est favorable au joueur, E<0 défavorable, E=0 équitable.", latex: null };
+  return { texte: "Rappel : E>0 signifie que le jeu est favorable au joueur, E<0 défavorable, E=0 équitable.", latex: "E>0\\quad E<0\\quad E=0" };
 }
 
 export function aideNiveau2C(e: ExerciceEsperanceC): AideAvecLatex {

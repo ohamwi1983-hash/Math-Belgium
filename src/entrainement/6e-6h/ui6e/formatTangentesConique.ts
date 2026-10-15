@@ -294,7 +294,7 @@ function aideB(e: ExerciceTangenteB, phase: PhaseTangentesConique, niveau: 1 | 2
   if (phase !== "bEcran3") return AUCUNE_AIDE;
   if (niveau === 1) return { texte: "Un discriminant négatif à cette étape signifie qu'AUCUNE tangente de la pente demandée n'existe pour cette conique — c'est une conclusion géométrique parfaitement légitime, pas un signe d'erreur.", latex: null };
   const D = discriminantParalleles(e.conique, e.m);
-  return { texte: `Le discriminant (k²) vaut ${formaterDecimal(D)}, qui est ${D > 0 ? "strictement positif" : "négatif ou nul"}. À toi de formuler la conclusion.`, latex: null };
+  return { texte: `Le discriminant (k²) vaut ${formaterDecimal(D)}, qui est ${D > 0 ? "strictement positif" : "négatif ou nul"}. À toi de formuler la conclusion.`, latex: `k^{2}=${formaterDecimal(D)}` };
 }
 
 // ============================================================================
@@ -470,7 +470,7 @@ function champsEcranE(phase: PhaseTangentesConique): ChampDef[] {
 function aideE(e: ExerciceTangenteE, phase: PhaseTangentesConique, niveau: 1 | 2): AideAvecLatex {
   if (phase !== "eEcran3") return AUCUNE_AIDE;
   if (niveau === 1) return { texte: "Le point le plus proche est celui dont la distance à la droite est la plus petite des deux — compare directement les 2 valeurs trouvées à l'étape précédente.", latex: null };
-  return { texte: `Rappel des 2 distances trouvées : ${formaterDecimal(e.distances[0])} et ${formaterDecimal(e.distances[1])}. La comparaison reste à faire.`, latex: null };
+  return { texte: `Rappel des 2 distances trouvées : ${formaterDecimal(e.distances[0])} et ${formaterDecimal(e.distances[1])}. La comparaison reste à faire.`, latex: `d_1=${formaterDecimal(e.distances[0])}\\quad d_2=${formaterDecimal(e.distances[1])}` };
 }
 
 // ============================================================================

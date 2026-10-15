@@ -194,8 +194,8 @@ export function champsA(exercice: ExerciceFamilleA, phase: PhaseCalculPrimitives
   return [{ label: "Forme réécrite =", placeholder: exercice.sousType === "diviserProduit" ? "ex : 2x^1.5" : "ex : 3x+2/x" }];
 }
 export function aideNiveau1A(_exercice: ExerciceFamilleA, phase: PhaseCalculPrimitives): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: "Divise séparément chaque terme du numérateur par le dénominateur (règle des exposants xᵃ/xᵇ=xᵃ⁻ᵇ).", latex: null };
-  return { texte: "Rappel des primitives immédiates : xⁿ → xⁿ⁺¹/(n+1) ; 1/x → ln|x| ; eˣ → eˣ ; cos(x) → sin(x).", latex: null };
+  if (phase === "aEcran1") return { texte: "Divise séparément chaque terme du numérateur par le dénominateur (règle des exposants xᵃ/xᵇ=xᵃ⁻ᵇ).", latex: "\\dfrac{x^a}{x^b}=x^{a-b}" };
+  return { texte: "Rappel des primitives immédiates : xⁿ → xⁿ⁺¹/(n+1) ; 1/x → ln|x| ; eˣ → eˣ ; cos(x) → sin(x).", latex: "x^n\\to\\dfrac{x^{n+1}}{n+1}\\text{ ; }\\dfrac{1}{x}\\to\\ln|x|\\text{ ; }e^x\\to e^x\\text{ ; }\\cos(x)\\to\\sin(x)" };
 }
 export function aideNiveau2A(exercice: ExerciceFamilleA, phase: PhaseCalculPrimitives): AideAvecLatex {
   if (phase === "aEcran1" && exercice.sousType === "diviserFraction") {
@@ -298,9 +298,9 @@ export function aideNiveau1B(phase: PhaseCalculPrimitives): AideAvecLatex {
 }
 export function aideNiveau2B(exercice: ExerciceFamilleB, phase: PhaseCalculPrimitives): AideAvecLatex {
   if (phase === "bEcran2") {
-    return { texte: `Coefficient affiché : ${exercice.k}. u'(x) calculé : ${exercice.mCoef}${exercice.expPart > 0 ? `x^{${exercice.expPart}}` : ""}. Quel est leur rapport ?`, latex: null };
+    return { texte: `Coefficient affiché : ${exercice.k}. u'(x) calculé : ${exercice.mCoef}${exercice.expPart > 0 ? `x^{${exercice.expPart}}` : ""}. Quel est leur rapport ?`, latex: `k=${exercice.k}\\text{, }u'(x)=${exercice.mCoef}${exercice.expPart > 0 ? `x^{${exercice.expPart}}` : ""}` };
   }
-  return { texte: "Rappel : ∫k·x^p·g(u(x))dx = facteur·G(u(x)) où G est la primitive de g.", latex: null };
+  return { texte: "Rappel : ∫k·x^p·g(u(x))dx = facteur·G(u(x)) où G est la primitive de g.", latex: "\\int k\\cdot x^p\\cdot g(u(x))\\,dx=\\text{facteur}\\cdot G(u(x))" };
 }
 
 // ============================================================================
@@ -447,9 +447,9 @@ export function champsD(phase: PhaseCalculPrimitives): ChampDef[] {
 export function aideNiveau1D(_exercice: ExerciceFamilleD, phase: PhaseCalculPrimitives): AideAvecLatex {
   if (phase === "dEcranDirect") return { texte: "Deux exponentielles de bases différentes multipliées entre elles peuvent parfois se combiner en une seule.", latex: null };
   if (phase === "dEcran1") return { texte: "u doit être la partie qui se SIMPLIFIE par dérivation (ou qui n'a pas de primitive immédiate, comme ln ou arctan) ; dv est le reste, facile à primitiver.", latex: null };
-  if (phase === "dEcran2") return { texte: "du = u'(x)dx. v s'obtient en primitivant dv (constante nulle).", latex: null };
+  if (phase === "dEcran2") return { texte: "du = u'(x)dx. v s'obtient en primitivant dv (constante nulle).", latex: "du=u'(x)\\,dx" };
   if (phase === "dEcran3") return { texte: "uv est simplement le produit de u et v ; la nouvelle intégrale est v·du (sans le signe −, qui apparaît devant l'intégrale entière).", latex: null };
-  return { texte: "Si le polynôme est de degré ≥2, une 2e IBP peut être nécessaire. Si l'intégrale de départ réapparaît (cas cyclique), pose une équation I=…−k·I et résous pour I.", latex: null };
+  return { texte: "Si le polynôme est de degré ≥2, une 2e IBP peut être nécessaire. Si l'intégrale de départ réapparaît (cas cyclique), pose une équation I=…−k·I et résous pour I.", latex: "I=\\ldots-k\\cdot I" };
 }
 export function aideNiveau2D(exercice: ExerciceFamilleD, phase: PhaseCalculPrimitives): AideAvecLatex {
   if (phase === "dEcran4" && exercice.sousType === "4") {
@@ -501,10 +501,10 @@ export function champsE(phase: PhaseCalculPrimitives): ChampDef[] {
   return [{ label: "F(x) =", placeholder: "ex : arcsin(x/a)" }];
 }
 export function aideNiveau1E(phase: PhaseCalculPrimitives): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "√(a²−x²) → substitution x=a·sinθ ; √(a²+x²) ou (a²+x²) au dénominateur → substitution x=a·tanθ.", latex: null };
-  if (phase === "eEcran2") return { texte: "Utilise 1−sin²θ=cos²θ (substitution sinus) ou 1+tan²θ=1/cos²θ (substitution tangente).", latex: null };
+  if (phase === "eEcran1") return { texte: "√(a²−x²) → substitution x=a·sinθ ; √(a²+x²) ou (a²+x²) au dénominateur → substitution x=a·tanθ.", latex: "\\sqrt{a^2-x^2}\\to x=a\\sin\\theta\\text{ ; }\\sqrt{a^2+x^2}\\to x=a\\tan\\theta" };
+  if (phase === "eEcran2") return { texte: "Utilise 1−sin²θ=cos²θ (substitution sinus) ou 1+tan²θ=1/cos²θ (substitution tangente).", latex: "1-\\sin^2\\theta=\\cos^2\\theta\\text{ ; }1+\\tan^2\\theta=\\dfrac{1}{\\cos^2\\theta}" };
   if (phase === "eEcran3") return { texte: "Multiplie l'expression simplifiée par le dx trouvé à l'étape 1, puis intègre en θ.", latex: null };
-  return { texte: "θ=arcsin(x/a) ou θ=arctan(x/a) selon le cas — un triangle rectangle de référence donne les autres fonctions trigonométriques de θ en fonction de x.", latex: null };
+  return { texte: "θ=arcsin(x/a) ou θ=arctan(x/a) selon le cas — un triangle rectangle de référence donne les autres fonctions trigonométriques de θ en fonction de x.", latex: "\\theta=\\arcsin\\left(\\dfrac{x}{a}\\right)\\text{ ou }\\theta=\\arctan\\left(\\dfrac{x}{a}\\right)" };
 }
 export function aideNiveau2E(_phase: PhaseCalculPrimitives): AideAvecLatex {
   return { texte: "Continue le calcul à partir de l'étape précédente.", latex: null };
@@ -577,7 +577,7 @@ export function champsF(phase: PhaseCalculPrimitives): ChampDef[] {
   return [{ label: "F(x) =", placeholder: "ex : -ln|cos(x)|" }];
 }
 export function aideNiveau1F(exercice: ExerciceFamilleF): AideAvecLatex {
-  return { texte: `Famille d'identités concernée : ${NOM_IDENTITE[exercice.sousType]}.`, latex: null };
+  return { texte: `Famille d'identités concernée : ${NOM_IDENTITE[exercice.sousType]}.`, latex: exercice.sousType === "tan" ? "\\tan(x)=\\dfrac{\\sin(x)}{\\cos(x)}" : null };
 }
 export function aideNiveau2F(exercice: ExerciceFamilleF): AideAvecLatex {
   const amorce: Record<ExerciceFamilleF["sousType"], string> = {
@@ -665,9 +665,9 @@ export function champsG(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives
 }
 export function aideNiveau1G(phase: PhaseCalculPrimitives): AideAvecLatex {
   if (phase === "gEcran1") return { texte: "Effectue la division polynomiale (numérateur ÷ dénominateur) comme une division euclidienne classique.", latex: null };
-  if (phase === "gEcran2") return { texte: "Facteur linéaire distinct → A/(x−r) ; facteur quadratique irréductible → (Ax+B)/(dénominateur).", latex: null };
+  if (phase === "gEcran2") return { texte: "Facteur linéaire distinct → A/(x−r) ; facteur quadratique irréductible → (Ax+B)/(dénominateur).", latex: "\\dfrac{A}{x-r}\\text{ ; }\\dfrac{Ax+B}{\\text{dénominateur}}" };
   if (phase === "gEcran3") return { texte: "Réduis au même dénominateur puis identifie les coefficients (par identification, ou en substituant des valeurs de x bien choisies).", latex: null };
-  return { texte: "Un terme A/(x−r) se primitive en A·ln|x−r| ; un terme quadratique irréductible mène à un arctan.", latex: null };
+  return { texte: "Un terme A/(x−r) se primitive en A·ln|x−r| ; un terme quadratique irréductible mène à un arctan.", latex: "\\dfrac{A}{x-r}\\to A\\ln|x-r|" };
 }
 export function aideNiveau2G(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives): AideAvecLatex {
   if (phase === "gEcran2") {

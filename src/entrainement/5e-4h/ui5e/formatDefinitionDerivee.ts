@@ -196,62 +196,105 @@ export function labelLimite(a: number): string {
 // dénominateur avant de pouvoir factoriser le h.
 // ============================================================================
 
-export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): string {
-  if (ecran === "developper") {
-    switch (exercice.famille) {
-      case "affine":
-        return "f(a+h)=m(a+h)+p=ma+mh+p — développe simplement, aucun terme au carré ici.";
-      case "quadratique":
-        return "f(a+h)=m(a+h)²+p — développe (a+h)²=a²+2ah+h² AVANT de multiplier par m et de distribuer. Piège : oublier le terme croisé 2ah, ou une erreur de signe si m est négatif.";
-      case "rationnelleSimple":
-        return exercice.expo === 1
-          ? "f(a+h)=k/(a+h) — ne développe rien, garde le dénominateur (a+h) tel quel pour l'instant."
-          : "f(a+h)=k/(a+h)² — ne développe rien, garde le dénominateur (a+h)² tel quel pour l'instant.";
-      case "rationnelleLineaire":
-        return "f(a+h)=(m(a+h)+p)/((a+h)-q) — développe seulement le numérateur, garde (a+h-q) au dénominateur.";
-    }
-  }
-  if (ecran === "quotient") {
-    switch (exercice.famille) {
-      case "affine":
-        return "[f(a+h)-f(a)]/h=mh/h=m — le h se simplifie directement, sans reste.";
-      case "quadratique":
-        return "Factorise h au numérateur de f(a+h)-f(a) AVANT de diviser par h — il doit rester 2ma+mh une fois le h du dénominateur simplifié.";
-      case "rationnelleSimple":
-        return "Mets f(a+h)-f(a) au MÊME DÉNOMINATEUR avant de diviser par h — sinon impossible de factoriser le h au numérateur pour le simplifier.";
-      case "rationnelleLineaire":
-        return "Mets f(a+h)-f(a) au MÊME DÉNOMINATEUR (a+h-q)(a-q) avant de diviser par h — le numérateur se réduit alors à un multiple de h, qui s'annule avec le h du dénominateur du quotient.";
-    }
-  }
-  return "Dans le quotient simplifié, il n'y a plus de h au dénominateur — remplace directement h par 0 pour obtenir f'(a).";
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
 }
 
-export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): string {
+export function texteAideNiveau1(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): AideFragmentee {
   if (ecran === "developper") {
     switch (exercice.famille) {
       case "affine":
-        return "Exemple : pour f(x)=2x+3, f(a+h)=2(a+h)+3=2a+2h+3.";
+        return { texte: "Développe simplement, aucun terme au carré ici :", latex: "f(a+h)=m(a+h)+p=ma+mh+p" };
       case "quadratique":
-        return "Exemple : pour f(x)=x²+1 et a=5, f(5+h)=(5+h)²+1=25+10h+h²+1=h²+10h+26.";
+        return {
+          texte: "Développe AVANT de multiplier par m et de distribuer. Piège : oublier le terme croisé 2ah, ou une erreur de signe si m est négatif.",
+          latex: "f(a+h)=m(a+h)^2+p, \\quad (a+h)^2=a^2+2ah+h^2",
+        };
       case "rationnelleSimple":
-        return exercice.expo === 1 ? "Exemple : pour f(x)=4/x et a=2, f(2+h)=4/(2+h)." : "Exemple : pour f(x)=4/x² et a=2, f(2+h)=4/(2+h)².";
+        return exercice.expo === 1
+          ? { texte: "Ne développe rien, garde le dénominateur (a+h) tel quel pour l'instant :", latex: "f(a+h)=\\dfrac{k}{a+h}" }
+          : { texte: "Ne développe rien, garde le dénominateur (a+h)² tel quel pour l'instant :", latex: "f(a+h)=\\dfrac{k}{(a+h)^2}" };
       case "rationnelleLineaire":
-        return "Exemple : pour f(x)=(x+1)/(x-2) et a=3, f(3+h)=((3+h)+1)/((3+h)-2)=(h+4)/(h+1).";
+        return {
+          texte: "Développe seulement le numérateur, garde (a+h)-q au dénominateur :",
+          latex: "f(a+h)=\\dfrac{m(a+h)+p}{(a+h)-q}",
+        };
     }
   }
   if (ecran === "quotient") {
     switch (exercice.famille) {
       case "affine":
-        return "Exemple : f(x)=2x+3, f(a+h)-f(a)=(2a+2h+3)-(2a+3)=2h, donc le quotient vaut 2h/h=2.";
+        return { texte: "Le h se simplifie directement, sans reste :", latex: "\\dfrac{f(a+h)-f(a)}{h}=\\dfrac{mh}{h}=m" };
       case "quadratique":
-        return "Exemple : a=5, f(5+h)-f(5)=(h²+10h+26)-26=h²+10h=h(h+10), donc le quotient vaut h(h+10)/h=h+10.";
+        return {
+          texte: "Factorise h au numérateur de f(a+h)-f(a) AVANT de diviser par h — il doit rester ceci une fois le h du dénominateur simplifié :",
+          latex: "2ma+mh",
+        };
       case "rationnelleSimple":
-        return "Exemple : f(x)=4/x, a=2 : [4/(2+h)-4/2]/h = [(8-4(2+h))/(2(2+h))]/h = [-4h/(2(2+h))]/h = -4/(2(2+h)).";
+        return {
+          texte: "Mets f(a+h)-f(a) au MÊME DÉNOMINATEUR avant de diviser par h — sinon impossible de factoriser le h au numérateur pour le simplifier.",
+          latex: null,
+        };
       case "rationnelleLineaire":
-        return "Exemple : le numérateur mis au même dénominateur se réduit toujours à une constante × h — c'est CE h-là qui se simplifie avec le h du dénominateur du quotient.";
+        return {
+          texte: "Mets f(a+h)-f(a) au même dénominateur avant de diviser par h — le numérateur se réduit alors à un multiple de h, qui s'annule avec le h du dénominateur du quotient :",
+          latex: "(a+h-q)(a-q)",
+        };
     }
   }
-  return "Exemple : si le quotient simplifié vaut 2a+h, alors en faisant h→0 on obtient directement f'(a)=2a.";
+  return { texte: "Dans le quotient simplifié, il n'y a plus de h au dénominateur — remplace directement h par 0 pour obtenir f'(a).", latex: null };
+}
+
+export function texteAideNiveau2(exercice: ExerciceDefinitionDerivee, ecran: EcranDefinitionDerivee): AideFragmentee {
+  if (ecran === "developper") {
+    switch (exercice.famille) {
+      case "affine":
+        return { texte: "Exemple :", latex: "f(x)=2x+3 \\;\\Rightarrow\\; f(a+h)=2(a+h)+3=2a+2h+3" };
+      case "quadratique":
+        return {
+          texte: "Exemple :",
+          latex: "f(x)=x^2+1,\\ a=5 \\;\\Rightarrow\\; f(5+h)=(5+h)^2+1=25+10h+h^2+1=h^2+10h+26",
+        };
+      case "rationnelleSimple":
+        return exercice.expo === 1
+          ? { texte: "Exemple :", latex: "f(x)=\\dfrac{4}{x},\\ a=2 \\;\\Rightarrow\\; f(2+h)=\\dfrac{4}{2+h}" }
+          : { texte: "Exemple :", latex: "f(x)=\\dfrac{4}{x^2},\\ a=2 \\;\\Rightarrow\\; f(2+h)=\\dfrac{4}{(2+h)^2}" };
+      case "rationnelleLineaire":
+        return {
+          texte: "Exemple :",
+          latex: "f(x)=\\dfrac{x+1}{x-2},\\ a=3 \\;\\Rightarrow\\; f(3+h)=\\dfrac{(3+h)+1}{(3+h)-2}=\\dfrac{h+4}{h+1}",
+        };
+    }
+  }
+  if (ecran === "quotient") {
+    switch (exercice.famille) {
+      case "affine":
+        return {
+          texte: "Exemple :",
+          latex: "f(x)=2x+3,\\ f(a+h)-f(a)=(2a+2h+3)-(2a+3)=2h \\;\\Rightarrow\\; \\dfrac{2h}{h}=2",
+        };
+      case "quadratique":
+        return {
+          texte: "Exemple :",
+          latex: "a=5,\\ f(5+h)-f(5)=(h^2+10h+26)-26=h^2+10h=h(h+10) \\;\\Rightarrow\\; \\dfrac{h(h+10)}{h}=h+10",
+        };
+      case "rationnelleSimple":
+        return {
+          texte: "Exemple :",
+          latex:
+            "f(x)=\\dfrac{4}{x},\\ a=2: \\quad \\dfrac{\\frac{4}{2+h}-\\frac{4}{2}}{h} = \\dfrac{\\frac{8-4(2+h)}{2(2+h)}}{h} = \\dfrac{\\frac{-4h}{2(2+h)}}{h} = \\dfrac{-4}{2(2+h)}",
+        };
+      case "rationnelleLineaire":
+        return {
+          texte: "Exemple : le numérateur mis au même dénominateur se réduit toujours à une constante × h — c'est CE h-là qui se simplifie avec le h du dénominateur du quotient.",
+          latex: null,
+        };
+    }
+  }
+  return { texte: "Exemple :", latex: "\\text{quotient simplifié}=2a+h \\;\\xrightarrow{h\\to0}\\; f'(a)=2a" };
 }
 
 // ============================================================================

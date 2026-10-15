@@ -134,10 +134,10 @@ function memeSigneB(exercice: ExerciceLimiteB): boolean {
 }
 
 function aideB1(phase: "bExponentielle" | "bPolynomiale" | "bGlobale", exercice: ExerciceLimiteB): AideAvecLatex {
-  if (phase === "bExponentielle") return { texte: "x²+p → +∞ quelle que soit la direction (x² domine toujours). Applique ensuite la règle base>1/base<1.", latex: null };
-  if (phase === "bPolynomiale") return { texte: "d est impair : x^d change de signe selon que x→+∞ ou x→−∞. Regarde le signe de q·x^d.", latex: null };
+  if (phase === "bExponentielle") return { texte: "x²+p → +∞ quelle que soit la direction (x² domine toujours). Applique ensuite la règle base>1/base<1.", latex: "x^{2}+p \\to +\\infty \\qquad \\text{base}>1\\ /\\ \\text{base}<1" };
+  if (phase === "bPolynomiale") return { texte: "d est impair : x^d change de signe selon que x→+∞ ou x→−∞. Regarde le signe de q·x^d.", latex: "x\\to+\\infty\\quad\\text{ou}\\quad x\\to-\\infty\\qquad\\text{signe de }q\\cdot x^{d}" };
   if (memeSigneB(exercice)) return { texte: "Les deux termes ont le même signe à l'infini (ou le terme exponentiel est négligeable) : la somme suit directement ce signe.", latex: null };
-  return { texte: "Les deux termes ont des signes opposés (forme ∞−∞) : une exponentielle qui diverge l'emporte TOUJOURS sur n'importe quelle puissance de x, quel que soit son degré.", latex: null };
+  return { texte: "Les deux termes ont des signes opposés (forme ∞−∞) : une exponentielle qui diverge l'emporte TOUJOURS sur n'importe quelle puissance de x, quel que soit son degré.", latex: "\\infty-\\infty" };
 }
 
 function aideB2(phase: "bExponentielle" | "bPolynomiale" | "bGlobale", exercice: ExerciceLimiteB): AideAvecLatex {
@@ -171,8 +171,8 @@ function consigneC(phase: "cFacteurs" | "cGlobale"): string {
 }
 
 function aideC1(phase: "cFacteurs" | "cGlobale"): AideAvecLatex {
-  if (phase === "cFacteurs") return { texte: "x^r (r>0) diverge vers +∞. Attention au signe de l'exposant dans e^(−x^s) : −x^s → −∞ quand x→+∞, donc e^(−x^s) → 0.", latex: null };
-  return { texte: "Réécris mentalement le produit x^r·e^(−x^s) comme un quotient x^r / e^(x^s), pour rendre la comparaison de croissance visible.", latex: null };
+  if (phase === "cFacteurs") return { texte: "x^r (r>0) diverge vers +∞. Attention au signe de l'exposant dans e^(−x^s) : −x^s → −∞ quand x→+∞, donc e^(−x^s) → 0.", latex: "x^{r}\\to+\\infty\\ (r>0)\\qquad -x^{s}\\to-\\infty\\ (x\\to+\\infty)\\Rightarrow e^{-x^{s}}\\to 0" };
+  return { texte: "Réécris mentalement le produit x^r·e^(−x^s) comme un quotient x^r / e^(x^s), pour rendre la comparaison de croissance visible.", latex: "x^{r}\\cdot e^{-x^{s}}=\\dfrac{x^{r}}{e^{x^{s}}}" };
 }
 
 function aideC2(phase: "cFacteurs" | "cGlobale", exercice: ExerciceLimiteC): AideAvecLatex {
@@ -203,7 +203,7 @@ function consigneG(phase: "gCombiner" | "gOrdre1" | "gConclure"): string {
 }
 
 function aideG1(phase: "gCombiner" | "gOrdre1" | "gConclure"): AideAvecLatex {
-  if (phase === "gCombiner") return { texte: "Mets les deux fractions au même dénominateur commun cos(x)·(1−e^(π/2−x)), puis additionne les numérateurs — ne simplifie rien d'autre à cette étape.", latex: null };
+  if (phase === "gCombiner") return { texte: "Mets les deux fractions au même dénominateur commun cos(x)·(1−e^(π/2−x)), puis additionne les numérateurs — ne simplifie rien d'autre à cette étape.", latex: "\\cos(x)\\cdot\\left(1-e^{\\frac{\\pi}{2}-x}\\right)" };
   if (phase === "gOrdre1") {
     return {
       texte: "Pose u=π/2−x (x→π/2 ⟺ u→0). Développements limités à l'ordre 1 :",
@@ -583,7 +583,7 @@ function aideK1(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerate
   }
   const positionExponentielle = (phase === "kNumerateur1" || phase === "kNumerateur2") === exercice.expAuNumerateur;
   if (phase === "kNumerateur1" || phase === "kDenominateur1") {
-    if (positionExponentielle) return { texte: "Rappel : la dérivée de a^(u(x)) est u'(x)·ln(a)·a^(u(x)) ; la dérivée de u(x)·ln(a) est u'(x)·ln(a).", latex: null };
+    if (positionExponentielle) return { texte: "Rappel : la dérivée de a^(u(x)) est u'(x)·ln(a)·a^(u(x)) ; la dérivée de u(x)·ln(a) est u'(x)·ln(a).", latex: "(a^{u(x)})'=u'(x)\\cdot\\ln(a)\\cdot a^{u(x)}\\qquad (u(x)\\cdot\\ln(a))'=u'(x)\\cdot\\ln(a)" };
     return { texte: "Rappel : la dérivée de m(x-x0)² est 2m(x-x0).", latex: "(m(x-x_0)^2)' = 2m(x-x_0)" };
   }
   if (positionExponentielle) return { texte: `Vérifie : cette partie de l'écran précédent s'annule-t-elle bien en x=${formatPointLimite(exercice.x0)} ? Si oui, redérive-la (même règle a^(u(x)) que précédemment).`, latex: null };

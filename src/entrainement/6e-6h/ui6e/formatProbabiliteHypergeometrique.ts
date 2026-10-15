@@ -118,7 +118,7 @@ export function niveauAideMaxA(phase: PhaseProbabiliteHypergeometrique): number 
 }
 
 export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Rappel de la structure de la formule : (façons de choisir les k succès parmi les K disponibles) × (façons de choisir les n−k échecs parmi les N−K disponibles), le tout divisé par (façons de choisir n éléments parmi N au total).", latex: null };
+  return { texte: "Rappel de la structure de la formule : (façons de choisir les k succès parmi les K disponibles) × (façons de choisir les n−k échecs parmi les N−K disponibles), le tout divisé par (façons de choisir n éléments parmi N au total).", latex: "\\dfrac{C_{K}^{k}\\cdot C_{N-K}^{n-k}}{C_{N}^{n}}" };
 }
 
 export function aideNiveau2A(e: ExerciceHypergeoA): AideAvecLatex {

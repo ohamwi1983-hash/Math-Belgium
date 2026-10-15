@@ -380,7 +380,7 @@ export function niveauAideMaxD(phase: PhaseDenombrementFondamental): number {
 }
 export function aideNiveau1D(phase: PhaseDenombrementFondamental): AideAvecLatex {
   if (phase !== "dEcran3") return AUCUNE_AIDE;
-  return { texte: "Vérifie, pour CHAQUE bloc, si l'ordre à l'intérieur est imposé (1 seul arrangement) ou libre (k! arrangements) — ne l'oublie pas dans le résultat final.", latex: null };
+  return { texte: "Vérifie, pour CHAQUE bloc, si l'ordre à l'intérieur est imposé (1 seul arrangement) ou libre (k! arrangements) — ne l'oublie pas dans le résultat final.", latex: "k!" };
 }
 export function aideNiveau2D(e: ExerciceDenombrementD, phase: PhaseDenombrementFondamental): AideAvecLatex {
   if (phase !== "dEcran3") return AUCUNE_AIDE;
@@ -431,7 +431,7 @@ export function niveauAideMaxE(phase: PhaseDenombrementFondamental): number {
 }
 export function aideNiveau1E(phase: PhaseDenombrementFondamental): AideAvecLatex {
   if (phase !== "eEcran1") return AUCUNE_AIDE;
-  return { texte: "(n-1)! compte les rotations comme équivalentes, mais PAS les réflexions — divise encore par 2 si le retournement rend deux dispositions identiques.", latex: null };
+  return { texte: "(n-1)! compte les rotations comme équivalentes, mais PAS les réflexions — divise encore par 2 si le retournement rend deux dispositions identiques.", latex: "(n-1)!" };
 }
 export function aideNiveau2E(phase: PhaseDenombrementFondamental): AideAvecLatex {
   if (phase !== "eEcran1") return AUCUNE_AIDE;

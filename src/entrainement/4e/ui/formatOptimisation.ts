@@ -252,11 +252,22 @@ export function texteAideSystemeNiveau2(exercice: ExerciceOptimisationModelisati
   return `La variable isolée : $${formatIsolementLatex(exercice.contrainte, exercice.contexte.labelVariable)}$.`;
 }
 
+/** Convertit la notation "texte" encore utilisée par `formuleSubstitueeTexte` (²/³/· hérités de
+ * l'ancien affichage non-KaTeX) en LaTeX valide — même esprit que `formatGrandeurXYLatex`
+ * ci-dessus, qui fait déjà ce remplacement pour `*`. */
+function formuleSubstitueeTexteVersLatex(texte: string): string {
+  return texte
+    .replace(/\*/g, " \\cdot ")
+    .replace(/·/g, "\\cdot ")
+    .replace(/²/g, "^2")
+    .replace(/³/g, "^3");
+}
+
 export function texteAideSystemeNiveau3(exercice: ExerciceOptimisationModelisation): string {
-  const rhs =
-    exercice.formuleSubstitueeTexte ??
-    `${exercice.contexte.labelVariable} · (${formatIsolementLatex(exercice.contrainte, exercice.contexte.labelVariable).replace(/^.*= /, "")})`;
-  return `Expression substituée, non développée : ${exercice.contexte.nomGrandeur} = ${rhs}.`;
+  const rhs = exercice.formuleSubstitueeTexte
+    ? formuleSubstitueeTexteVersLatex(exercice.formuleSubstitueeTexte)
+    : `${exercice.contexte.labelVariable} \\cdot (${formatIsolementLatex(exercice.contrainte, exercice.contexte.labelVariable).replace(/^.*= /, "")})`;
+  return `Expression substituée, non développée : $\\text{${exercice.contexte.nomGrandeur}} = ${rhs}$.`;
 }
 
 /**

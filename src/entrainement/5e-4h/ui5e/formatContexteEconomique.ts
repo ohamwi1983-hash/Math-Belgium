@@ -141,90 +141,121 @@ export function consigneEcran(exercice: ExerciceContexteEconomique, ecran: Ecran
 // Aides — niveau 1 (technique/piège), niveau 2 (exemple proche, jamais la réponse).
 // ============================================================================
 
-export function texteAideNiveau1(ecran: EcranContexteEconomique): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau1(ecran: EcranContexteEconomique): AideFragmentee {
   switch (ecran) {
     case "coutMarginalDiscret":
-      return "C_m(q_0) est une DIFFÉRENCE de 2 valeurs de C_T — jamais une dérivée à ce stade.";
+      return { texte: "C_m(q_0) est une DIFFÉRENCE de 2 valeurs de C_T — jamais une dérivée à ce stade.", latex: null };
     case "deriveeSymbolique":
-      return "Dérive terme à terme : la dérivée de a q^n est n a q^{n-1}.";
+      return { texte: "Dérive terme à terme :", latex: "\\dfrac{d}{dq}\\left(a\\,q^n\\right)=n\\,a\\,q^{n-1}" };
     case "deriveeValeur":
-      return "Remplace q par q_0 dans l'expression de C'_T(q) que tu viens de trouver.";
+      return { texte: "Remplace q par q_0 dans l'expression de C'_T(q) que tu viens de trouver.", latex: null };
     case "comparaisonEcart":
-      return "L'écart en % se calcule TOUJOURS par rapport à la valeur EXACTE (la dérivée), jamais par rapport à l'approximation discrète.";
+      return { texte: "L'écart en % se calcule TOUJOURS par rapport à la valeur EXACTE (la dérivée), jamais par rapport à l'approximation discrète.", latex: null };
     case "extremum":
-      return "PIÈGE : ne conclus jamais trop vite à un extremum — pour un coût cubique, vérifie le signe du discriminant Δ de C'_T avant de conclure.";
+      return { texte: "PIÈGE : ne conclus jamais trop vite à un extremum — pour un coût cubique, vérifie le signe du discriminant Δ de C'_T avant de conclure.", latex: null };
     case "recetteTotale":
-      return "Distribue x sur chaque terme de p(x).";
+      return { texte: "Distribue x sur chaque terme de p(x).", latex: null };
     case "marginales":
-      return "Le coût/la recette MARGINALE, c'est la DÉRIVÉE du coût/de la recette TOTALE — jamais le coût/la recette moyen(ne).";
+      return { texte: "Le coût/la recette MARGINALE, c'est la DÉRIVÉE du coût/de la recette TOTALE — jamais le coût/la recette moyen(ne).", latex: null };
     case "resoudreEgaliteMarginales":
-      return "PIÈGE : ne te contente jamais d'ignorer la racine négative — une quantité produite x doit être STRICTEMENT positive.";
+      return { texte: "PIÈGE : ne te contente jamais d'ignorer la racine négative — une quantité produite x doit être STRICTEMENT positive.", latex: null };
     case "beneficeFormule":
-      return "N'oublie pas la parenthèse : B(x)=R_T(x)-C_T(x), le signe '-' se distribue sur TOUS les termes de C_T.";
+      return { texte: "N'oublie pas la parenthèse : le signe '-' se distribue sur TOUS les termes de C_T :", latex: "B(x)=R_T(x)-C_T(x)" };
     case "beneficeDerivee":
-      return "B'(x)=R'_T(x)-C'_T(x) — tu as déjà calculé ces 2 dérivées à l'étape précédente.";
+      return { texte: "Tu as déjà calculé ces 2 dérivées à l'étape précédente :", latex: "B'(x)=R'_T(x)-C'_T(x)" };
     case "tableauSigneBenefice":
-      return "Le bénéfice est maximal là où B' passe du + au -.";
+      return { texte: "Le bénéfice est maximal là où B' passe du + au -.", latex: null };
     case "confirmationCoherence":
-      return "PIÈGE : vérifie que le x où B'(x)=0 est bien EXACTEMENT le même que celui trouvé en résolvant Cm(x)=Rm(x) — ce n'est jamais une coïncidence.";
+      return { texte: "PIÈGE : vérifie que le x où B'(x)=0 est bien EXACTEMENT le même que celui trouvé en résolvant Cm(x)=Rm(x) — ce n'est jamais une coïncidence.", latex: null };
     case "beneficeMaximum":
-      return "Substitue directement la valeur de x dans B(x) — jamais dans B'(x).";
+      return { texte: "Substitue directement la valeur de x dans B(x) — jamais dans B'(x).", latex: null };
     case "poserEquationReduite":
-      return "Distribue q dans C'_T(q), puis soustrais C_T(q) terme à terme — plusieurs termes s'annulent.";
+      return { texte: "Distribue q dans C'_T(q), puis soustrais C_T(q) terme à terme — plusieurs termes s'annulent.", latex: null };
     case "iteration0":
     case "iteration1":
     case "iteration2":
     case "iteration3":
-      return "PIÈGE documenté : le sous-intervalle à conserver est celui où P change de signe entre la borne et le milieu — pas l'inverse.";
+      return { texte: "PIÈGE documenté : le sous-intervalle à conserver est celui où P change de signe entre la borne et le milieu — pas l'inverse.", latex: null };
     case "racineApprochee":
-      return "Le milieu du dernier intervalle obtenu est une bonne approximation de la racine.";
+      return { texte: "Le milieu du dernier intervalle obtenu est une bonne approximation de la racine.", latex: null };
   }
 }
 
-export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): string {
+export function texteAideNiveau2(exercice: ExerciceContexteEconomique, ecran: EcranContexteEconomique): AideFragmentee {
   switch (ecran) {
     case "coutMarginalDiscret":
-      return "Exemple : si C_T(q)=q²+3q, C_m(2)=C_T(3)-C_T(2)=(9+9)-(4+6)=18-10=8.";
+      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q \\;\\Rightarrow\\; C_m(2)=C_T(3)-C_T(2)=(9+9)-(4+6)=18-10=8" };
     case "deriveeSymbolique":
-      return "Exemple : si C_T(q)=q²+3q, alors C'_T(q)=2q+3.";
+      return { texte: "Exemple :", latex: "C_T(q)=q^2+3q \\;\\Rightarrow\\; C'_T(q)=2q+3" };
     case "deriveeValeur":
-      return "Exemple : si C'_T(q)=2q+3 et q_0=2, C'_T(2)=2\\cdot2+3=7.";
+      return { texte: "Exemple :", latex: "C'_T(q)=2q+3,\\ q_0=2 \\;\\Rightarrow\\; C'_T(2)=2\\cdot2+3=7" };
     case "comparaisonEcart":
-      return "Exemple : discret=8, exact=7 ⟹ écart absolu=1, écart en %=1/7×100≈14.29%.";
+      return {
+        texte: "Exemple :",
+        latex: "\\text{discret}=8,\\ \\text{exact}=7 \\;\\Rightarrow\\; \\text{écart absolu}=1,\\ \\text{écart en \\%}=\\dfrac{1}{7}\\times100\\approx14.29\\%",
+      };
     case "extremum": {
       const ex = exercice as ExerciceContexteEconomiqueA;
       return ex.coutTotal.degre === 2
-        ? "En degré 2, C'_T(q)=2aq+b est TOUJOURS linéaire — elle a TOUJOURS exactement une racine, jamais 'pas d'extremum'."
-        : "Exemple : C'_T(q)=3q²-2q+5 a pour discriminant Δ=(-2)²-4·3·5=4-60=-56<0 — aucune racine réelle, donc pas d'extremum.";
+        ? {
+            texte: "En degré 2, C'_T(q) est TOUJOURS linéaire — elle a TOUJOURS exactement une racine, jamais 'pas d'extremum' :",
+            latex: "C'_T(q)=2aq+b",
+          }
+        : {
+            texte: "Exemple :",
+            latex:
+              "C'_T(q)=3q^2-2q+5 \\;\\Rightarrow\\; \\Delta=(-2)^2-4\\cdot3\\cdot5=4-60=-56<0 \\quad \\text{(aucune racine réelle, donc pas d'extremum)}",
+          };
     }
     case "recetteTotale":
-      return "Exemple : si p(x)=2x+5, R_T(x)=(2x+5)x=2x²+5x.";
+      return { texte: "Exemple :", latex: "p(x)=2x+5 \\;\\Rightarrow\\; R_T(x)=(2x+5)x=2x^2+5x" };
     case "marginales":
-      return "Exemple : si C_T(x)=x³-2x et R_T(x)=2x²+5x, alors C'_T(x)=3x²-2 et R'_T(x)=4x+5.";
+      return { texte: "Exemple :", latex: "C_T(x)=x^3-2x,\\ R_T(x)=2x^2+5x \\;\\Rightarrow\\; C'_T(x)=3x^2-2,\\ R'_T(x)=4x+5" };
     case "resoudreEgaliteMarginales":
-      return "Exemple : 3x²-2=4x+5 ⟺ 3x²-4x-7=0 ⟺ x=7/3 ou x=-1 — on retient x=7/3 (production positive), on rejette x=-1.";
+      return {
+        texte: "Exemple :",
+        latex:
+          "3x^2-2=4x+5 \\iff 3x^2-4x-7=0 \\iff x=\\dfrac{7}{3} \\text{ ou } x=-1 \\quad \\text{(on retient } x=\\tfrac{7}{3}\\text{, production positive)}",
+      };
     case "beneficeFormule":
-      return "Exemple : R_T(x)=2x²+5x, C_T(x)=x³-2x ⟹ B(x)=2x²+5x-x³+2x=-x³+2x²+7x.";
+      return { texte: "Exemple :", latex: "R_T(x)=2x^2+5x,\\ C_T(x)=x^3-2x \\;\\Rightarrow\\; B(x)=2x^2+5x-x^3+2x=-x^3+2x^2+7x" };
     case "beneficeDerivee":
-      return "Exemple : B(x)=-x³+2x²+7x ⟹ B'(x)=-3x²+4x+7.";
+      return { texte: "Exemple :", latex: "B(x)=-x^3+2x^2+7x \\;\\Rightarrow\\; B'(x)=-3x^2+4x+7" };
     case "tableauSigneBenefice":
-      return "Exemple : B' positive avant la solution retenue (B croît), négative après (B décroît) ⟹ maximum EN cette solution.";
+      return {
+        texte: "Exemple :",
+        latex: "B' \\text{ positive avant la solution retenue (B croît), négative après (B décroît)} \\;\\Rightarrow\\; \\text{maximum en cette solution}",
+      };
     case "confirmationCoherence":
-      return "C'est un fait mathématique garanti par construction : Cm(x)-Rm(x) et -B'(x) sont EXACTEMENT la même expression.";
+      return { texte: "C'est un fait mathématique garanti par construction :", latex: "C_m(x)-R_m(x) = -B'(x)" };
     case "beneficeMaximum":
-      return "Exemple : B(x)=-x³+2x²+7x, en x=7/3 : calcule chaque terme puis additionne.";
+      return { texte: "Exemple :", latex: "B(x)=-x^3+2x^2+7x,\\ x=\\dfrac{7}{3} \\;\\Rightarrow\\; \\text{calcule chaque terme puis additionne}" };
     case "poserEquationReduite":
-      return "Exemple : C_T(q)=q³+2q²+5, C'_T(q)=3q²+4q ⟹ P(q)=q(3q²+4q)-(q³+2q²+5)=3q³+4q²-q³-2q²-5=2q³+2q²-5.";
+      return {
+        texte: "Exemple :",
+        latex:
+          "C_T(q)=q^3+2q^2+5,\\ C'_T(q)=3q^2+4q \\;\\Rightarrow\\; P(q)=q(3q^2+4q)-(q^3+2q^2+5)=3q^3+4q^2-q^3-2q^2-5=2q^3+2q^2-5",
+      };
     case "iteration0":
     case "iteration1":
     case "iteration2":
     case "iteration3": {
       const ex = exercice as ExerciceContexteEconomiqueBonus;
       const it = ex.iterations[["iteration0", "iteration1", "iteration2", "iteration3"].indexOf(ecran)];
-      return `Ici : milieu=(${formatNombreLatex(it.gauche)}+${formatNombreLatex(it.droite)})/2=${formatNombreLatex(it.milieu)}.`;
+      return {
+        texte: "Ici :",
+        latex: `\\text{milieu}=\\dfrac{${formatNombreLatex(it.gauche)}+${formatNombreLatex(it.droite)}}{2}=${formatNombreLatex(it.milieu)}`,
+      };
     }
     case "racineApprochee":
-      return "La précision annoncée correspond exactement à la largeur du dernier intervalle obtenu après les 4 itérations.";
+      return { texte: "La précision annoncée correspond exactement à la largeur du dernier intervalle obtenu après les 4 itérations.", latex: null };
   }
 }
 

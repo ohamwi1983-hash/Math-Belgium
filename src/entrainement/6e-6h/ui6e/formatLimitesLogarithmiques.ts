@@ -151,7 +151,7 @@ const TEXTE_REFERENCE = "Limite de référence (nouvelle dans ce chapitre, analo
 
 function aideB1(phase: "bReformuler" | "bConclure"): AideAvecLatex {
   if (phase === "bConclure") return { texte: TEXTE_REFERENCE, latex: FORMULE_REFERENCE_LATEX };
-  return { texte: "Un logarithme dont la BASE et l'ARGUMENT tendent tous deux vers 1 en même temps est une forme 0/0 déguisée — la substitution u=x/x0−1 la révèle.", latex: null };
+  return { texte: "Un logarithme dont la BASE et l'ARGUMENT tendent tous deux vers 1 en même temps est une forme 0/0 déguisée — la substitution u=x/x0−1 la révèle.", latex: "u=\\dfrac{x}{x_0}-1" };
 }
 
 function aideB2(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB): AideAvecLatex {

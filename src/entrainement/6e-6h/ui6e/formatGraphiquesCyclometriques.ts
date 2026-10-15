@@ -282,7 +282,7 @@ export function texteAideNiveau1(exercice: ExerciceGraphiquesCyclometriques): Ai
     case "B":
       return { texte: "arctan a un domaine ℝ tout entier et deux asymptotes horizontales — jamais de cassure nette. Repère cette signature.", latex: null };
     case "C":
-      return { texte: "La fonction est PAIRE (symétrique par rapport à l'axe des ordonnées) : pose -1 ≤ a·x²+b ≤ 1 pour trouver le domaine.", latex: null };
+      return { texte: "La fonction est PAIRE (symétrique par rapport à l'axe des ordonnées) : pose -1 ≤ a·x²+b ≤ 1 pour trouver le domaine.", latex: "-1\\le a x^2+b \\le 1" };
     case "D":
       return { texte: "Le graphique doit présenter DEUX branches séparées, jamais une courbe continue — cherche où le dénominateur s'annule.", latex: null };
     case "E":

@@ -155,7 +155,7 @@ export function niveauAideMaxB(e: Extract<ExerciceNombresComplexes, { famille: "
   return e.sousType === "cube" && phase === "bCubeEcran2" ? 2 : 0;
 }
 export function aideNiveau1B(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): AideAvecLatex {
-  if (e.sousType === "cube" && phase === "bCubeEcran2") return { texte: "(a+bi)³=(a+bi)²·(a+bi) — calcule ce produit en 2 étapes plutôt que de développer directement un trinôme au cube.", latex: null };
+  if (e.sousType === "cube" && phase === "bCubeEcran2") return { texte: "(a+bi)³=(a+bi)²·(a+bi) — calcule ce produit en 2 étapes plutôt que de développer directement un trinôme au cube.", latex: "(a+bi)^{3}=(a+bi)^{2}\\cdot(a+bi)" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2B(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): AideAvecLatex {
@@ -199,7 +199,7 @@ export function niveauAideMaxC(phase: PhaseNombresComplexes): number {
   return phase === "cEcran1" ? 2 : 0;
 }
 export function aideNiveau1C(phase: PhaseNombresComplexes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Multiplier par le conjugué du dénominateur élimine sa partie imaginaire : (c+di)(c-di)=c²+d², un réel.", latex: null };
+  if (phase === "cEcran1") return { texte: "Multiplier par le conjugué du dénominateur élimine sa partie imaginaire : (c+di)(c-di)=c²+d², un réel.", latex: "(c+di)(c-di)=c^{2}+d^{2}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2C(e: Extract<ExerciceNombresComplexes, { famille: "C" }>, phase: PhaseNombresComplexes): AideAvecLatex {
@@ -227,7 +227,7 @@ export function niveauAideMaxD(): number {
   return 2;
 }
 export function aideNiveau1D(): AideAvecLatex {
-  return { texte: "1/i=-i (vérifiable par i×(-i)=-i²=1).", latex: null };
+  return { texte: "1/i=-i (vérifiable par i×(-i)=-i²=1).", latex: "\\dfrac{1}{i}=-i\\qquad i\\cdot(-i)=-i^{2}=1" };
 }
 export function aideNiveau2D(e: Extract<ExerciceNombresComplexes, { famille: "D" }>): AideAvecLatex {
   return { texte: "Expression réécrite comme un produit (calcul final non fait) :", latex: `(${entierComplexeLatex(e.a, e.b)})\\cdot\\left(${e.k === 1 ? "" : `\\dfrac{1}{${e.k}}`}-i\\right)` };
@@ -338,8 +338,8 @@ export function niveauAideMaxG(phase: PhaseNombresComplexes): number {
 }
 export function aideNiveau1G(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): AideAvecLatex {
   if (phase !== "gEcran1") return AUCUNE_AIDE;
-  if (e.n < 0) return { texte: "i^(-n)=1/i^n — le cycle des puissances négatives suit le même schéma, décalé : i⁻¹=-i, i⁻²=-1, i⁻³=i, i⁻⁴=1.", latex: null };
-  return { texte: "i a une période de 4 (i⁰=1, i¹=i, i²=-1, i³=-i, puis ça recommence) — réduis l'exposant modulo 4.", latex: null };
+  if (e.n < 0) return { texte: "i^(-n)=1/i^n — le cycle des puissances négatives suit le même schéma, décalé : i⁻¹=-i, i⁻²=-1, i⁻³=i, i⁻⁴=1.", latex: "i^{-n}=\\dfrac{1}{i^{n}}\\qquad i^{-1}=-i,\\ i^{-2}=-1,\\ i^{-3}=i,\\ i^{-4}=1" };
+  return { texte: "i a une période de 4 (i⁰=1, i¹=i, i²=-1, i³=-i, puis ça recommence) — réduis l'exposant modulo 4.", latex: "i^{0}=1,\\ i^{1}=i,\\ i^{2}=-1,\\ i^{3}=-i" };
 }
 export function aideNiveau2G(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): AideAvecLatex {
   if (phase !== "gEcran1") return AUCUNE_AIDE;

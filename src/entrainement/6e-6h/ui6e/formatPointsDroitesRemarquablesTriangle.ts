@@ -229,7 +229,7 @@ function niveauAideMaxC(phase: PhasePointsDroitesRemarquablesTriangle): number {
   return phase === "cEcran2" ? 2 : 0;
 }
 function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Une équation de la forme |expression|=k (k>0) a 2 solutions : expression=k OU expression=−k.", latex: null };
+  return { texte: "Une équation de la forme |expression|=k (k>0) a 2 solutions : expression=k OU expression=−k.", latex: "|\\text{expression}|=k\\ \\Rightarrow\\ \\text{expression}=k\\ \\text{ou}\\ \\text{expression}=-k" };
 }
 function aideNiveau2C(e: ExercicePDRT_C): AideAvecLatex {
   return { texte: "Une des 2 équations, l'autre reste à poser :", latex: `${fmtExpressionAffine(e.K, e.M)}=${2 * e.k}` };
@@ -363,7 +363,7 @@ function niveauAideMaxF(phase: PhasePointsDroitesRemarquablesTriangle): number {
   return phase === "fEcran3" ? 2 : 0;
 }
 function aideNiveau1F(): AideAvecLatex {
-  return { texte: "H est le milieu de [P,Q], donc Q=2H−P.", latex: null };
+  return { texte: "H est le milieu de [P,Q], donc Q=2H−P.", latex: "Q=2H-P" };
 }
 function aideNiveau2F(e: ExercicePDRT_F): AideAvecLatex {
   return { texte: "Relation posée (calcul non fait) :", latex: `Q=2\\times ${fmtPointFrac(e.HFrac.x, e.HFrac.y)}-${fmtPoint(e.P)}` };

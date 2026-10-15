@@ -276,13 +276,13 @@ export function aideDeriveeNiveau2(exercice: ExerciceGraphiqueDeriveeLogarithme)
 export function aideSelectionNiveau1(exercice: ExerciceGraphiqueDeriveeLogarithme): AideAvecLatex {
   switch (exercice.famille) {
     case "A":
-      return { texte: "Le zéro de cette dérivée est TOUJOURS en x=e, quels que soient k et la base — et sa courbe n'est PAS monotone (elle forme un pic).", latex: null };
+      return { texte: "Le zéro de cette dérivée est TOUJOURS en x=e, quels que soient k et la base — et sa courbe n'est PAS monotone (elle forme un pic).", latex: "x=e" };
     case "B":
-      return { texte: "ln(x)+1/x reste TOUJOURS ≥1 pour x>0 (jamais nul, jamais négatif) — le signe de f' dépend donc uniquement du signe de k.", latex: null };
+      return { texte: "ln(x)+1/x reste TOUJOURS ≥1 pour x>0 (jamais nul, jamais négatif) — le signe de f' dépend donc uniquement du signe de k.", latex: "\\ln(x)+\\dfrac{1}{x}\\ge 1 \\quad (x>0)" };
     case "C":
       return {
         texte: "Le zéro de cette dérivée est TOUJOURS en x=1/e, quel que soit k — et, contrairement à la famille k·log_base(x)/x, cette courbe est monotone (une droite croissante ou décroissante, jamais un pic).",
-        latex: null,
+        latex: "x=\\dfrac{1}{e}",
       };
   }
 }
@@ -298,7 +298,7 @@ export function aideSelectionNiveau2(exercice: ExerciceGraphiqueDeriveeLogarithm
       return { texte: "La valeur minimale de ln(x)+1/x est exactement 1, atteinte en x=1 :", latex: "\\ln(1)+\\dfrac{1}{1} = 1" };
     case "C": {
       const sens = exercice.k > 0 ? "croissante" : "décroissante";
-      return { texte: `f'(x) = k·(ln(x)+1) est croissante si k>0, décroissante si k<0. Ici, f' est ${sens}.`, latex: null };
+      return { texte: `f'(x) = k·(ln(x)+1) est croissante si k>0, décroissante si k<0. Ici, f' est ${sens}.`, latex: "f'(x)=k\\cdot(\\ln(x)+1)" };
     }
   }
 }

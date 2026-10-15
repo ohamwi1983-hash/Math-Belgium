@@ -177,7 +177,7 @@ function consigneC(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): string 
 
 function aideCNiveau1(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): AideAvecLatex {
   if (phase === "cDerivee") return { texte: "Rappel : sh'=ch et ch'=sh (pas de changement de signe, contrairement à sin/cos).", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
-  if (phase === "cDeriveeSeconde") return { texte: "Applique EXACTEMENT la même règle (sh'=ch, ch'=sh) à f'(x), en n'oubliant pas la chaîne.", latex: null };
+  if (phase === "cDeriveeSeconde") return { texte: "Applique EXACTEMENT la même règle (sh'=ch, ch'=sh) à f'(x), en n'oubliant pas la chaîne.", latex: `${SH}' = ${CH},\\quad ${CH}' = ${SH}` };
   return { texte: "Rappel : sh et ch vérifient chacune f''=f — une combinaison linéaire des deux hérite d'une propriété analogue, avec un facteur k² dû à la chaîne.", latex: `${SH}'' = ${SH},\\quad ${CH}'' = ${CH}` };
 }
 function aideCNiveau2(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation", exercice: ExerciceHyperboliquesC): AideAvecLatex {

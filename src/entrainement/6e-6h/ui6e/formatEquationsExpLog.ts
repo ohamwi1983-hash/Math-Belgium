@@ -84,8 +84,8 @@ function consigneEcranA(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): stri
 }
 
 function aideA1(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: `Rappel : vérifie d'abord si le second membre peut s'écrire comme une puissance entière ou simple de la base avant de recourir au logarithme. ${RAPPEL_LN}`, latex: null };
-  return { texte: "Rappel : substitue l'exposant cible CORRECT de l'étape précédente dans mx+n=exposant, puis isole x.", latex: null };
+  if (phase === "aEcran1") return { texte: `Rappel : vérifie d'abord si le second membre peut s'écrire comme une puissance entière ou simple de la base avant de recourir au logarithme. ${RAPPEL_LN}`, latex: "\\dfrac{\\ln(\\text{argument})}{\\ln(\\text{base})}" };
+  return { texte: "Rappel : substitue l'exposant cible CORRECT de l'étape précédente dans mx+n=exposant, puis isole x.", latex: "mx+n=\\text{exposant}" };
 }
 
 function aideA2(ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
@@ -116,7 +116,7 @@ function consigneEcranB(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): stri
 }
 
 function aideB1(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Rappel : ln(a^u)=u·ln(a), à appliquer aux DEUX membres.", latex: null };
+  if (phase === "bEcran1") return { texte: "Rappel : ln(a^u)=u·ln(a), à appliquer aux DEUX membres.", latex: "\\ln(a^u)=u\\cdot\\ln(a)" };
   return { texte: "Rappel : regroupe tous les termes en x d'un côté de l'égalité, les constantes de l'autre.", latex: null };
 }
 
@@ -174,8 +174,8 @@ function consigneEcranC(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEc
 }
 
 function aideC1(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Rappel : base^{2x}=(base^x)²=t², et base^x=t.", latex: null };
-  if (phase === "cEcran2") return { texte: "Rappel : une fois les racines du second degré trouvées, élimine toute valeur ≤0 (impossible pour base^x).", latex: null };
+  if (phase === "cEcran1") return { texte: "Rappel : base^{2x}=(base^x)²=t², et base^x=t.", latex: "\\text{base}^{2x}=(\\text{base}^x)^2=t^2,\\quad \\text{base}^x=t" };
+  if (phase === "cEcran2") return { texte: "Rappel : une fois les racines du second degré trouvées, élimine toute valeur ≤0 (impossible pour base^x).", latex: "\\text{base}^x>0" };
   return { texte: "Rappel : vérifie pour chaque t s'il s'agit d'une puissance entière reconnaissable de la base avant de recourir au logarithme.", latex: null };
 }
 
@@ -230,9 +230,9 @@ function consigneEcranD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): strin
 
 function aideD1(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
   if (phase === "dEcran1") {
-    return ex.sousType === "D1" ? { texte: "Rappel : ici x est la BASE du logarithme, donc x>0 ET x≠1.", latex: null } : { texte: "Rappel : ici x est l'ARGUMENT du logarithme (la base est déjà connue), donc seulement x>0.", latex: null };
+    return ex.sousType === "D1" ? { texte: "Rappel : ici x est la BASE du logarithme, donc x>0 ET x≠1.", latex: "x>0 \\quad\\text{et}\\quad x\\neq 1" } : { texte: "Rappel : ici x est l'ARGUMENT du logarithme (la base est déjà connue), donc seulement x>0.", latex: "x>0" };
   }
-  return ex.sousType === "D1" ? { texte: "Rappel : log_x(N)=k équivaut à x^k=N, donc x=N^(1/k).", latex: null } : { texte: "Rappel : log_a(x)=k équivaut directement à x=a^k.", latex: null };
+  return ex.sousType === "D1" ? { texte: "Rappel : log_x(N)=k équivaut à x^k=N, donc x=N^(1/k).", latex: "\\log_x(N)=k \\iff x^k=N \\iff x=N^{1/k}" } : { texte: "Rappel : log_a(x)=k équivaut directement à x=a^k.", latex: "\\log_a(x)=k \\iff x=a^k" };
 }
 
 function aideD2(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
@@ -274,7 +274,7 @@ function consigneEcranE(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEc
 
 function aideE1(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
   if (phase === "eEcran1") return { texte: "Rappel : chaque argument de chaque logarithme doit être strictement positif, séparément.", latex: null };
-  if (phase === "eEcran2") return { texte: "Rappel : log_base(A)+log_base(B) = log_base(A·B), puis égale les arguments (même base des deux côtés).", latex: null };
+  if (phase === "eEcran2") return { texte: "Rappel : log_base(A)+log_base(B) = log_base(A·B), puis égale les arguments (même base des deux côtés).", latex: "\\log_{\\text{base}}(A)+\\log_{\\text{base}}(B)=\\log_{\\text{base}}(A\\cdot B)" };
   return { texte: "Rappel : vérifie chaque racine trouvée contre la CE avant de conclure — n'en élimine ni n'en garde une par erreur.", latex: null };
 }
 
@@ -314,9 +314,9 @@ function consigneEcranF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcr
 }
 
 function aideF1(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
-  if (phase === "fEcran1") return { texte: "Rappel : x est ici la base du logarithme log_x(a), donc x>0 et x≠1.", latex: null };
-  if (phase === "fEcran2") return { texte: `Rappel de la formule de changement de base : log_a(N)=log_b(N)/log_b(a) — ici log_x(${ex.a}) = log_${ex.a}(${ex.a})/log_${ex.a}(x) = 1/y.`, latex: null };
-  return { texte: "Rappel : multiplie par y pour obtenir y²-ky+1=0, résous, puis calcule a^y pour chaque solution.", latex: null };
+  if (phase === "fEcran1") return { texte: "Rappel : x est ici la base du logarithme log_x(a), donc x>0 et x≠1.", latex: "\\log_x(a),\\quad x>0 \\quad\\text{et}\\quad x\\neq 1" };
+  if (phase === "fEcran2") return { texte: `Rappel de la formule de changement de base : log_a(N)=log_b(N)/log_b(a) — ici log_x(${ex.a}) = log_${ex.a}(${ex.a})/log_${ex.a}(x) = 1/y.`, latex: `\\log_x(${ex.a}) = \\dfrac{\\log_{${ex.a}}(${ex.a})}{\\log_{${ex.a}}(x)} = \\dfrac{1}{y}` };
+  return { texte: "Rappel : multiplie par y pour obtenir y²-ky+1=0, résous, puis calcule a^y pour chaque solution.", latex: `y^2-${ex.k}y+1=0` };
 }
 
 function aideF2(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {

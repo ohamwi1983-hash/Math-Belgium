@@ -129,7 +129,7 @@ export function placeholdersEcranA(exercice: ExerciceDetermParamA, phase: PhaseD
 
 export function aideNiveau1A(phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
   if (phase === "aEcran1") {
-    return { texte: "Une asymptote verticale de ln(mx+n) correspond à l'annulation de l'argument : mx+n=0.", latex: null };
+    return { texte: "Une asymptote verticale de ln(mx+n) correspond à l'annulation de l'argument : mx+n=0.", latex: "mx+n=0" };
   }
   return { texte: "Isole n dans l'équation de l'asymptote (la plus simple), puis substitue dans la deuxième équation.", latex: null };
 }
@@ -202,9 +202,9 @@ export function placeholdersEcranB(exercice: ExerciceDetermParamB, phase: PhaseD
 
 export function aideNiveau1B(phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
   if (phase === "bEcran1") {
-    return { texte: "Un polynôme du second degré ayant 2 racines connues r1 et r2 s'écrit p(x-r1)(x-r2).", latex: null };
+    return { texte: "Un polynôme du second degré ayant 2 racines connues r1 et r2 s'écrit p(x-r1)(x-r2).", latex: "p(x-r_1)(x-r_2)" };
   }
-  if (phase === "bEcran2") return { texte: "Remplace q et r (trouvés à l'étape précédente) dans px²+qx+r, puis utilise la condition du point de passage.", latex: null };
+  if (phase === "bEcran2") return { texte: "Remplace q et r (trouvés à l'étape précédente) dans px²+qx+r, puis utilise la condition du point de passage.", latex: "px^2+qx+r" };
   return { texte: "Réutilise les expressions de q(p) et r(p) trouvées à l'étape 1, avec la valeur de p trouvée à l'étape 2.", latex: null };
 }
 
@@ -264,7 +264,7 @@ export function placeholderEcranC(exercice: ExerciceDetermParamC, phase: PhaseDe
 
 export function aideNiveau1C(phase: PhaseDeterminerParametresLogarithme): AideAvecLatex {
   if (phase === "cEcran1") return { texte: "ln est croissante : un extremum de ln(u) est TOUJOURS de la même nature (max/min) que celui de u lui-même.", latex: null };
-  if (phase === "cEcran2") return { texte: "Le sommet d'une parabole px²+qx+r se situe en x=-q/(2p).", latex: null };
+  if (phase === "cEcran2") return { texte: "Le sommet d'une parabole px²+qx+r se situe en x=-q/(2p).", latex: "x=-\\dfrac{q}{2p}" };
   return { texte: "Un extremum de ln(u) suppose que u soit bien strictement positif à cet endroit — ce n'est pas automatique, c'est une condition supplémentaire à poser.", latex: null };
 }
 

@@ -320,8 +320,8 @@ export function consigneComportementInfiniE(): string {
 // ============================================================================
 
 export function aideDomaineNiveau1(exercice: ExerciceEtudeFonctionLogarithme): AideAvecLatex {
-  if (exercice.famille === "A" || exercice.famille === "B") return { texte: "Une puissance x^u n'est définie (au sens réel général) que pour une base x STRICTEMENT POSITIVE.", latex: null };
-  if (exercice.famille === "C") return { texte: "Rappel : |u|>0 dès que u≠0, quel que soit le signe de u — le domaine de ln|u| est donc plus large que celui de ln(u) seul.", latex: null };
+  if (exercice.famille === "A" || exercice.famille === "B") return { texte: "Une puissance x^u n'est définie (au sens réel général) que pour une base x STRICTEMENT POSITIVE.", latex: "x^u \\text{ défini} \\iff x>0" };
+  if (exercice.famille === "C") return { texte: "Rappel : |u|>0 dès que u≠0, quel que soit le signe de u — le domaine de ln|u| est donc plus large que celui de ln(u) seul.", latex: "|u|>0 \\text{ dès que } u\\neq 0" };
   return { texte: "Une somme/produit d'une exponentielle et d'un polynôme (ou d'une fonction trigonométrique) est toujours défini sur tout ℝ.", latex: null };
 }
 
@@ -335,9 +335,9 @@ export function aideDomaineNiveau2(exercice: ExerciceEtudeFonctionLogarithme): A
 }
 
 export function aideLimitesNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Croissances comparées : x·ln(x) → 0 quand x→0⁺ (résultat déjà connu). En +∞, la base et l'exposant grandissent tous les deux.", latex: null };
-  if (exercice.famille === "B") return { texte: "Croissances comparées : ln(x)/x → 0 quand x→+∞ (résultat déjà connu). En 0⁺, distingue le signe de k.", latex: null };
-  if (exercice.famille === "C") return { texte: "Aux points exclus, |k²-x²| → 0⁺ (valeur qui s'annule mais reste positive) — le logarithme d'une quantité qui tend vers 0⁺ tend vers -∞.", latex: null };
+  if (exercice.famille === "A") return { texte: "Croissances comparées : x·ln(x) → 0 quand x→0⁺ (résultat déjà connu). En +∞, la base et l'exposant grandissent tous les deux.", latex: "x\\ln(x)\\to 0 \\text{ quand } x\\to 0^+" };
+  if (exercice.famille === "B") return { texte: "Croissances comparées : ln(x)/x → 0 quand x→+∞ (résultat déjà connu). En 0⁺, distingue le signe de k.", latex: "\\dfrac{\\ln(x)}{x}\\to 0 \\text{ quand } x\\to+\\infty" };
+  if (exercice.famille === "C") return { texte: "Aux points exclus, |k²-x²| → 0⁺ (valeur qui s'annule mais reste positive) — le logarithme d'une quantité qui tend vers 0⁺ tend vers -∞.", latex: "|k^2-x^2|\\to 0^+" };
   return { texte: "Piège : les deux limites sont infinies, mais cela ne signifie pas 'pas d'asymptote' — regarde l'étape suivante avant de conclure.", latex: null };
 }
 
@@ -352,21 +352,21 @@ export function aideAsymptotesNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecL
   if (exercice.famille === "A") return { texte: "Une limite finie non nulle en une borne FINIE du domaine (ici x=0) n'est PAS une asymptote — l'asymptote horizontale exige une limite en ±∞.", latex: null };
   if (exercice.famille === "B") return { texte: "L'asymptote horizontale existe si la limite en +∞ est une valeur FINIE.", latex: null };
   if (exercice.famille === "C") return { texte: "Une asymptote verticale x=p existe quand la limite en p (d'un côté au moins) est infinie.", latex: null };
-  return { texte: "Une limite finie (0 ou une valeur) donne une asymptote HORIZONTALE ; une asymptote OBLIQUE y=ax+b existe si f(x)-(ax+b)→0. Une limite infinie sans cette propriété ne donne AUCUNE asymptote.", latex: null };
+  return { texte: "Une limite finie (0 ou une valeur) donne une asymptote HORIZONTALE ; une asymptote OBLIQUE y=ax+b existe si f(x)-(ax+b)→0. Une limite infinie sans cette propriété ne donne AUCUNE asymptote.", latex: "y=ax+b \\quad\\text{si}\\quad f(x)-(ax+b)\\to 0" };
 }
 
 export function aideAsymptotesNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
   if (exercice.famille === "A") return { texte: "Aucune des deux directions n'a d'asymptote pour cette famille.", latex: null };
   if (exercice.famille === "B") return { texte: "Équation attendue :", latex: "y=1" };
   if (exercice.famille === "C") return { texte: "Les 2 valeurs exclues du domaine :", latex: `x=-${exercice.k} \\text{ et } x=${exercice.k}` };
-  return { texte: "En +∞, x+c·e^(-x) - x = c·e^(-x) → 0 : c'est la définition d'une asymptote oblique y=x. En -∞, cette même différence diverge — aucune asymptote de ce côté.", latex: null };
+  return { texte: "En +∞, x+c·e^(-x) - x = c·e^(-x) → 0 : c'est la définition d'une asymptote oblique y=x. En -∞, cette même différence diverge — aucune asymptote de ce côté.", latex: "x+c\\,e^{-x}-x = c\\,e^{-x}\\to 0 \\quad\\Rightarrow\\quad y=x" };
 }
 
 export function aideCroissanceNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Dérivation logarithmique : pose ln(f)=ax·ln(x), dérive les deux membres pour obtenir f'/f, puis étudie son signe (f>0 toujours).", latex: null };
-  if (exercice.famille === "B") return { texte: "Dérivation logarithmique : pose ln(f)=(k/x)·ln(x), dérive les deux membres pour obtenir f'/f, puis étudie son signe.", latex: null };
-  if (exercice.famille === "C") return { texte: "f'(x)=2x/(x²-k²) — étudie séparément le signe du numérateur et du dénominateur sur chacun des 4 intervalles.", latex: null };
-  return { texte: "f'(x) = 1 - c·e^(-x), nul en une seule valeur — étudie son signe avant/après pour confirmer un minimum.", latex: null };
+  if (exercice.famille === "A") return { texte: "Dérivation logarithmique : pose ln(f)=ax·ln(x), dérive les deux membres pour obtenir f'/f, puis étudie son signe (f>0 toujours).", latex: "\\ln(f)=ax\\cdot\\ln(x)" };
+  if (exercice.famille === "B") return { texte: "Dérivation logarithmique : pose ln(f)=(k/x)·ln(x), dérive les deux membres pour obtenir f'/f, puis étudie son signe.", latex: "\\ln(f)=\\dfrac{k}{x}\\cdot\\ln(x)" };
+  if (exercice.famille === "C") return { texte: "f'(x)=2x/(x²-k²) — étudie séparément le signe du numérateur et du dénominateur sur chacun des 4 intervalles.", latex: "f'(x)=\\dfrac{2x}{x^2-k^2}" };
+  return { texte: "f'(x) = 1 - c·e^(-x), nul en une seule valeur — étudie son signe avant/après pour confirmer un minimum.", latex: "f'(x)=1-c\\,e^{-x}" };
 }
 
 export function aideCroissanceNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
@@ -385,22 +385,22 @@ export function aideConcaviteNiveau1(_exercice: ExerciceEtudeLogNonE): AideAvecL
 }
 
 export function aideConcaviteNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "f''(x) = f(x)·[a²(ln(x)+1)² + a/x] — une somme de deux termes toujours positifs (x>0, a>0).", latex: null };
+  if (exercice.famille === "A") return { texte: "f''(x) = f(x)·[a²(ln(x)+1)² + a/x] — une somme de deux termes toujours positifs (x>0, a>0).", latex: "f''(x)=f(x)\\cdot\\left[a^2(\\ln(x)+1)^2+\\dfrac{a}{x}\\right]" };
   if (exercice.famille === "B") return { texte: "Résultat NON trivial pour cette famille : la position exacte des points d'inflexion n'a pas de forme simple — utilise ta calculatrice pour un balayage numérique du signe de f''.", latex: null };
-  if (exercice.famille === "C") return { texte: "f''(x) = -2(x²+k²)/(k²-x²)² sur ]-k;k[, et une formule de même signe sur les 2 autres branches — toujours strictement négative.", latex: null };
-  return { texte: "f''(x) = c·e^(-x) — toujours strictement positif (c>0).", latex: null };
+  if (exercice.famille === "C") return { texte: "f''(x) = -2(x²+k²)/(k²-x²)² sur ]-k;k[, et une formule de même signe sur les 2 autres branches — toujours strictement négative.", latex: "f''(x)=\\dfrac{-2(x^2+k^2)}{(k^2-x^2)^2} \\quad \\text{sur } ]-k;k[" };
+  return { texte: "f''(x) = c·e^(-x) — toujours strictement positif (c>0).", latex: "f''(x)=c\\,e^{-x}" };
 }
 
 export function aideGraphiqueNiveau1(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Le graphique doit rester CONVEXE sur tout son domaine (x>0), avec un minimum unique en x=1/e ≈ 0,37, et une limite FINIE (1) en x→0⁺ — jamais une asymptote verticale à cet endroit.", latex: null };
-  if (exercice.famille === "B") return { texte: "Le graphique doit présenter une asymptote HORIZONTALE y=1 en +∞ (jamais un tracé qui continue de s'écarter), et un seul extremum en x=e.", latex: null };
-  if (exercice.famille === "C") return { texte: "Le graphique doit être SYMÉTRIQUE par rapport à l'axe des y, avec 2 asymptotes verticales bien placées en x=±k.", latex: null };
-  return { texte: "Le graphique doit se RAPPROCHER de la droite y=x en +∞ (jamais s'en éloigner), et n'avoir qu'un seul minimum.", latex: null };
+  if (exercice.famille === "A") return { texte: "Le graphique doit rester CONVEXE sur tout son domaine (x>0), avec un minimum unique en x=1/e ≈ 0,37, et une limite FINIE (1) en x→0⁺ — jamais une asymptote verticale à cet endroit.", latex: "x=\\dfrac{1}{e}" };
+  if (exercice.famille === "B") return { texte: "Le graphique doit présenter une asymptote HORIZONTALE y=1 en +∞ (jamais un tracé qui continue de s'écarter), et un seul extremum en x=e.", latex: "y=1,\\quad x=e" };
+  if (exercice.famille === "C") return { texte: "Le graphique doit être SYMÉTRIQUE par rapport à l'axe des y, avec 2 asymptotes verticales bien placées en x=±k.", latex: "x=\\pm k" };
+  return { texte: "Le graphique doit se RAPPROCHER de la droite y=x en +∞ (jamais s'en éloigner), et n'avoir qu'un seul minimum.", latex: "y=x" };
 }
 
 export function aideGraphiqueNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLatex {
   if (exercice.famille === "A") return { texte: "Position du minimum :", latex: "x=1/e \\approx 0{,}37" };
-  if (exercice.famille === "B") return { texte: exercice.k > 0 ? "Un MAXIMUM (pas un minimum) en x=e." : "Un MINIMUM (pas un maximum) en x=e.", latex: null };
+  if (exercice.famille === "B") return { texte: exercice.k > 0 ? "Un MAXIMUM (pas un minimum) en x=e." : "Un MINIMUM (pas un maximum) en x=e.", latex: "x=e" };
   if (exercice.famille === "C") return { texte: "Valeur du maximum local en x=0 :", latex: `\\ln(${exercice.k}^2) = 2\\ln(${exercice.k})` };
   return { texte: exercice.c > 0 ? "Position du minimum :" : "", latex: exercice.c > 0 ? `x=\\ln(${exercice.c})` : null };
 }
@@ -408,7 +408,7 @@ export function aideGraphiqueNiveau2(exercice: ExerciceEtudeLogNonE): AideAvecLa
 export function aideComportementInfiniNiveau1(): AideAvecLatex {
   return {
     texte: "|f(x)| ≤ |e^(ax)| toujours (l'enveloppe encadre l'oscillation, |sin|/|cos| ≤ 1) — si l'enveloppe tend vers 0, f aussi (encadrement) ; si elle explose, f oscille indéfiniment SANS jamais se stabiliser.",
-    latex: null,
+    latex: "|f(x)|\\le |e^{ax}|",
   };
 }
 

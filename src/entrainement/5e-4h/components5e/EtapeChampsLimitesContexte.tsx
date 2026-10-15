@@ -93,7 +93,16 @@ export function EtapeChampsLimitesContexte({
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, phase)}</p>}
+          {niveauAide >= 2 &&
+            (() => {
+              const aide2 = texteAideNiveau2(exercice, phase);
+              return (
+                <>
+                  <p>{aide2.texte}</p>
+                  {aide2.latex && <Katex expression={aide2.latex} block />}
+                </>
+              );
+            })()}
         </div>
       )}
       {!validation && (

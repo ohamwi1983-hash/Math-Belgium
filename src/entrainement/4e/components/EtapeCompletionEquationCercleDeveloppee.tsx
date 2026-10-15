@@ -2,9 +2,10 @@ import { useState } from "react";
 import type { ExerciceEquationCercleDeveloppee } from "../core/equationCercleDeveloppee.types";
 import { NIVEAU_AIDE_MAX_COMPLETION } from "../moteur/sessionEquationCercleDeveloppee";
 import { diagnostiquerCompletionCarre } from "../moteur/verificationEquationCercleDeveloppee";
-import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, TEXTE_AIDE_COMPLETION_NIVEAU1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_COMPLETION, CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COMPLETION, segmentsAideCompletionNiveau1, formatAideCompletionNiveau2Latex, formatEquationDeveloppeeLatex } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
+import { RenduFragments } from "./RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -67,7 +68,9 @@ export function EtapeCompletionEquationCercleDeveloppee({ exercice, tentativesUt
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_COMPLETION_NIVEAU1}</p>
+          <p>
+            <RenduFragments fragments={segmentsAideCompletionNiveau1()} />
+          </p>
           {niveauAide >= 2 && (
             <p>
               <Katex expression={formatAideCompletionNiveau2Latex(exercice)} />

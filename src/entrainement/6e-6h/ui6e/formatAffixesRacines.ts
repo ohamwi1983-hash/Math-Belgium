@@ -115,7 +115,7 @@ export function niveauAideMaxA(): number {
   return 2;
 }
 export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "z̄=a−bi — additionne (ou soustrais) z et z̄ terme à terme : parties réelles entre elles, parties imaginaires entre elles.", latex: null };
+  return { texte: "z̄=a−bi — additionne (ou soustrais) z et z̄ terme à terme : parties réelles entre elles, parties imaginaires entre elles.", latex: "\\bar z=a-bi" };
 }
 export function aideNiveau2A(e: Extract<ExerciceAffixesRacines, { famille: "A" }>): AideAvecLatex {
   const a = envelopperSiNegatif(e.a);
@@ -219,7 +219,7 @@ export function niveauAideMaxC(phase: PhaseAffixesRacines): number {
   return 0;
 }
 export function aideNiveau1C(phase: PhaseAffixesRacines): AideAvecLatex {
-  if (phase === "cEcran2") return { texte: "Remplace y par b/(2x) dans x²−y²=a pour obtenir une équation ne portant plus que sur x.", latex: null };
+  if (phase === "cEcran2") return { texte: "Remplace y par b/(2x) dans x²−y²=a pour obtenir une équation ne portant plus que sur x.", latex: "y=\\dfrac{b}{2x}" };
   if (phase === "cEcran3") return { texte: "Une racine carrée complexe non nulle possède TOUJOURS 2 solutions, opposées l'une de l'autre.", latex: null };
   return AUCUNE_AIDE;
 }

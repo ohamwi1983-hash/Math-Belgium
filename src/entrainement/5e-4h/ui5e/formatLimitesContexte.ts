@@ -163,25 +163,59 @@ export function texteAideNiveau1(exercice: ExerciceLimitesContexte, phase: Phase
   }
 }
 
-export function texteAideNiveau2(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau2(exercice: ExerciceLimitesContexte, phase: PhaseLimitesContexte): AideFragmentee {
   switch (exercice.famille) {
     case "prixRevient":
-      if (phase === "asymptoteHorizontale") return "Exemple : si Cᵤ(x)=15+300/x, alors lim Cᵤ(x) quand x→+∞ vaut 15.";
-      if (phase === "interpreter") return "Exemple : avec Cᵤ(x)=15+300/x, le coût unitaire descend vers 15 € sans jamais l'atteindre exactement.";
-      return `Exemple : si le seuil minimal est de 20 ${exercice.contexte.unitePluriel}, x=0 n'appartient jamais au domaine réel du problème.`;
+      if (phase === "asymptoteHorizontale")
+        return { texte: "Exemple :", latex: "C_u(x)=15+\\dfrac{300}{x} \\;\\Rightarrow\\; \\lim_{x\\to+\\infty} C_u(x)=15" };
+      if (phase === "interpreter")
+        return {
+          texte: "Exemple : le coût unitaire descend vers 15 € sans jamais l'atteindre exactement :",
+          latex: "C_u(x)=15+\\dfrac{300}{x}",
+        };
+      return {
+        texte: `Exemple : si le seuil minimal est de 20 ${exercice.contexte.unitePluriel}, x=0 n'appartient jamais au domaine réel du problème.`,
+        latex: null,
+      };
     case "eauSalee":
-      if (phase === "construireC") return "Exemple : V(t)=50+2t, Q(t)=3·2·t=6t ⟹ C(t)=6t/(50+2t).";
-      if (phase === "limiteC") return "Exemple : C(t)=6t/(50+2t)=6/(50/t+2) → 6/2=3 quand t→+∞.";
-      return "Exemple : ajouter en continu une solution à 3 g/L finit par imposer sa concentration au contenant tout entier.";
+      if (phase === "construireC")
+        return { texte: "Exemple :", latex: "V(t)=50+2t,\\ Q(t)=3\\cdot2\\cdot t=6t \\;\\Rightarrow\\; C(t)=\\dfrac{6t}{50+2t}" };
+      if (phase === "limiteC")
+        return { texte: "Exemple :", latex: "C(t)=\\dfrac{6t}{50+2t}=\\dfrac{6}{\\frac{50}{t}+2} \\;\\to\\; \\dfrac{6}{2}=3 \\quad \\text{quand } t\\to+\\infty" };
+      return { texte: "Exemple : ajouter en continu une solution à 3 g/L finit par imposer sa concentration au contenant tout entier.", latex: null };
     case "clubLoisirs":
-      if (phase === "evaluer") return `Exemple : si f(0)=4 (échelle centaines) et le facteur est 100, ${exercice.contexte.grandeurArticle} réel à la création est de 400.`;
-      if (phase === "inequation") return "Exemple : (ax+b−k)(x+d)=c est un polynôme du second degré en x — résous-le via le discriminant.";
-      if (phase === "asymptoteOblique") return "Exemple : f(x)=2x−1−5/(x+3) a pour asymptote oblique y=2x−1.";
-      return `Exemple : une pente de 3 (échelle centaines) avec un facteur 100 signifie +300 ${exercice.contexte.unitePluriel} réels par mois.`;
+      if (phase === "evaluer")
+        return {
+          texte: `Exemple : si f(0)=4 (échelle centaines) et le facteur est 100, ${exercice.contexte.grandeurArticle} réel à la création est de 400.`,
+          latex: null,
+        };
+      if (phase === "inequation")
+        return { texte: "Exemple : résous-le via le discriminant :", latex: "(ax+b-k)(x+d)=c \\quad \\text{(polynôme du second degré en } x\\text{)}" };
+      if (phase === "asymptoteOblique")
+        return { texte: "Exemple :", latex: "f(x)=2x-1-\\dfrac{5}{x+3} \\;\\Rightarrow\\; \\text{asymptote oblique } y=2x-1" };
+      return {
+        texte: `Exemple : une pente de 3 (échelle centaines) avec un facteur 100 signifie +300 ${exercice.contexte.unitePluriel} réels par mois.`,
+        latex: null,
+      };
     case "population":
-      if (phase === "identification") return "Exemple : (10x+25)/(x+2) — coefficient de x : b=10 ; terme constant : a+2b=25 ⟹ a=25−20=5.";
-      if (phase === "interpreter") return "Exemple : f(0)=12, limite b=10 : la valeur initiale est supérieure à la limite ⟹ régression, MÊME si a>0.";
-      return "Exemple : pour l'année 2030 avec une référence 2010, x=2030−2010=20.";
+      if (phase === "identification")
+        return {
+          texte: "Exemple :",
+          latex: "\\dfrac{10x+25}{x+2} \\;\\Rightarrow\\; \\text{coeff. de } x: b=10 \\text{ ; terme constant : } a+2b=25 \\;\\Rightarrow\\; a=25-20=5",
+        };
+      if (phase === "interpreter")
+        return {
+          texte: "La valeur initiale est supérieure à la limite ⟹ régression, MÊME si a>0 :",
+          latex: "f(0)=12,\\ \\text{limite } b=10",
+        };
+      return { texte: "Exemple :", latex: "\\text{année } 2030,\\ \\text{référence } 2010 \\;\\Rightarrow\\; x=2030-2010=20" };
   }
 }
 

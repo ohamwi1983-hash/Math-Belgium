@@ -215,7 +215,7 @@ export function niveauAideMaxA(phase: PhaseVolumesRevolution): number {
   return phase === "aEcran1" ? 2 : 0;
 }
 export function aideNiveau1A(phase: PhaseVolumesRevolution): AideAvecLatex {
-  if (phase === "aEcran1") return { texte: "Il faut TOUJOURS développer f(x)² avant de chercher une primitive — jamais intégrer un carré non développé directement, sauf s'il correspond déjà à une forme composée reconnue.", latex: null };
+  if (phase === "aEcran1") return { texte: "Il faut TOUJOURS développer f(x)² avant de chercher une primitive — jamais intégrer un carré non développé directement, sauf s'il correspond déjà à une forme composée reconnue.", latex: "f(x)^{2}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2A(exercice: ExerciceVolumeA, phase: PhaseVolumesRevolution): AideAvecLatex {

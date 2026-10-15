@@ -197,7 +197,7 @@ function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): string {
 
 function aideCNiveau1(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): AideAvecLatex {
   if (phase === "cDomaine") return { texte: "Un produit d'exponentielle(s)/de fonctions déjà définies partout reste défini partout (ou hérite du domaine du facteur le plus restrictif).", latex: null };
-  if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment (chaîne si besoin).", latex: null };
+  if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment (chaîne si besoin).", latex: "f(x)=u(x)\\cdot v(x)" };
   return { texte: "Rappel de la formule du produit (non substituée) :", latex: "(uv)' = u'v + uv'" };
 }
 
@@ -244,12 +244,12 @@ function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): string {
 
 function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage"): AideAvecLatex {
   if (phase === "dDomaine") return { texte: "Vérifie si le dénominateur peut s'annuler — ne conclus jamais ℝ par réflexe.", latex: null };
-  if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: null };
+  if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
   return { texte: "Rappel de la formule du quotient (non substituée) :", latex: "\\left(\\frac{N}{D}\\right)' = \\frac{N'D - ND'}{D^2}" };
 }
 
 function aideDNiveau2(phase: "dDomaine" | "dND" | "dAssemblage", exercice: ExerciceDomaineDeriveeD): AideAvecLatex {
-  if (phase === "dDomaine") return { texte: "Résous D(x)=0 (ou vérifie qu'il ne s'annule jamais).", latex: null };
+  if (phase === "dDomaine") return { texte: "Résous D(x)=0 (ou vérifie qu'il ne s'annule jamais).", latex: "D(x)=0" };
   const { n, d } = nomsNDdeD(exercice);
   if (phase === "dND") return { texte: "N(x) et D(x), pour t'aider à identifier ce que tu dois dériver :", latex: `\\begin{gathered} N(x) = ${n} \\\\ D(x) = ${d} \\end{gathered}` };
   return { texte: "N, D, N' et D' (déjà confirmés à l'étape précédente) :", latex: `N(x)=${n},\\ D(x)=${d}` };
@@ -323,7 +323,14 @@ function texteProprieteE(exercice: ExerciceDomaineDeriveeE): string {
 
 function aideENiveau1(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: ExerciceDomaineDeriveeE): AideAvecLatex {
   if (phase === "eDomaine") return { texte: "Le domaine d'une exponentielle (et de tout quotient d'exponentielles, jamais nulles) est toujours ℝ.", latex: null };
-  if (phase === "eSimplifier") return { texte: texteProprieteE(exercice), latex: null };
+  if (phase === "eSimplifier") {
+    const latexProprieteE: Record<ExerciceDomaineDeriveeE["sousType"], string> = {
+      j: "\\dfrac{a^m}{a^n}=a^{m-n}",
+      m: "\\dfrac{A-B}{C}=\\dfrac{A}{C}-\\dfrac{B}{C}",
+      n: "\\dfrac{a^x}{b^x}=\\left(\\dfrac{a}{b}\\right)^x",
+    };
+    return { texte: texteProprieteE(exercice), latex: latexProprieteE[exercice.sousType] };
+  }
   return { texte: "La forme simplifiée est une simple exponentielle (ou somme de 2 exponentielles) — dérive-la directement, sans repasser par la règle du quotient.", latex: null };
 }
 
@@ -355,7 +362,7 @@ function aideFNiveau1(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineD
     if (exercice.trig === "cos") return { texte: "cos est défini partout — aucune restriction ici.", latex: null };
     return {
       texte: "arccos(w) exige -1≤w≤1. Une exponentielle est TOUJOURS strictement positive — donc TOUJOURS > -1 : cette condition est automatique, seule w≤1 reste à résoudre.",
-      latex: null,
+      latex: "-1\\leq w\\leq 1",
     };
   }
   return { texte: "3 niveaux de chaîne à enchaîner, énumérés de l'extérieur vers l'intérieur (sans encore substituer) :", latex: "\\text{trig}(w),\\quad w=e^{v},\\quad v=x^2-k" };

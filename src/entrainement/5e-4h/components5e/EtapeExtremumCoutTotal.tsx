@@ -137,8 +137,25 @@ export function EtapeExtremumCoutTotal({ exercice, tentativesUtilisees, tentativ
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("extremum")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, "extremum")}</p>}
+          {(() => {
+            const aide1 = texteAideNiveau1("extremum");
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
+          {niveauAide >= 2 &&
+            (() => {
+              const aide2 = texteAideNiveau2(exercice, "extremum");
+              return (
+                <>
+                  <p>{aide2.texte}</p>
+                  {aide2.latex && <Katex expression={aide2.latex} block />}
+                </>
+              );
+            })()}
         </div>
       )}
       {!validation && (

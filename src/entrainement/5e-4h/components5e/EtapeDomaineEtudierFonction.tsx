@@ -51,7 +51,16 @@ export function EtapeDomaineEtudierFonction({ exercice, tentativesUtilisees, ten
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1EtudierFonction("domaine")}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2EtudierFonction("domaine")}</p>}
+          {niveauAide >= 2 &&
+            (() => {
+              const aide2 = texteAideNiveau2EtudierFonction("domaine");
+              return (
+                <>
+                  <p>{aide2.texte}</p>
+                  {aide2.latex && <Katex expression={aide2.latex} block />}
+                </>
+              );
+            })()}
         </div>
       )}
       {!validation && montrerErreurs && (

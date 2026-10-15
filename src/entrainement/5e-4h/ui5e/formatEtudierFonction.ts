@@ -144,24 +144,37 @@ export function texteAideNiveau1EtudierFonction(ecran: EcranEtudierFonction): st
   }
 }
 
-export function texteAideNiveau2EtudierFonction(ecran: EcranEtudierFonction): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau2EtudierFonction(ecran: EcranEtudierFonction): AideFragmentee {
   switch (ecran) {
     case "domaine":
-      return "Exemple : x-3=0 ⟺ x=3 ⟹ domf=ℝ\\{3}.";
+      return { texte: "Exemple :", latex: "x-3=0 \\iff x=3 \\;\\Rightarrow\\; \\text{domf}=\\mathbb{R}\\setminus\\{3\\}" };
     case "limites":
-      return "Exemple : f(x)=1/(x-2), en x→2⁻ le dénominateur est négatif proche de 0 ⟹ f(x)→-∞.";
+      return { texte: "Exemple :", latex: "f(x)=\\dfrac{1}{x-2}, \\text{ en } x\\to2^- \\text{ le dénominateur est négatif proche de } 0 \\;\\Rightarrow\\; f(x)\\to-\\infty" };
     case "calculerFPrime":
-      return "Exemple : f(x)=x³+2x ⟹ f'(x)=3x²+2.";
+      return { texte: "Exemple :", latex: "f(x)=x^3+2x \\;\\Rightarrow\\; f'(x)=3x^2+2" };
     case "tableauFPrime":
-      return "Exemple : f'(x)=6x² (racine double en 0) reste POSITIVE des 2 côtés de 0 — 'ni l'un ni l'autre'.";
+      return {
+        texte: "Exemple : (racine double en 0) reste POSITIVE des 2 côtés de 0 — 'ni l'un ni l'autre' :",
+        latex: "f'(x)=6x^2",
+      };
     case "calculerFSeconde":
-      return "Exemple : f'(x)=3x²+2 ⟹ f''(x)=6x.";
+      return { texte: "Exemple :", latex: "f'(x)=3x^2+2 \\;\\Rightarrow\\; f''(x)=6x" };
     case "tableauFSeconde":
-      return "Exemple : f''(x)=12x change bien de signe en x=0 — c'est un vrai point d'inflexion.";
+      return {
+        texte: "Exemple : change bien de signe en x=0 — c'est un vrai point d'inflexion :",
+        latex: "f''(x)=12x",
+      };
     case "recap":
-      return "";
+      return { texte: "", latex: null };
     case "graphique":
-      return "Utilise les valeurs déjà trouvées dans les écrans précédents (extremums, points d'inflexion) — l'ordonnée à l'origine se calcule avec f(0).";
+      return { texte: "Utilise les valeurs déjà trouvées dans les écrans précédents (extremums, points d'inflexion) — l'ordonnée à l'origine se calcule avec f(0).", latex: null };
   }
 }
 

@@ -180,7 +180,7 @@ export function niveauAideMaxA(phase: PhaseFormeTrigonometrique): number {
 }
 export function aideNiveau1A(phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return { texte: "arctan(b/a) donne directement le bon angle SEULEMENT si a>0. Si a<0, il faut ajouter ou soustraire π selon le quadrant du point (a;b).", latex: null };
+  return { texte: "arctan(b/a) donne directement le bon angle SEULEMENT si a>0. Si a<0, il faut ajouter ou soustraire π selon le quadrant du point (a;b).", latex: "\\arctan\\left(\\dfrac{b}{a}\\right) \\text{ valide si } a>0" };
 }
 export function aideNiveau2A(e: ExerciceFormeTrigA, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
@@ -306,7 +306,7 @@ export function niveauAideMaxD(phase: PhaseFormeTrigonometrique): number {
 }
 export function aideNiveau1D(phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "dEcran2") return AUCUNE_AIDE;
-  return { texte: "Les 4 conditions possibles sur l'argument (modulo 2π) : réel positif → nθ≡0 ; réel négatif → nθ≡π ; imaginaire pur positif → nθ≡π/2 ; imaginaire pur négatif → nθ≡3π/2.", latex: null };
+  return { texte: "Les 4 conditions possibles sur l'argument (modulo 2π) : réel positif → nθ≡0 ; réel négatif → nθ≡π ; imaginaire pur positif → nθ≡π/2 ; imaginaire pur négatif → nθ≡3π/2.", latex: "n\\theta\\equiv 0,\\ \\pi,\\ \\dfrac{\\pi}{2}\\ \\text{ou}\\ \\dfrac{3\\pi}{2}\\ (\\text{mod } 2\\pi)" };
 }
 export function aideNiveau2D(e: ExerciceFormeTrigD, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "dEcran2") return AUCUNE_AIDE;
@@ -349,7 +349,7 @@ export function niveauAideMaxE(phase: PhaseFormeTrigonometrique): number {
 export function aideNiveau1E(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "eEcran2") return AUCUNE_AIDE;
   if (e.operation === "quotient") return { texte: "Pour un quotient, multiplie numérateur ET dénominateur par le conjugué du dénominateur.", latex: null };
-  return { texte: "Pour un produit, développe directement (cos α+i sin α)(cos β+i sin β), en utilisant i²=-1.", latex: null };
+  return { texte: "Pour un produit, développe directement (cos α+i sin α)(cos β+i sin β), en utilisant i²=-1.", latex: "(\\cos\\alpha+i\\sin\\alpha)(\\cos\\beta+i\\sin\\beta), \\quad i^2=-1" };
 }
 export function aideNiveau2E(e: ExerciceFormeTrigE, phase: PhaseFormeTrigonometrique): AideAvecLatex {
   if (phase !== "eEcran2") return AUCUNE_AIDE;

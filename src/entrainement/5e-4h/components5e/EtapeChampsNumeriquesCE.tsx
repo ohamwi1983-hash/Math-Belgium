@@ -107,8 +107,25 @@ export function EtapeChampsNumeriquesCE({
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1(ecran)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, ecran)}</p>}
+          {(() => {
+            const aide1 = texteAideNiveau1(ecran);
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
+          {niveauAide >= 2 &&
+            (() => {
+              const aide2 = texteAideNiveau2(exercice, ecran);
+              return (
+                <>
+                  <p>{aide2.texte}</p>
+                  {aide2.latex && <Katex expression={aide2.latex} block />}
+                </>
+              );
+            })()}
         </div>
       )}
       {!validation && (

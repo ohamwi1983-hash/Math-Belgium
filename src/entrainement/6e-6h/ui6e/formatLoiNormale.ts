@@ -159,7 +159,7 @@ export function niveauAideMaxA(phase: PhaseLoiNormale): number {
 }
 export function aideNiveau1A(phase: PhaseLoiNormale): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "Rappels : Φ(−t)=1−Φ(t) (symétrie) et P(Z≥t)=1−Φ(t). La table ne donne directement que Φ(t) pour t≥0.", latex: null };
+  return { texte: "Rappels : Φ(−t)=1−Φ(t) (symétrie) et P(Z≥t)=1−Φ(t). La table ne donne directement que Φ(t) pour t≥0.", latex: "\\Phi(-t)=1-\\Phi(t)\\qquad P(Z\\geq t)=1-\\Phi(t)" };
 }
 export function aideNiveau2A(e: ExerciceLoiNormaleA, phase: PhaseLoiNormale): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
@@ -264,7 +264,7 @@ export function niveauAideMaxC(phase: PhaseLoiNormale): number {
 }
 export function aideNiveau1C(phase: PhaseLoiNormale): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
-  return { texte: "La table ne donne QUE Φ(t)=P(Z≤t) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: null };
+  return { texte: "La table ne donne QUE Φ(t)=P(Z≤t) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: "\\Phi(t)=P(Z\\leq t)" };
 }
 export function aideNiveau2C(e: ExerciceLoiNormaleC, phase: PhaseLoiNormale): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
@@ -321,7 +321,7 @@ export function niveauAideMaxD(phase: PhaseLoiNormale): number {
   return 0;
 }
 export function aideNiveau1D(phase: PhaseLoiNormale): AideAvecLatex {
-  if (phase === "dEcran1") return { texte: "La table ne donne QUE Φ(z)=P(Z≤z) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: null };
+  if (phase === "dEcran1") return { texte: "La table ne donne QUE Φ(z)=P(Z≤z) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: "\\Phi(z)=P(Z\\leq z)" };
   if (phase === "dEcran3") return { texte: "Rappel de la formule inverse (à partir de z=(a−μ)/σ) :", latex: "a=\\mu+z\\cdot\\sigma" };
   return AUCUNE_AIDE;
 }
@@ -399,7 +399,7 @@ export function niveauAideMaxE(phase: PhaseLoiNormale): number {
 }
 export function aideNiveau1E(phase: PhaseLoiNormale): AideAvecLatex {
   if (phase !== "eEcran1") return AUCUNE_AIDE;
-  return { texte: "Le pourcentage encadré correspond respectivement à μ±σ (68,3%), μ±2σ (95,4%) ou μ±3σ (99,7%).", latex: null };
+  return { texte: "Le pourcentage encadré correspond respectivement à μ±σ (68,3%), μ±2σ (95,4%) ou μ±3σ (99,7%).", latex: "\\mu\\pm\\sigma\\ (68{,}3\\%)\\qquad \\mu\\pm2\\sigma\\ (95{,}4\\%)\\qquad \\mu\\pm3\\sigma\\ (99{,}7\\%)" };
 }
 export function aideNiveau2E(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): AideAvecLatex {
   if (phase !== "eEcran1") return AUCUNE_AIDE;

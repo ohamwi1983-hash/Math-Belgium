@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ExerciceParametreNorme } from "../core/normeDistance.types";
 import { NIVEAU_AIDE_MAX } from "../moteur/typesNormeDistance";
-import { PLACEHOLDER_SOLUTION_X, TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE, formatDiscriminantLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
+import { PLACEHOLDER_SOLUTION_X, aideMethodeResolutionQuadratiqueNiveau1, formatDiscriminantLatex, formatTermesEnonceParametreLatex, segmentsConsigneParametre } from "../ui/formatNormeDistance";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
@@ -121,7 +121,8 @@ export function EtapeResolutionParametreNorme({ exercice, tentativesUtilisees, t
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE}</p>
+          <p>{aideMethodeResolutionQuadratiqueNiveau1().texte}</p>
+          <Katex expression={aideMethodeResolutionQuadratiqueNiveau1().latex} block />
           {niveauAide >= 2 && (
             <p>
               <Katex expression={formatDiscriminantLatex(exercice)} />

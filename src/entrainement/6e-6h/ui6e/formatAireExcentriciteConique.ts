@@ -103,7 +103,7 @@ export function niveauAideMaxA(phase: PhaseAireExcentriciteConique): number {
 }
 
 export function aideNiveau1A(): AideAvecLatex {
-  return { texte: "Rappel : pour TOUT point P de l'ellipse, |PF|+|PF'|=2a. Combine cette relation avec le rapport k donné pour former un système à 2 équations, 2 inconnues.", latex: null };
+  return { texte: "Rappel : pour TOUT point P de l'ellipse, |PF|+|PF'|=2a. Combine cette relation avec le rapport k donné pour former un système à 2 équations, 2 inconnues.", latex: "|PF|+|PF'|=2a" };
 }
 
 export function aideNiveau2A(e: ExerciceFamilleA): AideAvecLatex {
@@ -172,7 +172,7 @@ export function aideNiveau1B(e: ExerciceFamilleB): AideAvecLatex {
     return { texte: "Rappel : tout sommet de l'axe secondaire est à distance a de chaque foyer — propriété caractéristique de l'ellipse, à utiliser directement, sans recalcul.", latex: null };
   }
   if (e.sousType === "distanceDirectrices") {
-    return { texte: `Rappel des formules : distance entre les directrices=2a/e ; distance entre les foyers=2ae — à relier via le rapport donné (k=${e.k}).`, latex: null };
+    return { texte: `Rappel des formules : distance entre les directrices=2a/e ; distance entre les foyers=2ae — à relier via le rapport donné (k=${e.k}).`, latex: "D(\\text{directrices})=\\dfrac{2a}{e}\\text{, }D(\\text{foyers})=2ae" };
   }
   return AUCUNE_AIDE;
 }

@@ -80,7 +80,7 @@ function consigneA(phase: "aCE" | "aResoudre"): string {
 
 function aideA1(phase: "aCE" | "aResoudre"): AideAvecLatex {
   if (phase === "aCE") return { texte: "L'argument d'un logarithme doit toujours être strictement positif.", latex: null };
-  return { texte: "Le logarithme de base b est croissant si b>1, décroissant si 0<b<1 — le sens de l'inégalité doit être adapté en conséquence.", latex: null };
+  return { texte: "Le logarithme de base b est croissant si b>1, décroissant si 0<b<1 — le sens de l'inégalité doit être adapté en conséquence.", latex: "b>1\\ (\\text{croissant})\\qquad 0<b<1\\ (\\text{décroissant})" };
 }
 
 function aideA2(phase: "aCE" | "aResoudre", exercice: ExerciceLogA): AideAvecLatex {
@@ -114,7 +114,7 @@ function aideB1(phase: "bCE" | "bResoudre"): AideAvecLatex {
   if (phase === "bCE") return { texte: "Chacun des deux arguments doit être strictement positif — pose les deux conditions séparément.", latex: null };
   return {
     texte: "log_base(f) [symbole] log_base(g) équivaut à f [même symbole] g si base>1, ou f [symbole inversé] g si 0<base<1 — mais UNIQUEMENT à l'intérieur de la CE. Ne jamais oublier de ré-intersecter avec la CE après cette étape.",
-    latex: null,
+    latex: "\\text{base}>1\\qquad 0<\\text{base}<1",
   };
 }
 
@@ -158,7 +158,9 @@ function consigneC(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceL
 function aideC1(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): AideAvecLatex {
   if (phase === "cCE") return { texte: "Chacun des deux arguments doit être strictement positif — pose les deux conditions séparément.", latex: null };
   if (phase === "cCombiner") {
-    return exercice.sousType === "produit" ? { texte: "Rappel : log_base(f)+log_base(g) = log_base(f·g).", latex: null } : { texte: "Rappel : log_base(f)-log_base(g) = log_base(f/g).", latex: null };
+    return exercice.sousType === "produit"
+      ? { texte: "Rappel : log_base(f)+log_base(g) = log_base(f·g).", latex: "\\log_{\\text{base}}(f)+\\log_{\\text{base}}(g)=\\log_{\\text{base}}(f\\cdot g)" }
+      : { texte: "Rappel : log_base(f)-log_base(g) = log_base(f/g).", latex: "\\log_{\\text{base}}(f)-\\log_{\\text{base}}(g)=\\log_{\\text{base}}\\left(\\dfrac{f}{g}\\right)" };
   }
   return { texte: "log_base(f·g ou f/g) [symbole] log_base(k) équivaut à (f·g ou f/g) [même ou inversé selon la base] k — uniquement à l'intérieur de la CE.", latex: null };
 }
@@ -166,7 +168,7 @@ function aideC1(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC
 function aideC2(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): AideAvecLatex {
   if (phase === "cCE") return { texte: "Les 2 conditions de positivité :", latex: `${formatAffineLatex(exercice.f)} > 0 \\quad\\text{ET}\\quad ${formatAffineLatex(exercice.g)} > 0` };
   if (phase === "cCombiner") return { texte: "Combinaison partiellement effectuée — il ne reste qu'à l'écrire explicitement :", latex: `\\log_{${baseLatex(exercice.base)}}\\left(${formatCombinaisonC(exercice)}\\right)` };
-  return { texte: "Base " + (exercice.baseSuperieureA1 ? ">1 (sens conservé)." : "<1 (sens inversé)."), latex: null };
+  return { texte: "Base " + (exercice.baseSuperieureA1 ? ">1 (sens conservé)." : "<1 (sens inversé)."), latex: exercice.baseSuperieureA1 ? "\\text{base}>1" : "\\text{base}<1" };
 }
 
 // ============================================================================
@@ -209,11 +211,11 @@ function aideD1(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX"): Aide
     case "dCE":
       return { texte: "L'argument d'un logarithme doit toujours être strictement positif.", latex: null };
     case "dReecrire":
-      return { texte: "Remplace chaque occurrence de log_base(x) par y — le reste de l'expression ne change pas.", latex: null };
+      return { texte: "Remplace chaque occurrence de log_base(x) par y — le reste de l'expression ne change pas.", latex: "y=\\log_{\\text{base}}(x)" };
     case "dResoudreY":
       return { texte: "Calcule le discriminant (ou utilise les racines déjà visibles) pour construire le tableau de signes du trinôme en y.", latex: null };
     case "dConvertirX":
-      return { texte: "Convertir un intervalle en y vers x via x=base^y conserve le sens si base>1, l'inverse si 0<base<1 — y compris pour l'ORDRE des bornes.", latex: null };
+      return { texte: "Convertir un intervalle en y vers x via x=base^y conserve le sens si base>1, l'inverse si 0<base<1 — y compris pour l'ORDRE des bornes.", latex: "x=\\text{base}^{y}\\qquad \\text{base}>1\\ (\\text{sens conservé})\\qquad 0<\\text{base}<1\\ (\\text{sens inversé})" };
   }
 }
 
@@ -284,9 +286,9 @@ function aideF1(phase: "fCE" | "fSimplifier" | "fConclure"): AideAvecLatex {
     case "fCE":
       return { texte: "Pose les deux conditions de positivité séparément avant de chercher à les simplifier.", latex: null };
     case "fSimplifier":
-      return { texte: "Développe f(x)-g(x) terme à terme, sans chercher à factoriser tout de suite.", latex: null };
+      return { texte: "Développe f(x)-g(x) terme à terme, sans chercher à factoriser tout de suite.", latex: "f(x)-g(x)" };
     case "fConclure":
-      return { texte: "Un carré est toujours ≥0, donc jamais strictement négatif — un des deux cas devient automatiquement impossible.", latex: null };
+      return { texte: "Un carré est toujours ≥0, donc jamais strictement négatif — un des deux cas devient automatiquement impossible.", latex: "(\\cdot)^{2}\\geq 0" };
   }
 }
 

@@ -132,7 +132,7 @@ export function niveauAideMaxA(phase: PhaseRacinesNiemes): number {
 }
 export function aideNiveau1A(phase: PhaseRacinesNiemes): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
-  return { texte: "Les n racines n-ièmes ont TOUTES le même module (r^{1/n}), et leurs arguments sont régulièrement espacés de 2π/n sur le cercle trigonométrique.", latex: null };
+  return { texte: "Les n racines n-ièmes ont TOUTES le même module (r^{1/n}), et leurs arguments sont régulièrement espacés de 2π/n sur le cercle trigonométrique.", latex: "\\sqrt[n]{r}\\qquad\\dfrac{2\\pi}{n}" };
 }
 export function aideNiveau2A(e: ExerciceRacinesA, phase: PhaseRacinesNiemes): AideAvecLatex {
   if (phase !== "aEcran2") return AUCUNE_AIDE;
@@ -206,7 +206,7 @@ export function niveauAideMaxC(phase: PhaseRacinesNiemes): number {
 }
 export function aideNiveau1C(phase: PhaseRacinesNiemes): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
-  return { texte: "Si zⁿ=wⁿ, alors (z/w)ⁿ=1 : z/w est donc une racine n-ième de l'unité.", latex: null };
+  return { texte: "Si zⁿ=wⁿ, alors (z/w)ⁿ=1 : z/w est donc une racine n-ième de l'unité.", latex: "z^{n}=w^{n}\\ \\Rightarrow\\ \\left(\\dfrac{z}{w}\\right)^{n}=1" };
 }
 export function aideNiveau2C(phase: PhaseRacinesNiemes): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;

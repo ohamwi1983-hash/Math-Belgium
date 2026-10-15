@@ -241,7 +241,7 @@ export function niveauAideMaxEcranB(phase: PhaseIntersectionsConiques): number {
 }
 
 export function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Rappel : tout point qui vérifie à la fois C1=0 et C2=0 vérifie AUTOMATIQUEMENT n'importe quelle combinaison λC1+μC2=0 — cherche λ,μ pour que cette combinaison soit un cercle, plutôt que de résoudre le système {C1,C2} directement (un polynôme de degré 4, sans racine simple en général).", latex: null };
+  return { texte: "Rappel : tout point qui vérifie à la fois C1=0 et C2=0 vérifie AUTOMATIQUEMENT n'importe quelle combinaison λC1+μC2=0 — cherche λ,μ pour que cette combinaison soit un cercle, plutôt que de résoudre le système {C1,C2} directement (un polynôme de degré 4, sans racine simple en général).", latex: "C_1=0\\quad C_2=0\\quad\\Rightarrow\\quad \\lambda C_1+\\mu C_2=0" };
 }
 
 export function aideNiveau2B(e: ExerciceIntersectionsConiquesB): AideAvecLatex {

@@ -314,7 +314,7 @@ export function niveauAideMaxD(phase: PhaseCalculAires): number {
   return phase === "dEcran2" ? 2 : 0;
 }
 export function aideNiveau1D(phase: PhaseCalculAires): AideAvecLatex {
-  if (phase === "dEcran2") return { texte: "Teste le signe de f(x)-g(x) en un point de l'intervalle : le signe indique quelle courbe est au-dessus.", latex: null };
+  if (phase === "dEcran2") return { texte: "Teste le signe de f(x)-g(x) en un point de l'intervalle : le signe indique quelle courbe est au-dessus.", latex: "f(x)-g(x)" };
   return AUCUNE_AIDE;
 }
 function valeurFMoinsGTestD(exercice: ExerciceAireD, testX: number): number {

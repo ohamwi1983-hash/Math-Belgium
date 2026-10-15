@@ -321,7 +321,7 @@ export function aideNiveau1B(phase: PhaseLoiBinomiale): AideAvecLatex {
   if (estEcran1B(phase)) {
     return {
       texte: "3 stratégies possibles selon la formulation de la question : un seul terme (« exactement »/« aucun »/« tous »), une somme de plusieurs termes (« au plus »/« au moins », en sommant directement quand il y a peu de termes), ou un complément (1 moins un terme extrême, ex. « au moins 1 » = 1 − P(X=0)).",
-      latex: null,
+      latex: "\\text{au moins 1}=1-P(X=0)",
     };
   }
   if (estEcran2B(phase)) return { texte: "Rappel de la formule :", latex: "P(X=k)=C(n,k)\\cdot p^k\\cdot(1-p)^{n-k}" };

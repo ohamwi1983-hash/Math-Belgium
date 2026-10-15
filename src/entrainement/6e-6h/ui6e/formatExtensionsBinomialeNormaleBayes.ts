@@ -307,7 +307,7 @@ export function niveauAideMaxC(phase: PhaseExtensionsBinomialeNormaleBayes): num
 }
 
 export function aideNiveau1C(phase: PhaseExtensionsBinomialeNormaleBayes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "La table ne donne QUE Φ(z)=P(Z≤z) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: null };
+  if (phase === "cEcran1") return { texte: "La table ne donne QUE Φ(z)=P(Z≤z) directement — toute autre probabilité doit être reformulée sous cette forme avant lecture.", latex: "\\Phi(z)=P(Z\\le z)" };
   if (phase === "cEcran3") return { texte: "Rappel de la formule inverse (à partir de z=(a−μ)/σ) :", latex: "a=\\mu+z\\cdot\\sigma" };
   return AUCUNE_AIDE;
 }

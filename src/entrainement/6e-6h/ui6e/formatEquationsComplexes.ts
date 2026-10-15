@@ -290,7 +290,7 @@ export function niveauAideMaxC(phase: PhaseEquationsComplexes): number {
   return phase === "cEcran2" ? 2 : 0;
 }
 export function aideNiveau1C(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "cEcran2") return { texte: "Δ étant négatif, √Δ=i√|Δ| (|Δ| est positif, sa racine carrée réelle existe).", latex: null };
+  if (phase === "cEcran2") return { texte: "Δ étant négatif, √Δ=i√|Δ| (|Δ| est positif, sa racine carrée réelle existe).", latex: "\\sqrt{\\Delta}=i\\sqrt{|\\Delta|}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2C(e: ExerciceFamilleC, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -333,7 +333,7 @@ export function niveauAideMaxD(phase: PhaseEquationsComplexes): number {
   return phase === "dEcran2" ? 2 : 0;
 }
 export function aideNiveau1D(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "dEcran2") return { texte: "Pose √Δ=x+yi, élève au carré et identifie : x²-y²=Re(Δ), 2xy=Im(Δ) — un système à résoudre pour x,y entiers.", latex: null };
+  if (phase === "dEcran2") return { texte: "Pose √Δ=x+yi, élève au carré et identifie : x²-y²=Re(Δ), 2xy=Im(Δ) — un système à résoudre pour x,y entiers.", latex: "\\sqrt{\\Delta}=x+yi,\\quad x^2-y^2=\\operatorname{Re}(\\Delta),\\quad 2xy=\\operatorname{Im}(\\Delta)" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2D(e: ExerciceFamilleD, phase: PhaseEquationsComplexes): AideAvecLatex {
@@ -383,7 +383,7 @@ export function niveauAideMaxE(phase: PhaseEquationsComplexes): number {
   return phase === "eEcran3" ? 2 : 0;
 }
 export function aideNiveau1E(phase: PhaseEquationsComplexes): AideAvecLatex {
-  if (phase === "eEcran3") return { texte: "Une équation quartique réductible en u=z² produit jusqu'à 4 racines : 2 valeurs de u, CHACUNE donnant 2 racines opposées en z (z=+√u et z=-√u) — jamais une seule par valeur de u.", latex: null };
+  if (phase === "eEcran3") return { texte: "Une équation quartique réductible en u=z² produit jusqu'à 4 racines : 2 valeurs de u, CHACUNE donnant 2 racines opposées en z (z=+√u et z=-√u) — jamais une seule par valeur de u.", latex: "z=\\pm\\sqrt{u}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2E(e: ExerciceFamilleE, phase: PhaseEquationsComplexes): AideAvecLatex {

@@ -143,9 +143,9 @@ export function champsEcran(exercice: ExerciceIntegralesDefinies, phase: PhaseIn
 
 export function aideNiveau1(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): AideAvecLatex {
   if (estPhaseEmpruntee(exercice, phase)) return aideNiveau1Primitive(exercice.primitive, phase);
-  if (phase === "finalIntegrale") return { texte: "F(b)−F(a) s'obtient en évaluant la primitive trouvée aux 2 bornes, puis en soustrayant (borne supérieure moins borne inférieure).", latex: null };
+  if (phase === "finalIntegrale") return { texte: "F(b)−F(a) s'obtient en évaluant la primitive trouvée aux 2 bornes, puis en soustrayant (borne supérieure moins borne inférieure).", latex: "F(b)-F(a)" };
   if (phase === "valeurMoyenne") return { texte: "Valeur moyenne de f sur [a;b] :", latex: "\\bar f = \\dfrac{1}{b-a}\\displaystyle\\int_a^b f(x)\\,dx" };
-  if (phase === "poserEquationM") return { texte: "Identifie précisément quelle borne est FIXE (donnée) et laquelle est m (inconnue) avant d'écrire la différence F(...)−F(...).", latex: null };
+  if (phase === "poserEquationM") return { texte: "Identifie précisément quelle borne est FIXE (donnée) et laquelle est m (inconnue) avant d'écrire la différence F(...)−F(...).", latex: "F(\\cdot)-F(\\cdot)" };
   const technique = (exercice as ExerciceIntegraleParametre).technique;
   const texte =
     technique === "polynomiale"
@@ -153,7 +153,8 @@ export function aideNiveau1(exercice: ExerciceIntegralesDefinies, phase: PhaseIn
       : technique === "exponentielle"
         ? "Isole le terme en eᵐ, puis applique le logarithme népérien aux 2 membres."
         : "Isole sin(m) ou cos(m), puis applique arcsin ou arccos (selon le cas) pour revenir à m.";
-  return { texte, latex: null };
+  const latex = technique === "polynomiale" ? "Ax^{2}+Bx+C=0" : technique === "exponentielle" ? "e^{m}" : "\\sin(m)\\text{ ou }\\cos(m)";
+  return { texte, latex };
 }
 
 export function aideNiveau2(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): AideAvecLatex {

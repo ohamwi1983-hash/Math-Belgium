@@ -370,7 +370,7 @@ export function aideSelectionNiveau1(exercice: ExerciceGraphiqueDeriveeExponenti
     case "A":
       return { texte: "Dériver un produit crée un terme supplémentaire qui peut introduire un extremum absent de l'exponentielle seule.", latex: null };
     case "B":
-      return { texte: "Le signe de f' est déterminé UNIQUEMENT par le signe de ln(base) — il ne change jamais.", latex: null };
+      return { texte: "Le signe de f' est déterminé UNIQUEMENT par le signe de ln(base) — il ne change jamais.", latex: "\\text{signe}(f') = \\text{signe}(\\ln(\\text{base}))" };
     case "C":
       return { texte: "Dériver une somme de deux exponentielles symétriques inverse la parité : une fonction PAIRE (f) donne une dérivée IMPAIRE (f').", latex: null };
     case "D":

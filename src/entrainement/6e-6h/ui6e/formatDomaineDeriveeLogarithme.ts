@@ -119,7 +119,7 @@ function consigneB(phase: "bDomaine" | "bDerivee"): string {
 function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineDeriveeLogB): AideAvecLatex {
   if (phase === "bDomaine") {
     if (exercice.sousType === "doubleContrainte") return { texte: "Attention : il y a ICI DEUX conditions à croiser, pas une seule (l'argument du log ET le radicande).", latex: null };
-    if (exercice.sousType === "racineInterne") return { texte: "L'argument du log (une racine) doit être strictement positif, et son intérieur doit être ≥ 0.", latex: null };
+    if (exercice.sousType === "racineInterne") return { texte: "L'argument du log (une racine) doit être strictement positif, et son intérieur doit être ≥ 0.", latex: "\\begin{gathered} 1-x^2 > 0 \\\\ 1-x^2 \\geq 0 \\end{gathered}" };
     if (exercice.sousType === "quadratique") return { texte: "L'argument du log doit être strictement positif — résous une inéquation quadratique.", latex: null };
     return { texte: "L'argument du log est une racine ; l'ensemble se ramène à une seule condition simple (voir aide 2).", latex: null };
   }
@@ -184,7 +184,7 @@ function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): string {
 
 function aideCNiveau1(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): AideAvecLatex {
   if (phase === "cDomaine") return { texte: "Un produit de fonctions déjà définies partout (ou sur un domaine simple) hérite du domaine le plus restrictif.", latex: null };
-  if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment.", latex: null };
+  if (phase === "cFacteurs") return { texte: "Identifie u(x) et v(x) séparément à partir de f(x)=u(x)·v(x), puis dérive chacun indépendamment.", latex: "f(x)=u(x)\\cdot v(x)" };
   return { texte: "Rappel de la formule du produit (non substituée) :", latex: "(uv)' = u'v + uv'" };
 }
 
@@ -231,7 +231,7 @@ function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage", exercice: Exerc
     if (exercice.sousType === "expoSurLn") return { texte: "Le dénominateur d'une fraction doit être non nul — vérifie si l'expression du dénominateur peut s'annuler, même si elle 'a l'air' toujours définie.", latex: null };
     return { texte: "N'oublie pas la condition du logarithme (argument strictement positif).", latex: null };
   }
-  if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: null };
+  if (phase === "dND") return { texte: "Identifie N(x) et D(x) séparément à partir de f(x)=N(x)/D(x), puis dérive chacun indépendamment.", latex: "f(x)=\\dfrac{N(x)}{D(x)}" };
   return { texte: "Rappel de la formule du quotient (non substituée) :", latex: "\\left(\\frac{N}{D}\\right)' = \\frac{N'D - ND'}{D^2}" };
 }
 
@@ -239,7 +239,7 @@ function aideDNiveau2(phase: "dDomaine" | "dND" | "dAssemblage", exercice: Exerc
   const { n, nPrime, d, dPrime } = nDLatexD(exercice);
   if (phase === "dDomaine") {
     if (exercice.sousType === "expoSurLn") return { texte: "Équation dénominateur=0 (non résolue) :", latex: "\\ln(x) = 0" };
-    return { texte: "Domaine : x>0 (déjà couvert par le log et/ou le dénominateur).", latex: null };
+    return { texte: "Domaine : x>0 (déjà couvert par le log et/ou le dénominateur).", latex: "x>0" };
   }
   if (phase === "dND") return { texte: "N(x) et D(x), pour t'aider à identifier ce que tu dois dériver :", latex: `\\begin{gathered} N(x) = ${n} \\\\ D(x) = ${d} \\end{gathered}` };
   return { texte: "N, D, N' et D' (déjà confirmés à l'étape précédente) :", latex: `N=${n},\\ D=${d},\\ N'=${nPrime},\\ D'=${dPrime}` };
@@ -315,7 +315,17 @@ function texteProprieteE(exercice: ExerciceDomaineDeriveeLogE): string {
 
 function aideENiveau1(phase: "eDomaine" | "eSimplifier" | "eDerivee", exercice: ExerciceDomaineDeriveeLogE): AideAvecLatex {
   if (phase === "eDomaine") return { texte: "Calcule le domaine sur l'expression ORIGINALE — n'anticipe pas la simplification.", latex: null };
-  if (phase === "eSimplifier") return { texte: texteProprieteE(exercice), latex: null };
+  if (phase === "eSimplifier") {
+    const latexProprieteE: Record<ExerciceDomaineDeriveeLogE["sousType"], string> = {
+      puissanceAbs: "\\ln(u^2)=2\\ln|u|",
+      valeurAbsolueQuadratique: "\\ln(u^2)=2\\ln|u|",
+      quotientDifference: "\\ln\\left(\\dfrac{a}{b}\\right)=\\ln(a)-\\ln(b)",
+      puissanceSimple: "\\ln(\\sqrt{x})=\\ln\\left(x^{1/2}\\right)=\\dfrac{1}{2}\\ln(x)",
+      combinaison: "\\ln(x^3)=3\\ln(x)",
+      dejaSimplifie: "\\ln(x^x)=x\\cdot\\ln(x)",
+    };
+    return { texte: texteProprieteE(exercice), latex: latexProprieteE[exercice.sousType] };
+  }
   return { texte: "La forme simplifiée est nettement plus simple à dériver — dérive-la directement.", latex: null };
 }
 
@@ -444,8 +454,8 @@ function consigneG(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler"): string {
 
 function aideGNiveau1(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler"): AideAvecLatex {
   if (phase === "gIdentifier") return { texte: "Cherche à ramener f(x) à une SEULE base variable élevée à un SEUL exposant variable (utilise les propriétés des puissances si besoin).", latex: null };
-  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: null };
-  return { texte: "Il faut multiplier par f (c'est-à-dire remettre u^v) pour isoler f'.", latex: null };
+  if (phase === "gFPrimeSurF") return { texte: "Méthode complète : ln f = v·ln u, puis dérive les deux membres — le membre de gauche donne f'/f par dérivation implicite.", latex: "\\ln f = v\\cdot\\ln u" };
+  return { texte: "Il faut multiplier par f (c'est-à-dire remettre u^v) pour isoler f'.", latex: "f=u^v" };
 }
 
 function aideGNiveau2(phase: "gIdentifier" | "gFPrimeSurF" | "gIsoler", exercice: ExerciceDomaineDeriveeLogG): AideAvecLatex {

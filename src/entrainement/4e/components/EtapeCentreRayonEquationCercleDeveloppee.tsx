@@ -4,7 +4,7 @@ import { NIVEAU_AIDE_MAX_CENTRE_RAYON } from "../moteur/sessionEquationCercleDev
 import { diagnostiquerCentreRayon } from "../moteur/verificationEquationCercleDeveloppee";
 import type { ReponseEcranCentreRayon } from "../moteur/typesEquationCercleDeveloppee";
 import { filtrerSaisieNumerique, gererKeyDownNumerique } from "../ui/bloquerSaisieNonNumerique";
-import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, TEXTE_AIDE_CENTRE_RAYON_NIVEAU1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
+import { CONSIGNE_GENERALE_CENTRE_RAYON, PLACEHOLDER_COORDONNEE, PLACEHOLDER_RAYON, segmentsAideCentreRayonNiveau1, formatEquationDeveloppeeLatex, formatEquationReduiteLatex, segmentsConsigneCentreRayon } from "../ui/formatEquationCercleDeveloppee";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { RenduFragments } from "./RenduFragments";
@@ -107,7 +107,9 @@ export function EtapeCentreRayonEquationCercleDeveloppee({ exercice, tentativesU
 
       {niveauAide > 0 && (
         <div className="triangle-quelconque-aide">
-          <p>{TEXTE_AIDE_CENTRE_RAYON_NIVEAU1}</p>
+          <p>
+            <RenduFragments fragments={segmentsAideCentreRayonNiveau1()} />
+          </p>
           {niveauAide >= 2 && (
             <p>
               <Katex expression={formatEquationReduiteLatex(exercice)} />

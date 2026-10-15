@@ -99,7 +99,12 @@ export function EtapeRacinesTangente({ exercice, tentativesUtilisees, tentatives
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1("resoudre")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aide2.texte}</p>
+              {aide2.latex && <Katex expression={aide2.latex} block />}
+            </>
+          )}
         </div>
       )}
       {!validation && (

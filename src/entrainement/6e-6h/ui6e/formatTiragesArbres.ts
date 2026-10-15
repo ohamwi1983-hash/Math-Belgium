@@ -222,10 +222,10 @@ function champsB(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): ChampDef[] {
 }
 
 function aideNiveau1B(phase: PhaseTiragesArbres): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Une position fixée : (n-1)!/n!, ce qui se simplifie en 1/n. Deux positions fixées SIMULTANÉMENT : (n-2)!/n!.", latex: null };
-  if (phase === "bEcran2") return { texte: "Un seul arrangement (l'identité) est totalement correct, parmi n! arrangements équiprobables.", latex: null };
+  if (phase === "bEcran1") return { texte: "Une position fixée : (n-1)!/n!, ce qui se simplifie en 1/n. Deux positions fixées SIMULTANÉMENT : (n-2)!/n!.", latex: "\\dfrac{(n-1)!}{n!}=\\dfrac{1}{n}\\qquad\\dfrac{(n-2)!}{n!}" };
+  if (phase === "bEcran2") return { texte: "Un seul arrangement (l'identité) est totalement correct, parmi n! arrangements équiprobables.", latex: "n!" };
   if (phase === "bEcran3") return { texte: "\"Exactement k correctes\" impose que les n-k positions RESTANTES forment un DÉRANGEMENT COMPLET (aucune correcte parmi elles) — pas simplement \"au moins une incorrecte\".", latex: null };
-  return { texte: "Aucune position correcte = un DÉRANGEMENT COMPLET des n éléments, D(n).", latex: null };
+  return { texte: "Aucune position correcte = un DÉRANGEMENT COMPLET des n éléments, D(n).", latex: "D(n)" };
 }
 
 function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): AideAvecLatex {

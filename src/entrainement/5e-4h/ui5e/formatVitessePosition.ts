@@ -143,22 +143,32 @@ export function texteAideNiveau1(ecran: EcranVitessePosition): string {
   }
 }
 
-export function texteAideNiveau2(ecran: EcranVitessePosition): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau2(ecran: EcranVitessePosition): AideFragmentee {
   switch (ecran) {
     case "derivee":
-      return "Exemple : e(t)=t²+3t → v(t)=e'(t)=2t+3.";
+      return { texte: "Exemple :", latex: "e(t)=t^2+3t \\;\\Rightarrow\\; v(t)=e'(t)=2t+3" };
     case "evaluerV0":
-      return "Exemple : v(t)=2t+3, t₀=2 → v(2)=2·2+3=7.";
+      return { texte: "Exemple :", latex: "v(t)=2t+3,\\ t_0=2 \\;\\Rightarrow\\; v(2)=2\\cdot2+3=7" };
     case "resoudre":
-      return "Exemple : t²+3t=40 ⟺ t²+3t-40=0 ⟹ t=5 ou t=-8. Seul t=5 est retenu (temps positif).";
+      return {
+        texte: "Exemple :",
+        latex: "t^2+3t=40 \\iff t^2+3t-40=0 \\;\\Rightarrow\\; t=5 \\text{ ou } t=-8 \\quad \\text{(seul } t=5 \\text{ est retenu, temps positif)}",
+      };
     case "vitessePointe":
-      return "Exemple : v(t)=2t+3, temps retenu t=5 → v(5)=2·5+3=13 (m/s).";
+      return { texte: "Exemple :", latex: "v(t)=2t+3,\\ \\text{temps retenu } t=5 \\;\\Rightarrow\\; v(5)=2\\cdot5+3=13\\ \\text{(m/s)}" };
     case "conversion":
-      return "Exemple : 13 m/s × 3,6 = 46,8 km/h.";
+      return { texte: "Exemple :", latex: "13\\ \\text{m/s} \\times 3{,}6 = 46{,}8\\ \\text{km/h}" };
     case "segmentConstant":
-      return "Exemple : D₂=44 m, v=6 m/s → t₂=44/6≈7,33 s.";
+      return { texte: "Exemple :", latex: "D_2=44\\ \\text{m},\\ v=6\\ \\text{m/s} \\;\\Rightarrow\\; t_2=\\dfrac{44}{6}\\approx7{,}33\\ \\text{s}" };
     case "tempsTotal":
-      return "Exemple : t₁=4 s, t₂≈7,33 s → temps total ≈11,33 s.";
+      return { texte: "Exemple :", latex: "t_1=4\\ \\text{s},\\ t_2\\approx7{,}33\\ \\text{s} \\;\\Rightarrow\\; \\text{temps total}\\approx11{,}33\\ \\text{s}" };
   }
 }
 

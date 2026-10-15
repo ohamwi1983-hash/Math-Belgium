@@ -84,7 +84,16 @@ export function EtapeCalculerDeriveeGenerique({ exercice, phase, labelChamp, ten
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1EtudierFonction(ecran)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2EtudierFonction(ecran)}</p>}
+          {niveauAide >= 2 &&
+            (() => {
+              const aide2 = texteAideNiveau2EtudierFonction(ecran);
+              return (
+                <>
+                  <p>{aide2.texte}</p>
+                  {aide2.latex && <Katex expression={aide2.latex} block />}
+                </>
+              );
+            })()}
         </div>
       )}
       {!validation && (

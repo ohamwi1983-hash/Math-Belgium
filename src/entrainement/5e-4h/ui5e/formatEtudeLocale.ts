@@ -165,22 +165,35 @@ export function texteAideNiveau1EtudeLocale(ecran: EcranEtudeLocale): string {
   }
 }
 
-export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau2EtudeLocale(ecran: EcranEtudeLocale): AideFragmentee {
   switch (ecran) {
     case "domaine":
-      return "Exemple : (x-1)²-4=0 ⟺ (x-1)²=4 ⟺ x-1=±2 ⟺ x=-1 ou x=3 — domf=ℝ\\{-1;3}.";
+      return { texte: "Exemple :", latex: "(x-1)^2-4=0 \\iff (x-1)^2=4 \\iff x-1=\\pm2 \\iff x=-1 \\text{ ou } x=3 \\;\\Rightarrow\\; \\text{domf}=\\mathbb{R}\\setminus\\{-1;3\\}" };
     case "resoudreFPrime":
-      return "Exemple : f'(x)=6x²-6=0 ⟹ x²=1 ⟹ x=-1 ou x=1.";
+      return { texte: "Exemple :", latex: "f'(x)=6x^2-6=0 \\;\\Rightarrow\\; x^2=1 \\;\\Rightarrow\\; x=-1 \\text{ ou } x=1" };
     case "tableauFPrime":
-      return "Exemple : f'(x)=6x² (racine double en 0) reste POSITIVE des 2 côtés de 0 — 'ni l'un ni l'autre', même si f'(0)=0.";
+      return {
+        texte: "Exemple : (racine double en 0) reste POSITIVE des 2 côtés de 0 — 'ni l'un ni l'autre', même si f'(0)=0 :",
+        latex: "f'(x)=6x^2",
+      };
     case "extremums":
-      return "Exemple : pour f(x)=2x³-6x et x=-1, f(-1)=2·(-1)³-6·(-1)=-2+6=4.";
+      return { texte: "Exemple :", latex: "f(x)=2x^3-6x,\\ x=-1 \\;\\Rightarrow\\; f(-1)=2\\cdot(-1)^3-6\\cdot(-1)=-2+6=4" };
     case "resoudreFSeconde":
-      return "Exemple : f''(x)=12x=0 ⟹ x=0.";
+      return { texte: "Exemple :", latex: "f''(x)=12x=0 \\;\\Rightarrow\\; x=0" };
     case "tableauFSeconde":
-      return "Exemple : f''(x)=12x change bien de signe en x=0 (négative avant, positive après) — c'est un vrai point d'inflexion (PI).";
+      return {
+        texte: "Exemple : change bien de signe en x=0 (négative avant, positive après) — c'est un vrai point d'inflexion (PI) :",
+        latex: "f''(x)=12x",
+      };
     case "inflexions":
-      return "Exemple : pour f(x)=2x³ et x=0, f(0)=2·0³=0.";
+      return { texte: "Exemple :", latex: "f(x)=2x^3,\\ x=0 \\;\\Rightarrow\\; f(0)=2\\cdot0^3=0" };
   }
 }
 

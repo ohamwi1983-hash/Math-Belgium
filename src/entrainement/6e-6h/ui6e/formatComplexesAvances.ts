@@ -165,11 +165,11 @@ export function niveauAideMaxA(phase: PhaseComplexesAvances): number {
 }
 export function aideNiveau1A(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "zⁿ réel signifie nθ≡0 (mod π) — mais zⁿ réel POSITIF est plus restrictif : il faut nθ≡0 (mod 2π) EXACTEMENT (pas mod π).", latex: null };
+  return { texte: "zⁿ réel signifie nθ≡0 (mod π) — mais zⁿ réel POSITIF est plus restrictif : il faut nθ≡0 (mod 2π) EXACTEMENT (pas mod π).", latex: "n\\theta\\equiv 0\\ (\\text{mod }\\pi)\\text{, }n\\theta\\equiv 0\\ (\\text{mod }2\\pi)" };
 }
 export function aideNiveau2A(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "Parmi les valeurs de θ qui donnent un résultat réel (nθ≡0 mod π), une sur deux seulement donne un résultat POSITIF — l'autre moitié donne un résultat réel NÉGATIF (conclusion non donnée).", latex: null };
+  return { texte: "Parmi les valeurs de θ qui donnent un résultat réel (nθ≡0 mod π), une sur deux seulement donne un résultat POSITIF — l'autre moitié donne un résultat réel NÉGATIF (conclusion non donnée).", latex: "n\\theta\\equiv 0\\ (\\text{mod }\\pi)" };
 }
 
 // ============================================================================
@@ -252,9 +252,13 @@ export function aideNiveau1B(e: ExerciceComplexesB, phase: PhaseComplexesAvances
   if (e.sousType === "intersection" || phase !== "bEcran1") return AUCUNE_AIDE;
   return { texte: "Pose z=x+yi et substitue dans la condition donnée : réel ⟺ partie imaginaire nulle ; imaginaire pur ⟺ partie réelle nulle ; condition de module ⟺ élève au carré des 2 côtés.", latex: null };
 }
+const FORMULE_SOUS_TYPE_B: Partial<Record<ExerciceComplexesB["sousType"], string>> = {
+  demiDroites: "z+\\bar z=c|z|",
+  cercleO: "|z|=k",
+};
 export function aideNiveau2B(e: ExerciceComplexesB, phase: PhaseComplexesAvances): AideAvecLatex {
   if (e.sousType === "intersection" || phase !== "bEcran1") return AUCUNE_AIDE;
-  return { texte: `Sous-type : ${LIBELLE_SOUS_TYPE_B[e.sousType]} — substitution amorcée, simplification non faite.`, latex: null };
+  return { texte: `Sous-type : ${LIBELLE_SOUS_TYPE_B[e.sousType]} — substitution amorcée, simplification non faite.`, latex: FORMULE_SOUS_TYPE_B[e.sousType] ?? null };
 }
 
 // Natures toujours proposées à l'écran "lieu structuré" (droite/cercle/demiDroite).
@@ -319,7 +323,7 @@ export function niveauAideMaxC(phase: PhaseComplexesAvances): number {
 }
 export function aideNiveau1C(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;
-  return { texte: "Pour tout complexe w, |w|²=w·w̄. Ici z·z̄=1 (donné) — remplace-le dès qu'il apparaît.", latex: null };
+  return { texte: "Pour tout complexe w, |w|²=w·w̄. Ici z·z̄=1 (donné) — remplace-le dès qu'il apparaît.", latex: "|w|^2=w\\bar w\\text{, }z\\bar z=1" };
 }
 export function aideNiveau2C(phase: PhaseComplexesAvances): AideAvecLatex {
   if (phase !== "cEcran1") return AUCUNE_AIDE;

@@ -175,7 +175,7 @@ export function aideNiveau1A(phase: PhaseLoiPoisson): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
   return {
     texte: "Rappel des 3 conditions nécessaires pour approcher une loi binomiale B(n,p) par une loi de Poisson : n≥30 (un grand nombre d'épreuves) ; p≤0,1 (une probabilité de succès faible) ; n·p≤15 (le produit reste modéré).",
-    latex: null,
+    latex: "n\\geq30\\qquad p\\leq0{,}1\\qquad n\\cdot p\\leq15",
   };
 }
 
@@ -183,7 +183,7 @@ export function aideNiveau2A(phase: PhaseLoiPoisson): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
   return {
     texte: "2 des 3 conditions sont déjà confirmées : n≥30 et p≤0,1. Il reste à vérifier n·p≤15.",
-    latex: null,
+    latex: "n\\geq30\\qquad p\\leq0{,}1\\qquad(\\text{reste à vérifier : }n\\cdot p\\leq15)",
   };
 }
 

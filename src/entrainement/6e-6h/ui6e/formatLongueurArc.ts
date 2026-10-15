@@ -149,7 +149,7 @@ export function niveauAideMaxB(phase: PhaseLongueurArc): number {
   return phase === "bEcran1" ? 2 : 0;
 }
 export function aideNiveau1B(phase: PhaseLongueurArc): AideAvecLatex {
-  if (phase === "bEcran1") return { texte: "Calcule t directement depuis x avec t=√(x²+k²) — remplace simplement x et k par leurs valeurs à chaque borne, aucune inversion nécessaire.", latex: null };
+  if (phase === "bEcran1") return { texte: "Calcule t directement depuis x avec t=√(x²+k²) — remplace simplement x et k par leurs valeurs à chaque borne, aucune inversion nécessaire.", latex: "t=\\sqrt{x^2+k^2}" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2B(exercice: ExerciceLongueurArcB, phase: PhaseLongueurArc): AideAvecLatex {

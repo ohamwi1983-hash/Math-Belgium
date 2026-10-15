@@ -121,8 +121,21 @@ export const CONSIGNE_COMPLETION = "De ces 2 parenthèses, forme deux produits r
 /** `p` explicitement introduit (le coefficient linéaire déjà factorisé à l'écran précédent) avant
  * d'être réutilisé dans la formule de complétion — jamais une lettre générique non expliquée
  * (`promptgen46etcorrectionstransversaleschapitre6.md`, point B.4). */
-export const TEXTE_AIDE_COMPLETION_NIVEAU1 =
-  "Dans chaque parenthèse x²+px (p étant le coefficient linéaire déjà factorisé à l'écran précédent), ajoute et retranche (p/2)² pour obtenir (x+p/2)² — attention à multiplier ce terme par le coefficient commun avant de le déplacer de l'autre côté.";
+/** Fragments texte/LaTeX (jamais une chaîne Unicode brute "x²+px"/"(p/2)²" — même patron
+ * `texte()`/`latex()` que `segmentsConsigneCentreRayon` ci-dessous). */
+export function segmentsAideCompletionNiveau1(): FragmentConsigne[] {
+  return [
+    texte("Dans chaque parenthèse "),
+    latex("x^2+px"),
+    texte(" ("),
+    latex("p"),
+    texte(" étant le coefficient linéaire déjà factorisé à l'écran précédent), ajoute et retranche "),
+    latex("(p/2)^2"),
+    texte(" pour obtenir "),
+    latex("(x+p/2)^2"),
+    texte(" — attention à multiplier ce terme par le coefficient commun avant de le déplacer de l'autre côté."),
+  ];
+}
 
 /** "x - a" ou "x + |a|" — jamais "x - -1.5" ; "a=0" retourne la variable nue ("x"), jamais "x - 0". */
 function formatBinome(variable: "x" | "y", valeur: number): string {
@@ -178,7 +191,16 @@ export function segmentsConsigneCentreRayon(exercice: ExerciceEquationCercleDeve
   return [...base, texte(" (rayon : forme exacte ou valeur décimale arrondie au centième)")];
 }
 
-export const TEXTE_AIDE_CENTRE_RAYON_NIVEAU1 = "Divise chaque membre de l'équation par le coefficient commun devant les parenthèses pour isoler (x-x₀)²+(y-y₀)²=R², avec (x₀ ; y₀) le centre cherché.";
+/** Fragments texte/LaTeX (jamais une chaîne Unicode brute "(x-x₀)²+(y-y₀)²=R²"). */
+export function segmentsAideCentreRayonNiveau1(): FragmentConsigne[] {
+  return [
+    texte("Divise chaque membre de l'équation par le coefficient commun devant les parenthèses pour isoler "),
+    latex("(x-x_0)^2+(y-y_0)^2=R^2"),
+    texte(", avec "),
+    latex("(x_0 ; y_0)"),
+    texte(" le centre cherché."),
+  ];
+}
 
 /** Forme réduite (x-a)²+(y-b)²=r² — coefficient k TOUJOURS absent après division, jamais montré. */
 export function formatEquationReduiteLatex(exercice: ExerciceEquationCercleDeveloppee): string {

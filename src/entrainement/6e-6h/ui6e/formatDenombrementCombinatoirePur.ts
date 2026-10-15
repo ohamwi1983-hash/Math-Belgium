@@ -164,7 +164,7 @@ export function niveauAideMaxB(phase: PhaseDenombrementCombinatoirePur): number 
 }
 
 export function aideNiveau1B(): AideAvecLatex {
-  return { texte: "Répartir n objets en groupes de tailles fixées (sans ordre à l'intérieur de chaque groupe) suit la formule multinomiale : n! divisé par le produit des factorielles de chaque taille.", latex: null };
+  return { texte: "Répartir n objets en groupes de tailles fixées (sans ordre à l'intérieur de chaque groupe) suit la formule multinomiale : n! divisé par le produit des factorielles de chaque taille.", latex: "\\dfrac{n!}{k_1!\\,k_2!\\,\\cdots\\,k_m!}" };
 }
 
 export function aideNiveau2B(e: ExerciceDenombCombPurB): AideAvecLatex {
@@ -285,7 +285,7 @@ export function aideNiveau1D(): AideAvecLatex {
 
 export function aideNiveau2D(e: ExerciceDenombCombPurD): AideAvecLatex {
   const exemple = e.decompositionsS1[0];
-  return { texte: `Exemple déjà traité — décomposition (${exemple.valeurs.join(",")}) : ${exemple.arrangements} arrangement(s) (les autres décompositions restent à déterminer).`, latex: null };
+  return { texte: `Exemple déjà traité — décomposition (${exemple.valeurs.join(",")}) : ${exemple.arrangements} arrangement(s) (les autres décompositions restent à déterminer).`, latex: `(${exemple.valeurs.join(",")})\\to ${exemple.arrangements}` };
 }
 
 // Labels dédiés à l'écran 1 de la famille D (composant `EtapeListeDecompositionsDenombrementCombinatoirePur.tsx`).

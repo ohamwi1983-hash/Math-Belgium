@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ExerciceLimitesContexte, OptionInterpretation } from "../core5e/limitesContexte.types";
 import type { PhaseLimitesContexte } from "../moteur5e/typesLimitesContexte";
 import { consignePhase, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatLimitesContexte";
+import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -54,7 +55,16 @@ export function EtapeQCMLimitesContexte({ exercice, phase, options, tentativesUt
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(exercice, phase)}</p>
-          {niveauAide >= 2 && <p>{texteAideNiveau2(exercice, phase)}</p>}
+          {niveauAide >= 2 &&
+            (() => {
+              const aide2 = texteAideNiveau2(exercice, phase);
+              return (
+                <>
+                  <p>{aide2.texte}</p>
+                  {aide2.latex && <Katex expression={aide2.latex} block />}
+                </>
+              );
+            })()}
         </div>
       )}
       {!validation && (

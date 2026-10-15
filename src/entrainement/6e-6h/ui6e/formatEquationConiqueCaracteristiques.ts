@@ -385,7 +385,10 @@ export function niveauAideMaxC(phase: PhaseEquationConiqueCaracteristiques): num
 }
 
 export function aideNiveau1C(): AideAvecLatex {
-  return { texte: "4 relations possibles : c=|FF'|/2 ; e=c/a ; distance entre les directrices=2a/e (=2a²/c) ; 2a=distance entre les sommets. Identifie lesquelles correspondent aux 2 données de l'énoncé.", latex: null };
+  return {
+    texte: "4 relations possibles : c=|FF'|/2 ; e=c/a ; distance entre les directrices=2a/e (=2a²/c) ; 2a=distance entre les sommets. Identifie lesquelles correspondent aux 2 données de l'énoncé.",
+    latex: "c=\\dfrac{|FF'|}{2}\\text{, }e=\\dfrac{c}{a}\\text{, }d=\\dfrac{2a}{e}=\\dfrac{2a^2}{c}\\text{, }2a=\\text{distance entre les sommets}",
+  };
 }
 
 export function aideNiveau2C(e: ExerciceFamilleC): AideAvecLatex {
@@ -447,7 +450,7 @@ export function niveauAideMaxD(phase: PhaseEquationConiqueCaracteristiques): num
 }
 
 export function aideNiveau1D(): AideAvecLatex {
-  return { texte: "Les asymptotes d'une hyperbole d'axe transverse HORIZONTAL ont pour pente ±b/a ; d'axe transverse VERTICAL, ±a/b — identifie d'abord l'axe, avant d'extraire le rapport.", latex: null };
+  return { texte: "Les asymptotes d'une hyperbole d'axe transverse HORIZONTAL ont pour pente ±b/a ; d'axe transverse VERTICAL, ±a/b — identifie d'abord l'axe, avant d'extraire le rapport.", latex: "\\pm\\dfrac{b}{a}\\text{ (horizontal)}\\text{, }\\pm\\dfrac{a}{b}\\text{ (vertical)}" };
 }
 
 export function aideNiveau2D(e: ExerciceFamilleD): AideAvecLatex {

@@ -3,6 +3,7 @@ import type { ExerciceVitessePosition } from "../core5e/vitessePosition.types";
 import type { EcranVitessePosition } from "../moteur5e/typesVitessePosition";
 import { consigneEcran, texteAideNiveau1, texteAideNiveau2 } from "../ui5e/formatVitessePosition";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
+import { Katex } from "../components/Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -83,7 +84,12 @@ export function EtapeChampVitessePosition({
       {niveauAide >= 1 && (
         <div className="aide-5e">
           <p>{texteAideNiveau1(ecran)}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aide2.texte}</p>
+              {aide2.latex && <Katex expression={aide2.latex} block />}
+            </>
+          )}
         </div>
       )}
       {!validation && (

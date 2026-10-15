@@ -257,22 +257,35 @@ export function texteAideNiveau1(ecran: EcranTangente): string {
   }
 }
 
-export function texteAideNiveau2(ecran: EcranTangente): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau2(ecran: EcranTangente): AideFragmentee {
   switch (ecran) {
     case "substituer":
-      return "Exemple : pour f(x)=x²+1 et a=2, f(2)=2²+1=5. Si f'(x)=2x (donnée), f'(2)=2·2=4.";
+      return { texte: "Exemple :", latex: "f(x)=x^2+1,\\ a=2 \\;\\Rightarrow\\; f(2)=2^2+1=5. \\quad \\text{Si } f'(x)=2x \\text{ (donnée)}, \\ f'(2)=2\\cdot2=4" };
     case "tangente":
-      return "Exemple : a=2, f(a)=5, f'(a)=4 → y=4(x-2)+5=4x-8+5=4x-3.";
+      return { texte: "Exemple :", latex: "a=2,\\ f(a)=5,\\ f'(a)=4 \\;\\Rightarrow\\; y=4(x-2)+5=4x-8+5=4x-3" };
     case "resoudre":
-      return "Exemple : f'(x)=6x²-6=0 ⟹ x²=1 ⟹ x=-1 ou x=1 (deux solutions).";
+      return { texte: "Exemple :", latex: "f'(x)=6x^2-6=0 \\;\\Rightarrow\\; x^2=1 \\;\\Rightarrow\\; x=-1 \\text{ ou } x=1 \\quad \\text{(deux solutions)}" };
     case "coordonnees":
-      return "Exemple : pour x=1 avec f(x)=2x³-6x+1, f(1)=2-6+1=-3 → le point complet est (1;-3).";
+      return { texte: "Exemple :", latex: "x=1,\\ f(x)=2x^3-6x+1 \\;\\Rightarrow\\; f(1)=2-6+1=-3 \\;\\Rightarrow\\; \\text{le point complet est } (1;-3)" };
     case "tangenteEnP":
-      return "Exemple : f(x)=x⁴-4x³+4x²+x, f'(x)=4x³-12x²+8x+1, en p=0 : f'(0)=1, f(0)=0 → tangente y=1·(x-0)+0=x.";
+      return {
+        texte: "Exemple :",
+        latex: "f(x)=x^4-4x^3+4x^2+x,\\ f'(x)=4x^3-12x^2+8x+1, \\text{ en } p=0: f'(0)=1,\\ f(0)=0 \\;\\Rightarrow\\; \\text{tangente } y=1\\cdot(x-0)+0=x",
+      };
     case "trouverQ":
-      return "Exemple : f(x)-x=x⁴-4x³+4x²=x²(x-2)² — racine double en x=0 (connue, p) et racine double en x=2, donc q=2.";
+      return {
+        texte: "Exemple :",
+        latex: "f(x)-x=x^4-4x^3+4x^2=x^2(x-2)^2 \\;\\Rightarrow\\; \\text{racine double en } x=0 \\text{ (connue, } p\\text{) et racine double en } x=2,\\ \\text{donc } q=2",
+      };
     case "verifierPente":
-      return "Exemple : f'(0)=1 (calculé à l'écran précédent) — si f'(2) vaut aussi 1, la double tangence est confirmée.";
+      return { texte: "Exemple : (calculé à l'écran précédent) — si f'(2) vaut aussi 1, la double tangence est confirmée :", latex: "f'(0)=1" };
   }
 }
 

@@ -107,34 +107,100 @@ export function formatTermesEtatActuelLatex(exercice: ExerciceFonctionDerivee, e
 // oubli de la chaîne quand l'argument n'est pas x seul, ex. cos(3x)'=-3sin(3x) et non -sin(x)).
 // ============================================================================
 
-export function texteAideNiveau1(ecran: EcranFonctionDerivee, typeRetenu: TypeDerivee | null): string {
-  if (ecran === "reconnaissance") {
-    return "Une SOMME de termes (chacun en x seul) → règle de base. Une MULTIPLICATION de deux expressions → produit. Une DIVISION → quotient. UNE SEULE expression emboîtée dans une autre (ex. (...)^n, √(...), sin(...) avec un contenu ≠ x) → composée.";
-  }
-  if (ecran === "decomposer") {
-    if (typeRetenu === "produit") return "u(x) et v(x) sont les deux facteurs, tels quels, sans les multiplier entre eux — chacun peut lui-même contenir un exposant, une racine ou un sin/cos.";
-    if (typeRetenu === "quotient") return "u(x) est le numérateur, v(x) le dénominateur — l'ORDRE compte ici, contrairement au produit.";
-    return "u(x) est ce qu'il y a À L'INTÉRIEUR (l'argument), g(u) est l'opération extérieure appliquée à ce contenu — remplace mentalement tout le contenu intérieur par la lettre u pour écrire g(u).";
-  }
-  if (typeRetenu === "produit") return "(u·v)'=u'·v+u·v' — dérive u ET v séparément, puis additionne les DEUX termes (piège : oublier l'un des deux, ou ne dériver qu'un seul facteur).";
-  if (typeRetenu === "quotient") return "(u/v)'=(u'v-uv')/v² — attention à l'ORDRE (u'v-uv', jamais uv'-u'v) et à ne pas oublier le carré au dénominateur.";
-  if (typeRetenu === "composee") return "Dérive d'abord l'extérieure (en gardant l'intérieure telle quelle), PUIS multiplie par la dérivée de l'intérieure — ne jamais oublier ce dernier facteur.";
-  return "Dérive chaque terme séparément avec les dérivées connues (xⁿ, √x, 1/xⁿ, sin x, cos x), puis additionne les résultats — attention au signe : (sin x)'=cos x, mais (cos x)'=-sin x.";
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
 }
 
-export function texteAideNiveau2(ecran: EcranFonctionDerivee, typeRetenu: TypeDerivee | null): string {
+export function texteAideNiveau1(ecran: EcranFonctionDerivee, typeRetenu: TypeDerivee | null): AideFragmentee {
   if (ecran === "reconnaissance") {
-    return "Exemple : dans x²+sin(x), les deux termes sont juste ADDITIONNÉS → règle de base. Dans x·sin(x), x et sin(x) sont MULTIPLIÉS → produit. Dans sin(2x+1), un seul bloc (2x+1) est glissé À L'INTÉRIEUR de sin → composée.";
+    return {
+      texte:
+        "Une SOMME de termes (chacun en x seul) → règle de base. Une MULTIPLICATION de deux expressions → produit. Une DIVISION → quotient. UNE SEULE expression emboîtée dans une autre (ex. (...)ⁿ, √(...), sin(...) avec un contenu ≠ x) → composée.",
+      latex: null,
+    };
   }
   if (ecran === "decomposer") {
-    if (typeRetenu === "produit") return "Exemple : pour f(x)=x²·cos(3x), u(x)=x² et v(x)=cos(3x).";
-    if (typeRetenu === "quotient") return "Exemple : pour f(x)=x/(x+1), u(x)=x (numérateur) et v(x)=x+1 (dénominateur).";
-    return "Exemple : pour f(x)=(3x+2)^4, l'intérieure est u(x)=3x+2 et l'extérieure est g(u)=u^4 (ici, remplacer u par 3x+2 redonne bien f(x)).";
+    if (typeRetenu === "produit")
+      return {
+        texte: "u(x) et v(x) sont les deux facteurs, tels quels, sans les multiplier entre eux — chacun peut lui-même contenir un exposant, une racine ou un sin/cos.",
+        latex: null,
+      };
+    if (typeRetenu === "quotient")
+      return { texte: "u(x) est le numérateur, v(x) le dénominateur — l'ORDRE compte ici, contrairement au produit.", latex: null };
+    return {
+      texte:
+        "u(x) est ce qu'il y a À L'INTÉRIEUR (l'argument), g(u) est l'opération extérieure appliquée à ce contenu — remplace mentalement tout le contenu intérieur par la lettre u pour écrire g(u).",
+      latex: null,
+    };
   }
-  if (typeRetenu === "produit") return "Exemple : f(x)=x·sin(2x), avec u=x (u'=1) et v=sin(2x) (v'=2cos(2x)) → f'(x)=1·sin(2x)+x·2cos(2x)=sin(2x)+2x·cos(2x).";
-  if (typeRetenu === "quotient") return "Exemple : f(x)=x/(x+1), u=x (u'=1), v=x+1 (v'=1) → f'(x)=(1·(x+1)-x·1)/(x+1)²=1/(x+1)².";
-  if (typeRetenu === "composee") return "Exemple : f(x)=(3x+2)^4 → f'(x)=4(3x+2)^3·3=12(3x+2)^3 (dérivée de l'extérieure u^4 en 4u^3, MULTIPLIÉE par la dérivée de l'intérieure 3x+2, qui vaut 3).";
-  return "Exemple : f(x)=x^3+cos(x) → f'(x)=3x²-sin(x) (attention au signe MOINS devant sin, dérivée de cos).";
+  if (typeRetenu === "produit")
+    return {
+      texte: "Dérive u ET v séparément, puis additionne les DEUX termes (piège : oublier l'un des deux, ou ne dériver qu'un seul facteur) :",
+      latex: "(u\\cdot v)'=u'\\cdot v+u\\cdot v'",
+    };
+  if (typeRetenu === "quotient")
+    return {
+      texte: "Attention à l'ORDRE (u'v-uv', jamais uv'-u'v) et à ne pas oublier le carré au dénominateur :",
+      latex: "\\left(\\dfrac{u}{v}\\right)'=\\dfrac{u'v-uv'}{v^2}",
+    };
+  if (typeRetenu === "composee")
+    return {
+      texte: "Dérive d'abord l'extérieure (en gardant l'intérieure telle quelle), PUIS multiplie par la dérivée de l'intérieure — ne jamais oublier ce dernier facteur.",
+      latex: null,
+    };
+  return {
+    texte: "Dérive chaque terme séparément avec les dérivées connues (xⁿ, √x, 1/xⁿ, sin x, cos x), puis additionne les résultats — attention au signe :",
+    latex: "(\\sin x)'=\\cos x \\quad\\text{mais}\\quad (\\cos x)'=-\\sin x",
+  };
+}
+
+export function texteAideNiveau2(ecran: EcranFonctionDerivee, typeRetenu: TypeDerivee | null): AideFragmentee {
+  if (ecran === "reconnaissance") {
+    return {
+      texte: "Exemple :",
+      latex:
+        "\\underbrace{x^2+\\sin(x)}_{\\text{additionnés} \\to \\text{base}} \\quad \\underbrace{x\\cdot\\sin(x)}_{\\text{multipliés} \\to \\text{produit}} \\quad \\underbrace{\\sin(2x+1)}_{\\text{bloc intérieur} \\to \\text{composée}}",
+    };
+  }
+  if (ecran === "decomposer") {
+    if (typeRetenu === "produit")
+      return { texte: "Exemple :", latex: "f(x)=x^2\\cdot\\cos(3x), \\quad u(x)=x^2, \\quad v(x)=\\cos(3x)" };
+    if (typeRetenu === "quotient")
+      return {
+        texte: "Exemple :",
+        latex: "f(x)=\\dfrac{x}{x+1}, \\quad u(x)=x\\ \\text{(numérateur)}, \\quad v(x)=x+1\\ \\text{(dénominateur)}",
+      };
+    return {
+      texte: "Exemple :",
+      latex: "f(x)=(3x+2)^4, \\quad u(x)=3x+2, \\quad g(u)=u^4 \\quad \\text{(remplacer } u \\text{ par } 3x+2 \\text{ redonne bien } f(x)\\text{)}",
+    };
+  }
+  if (typeRetenu === "produit")
+    return {
+      texte: "Exemple :",
+      latex:
+        "f(x)=x\\cdot\\sin(2x), \\quad u=x\\ (u'=1), \\quad v=\\sin(2x)\\ (v'=2\\cos(2x)) \\;\\Rightarrow\\; f'(x)=1\\cdot\\sin(2x)+x\\cdot2\\cos(2x)=\\sin(2x)+2x\\cos(2x)",
+    };
+  if (typeRetenu === "quotient")
+    return {
+      texte: "Exemple :",
+      latex:
+        "f(x)=\\dfrac{x}{x+1}, \\quad u=x\\ (u'=1), \\quad v=x+1\\ (v'=1) \\;\\Rightarrow\\; f'(x)=\\dfrac{1\\cdot(x+1)-x\\cdot1}{(x+1)^2}=\\dfrac{1}{(x+1)^2}",
+    };
+  if (typeRetenu === "composee")
+    return {
+      texte: "Exemple :",
+      latex:
+        "f(x)=(3x+2)^4 \\;\\Rightarrow\\; f'(x)=4(3x+2)^3\\cdot3=12(3x+2)^3 \\quad \\text{(dérivée de l'extérieure } u^4 \\text{ en } 4u^3\\text{, multipliée par la dérivée de l'intérieure } 3x+2\\text{, qui vaut } 3\\text{)}",
+    };
+  return {
+    texte: "Exemple :",
+    latex:
+      "f(x)=x^3+\\cos(x) \\;\\Rightarrow\\; f'(x)=3x^2-\\sin(x) \\quad \\text{(attention au signe moins devant } \\sin\\text{, dérivée de } \\cos\\text{)}",
+  };
 }
 
 // ============================================================================

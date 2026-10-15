@@ -192,33 +192,62 @@ export function consignePhase(exercice: ExerciceAsymptoteOblique, phase: PhaseAs
 // Aides — niveau 1 (exemple/méthode), niveau 2 (résolution complète de l'exemple).
 // ============================================================================
 
-export function texteAideNiveau1(phase: PhaseAsymptoteOblique): string {
+/** Aide fragmentée — texte en français d'un côté, formule KaTeX de l'autre (jamais de formule
+ * brute dans le texte), rendue via `<p>{aide.texte}</p> {aide.latex && <Katex expression={aide.latex} block />}`. */
+export interface AideFragmentee {
+  texte: string;
+  latex: string | null;
+}
+
+export function texteAideNiveau1(phase: PhaseAsymptoteOblique): AideFragmentee {
   switch (phase) {
     case "diviserEuclidienne":
-      return "Pose la division euclidienne de N(x) par D(x), comme une division de polynômes classique — le quotient Q(x) est toujours de degré 1, le reste R(x) est toujours une constante (son degré reste strictement inférieur à celui de D(x)).";
+      return {
+        texte:
+          "Pose la division euclidienne de N(x) par D(x), comme une division de polynômes classique — le quotient Q(x) est toujours de degré 1, le reste R(x) est toujours une constante (son degré reste strictement inférieur à celui de D(x)).",
+        latex: null,
+      };
     case "ecrireFormeDeveloppee":
-      return "f(x)=Q(x)+R(x)/D(x), directement à partir de la division précédente. Piège : une erreur de signe pendant la division se répercute ici.";
+      return {
+        texte: "Directement à partir de la division précédente. Piège : une erreur de signe pendant la division se répercute ici.",
+        latex: "f(x)=Q(x)+\\dfrac{R(x)}{D(x)}",
+      };
     case "calculerCoefficientA":
-      return "Exemple avec une fonction différente : pour g(x)=(3x²-5x+1)/(x-2), calcule a=lim_{x→±∞} g(x)/x.";
+      return {
+        texte: "Exemple avec une fonction différente : pour g(x)=(3x²-5x+1)/(x-2), calcule :",
+        latex: "a=\\lim_{x\\to\\pm\\infty} \\dfrac{g(x)}{x}",
+      };
     case "calculerCoefficientB":
-      return "Exemple (suite) : pour la même fonction g(x)=(3x²-5x+1)/(x-2), avec a=3 déjà trouvé, calcule b=lim_{x→±∞} [g(x)-3x].";
+      return {
+        texte: "Exemple (suite) : pour la même fonction g(x)=(3x²-5x+1)/(x-2), avec a=3 déjà trouvé, calcule :",
+        latex: "b=\\lim_{x\\to\\pm\\infty} [g(x)-3x]",
+      };
     case "conclureEquationAsymptote":
-      return "L'asymptote oblique est le quotient Q(x) SEUL — le reste R(x) disparaît à la limite, ne l'inclus jamais dans l'équation finale.";
+      return {
+        texte: "L'asymptote oblique est le quotient Q(x) SEUL — le reste R(x) disparaît à la limite, ne l'inclus jamais dans l'équation finale.",
+        latex: null,
+      };
   }
 }
 
-export function texteAideNiveau2(phase: PhaseAsymptoteOblique): string {
+export function texteAideNiveau2(phase: PhaseAsymptoteOblique): AideFragmentee {
   switch (phase) {
     case "diviserEuclidienne":
-      return "Exemple : (x²+5x+2)÷(x-1) donne Q(x)=x+6 et R(x)=8.";
+      return { texte: "Exemple :", latex: "(x^2+5x+2)\\div(x-1) \\;\\Rightarrow\\; Q(x)=x+6, \\quad R(x)=8" };
     case "ecrireFormeDeveloppee":
-      return "Exemple : avec Q(x)=x+6, R(x)=8, D(x)=x-1 : f(x)=x+6+8/(x-1).";
+      return { texte: "Exemple :", latex: "Q(x)=x+6,\\ R(x)=8,\\ D(x)=x-1 \\;\\Rightarrow\\; f(x)=x+6+\\dfrac{8}{x-1}" };
     case "calculerCoefficientA":
-      return "g(x)/x=(3x²-5x+1)/(x(x-2)) — le rapport des termes dominants 3x²/x² donne a=3.";
+      return {
+        texte: "Le rapport des termes dominants donne a=3 :",
+        latex: "\\dfrac{g(x)}{x}=\\dfrac{3x^2-5x+1}{x(x-2)} \\;\\approx\\; \\dfrac{3x^2}{x^2}=3",
+      };
     case "calculerCoefficientB":
-      return "g(x)-3x=(3x²-5x+1)/(x-2)-3x=(3x²-5x+1-3x(x-2))/(x-2)=(x+1)/(x-2) — le rapport des termes dominants x/x donne b=1.";
+      return {
+        texte: "Le rapport des termes dominants donne b=1 :",
+        latex: "g(x)-3x=\\dfrac{3x^2-5x+1}{x-2}-3x=\\dfrac{3x^2-5x+1-3x(x-2)}{x-2}=\\dfrac{x+1}{x-2} \\;\\approx\\; \\dfrac{x}{x}=1",
+      };
     case "conclureEquationAsymptote":
-      return "Exemple : avec quotient x+6 (reste ignoré), l'asymptote est AO≡x+6.";
+      return { texte: "Exemple :", latex: "\\text{avec quotient } x+6 \\text{ (reste ignoré)} \\;\\Rightarrow\\; AO \\equiv x+6" };
   }
 }
 

@@ -73,7 +73,11 @@ export function EtapeSystemeOptimisation({ exercice, tentativesUtilisees, tentat
               <SegmentsInline segments={segmentsPhraseEnonce(texteAideSystemeNiveau2(exercice))} />
             </p>
           )}
-          {niveauAide >= 3 && <p>{texteAideSystemeNiveau3(exercice)}</p>}
+          {niveauAide >= 3 && (
+            <p>
+              <SegmentsInline segments={segmentsPhraseEnonce(texteAideSystemeNiveau3(exercice))} />
+            </p>
+          )}
         </div>
       )}
       {!validation && (

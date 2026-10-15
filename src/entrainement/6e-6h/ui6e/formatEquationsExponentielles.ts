@@ -179,7 +179,7 @@ function consigneB(phase: "bEcran1" | "bEcran2"): string {
 
 function aideB1(phase: "bEcran1" | "bEcran2"): AideAvecLatex {
   if (phase === "bEcran1") return { texte: "Rappel : une puissance de base strictement positive reste toujours strictement positive, donc la racine carrée est toujours définie.", latex: "\\sqrt{\\text{base}^{u}} = \\text{base}^{\\frac{u}{2}}" };
-  return { texte: "Si les deux membres se simplifient en une égalité fausse INDÉPENDANTE de x (ex. \"1=-4\"), l'équation n'a AUCUNE solution.", latex: null };
+  return { texte: "Si les deux membres se simplifient en une égalité fausse INDÉPENDANTE de x (ex. \"1=-4\"), l'équation n'a AUCUNE solution.", latex: "1=-4" };
 }
 
 function aideB2(phase: "bEcran1" | "bEcran2", exercice: ExerciceEqExpoB): AideAvecLatex {
@@ -217,7 +217,7 @@ function aideC1(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqEx
     return { texte: "Relation entre les puissances en jeu :", latex: `(\\text{base}^2)^{x} = (\\text{base}^{x})^2` };
   }
   if (phase === "cEcran2") return { texte: "Résous comme une équation du second degré ORDINAIRE en t (discriminant, formule quadratique) — aucune restriction de signe à ce stade.", latex: null };
-  return { texte: "Rappel : baseˣ est TOUJOURS STRICTEMENT POSITIF, donc toute valeur de t ≤ 0 doit être rejetée avant de convertir en x.", latex: null };
+  return { texte: "Rappel : baseˣ est TOUJOURS STRICTEMENT POSITIF, donc toute valeur de t ≤ 0 doit être rejetée avant de convertir en x.", latex: "\\text{base}^x>0" };
 }
 
 function aideC2(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): AideAvecLatex {
@@ -260,7 +260,7 @@ function consigneD(): string {
 /** Même message pour D1 et D2 (le fait fondamental invoqué est identique) — `exercice` non utilisé,
  * gardé en paramètre pour une signature uniforme avec `aideD2`. */
 function aideD1(_exercice: ExerciceEqExpoD): AideAvecLatex {
-  return { texte: "Rappel fondamental : une puissance de base strictement positive (base>0, ≠1) reste TOUJOURS strictement positive, quel que soit l'exposant — jamais nulle ni négative.", latex: null };
+  return { texte: "Rappel fondamental : une puissance de base strictement positive (base>0, ≠1) reste TOUJOURS strictement positive, quel que soit l'exposant — jamais nulle ni négative.", latex: "\\text{base}>0,\\ \\text{base}\\neq 1 \\;\\Rightarrow\\; \\text{base}^{x}>0" };
 }
 
 function aideD2(exercice: ExerciceEqExpoD): AideAvecLatex {

@@ -380,8 +380,8 @@ export function aideDomaineNiveau2(exercice: ExerciceEtudeFonctionExponentielle)
 }
 
 export function aideLimitesNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "Étudie d'abord la limite de l'exposant mx+n dans chaque direction, puis applique e^u→+∞ si u→+∞, e^u→0 si u→−∞.", latex: null };
-  if (exercice.famille === "B") return { texte: "Près du point exclu, distingue soigneusement les 2 côtés : le signe de l'exposant k/(x−p) n'est PAS le même des deux côtés. Aux deux infinis, l'exposant tend vers 0.", latex: null };
+  if (exercice.famille === "A") return { texte: "Étudie d'abord la limite de l'exposant mx+n dans chaque direction, puis applique e^u→+∞ si u→+∞, e^u→0 si u→−∞.", latex: "e^{u}\\to+\\infty \\text{ si } u\\to+\\infty, \\quad e^{u}\\to 0 \\text{ si } u\\to-\\infty" };
+  if (exercice.famille === "B") return { texte: "Près du point exclu, distingue soigneusement les 2 côtés : le signe de l'exposant k/(x−p) n'est PAS le même des deux côtés. Aux deux infinis, l'exposant tend vers 0.", latex: "\\dfrac{k}{x-p}" };
   if (exercice.famille === "C") return { texte: "Piège : les deux limites sont infinies, mais cela ne signifie pas 'pas d'asymptote' — regarde l'étape suivante avant de conclure.", latex: null };
   return { texte: "Le terme exponentiel l'emporte toujours sur le terme x en +∞ ; en −∞, l'exponentielle s'annule et x aussi (produit qui tend vers 0, pas vers −∞).", latex: null };
 }
@@ -400,7 +400,7 @@ export function aideLimitesNiveau2(exercice: ExerciceEtudeFonctionExponentielle)
 }
 
 export function aideAsymptotesNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "C") return { texte: texteFamilleAsymptoteC(), latex: null };
+  if (exercice.famille === "C") return { texte: texteFamilleAsymptoteC(), latex: "y=ax+b \\quad\\text{si}\\quad f(x)-(ax+b)\\to 0" };
   if (exercice.famille === "A" || exercice.famille === "D") return { texte: "Une limite finie (0 ou une valeur) donne une asymptote HORIZONTALE ; une limite infinie ne donne AUCUNE asymptote dans cette direction.", latex: null };
   return { texte: "", latex: null };
 }
@@ -457,9 +457,9 @@ export function aideConcaviteNiveau1(_exercice: ExerciceEtudeFonctionExponentiel
 }
 
 export function aideConcaviteNiveau2(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {
-  if (exercice.famille === "A") return { texte: "f''(x) = m²·e^(mx+n) — un carré multiplié par une exponentielle, toujours strictement positif.", latex: null };
+  if (exercice.famille === "A") return { texte: "f''(x) = m²·e^(mx+n) — un carré multiplié par une exponentielle, toujours strictement positif.", latex: "f''(x)=m^2\\cdot e^{mx+n}" };
   if (exercice.famille === "B") return { texte: "Position du point d'inflexion (voir en-tête du générateur pour la dérivation complète) :", latex: `x = p - \\dfrac{k}{2} = ${exercice.p} - \\dfrac{${exercice.k}}{2}` };
-  if (exercice.famille === "C") return { texte: "f''(x) = m²·ln(base)²·base^(mx+n) — le terme linéaire −c·x a une dérivée seconde nulle, il n'intervient jamais dans ce signe.", latex: null };
+  if (exercice.famille === "C") return { texte: "f''(x) = m²·ln(base)²·base^(mx+n) — le terme linéaire −c·x a une dérivée seconde nulle, il n'intervient jamais dans ce signe.", latex: "f''(x)=m^2\\cdot\\ln(\\text{base})^2\\cdot\\text{base}^{mx+n}" };
   return { texte: "f''(x) = a·e^x·(2+x), nul en x=−2 (formule déjà établie pour ce type de fonction, quel que soit le signe de a).", latex: "x=-2" };
 }
 

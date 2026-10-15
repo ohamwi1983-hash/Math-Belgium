@@ -211,7 +211,7 @@ export function aideNiveau1(exercice: ExerciceFormuleMoivre, phase: PhaseFormule
     case "ecran2":
       return {
         texte: "Le cycle des puissances de i est périodique de période 4 : i⁰=1, i¹=i, i²=−1, i³=−i, puis ça recommence (i⁴=1, i⁵=i, ...). Applique-le terme à terme, selon la valeur de k de CE terme précis — ne suppose jamais que 'i disparaît' globalement pour la partie imaginaire.",
-        latex: null,
+        latex: "i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i",
       };
     case "ecran3":
       return {

@@ -78,8 +78,9 @@ export const CONSIGNE_EQUATION = "Écris l'équation de ce cercle, sous sa forme
 
 export const LATEX_GABARIT_EQUATION = "(x - x_0)^2 + (y - y_0)^2 = R^2";
 
-export const TEXTE_AIDE_EQUATION_NIVEAU1 =
-  "Un cercle de centre (x₀ ; y₀) et de rayon R a pour équation (x−x₀)² + (y−y₀)² = R² — jamais développée à ce stade.";
+/** Prose seule — la formule générale (`LATEX_GABARIT_EQUATION`) est déjà rendue juste après en
+ * KaTeX (`EtapeEquationEquationCercle.tsx`), jamais dupliquée ici en notation Unicode brute. */
+export const TEXTE_AIDE_EQUATION_NIVEAU1 = "Un cercle de centre (x₀ ; y₀) et de rayon R a pour équation (jamais développée à ce stade) :";
 
 /** Centre + rayon CONFIRMÉS aux écrans 1/2 — rappelés, jamais resaisis. */
 export function formatEtatActuelCentreRayonLatex(exercice: ExerciceEquationCercle): string {

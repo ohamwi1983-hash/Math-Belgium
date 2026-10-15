@@ -202,13 +202,13 @@ function consigneCf(): string {
 }
 
 function aideCf1(): AideAvecLatex {
-  return { texte: "Compare le signe de x et le signe de (baseˣ − 1) séparément, pour x<0, x=0 et x>0 (base>1).", latex: null };
+  return { texte: "Compare le signe de x et le signe de (baseˣ − 1) séparément, pour x<0, x=0 et x>0 (base>1).", latex: "\\text{Signe de }x\\text{ et de }(\\text{base}^{x}-1)\\text{ pour }x<0,\\ x=0,\\ x>0\\ (\\text{base}>1)" };
 }
 
 function aideCf2(): AideAvecLatex {
   return {
     texte: "Pour x<0, baseˣ<1 donc (baseˣ−1)<0, ET x<0 : produit de 2 négatifs, positif. Pour x>0, les deux facteurs sont positifs : produit positif. En x=0, le produit est nul.",
-    latex: null,
+    latex: "x<0:\\ \\text{base}^{x}<1\\Rightarrow(\\text{base}^{x}-1)<0,\\ \\text{et }x<0\\Rightarrow\\text{produit}>0\\qquad x>0:\\ \\text{produit}>0\\qquad x=0:\\ \\text{produit}=0",
   };
 }
 
@@ -232,8 +232,8 @@ function consigneCk(phase: "ckRegrouper" | "ckConclure"): string {
 }
 
 function aideCk1(phase: "ckRegrouper" | "ckConclure", _exercice: ExerciceIneqCk): AideAvecLatex {
-  if (phase === "ckRegrouper") return { texte: "Rappel : diviser les deux membres par base2^{2g(x)} (toujours strictement positif) ne change jamais le sens de l'inégalité.", latex: null };
-  return { texte: "Rappel : le rapport base1/base2² est-il supérieur ou inférieur à 1 ? Quel sens en résulte pour g(x) [symbole] 0 ?", latex: null };
+  if (phase === "ckRegrouper") return { texte: "Rappel : diviser les deux membres par base2^{2g(x)} (toujours strictement positif) ne change jamais le sens de l'inégalité.", latex: "\\text{base}_2^{2g(x)}>0" };
+  return { texte: "Rappel : le rapport base1/base2² est-il supérieur ou inférieur à 1 ? Quel sens en résulte pour g(x) [symbole] 0 ?", latex: "\\dfrac{\\text{base}_1}{\\text{base}_2^{2}}" };
 }
 
 function aideCk2(phase: "ckRegrouper" | "ckConclure", exercice: ExerciceIneqCk): AideAvecLatex {
@@ -324,8 +324,8 @@ function consigneDVariable(phase: "dVariableSigne1" | "dVariableSigne2" | "dVari
 }
 
 function aideDVariable1(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): AideAvecLatex {
-  if (phase === "dVariableTableau") return { texte: "Rappel : la règle des signes d'un produit — (+)×(+)=+, (−)×(−)=+, (+)×(−)=(−)×(+)=−.", latex: null };
-  return { texte: "Résous l'équation \"facteur = 0\" pour trouver le zéro, puis teste le signe juste avant et juste après ce zéro.", latex: null };
+  if (phase === "dVariableTableau") return { texte: "Rappel : la règle des signes d'un produit — (+)×(+)=+, (−)×(−)=+, (+)×(−)=(−)×(+)=−.", latex: "(+)\\times(+)=+\\qquad(-)\\times(-)=+\\qquad(+)\\times(-)=(-)\\times(+)=-" };
+  return { texte: "Résous l'équation \"facteur = 0\" pour trouver le zéro, puis teste le signe juste avant et juste après ce zéro.", latex: "\\text{facteur}=0" };
 }
 
 function signeAvantApres(sens: DirectionSigne, avant: boolean): string {
@@ -378,8 +378,8 @@ function consigneE(phase: "eRegrouper" | "eResoudre"): string {
 }
 
 function aideE1(phase: "eRegrouper" | "eResoudre"): AideAvecLatex {
-  if (phase === "eRegrouper") return { texte: "Rappel : diviser les deux membres par base2^{mx+n} (toujours strictement positif) ne change jamais le sens.", latex: null };
-  return { texte: "Rappel de la règle base>1 (sens préservé) / base<1 (sens inversé), appliquée ici au RAPPORT base1/base2.", latex: null };
+  if (phase === "eRegrouper") return { texte: "Rappel : diviser les deux membres par base2^{mx+n} (toujours strictement positif) ne change jamais le sens.", latex: "\\text{base}_2^{mx+n}>0" };
+  return { texte: "Rappel de la règle base>1 (sens préservé) / base<1 (sens inversé), appliquée ici au RAPPORT base1/base2.", latex: "\\text{base}>1\\ (\\text{sens préservé})\\qquad \\text{base}<1\\ (\\text{sens inversé})\\qquad \\dfrac{\\text{base}_1}{\\text{base}_2}" };
 }
 
 function aideE2(phase: "eRegrouper" | "eResoudre", exercice: ExerciceIneqE): AideAvecLatex {

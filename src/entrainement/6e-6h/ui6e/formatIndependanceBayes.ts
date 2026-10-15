@@ -95,7 +95,7 @@ function etatActuelAPannes(ex: ExerciceFamilleAPannes, phase: PhaseIndependanceB
 }
 
 function aideNiveau1APannes(phase: PhaseIndependanceBayes): AideAvecLatex {
-  if (phase === "aPannesEcran1") return { texte: "Rappel : P(événement contraire) = 1 − P(événement).", latex: null };
+  if (phase === "aPannesEcran1") return { texte: "Rappel : P(événement contraire) = 1 − P(événement).", latex: "P(\\overline{A})=1-P(A)" };
   return { texte: "Deux événements indépendants : la probabilité que les DEUX se produisent est le PRODUIT de leurs probabilités — même règle pour toute combinaison de probabilités et de compléments.", latex: null };
 }
 
@@ -149,15 +149,15 @@ function etatActuelAUnion(ex: ExerciceFamilleAUnion, phase: PhaseIndependanceBay
 }
 
 function aideNiveau1AUnion(phase: PhaseIndependanceBayes): AideAvecLatex {
-  if (phase === "aUnionEcran1") return { texte: "Rappel : P(Ā) = 1 − P(A).", latex: null };
+  if (phase === "aUnionEcran1") return { texte: "Rappel : P(Ā) = 1 − P(A).", latex: "P(\\overline{A})=1-P(A)" };
   if (phase === "aUnionEcran2") return { texte: "Rappel de la relation d'union avec indépendance :", latex: "P(A\\cup B)=P(A)+P(B)-P(A)\\cdot P(B)" };
-  return { texte: "Rappel : si A et B sont indépendants, conditionner par l'un ne change JAMAIS la probabilité de l'autre : P(A|B)=P(A) et P(B|A)=P(B).", latex: null };
+  return { texte: "Rappel : si A et B sont indépendants, conditionner par l'un ne change JAMAIS la probabilité de l'autre : P(A|B)=P(A) et P(B|A)=P(B).", latex: "P(A|B)=P(A)\\quad P(B|A)=P(B)" };
 }
 
 function aideNiveau2AUnion(ex: ExerciceFamilleAUnion, phase: PhaseIndependanceBayes): AideAvecLatex {
   if (phase === "aUnionEcran1") return { texte: "Valeur connue, soustraction non faite :", latex: `1-${formatDecimalVirgule(ex.pA)}` };
   if (phase === "aUnionEcran2") return { texte: "Équation posée, valeurs connues substituées (résolution non faite) :", latex: `${formatDecimalVirgule(ex.pAouB)}=${formatDecimalVirgule(ex.pA)}+P(B)-${formatDecimalVirgule(ex.pA)}\\cdot P(B)` };
-  return { texte: "Un calcul complet P(A∩B)/P(B) et P(A∩B)/P(A) donnerait EXACTEMENT le même résultat — utilise directement le raccourci P(A|B)=P(A), P(B|A)=P(B).", latex: null };
+  return { texte: "Un calcul complet P(A∩B)/P(B) et P(A∩B)/P(A) donnerait EXACTEMENT le même résultat — utilise directement le raccourci P(A|B)=P(A), P(B|A)=P(B).", latex: "P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}=P(A)\\qquad P(B|A)=\\dfrac{P(A\\cap B)}{P(A)}=P(B)" };
 }
 
 // ============================================================================
@@ -199,7 +199,7 @@ function etatActuelBHisto(ex: ExerciceFamilleBHistogramme, phase: PhaseIndependa
 }
 
 function aideNiveau1BHisto(phase: PhaseIndependanceBayes): AideAvecLatex {
-  if (phase === "bHistoEcran1") return { texte: "Proportion = (valeur cible − début de la classe) / largeur de la classe.", latex: null };
+  if (phase === "bHistoEcran1") return { texte: "Proportion = (valeur cible − début de la classe) / largeur de la classe.", latex: "\\text{Proportion}=\\dfrac{\\text{valeur cible}-\\text{début de la classe}}{\\text{largeur de la classe}}" };
   return { texte: "Combine la portion interpolée de la classe cible (proportion × effectif de la classe) avec les effectifs des classes entières pertinentes, puis divise par l'effectif total n.", latex: null };
 }
 
@@ -248,7 +248,7 @@ function champsBTable(): ChampDef[] {
 }
 
 function aideNiveau1BTable(): AideAvecLatex {
-  return { texte: "Marginale : total d'UNE SEULE ligne (ou colonne) divisé par le total GÉNÉRAL. Conditionnelle : la cellule divisée par le total d'UNE SEULE ligne (ou colonne) — jamais le total général.", latex: null };
+  return { texte: "Marginale : total d'UNE SEULE ligne (ou colonne) divisé par le total GÉNÉRAL. Conditionnelle : la cellule divisée par le total d'UNE SEULE ligne (ou colonne) — jamais le total général.", latex: "P(\\text{marginale})=\\dfrac{\\text{total ligne (ou colonne)}}{\\text{total général}}\\qquad P(\\text{conditionnelle})=\\dfrac{\\text{cellule}}{\\text{total ligne (ou colonne)}}" };
 }
 
 function aideNiveau2BTable(ex: ExerciceFamilleBTableauDonne): AideAvecLatex {
@@ -328,7 +328,7 @@ function champsBRecon(ex: ExerciceFamilleBReconstruire, phase: PhaseIndependance
 }
 
 function aideNiveau1BRecon(phase: PhaseIndependanceBayes): AideAvecLatex {
-  if (phase === "bReconEcran1") return { texte: "Effectif = pourcentage × N / 100. Une cellule « X% de la ligne Y » se calcule à partir du TOTAL de la ligne Y (déjà connu), jamais de N directement.", latex: null };
+  if (phase === "bReconEcran1") return { texte: "Effectif = pourcentage × N / 100. Une cellule « X% de la ligne Y » se calcule à partir du TOTAL de la ligne Y (déjà connu), jamais de N directement.", latex: "\\text{Effectif}=\\dfrac{\\text{pourcentage}\\times N}{100}" };
   if (phase === "bReconEcran2") return { texte: "Chaque ligne ET chaque colonne doit sommer à son total connu — utilise cette contrainte pour déduire les cases manquantes une à une.", latex: null };
   return aideNiveau1BTable();
 }
@@ -390,7 +390,7 @@ function etatActuelC(ex: ExerciceFamilleC, phase: PhaseIndependanceBayes): strin
 }
 
 function aideNiveau1C(phase: PhaseIndependanceBayes): AideAvecLatex {
-  if (phase === "cEcran1") return { texte: "Chaque branche finale = P(cause) × P(effet ou son contraire | cette cause).", latex: null };
+  if (phase === "cEcran1") return { texte: "Chaque branche finale = P(cause) × P(effet ou son contraire | cette cause).", latex: "\\text{branche finale}=P(\\text{cause})\\times P(\\text{effet ou son contraire}\\mid\\text{cette cause})" };
   if (phase === "cEcran2") return { texte: "Rappel de la formule des probabilités totales :", latex: "P(\\text{effet})=p\\cdot q_1+(1-p)\\cdot q_2" };
   return { texte: "Rappel de la formule de Bayes :", latex: "P(\\text{cause}|\\text{effet})=\\dfrac{P(\\text{effet}|\\text{cause})\\cdot P(\\text{cause})}{P(\\text{effet})}" };
 }

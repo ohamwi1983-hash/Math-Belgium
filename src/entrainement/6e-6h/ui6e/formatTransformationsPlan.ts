@@ -158,7 +158,7 @@ export function niveauAideMaxA(phase: PhaseTransformationsPlan): number {
 }
 export function aideNiveau1A(phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
-  return { texte: "Formules complexes de base : translation de vecteur z_v → on ADDITIONNE z_v ; homothétie de rapport k → on MULTIPLIE par k ; rotation d'angle θ → on MULTIPLIE par e^{iθ}.", latex: null };
+  return { texte: "Formules complexes de base : translation de vecteur z_v → on ADDITIONNE z_v ; homothétie de rapport k → on MULTIPLIE par k ; rotation d'angle θ → on MULTIPLIE par e^{iθ}.", latex: "z_P+z_v\\qquad k\\cdot\\, z_P\\qquad z_P\\cdot\\, e^{i\\theta}" };
 }
 export function aideNiveau2A(e: ExerciceTransfoA, phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "aEcran1") return AUCUNE_AIDE;
@@ -255,7 +255,7 @@ export function niveauAideMaxB(phase: PhaseTransformationsPlan): number {
 }
 export function aideNiveau1B(phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "bEcran2") return AUCUNE_AIDE;
-  return { texte: "z_A+z_B est TOUJOURS une translation ; z_A·z_B est TOUJOURS une similitude centrée en O — sans dire encore laquelle correspond à quel point.", latex: null };
+  return { texte: "z_A+z_B est TOUJOURS une translation ; z_A·z_B est TOUJOURS une similitude centrée en O — sans dire encore laquelle correspond à quel point.", latex: "z_A+z_B\\qquad z_A\\cdot\\, z_B" };
 }
 export function aideNiveau2B(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): AideAvecLatex {
   if (phase !== "bEcran2") return AUCUNE_AIDE;

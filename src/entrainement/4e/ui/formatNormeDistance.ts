@@ -360,8 +360,16 @@ export function libelleVarianteNormeDistance(variante: VarianteNormeDistance): s
   return LIBELLES_VARIANTE[variante];
 }
 
-export const TEXTE_AIDE_METHODE_RESOLUTION_QUADRATIQUE =
-  "Calcule le discriminant Δ = b²-4ac. Si Δ>0, deux solutions x=(-b±√Δ)/(2a). Si Δ=0, une solution x=-b/(2a). Si Δ<0, aucune solution réelle.";
+/** Méthode générique (jamais substituée) — prose + formule KaTeX séparée, jamais une formule
+ * écrite en caractères Unicode bruts (Δ, ², ±, √) dans la prose (même patron que
+ * `EtapeCalculDistance.tsx`/`EtapeBtIntervalle.tsx`). */
+export function aideMethodeResolutionQuadratiqueNiveau1(): { texte: string; latex: string } {
+  return {
+    texte: "Calcule le discriminant, puis détermine le nombre de solutions selon son signe :",
+    latex:
+      "\\begin{gathered} \\Delta = b^2-4ac \\\\ \\Delta>0 \\implies x=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a} \\quad\\text{(2 solutions)} \\\\ \\Delta=0 \\implies x=\\dfrac{-b}{2a} \\quad\\text{(1 solution)} \\\\ \\Delta<0 \\implies \\text{aucune solution réelle} \\end{gathered}",
+  };
+}
 
 export const PLACEHOLDER_NORME = "ex : 5";
 export const PLACEHOLDER_COMPOSANTE = "ex : 3";

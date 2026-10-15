@@ -130,8 +130,8 @@ function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2
 function aideA1(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
   if (phase === "aEcran1") {
     return exercice.sousType === "evaluer"
-      ? { texte: "Rappel : une hausse de p % correspond à un facteur multiplicateur r=1+p/100 ; une baisse de p % correspond à r=1-p/100.", latex: null }
-      : { texte: "Rappel : reculer d'une période divise la quantité par 2 — le nombre de reculs entre l'instant t et T est T−t.", latex: null };
+      ? { texte: "Rappel : une hausse de p % correspond à un facteur multiplicateur r=1+p/100 ; une baisse de p % correspond à r=1-p/100.", latex: "r=1+\\dfrac{p}{100} \\quad\\text{ou}\\quad r=1-\\dfrac{p}{100}" }
+      : { texte: "Rappel : reculer d'une période divise la quantité par 2 — le nombre de reculs entre l'instant t et T est T−t.", latex: "T-t" };
   }
   return exercice.sousType === "evaluer" ? { texte: "Substitue t=n dans le modèle correct de l'étape précédente, puis calcule.", latex: null } : { texte: "Un recul d'une période correspond exactement à une division par 2.", latex: null };
 }
@@ -199,7 +199,7 @@ function aideB1(_exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" | "bE
     case "bEcran3":
       return { texte: "Substitue t=n dans le complément(t) CORRECT de l'étape précédente.", latex: null };
     case "bEcran4":
-      return { texte: "Pose l'équation complément(t)=Q0−tolérance, isole la puissance, puis utilise le logarithme (même technique qu'une équation exponentielle).", latex: null };
+      return { texte: "Pose l'équation complément(t)=Q0−tolérance, isole la puissance, puis utilise le logarithme (même technique qu'une équation exponentielle).", latex: "\\text{complément}(t) = Q_0-\\text{tolérance}" };
   }
 }
 
@@ -259,7 +259,7 @@ function consigneEcranC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2
 function aideC1(_exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
   if (phase === "cEcran1") return { texte: "Rappel :", latex: "v_2 = v_1\\cdot r^{\\Delta t} \\ \\Longrightarrow\\ r = \\left(\\dfrac{v_2}{v_1}\\right)^{\\frac{1}{\\Delta t}}" };
   if (phase === "cEcran2") return { texte: "Un point connu et r suffisent à reconstituer Q0.", latex: null };
-  return { texte: "Utilise le modèle Q(t)=Q0·r^t confirmé à l'étape précédente, substitue chaque temps demandé.", latex: null };
+  return { texte: "Utilise le modèle Q(t)=Q0·r^t confirmé à l'étape précédente, substitue chaque temps demandé.", latex: "Q(t)=Q_0\\cdot r^{t}" };
 }
 
 function aideC2(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -315,11 +315,11 @@ function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2
 function aideD1(_exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): AideAvecLatex {
   switch (phase) {
     case "dEcran1":
-      return { texte: "Pour L+C·r^t, la différence entre 2 valeurs équidistantes est une suite géométrique de raison r^d — même si L est encore inconnu.", latex: null };
+      return { texte: "Pour L+C·r^t, la différence entre 2 valeurs équidistantes est une suite géométrique de raison r^d — même si L est encore inconnu.", latex: "L+C\\cdot r^{t}" };
     case "dEcran2":
       return { texte: "Rappel :", latex: "a-L = \\dfrac{a-b}{1-r^{d}}" };
     case "dEcran3":
-      return { texte: "C=a−L, et r s'obtient depuis le rapport r^d (racine d-ième).", latex: null };
+      return { texte: "C=a−L, et r s'obtient depuis le rapport r^d (racine d-ième).", latex: "C=a-L" };
     case "dEcran4":
       return { texte: "Substitue t dans le modèle complet CORRECT de l'étape précédente.", latex: null };
   }
@@ -382,7 +382,7 @@ function consigneEcranE(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran
 }
 
 function aideE1(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
-  if (phase === "eEcran1") return { texte: "Règle du produit, puis dérivée de e^(−at) — factorise ensuite par le terme commun.", latex: null };
+  if (phase === "eEcran1") return { texte: "Règle du produit, puis dérivée de e^(−at) — factorise ensuite par le terme commun.", latex: "e^{-at}" };
   if (phase === "eEcran2") return { texte: "Un zéro de f' n'est pas automatiquement le maximum — vérifie le changement de signe autour de chaque zéro.", latex: null };
   return { texte: "Substitue le temps trouvé dans f(t).", latex: null };
 }
@@ -444,13 +444,13 @@ function consigneEcranF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2
 function aideF1(_exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2" | "fEcran3" | "fEcran4"): AideAvecLatex {
   switch (phase) {
     case "fEcran1":
-      return { texte: "e^(−kt) tend vers 0 quand t devient très grand.", latex: null };
+      return { texte: "e^(−kt) tend vers 0 quand t devient très grand.", latex: "e^{-kt}\\to 0" };
     case "fEcran2":
-      return { texte: "Substitue directement t=n1 dans p(t)=1−e^(−kt).", latex: null };
+      return { texte: "Substitue directement t=n1 dans p(t)=1−e^(−kt).", latex: "p(t)=1-e^{-kt}" };
     case "fEcran3":
       return { texte: "N'utilise jamais p(n1) ici — recalcule p au bon temps (n2), puis multiplie par N.", latex: null };
     case "fEcran4":
-      return { texte: "Rappel : bénéfice net = revenu − (coûts fixes + coûts variables).", latex: null };
+      return { texte: "Rappel : bénéfice net = revenu − (coûts fixes + coûts variables).", latex: "\\text{bénéfice net} = \\text{revenu} - (\\text{coûts fixes} + \\text{coûts variables})" };
   }
 }
 
@@ -520,9 +520,9 @@ function consigneEcranG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2
 function aideG1(_exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEcran3"): AideAvecLatex {
   switch (phase) {
     case "gEcran1":
-      return { texte: "Substitue directement chaque temps dans f(t)=c+e^(k−at).", latex: null };
+      return { texte: "Substitue directement chaque temps dans f(t)=c+e^(k−at).", latex: "f(t)=c+e^{k-at}" };
     case "gEcran2":
-      return { texte: "Isole e^(k−at)=S−c avant de passer au logarithme.", latex: null };
+      return { texte: "Isole e^(k−at)=S−c avant de passer au logarithme.", latex: "e^{k-at}=S-c" };
     case "gEcran3":
       return { texte: "La grandeur est décroissante : le seuil est franchi puis dépassé, jamais retrouvé.", latex: null };
   }

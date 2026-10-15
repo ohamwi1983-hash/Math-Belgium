@@ -90,8 +90,21 @@ export function EtapeDiviserEuclidienne({ exercice, tentativesUtilisees, tentati
       <CalculatriceScientifique />
       {niveauAide >= 1 && (
         <div className="aide-5e">
-          <p>{texteAideNiveau1("diviserEuclidienne")}</p>
-          {niveauAide >= 2 && <p>{aide2}</p>}
+          {(() => {
+            const aide1 = texteAideNiveau1("diviserEuclidienne");
+            return (
+              <>
+                <p>{aide1.texte}</p>
+                {aide1.latex && <Katex expression={aide1.latex} block />}
+              </>
+            );
+          })()}
+          {niveauAide >= 2 && (
+            <>
+              <p>{aide2.texte}</p>
+              {aide2.latex && <Katex expression={aide2.latex} block />}
+            </>
+          )}
         </div>
       )}
       {!validation && (

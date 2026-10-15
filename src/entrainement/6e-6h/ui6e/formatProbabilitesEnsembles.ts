@@ -162,7 +162,7 @@ function aideNiveau1A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): 
   if (phase === "aEcran1") return { texte: "Rappel de la relation d'inclusion-exclusion :", latex: "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)" };
   if (phase === "aEcran2") return { texte: "Réutilise les 4 cases du tableau à double entrée — chaque probabilité dérivée se lit directement dans une case, ou se calcule comme le rapport de 2 cases (probabilité conditionnelle).", latex: null };
   if (ex.sousTypeEcran3 === "incompatibilite") return { texte: "Deux événements sont incompatibles si leur intersection est vide — une question LOGIQUE, indépendante des valeurs numériques.", latex: null };
-  return { texte: "Calcule séparément P(A|B̄) et P(A|B) avant de les comparer — ne compare jamais deux probabilités conditionnelles sans les avoir d'abord calculées.", latex: null };
+  return { texte: "Calcule séparément P(A|B̄) et P(A|B) avant de les comparer — ne compare jamais deux probabilités conditionnelles sans les avoir d'abord calculées.", latex: "P(A|\\overline{B})\\quad\\text{et}\\quad P(A|B)" };
 }
 
 function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): AideAvecLatex {
@@ -170,8 +170,8 @@ function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): 
     const gauche = ex.troisiemeDonnee === "PAetB" ? `${formatFractionLatex(ex.nA, ex.denominateur)}+${formatFractionLatex(ex.nB, ex.denominateur)}-${formatFractionLatex(ex.nAetB, ex.denominateur)}` : `${formatFractionLatex(ex.nA, ex.denominateur)}+${formatFractionLatex(ex.nB, ex.denominateur)}-P(A\\cap B)=${formatFractionLatex(nAouBA(ex), ex.denominateur)}`;
     return { texte: "Équation posée, valeurs connues substituées (résolution non faite) :", latex: gauche };
   }
-  if (phase === "aEcran2") return { texte: "Rappel : P(A∩B̄) = P(A)−P(A∩B) ; P(Ā∩B) = P(B)−P(A∩B) ; P(A|B) = P(A∩B)/P(B).", latex: null };
-  if (ex.sousTypeEcran3 === "incompatibilite") return { texte: "A∩B̄ suppose A VRAI ; Ā∩B suppose A FAUX — contradiction directe, sans le moindre calcul nécessaire.", latex: null };
+  if (phase === "aEcran2") return { texte: "Rappel : P(A∩B̄) = P(A)−P(A∩B) ; P(Ā∩B) = P(B)−P(A∩B) ; P(A|B) = P(A∩B)/P(B).", latex: "P(A\\cap\\overline{B})=P(A)-P(A\\cap B)\\quad P(\\overline{A}\\cap B)=P(B)-P(A\\cap B)\\quad P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}" };
+  if (ex.sousTypeEcran3 === "incompatibilite") return { texte: "A∩B̄ suppose A VRAI ; Ā∩B suppose A FAUX — contradiction directe, sans le moindre calcul nécessaire.", latex: "A\\cap\\overline{B}\\quad\\text{et}\\quad\\overline{A}\\cap B" };
   return { texte: "Les deux membres, calculés séparément (comparaison non faite) :", latex: `P(A|\\overline{B})=${formatDecimalCourt(nAetBbarA(ex) / (ex.denominateur - ex.nB))}\\quad P(A|B)=${formatDecimalCourt(ex.nAetB / ex.nB)}` };
 }
 
@@ -225,9 +225,9 @@ function choixB(): OptionChoix[] {
 
 function aideNiveau1B(phase: PhaseProbabilitesEnsembles): AideAvecLatex {
   if (phase === "bEcran1") return { texte: "Compte les issues favorables à chaque événement, puis divise par la taille de l'univers Ω.", latex: null };
-  if (phase === "bEcran2") return { texte: "Dénombre directement les issues communes à A et B, ou utilise l'inclusion-exclusion : P(A∪B)=P(A)+P(B)-P(A∩B).", latex: null };
-  if (phase === "bEcran3") return { texte: "Rappel : P(A|B) = P(A∩B)/P(B).", latex: null };
-  return { texte: "Deux événements sont indépendants si et seulement si P(A∩B) = P(A)·P(B) — une égalité NUMÉRIQUE à vérifier explicitement, jamais une intuition.", latex: null };
+  if (phase === "bEcran2") return { texte: "Dénombre directement les issues communes à A et B, ou utilise l'inclusion-exclusion : P(A∪B)=P(A)+P(B)-P(A∩B).", latex: "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)" };
+  if (phase === "bEcran3") return { texte: "Rappel : P(A|B) = P(A∩B)/P(B).", latex: "P(A|B)=\\dfrac{P(A\\cap B)}{P(B)}" };
+  return { texte: "Deux événements sont indépendants si et seulement si P(A∩B) = P(A)·P(B) — une égalité NUMÉRIQUE à vérifier explicitement, jamais une intuition.", latex: "P(A\\cap B)=P(A)\\cdot P(B)" };
 }
 
 function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseProbabilitesEnsembles): AideAvecLatex {

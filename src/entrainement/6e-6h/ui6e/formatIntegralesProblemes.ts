@@ -322,7 +322,7 @@ export function niveauAideMaxD(phase: PhaseIntegralesProblemes): number {
   return phase === "dEcran3" ? 2 : 0;
 }
 export function aideNiveau1D(phase: PhaseIntegralesProblemes): AideAvecLatex {
-  if (phase === "dEcran3") return { texte: "L'augmentation de coût entre 2 quantités se calcule soit via C(q_2)−C(q_1), soit directement via l'intégrale définie du coût marginal entre q_1 et q_2 — les deux méthodes sont équivalentes.", latex: null };
+  if (phase === "dEcran3") return { texte: "L'augmentation de coût entre 2 quantités se calcule soit via C(q_2)−C(q_1), soit directement via l'intégrale définie du coût marginal entre q_1 et q_2 — les deux méthodes sont équivalentes.", latex: "C(q_2)-C(q_1)=\\displaystyle\\int_{q_1}^{q_2} f(q)\\,dq" };
   return AUCUNE_AIDE;
 }
 export function aideNiveau2D(phase: PhaseIntegralesProblemes): AideAvecLatex {
