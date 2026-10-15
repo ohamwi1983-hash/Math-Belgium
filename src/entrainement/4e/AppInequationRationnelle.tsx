@@ -538,14 +538,38 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
   const exercice = etat.exerciceCourant;
   switch (etat.phase) {
     case "isoler":
-      if (exercice.niveau === "niveau2") return <>Forme isolée attendue : {formatExpressionIsoleeLatex(exercice)}</>;
-      if (exercice.niveau === "niveau3") return <>Forme isolée attendue : {formatExpressionIsoleeNiveau3Latex(exercice)}</>;
-      if (exercice.niveau === "niveau4") return <>Forme isolée attendue : {formatExpressionIsoleeNiveau4Latex(exercice)}</>;
-      if (exercice.niveau === "denominateurCarre") return <>Forme isolée attendue : {formatExpressionIsoleeDenominateurCarreLatex(exercice)}</>;
+      if (exercice.niveau === "niveau2")
+        return (
+          <>
+            Forme isolée attendue : <Katex expression={formatExpressionIsoleeLatex(exercice)} />
+          </>
+        );
+      if (exercice.niveau === "niveau3")
+        return (
+          <>
+            Forme isolée attendue : <Katex expression={formatExpressionIsoleeNiveau3Latex(exercice)} />
+          </>
+        );
+      if (exercice.niveau === "niveau4")
+        return (
+          <>
+            Forme isolée attendue : <Katex expression={formatExpressionIsoleeNiveau4Latex(exercice)} />
+          </>
+        );
+      if (exercice.niveau === "denominateurCarre")
+        return (
+          <>
+            Forme isolée attendue : <Katex expression={formatExpressionIsoleeDenominateurCarreLatex(exercice)} />
+          </>
+        );
       return null;
     case "combiner":
       if (exercice.niveau === "niveau2") {
-        return <>Numérateur combiné attendu : {formatLineaireDeveloppe(exercice.numerateur.k, exercice.numerateur.p)}</>;
+        return (
+          <>
+            Numérateur combiné attendu : <Katex expression={formatLineaireDeveloppe(exercice.numerateur.k, exercice.numerateur.p)} />
+          </>
+        );
       }
       if (
         exercice.niveau === "niveau3" ||
@@ -553,7 +577,11 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         exercice.niveau === "denominateurCarre" ||
         exercice.niveau === "sansFacteurCommun"
       ) {
-        return <>Numérateur combiné attendu : {formatMembreGauche(exercice.numerateur.enonce)}</>;
+        return (
+          <>
+            Numérateur combiné attendu : <Katex expression={formatMembreGauche(exercice.numerateur.enonce)} />
+          </>
+        );
       }
       return null;
     case "ce":
@@ -592,7 +620,12 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       }
       return null;
     case "miseEnEvidence":
-      if (exercice.niveau === "cubique") return <>Mise en évidence attendue : x({formatMembreGauche(exercice.numerateur.enonce)})</>;
+      if (exercice.niveau === "cubique")
+        return (
+          <>
+            Mise en évidence attendue : <Katex expression={`x(${formatMembreGauche(exercice.numerateur.enonce)})`} />
+          </>
+        );
       return null;
     case "reduction":
     case "reconnaissance":
@@ -639,7 +672,12 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         const d = exercice.fraction.denominateur;
         return (
           <>
-            Réponse attendue (dénominateur) : {d.categorie === "cas_general" ? `Δ = ${d.solution.delta}` : `${d.solution.formeFactorisee} = 0`}
+            Réponse attendue (dénominateur) :{" "}
+            {d.categorie === "cas_general" ? (
+              `Δ = ${d.solution.delta}`
+            ) : (
+              <Katex expression={`${d.solution.formeFactorisee} = 0`} />
+            )}
           </>
         );
       }
@@ -671,7 +709,12 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         const n = exercice.fraction.numerateur;
         return (
           <>
-            Réponse attendue (numérateur) : {n.categorie === "cas_general" ? `Δ = ${n.solution.delta}` : `${n.solution.formeFactorisee} = 0`}
+            Réponse attendue (numérateur) :{" "}
+            {n.categorie === "cas_general" ? (
+              `Δ = ${n.solution.delta}`
+            ) : (
+              <Katex expression={`${n.solution.formeFactorisee} = 0`} />
+            )}
           </>
         );
       }
