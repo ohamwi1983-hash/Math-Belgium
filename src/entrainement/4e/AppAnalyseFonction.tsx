@@ -169,9 +169,22 @@ export function AppAnalyseFonction() {
     ]);
   }
 
-  function terminerEtape(nouvelEtat: EtatSessionAnalyseFonction) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" : tant qu'il reste des
+   * tentatives, une réponse fausse renvoie `{...etat, etapeCourante}` SANS clore la phase
+   * (`scoreXxxExercice` reste `null`), et `soumettreReponseXxx` est quand même rappelée à chaque
+   * tentative par les composants `EtapeXxx` (jamais seulement à la tentative qui clôt). Ignorer ce
+   * garde-fou poussait une entrée par tentative — y compris les ratées — toutes mal associées à la
+   * DERNIÈRE phase réellement close (`calculerRecapitulatifAnalyseFonction` ne voit que les phases
+   * déjà closes), désynchronisant l'index des puces de celui de l'historique : bug signalé par
+   * l'utilisateur, la fiche affichait "toujours la même question et réponse" quel que soit l'écran
+   * cliqué. */
+  function terminerEtape(nouvelEtat: EtatSessionAnalyseFonction, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele =
         etat.phase === "coefficients"
           ? nouvelEtat.coefficientsRevele
@@ -256,11 +269,9 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideCoefficientsUtilisee}
               onActiverAide={() => setEtat(activerAideCoefficients(etat))}
-              onValider={(reponse) => {
-                const nouvelEtat = soumettreReponseCoefficients(etat, reponse);
-                ajouterHistorique(`a = ${reponse.a} ; b = ${reponse.b} ; c = ${reponse.c}`, nouvelEtat);
-                terminerEtape(nouvelEtat);
-              }}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseCoefficients(etat, reponse), `a = ${reponse.a} ; b = ${reponse.b} ; c = ${reponse.c}`)
+              }
               validation={validation}
             />
           ) : etat.phase === "allure" ? (
@@ -270,10 +281,8 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               onValider={(reponse) => {
-                const nouvelEtat = soumettreReponseAllure(etat, reponse);
                 const texteAB = reponse.signeAB === "0" ? "a·b = 0" : reponse.signeAB === "+" ? "a·b > 0" : "a·b < 0";
-                ajouterHistorique(`${reponse.signeA === "+" ? "a > 0" : "a < 0"} ; ${texteAB}`, nouvelEtat);
-                terminerEtape(nouvelEtat);
+                terminerEtape(soumettreReponseAllure(etat, reponse), `${reponse.signeA === "+" ? "a > 0" : "a < 0"} ; ${texteAB}`);
               }}
               validation={validation}
             />
@@ -285,11 +294,9 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideAxeSommetUtilisee}
               onActiverAide={() => setEtat(activerAideAxeSommet(etat))}
-              onValider={(reponse) => {
-                const nouvelEtat = soumettreReponseAxeSommet(etat, reponse);
-                ajouterHistorique(`x = ${reponse.axeTexte} ; S(${reponse.xS} ; ${reponse.yS})`, nouvelEtat);
-                terminerEtape(nouvelEtat);
-              }}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseAxeSommet(etat, reponse), `x = ${reponse.axeTexte} ; S(${reponse.xS} ; ${reponse.yS})`)
+              }
               validation={validation}
             />
           ) : etat.phase === "domaineImage" ? (
@@ -301,13 +308,11 @@ export function AppAnalyseFonction() {
               aideActivee={etat.aideDomaineImageUtilisee}
               onActiverAide={() => setEtat(activerAideDomaineImage(etat))}
               onValider={(reponse) => {
-                const nouvelEtat = soumettreReponseImage(etat, reponse);
                 const borne = (b: typeof reponse.borneGauche) => (b === "-inf" ? "-∞" : b === "+inf" ? "+∞" : String(b));
-                ajouterHistorique(
+                terminerEtape(
+                  soumettreReponseImage(etat, reponse),
                   `domf = ℝ ; imf = ${reponse.crochetGauche}${borne(reponse.borneGauche)} ; ${borne(reponse.borneDroite)}${reponse.crochetDroit}`,
-                  nouvelEtat,
                 );
-                terminerEtape(nouvelEtat);
               }}
               validation={validation}
             />
@@ -320,11 +325,7 @@ export function AppAnalyseFonction() {
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               question="Quelle est la méthode la plus rapide pour trouver les racines de f ?"
               options={OPTIONS_CATEGORIE_SANS_CAS_GENERAL}
-              onChoisir={(choix: Categorie) => {
-                const nouvelEtat = soumettreChoixRacinesCategorie(etat, choix);
-                ajouterHistorique(libelleCategorie(choix), nouvelEtat);
-                terminerEtape(nouvelEtat);
-              }}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixRacinesCategorie(etat, choix), libelleCategorie(choix))}
               validation={validation}
             />
           ) : etat.phase === "racinesChamp1" ? (
@@ -335,11 +336,7 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.exercice, v)}
-              onValider={(reponse) => {
-                const nouvelEtat = soumettreReponseRacinesChamp1(etat, reponse);
-                ajouterHistorique(`${reponse} = 0`, nouvelEtat);
-                terminerEtape(nouvelEtat);
-              }}
+              onValider={(reponse) => terminerEtape(soumettreReponseRacinesChamp1(etat, reponse), `${reponse} = 0`)}
               validation={validation}
             />
           ) : etat.phase === "racinesChamp2" ? (
@@ -349,11 +346,7 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
-              onValider={(racines) => {
-                const nouvelEtat = soumettreReponseRacinesChamp2(etat, racines);
-                ajouterHistorique(racines.join(" ; "), nouvelEtat);
-                terminerEtape(nouvelEtat);
-              }}
+              onValider={(racines) => terminerEtape(soumettreReponseRacinesChamp2(etat, racines), racines.join(" ; "))}
               validation={validation}
             />
           ) : (
