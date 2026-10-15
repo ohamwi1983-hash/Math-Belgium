@@ -3,16 +3,20 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAireExcentriciteConique } from "./generateurs6e/aireExcentriciteConique";
 import type { IdVarianteAireExcentriciteConique } from "./generateurs6e/aireExcentriciteConique";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionAireExcentriciteConique, soumettreReponseEcran } from "./moteur6e/sessionAireExcentriciteConique";
-import type { EtatSessionAireExcentriciteConique } from "./moteur6e/typesAireExcentriciteConique";
+import type { EtatSessionAireExcentriciteConique, PhaseAireExcentriciteConique } from "./moteur6e/typesAireExcentriciteConique";
+import { phasesPourExercice } from "./moteur6e/typesAireExcentriciteConique";
 import { diagnostiquerEcran } from "./moteur6e/verificationAireExcentriciteConique";
 import { EtapeChampsAireExcentriciteConique } from "./components6e/EtapeChampsAireExcentriciteConique";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAireExcentriciteConique";
+import type { ChampDef } from "./ui6e/formatAireExcentriciteConique";
 import { calculerRecapitulatifAireExcentriciteConique, calculerSegmentsProgressionAireExcentriciteConique } from "./ui6e/recapitulatifAireExcentriciteConique";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen60` — Aire via rayons focaux et excentricité depuis une condition géométrique. Chapitre "Les
@@ -43,15 +47,60 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** `champs[i].label` déjà terminé par "=" — un simple "label valeur" suffit à produire une phrase
+ * courte et lisible ; pour un champ "choix", `valeurs[i]` est la valeur TECHNIQUE de l'option,
+ * jamais son libellé affiché — on recherche le libellé correspondant dans `champ.options`. */
+function formatVotreReponse(champs: ChampDef[], valeurs: string[]): string {
+  return champs
+    .map((champ, i) => {
+      const valeur = champ.type === "choix" ? champ.options?.find((o) => o.valeur === valeurs[i])?.label ?? valeurs[i] : valeurs[i];
+      return `${champ.label} ${valeur}`;
+    })
+    .join(" ; ");
+}
+
 export function App6gen60() {
   const [etat, setEtat] = useState<EtatSessionAireExcentriciteConique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionAireExcentriciteConique`, jamais dans le moteur (même principe que
+   * `App6gen58.tsx`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Un écran "aide" s'il a été clos avec `niveauAide>0` — capturé ICI au moment précis de la
+   * clôture (voir le commentaire équivalent dans `App6gen58.tsx`). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseAireExcentriciteConique, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionAireExcentriciteConique) {
+  function ajouterHistorique(votreReponse: string, nouvelEtat: EtatSessionAireExcentriciteConique) {
+    const recap = calculerRecapitulatifAireExcentriciteConique(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionAireExcentriciteConique, votreReponse?: string) {
     // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
     // ici) — piège "revele stale" documenté CLAUDE.md.
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      // `nouvelEtat.phase !== etat.phase` (jamais seulement `nouvelEtat.terminee`) — voir le
+      // commentaire équivalent dans `App6gen58.tsx` (clôture du DERNIER écran d'un exercice :
+      // `scoresPartiels`/`phase` de `nouvelEtat` restent ceux d'AVANT cette soumission, sans
+      // incidence pratique puisque cette puce reste "courante" jusqu'au reset, jamais cliquable).
+      if (votreReponse !== undefined && nouvelEtat.phase !== etat.phase) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
+      if (etat.niveauAide > 0) {
+        setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -60,12 +109,20 @@ export function App6gen60() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionAireExcentriciteConique(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteAireExcentriciteConique)));
   }
 
@@ -116,13 +173,18 @@ export function App6gen60() {
   // l'obtient ; les écrans purement symboliques... ne l'obtiennent pas").
   const calculatriceVisible = (exercice.famille === "A" && phase === "aEcran3") || (exercice.famille === "B" && phase === "bEcran2");
 
+  const sequencePhases = phasesPourExercice(exercice);
+  const segments = calculerSegmentsProgressionAireExcentriciteConique(etat).map((segment, i) =>
+    segment === "correcte" && aideUtiliseeParPhase[sequencePhases[i]] ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Aire via rayons focaux et excentricité</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionAireExcentriciteConique(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifAireExcentriciteConique(etat)} />
@@ -136,10 +198,13 @@ export function App6gen60() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), formatVotreReponse(champsEcran(exercice, phase), valeurs))}
         />
         {calculatriceVisible && <CalculatriceScientifique />}
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

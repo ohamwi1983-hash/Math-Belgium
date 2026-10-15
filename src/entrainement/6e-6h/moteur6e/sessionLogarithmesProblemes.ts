@@ -46,8 +46,8 @@ export const NIVEAU_AIDE_MAX = 2;
 
 function etatInitial(
   exercice: ExerciceLogarithmesProblemes,
-): Pick<EtatSessionLogarithmesProblemes, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+): Pick<EtatSessionLogarithmesProblemes, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, aidePartiels: {}, derniereTransitionRevelee: false };
 }
 
 export function demarrerSessionLogarithmesProblemes(reglages: ReglagesSession6e, generateur: () => ExerciceLogarithmesProblemes): EtatSessionLogarithmesProblemes {
@@ -119,13 +119,14 @@ function avancerPhase<TReponse>(
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
+  const aidePartiels = { ...etat.aidePartiels, [etat.phase]: etat.niveauAide > 0 };
   const phaseSuivante = phaseApres(etat.phase);
 
   if (phaseSuivante === "termine") {
-    return { ...cloturerExerciceOuSuivant(etat, construireResultat(exercice, scoresPartiels)), derniereTransitionRevelee: revele };
+    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels }, construireResultat(exercice, scoresPartiels)), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }
 
 // ============================================================================

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabiliteHypergeometrique } from "./generateurs6e/probabiliteHypergeometrique";
 import type { IdVarianteProbabiliteHypergeometrique } from "./generateurs6e/probabiliteHypergeometrique";
@@ -8,10 +9,22 @@ import { diagnostiquerEcran } from "./moteur6e/verificationProbabiliteHypergeome
 import { EtapeChampsProbabiliteHypergeometrique } from "./components6e/EtapeChampsProbabiliteHypergeometrique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatProbabiliteHypergeometrique";
+import {
+  blocDonnees,
+  champsEcran,
+  consigneEcran,
+  consigneGenerale,
+  niveauAideMaxEcran,
+  formatReponseAttenduePhaseLatex,
+  LIBELLE_PHASE,
+  aideNiveau1 as formatAideNiveau1,
+  aideNiveau2 as formatAideNiveau2,
+} from "./ui6e/formatProbabiliteHypergeometrique";
 import { calculerRecapitulatifProbabiliteHypergeometrique, calculerSegmentsProgressionProbabiliteHypergeometrique } from "./ui6e/recapitulatifProbabiliteHypergeometrique";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen47` — Probabilité hypergéométrique (tirage sans remise). Chapitre "Analyse combinatoire".
@@ -40,10 +53,34 @@ interface TransitionEnAttente {
 export function App6gen47() {
   const [etat, setEtat] = useState<EtatSessionProbabiliteHypergeometrique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionProbabiliteHypergeometrique` (voir `App6gen39.tsx`, même mécanisme). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionProbabiliteHypergeometrique) {
+  function terminerEtape(nouvelEtat: EtatSessionProbabiliteHypergeometrique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        const revele = nouvelEtat.derniereTransitionRevelee;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(etat.exerciceCourant, etat.phase).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+        setAideUtiliseeFermees((a) => [...a, etat.niveauAide > 0]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -52,12 +89,20 @@ export function App6gen47() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeFermees([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeFermees([]);
     setEtat(demarrerSessionProbabiliteHypergeometrique(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteProbabiliteHypergeometrique)));
   }
 
@@ -98,13 +143,16 @@ export function App6gen47() {
     validation,
   };
 
+  const segmentsBase = calculerSegmentsProgressionProbabiliteHypergeometrique(etat);
+  const segments = segmentsBase.map((s, i) => (s === "correcte" && aideUtiliseeFermees[i] ? ("aide" as const) : s));
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Probabilité hypergéométrique (tirage sans remise)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionProbabiliteHypergeometrique(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifProbabiliteHypergeometrique(etat)} />
@@ -118,9 +166,20 @@ export function App6gen47() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+          onValider={(valeurs) =>
+            terminerEtape(
+              soumettreReponseEcran(etat, valeurs),
+              champsEcran(exercice, phase)
+                .map((c, i) => `${c.label} ${c.options?.find((o) => o.valeur === valeurs[i])?.label ?? valeurs[i]}`)
+                .join(" ; "),
+            )
+          }
         />
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

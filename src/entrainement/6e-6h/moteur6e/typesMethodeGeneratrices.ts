@@ -48,6 +48,10 @@ export interface EtatSessionMethodeGeneratrices {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseMethodeGeneratrices, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhaseMethodeGeneratrices, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceMethodeGeneratrices[];
   terminee: boolean;

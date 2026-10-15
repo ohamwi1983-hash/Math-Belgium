@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
@@ -18,6 +19,8 @@ import { libelleDonneeManquante, valeurAffichageDonneeManquante } from "./ui/for
 import { valeurAire } from "./moteur/verificationTriangleQuelconque";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Résous ce triangle quelconque.";
@@ -48,7 +51,8 @@ function calculerSegmentsProgression(etat: EtatSessionTriangleQuelconque): EtatP
     if (phase === etat.phase) return "courante";
     const score = phase === "donneeManquante" ? etat.scoreDonneeManquanteExercice : null;
     if (score === null) return "a-venir";
-    return etat.donneeManquanteRevele ? "revele" : "correcte";
+    if (etat.donneeManquanteRevele) return "revele";
+    return etat.niveauAideDonneeManquante > 0 ? "aide" : "correcte";
   });
 }
 
@@ -64,11 +68,35 @@ interface TransitionEnAttente {
 export function AppTriangleQuelconque() {
   const [etat, setEtat] = useState<EtatSessionTriangleQuelconque>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionTriangleQuelconque`, jamais dans le moteur (voir
+   * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
   const recapitulatif = calculerRecapitulatifTriangleQuelconque(etat);
 
-  function terminerEtape(nouvelEtat: EtatSessionTriangleQuelconque) {
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
+   * `calculerRecapitulatifTriangleQuelconque` pour la réponse ATTENDUE ; cette fonction ne produit
+   * jamais d'entrée pour "aire" (dernière phase), comme ailleurs sur ce chantier. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionTriangleQuelconque) {
+    const recap = calculerRecapitulatifTriangleQuelconque(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
+   * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
+  function terminerEtape(nouvelEtat: EtatSessionTriangleQuelconque, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele = etat.phase === "donneeManquante" ? nouvelEtat.donneeManquanteRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.aireRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
@@ -78,12 +106,18 @@ export function AppTriangleQuelconque() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionTriangleQuelconque(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as ConfigurationTriangleQuelconque)));
   }
 
@@ -116,7 +150,7 @@ export function AppTriangleQuelconque() {
         <h1 className="app-title">Triangle quelconque</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -130,7 +164,7 @@ export function AppTriangleQuelconque() {
               tentativesMax={etat.reglages.tentativesMax}
               niveauAide={etat.niveauAideDonneeManquante}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(valeur, unite) => terminerEtape(soumettreReponseDonneeManquante(etat, valeur, unite))}
+              onValider={(valeur, unite) => terminerEtape(soumettreReponseDonneeManquante(etat, valeur, unite), `${valeur} ${unite}`)}
               validation={validation}
             />
           ) : (
@@ -147,6 +181,10 @@ export function AppTriangleQuelconque() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

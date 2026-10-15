@@ -29,6 +29,7 @@ export function calculerSegmentsProgressionMethodeGeneratrices(etat: EtatSession
   return sequence.map((phase) => {
     if (phase === etat.phase) return "courante" as const;
     if (etat.scoresPartiels[phase] === undefined) return "a-venir" as const;
-    return etat.scoresPartiels[phase] === 0 ? ("revele" as const) : ("correcte" as const);
+    if (etat.scoresPartiels[phase] === 0) return "revele" as const;
+    return etat.aidePartiels[phase] ? ("aide" as const) : ("correcte" as const);
   });
 }

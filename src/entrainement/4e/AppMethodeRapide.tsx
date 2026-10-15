@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { Categorie, Exercice } from "./core/generateur.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
@@ -28,9 +29,12 @@ import { EtapeChamp1 } from "./components/EtapeChamp1";
 import { EtapeZeros } from "./components/EtapeZeros";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
+import { libelleCategorie } from "./ui/categorieLabels";
 import { formatEnonceAffichage, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -80,7 +84,19 @@ function calculerSegmentsProgression(etat: EtatSession): EtatPuceProgression[] {
             : phase === "reconnaissance"
               ? etat.categorieRevelee
               : etat.scoreChampPrincipalExercice === 0;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    // "reconnaissance" n'a aucun mécanisme d'aide (toujours "correcte", jamais "aide").
+    const aideUtilisee =
+      phase === "simplification"
+        ? etat.aideSimplificationUtilisee
+        : phase === "isolement"
+          ? etat.aideIsolementUtilisee
+          : phase === "developper"
+            ? etat.aideDevelopperUtilisee
+            : phase === "champ1"
+              ? etat.aideChamp1Utilisee
+              : false;
+    return aideUtilisee ? "aide" : "correcte";
   });
 }
 
@@ -121,10 +137,39 @@ interface TransitionEnAttente {
 export function AppMethodeRapide() {
   const [etat, setEtat] = useState<EtatSession>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSession`, jamais dans le moteur (voir AppAnalyseFonction.tsx). Remis à
+   * vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSession) {
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise `calculerRecapitulatif`
+   * pour la réponse ATTENDUE, la dernière entrée du tableau correspondant toujours à l'étape qui
+   * vient de se clore. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSession) {
+    const recap = calculerRecapitulatif(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
+   * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
+  function terminerEtape(nouvelEtat: EtatSession, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele =
         etat.phase === "simplification"
           ? nouvelEtat.scoreSimplificationExercice === 0
@@ -145,7 +190,12 @@ export function AppMethodeRapide() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -161,6 +211,7 @@ export function AppMethodeRapide() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSession(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSecondDegreId)));
   }
 
@@ -197,7 +248,7 @@ export function AppMethodeRapide() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           <EnTeteExercice
             consigneGenerale={CONSIGNE_GENERALE}
@@ -215,7 +266,7 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
               aideActivee={etat.aideSimplificationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplification(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse), reponse)}
               validation={validation}
             />
           ) : phase === "isolement" ? (
@@ -232,7 +283,7 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
               aideActivee={etat.aideIsolementUtilisee}
               onActiverAide={() => setEtat(activerAideIsolement(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), reponse)}
               validation={validation}
             />
           ) : phase === "developper" ? (
@@ -247,7 +298,7 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerIsolement(exercice, v)}
               aideActivee={etat.aideDevelopperUtilisee}
               onActiverAide={() => setEtat(activerAideDevelopper(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDevelopper(etat, reponse), reponse)}
               validation={validation}
             />
           ) : phase === "reconnaissance" ? (
@@ -259,7 +310,7 @@ export function AppMethodeRapide() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix))}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix), libelleCategorie(choix))}
               validation={validation}
             />
           ) : phase === "champ1" ? (
@@ -274,7 +325,9 @@ export function AppMethodeRapide() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice, v)}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseChamp1(etat, reponse), exercice.categorie === "cas_general" ? `Δ = ${reponse}` : `${reponse} = 0`)
+              }
               validation={validation}
             />
           ) : (
@@ -294,6 +347,10 @@ export function AppMethodeRapide() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

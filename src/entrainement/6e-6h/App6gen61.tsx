@@ -3,15 +3,19 @@ import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntersectionsConiques } from "./generateurs6e/intersectionsConiques";
 import type { IdVarianteIntersectionsConiques } from "./generateurs6e/intersectionsConiques";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntersectionsConiques, soumettreReponseEcran } from "./moteur6e/sessionIntersectionsConiques";
-import type { EtatSessionIntersectionsConiques } from "./moteur6e/typesIntersectionsConiques";
+import type { EtatSessionIntersectionsConiques, PhaseIntersectionsConiques } from "./moteur6e/typesIntersectionsConiques";
+import { phasesPourExercice } from "./moteur6e/typesIntersectionsConiques";
 import { diagnostiquerEcran } from "./moteur6e/verificationIntersectionsConiques";
 import { EtapeChampsIntersectionsConiques } from "./components6e/EtapeChampsIntersectionsConiques";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntersectionsConiques";
+import type { ChampDef } from "./ui6e/formatIntersectionsConiques";
 import { calculerRecapitulatifIntersectionsConiques, calculerSegmentsProgressionIntersectionsConiques } from "./ui6e/recapitulatifIntersectionsConiques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen61` — Intersections : droite-conique et conique-conique. TROISIÈME générateur du chapitre
@@ -40,15 +44,60 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** `champs[i].label` déjà terminé par "=" — un simple "label valeur" suffit à produire une phrase
+ * courte et lisible ; pour un champ "choix", `valeurs[i]` est la valeur TECHNIQUE de l'option,
+ * jamais son libellé affiché — on recherche le libellé correspondant dans `champ.options`. */
+function formatVotreReponse(champs: ChampDef[], valeurs: string[]): string {
+  return champs
+    .map((champ, i) => {
+      const valeur = champ.type === "choix" ? champ.options?.find((o) => o.valeur === valeurs[i])?.label ?? valeurs[i] : valeurs[i];
+      return `${champ.label} ${valeur}`;
+    })
+    .join(" ; ");
+}
+
 export function App6gen61() {
   const [etat, setEtat] = useState<EtatSessionIntersectionsConiques>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionIntersectionsConiques`, jamais dans le moteur (même principe que
+   * `App6gen58.tsx`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Un écran "aide" s'il a été clos avec `niveauAide>0` — capturé ICI au moment précis de la
+   * clôture (voir le commentaire équivalent dans `App6gen58.tsx`). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseIntersectionsConiques, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionIntersectionsConiques) {
+  function ajouterHistorique(votreReponse: string, nouvelEtat: EtatSessionIntersectionsConiques) {
+    const recap = calculerRecapitulatifIntersectionsConiques(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionIntersectionsConiques, votreReponse?: string) {
     // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
     // ici) — piège "revele stale" documenté CLAUDE.md.
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      // `nouvelEtat.phase !== etat.phase` (jamais seulement `nouvelEtat.terminee`) — voir le
+      // commentaire équivalent dans `App6gen58.tsx` (clôture du DERNIER écran d'un exercice :
+      // `scoresPartiels`/`phase` de `nouvelEtat` restent ceux d'AVANT cette soumission, sans
+      // incidence pratique puisque cette puce reste "courante" jusqu'au reset, jamais cliquable).
+      if (votreReponse !== undefined && nouvelEtat.phase !== etat.phase) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
+      if (etat.niveauAide > 0) {
+        setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -57,12 +106,20 @@ export function App6gen61() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionIntersectionsConiques(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIntersectionsConiques)));
   }
 
@@ -103,13 +160,18 @@ export function App6gen61() {
     validation,
   };
 
+  const sequencePhases = phasesPourExercice(exercice);
+  const segments = calculerSegmentsProgressionIntersectionsConiques(etat).map((segment, i) =>
+    segment === "correcte" && aideUtiliseeParPhase[sequencePhases[i]] ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Intersections droite-conique et conique-conique</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionIntersectionsConiques(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifIntersectionsConiques(etat)} />
@@ -123,9 +185,12 @@ export function App6gen61() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), formatVotreReponse(champsEcran(exercice, phase), valeurs))}
         />
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

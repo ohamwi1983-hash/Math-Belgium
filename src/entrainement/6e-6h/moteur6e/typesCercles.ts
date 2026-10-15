@@ -125,6 +125,10 @@ export interface EtatSessionCercles {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseCercles, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhaseCercles, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceCercles[];
   terminee: boolean;

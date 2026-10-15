@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLogarithmesProblemes } from "./generateurs6e/logarithmesProblemes";
 import {
@@ -29,7 +30,7 @@ import {
   soumettreReponseGEcran3,
   soumettreReponseGEcran4,
 } from "./moteur6e/sessionLogarithmesProblemes";
-import type { EtatSessionLogarithmesProblemes } from "./moteur6e/typesLogarithmesProblemes";
+import type { EtatSessionLogarithmesProblemes, PhaseLogarithmesProblemes } from "./moteur6e/typesLogarithmesProblemes";
 import {
   diagnostiquerAEcran1,
   diagnostiquerAEcran2,
@@ -60,10 +61,12 @@ import { EtapeDeuxValeursLogProblemes } from "./components6e/EtapeDeuxValeursLog
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatLogarithmesProblemes";
+import { LIBELLE_PHASE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatLogarithmesProblemes";
 import { calculerRecapitulatifLogarithmesProblemes, calculerSegmentsProgressionLogarithmesProblemes } from "./ui6e/recapitulatifLogarithmesProblemes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -83,10 +86,40 @@ interface TransitionEnAttente {
 export function App6gen22() {
   const [etat, setEtat] = useState<EtatSessionLogarithmesProblemes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme
+   * `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionLogarithmesProblemes) {
+  /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise
+   * `calculerRecapitulatifLogarithmesProblemes` pour la réponse ATTENDUE. Garde sur le libellé : le
+   * dernier écran de l'exercice n'avance jamais `etat.phase` au-delà de lui-même, donc SANS cette
+   * garde on repousserait l'entrée de l'écran PRÉCÉDENT une seconde fois (bug déjà rencontré sur la
+   * référence 4e, `AppAnalyseFonction.tsx`). */
+  function ajouterHistorique(phaseFermee: PhaseLogarithmesProblemes, votreReponse: ReactNode, nouvelEtat: EtatSessionLogarithmesProblemes) {
+    const recap = calculerRecapitulatifLogarithmesProblemes(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere || derniere.libelle !== LIBELLE_PHASE[phaseFermee]) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (
+          <span className="equation-box-termes">{(derniere.valeurs ?? [derniere.valeur]).map((f, i) => <Katex key={i} expression={f} />)}</span>
+        ) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionLogarithmesProblemes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(etat.phase, votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -95,12 +128,20 @@ export function App6gen22() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
+    setFicheOuverteIndex(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionLogarithmesProblemes(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
@@ -169,15 +210,15 @@ export function App6gen22() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Logarithmes : problèmes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionLogarithmesProblemes(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLogarithmesProblemes(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifLogarithmesProblemes(etat)} />
         {phase === "aEcran1" && (
-          <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1000*1.05^t>=1500" diagnostiquer={(t) => (exercice.famille === "A" ? diagnostiquerAEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte))} />
+          <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1000*1.05^t>=1500" diagnostiquer={(t) => (exercice.famille === "A" ? diagnostiquerAEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte), texte)} />
         )}
         {phase === "aEcran2" && (
-          <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.05^t>=1.5" diagnostiquer={(t) => (exercice.famille === "A" ? diagnostiquerAEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseAEcran2(etat, texte))} />
+          <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.05^t>=1.5" diagnostiquer={(t) => (exercice.famille === "A" ? diagnostiquerAEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseAEcran2(etat, texte), texte)} />
         )}
         {phase === "aEcran3" && exercice.famille === "A" && exercice.sousType === "resoudreT" && exercice.variante === "fenetre" && (
           <EtapeDeuxValeursLogProblemes
@@ -194,7 +235,7 @@ export function App6gen22() {
             niveauAide={niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte, texte2) => terminerEtape(soumettreReponseAEcran3(etat, { texte, texte2 }))}
+            onValider={(texte, texte2) => terminerEtape(soumettreReponseAEcran3(etat, { texte, texte2 }), `t_1=${texte} ; t_2=${texte2}`)}
             validation={validation}
           />
         )}
@@ -209,21 +250,21 @@ export function App6gen22() {
               if (exercice.sousType === "resoudreTaux") return diagnostiquerAEcran3Taux(exercice, t);
               return diagnostiquerAEcran3Decroissance(exercice, t);
             }}
-            onValider={(texte) => terminerEtape(soumettreReponseAEcran3(etat, { texte }))}
+            onValider={(texte) => terminerEtape(soumettreReponseAEcran3(etat, { texte }), texte)}
           />
         )}
 
-        {phase === "bEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.05" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte))} />}
-        {phase === "bEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 100" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran2(etat, texte))} />}
-        {phase === "bEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 250" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran3(etat, texte))} />}
-        {phase === "bEcran4" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 30" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran4(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran4(etat, texte))} />}
+        {phase === "bEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.05" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte), texte)} />}
+        {phase === "bEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 100" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran2(etat, texte), texte)} />}
+        {phase === "bEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 250" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran3(etat, texte), texte)} />}
+        {phase === "bEcran4" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 30" diagnostiquer={(t) => (exercice.famille === "B" ? diagnostiquerBEcran4(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseBEcran4(etat, texte), texte)} />}
 
-        {phase === "cEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 12" diagnostiquer={(t) => (exercice.famille === "C" ? diagnostiquerCEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte))} />}
-        {phase === "cEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 20" diagnostiquer={(t) => (exercice.famille === "C" ? diagnostiquerCEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseCEcran2(etat, texte))} />}
-        {phase === "cEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.5" diagnostiquer={(t) => (exercice.famille === "C" ? diagnostiquerCEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseCEcran3(etat, texte))} />}
+        {phase === "cEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 12" diagnostiquer={(t) => (exercice.famille === "C" ? diagnostiquerCEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte), texte)} />}
+        {phase === "cEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 20" diagnostiquer={(t) => (exercice.famille === "C" ? diagnostiquerCEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseCEcran2(etat, texte), texte)} />}
+        {phase === "cEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.5" diagnostiquer={(t) => (exercice.famille === "C" ? diagnostiquerCEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseCEcran3(etat, texte), texte)} />}
 
-        {phase === "dEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 20+(90-20)*exp(k*t)" diagnostiquer={(t) => (exercice.famille === "D" ? diagnostiquerDEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseDEcran1(etat, texte))} />}
-        {phase === "dEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : (1/k)*ln((T-20)/70)" diagnostiquer={(t) => (exercice.famille === "D" ? diagnostiquerDEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseDEcran2(etat, texte))} />}
+        {phase === "dEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 20+(90-20)*exp(k*t)" diagnostiquer={(t) => (exercice.famille === "D" ? diagnostiquerDEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseDEcran1(etat, texte), texte)} />}
+        {phase === "dEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : (1/k)*ln((T-20)/70)" diagnostiquer={(t) => (exercice.famille === "D" ? diagnostiquerDEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseDEcran2(etat, texte), texte)} />}
 
         {phase === "eEcran1" && exercice.famille === "E" && (
           <EtapeDeuxValeursLogProblemes
@@ -240,17 +281,17 @@ export function App6gen22() {
             niveauAide={niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texteA, texteB) => terminerEtape(soumettreReponseEEcran1(etat, { texteA, texteB }))}
+            onValider={(texteA, texteB) => terminerEtape(soumettreReponseEEcran1(etat, { texteA, texteB }), `a=${texteA} ; b=${texteB}`)}
             validation={validation}
           />
         )}
-        {phase === "eEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 5" diagnostiquer={(t) => (exercice.famille === "E" ? diagnostiquerEEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseEEcran2(etat, texte))} />}
-        {phase === "eEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : -1" diagnostiquer={(t) => (exercice.famille === "E" ? diagnostiquerEEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseEEcran3(etat, texte))} />}
-        {phase === "eEcran4" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 3" diagnostiquer={(t) => (exercice.famille === "E" ? diagnostiquerEEcran4(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseEEcran4(etat, texte))} />}
+        {phase === "eEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 5" diagnostiquer={(t) => (exercice.famille === "E" ? diagnostiquerEEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseEEcran2(etat, texte), texte)} />}
+        {phase === "eEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : -1" diagnostiquer={(t) => (exercice.famille === "E" ? diagnostiquerEEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseEEcran3(etat, texte), texte)} />}
+        {phase === "eEcran4" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 3" diagnostiquer={(t) => (exercice.famille === "E" ? diagnostiquerEEcran4(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseEEcran4(etat, texte), texte)} />}
 
-        {phase === "fEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 4" diagnostiquer={(t) => (exercice.famille === "F" ? diagnostiquerFEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseFEcran1(etat, texte))} />}
-        {phase === "fEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.5" diagnostiquer={(t) => (exercice.famille === "F" ? diagnostiquerFEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseFEcran2(etat, texte))} />}
-        {phase === "fEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 100" diagnostiquer={(t) => (exercice.famille === "F" ? diagnostiquerFEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseFEcran3(etat, texte))} />}
+        {phase === "fEcran1" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 4" diagnostiquer={(t) => (exercice.famille === "F" ? diagnostiquerFEcran1(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseFEcran1(etat, texte), texte)} />}
+        {phase === "fEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 1.5" diagnostiquer={(t) => (exercice.famille === "F" ? diagnostiquerFEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseFEcran2(etat, texte), texte)} />}
+        {phase === "fEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 100" diagnostiquer={(t) => (exercice.famille === "F" ? diagnostiquerFEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseFEcran3(etat, texte), texte)} />}
 
         {phase === "gEcran1" && exercice.famille === "G" && (
           <EtapeDeuxValeursLogProblemes
@@ -267,16 +308,20 @@ export function App6gen22() {
             niveauAide={niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texteO, texteD) => terminerEtape(soumettreReponseGEcran1(etat, { texteO, texteD }))}
+            onValider={(texteO, texteD) => terminerEtape(soumettreReponseGEcran1(etat, { texteO, texteD }), `o(x_0)=${texteO} ; d(x_0)=${texteD}`)}
             validation={validation}
           />
         )}
-        {phase === "gEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 5000*u^2-13000=0" diagnostiquer={(t) => (exercice.famille === "G" ? diagnostiquerGEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseGEcran2(etat, texte))} />}
-        {phase === "gEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 0.1" diagnostiquer={(t) => (exercice.famille === "G" ? diagnostiquerGEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseGEcran3(etat, texte))} />}
-        {phase === "gEcran4" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 0.15" diagnostiquer={(t) => (exercice.famille === "G" ? diagnostiquerGEcran4(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseGEcran4(etat, texte))} />}
+        {phase === "gEcran2" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 5000*u^2-13000=0" diagnostiquer={(t) => (exercice.famille === "G" ? diagnostiquerGEcran2(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseGEcran2(etat, texte), texte)} />}
+        {phase === "gEcran3" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 0.1" diagnostiquer={(t) => (exercice.famille === "G" ? diagnostiquerGEcran3(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseGEcran3(etat, texte), texte)} />}
+        {phase === "gEcran4" && <EtapeChampLogProblemes key={phase} {...propsChampCommun} placeholder="ex : 0.15" diagnostiquer={(t) => (exercice.famille === "G" ? diagnostiquerGEcran4(exercice, t) : "parse_error")} onValider={(texte) => terminerEtape(soumettreReponseGEcran4(etat, texte), texte)} />}
 
         {calculatriceVisible && <CalculatriceScientifique />}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

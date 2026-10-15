@@ -18,6 +18,7 @@ import { ordreEcransLectureGraphiqueDerivees } from "./moteur5e/typesLectureGrap
 import { diagnostiquerCibleAsymptote, listeAsymptotes } from "./moteur5e/verificationLectureGraphiqueDerivees";
 import { diagnostiquerChampParmiCiblesExtremum, diagnostiquerChampParmiCiblesInflexion } from "./moteur5e/verificationLectureGraphiqueDerivees";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "./moteur5e/verificationLectureGraphiqueDerivees";
+import type { ReponseTableauEtudeLocale } from "./moteur5e/verificationEtudeLocale";
 import type { ExerciceLectureGraphiqueDerivees } from "./core5e/lectureGraphiqueDerivees.types";
 import { EtapeAsymptotesLectureGraphiqueDerivees } from "./components5e/EtapeAsymptotesLectureGraphiqueDerivees";
 import { EtapeTableauLectureGraphiqueDerivees } from "./components5e/EtapeTableauLectureGraphiqueDerivees";
@@ -29,6 +30,8 @@ import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import {
   formatEnteteColonnesTableauFPrime,
   formatEnteteColonnesTableauFSeconde,
@@ -80,22 +83,58 @@ interface TransitionEnAttente {
  * de chaque écran déjà clos de l'exercice courant (remis à `{}` au prochain exercice) — heuristique
  * `score === 0 ⟺ révélée` (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0
  * exactement quand l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e). */
-function calculerSegmentsProgression(etat: EtatSessionLectureGraphiqueDerivees): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionLectureGraphiqueDerivees,
+  aideParPhase: Partial<Record<EcranLectureGraphiqueDerivees, boolean>>,
+): EtatPuceProgression[] {
   return ordreEcransLectureGraphiqueDerivees(etat.exerciceCourant).map((ecran) => {
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideParPhase[ecran] ? "aide" : "correcte";
   });
+}
+
+/** Même texte court que `App5gen29.tsx::texteTableauEtudeLocale` (même type de réponse). */
+function texteTableauLectureGraphiqueDerivees(reponse: ReponseTableauEtudeLocale): string {
+  const signes = reponse.signes.map((s) => s ?? "?").join(" ");
+  const ligne2 = reponse.ligne2.map((v) => v ?? "·").join(" ");
+  return `signes : ${signes} ; ligne 2 : ${ligne2}`;
 }
 
 export function App5gen30() {
   const [etat, setEtat] = useState<EtatSessionLectureGraphiqueDerivees>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionLectureGraphiqueDerivees`, jamais dans le moteur (même principe que
+   * `AppAnalyseFonction.tsx`, 4e). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
+   * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranLectureGraphiqueDerivees, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDerivees) {
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLectureGraphiqueDerivees) {
+    const recap = calculerRecapitulatifLectureGraphiqueDerivees(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueDerivees, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -104,12 +143,20 @@ export function App5gen30() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionLectureGraphiqueDerivees(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
@@ -132,7 +179,7 @@ export function App5gen30() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Lecture graphique — dérivées et applications</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
@@ -151,6 +198,10 @@ export function App5gen30() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -162,7 +213,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueDerivees) => void;
+  terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueDerivees, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionLectureGraphiqueDerivees) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -183,7 +234,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(textes) => terminerEtape(soumettreReponseAsymptotes(etat, textes))}
+          onValider={(textes) => terminerEtape(soumettreReponseAsymptotes(etat, textes), textes.join(" ; "))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleAsymptote(t, slots[i].cible))}
           validation={validation}
         />
@@ -201,7 +252,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse), texteTableauLectureGraphiqueDerivees(reponse))}
           validation={validation}
         />
       );
@@ -221,7 +272,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseExtremums(etat, reponses))}
+          onValider={(reponses) => terminerEtape(soumettreReponseExtremums(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) =>
             diagnostiquerChampParmiCiblesExtremum(
               t,
@@ -243,7 +294,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse), texteTableauLectureGraphiqueDerivees(reponse))}
           validation={validation}
         />
       );
@@ -263,7 +314,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseInflexions(etat, reponses))}
+          onValider={(reponses) => terminerEtape(soumettreReponseInflexions(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) =>
             diagnostiquerChampParmiCiblesInflexion(
               t,

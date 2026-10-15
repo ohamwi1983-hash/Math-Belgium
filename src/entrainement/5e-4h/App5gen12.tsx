@@ -19,6 +19,8 @@ import { calculerRecapitulatifGeometrieCercle } from "./ui5e/recapitulatifGeomet
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -59,23 +61,56 @@ interface TransitionEnAttente {
 /** Même ternaire que `calculerRecapitulatifGeometrieCercle` (`scoresPartiels[phase] === 0 ⟺
  * révélée`) — la séquence de phases dépend du scénario de l'exercice courant (`phasesDuScenario`),
  * jamais un seul ordre générique (voir `moteur5e/typesGeometrieCercle.ts`). */
-function calculerSegmentsProgression(etat: EtatSessionGeometrieCercle): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionGeometrieCercle,
+  aideUtiliseeParPhase: Partial<Record<PhaseGeometrieCercle, boolean>>,
+): EtatPuceProgression[] {
   return phasesDuScenario(etat.exerciceCourant.scenario).map((phase: PhaseGeometrieCercle) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
 
 export function App5gen12() {
   const [etat, setEtat] = useState<EtatSessionGeometrieCercle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionGeometrieCercle`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que 5gen10/5gen11). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseGeometrieCercle, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionGeometrieCercle) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifGeometrieCercle` pour la réponse
+   * ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionGeometrieCercle, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifGeometrieCercle(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -83,12 +118,20 @@ export function App5gen12() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionGeometrieCercle(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioGeometrieCercle)));
   }
 
@@ -110,7 +153,7 @@ export function App5gen12() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes de géométrie du cercle</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
@@ -125,13 +168,17 @@ export function App5gen12() {
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMaxGeometrieCercle(etat.phase)}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponse(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponse(etat, texte), texte)}
             diagnostiquer={(texte) => diagnostiquerChamp(exercice, etat.phase, texte)}
             validation={validation}
           />
           {PHASES_CALCULATRICE.has(etat.phase) && <CalculatriceScientifique />}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -16,6 +16,8 @@ import { EtapeFonctionsReferenceExercice } from "./components/EtapeFonctionsRefe
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { MafsGraphFonctionsReference } from "./components/MafsGraphFonctionsReference";
 
@@ -56,6 +58,13 @@ function demarrer(reglagesFamilles: ReglagesFamillesFonctionReference): EtatSess
 interface TransitionEnAttente {
   etatSuivant: EtatSessionFonctionReference;
   revele: boolean;
+  /** `true` ⟺ la phase qui vient de se clore était "exercice" — la SEULE qui clôt un exercice
+   * (`etat.indexExercice` avance, ou la session entière se termine) et fasse donc redémarrer
+   * "reconnaissance" à vide pour l'exercice suivant. `historique`/`ficheOuverteIndex` ne doivent
+   * être remis à zéro qu'à CE moment précis (jamais quand "reconnaissance" vient juste de clore
+   * vers "exercice" DANS LE MÊME exercice — sinon l'entrée qu'on vient de pousser serait effacée
+   * avant que la puce ne devienne cliquable). */
+  nouvelExercice: boolean;
 }
 
 /** Reproduit exactement ce que `ResultatPanelFonctionsReference.tsx` affichait pour UNE phase
@@ -134,22 +143,58 @@ export function AppFonctionsReference() {
     setCurseurs(CURSEURS_INITIAUX);
   }
 
+  /** Consultation en lecture seule de l'écran "reconnaissance" déjà clos (puce cliquable de
+   * `ProgressionPuces`) — tenu ICI, à part de `EtatSessionFonctionReference`, jamais dans le
+   * moteur. "exercice" (toujours courante tant que l'exercice n'est pas clos, voir
+   * `calculerSegmentsProgression`) n'a jamais de puce "correcte"/"revele" : rien n'y est jamais
+   * poussé (même convention que la dernière phase des autres générateurs du chantier). Remis à
+   * vide à chaque nouvel exercice (voir `nouvelExercice` sur `TransitionEnAttente`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+
   function commencerSession(reglages: ReglagesFamillesFonctionReference) {
     setReglagesFamilles(reglages);
     setEtat(demarrer(reglages));
+    setHistorique([]);
+    setFicheOuverteIndex(null);
   }
 
   function onGenererDev(familleId: string) {
     setEnAttente(null);
     const reglagesSession: ReglagesSession = { ...REGLAGES_BASE, nombreExercices: NOMBRE_EXERCICES_ALEATOIRE };
     setEtat(demarrerSessionFonctionReference(reglagesSession, () => construireAvecFamille(familleId as FamilleReference)));
+    setHistorique([]);
+    setFicheOuverteIndex(null);
   }
 
-  function terminerEtape(nouvelEtat: EtatSessionFonctionReference) {
+  /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreChoixFamille` —
+   * réutilise `releveRevelePhase`/`reponseAttenduePhase`, déjà écrites pour `validation` sur ce
+   * même générateur à ce même point exact (`etat`/`nouvelEtat` juste avant la transition). Jamais
+   * appelée pour "exercice" (voir le commentaire de `historique` ci-dessus). */
+  function ajouterHistorique(etatAvant: EtatSessionFonctionReference, votreReponse: ReactNode, nouvelEtat: EtatSessionFonctionReference) {
+    const revele = releveRevelePhase(etatAvant, nouvelEtat);
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: "Famille",
+        votreReponse,
+        correcte: !revele,
+        reponseAttendue: revele ? reponseAttenduePhase(etatAvant, nouvelEtat) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde-fou que
+   * `AppAnalyseFonction.tsx`, bug déjà rencontré et corrigé là-bas). */
+  function terminerEtape(nouvelEtat: EtatSessionFonctionReference, votreReponse?: ReactNode) {
     if (!etat) return;
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
+      if (votreReponse !== undefined) {
+        ajouterHistorique(etat, votreReponse, nouvelEtat);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat), nouvelExercice: etat.phase === "exercice" });
       return;
     }
     setEtat(nouvelEtat);
@@ -165,6 +210,10 @@ export function AppFonctionsReference() {
       setEtat(reglagesFamilles ? demarrer(reglagesFamilles) : null);
     } else {
       setEtat(enAttente.etatSuivant);
+    }
+    if (enAttente.nouvelExercice) {
+      setHistorique([]);
+      setFicheOuverteIndex(null);
     }
     setEnAttente(null);
   }
@@ -223,14 +272,14 @@ export function AppFonctionsReference() {
             <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
           </div>
         </div>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={blocDonnees} />
           {etat.phase === "reconnaissance" ? (
             <EtapeReconnaissanceFonction
               tentativesUtilisees={etat.etapeReconnaissance.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onChoisir={(choix) => terminerEtape(soumettreChoixFamille(etat, choix))}
+              onChoisir={(choix) => terminerEtape(soumettreChoixFamille(etat, choix), libelleFamille(choix))}
               validation={validation}
             />
           ) : (
@@ -252,6 +301,10 @@ export function AppFonctionsReference() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -84,6 +84,10 @@ export interface EtatSessionBinomialeSequenceOrdonnee {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceBinomialeSequenceOrdonnee[];
   terminee: boolean;

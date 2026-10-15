@@ -98,6 +98,8 @@ import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -238,23 +240,74 @@ interface TransitionEnAttente {
  * révélée`) — la séquence RÉELLE de phases dépend de la technique de Phase 1 ET du type de Phase 2
  * tirés pour cette instance (`ordreComplet(exercice)`, jusqu'à 17 phases possibles — jamais un seul
  * ordre générique, voir `moteur5e/typesModelisationSinusoide.ts`). */
-function calculerSegmentsProgression(etat: EtatSessionModelisationSinusoide): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionModelisationSinusoide,
+  aideUtiliseeParPhase: Partial<Record<PhaseModelisationSinusoide, boolean>>,
+): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase: PhaseModelisationSinusoide) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
+}
+
+/** Formate la réponse (`reponse`/`paires`) de 4 écrans guidés à structure spécifique — un format
+ * court dérivé directement de la réponse typée, même principe que les formateurs de 5gen10. */
+function formatReponseSysteme(reponse: ReponseSysteme): string {
+  return `${reponse.equation1} ; ${reponse.equation2}`;
+}
+function formatReponseResolutionPhase13(reponse: ReponseResolution): string {
+  return `ω = ${reponse.omega} ; φ = ${reponse.phi}`;
+}
+function formatReponseArgumentResoudre(reponse: ReponseArgumentResoudre): string {
+  return reponse.aucuneSolution ? "Aucune solution" : reponse.lignes.join(" ; ");
+}
+function formatReponseBornes(reponse: ReponseBornes): string {
+  return `[${reponse.inf} ; ${reponse.sup}]`;
+}
+function formatReponsePaires(paires: [string, string][]): string {
+  return paires.map(([a, b]) => `[${a} ; ${b}]`).join(" ∪ ");
 }
 
 export function App5gen13() {
   const [etat, setEtat] = useState<EtatSessionModelisationSinusoide>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionModelisationSinusoide`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que 5gen10/5gen11/5gen12). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseModelisationSinusoide, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionModelisationSinusoide) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifModelisationSinusoide` pour la
+   * réponse ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionModelisationSinusoide, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifModelisationSinusoide(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -262,13 +315,21 @@ export function App5gen13() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     const [technique, phase2Choix] = id.split("|") as [TechniquePhase1, Phase2ChoixDev];
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionModelisationSinusoide(REGLAGES_DEMO, () => construireAvecTechniqueEtPhase2(technique, phase2Choix)));
   }
 
@@ -320,7 +381,7 @@ export function App5gen13() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Modéliser une fonction sinusoïdale en contexte</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_TECHNIQUE_PHASE2} onGenerer={forcerVariante} />
       <main className="card">
@@ -375,19 +436,19 @@ export function App5gen13() {
                   onValider={(texte) => {
                     switch (phase) {
                       case "amplitude":
-                        return terminerEtape(soumettreReponseAmplitude(etat, texte));
+                        return terminerEtape(soumettreReponseAmplitude(etat, texte), texte);
                       case "decalage":
-                        return terminerEtape(soumettreReponseDecalage(etat, texte));
+                        return terminerEtape(soumettreReponseDecalage(etat, texte), texte);
                       case "pulsation":
-                        return terminerEtape(soumettreReponsePulsation(etat, texte));
+                        return terminerEtape(soumettreReponsePulsation(etat, texte), texte);
                       case "phi":
-                        return terminerEtape(soumettreReponsePhi(etat, texte));
+                        return terminerEtape(soumettreReponsePhi(etat, texte), texte);
                       case "fonctionFinale":
-                        return terminerEtape(soumettreReponseFonctionFinale(etat, texte));
+                        return terminerEtape(soumettreReponseFonctionFinale(etat, texte), texte);
                       case "poserExtremum":
-                        return terminerEtape(soumettreReponsePoserExtremum(etat, texte));
+                        return terminerEtape(soumettreReponsePoserExtremum(etat, texte), texte);
                       case "isolerTExtremum":
-                        return terminerEtape(soumettreReponseIsolerTExtremum(etat, texte));
+                        return terminerEtape(soumettreReponseIsolerTExtremum(etat, texte), texte);
                       default:
                         return;
                     }
@@ -406,7 +467,7 @@ export function App5gen13() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxModelisation(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseSysteme(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseSysteme(etat, reponse), formatReponseSysteme(reponse))}
                   diagnostiquer={(reponse) => diagnostiquerSystemePhase(exercice, reponse)}
                   validation={validation}
                 />
@@ -421,7 +482,7 @@ export function App5gen13() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxModelisation(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse), formatReponseResolutionPhase13(reponse))}
                   diagnostiquer={(reponse) => diagnostiquerResolutionPhase(exercice, reponse)}
                   validation={validation}
                 />
@@ -437,7 +498,7 @@ export function App5gen13() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxModelisation(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseArgumentResoudre(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseArgumentResoudre(etat, reponse), formatReponseArgumentResoudre(reponse))}
                   diagnostiquer={(reponse) => diagnostiquerArgumentResoudrePhase(exercice, reponse)}
                   validation={validation}
                 />
@@ -457,11 +518,11 @@ export function App5gen13() {
                   onValider={(lignes) => {
                     switch (phase) {
                       case "isolerTResoudre":
-                        return terminerEtape(soumettreReponseIsolerTResoudre(etat, lignes));
+                        return terminerEtape(soumettreReponseIsolerTResoudre(etat, lignes), lignes.join(" ; "));
                       case "solutionsResoudre":
-                        return terminerEtape(soumettreReponseSolutionsResoudre(etat, lignes));
+                        return terminerEtape(soumettreReponseSolutionsResoudre(etat, lignes), lignes.join(" ; "));
                       case "solutionsExtremum":
-                        return terminerEtape(soumettreReponseSolutionsExtremum(etat, lignes));
+                        return terminerEtape(soumettreReponseSolutionsExtremum(etat, lignes), lignes.join(" ; "));
                       default:
                         return;
                     }
@@ -482,7 +543,7 @@ export function App5gen13() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxModelisation(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseIsolerSinInequation(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseIsolerSinInequation(etat, texte), texte)}
                   diagnostiquer={(texte) => diagnostiquerIsolerSinInequationPhase(exercice, texte)}
                   validation={validation}
                 />
@@ -503,6 +564,7 @@ export function App5gen13() {
                       phase === "resoudreUInequation"
                         ? soumettreReponseResoudreUInequation(etat, reponse)
                         : soumettreReponseIsolerTInequation(etat, reponse),
+                      formatReponseBornes(reponse),
                     )
                   }
                   diagnostiquer={(reponse) => diagnostiquerBornesPhase(exercice, phase as "resoudreUInequation" | "isolerTInequation", reponse)}
@@ -520,7 +582,7 @@ export function App5gen13() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxModelisation(exercice, etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(paires) => terminerEtape(soumettreReponseListerIntervalles(etat, paires))}
+                  onValider={(paires) => terminerEtape(soumettreReponseListerIntervalles(etat, paires), formatReponsePaires(paires))}
                   diagnostiquer={(paires) => diagnostiquerListerIntervallesPhase(exercice, paires)}
                   validation={validation}
                 />
@@ -529,6 +591,10 @@ export function App5gen13() {
             </>
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

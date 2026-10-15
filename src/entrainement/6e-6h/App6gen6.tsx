@@ -38,7 +38,10 @@ import {
   soumettreReponseNCombiner,
   soumettreReponseNConclure,
 } from "./moteur6e/sessionLimitesExponentielles";
-import type { EtatSessionLimiteExponentielle } from "./moteur6e/typesLimitesExponentielles";
+import type { EtatSessionLimiteExponentielle, PhaseLimiteExponentielle } from "./moteur6e/typesLimitesExponentielles";
+import { phaseApres, phaseInitiale } from "./moteur6e/typesLimitesExponentielles";
+import type { ReponseFacteursC, ReponseLimite } from "./moteur6e/verificationLimitesExponentielles";
+import type { CategorieFI } from "./core6e/limitesExponentielles.types";
 import { EtapeChampLimiteExpo } from "./components6e/EtapeChampLimiteExpo";
 import { EtapeFacteursC } from "./components6e/EtapeFacteursC";
 import { EtapeFormeFI } from "./components6e/EtapeFormeFI";
@@ -50,6 +53,8 @@ import { aideNiveau1, aideNiveau2, consigneEcran, formatCibleTexte, formatLimite
 import { calculerRecapitulatifLimitesExponentielles, calculerSegmentsProgressionLimitesExponentielles } from "./ui6e/recapitulatifLimitesExponentielles";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -66,11 +71,58 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Reconstitue la séquence RÉELLEMENT traversée par CET exercice en bouclant `phaseInitiale`/
+ * `phaseApres` jusqu'à "termine" — même technique que `ui6e/recapitulatifLimitesExponentielles.ts`
+ * (non exportée depuis ce fichier, reconstruite ici pour la puce "aide"). */
+function sequenceDesPhases(exercice: EtatSessionLimiteExponentielle["exerciceCourant"]): PhaseLimiteExponentielle[] {
+  const phases: PhaseLimiteExponentielle[] = [];
+  let phase: PhaseLimiteExponentielle | "termine" = phaseInitiale(exercice);
+  while (phase !== "termine") {
+    phases.push(phase);
+    phase = phaseApres(phase);
+  }
+  return phases;
+}
+
+/** Formate la réponse catégorielle/texte libre de l'écran pour la fiche de consultation — même
+ * primitive `ReponseLimite` que les 7 écrans catégoriels (A×2, B×3, C-facteurs, voir
+ * `verificationLimitesExponentielles.ts`). */
+function formatReponseLimiteTexte(r: ReponseLimite): string {
+  if (r.type === "plus_infini") return "+∞";
+  if (r.type === "moins_infini") return "-∞";
+  if (r.type === "zero") return "0";
+  return r.texte;
+}
+
+function formatCategorieFITexte(c: CategorieFI): string {
+  return c === "zero_sur_zero" ? "0/0" : c === "infini_sur_infini" ? "∞/∞" : "Pas une FI";
+}
+
 export function App6gen6() {
   const [etat, setEtat] = useState<EtatSessionLimiteExponentielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionLimiteExponentielle`, jamais dans le moteur (même principe que la référence 4e,
+   * `AppAnalyseFonction.tsx`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionLimiteExponentielle) {
+  function ajouterHistorique(votreReponse: string, nouvelEtat: EtatSessionLimiteExponentielle) {
+    const recap = calculerRecapitulatifLimitesExponentielles(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionLimiteExponentielle, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
@@ -81,6 +133,17 @@ export function App6gen6() {
       const detail = exerciceVientDeFinir
         ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
         : nouvelEtat.detailsPartiels[etat.phase];
+      // `nouvelEtat.phase !== etat.phase` (jamais seulement `exerciceVientDeFinir`/`terminee`) —
+      // quand l'écran qui vient de clore est le DERNIER de l'exercice, `nouvelEtat.phase`/
+      // `detailsPartiels` restent ceux d'AVANT cette soumission (voir `exerciceVientDeFinir`
+      // ci-dessus) : `calculerRecapitulatifLimitesExponentielles(nouvelEtat)` y verrait alors
+      // l'écran précédent, pas celui qui vient de clore. Sans incidence pratique : cet écran est le
+      // dernier, sa puce reste "courante" jusqu'au reset du nouvel exercice (jamais cliquable), même
+      // principe que `App6gen58.tsx`/la référence 4e (`tableauSignes`, jamais de `votreReponse`
+      // passé).
+      if (votreReponse !== undefined && nouvelEtat.phase !== etat.phase) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
       return;
     }
@@ -89,12 +152,18 @@ export function App6gen6() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionLimiteExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -208,13 +277,21 @@ export function App6gen6() {
       }
     : null;
 
+  // "aide" (puce jaune) remplace "correcte" pour tout écran clos avec `niveauAide>0` —
+  // `detailsPartiels[phase].niveauAide` (jamais recalculé depuis le score, voir le commentaire de
+  // `DetailPhaseLimiteExponentielle`, `typesLimitesExponentielles.ts`).
+  const sequencePhases = sequenceDesPhases(exercice);
+  const segments = calculerSegmentsProgressionLimitesExponentielles(etat).map((segment, i) =>
+    segment === "correcte" && (etat.detailsPartiels[sequencePhases[i]]?.niveauAide ?? 0) > 0 ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Calcul de limites (fonctions exponentielles)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionLimitesExponentielles(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifLimitesExponentielles(etat)} />
@@ -234,7 +311,10 @@ export function App6gen6() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) =>
-                    terminerEtape(phase === "aExposant" ? soumettreReponseAExposant(etat, reponse) : soumettreReponseAGlobale(etat, reponse))
+                    terminerEtape(
+                      phase === "aExposant" ? soumettreReponseAExposant(etat, reponse) : soumettreReponseAGlobale(etat, reponse),
+                      formatReponseLimiteTexte(reponse),
+                    )
                   }
                   validation={validation}
                 />
@@ -254,7 +334,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseBExponentielle(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseBExponentielle(etat, reponse), formatReponseLimiteTexte(reponse))}
                   validation={validation}
                 />
               )}
@@ -273,7 +353,10 @@ export function App6gen6() {
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) =>
-                    terminerEtape(phase === "bPolynomiale" ? soumettreReponseBPolynomiale(etat, reponse) : soumettreReponseBGlobale(etat, reponse))
+                    terminerEtape(
+                      phase === "bPolynomiale" ? soumettreReponseBPolynomiale(etat, reponse) : soumettreReponseBGlobale(etat, reponse),
+                      formatReponseLimiteTexte(reponse),
+                    )
                   }
                   validation={validation}
                 />
@@ -291,7 +374,12 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseCFacteurs(etat, reponse))}
+                  onValider={(reponse: ReponseFacteursC) =>
+                    terminerEtape(
+                      soumettreReponseCFacteurs(etat, reponse),
+                      `${formatReponseLimiteTexte(reponse.facteur1)} ; ${formatReponseLimiteTexte(reponse.facteur2)}`,
+                    )
+                  }
                   validation={validation}
                 />
               )}
@@ -308,7 +396,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseCGlobale(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseCGlobale(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -326,7 +414,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseGCombiner(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseGCombiner(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -342,7 +430,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(ordre1Suffit) => terminerEtape(soumettreReponseGOrdre1(etat, ordre1Suffit))}
+                  onValider={(ordre1Suffit) => terminerEtape(soumettreReponseGOrdre1(etat, ordre1Suffit), ordre1Suffit ? "Oui" : "Non")}
                   validation={validation}
                 />
               )}
@@ -359,7 +447,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseGConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseGConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -376,7 +464,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseHForme(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseHForme(etat, reponse), formatCategorieFITexte(reponse))}
                   validation={validation}
                 />
               )}
@@ -393,7 +481,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseHNumerateur(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseHNumerateur(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -412,7 +500,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseHDenominateur(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseHDenominateur(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -429,7 +517,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseHConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseHConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -446,7 +534,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseIForme(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseIForme(etat, reponse), formatCategorieFITexte(reponse))}
                   validation={validation}
                 />
               )}
@@ -465,7 +553,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseINumerateur(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseINumerateur(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -488,7 +576,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseIDenominateur(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseIDenominateur(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -505,7 +593,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseIConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseIConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -522,7 +610,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseJForme(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseJForme(etat, reponse), formatCategorieFITexte(reponse))}
                   validation={validation}
                 />
               )}
@@ -547,7 +635,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseJNumerateur(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseJNumerateur(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -572,7 +660,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseJDenominateur(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseJDenominateur(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -589,7 +677,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseJConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseJConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -606,7 +694,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseKForme(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseKForme(etat, reponse), formatCategorieFITexte(reponse))}
                   validation={validation}
                 />
               )}
@@ -625,7 +713,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseKNumerateur1(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseKNumerateur1(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -644,7 +732,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseKDenominateur1(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseKDenominateur1(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -663,7 +751,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseKNumerateur2(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseKNumerateur2(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -682,7 +770,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseKDenominateur2(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseKDenominateur2(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -699,7 +787,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseKConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseKConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -721,7 +809,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseLReformuler(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseLReformuler(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -738,7 +826,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseLConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseLConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -756,7 +844,7 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseNCombiner(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseNCombiner(etat, texte), texte)}
                   validation={validation}
                 />
               )}
@@ -773,12 +861,15 @@ export function App6gen6() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponseNConclure(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponseNConclure(etat, texte), texte)}
                   validation={validation}
                 />
               )}
         </div>
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

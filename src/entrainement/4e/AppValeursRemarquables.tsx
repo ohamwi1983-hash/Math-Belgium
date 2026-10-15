@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAide,
@@ -23,6 +24,8 @@ import { Katex } from "./components/Katex";
 import { calculerRecapitulatifValeursRemarquables } from "./ui/recapitulatifValeursRemarquables";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -51,7 +54,9 @@ function calculerSegmentsProgression(etat: EtatSessionValeursRemarquables): Etat
     const score = phase === "quadrant" ? etat.scoreQuadrantExercice : phase === "anglePremierQuadrant" ? etat.scoreAnglePremierQuadrantExercice : null;
     if (score === null) return "a-venir";
     const revele = phase === "quadrant" ? etat.quadrantRevele : etat.anglePremierQuadrantRevele;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    const aideUtilisee = phase === "quadrant" ? etat.aideQuadrantUtilisee : etat.aideAnglePremierQuadrantUtilisee;
+    return aideUtilisee ? "aide" : "correcte";
   });
 }
 
@@ -67,10 +72,34 @@ interface TransitionEnAttente {
 export function AppValeursRemarquables() {
   const [etat, setEtat] = useState<EtatSessionValeursRemarquables>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionValeursRemarquables`, jamais dans le moteur (voir
+   * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionValeursRemarquables) {
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
+   * `calculerRecapitulatifValeursRemarquables` pour la réponse ATTENDUE ; cette fonction ne produit
+   * jamais d'entrée pour "valeursExactes" (dernière phase), comme ailleurs sur ce chantier. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionValeursRemarquables) {
+    const recap = calculerRecapitulatifValeursRemarquables(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? derniere.valeur : undefined },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
+   * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
+  function terminerEtape(nouvelEtat: EtatSessionValeursRemarquables, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele =
         etat.phase === "quadrant"
           ? nouvelEtat.quadrantRevele
@@ -85,12 +114,18 @@ export function AppValeursRemarquables() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionValeursRemarquables(REGLAGES_DEMO, () => construireAvecVarianteId(Number(varianteId) as AngleRemarquable)));
   }
 
@@ -125,7 +160,7 @@ export function AppValeursRemarquables() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice
@@ -144,7 +179,7 @@ export function AppValeursRemarquables() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideQuadrantUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(quadrant) => terminerEtape(soumettreReponseQuadrant(etat, quadrant))}
+              onValider={(quadrant) => terminerEtape(soumettreReponseQuadrant(etat, quadrant), libelleQuadrant(quadrant))}
               validation={validation}
             />
           ) : etat.phase === "anglePremierQuadrant" ? (
@@ -155,7 +190,7 @@ export function AppValeursRemarquables() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideAnglePremierQuadrantUtilisee}
               onActiverAide={() => setEtat(activerAide(etat))}
-              onValider={(valeur) => terminerEtape(soumettreReponseAnglePremierQuadrant(etat, valeur))}
+              onValider={(valeur) => terminerEtape(soumettreReponseAnglePremierQuadrant(etat, valeur), `${valeur}°`)}
               validation={validation}
             />
           ) : (
@@ -172,6 +207,10 @@ export function AppValeursRemarquables() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

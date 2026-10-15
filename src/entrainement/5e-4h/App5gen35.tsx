@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceVitessePosition } from "./generateurs5e/vitessePosition/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -41,8 +42,11 @@ import { SegmentsInline } from "./components/SegmentsInline";
 import { QuestionFinale } from "./components/QuestionFinale";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
+import type { ReponseResoudre } from "./moteur5e/verificationVitessePosition";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -60,22 +64,67 @@ interface TransitionEnAttente {
 /** Même heuristique que `calculerRecapitulatifVitessePosition` (`scoresPartiels[ecran] === 0 ⟺
  * révélée`) — `ordreEcransVitessePosition(exercice)` donne la séquence RÉELLE (5 écrans pour la
  * variante "A", 6 pour "B", fixée dès le tirage). */
-function calculerSegmentsProgression(etat: EtatSessionVitessePosition): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionVitessePosition,
+  aideUtiliseeParPhase: Partial<Record<string, boolean>>,
+): EtatPuceProgression[] {
   return ordreEcransVitessePosition(etat.exerciceCourant).map((ecran) => {
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[ecran] ? "aide" : "correcte";
   });
+}
+
+/** Format court de la réponse de l'élève à l'écran "resoudre" — mêmes données que
+ * `ReponseResoudre` (2 racines + justification du rejet d'une des deux). */
+function formatReponseResoudreTexte(exercice: EtatSessionVitessePosition["exerciceCourant"], r: ReponseResoudre): string {
+  const justification = r.justificationIndex !== null ? exercice.optionsRejetRacine[r.justificationIndex].texte : "?";
+  return `racines : ${r.racines[0]} ; ${r.racines[1]} — justification : ${justification}`;
 }
 
 export function App5gen35() {
   const [etat, setEtat] = useState<EtatSessionVitessePosition>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionVitessePosition`, jamais dans le moteur (même principe que
+   * `AppAnalyseFonction.tsx`, 4e). Remis à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionVitessePosition) {
+  /** Réutilise `calculerRecapitulatifVitessePosition` (même mécanisme que `RecapitulatifPanel`)
+   * pour la réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du
+   * tableau, les écrans se closent dans l'ordre (`ordreEcransVitessePosition`). */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionVitessePosition) {
+    const recap = calculerRecapitulatifVitessePosition(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT poussée dans l'historique quand l'écran se clôt RÉELLEMENT (même
+   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`), et JAMAIS pour le
+   * DERNIER écran de l'exercice — ici variable selon la variante ("conversion" pour "A",
+   * "tempsTotal" pour "B", voir `ordreEcransVitessePosition`), donc détecté dynamiquement via
+   * `nouvelEtat.resultats.length > etat.resultats.length` plutôt que par le nom d'un écran fixe. */
+  function terminerEtape(nouvelEtat: EtatSessionVitessePosition, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      const exerciceTermine = nouvelEtat.resultats.length > etat.resultats.length;
+      if (!exerciceTermine && votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -84,12 +133,22 @@ export function App5gen35() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionVitessePosition(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
@@ -118,7 +177,10 @@ export function App5gen35() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Vitesse et position</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces
+          segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
@@ -150,6 +212,10 @@ export function App5gen35() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -161,7 +227,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionVitessePosition) => void;
+  terminerEtape: (nouvelEtat: EtatSessionVitessePosition, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionVitessePosition) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -185,7 +251,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte), `v(t) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerDeriveeVitesse(t, exercice)}
           validation={validation}
         />
@@ -205,7 +271,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseEvaluerV0(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseEvaluerV0(etat, texte), `v(t₀) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerEvaluerV0(t, exercice)}
           validation={validation}
         />
@@ -221,7 +287,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseResoudre(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseResoudre(etat, reponse), formatReponseResoudreTexte(exercice, reponse))}
           diagnostiquerRacine={(t) => diagnostiquerRacineChamp(t, exercice)}
           validation={validation}
         />
@@ -241,7 +307,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseVitessePointe(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseVitessePointe(etat, texte), `v = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerVitessePointe(t, exercice)}
           validation={validation}
         />
@@ -261,7 +327,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseConversion(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseConversion(etat, texte), `v (km/h) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerConversionKmh(t, exercice)}
           validation={validation}
         />
@@ -281,7 +347,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseSegmentConstant(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseSegmentConstant(etat, texte), `t₂ = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerSegmentConstant(t, exercice)}
           validation={validation}
         />
@@ -301,7 +367,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseTempsTotal(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseTempsTotal(etat, texte), `t total = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerTempsTotal(t, exercice)}
           validation={validation}
         />

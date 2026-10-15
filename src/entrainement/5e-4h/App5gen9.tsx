@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { genererExerciceParametresSinusoideGraphique } from "./generateurs5e/parametresSinusoideGraphique";
 import {
@@ -9,7 +10,7 @@ import {
 } from "./moteur5e/sessionParametresSinusoideGraphique";
 import type { EtatSessionParametresSinusoideGraphique } from "./moteur5e/typesParametresSinusoideGraphique";
 import { EtapeParametreSinusoideGraphique } from "./components5e/EtapeParametreSinusoideGraphique";
-import { formatChampParametreGraphiqueLatex } from "./ui5e/formatParametresSinusoideGraphique";
+import { formatChampParametreGraphiqueLatex, labelPhase } from "./ui5e/formatParametresSinusoideGraphique";
 import { Katex } from "./components/Katex";
 import type { PhaseParametresSinusoideGraphique } from "./moteur5e/typesParametresSinusoideGraphique";
 import { ORDRE_PHASES_SINUSOIDE_GRAPHIQUE } from "./moteur5e/typesParametresSinusoideGraphique";
@@ -28,6 +29,8 @@ import { calculerRecapitulatifParametresSinusoideGraphique } from "./ui5e/recapi
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -67,7 +70,10 @@ interface TransitionEnAttente {
 /** Même ternaire que `calculerRecapitulatifParametresSinusoideGraphique` (`scoreXxxPartiel === 0 ⟺
  * révélée`) — `phi` (dernière phase) n'a pas de champ `scorePhiPartiel` : forcément "courante" tant
  * que l'exercice n'est pas terminé (dernière phase active). */
-function calculerSegmentsProgression(etat: EtatSessionParametresSinusoideGraphique): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionParametresSinusoideGraphique,
+  aideUtiliseeParPhase: Partial<Record<string, boolean>>,
+): EtatPuceProgression[] {
   return ORDRE_PHASES_SINUSOIDE_GRAPHIQUE.map((phase) => {
     if (phase === etat.phase) return "courante";
     const score =
@@ -81,17 +87,45 @@ function calculerSegmentsProgression(etat: EtatSessionParametresSinusoideGraphiq
               ? etat.scoreFrequencePartiel
               : null;
     if (score === null) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
 
 export function App5gen9() {
   const [etat, setEtat] = useState<EtatSessionParametresSinusoideGraphique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des phases déjà closes (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionParametresSinusoideGraphique`, jamais dans le moteur. Remis à
+   * vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionParametresSinusoideGraphique) {
+  /** Réutilise `calculerRecapitulatifParametresSinusoideGraphique` pour la réponse ATTENDUE : la
+   * phase qui vient de se clore est toujours la DERNIÈRE entrée du tableau. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionParametresSinusoideGraphique) {
+    const recap = calculerRecapitulatifParametresSinusoideGraphique(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      { titre: derniere.libelle, votreReponse, correcte: !derniere.revele, reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT poussée dans l'historique quand la phase se clôt RÉELLEMENT (même
+   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`), et JAMAIS pour "phi"
+   * (dernière phase, jamais "close" au sens de `calculerRecapitulatifParametresSinusoideGraphique`
+   * non plus) — détectée dynamiquement via `nouvelEtat.resultats.length > etat.resultats.length`. */
+  function terminerEtape(nouvelEtat: EtatSessionParametresSinusoideGraphique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      const exerciceTermine = nouvelEtat.resultats.length > etat.resultats.length;
+      if (!exerciceTermine && votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -100,7 +134,14 @@ export function App5gen9() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -122,7 +163,10 @@ export function App5gen9() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Paramètres d'une fonction sinusoïdale — lecture graphique</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces
+          segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
       </header>
       <main className="card">
         <div className="card-body">
@@ -136,12 +180,16 @@ export function App5gen9() {
             niveauAide={etat.niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX_SINUSOIDE_GRAPHIQUE}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoideGraphique(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseParametresSinusoideGraphique(etat, texte), `${labelPhase(etat.phase)} ${texte}`)}
             diagnostiquer={(texte) => diagnostiquerReponsePourPhase(exercice, etat.phase, texte)}
             validation={validation}
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

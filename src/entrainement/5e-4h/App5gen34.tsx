@@ -24,6 +24,7 @@ import {
   valeursFAuxBornes,
   valeursFAuxExtremumsBorne,
 } from "./moteur5e/verificationExtremaBornes";
+import type { ReponseTableauFPrimeBorne } from "./moteur5e/verificationExtremaBornes";
 import { EtapeDeriverExtremaBornes } from "./components5e/EtapeDeriverExtremaBornes";
 import { EtapeTableauFPrimeExtremaBornes } from "./components5e/EtapeTableauFPrimeExtremaBornes";
 import { EtapeChampsNumeriquesExtremaBornes } from "./components5e/EtapeChampsNumeriquesExtremaBornes";
@@ -49,6 +50,8 @@ import { QuestionFinale } from "./components/QuestionFinale";
 import type { ReactNode } from "react";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -90,22 +93,72 @@ interface TransitionEnAttente {
  * à `{}` au prochain exercice) — heuristique `score === 0 ⟺ révélée` (`soumettreEtapeTentatives`,
  * `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand l'écran est révélé), même
  * convention que `AppMethodeRapide.tsx` (4e). */
-function calculerSegmentsProgression(etat: EtatSessionExtremaBornes): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionExtremaBornes,
+  aideUtiliseeParPhase: Partial<Record<string, boolean>>,
+): EtatPuceProgression[] {
   return ORDRE_ECRANS_EXTREMA_BORNES.map((ecran) => {
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[ecran] ? "aide" : "correcte";
   });
+}
+
+// ============================================================================
+// Formatage de "votreReponse" (fiche de consultation) — un format court par type d'écran, même
+// style que les labels déjà utilisés par chaque composant d'écran.
+// ============================================================================
+
+function formatReponseChampsLatex(labels: string[], valeurs: string[]): string {
+  return labels.map((label, i) => `${label}${valeurs[i] ?? "?"}`).join("\\quad");
+}
+
+function formatReponseTableauFPrimeBorneTexte(r: ReponseTableauFPrimeBorne): string {
+  return `signes : ${r.signes.map((v) => v ?? "×").join(" ")} ; ${r.ligne2.map((v) => v ?? "×").join(" ")}`;
 }
 
 export function App5gen34() {
   const [etat, setEtat] = useState<EtatSessionExtremaBornes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionExtremaBornes`, jamais dans le moteur (même principe que
+   * `AppAnalyseFonction.tsx`, 4e). Remis à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionExtremaBornes) {
+  /** Réutilise `calculerRecapitulatifExtremaBornes` (même mécanisme que `RecapitulatifPanel`) pour
+   * la réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du tableau, les
+   * écrans se closent dans l'ordre (`ORDRE_ECRANS_EXTREMA_BORNES`). */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionExtremaBornes) {
+    const recap = calculerRecapitulatifExtremaBornes(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT poussée dans l'historique quand l'écran se clôt RÉELLEMENT (même
+   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`). "comparaison" (dernier
+   * écran) n'est jamais poussé : `calculerRecapitulatifExtremaBornes` ne le voit jamais non plus
+   * (voir sa tête de fichier), et sa puce reste "courante" tant que `enAttente` est actif, puis
+   * l'exercice entier redémarre à zéro dès "Nouvel exercice". */
+  function terminerEtape(nouvelEtat: EtatSessionExtremaBornes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -114,12 +167,22 @@ export function App5gen34() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionExtremaBornes(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
@@ -142,7 +205,10 @@ export function App5gen34() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Extrema en contexte borné</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces
+          segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
@@ -173,6 +239,10 @@ export function App5gen34() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -184,7 +254,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionExtremaBornes) => void;
+  terminerEtape: (nouvelEtat: EtatSessionExtremaBornes, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionExtremaBornes) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -203,7 +273,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseDeriverBorne(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseDeriverBorne(etat, texte), `f'(t) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerCalculerDeriveeBorne(t, exercice)}
           validation={validation}
         />
@@ -219,46 +289,54 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrimeBorne(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrimeBorne(etat, reponse), formatReponseTableauFPrimeBorneTexte(reponse))}
           validation={validation}
         />
       );
 
-    case "valeursExtremums":
+    case "valeursExtremums": {
+      const labels = labelsChampsExtremums(exercice);
       return (
         <EtapeChampsNumeriquesExtremaBornes
           key={cleEcran}
           phase="valeursExtremums"
-          labels={labelsChampsExtremums(exercice)}
+          labels={labels}
           placeholders={placeholdersChampsExtremums()}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseValeursExtremumsBorne(etat, reponses))}
+          onValider={(reponses) =>
+            terminerEtape(soumettreReponseValeursExtremumsBorne(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)
+          }
           diagnostiquer={(t) => diagnostiquerChampParmiCiblesBorne(t, valeursFAuxExtremumsBorne(exercice))}
           validation={validation}
         />
       );
+    }
 
-    case "valeursBornes":
+    case "valeursBornes": {
+      const labels = labelsChampsBornes(exercice);
       return (
         <EtapeChampsNumeriquesExtremaBornes
           key={cleEcran}
           phase="valeursBornes"
-          labels={labelsChampsBornes(exercice)}
+          labels={labels}
           placeholders={placeholdersChampsBornes()}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseValeursBornes(etat, reponses))}
+          onValider={(reponses) =>
+            terminerEtape(soumettreReponseValeursBornes(etat, reponses), <Katex expression={formatReponseChampsLatex(labels, reponses)} />)
+          }
           diagnostiquer={(t) => diagnostiquerChampParmiCiblesBorne(t, valeursFAuxBornes(exercice))}
           validation={validation}
         />
       );
+    }
 
     case "comparaison":
       return (

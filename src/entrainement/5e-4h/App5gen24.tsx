@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeComplete } from "./generateurs5e/etudeComplete/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -58,6 +59,8 @@ import { calculerRecapitulatifEtudeComplete } from "./ui5e/recapitulatifEtudeCom
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -93,22 +96,57 @@ interface TransitionEnAttente {
  * `ORDRE_PHASES` fixe reconstitué à la main : même source que `calculerRecapitulatifEtudeComplete`.
  * "courante" pour `etat.phase`, "correcte"/"revele" pour les phases déjà closes
  * (`scoresPartiels[phase]`, 0 ⟺ révélée), "a-venir" au-delà. */
-function calculerSegmentsProgression(etat: EtatSessionEtudeComplete): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionEtudeComplete,
+  aideParPhase: Partial<Record<PhaseEtudeComplete, boolean>>,
+): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideParPhase[phase] ? "aide" : "correcte";
   });
+}
+
+/** Texte court pour un bloc de réponse "asymptoteInfini" (écran 8) — "aucune", ou l'équation
+ * saisie par l'élève (horizontale/oblique), sans jamais révéler la cible. */
+function texteBlocAsymptote(bloc: { aucune: true } | { aucune: false; type: "horizontale"; valeur: string } | { aucune: false; type: "oblique"; equation: string }): string {
+  if (bloc.aucune) return "aucune";
+  return bloc.type === "horizontale" ? `y = ${bloc.valeur}` : `y = ${bloc.equation}`;
 }
 
 export function App5gen24() {
   const [etat, setEtat] = useState<EtatSessionEtudeComplete>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionEtudeComplete`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Niveau d'aide RÉELLEMENT utilisé par phase close — capturé ici (présentation), `niveauAide`
+   * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseEtudeComplete, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionEtudeComplete) {
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionEtudeComplete) {
+    const recap = calculerRecapitulatifEtudeComplete(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionEtudeComplete, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -117,12 +155,20 @@ export function App5gen24() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionEtudeComplete(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
@@ -146,7 +192,7 @@ export function App5gen24() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude complète</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -165,6 +211,10 @@ export function App5gen24() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -176,7 +226,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionEtudeComplete) => void;
+  terminerEtape: (nouvelEtat: EtatSessionEtudeComplete, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionEtudeComplete) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -207,7 +257,7 @@ function EcranCourant({
           labels={["f(x) ="]}
           placeholders={["ex : (3x+1)/(x-2)"]}
           {...propsCommunes}
-          onValider={(v) => terminerEtape(soumettreReponseConstructionInverse(etat, v[0]))}
+          onValider={(v) => terminerEtape(soumettreReponseConstructionInverse(etat, v[0]), `f(x) = ${v[0]}`)}
           diagnostiquer={(v) => [diagnostiquerProprietesConstructionInverse(v[0], proprietes)]}
         />
       );
@@ -222,7 +272,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponseDomaine(etat, v))}
+        onValider={(v) => terminerEtape(soumettreReponseDomaine(etat, v), v.join(" ; "))}
         diagnostiquer={(v) => diagnostiquerEnsembleNombres(v, cibles)}
       />
     );
@@ -234,7 +284,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         {...propsCommunes}
-        onValider={(choix) => terminerEtape(soumettreReponseTypeLimite(etat, choix))}
+        onValider={(choix) => terminerEtape(soumettreReponseTypeLimite(etat, choix), choix.map((c) => (c === "infini" ? "∞" : "point vide")).join(" ; "))}
         diagnostiquer={(choix) => exercice.exclusions.map((e, i) => verifierTypeLimite(choix[i], e.type === "pointVide"))}
       />
     );
@@ -251,7 +301,7 @@ function EcranCourant({
         labels={["f(x) ="]}
         placeholders={["ex : (3x+1)/(x-2)"]}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponsePointVideSimplification(etat, v[0]))}
+        onValider={(v) => terminerEtape(soumettreReponsePointVideSimplification(etat, v[0]), `f(x) = ${v[0]}`)}
         diagnostiquer={(v) => [diagnostiquerSimplificationPointVide(v[0], coeffsM, coeffsDVraie)]}
       />
     );
@@ -269,7 +319,7 @@ function EcranCourant({
         labelsLatex
         placeholders={["ex : 2.5"]}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponsePointVideLimite(etat, v[0]))}
+        onValider={(v) => terminerEtape(soumettreReponsePointVideLimite(etat, v[0]), `lim = ${v[0]}`)}
         diagnostiquer={(v) => [diagnostiquerNombre(v[0], cible)]}
       />
     );
@@ -281,7 +331,12 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         {...propsCommunes}
-        onValider={(reponse) => terminerEtape(soumettreReponsePointVideConclusion(etat, reponse))}
+        onValider={(reponse) =>
+          terminerEtape(
+            soumettreReponsePointVideConclusion(etat, reponse),
+            `${reponse.estAV ? "AV" : "pas d'AV"} ; ${reponse.appartientDomaine ? "appartient au domaine" : "n'appartient pas au domaine"}`,
+          )
+        }
       />
     );
   }
@@ -299,7 +354,9 @@ function EcranCourant({
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponseLimitesGD(etat, phase, { gauche: v[0], droite: v[1] }))}
+        onValider={(v) =>
+          terminerEtape(soumettreReponseLimitesGD(etat, phase, { gauche: v[0], droite: v[1] }), `gauche : ${v[0]} ; droite : ${v[1]}`)
+        }
         diagnostiquer={(v) => [diagnostiquerValeurOuInfini(v[0], cibleGauche), diagnostiquerValeurOuInfini(v[1], cibleDroite)]}
       />
     );
@@ -312,7 +369,9 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         {...propsCommunes}
-        onValider={(reponse) => terminerEtape(soumettreReponseAV(etat, reponse))}
+        onValider={(reponse) =>
+          terminerEtape(soumettreReponseAV(etat, reponse), reponse.aucuneAV ? "aucune AV" : reponse.textes.join(" ; "))
+        }
         diagnostiquer={(v) => diagnostiquerEnsembleEquationsAV(v, cibles)}
       />
     );
@@ -339,7 +398,7 @@ function EcranCourant({
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponseInfini(etat, { moins: v[0], plus: v[1] }))}
+        onValider={(v) => terminerEtape(soumettreReponseInfini(etat, { moins: v[0], plus: v[1] }), `−∞ : ${v[0]} ; +∞ : ${v[1]}`)}
         diagnostiquer={(v) => [diagnostiquerValeurOuInfini(v[0], cibleMoins), diagnostiquerValeurOuInfini(v[1], ciblePlus)]}
       />
     );
@@ -368,7 +427,9 @@ function EcranCourant({
         labelsLatex
         placeholders={["ex : 2, -3/2, +inf, -inf", "ex : 2, -3/2, +inf, -inf"]}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponseCoefDirecteur(etat, { moins: v[0], plus: v[1] }))}
+        onValider={(v) =>
+          terminerEtape(soumettreReponseCoefDirecteur(etat, { moins: v[0], plus: v[1] }), `a(−∞) = ${v[0]} ; a(+∞) = ${v[1]}`)
+        }
         diagnostiquer={(v) => [diagnostiquerValeurOuInfini(v[0], cibleMoins), diagnostiquerValeurOuInfini(v[1], ciblePlus)]}
       />
     );
@@ -394,7 +455,7 @@ function EcranCourant({
         labelsLatex
         placeholders={bornes.map(() => "ex : 2, -3/2, +inf, -inf")}
         {...propsCommunes}
-        onValider={(v) => terminerEtape(soumettreReponseCoefB(etat, { moins: v[0], plus: v[1] }))}
+        onValider={(v) => terminerEtape(soumettreReponseCoefB(etat, { moins: v[0], plus: v[1] }), `b(−∞) = ${v[0]} ; b(+∞) = ${v[1]}`)}
         diagnostiquer={(v) => v.map((texte) => diagnostiquerValeurOuInfini(texte, cibleB))}
       />
     );
@@ -416,7 +477,12 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         {...propsCommunes}
-        onValider={(reponse) => terminerEtape(soumettreReponseAsymptoteInfini(etat, reponse))}
+        onValider={(reponse) =>
+          terminerEtape(
+            soumettreReponseAsymptoteInfini(etat, reponse),
+            `vers −∞ : ${texteBlocAsymptote(reponse.moins)} ; vers +∞ : ${texteBlocAsymptote(reponse.plus)}`,
+          )
+        }
         diagnostiquer={(reponse) => ({ moins: blocCorrect(reponse.moins), plus: blocCorrect(reponse.plus) })}
       />
     );
@@ -429,7 +495,7 @@ function EcranCourant({
         key={cleEcran}
         exercice={exercice}
         {...propsCommunes}
-        onValider={(reponse) => terminerEtape(soumettreReponseCasSpecial(etat, reponse))}
+        onValider={(reponse) => terminerEtape(soumettreReponseCasSpecial(etat, reponse), `x = ${reponse.x} ; y = ${reponse.y}`)}
         diagnostiquer={(reponse) => diagnostiquerCasSpecial(reponse, x, y)}
       />
     );

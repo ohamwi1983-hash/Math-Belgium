@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { Enonce, Exercice } from "./core/generateur.types";
 import type { ExerciceSignesProduit, FacteurQuadratiqueIrreductible, FacteurSignesProduit, SolutionEnsembleProduit } from "./core/signesProduit.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -44,7 +45,9 @@ import { formatTermesEnonceSignesProduitLatex } from "./ui/formatSignesProduit";
 import { necessiteSimplification } from "./moteur/simplificationEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
-import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE } from "./ui/categorieLabels";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+import { OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE, libelleCategorie } from "./ui/categorieLabels";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
 import { formatFormeFactoriseeDepuisRacines } from "./ui/formatEquation";
 import { Katex } from "./components/Katex";
@@ -177,7 +180,23 @@ function calculerSegmentsProgression(etat: EtatSessionSignesProduit): EtatPucePr
             return etat.scoresSigneIrreductibleExercice[indexIrreductible] === 0;
         }
       })();
-      segments.push(revele ? "revele" : "correcte");
+      if (revele) {
+        segments.push("revele");
+        return;
+      }
+      // "methodeFacteur"/"signeIrreductible" (comme "racineLineaire" ci-dessus) n'ont aucun
+      // mécanisme d'aide (toujours "correcte", jamais "aide").
+      const aideUtilisee =
+        sousPhase === "reductionFacteur"
+          ? etat.aideReductionFacteurUtilisee
+          : sousPhase === "factorisationChamp1"
+            ? etat.aideFactorisationChamp1Utilisee
+            : sousPhase === "factorisationChamp2"
+              ? etat.aideFactorisationChamp2Utilisee
+              : sousPhase === "factorisationFactorisation"
+                ? etat.aideFactorisationFactorisationUtilisee
+                : false;
+      segments.push(aideUtilisee ? "aide" : "correcte");
     });
   });
 
@@ -185,7 +204,9 @@ function calculerSegmentsProgression(etat: EtatSessionSignesProduit): EtatPucePr
     etat.scoreGrilleExercice !== null
       ? etat.grilleRevelee
         ? "revele"
-        : "correcte"
+        : etat.aideGrilleTableauUtilisee
+          ? "aide"
+          : "correcte"
       : etat.phase === "grille"
         ? "courante"
         : "a-venir",
@@ -213,8 +234,52 @@ interface TransitionEnAttente {
 export function AppSignesProduit() {
   const [etat, setEtat] = useState<EtatSessionSignesProduit>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSignesProduit`, jamais dans le moteur (voir
+   * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionSignesProduit) {
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
+   * `calculerRecapitulatifSignesProduit` pour la réponse ATTENDUE : couvre toutes les étapes SAUF
+   * "grille"/"intervalle" (jamais une entrée pour elles, voir son commentaire) — "grille" a sa
+   * propre fonction ci-dessous, "intervalle" (dernière phase) n'est jamais poussée dans
+   * l'historique (son appelant ne fournit pas de second argument, même principe que la dernière
+   * phase des autres générateurs). */
+  function ajouterHistoriqueDepuisRecap(votreReponse: ReactNode, nouvelEtat: EtatSessionSignesProduit) {
+    const recap = calculerRecapitulatifSignesProduit(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  /** "grille" n'a pas d'entrée dans `calculerRecapitulatifSignesProduit` (voir son commentaire) —
+   * même donnée que `validation.reponseAttendue` pour cette phase, construite directement depuis
+   * `exerciceCourant.grille`, jamais une seconde source. */
+  function ajouterHistoriqueGrille(votreReponse: ReactNode, nouvelEtat: EtatSessionSignesProduit) {
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: "Tableau de signes",
+        votreReponse,
+        correcte: !nouvelEtat.grilleRevelee,
+        reponseAttendue: nouvelEtat.grilleRevelee ? <>Signe du produit = {nouvelEtat.exerciceCourant.grille.produit.join(" ")}</> : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand la SOUS-ÉTAPE se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
+   * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
+  function terminerEtape(nouvelEtat: EtatSessionSignesProduit, votreReponse?: ReactNode) {
     const transitionDEcran = (() => {
       switch (etat.phase) {
         case "racineLineaire":
@@ -236,6 +301,14 @@ export function AppSignesProduit() {
     if (!transitionDEcran) {
       setEtat(nouvelEtat);
       return;
+    }
+
+    if (votreReponse !== undefined) {
+      if (etat.phase === "grille") {
+        ajouterHistoriqueGrille(votreReponse, nouvelEtat);
+      } else {
+        ajouterHistoriqueDepuisRecap(votreReponse, nouvelEtat);
+      }
     }
 
     const revele = (() => {
@@ -266,12 +339,18 @@ export function AppSignesProduit() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionSignesProduit(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteSignesProduitId)));
   }
 
@@ -340,7 +419,7 @@ export function AppSignesProduit() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice
@@ -359,7 +438,7 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel as string}
-              onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine))}
+              onValider={(racine) => terminerEtape(soumettreReponseRacineLineaire(etat, racine), `x = ${racine}`)}
               validation={validation}
             />
           ) : etat.phase === "reductionFacteur" && facteurCourant?.type === "quadratique_factorisable" ? (
@@ -375,7 +454,7 @@ export function AppSignesProduit() {
               diagnostiquer={(v) => diagnostiquerReductionCoefficients(facteurCourant.exercice, v)}
               aideActivee={etat.aideReductionFacteurUtilisee}
               onActiverAide={() => setEtat(activerAideReductionFacteur(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseReductionFacteur(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "methodeFacteur" && facteurCourant && facteurCourant.type !== "lineaire" ? (
@@ -389,7 +468,7 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               options={OPTIONS_CATEGORIE_AVEC_IRREDUCTIBLE}
               question="Quelle est la méthode la plus rapide pour factoriser ce facteur ?"
-              onChoisir={(choix) => terminerEtape(soumettreChoixMethodeFacteur(etat, choix))}
+              onChoisir={(choix) => terminerEtape(soumettreChoixMethodeFacteur(etat, choix), libelleCategorie(choix))}
               validation={validation}
             />
           ) : etat.phase === "factorisationChamp1" && factorisable ? (
@@ -404,7 +483,12 @@ export function AppSignesProduit() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(factorisable, v)}
               aideActivee={etat.aideFactorisationChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp1(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationChamp1(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseFactorisationChamp1(etat, reponse),
+                  factorisable.categorie === "cas_general" ? `Δ = ${reponse}` : `${reponse} = 0`,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "factorisationChamp2" && factorisable ? (
@@ -423,7 +507,7 @@ export function AppSignesProduit() {
               etatActuel={etatActuel}
               aideActivee={etat.aideFactorisationChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideFactorisationChamp2(etat))}
-              onValider={(racines) => terminerEtape(soumettreReponseFactorisationChamp2(etat, racines))}
+              onValider={(racines) => terminerEtape(soumettreReponseFactorisationChamp2(etat, racines), racines.join(" ; "))}
               validation={validation}
             />
           ) : etat.phase === "factorisationFactorisation" && factorisable ? (
@@ -440,7 +524,7 @@ export function AppSignesProduit() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(factorisable, v)}
               aideActivee={etat.aideFactorisationFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideFactorisationFactorisation(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationFactorisation(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseFactorisationFactorisation(etat, reponse), `${reponse} = 0`)}
               validation={validation}
             />
           ) : etat.phase === "signeIrreductible" && irreductibleCourant ? (
@@ -449,7 +533,7 @@ export function AppSignesProduit() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               etatActuel={etatActuel}
-              onValider={(reponse) => terminerEtape(soumettreReponseSigneIrreductible(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSigneIrreductible(etat, reponse), reponse === "+" ? "Toujours positif" : "Toujours négatif")}
               validation={validation}
             />
           ) : etat.phase === "grille" ? (
@@ -460,7 +544,7 @@ export function AppSignesProduit() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideGrilleTableauUtilisee}
               onActiverAide={() => setEtat(activerAideGrilleTableau(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseGrille(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseGrille(etat, reponse), `Signe du produit = ${reponse.produit.join(" ")}`)}
               validation={validation}
             />
           ) : (
@@ -477,6 +561,10 @@ export function AppSignesProduit() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import type { ExerciceDomaineDefinition, FamilleDomaineDefinition } from "./core5e/domaineDefinition.types";
+import type { ExerciceDomaineDefinition, FamilleDomaineDefinition, SlotCE } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceDomaineDefinition } from "./generateurs5e/domaineDefinition";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -13,15 +13,19 @@ import {
   soumettreReponseDomf,
   soumettreReponseResolution,
 } from "./moteur5e/sessionDomaineDefinition";
+import type { ReponseResolution } from "./moteur5e/sessionDomaineDefinition";
+import type { ReponseCE } from "./moteur5e/verificationDomaineDefinition";
 import type { EtatSessionDomaineDefinition, PhaseDomaineDefinition } from "./moteur5e/typesDomaineDefinition";
 import { EtapeCEDomaineDefinition } from "./components5e/EtapeCEDomaineDefinition";
 import { EtapeResolutionDomaineDefinition } from "./components5e/EtapeResolutionDomaineDefinition";
 import { EtapeDomfDomaineDefinition } from "./components5e/EtapeDomfDomaineDefinition";
 import { GrilleQuotientDomfRecap } from "./components5e/GrilleQuotientDomfRecap";
-import { formatCEAttendueLatex, formatDomfLatex, formatResolutionAttendueLatex } from "./ui5e/formatDomaineDefinition";
+import { formatCEAttendueLatex, formatDomfLatex, formatEnsembleReelLatex, formatResolutionAttendueLatex } from "./ui5e/formatDomaineDefinition";
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -70,15 +74,56 @@ function releveRevelePhase(nouvelEtat: EtatSessionDomaineDefinition, phaseFinie:
 const ORDRE_PHASES: PhaseDomaineDefinition[] = ["ce", "resolution", "domf"];
 
 /** Même lecture que `releveRevelePhase` ci-dessus pour `scoreXxxExercice`/`xxxRevele` — jamais une
- * valeur recalculée séparément. */
+ * valeur recalculée séparément. "aide" (3e état, jaune) dès que l'aide a été utilisée
+ * (`niveauAideXxx > 0`) sur une étape close correcte — "domf" n'a pas de champ `scoreDomfExercice`
+ * dédié au niveau session (voir commentaire au-dessus de `ORDRE_PHASES`), donc jamais "aide" ici
+ * (toujours "courante"/"a-venir" avant la fin, comme déjà noté). */
 function calculerSegmentsProgression(etat: EtatSessionDomaineDefinition): EtatPuceProgression[] {
   return ORDRE_PHASES.map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = phase === "ce" ? etat.scoreCEExercice : phase === "resolution" ? etat.scoreResolutionExercice : null;
     if (score === null) return "a-venir";
     const revele = phase === "ce" ? etat.ceRevele : etat.resolutionRevele;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    const aideUtilisee = phase === "ce" ? etat.niveauAideCE > 0 : etat.niveauAideResolution > 0;
+    return aideUtilisee ? "aide" : "correcte";
   });
+}
+
+/** Titre affiché sur la fiche de consultation en lecture seule (`FicheReponseEcran`) — "domf"
+ * n'apparaît jamais ici en pratique (dernière phase, jamais poussée dans l'historique, voir
+ * `terminerEtape` ci-dessous), mais le type doit couvrir les 4 valeurs de `PhaseDomaineDefinition`. */
+const TITRE_PHASE: Record<PhaseDomaineDefinition, string> = {
+  ce: "Conditions d'existence",
+  resolution: "Résolution",
+  domf: "Domaine de définition",
+  termine: "",
+};
+
+function slotsDeLExercice(exercice: ExerciceDomaineDefinition): SlotCE[] {
+  return exercice.famille === "pasDeCE" ? [] : exercice.slots;
+}
+
+/** Formate la réponse de l'élève à l'écran "ce", même style que `formatSlotConditionLatex`
+ * (ui5e/formatDomaineDefinition.ts) mais en texte brut (pas de KaTeX nécessaire, un symbole suffit). */
+function formatReponseCE(exercice: ExerciceDomaineDefinition, reponse: ReponseCE): string {
+  if (reponse.aucuneCE) return "Aucune CE";
+  const slots = slotsDeLExercice(exercice);
+  return reponse.lignes.map((l) => `${slots.find((s) => s.id === l.slotId)?.texte ?? l.slotId} ${l.symbole} 0`).join(" ; ");
+}
+
+/** Formate la réponse de l'élève à l'écran "resolution" — n'est en pratique jamais appelée que
+ * pour "fractionSousRacine"/"racineSurFraction" (seules familles à garder cet écran, voir
+ * `phaseApresCE`) ; les 2 autres branches ("ensemble" simple) sont un repli défensif jamais
+ * atteint pour ce générateur dans sa configuration actuelle. */
+function formatReponseResolution(reponse: ReponseResolution): ReactNode {
+  if (reponse.famille === "fractionSousRacine") {
+    return `N : ${reponse.grille.ligneNumerateur.join(" ")} ; D : ${reponse.grille.ligneDenominateur.join(" ")} ; Q : ${reponse.grille.ligneQuotient.join(" ")}`;
+  }
+  if (reponse.famille === "racineSurFraction") {
+    return <Katex expression={`x\\in ${formatEnsembleReelLatex(reponse.radicande)} \\text{ et } x\\in ${formatEnsembleReelLatex(reponse.denominateur)}`} />;
+  }
+  return <Katex expression={`x\\in ${formatEnsembleReelLatex(reponse.ensemble)}`} />;
 }
 
 export function App5gen1() {
@@ -91,11 +136,34 @@ export function App5gen1() {
   // l'exercice PRÉCÉDENT — même classe de bug que gen53 (4e)/5gen6/5gen7 ("composant d'écran partagé
   // non remonté entre phases"), ici entre deux exercices plutôt qu'entre deux écrans.
   const [generationExercice, setGenerationExercice] = useState(0);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionDomaineDefinition`, jamais dans le moteur : la saisie de
+   * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice,
+   * comme `enAttente`/`generationExercice`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionDomaineDefinition) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire
+   * équivalent d'`AppAnalyseFonction.tsx`, même garde). Jamais appelée pour "domf" (dernière phase,
+   * jamais visible comme puce close avant la fin de l'exercice — voir `calculerSegmentsProgression`
+   * — donc jamais passée à l'historique par son `onValider` ci-dessous). */
+  function terminerEtape(nouvelEtat: EtatSessionDomaineDefinition, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(nouvelEtat, etat.phase) });
+      const revele = releveRevelePhase(nouvelEtat, etat.phase);
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: TITRE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePhase(etat.exerciceCourant, etat.phase) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -103,7 +171,12 @@ export function App5gen1() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -123,12 +196,13 @@ export function App5gen1() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Domaine de définition</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev
         options={CATALOGUE_FAMILLES}
         onGenerer={(id) => {
           setEnAttente(null);
+          setHistorique([]);
           setGenerationExercice((g) => g + 1);
           setEtat(demarrerSessionDomaineDefinition(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleDomaineDefinition)));
         }}
@@ -149,7 +223,7 @@ export function App5gen1() {
                   <Katex expression={exercice.fLatex} block />
                 </div>
               }
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse), formatReponseCE(exercice, reponse))}
               validation={validation}
             />
           )}
@@ -164,7 +238,7 @@ export function App5gen1() {
                   <Katex expression={exercice.fLatex} block />
                 </div>
               }
-              onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseResolution(etat, reponse), formatReponseResolution(reponse))}
               validation={validation}
             />
           )}
@@ -188,6 +262,10 @@ export function App5gen1() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

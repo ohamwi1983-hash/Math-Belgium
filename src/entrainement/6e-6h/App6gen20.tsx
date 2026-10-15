@@ -22,6 +22,8 @@ import {
 import { calculerRecapitulatifGraphiqueDeriveeLogarithme, calculerSegmentsProgressionGraphiqueDeriveeLogarithme } from "./ui6e/recapitulatifGraphiqueDeriveeLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -37,10 +39,42 @@ interface TransitionEnAttente {
 export function App6gen20() {
   const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeLogarithme>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, jamais dans le moteur : la saisie de l'élève n'a aucune autre utilité une fois l'écran
+   * clos. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme) {
+  /** Seul l'écran "derivee" peut jamais être consulté : "selection" est le dernier écran de
+   * l'exercice, `phase` n'avance jamais au-delà de lui (voir `typesGraphiqueDeriveeLogarithme.ts`),
+   * donc `calculerRecapitulatifGraphiqueDeriveeLogarithme` ne le voit JAMAIS comme "clos" — y
+   * pousser une entrée rejouerait toujours celle de "derivee" (bug déjà rencontré sur la référence
+   * 4e, voir `AppAnalyseFonction.tsx`). */
+  function ajouterHistorique(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme, votreReponse: string) {
+    const recap = calculerRecapitulatifGraphiqueDeriveeLogarithme(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'écran "derivee" vient
+   * RÉELLEMENT de se clore (jamais à chaque tentative ratée tant que `scoreDeriveePartiel` reste
+   * `null` côté moteur — même garde que la transition d'écran elle-même) ; jamais pour la clôture de
+   * "selection" (dernier écran, voir `ajouterHistorique`). */
+  function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeLogarithme, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined && etat.phase === "derivee") {
+        ajouterHistorique(nouvelEtat, votreReponse);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -49,12 +83,20 @@ export function App6gen20() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
+    setFicheOuverteIndex(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionGraphiqueDeriveeLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -87,7 +129,7 @@ export function App6gen20() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Graphique de la dérivée (fonctions logarithmes)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionGraphiqueDeriveeLogarithme(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgressionGraphiqueDeriveeLogarithme(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifGraphiqueDeriveeLogarithme(etat)} />
@@ -104,7 +146,7 @@ export function App6gen20() {
             niveauAide={etat.niveauAide}
             niveauAideMax={NIVEAU_AIDE_MAX}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte), texte)}
             validation={validation}
           />
         )}
@@ -124,6 +166,10 @@ export function App6gen20() {
           />
         )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

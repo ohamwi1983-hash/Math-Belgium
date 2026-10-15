@@ -85,6 +85,10 @@ export interface EtatSessionVolumesRevolution {
   niveauAide: number;
   /** Accumule au fil des écrans de l'exercice COURANT — remis à `{}` à chaque nouvel exercice. */
   scoresPartiels: Partial<Record<PhaseVolumesRevolution, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces`. */
+  aidePartiels: Partial<Record<PhaseVolumesRevolution, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceVolumesRevolution[];
   terminee: boolean;

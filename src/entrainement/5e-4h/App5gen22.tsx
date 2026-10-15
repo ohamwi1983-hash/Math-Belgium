@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceLectureGraphiqueLimites } from "./generateurs5e/lectureGraphiqueLimites";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -20,6 +21,8 @@ import { calculerRecapitulatifLectureGraphiqueLimites } from "./ui5e/recapitulat
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -54,10 +57,32 @@ function calculerSegmentsProgression(etat: EtatSessionLectureGraphiqueLimites): 
 export function App5gen22() {
   const [etat, setEtat] = useState<EtatSessionLectureGraphiqueLimites>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionLectureGraphiqueLimites`, jamais dans le moteur (même principe que
+   * `AppAnalyseFonction.tsx`, 4e). Pas de puce "aide" ici : 5gen22 n'a aucun mécanisme d'aide
+   * (voir le commentaire de `calculerSegmentsProgression`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueLimites) {
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLectureGraphiqueLimites) {
+    const recap = calculerRecapitulatifLectureGraphiqueLimites(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionLectureGraphiqueLimites, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -66,7 +91,12 @@ export function App5gen22() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -96,12 +126,13 @@ export function App5gen22() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Limites et asymptotes — lecture graphique</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev
         options={CATALOGUE_FAMILLES}
         onGenerer={(id) => {
           setEnAttente(null);
+          setHistorique([]);
           setEtat(demarrerSessionLectureGraphiqueLimites(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
         }}
       />
@@ -120,6 +151,10 @@ export function App5gen22() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -131,7 +166,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueLimites) => void;
+  terminerEtape: (nouvelEtat: EtatSessionLectureGraphiqueLimites, votreReponse?: ReactNode) => void;
   validation: ValidationEtapeProps | null;
 }
 
@@ -154,7 +189,7 @@ function EcranCourant({
           exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
-          onValider={(textes) => terminerEtape(soumettreReponseCompleterLimites(etat, textes))}
+          onValider={(textes) => terminerEtape(soumettreReponseCompleterLimites(etat, textes), textes.join(" ; "))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleComportement(t, slots[i].cible))}
           validation={validation}
         />
@@ -169,7 +204,7 @@ function EcranCourant({
           exercice={exercice}
           tentativesUtilisees={tentativesUtilisees}
           tentativesMax={tentativesMax}
-          onValider={(textes) => terminerEtape(soumettreReponseNommerAsymptotes(etat, textes))}
+          onValider={(textes) => terminerEtape(soumettreReponseNommerAsymptotes(etat, textes), textes.join(" ; "))}
           diagnostiquer={(textes) => textes.map((t, i) => diagnostiquerCibleAsymptote(t, slots[i].cible))}
           validation={validation}
         />

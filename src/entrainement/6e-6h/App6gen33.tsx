@@ -1,9 +1,11 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabilitesProblemes } from "./generateurs6e/probabilitesProblemes";
 import type { IdVarianteProbabilitesProblemes } from "./generateurs6e/probabilitesProblemes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProbabilitesProblemes, soumettreReponseEcran } from "./moteur6e/sessionProbabilitesProblemes";
-import type { EtatSessionProbabilitesProblemes } from "./moteur6e/typesProbabilitesProblemes";
+import { phasesPourExercice } from "./moteur6e/typesProbabilitesProblemes";
+import type { EtatSessionProbabilitesProblemes, PhaseProbabilitesProblemes } from "./moteur6e/typesProbabilitesProblemes";
 import { diagnostiquerEcran, typeEcran } from "./moteur6e/verificationProbabilitesProblemes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsProbabilitesProblemes } from "./components6e/EtapeChampsProbabilitesProblemes";
@@ -11,10 +13,14 @@ import { EtapeChoixProbabilitesProblemes } from "./components6e/EtapeChoixProbab
 import { EtapeIntervalleProbabilitesProblemes } from "./components6e/EtapeIntervalleProbabilitesProblemes";
 import { EtapeListeConfigurationsProbabilitesProblemes } from "./components6e/EtapeListeConfigurationsProbabilitesProblemes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, placeholderListe } from "./ui6e/formatProbabilitesProblemes";
+import { LIBELLE_PHASE, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2, blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, placeholderListe } from "./ui6e/formatProbabilitesProblemes";
 import { calculerRecapitulatifProbabilitesProblemes, calculerSegmentsProgressionProbabilitesProblemes } from "./ui6e/recapitulatifProbabilitesProblemes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen33` — Probabilités : problèmes (chapitre 8, "Probabilités", générateur de CLÔTURE du
@@ -39,11 +45,43 @@ interface TransitionEnAttente {
 export function App6gen33() {
   const [etat, setEtat] = useState<EtatSessionProbabilitesProblemes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionProbabilitesProblemes`, jamais dans le moteur : la saisie de
+   * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice,
+   * comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Puce "aide" (jaune) : le moteur ne garde `niveauAide` que pour l'écran COURANT (remis à 0 au
+   * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
+   * `historique`. */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseProbabilitesProblemes, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionProbabilitesProblemes) {
+  /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
+   * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
+  function terminerEtape(nouvelEtat: EtatSessionProbabilitesProblemes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      const phaseFermee = etat.phase;
+      const revele = nouvelEtat.derniereTransitionRevelee;
+      setAideParPhase((prev) => ({ ...prev, [phaseFermee]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[phaseFermee],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(exercice, phaseFermee).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -51,12 +89,20 @@ export function App6gen33() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionProbabilitesProblemes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteProbabilitesProblemes)));
   }
 
@@ -107,24 +153,69 @@ export function App6gen33() {
 
   const type = typeEcran(exercice, phase);
 
+  /** Surcharge locale de `calculerSegmentsProgressionProbabilitesProblemes` : "correcte" devient
+   * "aide" quand `aideParPhase` montre que l'écran a été fermé avec de l'aide active. */
+  const segmentsBase = calculerSegmentsProgressionProbabilitesProblemes(etat);
+  const segments: EtatPuceProgression[] = phasesPourExercice(exercice).map((p, i) =>
+    segmentsBase[i] === "correcte" && aideParPhase[p] ? "aide" : segmentsBase[i],
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Probabilités : problèmes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionProbabilitesProblemes(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifProbabilitesProblemes(etat)} />
-        {type === "champs" && <EtapeChampsProbabilitesProblemes key={phase} {...propsCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />}
+        {type === "champs" && (
+          <EtapeChampsProbabilitesProblemes
+            key={phase}
+            {...propsCommun}
+            champs={champsEcran(exercice, phase)}
+            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            onValider={(valeurs) =>
+              terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
+            }
+          />
+        )}
 
-        {type === "liste" && <EtapeListeConfigurationsProbabilitesProblemes key={phase} {...propsCommun} placeholder={placeholderListe(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />}
+        {type === "liste" && (
+          <EtapeListeConfigurationsProbabilitesProblemes
+            key={phase}
+            {...propsCommun}
+            placeholder={placeholderListe(exercice, phase)}
+            diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(", "))}
+          />
+        )}
 
-        {type === "choix" && <EtapeChoixProbabilitesProblemes key={phase} {...propsCommun} options={choixEcran()} diagnostiquer={(choixId) => diagnostiquerEcran(exercice, phase, [choixId])} onValider={(choixId) => terminerEtape(soumettreReponseEcran(etat, [choixId]))} />}
+        {type === "choix" && (
+          <EtapeChoixProbabilitesProblemes
+            key={phase}
+            {...propsCommun}
+            options={choixEcran()}
+            diagnostiquer={(choixId) => diagnostiquerEcran(exercice, phase, [choixId])}
+            onValider={(choixId) => terminerEtape(soumettreReponseEcran(etat, [choixId]), choixEcran().find((o) => o.id === choixId)?.label ?? choixId)}
+          />
+        )}
 
-        {type === "intervalle" && <EtapeIntervalleProbabilitesProblemes key={phase} {...propsCommun} onValider={(ensemble) => terminerEtape(soumettreReponseEcran(etat, [JSON.stringify(ensemble)]))} />}
+        {type === "intervalle" && (
+          <EtapeIntervalleProbabilitesProblemes
+            key={phase}
+            {...propsCommun}
+            onValider={(ensemble) =>
+              terminerEtape(soumettreReponseEcran(etat, [JSON.stringify(ensemble)]), <Katex expression={formatEnsembleReelLatex(ensemble)} />)
+            }
+          />
+        )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

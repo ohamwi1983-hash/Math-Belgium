@@ -20,7 +20,7 @@ import { quantitesManquantes } from "./moteur5e/typesArcsSecteurs";
 import { diagnostiquerValeurArcSecteur } from "./moteur5e/verificationArcsSecteurs";
 import { EtapeConversionArcSecteur } from "./components5e/EtapeConversionArcSecteur";
 import { EtapeQuantiteArcSecteur } from "./components5e/EtapeQuantiteArcSecteur";
-import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex, segmentsDonneesConnues } from "./ui5e/formatArcsSecteurs";
+import { formatValeurCibleConversionLatex, formatValeurQuantiteLatex, LABELS, segmentsDonneesConnues } from "./ui5e/formatArcsSecteurs";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components5e/EnTeteExercice";
 
@@ -29,6 +29,8 @@ import { calculerRecapitulatifArcSecteur } from "./ui5e/recapitulatifArcSecteur"
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -60,14 +62,18 @@ function reponseAttenduePhase(exercice: ExerciceArcSecteur, phase: PhaseArcSecte
 /** Une puce par quantité manquante (mode "deuxVersTrois", séquence dynamique — voir
  * `quantitesManquantes`) — une seule puce toujours "courante" pour le mode "conversion" (unique
  * écran, jamais de séquence à proprement parler). */
-function calculerSegmentsProgression(etat: EtatSessionArcSecteur): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionArcSecteur,
+  aideUtiliseeParPhase: Partial<Record<string, boolean>>,
+): EtatPuceProgression[] {
   const exercice = etat.exerciceCourant;
   if (exercice.mode === "conversion") return ["courante"];
   return quantitesManquantes(exercice).map((quantite) => {
     if (quantite === etat.phase) return "courante";
     const revele = etat.revelesPartiels[quantite];
     if (revele === undefined) return "a-venir";
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    return aideUtiliseeParPhase[quantite] ? "aide" : "correcte";
   });
 }
 
@@ -81,10 +87,44 @@ interface TransitionEnAttente {
 export function App5gen6() {
   const [etat, setEtat] = useState<EtatSessionArcSecteur>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des quantités déjà closes (puces cliquables de
+   * `ProgressionPuces`, mode "deuxVersTrois" uniquement — le mode "conversion" n'a qu'un seul écran,
+   * toujours "courante", jamais clos ni consultable) — tenu ICI, à part de
+   * `EtatSessionArcSecteur`, jamais dans le moteur. Remis à vide à chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionArcSecteur) {
+  /** Réutilise `reponseAttenduePhase` — EXACTEMENT la même source que la bannière `validation`
+   * ci-dessous pour l'écran COURANT revélé. */
+  function ajouterHistorique(votreReponse: ReactNode, phaseClose: PhaseArcSecteur, nouvelEtat: EtatSessionArcSecteur) {
+    const revele = releveDeLaPhase(phaseClose, nouvelEtat);
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: LABELS[phaseClose as QuantiteArcSecteur],
+        votreReponse,
+        correcte: !revele,
+        reponseAttendue: revele ? reponseAttenduePhase(nouvelEtat.exerciceCourant, phaseClose) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT poussée dans l'historique quand l'écran se clôt RÉELLEMENT (même
+   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`), et JAMAIS pour la
+   * DERNIÈRE quantité de l'exercice (mode "deuxVersTrois") — jamais consultable, même principe que
+   * les autres générateurs 5e déjà migrés. Le mode "conversion" ne passe JAMAIS de `votreReponse`
+   * du tout (son unique appelant, ci-dessous, ne passe que l'argument `nouvelEtat`) : son unique
+   * écran n'est jamais clos tant qu'il est affiché (`calculerSegmentsProgression` le garde toujours
+   * "courante"), donc rien à consulter. */
+  function terminerEtape(nouvelEtat: EtatSessionArcSecteur, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      const exerciceTermine = nouvelEtat.resultats.length > etat.resultats.length;
+      if (!exerciceTermine && votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, etat.phase, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: releveDeLaPhase(etat.phase, nouvelEtat) });
       return;
     }
@@ -93,12 +133,22 @@ export function App5gen6() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionArcSecteur(REGLAGES_DEMO, id === "conversion" ? genererExerciceConversion : genererExerciceDeuxVersTrois));
   }
 
@@ -120,7 +170,10 @@ export function App5gen6() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Arcs et secteurs</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces
+          segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
       </header>
       <SelecteurVarianteDev options={OPTIONS_MODE} onGenerer={forcerVariante} />
       <main className="card">
@@ -148,7 +201,7 @@ export function App5gen6() {
               niveauAide={etat.niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX_ARC_SECTEUR}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseArcSecteur(etat, texte), `${LABELS[etat.phase as QuantiteArcSecteur]} = ${texte}`)}
               diagnostiquer={(texte) => diagnostiquerValeurArcSecteur(texte, exercice.valeurs[etat.phase as QuantiteArcSecteur])}
               validation={validation}
             />
@@ -168,6 +221,10 @@ export function App5gen6() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -15,11 +15,13 @@ import {
   soumettreReponseCEcran3,
   soumettreReponseDEcran,
 } from "./moteur6e/sessionEquationsExponentielles";
-import type { EtatSessionEquationExponentielle } from "./moteur6e/typesEquationsExponentielles";
+import type { EtatSessionEquationExponentielle, PhaseEquationExponentielle } from "./moteur6e/typesEquationsExponentielles";
+import { phaseApres, phaseInitiale } from "./moteur6e/typesEquationsExponentielles";
 import { EtapeChampEquExpo } from "./components6e/EtapeChampEquExpo";
 import { EtapeListeEquExpo } from "./components6e/EtapeListeEquExpo";
 import { EtapeReconnaitreImpossibleEquExpo } from "./components6e/EtapeReconnaitreImpossibleEquExpo";
 import { EtapeValeurOuVideEquExpo } from "./components6e/EtapeValeurOuVideEquExpo";
+import type { ReponseValeurOuVide } from "./moteur6e/verificationEquationsExponentielles";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
@@ -27,6 +29,8 @@ import { aideNiveau1, aideNiveau2, consigneEcran, formatEnonceLatex, formatRepon
 import { calculerRecapitulatifEquationsExponentielles, calculerSegmentsProgressionEquationsExponentielles } from "./ui6e/recapitulatifEquationsExponentielles";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen9` — Résoudre une équation exponentielle. Validation INLINE même écran (rollout UX
@@ -50,16 +54,79 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Reconstitue la séquence RÉELLEMENT traversée par CET exercice en bouclant `phaseInitiale`/
+ * `phaseApres` jusqu'à "termine" — même technique que `ui6e/recapitulatifEquationsExponentielles.ts`
+ * (non exportée depuis ce fichier, reconstruite ici pour aligner `aideUtiliseeParPhase` sur les
+ * segments de `calculerSegmentsProgressionEquationsExponentielles`). */
+function sequencePourExercice(exercice: EtatSessionEquationExponentielle["exerciceCourant"]): PhaseEquationExponentielle[] {
+  const phases: PhaseEquationExponentielle[] = [];
+  let phase: PhaseEquationExponentielle | "termine" = phaseInitiale(exercice);
+  while (phase !== "termine") {
+    phases.push(phase);
+    phase = phaseApres(phase);
+  }
+  return phases;
+}
+
+/** Formate la réponse de l'élève pour la fiche de consultation — un simple texte brut suffit pour
+ * les écrans à champ unique, et les cas spéciaux (liste add-as-needed, "valeur ou vide", booléen)
+ * sont formatés au point d'appel, où leur forme typée précise est encore connue. */
+function formatListeOuVide(textes: string[]): string {
+  return textes.length === 0 ? "∅" : textes.join(" ; ");
+}
+
+function formatValeurOuVide(reponse: ReponseValeurOuVide): string {
+  return reponse.existe && reponse.texte !== null ? reponse.texte : "∅ (aucune solution)";
+}
+
 export function App6gen9() {
   const [etat, setEtat] = useState<EtatSessionEquationExponentielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionEquationExponentielle`, jamais dans le moteur (même principe que la référence 4e,
+   * `AppAnalyseFonction.tsx`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Un écran "aide" s'il a été clos avec `niveauAide>0` — ce générateur ne garde `niveauAide` que
+   * pour l'écran COURANT (`scoresPartiels` ne retient que le score déjà pénalisé, qui ne permet pas
+   * de distinguer "pénalité d'aide" de "pénalité de tentatives" une fois l'écran clos) : capturé ICI
+   * au moment précis de la clôture. */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseEquationExponentielle, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionEquationExponentielle) {
+  function ajouterHistorique(votreReponse: string, nouvelEtat: EtatSessionEquationExponentielle) {
+    const recap = calculerRecapitulatifEquationsExponentielles(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique (et `aideUtiliseeParPhase` MIS
+   * À JOUR) quand l'écran se clôt RÉELLEMENT — jamais à chaque clic sur "Valider" (piège "revele
+   * stale"/historique désynchronisé documenté dans la référence 4e). */
+  function terminerEtape(nouvelEtat: EtatSessionEquationExponentielle, votreReponse?: string) {
     // `nouvelEtat.derniereTransitionRevelee` (jamais `etat.etapeCourante.revelee`, toujours false
     // ici — remis à zéro par `avancerPhase` DANS le même appel qui clôt l'écran, voir
     // `moteur6e/sessionEquationsExponentielles.ts` et `docs/historique-6e.md`).
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      // `nouvelEtat.phase !== etat.phase` (jamais seulement `nouvelEtat.terminee`) — voir le
+      // commentaire équivalent dans `App6gen58.tsx` (clôture du DERNIER écran d'un exercice :
+      // `scoresPartiels`/`phase` de `nouvelEtat` restent ceux d'AVANT cette soumission, sans
+      // incidence pratique puisque cette puce reste "courante" jusqu'au reset, jamais cliquable).
+      if (votreReponse !== undefined && nouvelEtat.phase !== etat.phase) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
+      if (etat.niveauAide > 0) {
+        setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -68,12 +135,20 @@ export function App6gen9() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionEquationExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -113,13 +188,18 @@ export function App6gen9() {
       }
     : null;
 
+  const sequencePhases = sequencePourExercice(exercice);
+  const segments = calculerSegmentsProgressionEquationsExponentielles(etat).map((segment, i) =>
+    segment === "correcte" && aideUtiliseeParPhase[sequencePhases[i]] ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Résoudre une équation exponentielle</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionEquationsExponentielles(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifEquationsExponentielles(etat)} />
@@ -137,7 +217,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte), texte)}
               validation={validation}
             />
           )}
@@ -154,7 +234,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseAEcran2Valeur(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseAEcran2Valeur(etat, texte), `x = ${texte}`)}
               validation={validation}
             />
           )}
@@ -173,7 +253,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseAEcran2Liste(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseAEcran2Liste(etat, textes), formatListeOuVide(textes))}
               validation={validation}
             />
           )}
@@ -191,7 +271,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte), texte)}
               validation={validation}
             />
           )}
@@ -208,7 +288,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseBEcran2(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseBEcran2(etat, reponse), formatValeurOuVide(reponse))}
               validation={validation}
             />
           )}
@@ -226,7 +306,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte), texte)}
               validation={validation}
             />
           )}
@@ -245,7 +325,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseCEcran2(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseCEcran2(etat, textes), formatListeOuVide(textes))}
               validation={validation}
             />
           )}
@@ -264,7 +344,7 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseCEcran3(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseCEcran3(etat, textes), formatListeOuVide(textes))}
               validation={validation}
             />
           )}
@@ -282,12 +362,15 @@ export function App6gen9() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(existeUneSolution) => terminerEtape(soumettreReponseDEcran(etat, existeUneSolution))}
+              onValider={(existeUneSolution) => terminerEtape(soumettreReponseDEcran(etat, existeUneSolution), existeUneSolution ? "Oui" : "Non")}
               validation={validation}
             />
           )}
         </div>
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

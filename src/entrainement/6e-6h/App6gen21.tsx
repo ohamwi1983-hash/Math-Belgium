@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionLogarithme } from "./generateurs6e/etudeFonctionLogarithme";
 import {
@@ -13,7 +14,7 @@ import {
   soumettreReponseGraphique,
   soumettreReponseLimites,
 } from "./moteur6e/sessionEtudeFonctionLogarithme";
-import type { EtatSessionEtudeFonctionLogarithme } from "./moteur6e/typesEtudeFonctionLogarithme";
+import type { EtatSessionEtudeFonctionLogarithme, PhaseEtudeFonctionLogarithme } from "./moteur6e/typesEtudeFonctionLogarithme";
 import { EtapeAsymptotesMultiLog } from "./components6e/EtapeAsymptotesMultiLog";
 import { EtapeComportementInfiniE } from "./components6e/EtapeComportementInfiniE";
 import { EtapeConcaviteLog } from "./components6e/EtapeConcaviteLog";
@@ -47,10 +48,13 @@ import {
   directionLabelsAsymptotes,
   directionLabelsLimites,
   formatFonctionLatex,
+  LIBELLE_PHASE_ETUDE_LOG,
 } from "./ui6e/formatEtudeFonctionLogarithme";
 import { calculerRecapitulatifEtudeFonctionLogarithme, calculerSegmentsProgressionEtudeFonctionLogarithme } from "./ui6e/recapitulatifEtudeFonctionLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -79,10 +83,40 @@ interface TransitionEnAttente {
 export function App6gen21() {
   const [etat, setEtat] = useState<EtatSessionEtudeFonctionLogarithme>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, jamais dans le moteur : la saisie de l'élève n'a aucune autre utilité une fois l'écran
+   * clos. Remis à vide à chaque nouvel exercice/variante forcée, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionEtudeFonctionLogarithme) {
+  /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` (jamais `nouvelEtat.phase`), appelé avant que
+   * `setEtat` n'applique la transition — réutilise `calculerRecapitulatifEtudeFonctionLogarithme`
+   * (même source que `RecapitulatifPanel`) pour la réponse ATTENDUE. Garde explicite sur le libellé :
+   * le dernier écran de l'exercice (famille E : "comportementInfini", A-D : "graphique") n'avance
+   * jamais `etat.phase` au-delà de lui-même, donc le récapitulatif ne le voit JAMAIS comme "clos" —
+   * sans cette garde on repousserait l'entrée de l'écran PRÉCÉDENT une seconde fois (bug déjà
+   * rencontré sur la référence 4e, voir `AppAnalyseFonction.tsx`). */
+  function ajouterHistorique(phaseFermee: PhaseEtudeFonctionLogarithme, votreReponse: ReactNode, nouvelEtat: EtatSessionEtudeFonctionLogarithme) {
+    const recap = calculerRecapitulatifEtudeFonctionLogarithme(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere || derniere.libelle !== LIBELLE_PHASE_ETUDE_LOG[phaseFermee]) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionEtudeFonctionLogarithme, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(etat.phase, votreReponse, nouvelEtat);
+      }
       // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
       // détail vit soit dans `detailsPartiels` (écran intermédiaire), soit dans le `resultats` qui
       // vient d'être poussé (dernier écran de l'exercice), même principe que `App6gen16.tsx`.
@@ -98,12 +132,20 @@ export function App6gen21() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
+    setFicheOuverteIndex(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionEtudeFonctionLogarithme(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -140,7 +182,7 @@ export function App6gen21() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction (synthèse, logarithmes)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionEtudeFonctionLogarithme(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgressionEtudeFonctionLogarithme(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifEtudeFonctionLogarithme(etat)} />
@@ -156,7 +198,16 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseDomaine(etat, reponse),
+                    reponse.forme === "reel"
+                      ? "ℝ"
+                      : reponse.forme === "prive_points"
+                        ? `ℝ \\ {${reponse.points.join(", ")}}`
+                        : reponse.morceaux.map((m) => `${m.infInclus ? "[" : "]"}${m.inf ?? "-∞"} ; ${m.sup ?? "+∞"}${m.supInclus ? "]" : "["}`).join(" ∪ "),
+                  )
+                }
                 validation={validation}
               />
             )}
@@ -175,7 +226,12 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseLimites(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseLimites(etat, reponse),
+                    reponse.map((r) => (r.type === "plus_infini" ? "+∞" : r.type === "moins_infini" ? "-∞" : r.type === "zero" ? "0" : r.texte)).join(" ; "),
+                  )
+                }
                 validation={validation}
               />
             )}
@@ -195,7 +251,9 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseAsymptotes(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(soumettreReponseAsymptotes(etat, reponse), reponse.map((d) => (d.existe ? d.texte : "n'existe pas")).join(" ; "))
+                }
                 validation={validation}
               />
             )}
@@ -214,7 +272,9 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseCroissance(etat, { type: "grilleC", reponse }))}
+                onValider={(reponse) =>
+                  terminerEtape(soumettreReponseCroissance(etat, { type: "grilleC", reponse }), `${reponse.signes.join(" ; ")} ; max en x=${reponse.positionMax}`)
+                }
                 validation={validation}
               />
             )}
@@ -231,7 +291,12 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseCroissance(etat, { type: "standard", reponse }))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseCroissance(etat, { type: "standard", reponse }),
+                    `${reponse.type}${reponse.position ? ` (extremum en x=${reponse.position})` : ""}`,
+                  )
+                }
                 validation={validation}
               />
             )}
@@ -248,7 +313,12 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseConcavite(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseConcavite(etat, reponse),
+                    `${reponse.type}${reponse.positionsTexte.length > 0 ? ` (inflexion(s) en x=${reponse.positionsTexte.join(", ")})` : ""}`,
+                  )
+                }
                 validation={validation}
               />
             )}
@@ -264,7 +334,7 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index))}
+                onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index), `Graphique ${String.fromCharCode(65 + index)}`)}
                 validation={validation}
               />
             )}
@@ -281,11 +351,20 @@ export function App6gen21() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={onActiverAide}
-                onValider={(reponse) => terminerEtape(soumettreReponseComportementInfini(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseComportementInfini(etat, reponse),
+                    `lim(-∞) ${reponse.moinsInfini === "zero" ? "= 0" : "n'existe pas"} ; lim(+∞) ${reponse.plusInfini === "zero" ? "= 0" : "n'existe pas"}`,
+                  )
+                }
                 validation={validation}
               />
             )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { RacineEtudeLocale } from "./core5e/etudeLocale.types";
+import type { EnsembleReelGuide } from "./core5e/domaineDefinition.types";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEtudeLocale } from "./generateurs5e/etudeLocale/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -26,6 +28,8 @@ import {
   valeursFAuxExtremums,
   valeursFAuxInflexions,
 } from "./moteur5e/verificationEtudeLocale";
+import type { ReponseTableauEtudeLocale } from "./moteur5e/verificationEtudeLocale";
+import { formatTermesEnsembleReelLatex } from "./ui5e/formatDomaineDefinition";
 import { EtapeDomaineEtudeLocale } from "./components5e/EtapeDomaineEtudeLocale";
 import { EtapeChampsNumeriquesEtudeLocale } from "./components5e/EtapeChampsNumeriquesEtudeLocale";
 import { EtapeZerosDeriveeEtudeLocale } from "./components5e/EtapeZerosDeriveeEtudeLocale";
@@ -37,6 +41,8 @@ import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import {
   formatEnteteColonnesTableau,
   formatReponseAttenduePhaseLatex,
@@ -92,22 +98,73 @@ interface TransitionEnAttente {
  * de l'exercice courant (remis à `{}` au prochain exercice) — heuristique `score === 0 ⟺ révélée`
  * (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand
  * l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e). */
-function calculerSegmentsProgression(etat: EtatSessionEtudeLocale): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionEtudeLocale,
+  aideParPhase: Partial<Record<EcranEtudeLocale, boolean>>,
+): EtatPuceProgression[] {
   return ordreEcransEtudeLocale(etat.exerciceCourant).map((ecran) => {
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideParPhase[ecran] ? "aide" : "correcte";
   });
+}
+
+/** Texte court pour un ensemble réel saisi par l'élève (écran "domaine") — réutilise
+ * `formatTermesEnsembleReelLatex` (même source que `App5gen3.tsx::LigneDomaineTermes`), affiché via
+ * KaTeX plutôt que du LaTeX brut. */
+function TexteEnsembleReel({ ensemble }: { ensemble: EnsembleReelGuide }) {
+  const termes = formatTermesEnsembleReelLatex(ensemble);
+  return (
+    <span className="equation-box-termes">
+      {termes.map((t, i) => (
+        <Katex key={i} expression={t} />
+      ))}
+    </span>
+  );
+}
+
+/** Texte court pour une réponse de tableau de signes/variations (écrans "tableauFPrime"/
+ * "tableauFSeconde") — énumère les valeurs saisies colonne par colonne, jamais recalculé depuis
+ * l'attendu (qui reste dans `reponseAttendueEtudeLocale`, jamais ici). */
+function texteTableauEtudeLocale(reponse: ReponseTableauEtudeLocale): string {
+  const signes = reponse.signes.map((s) => s ?? "?").join(" ");
+  const ligne2 = reponse.ligne2.map((v) => v ?? "·").join(" ");
+  return `signes : ${signes} ; ligne 2 : ${ligne2}`;
 }
 
 export function App5gen29() {
   const [etat, setEtat] = useState<EtatSessionEtudeLocale>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionEtudeLocale`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
+   * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranEtudeLocale, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionEtudeLocale) {
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionEtudeLocale) {
+    const recap = calculerRecapitulatifEtudeLocale(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionEtudeLocale, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -116,12 +173,20 @@ export function App5gen29() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionEtudeLocale(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
@@ -144,7 +209,7 @@ export function App5gen29() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Étude locale (extremums et points critiques)</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       <main className="card">
@@ -163,6 +228,10 @@ export function App5gen29() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -174,7 +243,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionEtudeLocale) => void;
+  terminerEtape: (nouvelEtat: EtatSessionEtudeLocale, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionEtudeLocale) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -194,7 +263,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse), <TexteEnsembleReel ensemble={reponse} />)}
           validation={validation}
         />
       );
@@ -211,7 +280,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseResoudreFPrime(etat, reponses))}
+          onValider={(reponses) => terminerEtape(soumettreReponseResoudreFPrime(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, racinesFPrimeNumeriques(exercice))}
           validation={validation}
         />
@@ -229,7 +298,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFPrime(etat, reponse), texteTableauEtudeLocale(reponse))}
           validation={validation}
         />
       );
@@ -249,7 +318,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseExtremums(etat, reponses))}
+          onValider={(reponses) => terminerEtape(soumettreReponseExtremums(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, valeursFAuxExtremums(exercice))}
           validation={validation}
         />
@@ -268,7 +337,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseResoudreFSeconde(etat, reponses))}
+          onValider={(reponses) => terminerEtape(soumettreReponseResoudreFSeconde(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, racinesFSecondeNumeriques(exercice))}
           validation={validation}
         />
@@ -286,7 +355,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse))}
+          onValider={(reponse) => terminerEtape(soumettreReponseTableauFSeconde(etat, reponse), texteTableauEtudeLocale(reponse))}
           validation={validation}
         />
       );
@@ -306,7 +375,7 @@ function EcranCourant({ exercice, phase, etat, tentativesUtilisees, tentativesMa
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponses) => terminerEtape(soumettreReponseInflexions(etat, reponses))}
+          onValider={(reponses) => terminerEtape(soumettreReponseInflexions(etat, reponses), reponses.join(" ; "))}
           diagnostiquer={(t) => diagnostiquerChampParmiCibles(t, valeursFAuxInflexions(exercice))}
           validation={validation}
         />

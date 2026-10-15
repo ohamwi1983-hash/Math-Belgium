@@ -34,6 +34,12 @@ export interface EtatSessionGraphiqueDeriveeLogarithme {
    * uniquement tant que l'écran "derivee" n'est pas encore terminé (jamais `null` dans un
    * `ResultatExerciceGraphiqueDeriveeLogarithme`, toutes les familles traversent cet écran). */
   scoreDeriveePartiel: number | null;
+  /** `niveauAide` AU MOMENT PRÉCIS de la clôture de l'écran "derivee" (avant que la transition vers
+   * "selection" ne le remette à zéro) — même principe que `scoreDeriveePartiel`/
+   * `derniereTransitionRevelee`, jamais recalculé depuis le score (ambigu : un score réduit peut
+   * aussi venir de tentatives ratées). Pilote la puce jaune "correcte avec aide" de
+   * `ProgressionPuces`. `null` tant que l'écran "derivee" n'est pas encore clos. */
+  deriveeNiveauAide: number | null;
   indexExercice: number;
   resultats: ResultatExerciceGraphiqueDeriveeLogarithme[];
   terminee: boolean;

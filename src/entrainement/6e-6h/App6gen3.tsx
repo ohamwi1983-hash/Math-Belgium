@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationsCyclometriques } from "./generateurs6e/equationsCyclometriques";
 import type { IdVarianteDev } from "./generateurs6e/equationsCyclometriques";
@@ -12,7 +13,9 @@ import {
   soumettreReponseEquation,
   soumettreReponseSolutions,
 } from "./moteur6e/sessionEquationsCyclometriques";
-import type { EtatSessionEquationsCyclometriques } from "./moteur6e/typesEquationsCyclometriques";
+import { PHASE_INITIALE, phaseApres } from "./moteur6e/typesEquationsCyclometriques";
+import type { EtatSessionEquationsCyclometriques, PhaseEquationsCyclometriques } from "./moteur6e/typesEquationsCyclometriques";
+import type { ExerciceEquationsCyclometriques } from "./core6e/equationsCyclometriques.types";
 import { EtapeAccepterRejeterEquationsCyclometriques } from "./components6e/EtapeAccepterRejeterEquationsCyclometriques";
 import { EtapeCEEquationsCyclometriques } from "./components6e/EtapeCEEquationsCyclometriques";
 import { EtapeChampEquationCyclo } from "./components6e/EtapeChampEquationCyclo";
@@ -33,12 +36,38 @@ import {
 } from "./ui6e/formatEquationsCyclometriques";
 import { calculerRecapitulatifEquationsCyclometriques, calculerSegmentsProgressionEquationsCyclometriques } from "./ui6e/recapitulatifEquationsCyclometriques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionEquationsCyclometriques {
   return demarrerSessionEquationsCyclometriques(REGLAGES_DEMO, genererExerciceEquationsCyclometriques);
+}
+
+/** Même libellé que `LIBELLE_PHASE` (`ui6e/recapitulatifEquationsCyclometriques.ts`, privé à ce
+ * module) — dupliqué ici car cette tâche ne touche qu'à `AppXxx.tsx` (voir consigne). */
+const LIBELLE_PHASE_PUCE: Record<PhaseEquationsCyclometriques, string> = {
+  ce: "Condition d'existence (CE)",
+  condition: "Condition de compatibilité",
+  equation: "Équation non cyclométrique",
+  solutions: "Solutions (avant la CE)",
+  acceptRejet: "Accepter / rejeter",
+};
+
+/** Même boucle que `sequenceReelle` (`ui6e/recapitulatifEquationsCyclometriques.ts`, privée à ce
+ * module) — dupliquée ici pour associer chaque segment de `calculerSegmentsProgressionEquationsCyclometriques`
+ * à sa phase (nécessaire pour la puce "aide", calculée localement — voir `aideParPhase` ci-dessous). */
+function sequenceReellePhases(exercice: ExerciceEquationsCyclometriques): PhaseEquationsCyclometriques[] {
+  const sequence: PhaseEquationsCyclometriques[] = [];
+  let phase: PhaseEquationsCyclometriques | "termine" = PHASE_INITIALE;
+  while (phase !== "termine") {
+    sequence.push(phase);
+    phase = phaseApres(phase, exercice);
+  }
+  return sequence;
 }
 
 function ListeSolutions({ solutions }: { solutions: number[] }) {
@@ -67,14 +96,39 @@ interface TransitionEnAttente {
 export function App6gen3() {
   const [etat, setEtat] = useState<EtatSessionEquationsCyclometriques>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionEquationsCyclometriques`, jamais dans le moteur : la saisie de
+   * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice,
+   * comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Puce "aide" (jaune) : contrairement à la référence 4e, ce moteur ne garde PAS un champ
+   * `aideXxxUtilisee` par phase — `derniereCloture` ne porte l'info que pour l'écran qui VIENT de se
+   * fermer. On la persiste donc nous-mêmes ici, phase par phase, au même point que `historique`. */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseEquationsCyclometriques, boolean>>>({});
 
   /** `nouvelEtat.derniereCloture` porte l'aide/révélation de l'écran qui vient PRÉCISÉMENT de se
    * fermer, capturée côté moteur (jamais reconstruite depuis un `etat` React déjà obsolète — voir
-   * `typesEquationsCyclometriques.ts`). */
-  function terminerEtape(nouvelEtat: EtatSessionEquationsCyclometriques) {
+   * `typesEquationsCyclometriques.ts`). `votreReponse` n'est poussé dans l'historique QUE dans cette
+   * branche de transition RÉELLE (jamais à chaque tentative ratée tant que l'écran reste ouvert). */
+  function terminerEtape(nouvelEtat: EtatSessionEquationsCyclometriques, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereCloture!.info.revele });
+      const phaseFermee = etat.phase;
+      const revele = nouvelEtat.derniereCloture!.info.revele;
+      setAideParPhase((prev) => ({ ...prev, [phaseFermee]: nouvelEtat.derniereCloture!.info.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE_PUCE[phaseFermee],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePhase() : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -82,12 +136,20 @@ export function App6gen3() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionEquationsCyclometriques(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteDev)));
   }
 
@@ -133,13 +195,20 @@ export function App6gen3() {
       }
     : null;
 
+  /** Surcharge locale de `calculerSegmentsProgressionEquationsCyclometriques` : "correcte" devient
+   * "aide" quand `aideParPhase` (ci-dessus) montre que l'écran a été fermé avec de l'aide active. */
+  const segmentsBase = calculerSegmentsProgressionEquationsCyclometriques(etat);
+  const segments: EtatPuceProgression[] = sequenceReellePhases(exercice).map((phase, i) =>
+    segmentsBase[i] === "correcte" && aideParPhase[phase] ? "aide" : segmentsBase[i],
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Équations avec fonctions cyclométriques</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionEquationsCyclometriques(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifEquationsCyclometriques(etat)} />
@@ -153,7 +222,9 @@ export function App6gen3() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseCE(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse, MAX_DEN)} />)
+              }
               validation={validation}
             />
           )}
@@ -167,7 +238,9 @@ export function App6gen3() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseCondition(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(soumettreReponseCondition(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse, MAX_DEN)} />)
+              }
               validation={validation}
             />
           )}
@@ -185,7 +258,7 @@ export function App6gen3() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseEquation(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseEquation(etat, texte), texte)}
               validation={validation}
             />
           )}
@@ -205,7 +278,9 @@ export function App6gen3() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes))}
+              onValider={(textes) =>
+                terminerEtape(soumettreReponseSolutions(etat, textes), textes.length === 0 ? "Pas de solution" : textes.join(", "))
+              }
               validation={validation}
             />
           )}
@@ -219,12 +294,28 @@ export function App6gen3() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(decisions) => terminerEtape(soumettreReponseAcceptRejet(etat, decisions))}
+              onValider={(decisions) =>
+                terminerEtape(
+                  soumettreReponseAcceptRejet(etat, decisions),
+                  <>
+                    {exercice.candidats.map((cand, i) => (
+                      <span key={i}>
+                        {i > 0 && " ; "}
+                        <Katex expression={formatCandidatLatex(cand.x)} /> ({decisions[i] ? "accepté" : "rejeté"})
+                      </span>
+                    ))}
+                  </>,
+                )
+              }
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

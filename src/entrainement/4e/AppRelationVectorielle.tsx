@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ExerciceRelationGeneraleRV } from "./core/relationVectorielle.types";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAide, demarrerSessionRelationVectorielle, soumettreReponseCoordonnees, soumettreReponseTraduction } from "./moteur/sessionRelationVectorielle";
@@ -14,6 +15,8 @@ import { Katex } from "./components/Katex";
 import { calculerRecapitulatifRelationVectorielle } from "./ui/recapitulatifRelationVectorielle";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Détermine les coordonnées de ce point à partir de la relation vectorielle.";
@@ -49,7 +52,8 @@ function calculerSegmentsProgression(etat: EtatSessionRelationVectorielle): Etat
     if (phase === etat.phase) return "courante";
     if (phase !== "traduction") return "a-venir";
     if (etat.scoreTraductionExercice === null) return "a-venir";
-    return etat.traductionRevele ? "revele" : "correcte";
+    if (etat.traductionRevele) return "revele";
+    return etat.traductionAideUtiliseeExercice ? "aide" : "correcte";
   });
 }
 
@@ -72,10 +76,40 @@ interface TransitionEnAttente {
 export function AppRelationVectorielle() {
   const [etat, setEtat] = useState<EtatSessionRelationVectorielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionRelationVectorielle`, jamais dans le moteur (voir
+   * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionRelationVectorielle) {
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
+   * `calculerRecapitulatifRelationVectorielle` pour la réponse ATTENDUE ; cette fonction ne produit
+   * une entrée que pour "traduction", jamais pour "coordonnees" (dernière phase) — voir son
+   * commentaire. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionRelationVectorielle) {
+    const recap = calculerRecapitulatifRelationVectorielle(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
+   * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
+  function terminerEtape(nouvelEtat: EtatSessionRelationVectorielle, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele =
         etat.phase === "traduction" ? nouvelEtat.traductionRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.coordonneesRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
@@ -86,12 +120,18 @@ export function AppRelationVectorielle() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionRelationVectorielle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteRelationVectorielle)));
   }
 
@@ -120,7 +160,7 @@ export function AppRelationVectorielle() {
         <h1 className="app-title">Point à partir d'une relation vectorielle</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel (version guidée)</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -143,7 +183,7 @@ export function AppRelationVectorielle() {
             tentativesMax={etat.reglages.tentativesMax}
             aideActivee={etat.aideUtilisee}
             onActiverAide={() => setEtat(activerAide(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseTraduction(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseTraduction(etat, texte), texte)}
             validation={validation}
           />
         ) : (
@@ -160,6 +200,10 @@ export function AppRelationVectorielle() {
         )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

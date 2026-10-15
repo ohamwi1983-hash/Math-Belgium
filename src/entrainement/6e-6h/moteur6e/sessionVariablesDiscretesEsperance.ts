@@ -34,8 +34,8 @@ export const NIVEAU_AIDE_MAX = 2;
  */
 let prochainGenerationId = 0;
 
-function etatInitial(exercice: ExerciceVariablesDiscretesEsperance): Pick<EtatSessionVariablesDiscretesEsperance, "exerciceCourant" | "phase" | "generationId" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), generationId: prochainGenerationId++, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(exercice: ExerciceVariablesDiscretesEsperance): Pick<EtatSessionVariablesDiscretesEsperance, "exerciceCourant" | "phase" | "generationId" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), generationId: prochainGenerationId++, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, aidePartiels: {}, derniereTransitionRevelee: false };
 }
 
 export function demarrerSessionVariablesDiscretesEsperance(reglages: ReglagesSession6e, generateur: () => ExerciceVariablesDiscretesEsperance): EtatSessionVariablesDiscretesEsperance {
@@ -76,12 +76,13 @@ export function soumettreReponseEcran(etat: EtatSessionVariablesDiscretesEsperan
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseVariablesDiscretesEsperance, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const aidePartiels: Partial<Record<PhaseVariablesDiscretesEsperance, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };
   const phaseSuivante = phaseApres(phaseCourante);
 
   if (phaseSuivante === "termine") {
     const resultat: ResultatExerciceVariablesDiscretesEsperance = { exercice, scores: scoresPartiels };
-    return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
+    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels }, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

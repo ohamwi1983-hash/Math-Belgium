@@ -68,6 +68,13 @@ import {
   diagnostiquerSolutionsPythagoricienne,
 } from "./moteur5e/verificationEquationTrig";
 import type {
+  ReponseArgument,
+  ReponseDeuxFacteursArgument,
+  ReponseDeuxFacteursLignes,
+  ReponseRacine,
+  ReponseRacinesPythagoricienne,
+} from "./moteur5e/verificationEquationTrig";
+import type {
   EtatSessionEquationTrigonometrique,
   PhaseEquationTrigonometrique,
 } from "./moteur5e/typesEquationTrig";
@@ -110,6 +117,8 @@ import { calculerRecapitulatifEquationTrig } from "./ui5e/recapitulatifEquationT
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -215,24 +224,80 @@ function ordrePhasesPourExercice(exercice: ExerciceEquationTrigonometrique): Pha
 }
 
 /** Même ternaire que `calculerRecapitulatifEquationTrig` (`scoresPartiels[phase] === 0 ⟺
- * révélée`). */
-function calculerSegmentsProgression(etat: EtatSessionEquationTrigonometrique): EtatPuceProgression[] {
+ * révélée`). "aide" (3e état, jaune) dès que la phase a été close avec de l'aide — le moteur ne
+ * garde `niveauAide` que de façon TRANSITOIRE (remis à 0 à chaque transition de phase, voir
+ * `typesEquationTrig.ts`), donc capturé localement par phase dans `aideUtiliseeParPhase`
+ * (ci-dessous dans le composant, jamais recalculé depuis `etat` seul). */
+function calculerSegmentsProgression(
+  etat: EtatSessionEquationTrigonometrique,
+  aideUtiliseeParPhase: Partial<Record<PhaseEquationTrigonometrique, boolean>>,
+): EtatPuceProgression[] {
   return ordrePhasesPourExercice(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
+}
+
+/** Formateurs locaux "votreReponse" (point 4 de la fonctionnalité 1) — un format court et clair,
+ * toujours dérivé directement de la réponse typée fournie à `onValider`, jamais recalculé via le
+ * moteur. */
+function formatReponseArgument(reponse: ReponseArgument): string {
+  return reponse.aucuneSolution ? "Aucune solution" : reponse.lignes.join(" ; ");
+}
+function formatReponseDeuxFacteursArgument(reponse: ReponseDeuxFacteursArgument): string {
+  return `Facteur 1 : ${formatReponseArgument(reponse.facteur1)} — Facteur 2 : ${formatReponseArgument(reponse.facteur2)}`;
+}
+function formatReponseDeuxFacteursLignes(reponse: ReponseDeuxFacteursLignes): string {
+  return `Facteur 1 : ${reponse.facteur1.join(" ; ")} — Facteur 2 : ${reponse.facteur2.join(" ; ")}`;
+}
+function formatReponseUneRacine(racine: ReponseRacine): string {
+  return racine.rejeter ? "rejetée" : racine.lignes.join(" ; ");
+}
+function formatReponseRacinesPythagoricienne(reponse: ReponseRacinesPythagoricienne): string {
+  return `t₁ : ${formatReponseUneRacine(reponse.racine1)} — t₂ : ${formatReponseUneRacine(reponse.racine2)}`;
 }
 
 export function App5gen10() {
   const [etat, setEtat] = useState<EtatSessionEquationTrigonometrique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionEquationTrigonometrique`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE (le moteur remet
+   * `niveauAide` à 0 dès la transition — voir le commentaire de `calculerSegmentsProgression`).
+   * Remis à vide aux mêmes endroits que `historique`. */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseEquationTrigonometrique, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionEquationTrigonometrique) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifEquationTrig` pour la réponse
+   * ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du tableau. */
+  function terminerEtape(nouvelEtat: EtatSessionEquationTrigonometrique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifEquationTrig(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -240,7 +305,13 @@ export function App5gen10() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -263,12 +334,14 @@ export function App5gen10() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Équations trigonométriques</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev
         options={OPTIONS_FAMILLE}
         onGenerer={(id) => {
           setEnAttente(null);
+          setHistorique([]);
+          setAideUtiliseeParPhase({});
           setEtat(demarrerSessionEquationTrig(REGLAGES_DEMO, GENERATEURS_FAMILLE[id]));
         }}
       />
@@ -281,7 +354,7 @@ export function App5gen10() {
               exercice={exercice}
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
-              onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix))}
+              onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix), labelFamilleRecap(choix))}
               validation={validation}
             />
           )}
@@ -295,7 +368,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseArgument(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseArgument(etat, reponse), formatReponseArgument(reponse))}
               diagnostiquer={(reponse) => diagnostiquerArgument(commeDirecte(exercice), reponse)}
               validation={validation}
             />
@@ -309,7 +382,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(lignes) => terminerEtape(soumettreReponseIsolerX(etat, lignes))}
+              onValider={(lignes) => terminerEtape(soumettreReponseIsolerX(etat, lignes), lignes.join(" ; "))}
               diagnostiquer={(lignes) => diagnostiquerIsolerX(commeDirecte(exercice), lignes)}
               validation={validation}
             />
@@ -323,7 +396,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutions(etat, textes), textes.join(" ; "))}
               diagnostiquer={(textes) => diagnostiquerSolutions(commeDirecte(exercice), textes)}
               validation={validation}
             />
@@ -338,7 +411,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponsePrefacteur(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponsePrefacteur(etat, texte), texte)}
               diagnostiquer={(texte) => diagnostiquerFactorisationProduit(commeProduit(exercice), texte)}
               validation={validation}
             />
@@ -352,7 +425,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(lignes) => terminerEtape(soumettreReponseSeparerFacteurs(etat, lignes))}
+              onValider={(lignes) => terminerEtape(soumettreReponseSeparerFacteurs(etat, lignes), lignes.join(" ; "))}
               diagnostiquer={(lignes) => diagnostiquerSeparerFacteurs(commeProduit(exercice), lignes)}
               validation={validation}
             />
@@ -366,7 +439,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseArgumentProduit(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseArgumentProduit(etat, reponse), formatReponseDeuxFacteursArgument(reponse))}
               diagnostiquer={(reponse) => diagnostiquerArgumentProduit(commeProduit(exercice), reponse)}
               validation={validation}
             />
@@ -380,7 +453,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseIsolerXProduit(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolerXProduit(etat, reponse), formatReponseDeuxFacteursLignes(reponse))}
               diagnostiquer={(reponse) => diagnostiquerIsolerXProduit(commeProduit(exercice), reponse)}
               validation={validation}
             />
@@ -394,7 +467,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseSolutionsProduit(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutionsProduit(etat, textes), textes.join(" ; "))}
               diagnostiquer={(textes) => diagnostiquerSolutionsProduit(commeProduit(exercice), textes)}
               validation={validation}
             />
@@ -409,7 +482,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseConversionPythagoricienne(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseConversionPythagoricienne(etat, texte), texte)}
               diagnostiquer={(texte) => diagnostiquerConversionPythagoricienne(commePythagoricienne(exercice), texte)}
               validation={validation}
             />
@@ -423,7 +496,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseRacinesPythagoricienne(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseRacinesPythagoricienne(etat, textes), textes.join(" ; "))}
               diagnostiquer={(textes) => diagnostiquerRacinesPythagoricienne(commePythagoricienne(exercice), textes)}
               validation={validation}
             />
@@ -437,7 +510,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseRacinesResolution(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseRacinesResolution(etat, reponse), formatReponseRacinesPythagoricienne(reponse))}
               diagnostiquer={(reponse) => diagnostiquerRacinesResolution(commePythagoricienne(exercice), reponse)}
               validation={validation}
             />
@@ -451,7 +524,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseSolutionsPythagoricienne(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutionsPythagoricienne(etat, textes), textes.join(" ; "))}
               diagnostiquer={(textes) => diagnostiquerSolutionsPythagoricienne(commePythagoricienne(exercice), textes)}
               validation={validation}
             />
@@ -466,7 +539,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseConversionEgalite(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseConversionEgalite(etat, texte), texte)}
               diagnostiquer={(texte) => diagnostiquerConversionEgalite(commeEgalite(exercice), texte)}
               validation={validation}
             />
@@ -480,7 +553,7 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(lignes) => terminerEtape(soumettreReponseResoudreEgalite(etat, lignes))}
+              onValider={(lignes) => terminerEtape(soumettreReponseResoudreEgalite(etat, lignes), lignes.join(" ; "))}
               diagnostiquer={(lignes) => diagnostiquerResoudreEgalite(commeEgalite(exercice), lignes)}
               validation={validation}
             />
@@ -494,13 +567,17 @@ export function App5gen10() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEquationTrig(exercice, etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(textes) => terminerEtape(soumettreReponseSolutionsEgalite(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseSolutionsEgalite(etat, textes), textes.join(" ; "))}
               diagnostiquer={(textes) => diagnostiquerSolutionsEgalite(commeEgalite(exercice), textes)}
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

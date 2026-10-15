@@ -20,13 +20,14 @@ export const NIVEAU_AIDE_MAX = 2;
 
 function etatInitial(
   exercice: ExerciceGraphiqueDeriveeLogarithme,
-): Pick<EtatSessionGraphiqueDeriveeLogarithme, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreDeriveePartiel" | "derniereTransitionRevelee"> {
+): Pick<EtatSessionGraphiqueDeriveeLogarithme, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreDeriveePartiel" | "deriveeNiveauAide" | "derniereTransitionRevelee"> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scoreDeriveePartiel: null,
+    deriveeNiveauAide: null,
     derniereTransitionRevelee: false,
   };
 }
@@ -83,7 +84,7 @@ function avancerPhase<TReponse>(
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoreDeriveePartiel: score, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoreDeriveePartiel: score, deriveeNiveauAide: etat.niveauAide, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }
 
 export function soumettreReponseDerivee(etat: EtatSessionGraphiqueDeriveeLogarithme, texte: string): EtatSessionGraphiqueDeriveeLogarithme {

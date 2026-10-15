@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideIntervalle,
@@ -23,6 +24,8 @@ import { Katex } from "./components/Katex";
 import { calculerRecapitulatifInequation } from "./ui/recapitulatifInequation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Détermine le signe de ce trinôme du second degré.";
@@ -66,7 +69,9 @@ function calculerSegmentsProgression(etat: EtatSessionInequation): EtatPuceProgr
         : phase === "racines"
           ? etat.racinesRevele
           : etat.signeARevele;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    // "racines"/"signe_a" n'ont aucun mécanisme d'aide (toujours "correcte", jamais "aide").
+    return phase === "simplification" && etat.aideSimplificationUtilisee ? "aide" : "correcte";
   });
 }
 
@@ -82,10 +87,42 @@ interface TransitionEnAttente {
 export function AppInequation() {
   const [etat, setEtat] = useState<EtatSessionInequation>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionInequation`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionInequation) {
+  /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
+   * réutilise `calculerRecapitulatifInequation` pour la réponse ATTENDUE (l'entrée qui vient
+   * d'être ajoutée est toujours la dernière du tableau). Jamais appelée pour "intervalle" (dernière
+   * phase, clôture toujours immédiatement l'exercice — aucune entrée de récapitulatif, et sa puce
+   * de progression n'est jamais "correcte"/"revele" dans `calculerSegmentsProgression`, donc jamais
+   * cliquable — même convention que `AppAnalyseFonction.tsx`/"tableauSignes"). */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionInequation) {
+    const recap = calculerRecapitulatifInequation(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde-fou que
+   * `AppAnalyseFonction.tsx`, bug déjà rencontré et corrigé là-bas). */
+  function terminerEtape(nouvelEtat: EtatSessionInequation, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       // "simplification" n'expose aucun champ `xxxRevele` dédié côté moteur (jamais de ligne de
       // réponse révélée pour cette étape dans l'ancien ResultatPanel) — équivalent exact :
       // score 0 ⟺ tentatives épuisées (voir etapeTentatives.ts, soumettreEtapeTentatives).
@@ -105,12 +142,18 @@ export function AppInequation() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionInequation(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteInequationId)));
   }
 
@@ -144,7 +187,7 @@ export function AppInequation() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice
@@ -162,7 +205,7 @@ export function AppInequation() {
               diagnostiquer={(v) => diagnostiquerSimplification(exercice, v)}
               aideActivee={etat.aideSimplificationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplification(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplification(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "racines" ? (
@@ -170,7 +213,12 @@ export function AppInequation() {
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseRacines(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseRacines(etat, reponse),
+                  reponse.type === "aucune" ? "Pas de solutions" : reponse.x1 === reponse.x2 ? `x = ${reponse.x1}` : `x = ${reponse.x1} ; x = ${reponse.x2}`,
+                )
+              }
               validation={validation}
             />
           ) : etat.phase === "signe_a" ? (
@@ -179,7 +227,7 @@ export function AppInequation() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseSigneA(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSigneA(etat, reponse), reponse === "+" ? "a > 0" : "a < 0")}
               validation={validation}
             />
           ) : (
@@ -196,6 +244,10 @@ export function AppInequation() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

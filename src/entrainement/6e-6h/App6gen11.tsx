@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceEtudeFonctionExponentielle } from "./generateurs6e/etudeFonctionExponentielle";
 import {
@@ -12,7 +13,11 @@ import {
   soumettreReponseGraphique,
   soumettreReponseLimites,
 } from "./moteur6e/sessionEtudeFonctionExponentielle";
-import type { EtatSessionEtudeFonctionExponentielle } from "./moteur6e/typesEtudeFonctionExponentielle";
+import { phaseApres, phaseInitiale } from "./moteur6e/typesEtudeFonctionExponentielle";
+import type { EtatSessionEtudeFonctionExponentielle, PhaseEtudeFonctionExponentielle } from "./moteur6e/typesEtudeFonctionExponentielle";
+import type { ReponseAsymptoteDirection, ReponseAsymptotes, ReponseCroissance, ReponseConcavite, ReponseLimites } from "./moteur6e/verificationEtudeFonctionExponentielle";
+import type { ReponseLimite } from "./moteur6e/verificationLimitesExponentielles";
+import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { EtapeAsymptotesB } from "./components6e/EtapeAsymptotesB";
 import { EtapeAsymptotesDeux } from "./components6e/EtapeAsymptotesDeux";
 import { EtapeConcavite } from "./components6e/EtapeConcavite";
@@ -45,13 +50,67 @@ import {
   formatFonctionLatex,
 } from "./ui6e/formatEtudeFonctionExponentielle";
 import { calculerRecapitulatifEtudeFonctionExponentielle, calculerSegmentsProgressionEtudeFonctionExponentielle } from "./ui6e/recapitulatifEtudeFonctionExponentielle";
+import { LIBELLE_PHASE_ETUDE } from "./ui6e/formatEtudeFonctionExponentielle";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
 function nouvelleSession(): EtatSessionEtudeFonctionExponentielle {
   return demarrerSessionEtudeFonctionExponentielle(REGLAGES_DEMO, genererExerciceEtudeFonctionExponentielle);
+}
+
+/** Séquence FIXE à 6 écrans (`typesEtudeFonctionExponentielle.ts`) — répliquée ICI à partir de
+ * `phaseInitiale`/`phaseApres` (même reconstruction que `sequenceComplete`, non exportée par
+ * `ui6e/recapitulatifEtudeFonctionExponentielle.ts`) pour aligner l'index des segments de
+ * `ProgressionPuces` sur celui de `historique`/`aideUtiliseeParPhase`. */
+function sequenceComplete(): PhaseEtudeFonctionExponentielle[] {
+  const phases: PhaseEtudeFonctionExponentielle[] = [];
+  let phase: PhaseEtudeFonctionExponentielle | "termine" = phaseInitiale();
+  while (phase !== "termine") {
+    phases.push(phase);
+    phase = phaseApres(phase);
+  }
+  return phases;
+}
+
+/** Formats "votre réponse" courts pour la fiche de consultation — mêmes champs que les types déjà
+ * exportés par `verificationEtudeFonctionExponentielle.ts`/`verificationLimitesExponentielles.ts`,
+ * jamais une forme recalculée différemment. */
+function formatReponseLimiteCourt(r: ReponseLimite): string {
+  switch (r.type) {
+    case "plus_infini":
+      return "+∞";
+    case "moins_infini":
+      return "−∞";
+    case "zero":
+      return "0";
+    case "valeur":
+      return r.texte;
+  }
+}
+
+function formatReponseLimitesCourt(r: ReponseLimites): string {
+  if (r.type === "quatre") {
+    return `x→x₀⁻ : ${formatReponseLimiteCourt(r.pointMoins)} ; x→x₀⁺ : ${formatReponseLimiteCourt(r.pointPlus)} ; +∞ : ${formatReponseLimiteCourt(r.plusInfini)} ; −∞ : ${formatReponseLimiteCourt(r.moinsInfini)}`;
+  }
+  return `+∞ : ${formatReponseLimiteCourt(r.plusInfini)} ; −∞ : ${formatReponseLimiteCourt(r.moinsInfini)}`;
+}
+
+function formatDirectionCourt(d: ReponseAsymptoteDirection): string {
+  return d.existe ? d.texte : "aucune";
+}
+
+function formatReponseAsymptotesCourt(r: ReponseAsymptotes): string {
+  if (r.type === "b") return `y = ${r.texteHorizontale} (côté ${r.cote === "plus" ? "+∞" : "−∞"})`;
+  return `+∞ : ${formatDirectionCourt(r.plusInfini)} ; −∞ : ${formatDirectionCourt(r.moinsInfini)}`;
+}
+
+function formatReponseTypePositionCourt(r: ReponseCroissance | ReponseConcavite): string {
+  return r.position ? `${r.type} (en ${r.position})` : r.type;
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -66,11 +125,38 @@ interface TransitionEnAttente {
 export function App6gen11() {
   const [etat, setEtat] = useState<EtatSessionEtudeFonctionExponentielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionEtudeFonctionExponentielle`, jamais dans le moteur. Remis à
+   * vide à chaque nouvel exercice (mêmes endroits que `enAttente`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Aide utilisée PAR PHASE DÉJÀ CLOSE — le moteur ne garde aucune trace persistante de l'aide une
+   * fois la phase refermée (`niveauAide` est remis à 0 à chaque transition), capturé ICI au moment
+   * exact de la clôture réelle (même garde que `terminerEtape`). Remis à vide comme `historique`. */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseEtudeFonctionExponentielle, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionEtudeFonctionExponentielle) {
+  function terminerEtape(nouvelEtat: EtatSessionEtudeFonctionExponentielle, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereRevelee });
+      const revele = nouvelEtat.derniereRevelee;
+      // `votreReponse`/`niveauAide` : UNIQUEMENT capturés dans la branche de transition RÉELLE —
+      // jamais à chaque clic sur "Valider".
+      if (votreReponse !== undefined) {
+        const contenu = contenuRecapPhase(exercice, etat.phase);
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE_ETUDE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (contenu.latex !== null ? <Katex expression={contenu.latex} /> : contenu.texte) : undefined,
+          },
+        ]);
+      }
+      if (etat.niveauAide > 0) {
+        setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -78,12 +164,20 @@ export function App6gen11() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(
       demarrerSessionEtudeFonctionExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
     );
@@ -122,13 +216,20 @@ export function App6gen11() {
       }
     : null;
 
+  // "aide" (puce jaune) : post-traite les segments déjà calculés par `calculerSegmentsProgressionEtudeFonctionExponentielle`
+  // avec `aideUtiliseeParPhase` capturé localement ci-dessus.
+  const sequence = sequenceComplete();
+  const segments: EtatPuceProgression[] = calculerSegmentsProgressionEtudeFonctionExponentielle(etat).map((segment, index) =>
+    segment === "correcte" && aideUtiliseeParPhase[sequence[index]] ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Étudier une fonction exponentielle (synthèse)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionEtudeFonctionExponentielle(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifEtudeFonctionExponentielle(etat)} />
@@ -144,7 +245,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse)} />)}
                   validation={validation}
                 />
               )}
@@ -162,7 +263,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseLimites(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseLimites(etat, reponse), formatReponseLimitesCourt(reponse))}
                   validation={validation}
                 />
               )}
@@ -179,7 +280,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseLimites(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseLimites(etat, reponse), formatReponseLimitesCourt(reponse))}
                   validation={validation}
                 />
               )}
@@ -196,7 +297,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseAsymptotes(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseAsymptotes(etat, reponse), formatReponseAsymptotesCourt(reponse))}
                   validation={validation}
                 />
               )}
@@ -213,7 +314,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseAsymptotes(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseAsymptotes(etat, reponse), formatReponseAsymptotesCourt(reponse))}
                   validation={validation}
                 />
               )}
@@ -229,7 +330,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseCroissance(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseCroissance(etat, reponse), formatReponseTypePositionCourt(reponse))}
                   validation={validation}
                 />
               )}
@@ -245,7 +346,7 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(reponse) => terminerEtape(soumettreReponseConcavite(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseConcavite(etat, reponse), formatReponseTypePositionCourt(reponse))}
                   validation={validation}
                 />
               )}
@@ -261,12 +362,16 @@ export function App6gen11() {
                   niveauAide={niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX}
                   onActiverAide={onActiverAide}
-                  onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index))}
+                  onValider={(index) => terminerEtape(soumettreReponseGraphique(etat, index), `Graphique n°${index + 1}`)}
                   validation={validation}
                 />
               )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

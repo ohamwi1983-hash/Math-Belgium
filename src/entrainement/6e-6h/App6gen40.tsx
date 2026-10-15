@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTransformationsPlan } from "./generateurs6e/transformationsPlan";
 import type { IdVarianteTransformationsPlan } from "./generateurs6e/transformationsPlan";
@@ -11,10 +12,23 @@ import { EtapeChoixFormuleTransformationsPlan } from "./components6e/EtapeChoixF
 import { EtapeImagesTransformationsPlan } from "./components6e/EtapeImagesTransformationsPlan";
 import { EtapeTypeParametresTransformationsPlan } from "./components6e/EtapeTypeParametresTransformationsPlan";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, optionsFormuleA, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTransformationsPlan";
+import {
+  blocDonnees,
+  champsEcran,
+  consigneEcran,
+  consigneGenerale,
+  formatReponseAttenduePhaseLatex,
+  niveauAideMaxEcran,
+  optionsFormuleA,
+  LIBELLE_PHASE,
+  aideNiveau1 as formatAideNiveau1,
+  aideNiveau2 as formatAideNiveau2,
+} from "./ui6e/formatTransformationsPlan";
 import { calculerRecapitulatifTransformationsPlan, calculerSegmentsProgressionTransformationsPlan } from "./ui6e/recapitulatifTransformationsPlan";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen40` — Transformations du plan via les nombres complexes (chapitre 7, "Nombres complexes",
@@ -40,10 +54,34 @@ interface TransitionEnAttente {
 export function App6gen40() {
   const [etat, setEtat] = useState<EtatSessionTransformationsPlan>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionTransformationsPlan` (voir `App6gen39.tsx`, même mécanisme). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionTransformationsPlan) {
+  function terminerEtape(nouvelEtat: EtatSessionTransformationsPlan, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        const revele = nouvelEtat.derniereTransitionRevelee;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(etat.exerciceCourant, etat.phase).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+        setAideUtiliseeFermees((a) => [...a, etat.niveauAide > 0]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -52,12 +90,20 @@ export function App6gen40() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeFermees([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeFermees([]);
     setEtat(demarrerSessionTransformationsPlan(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTransformationsPlan)));
   }
 
@@ -101,13 +147,16 @@ export function App6gen40() {
   const estEcranTypeParametres = exercice.famille === "B" && phase === "bEcran2";
   const estEcranImages = exercice.famille === "C" && phase === "cEcran3";
 
+  const segmentsBase = calculerSegmentsProgressionTransformationsPlan(etat);
+  const segments = segmentsBase.map((s, i) => (s === "correcte" && aideUtiliseeFermees[i] ? ("aide" as const) : s));
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Transformations du plan via les nombres complexes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionTransformationsPlan(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifTransformationsPlan(etat)} />
@@ -121,7 +170,12 @@ export function App6gen40() {
             options={optionsFormuleA(exercice.parametres.sousType)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))}
+            onValider={(id) =>
+              terminerEtape(
+                soumettreReponseEcran(etat, [id]),
+                <Katex expression={optionsFormuleA(exercice.parametres.sousType).find((o) => o.id === id)?.latex ?? id} />,
+              )
+            }
             validation={validation}
           />
         )}
@@ -136,7 +190,7 @@ export function App6gen40() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
             validation={validation}
           />
         )}
@@ -151,7 +205,7 @@ export function App6gen40() {
             nombreMaxPoints={exercice.autresPoints.length}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
             validation={validation}
           />
         )}
@@ -167,11 +221,22 @@ export function App6gen40() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) =>
+              terminerEtape(
+                soumettreReponseEcran(etat, valeurs),
+                champsEcran(exercice, phase)
+                  .map((c, i) => `${c.label} ${c.options?.find((o) => o.valeur === valeurs[i])?.label ?? valeurs[i]}`)
+                  .join(" ; "),
+              )
+            }
             validation={validation}
           />
         )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

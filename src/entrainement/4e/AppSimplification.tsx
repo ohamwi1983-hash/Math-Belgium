@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { Exercice } from "./core/generateur.types";
 import type { PolynomeLineaire } from "./core/simplification.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -50,6 +51,8 @@ import { Katex } from "./components/Katex";
 import type { TypeFraction } from "./core/simplification.types";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 /**
@@ -172,7 +175,32 @@ function calculerSegmentsProgression(etat: EtatSessionSimplification): EtatPuceP
                             : phase === "numChamp2"
                               ? etat.scoreNumChamp2Exercice === 0
                               : etat.scoreNumFactorisationExercice === 0;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    // "denomReconnaissance"/"numReconnaissance"/"ceDirecte" n'ont aucun mécanisme d'aide (toujours
+    // "correcte", jamais "aide").
+    const aideUtilisee =
+      phase === "denomReduction"
+        ? etat.aideDenomReductionUtilisee
+        : phase === "denomReductionP1"
+          ? etat.aideDenomReductionP1Utilisee
+          : phase === "denomChamp1"
+            ? etat.aideDenomChamp1Utilisee
+            : phase === "denomChamp2"
+              ? etat.aideDenomChamp2Utilisee
+              : phase === "denomFactorisation"
+                ? etat.aideDenomFactorisationUtilisee
+                : phase === "numReduction"
+                  ? etat.aideNumReductionUtilisee
+                  : phase === "numReductionP1"
+                    ? etat.aideNumReductionP1Utilisee
+                    : phase === "numChamp1"
+                      ? etat.aideNumChamp1Utilisee
+                      : phase === "numChamp2"
+                        ? etat.aideNumChamp2Utilisee
+                        : phase === "numFactorisation"
+                          ? etat.aideNumFactorisationUtilisee
+                          : false;
+    return aideUtilisee ? "aide" : "correcte";
   });
 }
 
@@ -190,12 +218,42 @@ interface TransitionEnAttente {
 export function AppSimplification() {
   const [etat, setEtat] = useState<EtatSessionSimplification>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSimplification`, jamais dans le moteur (voir
+   * AppAnalyseFonction.tsx). Remis à vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionSimplification) {
+  /** Même mécanisme que AppAnalyseFonction.tsx::ajouterHistorique — réutilise
+   * `calculerRecapitulatifSimplification` pour la réponse ATTENDUE ; cette fonction ne produit
+   * jamais d'entrée pour "simplification" (dernière phase), comme ailleurs sur ce chantier. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionSimplification) {
+    const recap = calculerRecapitulatifSimplification(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le commentaire détaillé
+   * de AppAnalyseFonction.tsx::terminerEtape, même garde reproduit ici à l'identique). */
+  function terminerEtape(nouvelEtat: EtatSessionSimplification, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (!transitionDEcran) {
       setEtat(nouvelEtat);
       return;
+    }
+
+    if (votreReponse !== undefined) {
+      ajouterHistorique(votreReponse, nouvelEtat);
     }
 
     const revele = (() => {
@@ -236,12 +294,18 @@ export function AppSimplification() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionSimplification(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as TypeFraction)));
   }
 
@@ -340,7 +404,7 @@ export function AppSimplification() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={<FractionHeader exercice={exercice} />} />
@@ -357,7 +421,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomReductionUtilisee}
                 onActiverAide={() => setEtat(activerAideDenomReduction(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseDenomReduction(etat, reponse))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomReduction(etat, reponse), reponse)}
                 validation={validation}
               />
             </>
@@ -374,7 +438,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(exercice.denominateur as PolynomeLineaire, v)}
                 aideActivee={etat.aideDenomReductionP1Utilisee}
                 onActiverAide={() => setEtat(activerAideDenomReductionP1(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseDenomReductionP1(etat, reponse))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomReductionP1(etat, reponse), reponse)}
                 validation={validation}
               />
             </>
@@ -387,7 +451,7 @@ export function AppSimplification() {
                 recapitulatif={recapitulatif}
                 expressionAffichee={formatEquationDenominateur(exercice.denominateur as Exercice)}
                 question={QUESTION_FACTORISATION_DENOMINATEUR}
-                onChoisir={(choix) => terminerEtape(soumettreChoixDenomCategorie(etat, choix))}
+                onChoisir={(choix) => terminerEtape(soumettreChoixDenomCategorie(etat, choix), libelleCategorie(choix))}
                 validation={validation}
               />
             </>
@@ -403,7 +467,12 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomChamp1Utilisee}
                 onActiverAide={() => setEtat(activerAideDenomChamp1(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseDenomChamp1(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseDenomChamp1(etat, reponse),
+                    (exercice.denominateur as Exercice).categorie === "cas_general" ? `Δ = ${reponse}` : reponse,
+                  )
+                }
                 validation={validation}
               />
             </>
@@ -424,7 +493,7 @@ export function AppSimplification() {
                 texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
                 aideActivee={etat.aideDenomChamp2Utilisee}
                 onActiverAide={() => setEtat(activerAideDenomChamp2(etat))}
-                onValider={(racines) => terminerEtape(soumettreReponseDenomChamp2(etat, racines))}
+                onValider={(racines) => terminerEtape(soumettreReponseDenomChamp2(etat, racines), racines.map((r) => `x≠${r}`).join(" ; "))}
                 validation={validation}
               />
             </>
@@ -441,7 +510,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exercice.denominateur as Exercice, v)}
                 aideActivee={etat.aideDenomFactorisationUtilisee}
                 onActiverAide={() => setEtat(activerAideDenomFactorisation(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseDenomFactorisation(etat, reponse))}
+                onValider={(reponse) => terminerEtape(soumettreReponseDenomFactorisation(etat, reponse), `${reponse} = 0`)}
                 validation={validation}
               />
             </>
@@ -451,7 +520,7 @@ export function AppSimplification() {
               tentativesUtilisees={tentativesUtilisees}
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseCEDirecte(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCEDirecte(etat, reponse), `x≠${reponse}`)}
               validation={validation}
             />
           ) : etat.phase === "numReduction" ? (
@@ -467,7 +536,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumReductionUtilisee}
                 onActiverAide={() => setEtat(activerAideNumReduction(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseNumReduction(etat, reponse))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumReduction(etat, reponse), reponse)}
                 validation={validation}
               />
             </>
@@ -480,7 +549,7 @@ export function AppSimplification() {
                 recapitulatif={recapitulatif}
                 expressionAffichee={formatEquationNumerateur(exercice.numerateur as Exercice)}
                 question={QUESTION_FACTORISATION_NUMERATEUR}
-                onChoisir={(choix) => terminerEtape(soumettreChoixNumCategorie(etat, choix))}
+                onChoisir={(choix) => terminerEtape(soumettreChoixNumCategorie(etat, choix), libelleCategorie(choix))}
                 validation={validation}
               />
             </>
@@ -496,7 +565,12 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerChampPrincipal(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumChamp1Utilisee}
                 onActiverAide={() => setEtat(activerAideNumChamp1(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseNumChamp1(etat, reponse))}
+                onValider={(reponse) =>
+                  terminerEtape(
+                    soumettreReponseNumChamp1(etat, reponse),
+                    (exercice.numerateur as Exercice).categorie === "cas_general" ? `Δ = ${reponse}` : reponse,
+                  )
+                }
                 validation={validation}
               />
             </>
@@ -511,7 +585,7 @@ export function AppSimplification() {
                 prefixeChamp="x ="
                 aideActivee={etat.aideNumChamp2Utilisee}
                 onActiverAide={() => setEtat(activerAideNumChamp2(etat))}
-                onValider={(racines) => terminerEtape(soumettreReponseNumChamp2(etat, racines))}
+                onValider={(racines) => terminerEtape(soumettreReponseNumChamp2(etat, racines), racines.join(" ; "))}
                 validation={validation}
               />
             </>
@@ -528,7 +602,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(exercice.numerateur as Exercice, v)}
                 aideActivee={etat.aideNumFactorisationUtilisee}
                 onActiverAide={() => setEtat(activerAideNumFactorisation(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseNumFactorisation(etat, reponse))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumFactorisation(etat, reponse), `${reponse} = 0`)}
                 validation={validation}
               />
             </>
@@ -545,7 +619,7 @@ export function AppSimplification() {
                 diagnostiquer={(v) => diagnostiquerMiseEnEvidenceP1(exercice.numerateur as PolynomeLineaire, v)}
                 aideActivee={etat.aideNumReductionP1Utilisee}
                 onActiverAide={() => setEtat(activerAideNumReductionP1(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseNumReductionP1(etat, reponse))}
+                onValider={(reponse) => terminerEtape(soumettreReponseNumReductionP1(etat, reponse), reponse)}
                 validation={validation}
               />
             </>
@@ -564,6 +638,10 @@ export function AppSimplification() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

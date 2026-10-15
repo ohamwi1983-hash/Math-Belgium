@@ -26,6 +26,8 @@ import { Katex } from "./components/Katex";
 import { TableComparaisonRecap } from "./components5e/TableComparaisonRecap";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -50,22 +52,47 @@ const ORDRE_PHASES: PhaseComparaisonSuites[] = ["tableau", "conclusion"];
  * convention que `AppMethodeRapide.tsx` (4e). "conclusion" (dernière phase) clôture toujours
  * l'exercice : jamais de champ de score qui lui survivrait une fois la phase quittée, donc toujours
  * "courante" ou "a-venir", jamais "revele"/"correcte" avant la fin. */
-function calculerSegmentsProgression(etat: EtatSessionComparaisonSuites): EtatPuceProgression[] {
+function calculerSegmentsProgression(etat: EtatSessionComparaisonSuites, aideUtiliseeTableau: boolean): EtatPuceProgression[] {
   return ORDRE_PHASES.map((phase) => {
     if (phase === etat.phase) return "courante";
     if (phase !== "tableau" || etat.scoreTableauPartiel === null) return "a-venir";
-    return etat.scoreTableauPartiel === 0 ? "revele" : "correcte";
+    if (etat.scoreTableauPartiel === 0) return "revele";
+    return aideUtiliseeTableau ? "aide" : "correcte";
   });
 }
 
 export function App5gen18() {
   const [etat, setEtat] = useState<EtatSessionComparaisonSuites>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule de l'écran "tableau" déjà clos (seule puce cliquable — voir
+   * `calculerSegmentsProgression`, "conclusion" ne clôt jamais avant la fin de l'exercice) — tenu
+   * ICI, à part de `EtatSessionComparaisonSuites`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. Pas de fonction `calculerRecapitulatifXxx` pour ce
+   * générateur : "réponse attendue" construite directement depuis `exercice`, exactement comme le
+   * fait déjà `validation.reponseAttendue` ci-dessous pour la phase "tableau". */
+  const [historiqueTableau, setHistoriqueTableau] = useState<EntreeHistoriqueEtape | null>(null);
+  const [ficheOuverte, setFicheOuverte] = useState(false);
+  /** Capture locale de `etat.niveauAide > 0` à la clôture de l'écran "tableau" — le moteur remet
+   * `niveauAide` à 0 à la transition vers "conclusion" (même mécanique que les autres générateurs
+   * de ce chantier). */
+  const [aideUtiliseeTableau, setAideUtiliseeTableau] = useState(false);
 
-  function terminerEtape(nouvelEtat: EtatSessionComparaisonSuites) {
+  function terminerEtape(nouvelEtat: EtatSessionComparaisonSuites, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      if (etat.phase === "tableau") {
+        setAideUtiliseeTableau(etat.niveauAide > 0);
+        if (votreReponse !== undefined) {
+          setHistoriqueTableau({
+            titre: "Tableau de valeurs",
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? <TableComparaisonRecap exercice={etat.exerciceCourant} /> : undefined,
+          });
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -73,12 +100,20 @@ export function App5gen18() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistoriqueTableau(null);
+      setAideUtiliseeTableau(false);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistoriqueTableau(null);
+    setAideUtiliseeTableau(false);
     setEtat(demarrerSessionComparaisonSuites(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleComparaisonSuites)));
   }
 
@@ -108,7 +143,7 @@ export function App5gen18() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Comparaison numérique de deux suites</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeTableau)} onSegmentClick={() => setFicheOuverte(true)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -123,7 +158,7 @@ export function App5gen18() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={NIVEAU_AIDE_MAX_COMPARAISON_SUITES}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreReponseTableau(etat, textes))}
+                  onValider={(textes) => terminerEtape(soumettreReponseTableau(etat, textes), textes.join(" ; "))}
                   diagnostiquer={(textes) => diagnostiquerTableau(textes, exercice)}
                   diagnostiquerCellule={(index, texte) => diagnostiquerCelluleTableau(texte, index, exercice)}
                   validation={validation}
@@ -150,6 +185,8 @@ export function App5gen18() {
             </>
         </div>
       </main>
+
+      {ficheOuverte && historiqueTableau && <FicheReponseEcran entree={historiqueTableau} onFermer={() => setFicheOuverte(false)} />}
     </div>
   );
 }

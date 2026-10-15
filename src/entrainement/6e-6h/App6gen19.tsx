@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceHyperboliques } from "./generateurs6e/hyperboliques";
 import {
@@ -14,6 +15,7 @@ import {
   soumettreReponseDLimites,
   soumettreReponseDReecriture,
 } from "./moteur6e/sessionHyperboliques";
+import { phaseApres, phaseInitiale } from "./moteur6e/typesHyperboliques";
 import type { EtatSessionHyperboliques, PhaseHyperboliques } from "./moteur6e/typesHyperboliques";
 import {
   diagnostiquerBIsoler,
@@ -30,7 +32,37 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { CONSIGNE_GENERALE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, etatActuel } from "./ui6e/formatHyperboliques";
 import { calculerRecapitulatifHyperboliques, calculerSegmentsProgressionHyperboliques } from "./ui6e/recapitulatifHyperboliques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+
+/** Même libellé, phase par phase, que `LIBELLE_PHASE` (`ui6e/recapitulatifHyperboliques.ts`, non
+ * exporté) — répliqué ICI pour la fiche de consultation. */
+const LIBELLE_PHASE: Record<PhaseHyperboliques, string> = {
+  aParite: "Parité",
+  bIsoler: "Inconnue isolée",
+  bValeurs: "Valeur(s)",
+  cDerivee: "f'(x)",
+  cDeriveeSeconde: "f''(x)",
+  cRelation: "Coefficient k²",
+  dReecriture: "f(x) réécrite",
+  dLimites: "Signes des limites",
+};
+
+/** Séquence RÉELLEMENT traversée par la famille de l'exercice courant — même reconstruction que
+ * `sequenceReelle` (`ui6e/recapitulatifHyperboliques.ts`, non exporté), répliquée ICI à partir de
+ * `phaseInitiale`/`phaseApres` pour aligner l'index des segments de `ProgressionPuces` sur celui de
+ * `historique`. */
+function sequenceReelle(exercice: Parameters<typeof phaseInitiale>[0]): PhaseHyperboliques[] {
+  const sequence: PhaseHyperboliques[] = [];
+  let phase: PhaseHyperboliques | "termine" = phaseInitiale(exercice);
+  while (phase !== "termine") {
+    sequence.push(phase);
+    phase = phaseApres(phase);
+  }
+  return sequence;
+}
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -58,8 +90,15 @@ interface TransitionEnAttente {
 export function App6gen19() {
   const [etat, setEtat] = useState<EtatSessionHyperboliques>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionHyperboliques`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice (mêmes endroits que `enAttente`). L'aide PAR PHASE DÉJÀ CLOSE n'a pas besoin
+   * d'être trackée ici séparément : elle est déjà persistée côté moteur
+   * (`detailsPartiels[phase].niveauAide`, voir `DetailPhaseHyperboliques`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionHyperboliques) {
+  function terminerEtape(nouvelEtat: EtatSessionHyperboliques, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
@@ -69,7 +108,21 @@ export function App6gen19() {
       const detail = exerciceVientDeFinir
         ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
         : nouvelEtat.detailsPartiels[etat.phase];
-      setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
+      const revele = detail?.revele ?? false;
+      // `votreReponse` : UNIQUEMENT poussée dans l'historique dans cette branche de transition
+      // RÉELLE — jamais à chaque clic sur "Valider".
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePhase() : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -77,12 +130,18 @@ export function App6gen19() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionHyperboliques(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
   }
 
@@ -115,11 +174,11 @@ export function App6gen19() {
   }
 
   function onValiderChampUnique(texte: string) {
-    if (phase === "bIsoler") return terminerEtape(soumettreReponseBIsoler(etat, texte));
-    if (phase === "cDerivee") return terminerEtape(soumettreReponseCDerivee(etat, texte));
-    if (phase === "cDeriveeSeconde") return terminerEtape(soumettreReponseCDeriveeSeconde(etat, texte));
-    if (phase === "cRelation") return terminerEtape(soumettreReponseCRelation(etat, texte));
-    return terminerEtape(soumettreReponseDReecriture(etat, texte));
+    if (phase === "bIsoler") return terminerEtape(soumettreReponseBIsoler(etat, texte), texte);
+    if (phase === "cDerivee") return terminerEtape(soumettreReponseCDerivee(etat, texte), texte);
+    if (phase === "cDeriveeSeconde") return terminerEtape(soumettreReponseCDeriveeSeconde(etat, texte), texte);
+    if (phase === "cRelation") return terminerEtape(soumettreReponseCRelation(etat, texte), texte);
+    return terminerEtape(soumettreReponseDReecriture(etat, texte), texte);
   }
 
   // Réplique exactement le contenu (par écran RÉELLEMENT traversé) de l'ancien
@@ -145,13 +204,22 @@ export function App6gen19() {
       }
     : null;
 
+  // "aide" (puce jaune) : post-traite les segments déjà calculés par `calculerSegmentsProgressionHyperboliques`
+  // avec `detailsPartiels[phase].niveauAide`, déjà persisté côté moteur (jamais recalculé ici).
+  const sequence = sequenceReelle(exercice);
+  const segments: EtatPuceProgression[] = calculerSegmentsProgressionHyperboliques(etat).map((segment, index) => {
+    if (segment !== "correcte") return segment;
+    const detail = etat.detailsPartiels[sequence[index]];
+    return detail && detail.niveauAide > 0 ? "aide" : segment;
+  });
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Sinus et cosinus hyperboliques (sh, ch)</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionHyperboliques(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifHyperboliques(etat)} />
@@ -168,7 +236,9 @@ export function App6gen19() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(choix) => terminerEtape(soumettreReponseAParite(etat, choix))}
+                onValider={(choix) =>
+                  terminerEtape(soumettreReponseAParite(etat, choix), choix === "paire" ? "Paire" : choix === "impaire" ? "Impaire" : "Ni l'une ni l'autre")
+                }
                 validation={validation}
               />
             )}
@@ -189,7 +259,7 @@ export function App6gen19() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(textes) => terminerEtape(soumettreReponseBValeurs(etat, textes))}
+                onValider={(textes) => terminerEtape(soumettreReponseBValeurs(etat, textes), textes.join(" ; "))}
                 validation={validation}
               />
             )}
@@ -208,7 +278,10 @@ export function App6gen19() {
                 niveauAide={niveauAide}
                 niveauAideMax={NIVEAU_AIDE_MAX}
                 onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                onValider={(reponse) => terminerEtape(soumettreReponseDLimites(etat, reponse))}
+                onValider={(reponse) => {
+                  const signe = (s: typeof reponse.plusInfini) => (s === "plus_infini" ? "+∞" : "−∞");
+                  terminerEtape(soumettreReponseDLimites(etat, reponse), `+∞ : ${signe(reponse.plusInfini)} ; −∞ : ${signe(reponse.moinsInfini)}`);
+                }}
                 validation={validation}
               />
             )}
@@ -234,6 +307,10 @@ export function App6gen19() {
               />
             )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

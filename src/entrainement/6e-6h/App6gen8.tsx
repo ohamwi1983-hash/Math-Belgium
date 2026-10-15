@@ -32,7 +32,10 @@ import {
 } from "./ui6e/formatGraphiquesDeriveeExponentielles";
 import { calculerRecapitulatifGraphiquesDeriveeExponentielles, calculerSegmentsProgressionGraphiquesDeriveeExponentielles } from "./ui6e/recapitulatifGraphiquesDeriveeExponentielles";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -48,10 +51,39 @@ interface TransitionEnAttente {
 export function App6gen8() {
   const [etat, setEtat] = useState<EtatSessionGraphiqueDeriveeExponentielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule de l'écran "derivee" déjà clos (familles B/D uniquement — voir
+   * `typesGraphiquesDeriveeExponentielles.ts`) — tenu ICI, à part de
+   * `EtatSessionGraphiqueDeriveeExponentielle`, jamais dans le moteur (même principe que la
+   * référence 4e, `AppAnalyseFonction.tsx`). Au plus 1 entrée possible pour ce générateur (2 écrans
+   * max), jamais besoin d'un index : `ficheOuverte` suffit. */
+  const [historiqueDerivee, setHistoriqueDerivee] = useState<EntreeHistoriqueEtape | null>(null);
+  const [ficheOuverte, setFicheOuverte] = useState(false);
+  /** Vrai si l'écran "derivee" a été clos avec `niveauAide>0` — capturé ICI au moment précis de la
+   * clôture (`scoreDeriveePartiel` ne retient que le score déjà pénalisé, qui ne permet pas de
+   * distinguer "pénalité d'aide" de "pénalité de tentatives" une fois l'écran clos). */
+  const [aideDeriveeUtilisee, setAideDeriveeUtilisee] = useState(false);
 
-  function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeExponentielle) {
+  function terminerEtape(nouvelEtat: EtatSessionGraphiqueDeriveeExponentielle, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      // Seul l'écran "derivee" a un écran suivant ("selection") depuis lequel le revoir — "selection"
+      // clôt directement l'exercice entier, jamais revisitée (voir le commentaire de
+      // `historiqueDerivee` ci-dessus).
+      if (votreReponse !== undefined && etat.phase === "derivee") {
+        const recap = calculerRecapitulatifGraphiquesDeriveeExponentielles(nouvelEtat);
+        const derniere = recap[0];
+        if (derniere) {
+          setHistoriqueDerivee({
+            titre: derniere.libelle,
+            votreReponse,
+            correcte: !derniere.revele,
+            reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+          });
+        }
+        if (etat.niveauAide > 0) {
+          setAideDeriveeUtilisee(true);
+        }
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -60,12 +92,20 @@ export function App6gen8() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistoriqueDerivee(null);
+      setAideDeriveeUtilisee(false);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistoriqueDerivee(null);
+    setAideDeriveeUtilisee(false);
     setEtat(
       demarrerSessionGraphiqueDeriveeExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
     );
@@ -101,13 +141,27 @@ export function App6gen8() {
       }
     : null;
 
+  // "aide" (puce jaune) remplace "correcte" pour l'écran "derivee" s'il a été clos avec
+  // `aideDeriveeUtilisee` — jamais recalculé depuis le score (voir son commentaire ci-dessus). Les 2
+  // écrans possibles ("derivee" puis "selection") sont TOUJOURS les 2 premiers segments quand
+  // "derivee" existe pour cet exercice (voir `calculerSegmentsProgressionGraphiquesDeriveeExponentielles`).
+  const segmentsBase = calculerSegmentsProgressionGraphiquesDeriveeExponentielles(etat);
+  const segments: EtatPuceProgression[] =
+    segmentsBase.length === 2 && segmentsBase[0] === "correcte" && aideDeriveeUtilisee ? ["aide", segmentsBase[1]] : segmentsBase;
+  // Seul le 1ᵉʳ segment (écran "derivee") a quelque chose à consulter : "selection" (dernier) clôt
+  // directement l'exercice, jamais revisitée (voir le commentaire de `historiqueDerivee`).
+  const indexSegmentDerivee = segmentsBase.length === 2 ? 0 : null;
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Graphique de la dérivée (fonctions exponentielles)</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionGraphiquesDeriveeExponentielles(etat)} />
+        <ProgressionPuces
+          segments={segments}
+          onSegmentClick={indexSegmentDerivee !== null ? (index) => index === indexSegmentDerivee && setFicheOuverte(true) : undefined}
+        />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifGraphiquesDeriveeExponentielles(etat)} />
@@ -126,7 +180,7 @@ export function App6gen8() {
               niveauAide={etat.niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseDerivee(etat, texte), texte)}
               validation={validation}
             />
           )}
@@ -147,6 +201,7 @@ export function App6gen8() {
           )}
         </div>
       </main>
+      {ficheOuverte && historiqueDerivee && <FicheReponseEcran entree={historiqueDerivee} onFermer={() => setFicheOuverte(false)} />}
     </div>
   );
 }

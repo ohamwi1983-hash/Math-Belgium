@@ -1,19 +1,24 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceAffixesRacines } from "./generateurs6e/affixesRacines";
 import type { IdVarianteAffixesRacines } from "./generateurs6e/affixesRacines";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionAffixesRacines, soumettreReponseEcran } from "./moteur6e/sessionAffixesRacines";
-import type { EtatSessionAffixesRacines } from "./moteur6e/typesAffixesRacines";
+import { phasesPourExercice } from "./moteur6e/typesAffixesRacines";
+import type { EtatSessionAffixesRacines, PhaseAffixesRacines } from "./moteur6e/typesAffixesRacines";
 import { diagnostiquerEcran } from "./moteur6e/verificationAffixesRacines";
 import { Katex } from "./components/Katex";
 import { EtapeChampsAffixesRacines } from "./components6e/EtapeChampsAffixesRacines";
 import { EtapeChoixAffixesRacines } from "./components6e/EtapeChoixAffixesRacines";
 import { EtapeRacinesAffixesRacines } from "./components6e/EtapeRacinesAffixesRacines";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { OPTIONS_RELATION_B, OPTIONS_SYSTEME_C, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAffixesRacines";
+import { LIBELLE_PHASE, OPTIONS_RELATION_B, OPTIONS_SYSTEME_C, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatAffixesRacines";
 import { calculerRecapitulatifAffixesRacines, calculerSegmentsProgressionAffixesRacines } from "./ui6e/recapitulatifAffixesRacines";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen35` — Nombres complexes : affixes et racines carrées (chapitre 7, "Nombres complexes",
@@ -38,11 +43,43 @@ interface TransitionEnAttente {
 export function App6gen35() {
   const [etat, setEtat] = useState<EtatSessionAffixesRacines>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionAffixesRacines`, jamais dans le moteur : la saisie de l'élève
+   * n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice, comme
+   * `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Puce "aide" (jaune) : le moteur ne garde `niveauAide` que pour l'écran COURANT (remis à 0 au
+   * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
+   * `historique`. */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseAffixesRacines, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionAffixesRacines) {
+  /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
+   * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
+  function terminerEtape(nouvelEtat: EtatSessionAffixesRacines, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      const phaseFermee = etat.phase;
+      const revele = nouvelEtat.derniereTransitionRevelee;
+      setAideParPhase((prev) => ({ ...prev, [phaseFermee]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[phaseFermee],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(exercice, phaseFermee).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -50,12 +87,20 @@ export function App6gen35() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionAffixesRacines(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteAffixesRacines)));
   }
 
@@ -106,16 +151,59 @@ export function App6gen35() {
 
   function rendreEcran() {
     if (phase === "bEcran1") {
-      return <EtapeChoixAffixesRacines key={phase} {...aideCommun} {...ecranCommun} options={OPTIONS_RELATION_B} onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))} />;
+      return (
+        <EtapeChoixAffixesRacines
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          options={OPTIONS_RELATION_B}
+          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={OPTIONS_RELATION_B.find((o) => o.id === id)?.latex ?? id} />)}
+        />
+      );
     }
     if (phase === "cEcran1" && exercice.famille === "C") {
-      return <EtapeChoixAffixesRacines key={phase} {...aideCommun} {...ecranCommun} options={OPTIONS_SYSTEME_C(exercice.a, exercice.b)} onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))} />;
+      const options = OPTIONS_SYSTEME_C(exercice.a, exercice.b);
+      return (
+        <EtapeChoixAffixesRacines
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          options={options}
+          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={options.find((o) => o.id === id)?.latex ?? id} />)}
+        />
+      );
     }
     if (phase === "cEcran3") {
-      return <EtapeRacinesAffixesRacines key={phase} {...aideCommun} {...ecranCommun} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />;
+      return (
+        <EtapeRacinesAffixesRacines
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(", "))}
+        />
+      );
     }
-    return <EtapeChampsAffixesRacines key={phase} {...aideCommun} {...ecranCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />;
+    return (
+      <EtapeChampsAffixesRacines
+        key={phase}
+        {...aideCommun}
+        {...ecranCommun}
+        champs={champsEcran(exercice, phase)}
+        diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+        onValider={(valeurs) =>
+          terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
+        }
+      />
+    );
   }
+
+  /** Surcharge locale de `calculerSegmentsProgressionAffixesRacines` : "correcte" devient "aide"
+   * quand `aideParPhase` montre que l'écran a été fermé avec de l'aide active. */
+  const segmentsBase = calculerSegmentsProgressionAffixesRacines(etat);
+  const segments: EtatPuceProgression[] = phasesPourExercice(exercice).map((p, i) =>
+    segmentsBase[i] === "correcte" && aideParPhase[p] ? "aide" : segmentsBase[i],
+  );
 
   return (
     <div className="app-shell">
@@ -123,12 +211,16 @@ export function App6gen35() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Nombres complexes : affixes et racines carrées</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionAffixesRacines(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifAffixesRacines(etat)} />
         {rendreEcran()}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

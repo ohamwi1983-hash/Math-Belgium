@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceComplexesAvances } from "./generateurs6e/complexesAvances";
 import type { IdVarianteComplexesAvances } from "./generateurs6e/complexesAvances";
@@ -26,12 +27,16 @@ import {
   optionsStatutC,
   optionsStatutE,
   formatReponseAttenduePhaseLatex,
+  LIBELLE_PHASE,
+  NATURES_DISPONIBLES,
   aideNiveau1 as formatAideNiveau1,
   aideNiveau2 as formatAideNiveau2,
 } from "./ui6e/formatComplexesAvances";
 import { calculerRecapitulatifComplexesAvances, calculerSegmentsProgressionComplexesAvances } from "./ui6e/recapitulatifComplexesAvances";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen42` — Nombres complexes : problèmes avancés (chapitre 7, "Nombres complexes", 9e et DERNIER
@@ -61,10 +66,34 @@ interface TransitionEnAttente {
 export function App6gen42() {
   const [etat, setEtat] = useState<EtatSessionComplexesAvances>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionComplexesAvances` (voir `App6gen39.tsx`, même mécanisme). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionComplexesAvances) {
+  function terminerEtape(nouvelEtat: EtatSessionComplexesAvances, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        const revele = nouvelEtat.derniereTransitionRevelee;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(etat.exerciceCourant, etat.phase).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+        setAideUtiliseeFermees((a) => [...a, etat.niveauAide > 0]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -73,12 +102,20 @@ export function App6gen42() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeFermees([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeFermees([]);
     setEtat(demarrerSessionComplexesAvances(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteComplexesAvances)));
   }
 
@@ -150,13 +187,16 @@ export function App6gen42() {
     return "ex : 3+2i";
   }
 
+  const segmentsBase = calculerSegmentsProgressionComplexesAvances(etat);
+  const segments = segmentsBase.map((s, i) => (s === "correcte" && aideUtiliseeFermees[i] ? ("aide" as const) : s));
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Nombres complexes : problèmes avancés</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionComplexesAvances(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifComplexesAvances(etat)} />
@@ -170,7 +210,10 @@ export function App6gen42() {
             options={phase === "aEcran1" ? optionsEcran1A(exercice.n) : phase === "aEcran2" ? optionsEcran2A(exercice.n) : optionsEcran3A(exercice)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))}
+            onValider={(id) => {
+              const options = phase === "aEcran1" ? optionsEcran1A(exercice.n) : phase === "aEcran2" ? optionsEcran2A(exercice.n) : optionsEcran3A(exercice);
+              terminerEtape(soumettreReponseEcran(etat, [id]), options.find((o) => o.id === id)?.label ?? id);
+            }}
           />
         )}
 
@@ -184,7 +227,7 @@ export function App6gen42() {
             options={optionsStatutE()}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))}
+            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), optionsStatutE().find((o) => o.id === id)?.label ?? id)}
           />
         )}
 
@@ -199,7 +242,10 @@ export function App6gen42() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => {
+              const natureLabel = NATURES_DISPONIBLES.find((n) => n.id === valeurs[0])?.label ?? valeurs[0];
+              terminerEtape(soumettreReponseEcran(etat, valeurs), [natureLabel, ...valeurs.slice(1)].join(" ; "));
+            }}
           />
         )}
 
@@ -214,7 +260,13 @@ export function App6gen42() {
             optionsReciproque={optionsReciproqueC()}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => {
+              const texte = [
+                optionsStatutC().find((o) => o.id === valeurs[0])?.label ?? valeurs[0],
+                optionsReciproqueC().find((o) => o.id === valeurs[1])?.label ?? valeurs[1],
+              ].join(" ; ");
+              terminerEtape(soumettreReponseEcran(etat, valeurs), texte);
+            }}
           />
         )}
 
@@ -229,7 +281,7 @@ export function App6gen42() {
             placeholder={placeholderListe()}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
           />
         )}
 
@@ -244,11 +296,22 @@ export function App6gen42() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) =>
+              terminerEtape(
+                soumettreReponseEcran(etat, valeurs),
+                champsEcran(exercice, phase)
+                  .map((c, i) => `${c.label} ${valeurs[i]}`)
+                  .join(" ; "),
+              )
+            }
           />
         )}
         {calculatriceVisible && <CalculatriceScientifique />}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

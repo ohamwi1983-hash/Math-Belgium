@@ -17,6 +17,12 @@ export function calculerRecapitulatifGraphiqueDeriveeLogarithme(etat: EtatSessio
 /** Puces pour `6gen20` : toujours 2 puces ("derivee" puis "selection"), séquence fixe. */
 export function calculerSegmentsProgressionGraphiqueDeriveeLogarithme(etat: EtatSessionGraphiqueDeriveeLogarithme): EtatPuceProgression[] {
   const segmentDerivee: EtatPuceProgression =
-    etat.phase === "derivee" ? "courante" : etat.scoreDeriveePartiel === 0 ? "revele" : "correcte";
+    etat.phase === "derivee"
+      ? "courante"
+      : etat.scoreDeriveePartiel === 0
+        ? "revele"
+        : etat.deriveeNiveauAide !== null && etat.deriveeNiveauAide > 0
+          ? "aide"
+          : "correcte";
   return [segmentDerivee, etat.phase === "selection" ? "courante" : "a-venir"];
 }

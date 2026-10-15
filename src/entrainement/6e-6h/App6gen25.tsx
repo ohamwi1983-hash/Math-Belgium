@@ -1,18 +1,21 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceIntegralesDefinies } from "./generateurs6e/integralesDefinies";
 import type { IdVarianteIntegralesDefinies } from "./generateurs6e/integralesDefinies";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionIntegralesDefinies, soumettreReponseEcran } from "./moteur6e/sessionIntegralesDefinies";
-import type { EtatSessionIntegralesDefinies } from "./moteur6e/typesIntegralesDefinies";
+import type { EtatSessionIntegralesDefinies, PhaseIntegralesDefinies } from "./moteur6e/typesIntegralesDefinies";
 import { diagnostiquerEcran } from "./moteur6e/verificationIntegralesDefinies";
 import { EtapeChampsCalculPrimitives } from "./components6e/EtapeChampsCalculPrimitives";
 import { EtapeResoudreMIntegralesDefinies } from "./components6e/EtapeResoudreMIntegralesDefinies";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntegralesDefinies";
+import { LIBELLE_PHASE, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatIntegralesDefinies";
 import { calculerRecapitulatifIntegralesDefinies, calculerSegmentsProgressionIntegralesDefinies } from "./ui6e/recapitulatifIntegralesDefinies";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen25` — Intégrales définies, paramètre et valeur moyenne (chapitre 4, "Intégrales et
@@ -42,10 +45,40 @@ interface TransitionEnAttente {
 export function App6gen25() {
   const [etat, setEtat] = useState<EtatSessionIntegralesDefinies>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, jamais dans le moteur. Remis à vide à chaque nouvel exercice/variante forcée, comme
+   * `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionIntegralesDefinies) {
+  /** `phaseFermee` est TOUJOURS l'ancien `etat.phase` — réutilise
+   * `calculerRecapitulatifIntegralesDefinies` pour la réponse ATTENDUE. Garde sur le libellé : le
+   * dernier écran de l'exercice n'avance jamais `etat.phase` au-delà de lui-même, donc SANS cette
+   * garde on repousserait l'entrée de l'écran PRÉCÉDENT une seconde fois (bug déjà rencontré sur la
+   * référence 4e, `AppAnalyseFonction.tsx`). */
+  function ajouterHistorique(phaseFermee: PhaseIntegralesDefinies, votreReponse: ReactNode, nouvelEtat: EtatSessionIntegralesDefinies) {
+    const recap = calculerRecapitulatifIntegralesDefinies(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere || derniere.libelle !== LIBELLE_PHASE[phaseFermee]) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (
+          <span className="equation-box-termes">{(derniere.valeurs ?? [derniere.valeur]).map((f, i) => <Katex key={i} expression={f} />)}</span>
+        ) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionIntegralesDefinies, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(etat.phase, votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -54,12 +87,20 @@ export function App6gen25() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
+    setFicheOuverteIndex(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionIntegralesDefinies(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteIntegralesDefinies)));
   }
 
@@ -103,7 +144,7 @@ export function App6gen25() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Intégrales définies, paramètre et valeur moyenne</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionIntegralesDefinies(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgressionIntegralesDefinies(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifIntegralesDefinies(etat)} />
@@ -118,7 +159,7 @@ export function App6gen25() {
             labelAjout="+ Ajouter une valeur de m"
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
           />
         )}
         {phase !== "resoudreM" && (
@@ -132,10 +173,14 @@ export function App6gen25() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
           />
         )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

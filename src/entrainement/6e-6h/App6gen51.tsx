@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLoiNormale } from "./generateurs6e/loiNormale";
 import type { IdVarianteLoiNormale } from "./generateurs6e/loiNormale";
@@ -9,9 +10,12 @@ import { EtapeChampsLoiNormale } from "./components6e/EtapeChampsLoiNormale";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
 import { blocDonnees, calculerReferenceLoiNormale, champsEcran, consigneEcran, consigneGenerale, niveauAideMaxEcran, formatReponseAttenduePhaseLatex, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatLoiNormale";
+import type { ChampDef } from "./ui6e/formatLoiNormale";
 import { calculerRecapitulatifLoiNormale, calculerSegmentsProgressionLoiNormale } from "./ui6e/recapitulatifLoiNormale";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen51` — Loi normale (premier générateur du nouveau chapitre "Variables aléatoires et lois de
@@ -37,6 +41,21 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Formate la réponse de l'élève pour UN écran (`champs`/`valeurs` apparié par index) en une ligne
+ * lisible "label = valeur" (ou "label : valeur" si le label ne se termine pas déjà par `=`/`:`) —
+ * pour un champ `choix`, affiche le LABEL de l'option choisie, jamais sa valeur technique. Consultée
+ * en lecture seule par `FicheReponseEcran` (voir `onValider` ci-dessous), jamais par le moteur. */
+function formatVotreReponseChamps(champs: ChampDef[], valeurs: string[]): string {
+  return champs
+    .map((champ, i) => {
+      const brut = valeurs[i] ?? "";
+      const valeurAffichee = champ.type === "choix" ? champ.options?.find((o) => o.valeur === brut)?.label ?? brut : brut;
+      const label = champ.label.trim();
+      return /[=:]$/.test(label) ? `${label} ${valeurAffichee}` : `${label} : ${valeurAffichee}`;
+    })
+    .join(" ; ");
+}
+
 export function App6gen51() {
   const [etat, setEtat] = useState<EtatSessionLoiNormale>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
@@ -46,10 +65,48 @@ export function App6gen51() {
   // partageant le même nom de phase initiale, ex. `A_superieur` puis `A_intervalle`, toutes deux
   // "aEcran1").
   const [nonceForcage, setNonceForcage] = useState(0);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionLoiNormale`, jamais dans le moteur : la saisie de l'élève n'a
+   * aucune autre utilité une fois l'écran clos. Remis à vide à chaque nouvel exercice, comme
+   * `enAttente` — mirroir `AppAnalyseFonction.tsx` (4e). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionLoiNormale) {
+  /** Réutilise `calculerRecapitulatifLoiNormale` (même mécanisme que `RecapitulatifPanel`) pour la
+   * réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la DERNIÈRE du tableau, les
+   * écrans se closent dans l'ordre. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionLoiNormale) {
+    const recap = calculerRecapitulatifLoiNormale(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (
+          <span className="equation-box-termes">
+            {(derniere.valeurs ?? [derniere.valeur]).map((v, i) => (
+              <Katex key={i} expression={v} />
+            ))}
+          </span>
+        ) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'écran se clôt RÉELLEMENT
+   * (`transitionDEcran`) — jamais à chaque clic sur "Valider" : tant qu'il reste des tentatives, une
+   * réponse fausse renvoie un état où `etapeCourante.terminee` reste `false` SANS clore l'écran, et
+   * `onValider`/`soumettreReponseEcran` sont quand même rappelés à CHAQUE tentative. Même garde que
+   * `AppAnalyseFonction.tsx` (4e) — piège déjà documenté CLAUDE.md. */
+  function terminerEtape(nouvelEtat: EtatSessionLoiNormale, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -58,13 +115,21 @@ export function App6gen51() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
     setNonceForcage((n) => n + 1);
+    setHistorique([]);
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionLoiNormale(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteLoiNormale), calculerReferenceLoiNormale));
   }
 
@@ -111,7 +176,7 @@ export function App6gen51() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Loi normale</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionLoiNormale(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgressionLoiNormale(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifLoiNormale(etat)} />
@@ -139,9 +204,13 @@ export function App6gen51() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs, calculerReferenceLoiNormale(exercice, phase))}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), formatVotreReponseChamps(champsEcran(exercice, phase), valeurs))}
         />
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

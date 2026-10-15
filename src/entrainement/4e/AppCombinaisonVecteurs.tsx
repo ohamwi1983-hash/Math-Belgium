@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import { activerAideSuivante, demarrerSessionCombinaisonVecteurs, soumettreReponseComposantes, soumettreReponseSimplification } from "./moteur/sessionCombinaisonVecteurs";
 import type { EtatSessionCombinaisonVecteurs, PhaseCombinaisonVecteurs } from "./moteur/typesCombinaisonVecteurs";
@@ -12,6 +13,8 @@ import { formatEquationReduiteLatex, formatResultatLatex, formatTermesDonneesLat
 import { calculerRecapitulatifCombinaisonVecteurs } from "./ui/recapitulatifCombinaisonVecteurs";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Calcule les composantes de cette combinaison linéaire de vecteurs.";
@@ -42,7 +45,8 @@ function calculerSegmentsProgression(etat: EtatSessionCombinaisonVecteurs): Etat
     if (phase === etat.phase) return "courante";
     const score = phase === "simplification" ? etat.scoreSimplificationExercice : null;
     if (score === null) return "a-venir";
-    return etat.simplificationRevele ? "revele" : "correcte";
+    if (etat.simplificationRevele) return "revele";
+    return etat.niveauAideSimplification > 0 ? "aide" : "correcte";
   });
 }
 
@@ -64,10 +68,42 @@ interface TransitionEnAttente {
 export function AppCombinaisonVecteurs() {
   const [etat, setEtat] = useState<EtatSessionCombinaisonVecteurs>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionCombinaisonVecteurs`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionCombinaisonVecteurs) {
+  /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
+   * réutilise `calculerRecapitulatifCombinaisonVecteurs` pour la réponse ATTENDUE (l'entrée qui
+   * vient d'être ajoutée est toujours la dernière du tableau). Jamais appelée pour "composantes"
+   * (dernière phase, clôture toujours immédiatement l'exercice — aucune entrée de récapitulatif, et
+   * sa puce de progression n'est jamais "correcte"/"revele" dans `calculerSegmentsProgression`, donc
+   * jamais cliquable — même convention que `AppAnalyseFonction.tsx`/"tableauSignes"). */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionCombinaisonVecteurs) {
+    const recap = calculerRecapitulatifCombinaisonVecteurs(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? <Katex expression={derniere.valeur} /> : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde-fou que
+   * `AppAnalyseFonction.tsx`, bug déjà rencontré et corrigé là-bas). */
+  function terminerEtape(nouvelEtat: EtatSessionCombinaisonVecteurs, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele =
         etat.phase === "simplification" ? nouvelEtat.simplificationRevele : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.composantesRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
@@ -78,7 +114,12 @@ export function AppCombinaisonVecteurs() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -87,6 +128,7 @@ export function AppCombinaisonVecteurs() {
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionCombinaisonVecteurs(REGLAGES_DEMO, () => construireAvecVarianteId(id as VarianteCombinaisonVecteurs)));
   }
 
@@ -113,7 +155,7 @@ export function AppCombinaisonVecteurs() {
         <h1 className="app-title">Calcul de composantes de combinaisons linéaires</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -135,7 +177,7 @@ export function AppCombinaisonVecteurs() {
             tentativesMax={etat.reglages.tentativesMax}
             niveauAide={etat.niveauAideSimplification}
             onActiverAide={() => setEtat(activerAideSuivante(etat))}
-            onValider={(texte) => terminerEtape(soumettreReponseSimplification(etat, texte))}
+            onValider={(texte) => terminerEtape(soumettreReponseSimplification(etat, texte), texte)}
             validation={validation}
           />
         ) : (
@@ -152,6 +194,10 @@ export function AppCombinaisonVecteurs() {
         )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

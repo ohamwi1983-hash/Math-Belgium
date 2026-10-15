@@ -126,6 +126,10 @@ export interface EtatSessionPointsDroitesRemarquablesTriangle {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhasePointsDroitesRemarquablesTriangle, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhasePointsDroitesRemarquablesTriangle, boolean>>;
   indexExercice: number;
   resultats: ResultatExercicePointsDroitesRemarquablesTriangle[];
   terminee: boolean;

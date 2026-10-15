@@ -141,6 +141,10 @@ export interface EtatSessionIntegralesProblemes {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseIntegralesProblemes, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces`. */
+  aidePartiels: Partial<Record<PhaseIntegralesProblemes, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceIntegralesProblemes[];
   terminee: boolean;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceExponentiellesProblemes } from "./generateurs6e/exponentiellesProblemes";
 import {
@@ -29,7 +30,7 @@ import {
   soumettreReponseGEcran2,
   soumettreReponseGEcran3,
 } from "./moteur6e/sessionExponentiellesProblemes";
-import type { EtatSessionExponentiellesProblemes } from "./moteur6e/typesExponentiellesProblemes";
+import type { EtatSessionExponentiellesProblemes, PhaseExponentiellesProblemes } from "./moteur6e/typesExponentiellesProblemes";
 import { EtapeChampExpoProblemes } from "./components6e/EtapeChampExpoProblemes";
 import { EtapeDeuxValeursExpoProblemes } from "./components6e/EtapeDeuxValeursExpoProblemes";
 import { EtapeListeExpoProblemes } from "./components6e/EtapeListeExpoProblemes";
@@ -37,10 +38,13 @@ import { EtapeChoixOuiNonExpoProblemes } from "./components6e/EtapeChoixOuiNonEx
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatExponentiellesProblemes";
+import { LIBELLE_PHASE, PHASES_PAR_FAMILLE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex } from "./ui6e/formatExponentiellesProblemes";
 import { calculerRecapitulatifExponentiellesProblemes, calculerSegmentsProgressionExponentiellesProblemes } from "./ui6e/recapitulatifExponentiellesProblemes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -60,11 +64,44 @@ interface TransitionEnAttente {
 export function App6gen12() {
   const [etat, setEtat] = useState<EtatSessionExponentiellesProblemes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionExponentiellesProblemes`, jamais dans le moteur. Remis à vide
+   * à chaque nouvel exercice (mêmes endroits que `enAttente`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Aide utilisée PAR PHASE DÉJÀ CLOSE — le moteur ne garde aucune trace persistante de l'aide une
+   * fois la phase refermée (`niveauAide` est remis à 0 à chaque transition), capturé ICI au moment
+   * exact de la clôture réelle (même garde que `terminerEtape`). Remis à vide comme `historique`. */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseExponentiellesProblemes, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionExponentiellesProblemes) {
+  function terminerEtape(nouvelEtat: EtatSessionExponentiellesProblemes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      const revele = nouvelEtat.derniereTransitionRevelee;
+      // `votreReponse`/`niveauAide` : UNIQUEMENT capturés dans la branche de transition RÉELLE —
+      // jamais à chaque clic sur "Valider".
+      if (votreReponse !== undefined) {
+        const valeurs = formatReponseAttenduePhaseLatex(exercice, etat.phase);
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {valeurs.map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+      }
+      if (etat.niveauAide > 0) {
+        setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -72,12 +109,20 @@ export function App6gen12() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(
       demarrerSessionExponentiellesProblemes(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
     );
@@ -145,13 +190,20 @@ export function App6gen12() {
     phase === "gEcran1" ||
     phase === "gEcran2";
 
+  // "aide" (puce jaune) : post-traite les segments déjà calculés par `calculerSegmentsProgressionExponentiellesProblemes`
+  // avec `aideUtiliseeParPhase` capturé localement ci-dessus.
+  const sequence = PHASES_PAR_FAMILLE[exercice.famille];
+  const segments: EtatPuceProgression[] = calculerSegmentsProgressionExponentiellesProblemes(etat).map((segment, index) =>
+    segment === "correcte" && aideUtiliseeParPhase[sequence[index]] ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Exponentielles : problèmes</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionExponentiellesProblemes(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifExponentiellesProblemes(etat)} />
@@ -161,7 +213,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder={exercice.famille === "A" && exercice.sousType === "evaluer" ? "ex : 5000*1.08^t" : "ex : 80-t"}
-              onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseAEcran1(etat, texte), texte)}
             />
           )}
           {phase === "aEcran2" && (
@@ -169,7 +221,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 12,5"
-              onValider={(texte) => terminerEtape(soumettreReponseAEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseAEcran2(etat, texte), texte)}
             />
           )}
 
@@ -178,7 +230,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 20*0.8^t"
-              onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseBEcran1(etat, texte), texte)}
             />
           )}
           {phase === "bEcran2" && (
@@ -186,7 +238,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 20*(1-0.8^t)"
-              onValider={(texte) => terminerEtape(soumettreReponseBEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseBEcran2(etat, texte), texte)}
             />
           )}
           {phase === "bEcran3" && (
@@ -194,7 +246,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 12,5"
-              onValider={(texte) => terminerEtape(soumettreReponseBEcran3(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseBEcran3(etat, texte), texte)}
             />
           )}
           {phase === "bEcran4" && (
@@ -202,7 +254,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 8,3"
-              onValider={(texte) => terminerEtape(soumettreReponseBEcran4(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseBEcran4(etat, texte), texte)}
             />
           )}
 
@@ -211,7 +263,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 0,9"
-              onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseCEcran1(etat, texte), texte)}
             />
           )}
           {phase === "cEcran2" && (
@@ -219,7 +271,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 15,2"
-              onValider={(texte) => terminerEtape(soumettreReponseCEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseCEcran2(etat, texte), texte)}
             />
           )}
           {phase === "cEcran3" && exercice.famille === "C" && (
@@ -228,7 +280,7 @@ export function App6gen12() {
               {...propsChampCommun}
               placeholder="ex : 42,3"
               labelAjout="+ Ajouter une valeur"
-              onValider={(textes) => terminerEtape(soumettreReponseCEcran3(etat, textes))}
+              onValider={(textes) => terminerEtape(soumettreReponseCEcran3(etat, textes), textes.join(" ; "))}
             />
           )}
 
@@ -237,7 +289,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 0,64"
-              onValider={(texte) => terminerEtape(soumettreReponseDEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseDEcran1(etat, texte), texte)}
             />
           )}
           {phase === "dEcran2" && (
@@ -245,7 +297,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 20"
-              onValider={(texte) => terminerEtape(soumettreReponseDEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseDEcran2(etat, texte), texte)}
             />
           )}
           {phase === "dEcran3" && (
@@ -253,7 +305,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 20+25*0.8^t"
-              onValider={(texte) => terminerEtape(soumettreReponseDEcran3(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseDEcran3(etat, texte), texte)}
             />
           )}
           {phase === "dEcran4" && (
@@ -261,7 +313,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 25,4"
-              onValider={(texte) => terminerEtape(soumettreReponseDEcran4(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseDEcran4(etat, texte), texte)}
             />
           )}
 
@@ -270,7 +322,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 20*t*exp(-t)*(2-t)"
-              onValider={(texte) => terminerEtape(soumettreReponseEEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseEEcran1(etat, texte), texte)}
             />
           )}
           {phase === "eEcran2" && (
@@ -278,7 +330,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 2"
-              onValider={(texte) => terminerEtape(soumettreReponseEEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseEEcran2(etat, texte), texte)}
             />
           )}
           {phase === "eEcran3" && (
@@ -286,7 +338,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 10,8"
-              onValider={(texte) => terminerEtape(soumettreReponseEEcran3(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseEEcran3(etat, texte), texte)}
             />
           )}
 
@@ -295,7 +347,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 1"
-              onValider={(texte) => terminerEtape(soumettreReponseFEcran1(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseFEcran1(etat, texte), texte)}
             />
           )}
           {phase === "fEcran2" && (
@@ -303,7 +355,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 0,86"
-              onValider={(texte) => terminerEtape(soumettreReponseFEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseFEcran2(etat, texte), texte)}
             />
           )}
           {phase === "fEcran3" && (
@@ -311,7 +363,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 950000"
-              onValider={(texte) => terminerEtape(soumettreReponseFEcran3(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseFEcran3(etat, texte), texte)}
             />
           )}
           {phase === "fEcran4" && (
@@ -319,7 +371,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 125000"
-              onValider={(texte) => terminerEtape(soumettreReponseFEcran4(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseFEcran4(etat, texte), texte)}
             />
           )}
 
@@ -338,7 +390,7 @@ export function App6gen12() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte1, texte2) => terminerEtape(soumettreReponseGEcran1(etat, { texte1, texte2 }))}
+              onValider={(texte1, texte2) => terminerEtape(soumettreReponseGEcran1(etat, { texte1, texte2 }), `f(${exercice.tEval1})=${texte1} ; f(${exercice.tEval2})=${texte2}`)}
               validation={validation}
             />
           )}
@@ -347,7 +399,7 @@ export function App6gen12() {
               key={phase}
               {...propsChampCommun}
               placeholder="ex : 4,2"
-              onValider={(texte) => terminerEtape(soumettreReponseGEcran2(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseGEcran2(etat, texte), texte)}
             />
           )}
           {phase === "gEcran3" && (
@@ -363,7 +415,7 @@ export function App6gen12() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(atteignable) => terminerEtape(soumettreReponseGEcran3(etat, atteignable))}
+              onValider={(atteignable) => terminerEtape(soumettreReponseGEcran3(etat, atteignable), atteignable ? "Oui" : "Non")}
               validation={validation}
             />
           )}
@@ -371,6 +423,10 @@ export function App6gen12() {
           {calculatriceVisible && <CalculatriceScientifique />}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

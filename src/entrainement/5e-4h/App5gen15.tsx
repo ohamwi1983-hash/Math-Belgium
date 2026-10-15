@@ -71,6 +71,8 @@ import { calculerRecapitulatifSuiteGeometrique } from "./ui5e/recapitulatifSuite
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -251,13 +253,22 @@ function nouvelleSession(): EtatSessionSuiteGeometrique {
  * réelle dépend de `exercice.famille`/`combo`/`statutQ` (branches B1/B2 dupliquées), donc toujours
  * recalculée via `ordreComplet(exercice)`. Même heuristique `score === 0 ⟺ révélée` que
  * `calculerRecapitulatifSuiteGeometrique`. */
-function calculerSegmentsProgression(etat: EtatSessionSuiteGeometrique): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteGeometrique,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteGeometrique, boolean>>,
+): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
+}
+
+/** Formateurs locaux "votreReponse" — un format court dérivé directement de la réponse typée. */
+function formatReponseSommeInfinie(reponse: ReponseSommeInfinie): string {
+  return reponse.existe ? reponse.valeur : "N'existe pas";
 }
 
 interface TransitionEnAttente {
@@ -346,11 +357,41 @@ function soumettrePoserEquation(
 export function App5gen15() {
   const [etat, setEtat] = useState<EtatSessionSuiteGeometrique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteGeometrique`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteGeometrique, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionSuiteGeometrique) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteGeometrique` pour la réponse
+   * ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteGeometrique, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifSuiteGeometrique(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -358,12 +399,20 @@ export function App5gen15() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionSuiteGeometrique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteGeometriqueId)));
   }
 
@@ -393,7 +442,7 @@ export function App5gen15() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites géométriques, formule générale et termes</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -410,7 +459,7 @@ export function App5gen15() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreChampSimple(etat, phase, texte))}
+                  onValider={(texte) => terminerEtape(soumettreChampSimple(etat, phase, texte), texte)}
                   diagnostiquer={(texte) => diagnostiquerChampSimpleGeo(exercice, phase, texte)}
                   validation={validation}
                 />
@@ -427,7 +476,7 @@ export function App5gen15() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreTermesMultiples(etat, phase, textes))}
+                  onValider={(textes) => terminerEtape(soumettreTermesMultiples(etat, phase, textes), textes.join(" ; "))}
                   diagnostiquer={(textes) => diagnostiquerTermesMultiplesGeo(exercice, phase, textes)}
                   diagnostiquerChamp={(index, texte) => diagnostiquerChampTermesMultiplesGeo(exercice, phase, index, texte)}
                   validation={validation}
@@ -444,7 +493,7 @@ export function App5gen15() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(valeurs) => terminerEtape(soumettreReponseTrouverQ(etat, valeurs))}
+                  onValider={(valeurs) => terminerEtape(soumettreReponseTrouverQ(etat, valeurs), valeurs.join(" ; "))}
                   diagnostiquer={(valeurs) => (exercice.famille === "principal" ? diagnostiquerTrouverQ(exercice, valeurs) : "parse_error")}
                   diagnostiquerChamp={(_index, texte) => diagnostiquerChampTrouverQ(exercice, texte)}
                   validation={validation}
@@ -462,7 +511,7 @@ export function App5gen15() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreSommeInfinie(etat, phase, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreSommeInfinie(etat, phase, reponse), formatReponseSommeInfinie(reponse))}
                   diagnostiquer={(reponse) => diagnostiquerSommeInfinieGeo(exercice, phase, reponse)}
                   validation={validation}
                 />
@@ -480,7 +529,7 @@ export function App5gen15() {
                   niveauAideMax={niveauAideMaxSuiteGeometrique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) =>
-                    terminerEtape(soumettrePoserEquation(etat, phase as "poserEquationAlgebrique" | "poserEquationRangN", reponse))
+                    terminerEtape(soumettrePoserEquation(etat, phase as "poserEquationAlgebrique" | "poserEquationRangN", reponse), reponse.texte)
                   }
                   diagnostiquer={(reponse) =>
                     diagnostiquerPoserEquationGeo(exercice, phase as "poserEquationAlgebrique" | "poserEquationRangN", reponse)
@@ -492,6 +541,10 @@ export function App5gen15() {
             </>
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

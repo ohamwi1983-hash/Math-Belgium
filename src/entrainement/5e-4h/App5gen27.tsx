@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceFonctionDerivee } from "./generateurs5e/fonctionDerivee/index";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -11,7 +12,7 @@ import {
   soumettreReponseDecomposerUV,
   soumettreReponseReconnaissance,
 } from "./moteur5e/sessionFonctionDerivee";
-import type { EtatSessionFonctionDerivee } from "./moteur5e/typesFonctionDerivee";
+import type { EcranFonctionDerivee, EtatSessionFonctionDerivee } from "./moteur5e/typesFonctionDerivee";
 import {
   diagnostiquerCalculerDerivee,
   diagnostiquerChampExterieur,
@@ -23,11 +24,18 @@ import type { ExerciceFonctionDerivee, TypeDerivee } from "./core5e/fonctionDeri
 import { EtapeReconnaissanceFonctionDerivee } from "./components5e/EtapeReconnaissanceFonctionDerivee";
 import { EtapeDecomposerFonctionDerivee } from "./components5e/EtapeDecomposerFonctionDerivee";
 import { EtapeCalculerFonctionDerivee } from "./components5e/EtapeCalculerFonctionDerivee";
-import { formatReponseAttendueCalculerLatex, formatTermesReponseAttendueDecomposerLatex, texteReponseAttendueReconnaissance } from "./ui5e/formatFonctionDerivee";
+import {
+  LIBELLE_TYPE,
+  formatReponseAttendueCalculerLatex,
+  formatTermesReponseAttendueDecomposerLatex,
+  texteReponseAttendueReconnaissance,
+} from "./ui5e/formatFonctionDerivee";
 import { calculerRecapitulatifFonctionDerivee } from "./ui5e/recapitulatifFonctionDerivee";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
@@ -69,22 +77,50 @@ function ordreEcransReels(exercice: ExerciceFonctionDerivee): ("reconnaissance" 
 
 /** Même heuristique que `calculerRecapitulatifFonctionDerivee` (`scoresPartiels[ecran] === 0 ⟺
  * révélée`). */
-function calculerSegmentsProgression(etat: EtatSessionFonctionDerivee): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionFonctionDerivee,
+  aideParPhase: Partial<Record<EcranFonctionDerivee, boolean>>,
+): EtatPuceProgression[] {
   return ordreEcransReels(etat.exerciceCourant).map((ecran) => {
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideParPhase[ecran] ? "aide" : "correcte";
   });
 }
 
 export function App5gen27() {
   const [etat, setEtat] = useState<EtatSessionFonctionDerivee>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionFonctionDerivee`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Niveau d'aide RÉELLEMENT utilisé par écran close — capturé ici (présentation), `niveauAide`
+   * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<EcranFonctionDerivee, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionFonctionDerivee) {
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionFonctionDerivee) {
+    const recap = calculerRecapitulatifFonctionDerivee(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionFonctionDerivee, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -93,12 +129,20 @@ export function App5gen27() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionFonctionDerivee(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
@@ -121,7 +165,7 @@ export function App5gen27() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Fonction dérivée</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -139,6 +183,10 @@ export function App5gen27() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -149,7 +197,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionFonctionDerivee) => void;
+  terminerEtape: (nouvelEtat: EtatSessionFonctionDerivee, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionFonctionDerivee) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -178,7 +226,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix))}
+          onValider={(choix) => terminerEtape(soumettreReponseReconnaissance(etat, choix), LIBELLE_TYPE[choix])}
           validation={validation}
         />
       );
@@ -196,7 +244,9 @@ function EcranCourant({
             niveauAide={etat.niveauAide}
             niveauAideMax={niveauAideMax}
             onActiverAide={onActiverAide}
-            onValider={(reponse) => terminerEtape(soumettreReponseDecomposerUV(etat, { u: reponse.champ1, v: reponse.champ2 }))}
+            onValider={(reponse) =>
+              terminerEtape(soumettreReponseDecomposerUV(etat, { u: reponse.champ1, v: reponse.champ2 }), `u = ${reponse.champ1} ; v = ${reponse.champ2}`)
+            }
             diagnostiquer={(r) => ({ champ1: diagnostiquerChampU(r.champ1, exercice), champ2: diagnostiquerChampV(r.champ2, exercice) })}
             validation={validation}
           />
@@ -212,7 +262,12 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseDecomposerComposee(etat, { interieur: reponse.champ1, exterieur: reponse.champ2 }))}
+          onValider={(reponse) =>
+            terminerEtape(
+              soumettreReponseDecomposerComposee(etat, { interieur: reponse.champ1, exterieur: reponse.champ2 }),
+              `intérieur = ${reponse.champ1} ; extérieur = ${reponse.champ2}`,
+            )
+          }
           diagnostiquer={(r) => ({
             champ1: diagnostiquerChampInterieur(r.champ1, exercice, typeRetenu),
             champ2: diagnostiquerChampExterieur(r.champ2, exercice, typeRetenu),
@@ -233,7 +288,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseCalculer(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseCalculer(etat, texte), `f'(x) = ${texte}`)}
           diagnostiquer={(t) => diagnostiquerCalculerDerivee(t, exercice)}
           validation={validation}
         />

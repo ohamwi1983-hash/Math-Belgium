@@ -64,6 +64,10 @@ export interface EtatSessionIntegralesDefinies {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseIntegralesDefinies, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces`. */
+  aidePartiels: Partial<Record<PhaseIntegralesDefinies, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceIntegralesDefinies[];
   terminee: boolean;

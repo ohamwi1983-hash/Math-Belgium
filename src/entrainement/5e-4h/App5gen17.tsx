@@ -76,11 +76,13 @@ import { EtapeListeChampsClassique } from "./components5e/EtapeListeChampsClassi
 import { EtapeQCMClassique } from "./components5e/EtapeQCMClassique";
 import { EtapeSuitesFinalesCombinees } from "./components5e/EtapeSuitesFinalesCombinees";
 import { CalculatriceScientifique } from "./components5e/CalculatriceScientifique";
-import { formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, texteReponseAttendueQCM } from "./ui5e/formatSuiteClassique";
+import { formatTermesReponseAttendueLatex, formatTermesSuitesFinalesLatex, optionsQCM, texteReponseAttendueQCM } from "./ui5e/formatSuiteClassique";
 import { calculerRecapitulatifSuiteClassique } from "./ui5e/recapitulatifSuiteClassique";
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -151,13 +153,27 @@ function nouvelleSession(): EtatSessionSuiteClassique {
  * `moteur5e/typesSuiteClassique.ts` (`Record<ScenarioSuiteClassique, PhaseSuiteClassique[]>`) suffit
  * via `ordreComplet(exercice)`, même principe que 5gen14/5gen15/5gen16. Même heuristique
  * `score === 0 ⟺ révélée` que `calculerRecapitulatifSuiteClassique`. */
-function calculerSegmentsProgression(etat: EtatSessionSuiteClassique): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteClassique,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteClassique, boolean>>,
+): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
+}
+
+/** Libellé lisible du choix QCM — recherché dans le même catalogue d'options que celui affiché à
+ * l'élève (`optionsQCM`), jamais retapé. */
+function labelQCMChoisi(exercice: ExerciceSuiteClassique, phase: PhaseSuiteClassique, choixId: string): string {
+  return optionsQCM(exercice, phase).find((o) => o.id === choixId)?.label ?? choixId;
+}
+
+function formatReponseSuitesFinalesCombinees(reponse: { arithmetique: string[]; geometrique: string[] }): string {
+  return `Arithmétique : ${reponse.arithmetique.join(" ; ")} — Géométrique : ${reponse.geometrique.join(" ; ")}`;
 }
 
 interface TransitionEnAttente {
@@ -338,11 +354,41 @@ function diagnostiquerListe(exercice: ExerciceSuiteClassique, phase: PhaseSuiteC
 export function App5gen17() {
   const [etat, setEtat] = useState<EtatSessionSuiteClassique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteClassique`, jamais dans le moteur. Remis à vide à chaque
+   * nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteClassique, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionSuiteClassique) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteClassique` pour la réponse
+   * ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteClassique, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifSuiteClassique(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -350,12 +396,20 @@ export function App5gen17() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionSuiteClassique(REGLAGES_DEMO, () => construireAvecScenarioId(id as ScenarioSuiteClassique)));
   }
 
@@ -379,7 +433,7 @@ export function App5gen17() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Problèmes classiques sur les suites</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_SCENARIOS} onGenerer={forcerVariante} />
       <main className="card">
@@ -396,7 +450,7 @@ export function App5gen17() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteClassique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreChampSimple(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreChampSimple(etat, texte), texte)}
                   diagnostiquer={(texte) => diagnostiquerChampSimple(exercice, phase, texte)}
                   validation={validation}
                 />
@@ -413,7 +467,7 @@ export function App5gen17() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteClassique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(textes) => terminerEtape(soumettreListe(etat, textes))}
+                  onValider={(textes) => terminerEtape(soumettreListe(etat, textes), textes.join(" ; "))}
                   diagnostiquer={(textes) => diagnostiquerListe(exercice, phase, textes)}
                   diagnostiquerChamp={(index, texte) => diagnostiquerChampListe(texte, index, exercice, phase)}
                   validation={validation}
@@ -431,7 +485,7 @@ export function App5gen17() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteClassique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(choixId) => terminerEtape(soumettreQCM(etat, choixId))}
+                  onValider={(choixId) => terminerEtape(soumettreQCM(etat, choixId), labelQCMChoisi(exercice, phase, choixId))}
                   validation={validation}
                 />
               )}
@@ -445,7 +499,9 @@ export function App5gen17() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteClassique(phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseSuitesFinalesCombinees(etat, reponse))}
+                  onValider={(reponse) =>
+                    terminerEtape(soumettreReponseSuitesFinalesCombinees(etat, reponse), formatReponseSuitesFinalesCombinees(reponse))
+                  }
                   diagnostiquer={(reponse) => diagnostiquerSuitesFinalesCombinees(reponse, exercice)}
                   diagnostiquerChamp={(groupe, index, texte) => diagnostiquerChampSuitesFinalesCombinees(groupe, index, texte, exercice)}
                   validation={validation}
@@ -454,6 +510,10 @@ export function App5gen17() {
             </>
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

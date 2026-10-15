@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
 import type { IdVarianteTrianglesComplexes } from "./generateurs6e/trianglesComplexes";
@@ -9,10 +10,23 @@ import { Katex } from "./components/Katex";
 import { CalculatriceScientifique } from "./components6e/CalculatriceScientifique";
 import { EtapeTrianglesComplexes } from "./components6e/EtapeTrianglesComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, choixEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatTrianglesComplexes";
+import {
+  blocDonnees,
+  champsEcran,
+  choixEcran,
+  consigneEcran,
+  consigneGenerale,
+  formatReponseAttenduePhaseLatex,
+  niveauAideMaxEcran,
+  LIBELLE_PHASE,
+  aideNiveau1 as formatAideNiveau1,
+  aideNiveau2 as formatAideNiveau2,
+} from "./ui6e/formatTrianglesComplexes";
 import { calculerRecapitulatifTrianglesComplexes, calculerSegmentsProgressionTrianglesComplexes } from "./ui6e/recapitulatifTrianglesComplexes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen41` — Propriétés géométriques de triangles via les nombres complexes (chapitre 7, "Nombres
@@ -39,10 +53,34 @@ interface TransitionEnAttente {
 export function App6gen41() {
   const [etat, setEtat] = useState<EtatSessionTrianglesComplexes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionTrianglesComplexes` (voir `App6gen39.tsx`, même mécanisme). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionTrianglesComplexes) {
+  function terminerEtape(nouvelEtat: EtatSessionTrianglesComplexes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        const revele = nouvelEtat.derniereTransitionRevelee;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(etat.exerciceCourant, etat.phase).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+        setAideUtiliseeFermees((a) => [...a, etat.niveauAide > 0]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -51,12 +89,20 @@ export function App6gen41() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeFermees([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeFermees([]);
     setEtat(demarrerSessionTrianglesComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteTrianglesComplexes)));
   }
 
@@ -104,13 +150,16 @@ export function App6gen41() {
       }
     : null;
 
+  const segmentsBase = calculerSegmentsProgressionTrianglesComplexes(etat);
+  const segments = segmentsBase.map((s, i) => (s === "correcte" && aideUtiliseeFermees[i] ? ("aide" as const) : s));
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Propriétés géométriques de triangles via les nombres complexes</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionTrianglesComplexes(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifTrianglesComplexes(etat)} />
@@ -125,11 +174,24 @@ export function App6gen41() {
           aideNiveau1={formatAideNiveau1(exercice, phase)}
           aideNiveau2={formatAideNiveau2(exercice, phase)}
           diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+          onValider={(valeurs) => {
+            const champs = champsEcran(exercice, phase);
+            const choixDisponibles = choixEcran(exercice, phase);
+            const partiesTexte = champs.map((c, i) => `${c.label} ${valeurs[i]}`);
+            const partieChoix =
+              choixDisponibles.length > 0
+                ? [choixDisponibles.find((c) => c.id === valeurs[valeurs.length - 1])?.label ?? valeurs[valeurs.length - 1]]
+                : [];
+            terminerEtape(soumettreReponseEcran(etat, valeurs), [...partiesTexte, ...partieChoix].join(" ; "));
+          }}
           validation={validation}
         />
         {calculatriceVisible && <CalculatriceScientifique modeInitial="DEG" />}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

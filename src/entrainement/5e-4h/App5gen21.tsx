@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession5e } from "./core5e/session5e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceAsymptoteOblique } from "./generateurs5e/asymptoteOblique";
 import { SelecteurVarianteDev } from "./components5e/SelecteurVarianteDev";
@@ -25,6 +26,8 @@ import { calculerRecapitulatifAsymptoteOblique } from "./ui5e/recapitulatifAsymp
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import type { ValidationEtapeProps } from "../components/ValidationEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -53,22 +56,50 @@ interface TransitionEnAttente {
  * reconstitué à la main : même source que `calculerRecapitulatifAsymptoteOblique`. "courante" pour
  * `etat.phase`, "correcte"/"revele" pour les phases déjà closes (`scoresPartiels[phase]`, 0 ⟺
  * révélée), "a-venir" au-delà. */
-function calculerSegmentsProgression(etat: EtatSessionAsymptoteOblique): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionAsymptoteOblique,
+  aideParPhase: Partial<Record<PhaseAsymptoteOblique, boolean>>,
+): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideParPhase[phase] ? "aide" : "correcte";
   });
 }
 
 export function App5gen21() {
   const [etat, setEtat] = useState<EtatSessionAsymptoteOblique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionAsymptoteOblique`, jamais dans le moteur (même principe que `AppAnalyseFonction.tsx`, 4e). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Niveau d'aide RÉELLEMENT utilisé par phase close — capturé ici (présentation), `niveauAide`
+   * (moteur) étant remis à 0 à chaque transition (même patron que `App5gen31.tsx::aideParPhase`). */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseAsymptoteOblique, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionAsymptoteOblique) {
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionAsymptoteOblique) {
+    const recap = calculerRecapitulatifAsymptoteOblique(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionAsymptoteOblique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) ajouterHistorique(votreReponse, nouvelEtat);
+      if (etat.niveauAide > 0) setAideParPhase((m) => ({ ...m, [etat.phase]: true }));
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
       return;
     }
@@ -77,12 +108,20 @@ export function App5gen21() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionAsymptoteOblique(REGLAGES_DEMO, () => construireAvecFamilleId(id)));
   }
 
@@ -106,7 +145,7 @@ export function App5gen21() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Asymptote oblique</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -125,6 +164,10 @@ export function App5gen21() {
           />
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
@@ -136,7 +179,7 @@ interface EcranProps {
   tentativesUtilisees: number;
   tentativesMax: number;
   cleEcran: string;
-  terminerEtape: (nouvelEtat: EtatSessionAsymptoteOblique) => void;
+  terminerEtape: (nouvelEtat: EtatSessionAsymptoteOblique, votreReponse?: ReactNode) => void;
   setEtat: (etat: EtatSessionAsymptoteOblique) => void;
   validation: ValidationEtapeProps | null;
 }
@@ -167,7 +210,9 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(reponse) => terminerEtape(soumettreReponseDiviserEuclidienne(etat, reponse))}
+          onValider={(reponse) =>
+            terminerEtape(soumettreReponseDiviserEuclidienne(etat, reponse), `quotient = ${reponse.quotient} ; reste = ${reponse.reste}`)
+          }
           diagnostiquer={(r: ReponseDiviserEuclidienne) => ({
             quotient: diagnostiquerQuotient(r.quotient, a, b),
             reste: diagnostiquerNombre(r.reste, c),
@@ -187,7 +232,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseEcrireFormeDeveloppee(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseEcrireFormeDeveloppee(etat, texte), texte)}
           placeholder="ex : 2x-3+5/(x-1)"
           diagnostiquer={(t) => diagnostiquerFormeDeveloppee(t, a, b, c, coeffsD)}
           validation={validation}
@@ -205,7 +250,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseCalculerCoefficientA(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseCalculerCoefficientA(etat, texte), `a = ${texte}`)}
           placeholder="ex : 2"
           diagnostiquer={(t) => diagnostiquerNombre(t, a)}
           validation={validation}
@@ -223,7 +268,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseCalculerCoefficientB(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseCalculerCoefficientB(etat, texte), `b = ${texte}`)}
           placeholder="ex : -3"
           diagnostiquer={(t) => diagnostiquerNombre(t, b)}
           validation={validation}
@@ -241,7 +286,7 @@ function EcranCourant({
           niveauAide={etat.niveauAide}
           niveauAideMax={niveauAideMax}
           onActiverAide={onActiverAide}
-          onValider={(texte) => terminerEtape(soumettreReponseConclureEquationAsymptote(etat, texte))}
+          onValider={(texte) => terminerEtape(soumettreReponseConclureEquationAsymptote(etat, texte), texte)}
           placeholder="ex : 2x-3"
           diagnostiquer={(t) => diagnostiquerQuotient(t, a, b)}
           validation={validation}

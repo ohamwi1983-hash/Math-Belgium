@@ -45,6 +45,8 @@ import { calculerRecapitulatifSuiteArithmetique } from "./ui5e/recapitulatifSuit
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 
 type PhaseChampSimple =
@@ -192,12 +194,16 @@ function nouvelleSession(): EtatSessionSuiteArithmetique {
  * undefined pour une phase déjà close) pilote "correcte"/"revele" avec la même heuristique
  * `score === 0 ⟺ révélée` que `calculerRecapitulatifSuiteArithmetique`.
  */
-function calculerSegmentsProgression(etat: EtatSessionSuiteArithmetique): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteArithmetique,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteArithmetique, boolean>>,
+): EtatPuceProgression[] {
   return ordreComplet(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
 
@@ -209,11 +215,41 @@ interface TransitionEnAttente {
 export function App5gen14() {
   const [etat, setEtat] = useState<EtatSessionSuiteArithmetique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteArithmetique`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteArithmetique, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionSuiteArithmetique) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteArithmetique` pour la
+   * réponse ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteArithmetique, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifSuiteArithmetique(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -221,12 +257,20 @@ export function App5gen14() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionSuiteArithmetique(REGLAGES_DEMO, () => construireAvecFamilleId(id as FamilleSuiteArithmetiqueId)));
   }
 
@@ -259,7 +303,7 @@ export function App5gen14() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suites arithmétiques, formule générale et termes</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
       <main className="card">
@@ -279,21 +323,21 @@ export function App5gen14() {
                   onValider={(texte) => {
                     switch (phase) {
                       case "trouverR":
-                        return terminerEtape(soumettreReponseTrouverR(etat, texte));
+                        return terminerEtape(soumettreReponseTrouverR(etat, texte), texte);
                       case "trouverU1":
-                        return terminerEtape(soumettreReponseTrouverU1(etat, texte));
+                        return terminerEtape(soumettreReponseTrouverU1(etat, texte), texte);
                       case "formuleGenerale":
-                        return terminerEtape(soumettreReponseFormuleGenerale(etat, texte));
+                        return terminerEtape(soumettreReponseFormuleGenerale(etat, texte), texte);
                       case "termeEloigne":
-                        return terminerEtape(soumettreReponseTermeEloigne(etat, texte));
+                        return terminerEtape(soumettreReponseTermeEloigne(etat, texte), texte);
                       case "sommeSn":
-                        return terminerEtape(soumettreReponseSommeSn(etat, texte));
+                        return terminerEtape(soumettreReponseSommeSn(etat, texte), texte);
                       case "calculerSn":
-                        return terminerEtape(soumettreReponseCalculerSn(etat, texte));
+                        return terminerEtape(soumettreReponseCalculerSn(etat, texte), texte);
                       case "resoudreXAlgebrique":
-                        return terminerEtape(soumettreReponseResoudreXAlgebrique(etat, texte));
+                        return terminerEtape(soumettreReponseResoudreXAlgebrique(etat, texte), texte);
                       case "resoudreRangN":
-                        return terminerEtape(soumettreReponseResoudreRangN(etat, texte));
+                        return terminerEtape(soumettreReponseResoudreRangN(etat, texte), texte);
                       default:
                         return;
                     }
@@ -315,8 +359,8 @@ export function App5gen14() {
                   niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(textes) => {
-                    if (phase === "termesProches") return terminerEtape(soumettreReponseTermesProches(etat, textes));
-                    return terminerEtape(soumettreReponseCalculerTermesAlgebrique(etat, textes));
+                    if (phase === "termesProches") return terminerEtape(soumettreReponseTermesProches(etat, textes), textes.join(" ; "));
+                    return terminerEtape(soumettreReponseCalculerTermesAlgebrique(etat, textes), textes.join(" ; "));
                   }}
                   diagnostiquer={(textes) => diagnostiquerTermesMultiples(exercice, phase as PhaseTermesMultiples, textes)}
                   validation={validation}
@@ -333,7 +377,7 @@ export function App5gen14() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(choix) => terminerEtape(soumettreReponseCoherenceJugement(etat, choix))}
+                  onValider={(choix) => terminerEtape(soumettreReponseCoherenceJugement(etat, choix), choix ? "Cohérentes" : "Incohérentes")}
                   validation={validation}
                 />
               )}
@@ -349,8 +393,8 @@ export function App5gen14() {
                   niveauAideMax={niveauAideMaxSuiteArithmetique(etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
                   onValider={(reponse) => {
-                    if (phase === "poserEquationRangN") return terminerEtape(soumettreReponsePoserEquationRangN(etat, reponse));
-                    return terminerEtape(soumettreReponsePoserEquationAlgebrique(etat, reponse));
+                    if (phase === "poserEquationRangN") return terminerEtape(soumettreReponsePoserEquationRangN(etat, reponse), reponse.texte);
+                    return terminerEtape(soumettreReponsePoserEquationAlgebrique(etat, reponse), reponse.texte);
                   }}
                   diagnostiquer={(reponse) => diagnostiquerPoserEquation(exercice, phase as PhasePoserEquation, reponse)}
                   validation={validation}
@@ -360,6 +404,10 @@ export function App5gen14() {
             </>
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

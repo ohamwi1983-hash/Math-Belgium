@@ -143,6 +143,11 @@ export interface EtatSessionCalculPrimitives {
   /** Accumule au fil des écrans de l'exercice COURANT — l'ensemble de phases réellement traversées
    * varie par famille/sous-type (voir `phasesPourExercice`), remis à `{}` à chaque nouvel exercice. */
   scoresPartiels: Partial<Record<PhaseCalculPrimitives, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture (avant que la transition
+   * suivante ne remette `niveauAide` à zéro) — capturé dans `avancerPhase`/`soumettreReponseEcran`,
+   * jamais recalculé depuis le score (ambigu : un score réduit peut aussi venir de tentatives
+   * ratées). Pilote la puce jaune "correcte avec aide" de `ProgressionPuces`. */
+  aidePartiels: Partial<Record<PhaseCalculPrimitives, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceCalculPrimitives[];
   terminee: boolean;

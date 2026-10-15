@@ -87,6 +87,10 @@ export interface EtatSessionVariablesDiscretesEsperance {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseVariablesDiscretesEsperance, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhaseVariablesDiscretesEsperance, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceVariablesDiscretesEsperance[];
   terminee: boolean;

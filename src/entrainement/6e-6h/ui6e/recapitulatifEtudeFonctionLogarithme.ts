@@ -39,6 +39,8 @@ export function calculerSegmentsProgressionEtudeFonctionLogarithme(etat: EtatSes
   return sequence.map((phase) => {
     if (phase === etat.phase) return "courante" as const;
     if (etat.scoresPartiels[phase] === undefined) return "a-venir" as const;
-    return etat.detailsPartiels[phase]?.revele ? ("revele" as const) : ("correcte" as const);
+    const detail = etat.detailsPartiels[phase];
+    if (detail?.revele) return "revele" as const;
+    return detail !== undefined && detail.niveauAide > 0 ? ("aide" as const) : ("correcte" as const);
   });
 }

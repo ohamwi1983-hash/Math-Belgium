@@ -32,6 +32,8 @@ import { calculerRecapitulatifSuiteRecurrenteAffine } from "./ui5e/recapitulatif
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
@@ -53,23 +55,62 @@ interface TransitionEnAttente {
  * "tableauSignes" dans `AppAnalyseFonction.tsx`). */
 const ORDRE_PHASES: PhaseSuiteRecurrenteAffine[] = ["poserRecurrence", "regimePermanent", "termesSuccessifs"];
 
-function calculerSegmentsProgression(etat: EtatSessionSuiteRecurrenteAffine): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionSuiteRecurrenteAffine,
+  aideUtiliseeParPhase: Partial<Record<PhaseSuiteRecurrenteAffine, boolean>>,
+): EtatPuceProgression[] {
   return ORDRE_PHASES.map((phase) => {
     if (phase === etat.phase) return "courante";
     const score = phase === "poserRecurrence" ? etat.scorePoserRecurrencePartiel : phase === "regimePermanent" ? etat.scoreRegimePermanentPartiel : null;
     if (score === null) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
+}
+
+function formatReponseRegimePermanent(reponse: { existe: boolean; L: string }): string {
+  return reponse.existe ? `L = ${reponse.L}` : "N'existe pas";
 }
 
 export function App5gen19() {
   const [etat, setEtat] = useState<EtatSessionSuiteRecurrenteAffine>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionSuiteRecurrenteAffine`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que les autres générateurs de
+   * ce chantier). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseSuiteRecurrenteAffine, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionSuiteRecurrenteAffine) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifSuiteRecurrenteAffine` pour la
+   * réponse ATTENDUE. Jamais appelée pour "termesSuccessifs" (dernière phase, jamais visible comme
+   * puce close avant la fin de l'exercice — voir `calculerSegmentsProgression`). */
+  function terminerEtape(nouvelEtat: EtatSessionSuiteRecurrenteAffine, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifSuiteRecurrenteAffine(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -77,12 +118,20 @@ export function App5gen19() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionSuiteRecurrenteAffine(REGLAGES_DEMO, () => construireAvecRegime(id as RegimeSuiteRecurrenteAffine)));
   }
 
@@ -111,7 +160,7 @@ export function App5gen19() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Suite récurrente affine et régime permanent</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_REGIME} onGenerer={forcerVariante} />
       <main className="card">
@@ -128,7 +177,7 @@ export function App5gen19() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteRecurrenteAffine(etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(texte) => terminerEtape(soumettreReponsePoserRecurrence(etat, texte))}
+                  onValider={(texte) => terminerEtape(soumettreReponsePoserRecurrence(etat, texte), texte)}
                   diagnostiquer={(texte) => diagnostiquerPoserRecurrence(texte, exercice)}
                   validation={validation}
                 />
@@ -143,7 +192,7 @@ export function App5gen19() {
                   niveauAide={etat.niveauAide}
                   niveauAideMax={niveauAideMaxSuiteRecurrenteAffine(etat.phase)}
                   onActiverAide={() => setEtat(activerAideSuivante(etat))}
-                  onValider={(reponse) => terminerEtape(soumettreReponseRegimePermanent(etat, reponse))}
+                  onValider={(reponse) => terminerEtape(soumettreReponseRegimePermanent(etat, reponse), formatReponseRegimePermanent(reponse))}
                   diagnostiquer={(reponse) => diagnostiquerRegimePermanent(reponse, exercice)}
                   validation={validation}
                 />
@@ -168,6 +217,10 @@ export function App5gen19() {
             </>
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

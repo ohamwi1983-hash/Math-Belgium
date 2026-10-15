@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceInjectiviteFonctions } from "./generateurs6e/injectiviteFonctions";
 import {
@@ -11,7 +12,8 @@ import {
   soumettreReponseInjective,
   soumettreReponseReciproque,
 } from "./moteur6e/sessionInjectiviteFonctions";
-import type { EtatSessionInjectiviteFonctions } from "./moteur6e/typesInjectiviteFonctions";
+import { ORDRE_PHASES_INJECTIVITE } from "./moteur6e/typesInjectiviteFonctions";
+import type { EtatSessionInjectiviteFonctions, PhaseInjectiviteFonctions } from "./moteur6e/typesInjectiviteFonctions";
 import { Katex } from "./components/Katex";
 import { EtapeBijectionInjectiviteFonctions } from "./components6e/EtapeBijectionInjectiviteFonctions";
 import { EtapeDomaineInjectiviteFonctions } from "./components6e/EtapeDomaineInjectiviteFonctions";
@@ -22,7 +24,28 @@ import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
 import { calculerRecapitulatifInjectiviteFonctions, calculerSegmentsProgressionInjectiviteFonctions } from "./ui6e/recapitulatifInjectiviteFonctions";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
+
+/** Libellé par phase pour la fiche de consultation (`FicheReponseEcran`) — même vocabulaire que
+ * `LIBELLE_PHASE` de `ui6e/recapitulatifInjectiviteFonctions.ts`, complété pour "bijection" (seule
+ * phase absente de ce récapitulatif, qui n'a pas de champ "Partiel" côté moteur). */
+function libellePhaseInjectiviteFonctions(phase: PhaseInjectiviteFonctions): string {
+  switch (phase) {
+    case "domaine":
+      return "Domaine";
+    case "injective":
+      return "Injectivité";
+    case "reciproque":
+      return "Réciproque";
+    case "image":
+      return "Image";
+    case "bijection":
+      return "Bijection";
+  }
+}
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -42,8 +65,20 @@ interface TransitionEnAttente {
 export function App6gen1() {
   const [etat, setEtat] = useState<EtatSessionInjectiviteFonctions>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionInjectiviteFonctions`, jamais dans le moteur : la saisie de
+   * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice
+   * (mêmes endroits que `enAttente`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Aide utilisée PAR PHASE DÉJÀ CLOSE — contrairement à la référence 4e, le moteur ne garde
+   * aucune trace persistante de l'aide une fois la phase refermée (`niveauAide` est remis à 0 à
+   * chaque transition, voir `avancerPhase`, `sessionInjectiviteFonctions.ts`) : capturé ICI, côté
+   * UI, au moment exact de la clôture réelle (même garde que `terminerEtape`), avant que l'état ne
+   * soit remplacé. Remis à vide à chaque nouvel exercice, comme `historique`. */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseInjectiviteFonctions, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionInjectiviteFonctions) {
+  function terminerEtape(nouvelEtat: EtatSessionInjectiviteFonctions, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // Le champ "Partiel" correspondant à la phase qui VIENT de se clore (`etat.phase`, pas
@@ -60,6 +95,24 @@ export function App6gen1() {
               : etat.phase === "image"
                 ? (nouvelEtat.reveleImagePartiel as boolean)
                 : nouvelEtat.resultats[nouvelEtat.resultats.length - 1].reveleBijection;
+      // `votreReponse`/`niveauAide` : UNIQUEMENT capturés ici, dans la branche de transition
+      // RÉELLE — jamais à chaque clic sur "Valider" (tant qu'il reste des tentatives, une réponse
+      // fausse renvoie `{...etat, etapeCourante}` sans clore la phase, et `onValider` est quand
+      // même rappelée par les composants `EtapeXxx` à chaque tentative).
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: libellePhaseInjectiviteFonctions(etat.phase),
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? reponseAttenduePhase(etat.phase) : undefined,
+          },
+        ]);
+      }
+      if (etat.niveauAide > 0) {
+        setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: true }));
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
@@ -68,12 +121,20 @@ export function App6gen1() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionInjectiviteFonctions(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])));
   }
 
@@ -121,13 +182,20 @@ export function App6gen1() {
       }
     : null;
 
+  // "aide" (puce jaune) : post-traite les segments déjà calculés par `ui6e/recapitulatifInjectiviteFonctions.ts`
+  // (qui ne connaît que `etat`, pas l'aide déjà utilisée sur une phase désormais close) avec
+  // `aideUtiliseeParPhase` capturé localement ci-dessus — jamais pour "revele"/"courante"/"a-venir".
+  const segments: EtatPuceProgression[] = calculerSegmentsProgressionInjectiviteFonctions(etat).map((segment, index) =>
+    segment === "correcte" && aideUtiliseeParPhase[ORDRE_PHASES_INJECTIVITE[index]] ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Fonctions injectives / surjectives / bijectives</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionInjectiviteFonctions(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifInjectiviteFonctions(etat)} />
@@ -141,7 +209,7 @@ export function App6gen1() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMax}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse)} />)}
               validation={validation}
             />
           )}
@@ -154,7 +222,16 @@ export function App6gen1() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMax}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseInjective(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseInjective(etat, reponse),
+                  reponse.ouiNon ? (
+                    "Oui"
+                  ) : (
+                    <>Non — <Katex expression={formatEnsembleReelLatex(reponse.intervalle!)} /></>
+                  ),
+                )
+              }
               validation={validation}
             />
           )}
@@ -168,7 +245,7 @@ export function App6gen1() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMax}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseReciproque(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseReciproque(etat, reponse), `f⁻¹(x) = ${reponse}`)}
               validation={validation}
             />
           )}
@@ -181,7 +258,7 @@ export function App6gen1() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMax}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseImage(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseImage(etat, reponse), <Katex expression={formatEnsembleReelLatex(reponse)} />)}
               validation={validation}
             />
           )}
@@ -194,12 +271,23 @@ export function App6gen1() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMax}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseBijection(etat, reponse))}
+              onValider={(reponse) =>
+                terminerEtape(
+                  soumettreReponseBijection(etat, reponse),
+                  <>
+                    X : <Katex expression={formatEnsembleReelLatex(reponse.x)} /> ; Y : <Katex expression={formatEnsembleReelLatex(reponse.y)} />
+                  </>,
+                )
+              }
               validation={validation}
             />
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

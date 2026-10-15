@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideNorme,
@@ -21,6 +22,8 @@ import { EtapeInterpretationApplicationPhysique } from "./components/EtapeInterp
 import { Katex } from "./components/Katex";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -62,7 +65,9 @@ function calculerSegmentsProgression(etat: EtatSessionApplicationPhysique): Etat
     if (score === null) return "a-venir";
     const revele =
       phase === "modelisation" ? etat.modelisationReveleExercice : phase === "norme" ? etat.normeReveleExercice : etat.deviationReveleExercice;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    // "modelisation"/"deviation" n'ont aucun mécanisme d'aide (toujours "correcte", jamais "aide").
+    return phase === "norme" && etat.normeAideUtiliseeExercice ? "aide" : "correcte";
   });
 }
 
@@ -78,10 +83,45 @@ interface TransitionEnAttente {
 export function AppApplicationPhysique() {
   const [etat, setEtat] = useState<EtatSessionApplicationPhysique>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionApplicationPhysique`, jamais dans le moteur : la saisie de
+   * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice,
+   * comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionApplicationPhysique) {
+  /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
+   * réutilise `calculerRecapitulatifApplicationPhysique` pour la réponse ATTENDUE (l'entrée qui
+   * vient d'être ajoutée est toujours la dernière du tableau, les étapes se closent dans l'ordre).
+   * Jamais appelée pour "interpretation" (dernière phase, clôture toujours immédiatement
+   * l'exercice — aucune entrée de récapitulatif, et sa puce de progression n'est d'ailleurs jamais
+   * "correcte"/"revele" dans `calculerSegmentsProgression`, donc jamais cliquable — même convention
+   * que `AppAnalyseFonction.tsx`/"tableauSignes", qui n'appelle pas non plus `ajouterHistorique`
+   * pour sa dernière phase). `votreReponse` est formatée séparément par chaque appelant. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionApplicationPhysique) {
+    const recap = calculerRecapitulatifApplicationPhysique(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? derniere.valeur : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" (voir le garde-fou
+   * identique dans `AppAnalyseFonction.tsx`, bug déjà rencontré et corrigé là-bas). */
+  function terminerEtape(nouvelEtat: EtatSessionApplicationPhysique, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       const revele =
         etat.phase === "modelisation"
           ? nouvelEtat.modelisationReveleExercice
@@ -98,12 +138,18 @@ export function AppApplicationPhysique() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionApplicationPhysique(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteApplicationPhysique)));
   }
 
@@ -138,7 +184,7 @@ export function AppApplicationPhysique() {
         <h1 className="app-title">Applications physiques (résultante de vecteurs)</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -149,7 +195,9 @@ export function AppApplicationPhysique() {
             exercice={etat.exerciceCourant}
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
-            onChoisir={(choix) => terminerEtape(soumettreReponseModelisation(etat, choix))}
+            onChoisir={(choix) =>
+              terminerEtape(soumettreReponseModelisation(etat, choix), choix === "angleDroit" ? "Angle droit" : "Angle quelconque")
+            }
             validation={validation}
           />
         ) : etat.phase === "norme" ? (
@@ -160,7 +208,7 @@ export function AppApplicationPhysique() {
             niveauAide={etat.niveauAideNorme}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
             onActiverAide={() => setEtat(activerAideNorme(etat))}
-            onValider={(valeur) => terminerEtape(soumettreReponseNorme(etat, valeur))}
+            onValider={(valeur) => terminerEtape(soumettreReponseNorme(etat, valeur), `${valeur} ${exercice.unite}`)}
             validation={validation}
           />
         ) : etat.phase === "deviation" ? (
@@ -169,7 +217,7 @@ export function AppApplicationPhysique() {
             tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
             tentativesMax={etat.reglages.tentativesMax}
             recapitulatif={calculerRecapitulatifApplicationPhysique(etat)}
-            onValider={(valeur) => terminerEtape(soumettreReponseDeviation(etat, valeur))}
+            onValider={(valeur) => terminerEtape(soumettreReponseDeviation(etat, valeur), `${valeur}°`)}
             validation={validation}
           />
         ) : (
@@ -184,6 +232,10 @@ export function AppApplicationPhysique() {
         )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

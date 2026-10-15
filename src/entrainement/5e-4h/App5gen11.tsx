@@ -32,6 +32,8 @@ import { calculerRecapitulatifExtremumsSinusoide } from "./ui5e/recapitulatifExt
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -47,23 +49,56 @@ interface TransitionEnAttente {
 /** Même ternaire que `calculerRecapitulatifExtremumsSinusoide` (`scoreXxxPartiel === 0 ⟺
  * révélée`) — `solutions` (dernière phase) n'a pas de champ `scoreSolutionsPartiel` : forcément
  * "courante" tant que l'exercice n'est pas terminé (dernière phase active). */
-function calculerSegmentsProgression(etat: EtatSessionExtremumsSinusoide): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionExtremumsSinusoide,
+  aideUtiliseeParPhase: Partial<Record<PhaseExtremumsSinusoide, boolean>>,
+): EtatPuceProgression[] {
   return ORDRE_PHASES_EXTREMUMS.map((phase: PhaseExtremumsSinusoide) => {
     if (phase === etat.phase) return "courante";
     const score = phase === "poserEquation" ? etat.scorePoserEquationPartiel : phase === "isolerX" ? etat.scoreIsolerXPartiel : null;
     if (score === null) return "a-venir";
-    return score === 0 ? "revele" : "correcte";
+    if (score === 0) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
 
 export function App5gen11() {
   const [etat, setEtat] = useState<EtatSessionExtremumsSinusoide>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionExtremumsSinusoide`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Capture locale de `etat.niveauAide > 0` pour chaque phase CLOSE — le moteur remet
+   * `niveauAide` à 0 à chaque transition de phase (même mécanique que 5gen10). */
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseExtremumsSinusoide, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionExtremumsSinusoide) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde
+   * qu'`AppAnalyseFonction.tsx`). Réutilise `calculerRecapitulatifExtremumsSinusoide` pour la
+   * réponse ATTENDUE. */
+  function terminerEtape(nouvelEtat: EtatSessionExtremumsSinusoide, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereEtapeRevelee });
+      const revele = nouvelEtat.derniereEtapeRevelee;
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        const recap = calculerRecapitulatifExtremumsSinusoide(nouvelEtat);
+        const derniere = recap[recap.length - 1];
+        if (derniere) {
+          setHistorique((h) => [
+            ...h,
+            {
+              titre: derniere.libelle,
+              votreReponse,
+              correcte: !derniere.revele,
+              reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+            },
+          ]);
+        }
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -71,12 +106,20 @@ export function App5gen11() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
     setEtat(demarrerSessionExtremumsSinusoide(REGLAGES_DEMO, () => construireAvecFonction(id as FonctionExtremum)));
   }
 
@@ -107,7 +150,7 @@ export function App5gen11() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Extremums d'une fonction sinusoïdale</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <SelecteurVarianteDev options={OPTIONS_FONCTION} onGenerer={forcerVariante} />
       <main className="card">
@@ -124,7 +167,7 @@ export function App5gen11() {
               niveauAideMax={niveauAideMaxExtremums(etat.phase)}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(texte) =>
-                terminerEtape(etat.phase === "poserEquation" ? soumettreReponsePoserEquation(etat, texte) : soumettreReponseIsolerX(etat, texte))
+                terminerEtape(etat.phase === "poserEquation" ? soumettreReponsePoserEquation(etat, texte) : soumettreReponseIsolerX(etat, texte), texte)
               }
               diagnostiquer={(texte) =>
                 etat.phase === "poserEquation"
@@ -150,6 +193,10 @@ export function App5gen11() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

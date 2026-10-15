@@ -103,6 +103,10 @@ export interface EtatSessionLoiPoisson {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseLoiPoisson, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhaseLoiPoisson, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceLoiPoisson[];
   terminee: boolean;

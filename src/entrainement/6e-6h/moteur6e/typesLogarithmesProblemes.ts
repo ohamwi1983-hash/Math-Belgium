@@ -127,6 +127,10 @@ export interface EtatSessionLogarithmesProblemes {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseLogarithmesProblemes, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans `avancerPhase`,
+   * jamais recalculé depuis le score. Pilote la puce jaune "correcte avec aide" de
+   * `ProgressionPuces`. */
+  aidePartiels: Partial<Record<PhaseLogarithmesProblemes, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceLogarithmesProblemes[];
   terminee: boolean;

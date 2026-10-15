@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceRacinesNiemes } from "./generateurs6e/racinesNiemes";
 import type { IdVarianteRacinesNiemes } from "./generateurs6e/racinesNiemes";
@@ -10,10 +11,23 @@ import { EtapeChampsRacinesNiemes } from "./components6e/EtapeChampsRacinesNieme
 import { EtapeChoixRelationRacinesNiemes } from "./components6e/EtapeChoixRelationRacinesNiemes";
 import { EtapeListeRacinesNiemes } from "./components6e/EtapeListeRacinesNiemes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatRacinesNiemes";
+import {
+  blocDonnees,
+  champsEcran,
+  consigneEcran,
+  consigneGenerale,
+  formatReponseAttenduePhaseLatex,
+  niveauAideMaxEcran,
+  LIBELLE_PHASE,
+  LIBELLE_RELATION_C,
+  aideNiveau1 as formatAideNiveau1,
+  aideNiveau2 as formatAideNiveau2,
+} from "./ui6e/formatRacinesNiemes";
 import { calculerRecapitulatifRacinesNiemes, calculerSegmentsProgressionRacinesNiemes } from "./ui6e/recapitulatifRacinesNiemes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen39` — Racines n-ièmes d'un nombre complexe (chapitre 7, "Nombres complexes", après `6gen34`/
@@ -38,10 +52,46 @@ interface TransitionEnAttente {
 export function App6gen39() {
   const [etat, setEtat] = useState<EtatSessionRacinesNiemes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionRacinesNiemes`, jamais dans le moteur : la saisie de l'élève
+   * n'a aucune autre utilité une fois l'étape close. `aideUtiliseeFermees` est l'équivalent, un
+   * booléen par écran déjà clos (même index que `historique`), capturé car le moteur ne garde
+   * `niveauAide` que de façon TRANSITOIRE (remis à 0 à chaque nouvelle phase, jamais archivé par
+   * écran) — voir `calculerSegmentsProgressionRacinesNiemes` pour la couleur de base. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [aideUtiliseeFermees, setAideUtiliseeFermees] = useState<boolean[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionRacinesNiemes) {
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * RÉELLEMENT (même garde `transitionDEcran` qui déclenche déjà `setEnAttente`) — jamais à chaque
+   * clic sur "Valider" (bug déjà rencontré sur la référence 4e, voir `AppAnalyseFonction.tsx`).
+   * `etat.phase`/`etat.exerciceCourant`/`etat.niveauAide` (AVANT transition) décrivent toujours
+   * l'écran qui vient de se clore ici, y compris sur la toute dernière phase d'un exercice
+   * (`nombreExercices` est toujours 1 en démo, donc `etat.exerciceCourant` ne change jamais sous
+   * nos pieds) — jamais besoin de relire `calculerRecapitulatifRacinesNiemes`, dont la dernière
+   * entrée ne correspond PAS à la phase qui se clôt quand l'exercice entier se termine. */
+  function terminerEtape(nouvelEtat: EtatSessionRacinesNiemes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        const revele = nouvelEtat.derniereTransitionRevelee;
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[etat.phase],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(etat.exerciceCourant, etat.phase).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+        setAideUtiliseeFermees((a) => [...a, etat.niveauAide > 0]);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
       return;
     }
@@ -50,12 +100,20 @@ export function App6gen39() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeFermees([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeFermees([]);
     setEtat(demarrerSessionRacinesNiemes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteRacinesNiemes)));
   }
 
@@ -98,13 +156,16 @@ export function App6gen39() {
   const estEcranChoix = exercice.famille === "C" && phase === "cEcran1";
   const estEcranListe = (exercice.famille === "A" && phase === "aEcran3") || (exercice.famille === "C" && (phase === "cEcran2" || phase === "cEcran3"));
 
+  const segmentsBase = calculerSegmentsProgressionRacinesNiemes(etat);
+  const segments = segmentsBase.map((s, i) => (s === "correcte" && aideUtiliseeFermees[i] ? ("aide" as const) : s));
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Racines n-ièmes d'un nombre complexe</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionRacinesNiemes(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifRacinesNiemes(etat)} />
@@ -117,7 +178,7 @@ export function App6gen39() {
             consigneEcran={consigneEcran(exercice, phase)}
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
-            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))}
+            onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={LIBELLE_RELATION_C[id]} />)}
             validation={validation}
           />
         )}
@@ -133,7 +194,7 @@ export function App6gen39() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(" ; "))}
             validation={validation}
           />
         )}
@@ -149,11 +210,22 @@ export function App6gen39() {
             aideNiveau1={formatAideNiveau1(exercice, phase)}
             aideNiveau2={formatAideNiveau2(exercice, phase)}
             diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
-            onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))}
+            onValider={(valeurs) =>
+              terminerEtape(
+                soumettreReponseEcran(etat, valeurs),
+                champsEcran(exercice, phase)
+                  .map((c, i) => `${c.label} ${valeurs[i]}`)
+                  .join(" ; "),
+              )
+            }
             validation={validation}
           />
         )}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

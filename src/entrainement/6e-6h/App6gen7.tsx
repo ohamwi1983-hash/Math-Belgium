@@ -20,13 +20,15 @@ import {
   soumettreReponseESimplifier,
   soumettreReponseFDerivee,
 } from "./moteur6e/sessionDomaineDeriveeExponentielles";
-import type { EtatSessionDomaineDeriveeExponentielle } from "./moteur6e/typesDomaineDeriveeExponentielles";
+import type { EtatSessionDomaineDeriveeExponentielle, PhaseDomaineDeriveeExponentielle } from "./moteur6e/typesDomaineDeriveeExponentielles";
+import { phaseApres, phaseInitiale } from "./moteur6e/typesDomaineDeriveeExponentielles";
+import type { ReponseDeuxChamps } from "./moteur6e/verificationDomaineDeriveeExponentielles";
 import { EtapeChampDomaineDerivee } from "./components6e/EtapeChampDomaineDerivee";
 import { EtapeDeuxChampsDomaineDerivee } from "./components6e/EtapeDeuxChampsDomaineDerivee";
 import { EtapeDomaineDomaineDerivee } from "./components6e/EtapeDomaineDomaineDerivee";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
 import { Katex } from "./components/Katex";
-import { formatEnsembleReelLatex } from "./ui6e/formatEnsembleReel";
+import { formatEnsembleReelLatex, formatEnsembleReelTexte } from "./ui6e/formatEnsembleReel";
 import {
   aideNiveau1,
   aideNiveau2,
@@ -38,6 +40,8 @@ import {
 import { calculerRecapitulatifDomaineDeriveeExponentielle, calculerSegmentsProgressionDomaineDeriveeExponentielle } from "./ui6e/recapitulatifDomaineDeriveeExponentielles";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -54,11 +58,44 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
+/** Reconstitue la séquence RÉELLEMENT traversée par CET exercice en bouclant `phaseInitiale`/
+ * `phaseApres` jusqu'à "termine" — même technique que `ui6e/recapitulatifDomaineDeriveeExponentielles.ts`
+ * (non exportée depuis ce fichier, reconstruite ici pour la puce "aide"). */
+function sequencePourExercice(exercice: EtatSessionDomaineDeriveeExponentielle["exerciceCourant"]): PhaseDomaineDeriveeExponentielle[] {
+  const phases: PhaseDomaineDeriveeExponentielle[] = [];
+  let phase: PhaseDomaineDeriveeExponentielle | "termine" = phaseInitiale(exercice);
+  while (phase !== "termine") {
+    phases.push(phase);
+    phase = phaseApres(phase);
+  }
+  return phases;
+}
+
 export function App6gen7() {
   const [etat, setEtat] = useState<EtatSessionDomaineDeriveeExponentielle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos — tenu ICI, à part de
+   * `EtatSessionDomaineDeriveeExponentielle`, jamais dans le moteur (même principe que la
+   * référence 4e, `AppAnalyseFonction.tsx`). */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionDomaineDeriveeExponentielle) {
+  function ajouterHistorique(votreReponse: string, nouvelEtat: EtatSessionDomaineDeriveeExponentielle) {
+    const recap = calculerRecapitulatifDomaineDeriveeExponentielle(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? (derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur) : undefined,
+      },
+    ]);
+  }
+
+  function terminerEtape(nouvelEtat: EtatSessionDomaineDeriveeExponentielle, votreReponse?: string) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
       // La phase qui vient PRÉCISÉMENT de se fermer est `etat.phase` (pas `nouvelEtat.phase`) — son
@@ -68,6 +105,17 @@ export function App6gen7() {
       const detail = exerciceVientDeFinir
         ? nouvelEtat.resultats[nouvelEtat.resultats.length - 1].details[etat.phase]
         : nouvelEtat.detailsPartiels[etat.phase];
+      // `nouvelEtat.phase !== etat.phase` (jamais seulement `exerciceVientDeFinir`/`terminee`) —
+      // quand l'écran qui vient de clore est le DERNIER de l'exercice, `nouvelEtat.phase`/
+      // `detailsPartiels` restent ceux d'AVANT cette soumission (voir `exerciceVientDeFinir`
+      // ci-dessus) : `calculerRecapitulatifDomaineDeriveeExponentielle(nouvelEtat)` y verrait alors
+      // l'écran précédent, pas celui qui vient de clore. Sans incidence pratique : cet écran est le
+      // dernier, sa puce reste "courante" jusqu'au reset du nouvel exercice (jamais cliquable), même
+      // principe que `App6gen58.tsx`/la référence 4e (`tableauSignes`, jamais de `votreReponse`
+      // passé).
+      if (votreReponse !== undefined && nouvelEtat.phase !== etat.phase) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: detail?.revele ?? false });
       return;
     }
@@ -76,12 +124,18 @@ export function App6gen7() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(
       demarrerSessionDomaineDeriveeExponentielle(REGLAGES_DEMO, () => construireAvecFamilleId(id as Parameters<typeof construireAvecFamilleId>[0])),
     );
@@ -146,13 +200,21 @@ export function App6gen7() {
       }
     : null;
 
+  // "aide" (puce jaune) remplace "correcte" pour tout écran clos avec `niveauAide>0` —
+  // `detailsPartiels[phase].niveauAide` (jamais recalculé depuis le score, voir le commentaire de
+  // `DetailPhaseDomaineDeriveeExponentielle`, `typesDomaineDeriveeExponentielles.ts`).
+  const sequencePhases = sequencePourExercice(exercice);
+  const segments = calculerSegmentsProgressionDomaineDeriveeExponentielle(etat).map((segment, i) =>
+    segment === "correcte" && (etat.detailsPartiels[sequencePhases[i]]?.niveauAide ?? 0) > 0 ? "aide" : segment,
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Domaine et dérivée de fonctions exponentielles</h1>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionDomaineDeriveeExponentielle(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifDomaineDeriveeExponentielle(etat)} />
@@ -170,7 +232,7 @@ export function App6gen7() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse), formatEnsembleReelTexte(reponse))}
               validation={validation}
             />
           )}
@@ -190,8 +252,11 @@ export function App6gen7() {
               niveauAide={niveauAide}
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) =>
-                terminerEtape(phase === "cFacteurs" ? soumettreReponseCFacteurs(etat, reponse) : soumettreReponseDND(etat, reponse))
+              onValider={(reponse: ReponseDeuxChamps) =>
+                terminerEtape(
+                  phase === "cFacteurs" ? soumettreReponseCFacteurs(etat, reponse) : soumettreReponseDND(etat, reponse),
+                  `${labels.a} ${reponse.a} ; ${labels.b} ${reponse.b}`,
+                )
               }
               validation={validation}
             />
@@ -212,19 +277,22 @@ export function App6gen7() {
               niveauAideMax={NIVEAU_AIDE_MAX}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(texte) => {
-                if (phase === "aDerivee") return terminerEtape(soumettreReponseADerivee(etat, texte));
-                if (phase === "bDerivee") return terminerEtape(soumettreReponseBDerivee(etat, texte));
-                if (phase === "cAssemblage") return terminerEtape(soumettreReponseCAssemblage(etat, texte));
-                if (phase === "dAssemblage") return terminerEtape(soumettreReponseDAssemblage(etat, texte));
-                if (phase === "eSimplifier") return terminerEtape(soumettreReponseESimplifier(etat, texte));
-                if (phase === "eDerivee") return terminerEtape(soumettreReponseEDerivee(etat, texte));
-                return terminerEtape(soumettreReponseFDerivee(etat, texte));
+                if (phase === "aDerivee") return terminerEtape(soumettreReponseADerivee(etat, texte), texte);
+                if (phase === "bDerivee") return terminerEtape(soumettreReponseBDerivee(etat, texte), texte);
+                if (phase === "cAssemblage") return terminerEtape(soumettreReponseCAssemblage(etat, texte), texte);
+                if (phase === "dAssemblage") return terminerEtape(soumettreReponseDAssemblage(etat, texte), texte);
+                if (phase === "eSimplifier") return terminerEtape(soumettreReponseESimplifier(etat, texte), texte);
+                if (phase === "eDerivee") return terminerEtape(soumettreReponseEDerivee(etat, texte), texte);
+                return terminerEtape(soumettreReponseFDerivee(etat, texte), texte);
               }}
               validation={validation}
             />
           )}
         </div>
       </main>
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

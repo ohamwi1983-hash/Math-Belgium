@@ -62,6 +62,8 @@ import { libelleCategorie } from "./ui/categorieLabels";
 import { estSolutionUnique, formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
 const CONSIGNE_GENERALE = "Résous cette équation rationnelle.";
@@ -179,8 +181,86 @@ function calculerSegmentsProgression(etat: EtatSessionEquationRationnelle): Etat
                           : phase === "champ1"
                             ? etat.scoreChampPrincipalExercice === 0
                             : etat.scoreRacinesExercice === 0; // champ2
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    return aideUtiliseePhase(etat, phase) ? "aide" : "correcte";
   });
+}
+
+/** Lit le flag `aideXxxUtilisee` correspondant à `phase`, jamais recalculé — "simplifier"/
+ * "simplifierReconnaissance"/"reconnaissance"/"racinesEtrangeres" n'ont aucun mécanisme d'aide
+ * (QCM sans aide, ou pas de bouton Aide dédié), toujours `false`. Ces flags sont remis à `false`
+ * seulement à l'exercice suivant (jamais entre deux phases du même exercice, voir
+ * `typesEquationRationnelle.ts`), donc toujours lisibles tels quels depuis une phase ultérieure. */
+function aideUtiliseePhase(etat: EtatSessionEquationRationnelle, phase: PhaseEquationRationnelle): boolean {
+  switch (phase) {
+    case "ce":
+      return etat.aideCeUtilisee;
+    case "simplifierReduction":
+      return etat.aideSimplifierReductionUtilisee;
+    case "simplifierChamp1":
+      return etat.aideSimplifierChamp1Utilisee;
+    case "simplifierChamp2":
+      return etat.aideSimplifierChamp2Utilisee;
+    case "simplifierFactorisation":
+      return etat.aideSimplifierFactorisationUtilisee;
+    case "simplifierFraction":
+      return etat.aideSimplifierFractionUtilisee;
+    case "isolement":
+      return etat.aideIsolementUtilisee;
+    case "champ1":
+      return etat.aideChamp1Utilisee;
+    case "champ2":
+      return etat.aideChamp2Utilisee;
+    default:
+      return false;
+  }
+}
+
+/** Titre court d'une phase (fiche de consultation en lecture seule) — même libellé que
+ * `calculerRecapitulatifEquationRationnelle` (`ui/recapitulatifEquationRationnelle.ts`) pour la
+ * même phase, jamais un second vocabulaire. */
+function titrePhase(etat: EtatSessionEquationRationnelle): string {
+  const exercice = etat.exerciceCourant;
+  switch (etat.phase) {
+    case "ce":
+      return exercice.ce.length === 1 ? "Condition d'existence (CE)" : "Conditions d'existence (CE)";
+    case "simplifier":
+      return exercice.fractionsSimplifiables.length === 1 ? "Fraction simplifiée" : "Fractions simplifiées";
+    case "simplifierReduction":
+      return "Mise en évidence (fraction)";
+    case "simplifierReconnaissance":
+      return "Méthode (fraction)";
+    case "simplifierChamp1": {
+      const p2 = p2DeFractionGauche(exercice);
+      return p2.categorie === "cas_general" ? "Δ (fraction)" : "Forme factorisée (fraction)";
+    }
+    case "simplifierChamp2": {
+      const p2 = p2DeFractionGauche(exercice);
+      return estSolutionUnique(p2) ? "Racine (fraction)" : "Racines (fraction)";
+    }
+    case "simplifierFactorisation":
+      return "Forme factorisée (fraction)";
+    case "simplifierFraction":
+      return "Fraction simplifiée";
+    case "isolement":
+      return "Équation isolée";
+    case "reconnaissance":
+      return "Méthode";
+    case "champ1":
+      return exercice.equationIsolee.categorie === "cas_general" ? "Δ" : "Forme factorisée";
+    case "champ2":
+      return estSolutionUnique(exercice.equationIsolee) ? "Solution" : "Solutions";
+    case "racinesEtrangeres":
+      return "Racines étrangères";
+  }
+}
+
+/** Formate un couple `[number, number]` saisi (CE ou racines flexibles) — dédoublonne (racine
+ * double saisie deux fois par convention, voir `EtapeRacinesFlexibles.tsx`) et ignore `NaN` (bouton
+ * "Pas de..."), jamais recalculé différemment d'un appelant à l'autre. */
+function formatCoupleSaisi(valeurs: [number, number], prefixe: string, libellePasDe: string): string {
+  const uniques = Array.from(new Set(valeurs.filter((v) => !Number.isNaN(v))));
+  return uniques.length === 0 ? libellePasDe : uniques.map((v) => `${prefixe} ${v}`).join(" et ");
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -344,10 +424,41 @@ function releveRevelePhase(etat: EtatSessionEquationRationnelle, nouvelEtat: Eta
 export function AppEquationRationnelle() {
   const [etat, setEtat] = useState<EtatSessionEquationRationnelle>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionEquationRationnelle`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
 
-  function terminerEtape(nouvelEtat: EtatSessionEquationRationnelle) {
+  /** Appelé juste avant `terminerEtape`, avec l'état AVANT la transition (`etat`, jamais
+   * `nouvelEtat`) — réutilise directement `releveRevelePhase`/`reponseAttenduePhase`, déjà écrites
+   * pour calculer `validation` sur ce même générateur à ce même point exact (`etat.phase`/
+   * `etat.exerciceCourant` juste avant transition). `reponseAttenduePhase` renvoie `null` pour
+   * "simplifierReduction"/"reconnaissance" (l'ancien panneau n'avait pas de bloc réponse pour ces
+   * deux phases) — reproduit à l'identique. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionEquationRationnelle) {
+    const revele = releveRevelePhase(etat, nouvelEtat);
+    const reponseAttendue = revele ? reponseAttenduePhase(etat) : null;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: titrePhase(etat),
+        votreReponse,
+        correcte: !revele,
+        reponseAttendue: reponseAttendue ?? undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT formatée/poussée dans l'historique quand l'étape se clôt
+   * réellement (`transitionDEcran`) — jamais à chaque clic sur "Valider" (même garde-fou que
+   * `AppAnalyseFonction.tsx`, bug déjà rencontré et corrigé là-bas). */
+  function terminerEtape(nouvelEtat: EtatSessionEquationRationnelle, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      if (votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: releveRevelePhase(etat, nouvelEtat) });
       return;
     }
@@ -356,12 +467,18 @@ export function AppEquationRationnelle() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(demarrerSessionEquationRationnelle(REGLAGES_DEMO, () => construireAvecVarianteId(varianteId as VarianteEquationRationnelleId)));
   }
 
@@ -388,7 +505,7 @@ export function AppEquationRationnelle() {
       </header>
 
       <main className="card">
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
 
         <div className="card-body">
           <EnTeteExercice
@@ -407,7 +524,7 @@ export function AppEquationRationnelle() {
               expressionAffichee={formatEquationRationnelleLatex(etat.exerciceCourant)}
               masquerBlocDonnees
               question={QUESTION_CE}
-              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]))}
+              onValider={(reponse) => terminerEtape(soumettreReponseCE(etat, [Number(reponse)]), `x ≠ ${reponse}`)}
               validation={validation}
             />
           ) : etat.phase === "ce" ? (
@@ -427,7 +544,7 @@ export function AppEquationRationnelle() {
               texteAide="Une fois le dénominateur factorisé, chaque facteur égalé à 0 donne une condition d'existence (CE)."
               aideActivee={etat.aideCeUtilisee}
               onActiverAide={() => setEtat(activerAideCe(etat))}
-              onValider={(valeurs) => terminerEtape(soumettreReponseCE(etat, valeurs))}
+              onValider={(valeurs) => terminerEtape(soumettreReponseCE(etat, valeurs), formatCoupleSaisi(valeurs, "x ≠", "Pas de CE"))}
               validation={validation}
             />
           ) : etat.phase === "simplifier" ? (
@@ -437,7 +554,9 @@ export function AppEquationRationnelle() {
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
               diagnostiquer={(reponses) => diagnostiquerSimplifierToutes(etat.exerciceCourant.fractionsSimplifiables, reponses)}
-              onValider={(reponses) => terminerEtape(soumettreReponseSimplifier(etat, reponses))}
+              onValider={(reponses) =>
+                terminerEtape(soumettreReponseSimplifier(etat, reponses), reponses.map((r) => `${r.numerateur}/${r.denominateur}`).join(" ; "))
+              }
               validation={validation}
             />
           ) : etat.phase === "simplifierReduction" ? (
@@ -450,7 +569,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerMiseEnEvidenceFraction(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierReductionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierReduction(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierReduction(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierReduction(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "simplifierReconnaissance" ? (
@@ -461,7 +580,7 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               expressionAffichee={expressionP2(etat.exerciceCourant)}
               question={QUESTION_FACTORISATION_FRACTION}
-              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierCategorie(etat, choix))}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixSimplifierCategorie(etat, choix), libelleCategorie(choix))}
               validation={validation}
             />
           ) : etat.phase === "simplifierChamp1" ? (
@@ -475,7 +594,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerChampPrincipal(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierChamp1(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierChamp1(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierChamp1(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "simplifierChamp2" ? (
@@ -488,7 +607,9 @@ export function AppEquationRationnelle() {
               prefixeChamp="x ="
               aideActivee={etat.aideSimplifierChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideSimplifierChamp2(etat))}
-              onValider={(racines) => terminerEtape(soumettreReponseSimplifierChamp2(etat, racines))}
+              onValider={(racines) =>
+                terminerEtape(soumettreReponseSimplifierChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de racine"))
+              }
               validation={validation}
             />
           ) : etat.phase === "simplifierFactorisation" ? (
@@ -503,7 +624,7 @@ export function AppEquationRationnelle() {
               diagnostiquer={(v) => diagnostiquerFactorisationCasGeneral(p2DeFractionGauche(etat.exerciceCourant), v)}
               aideActivee={etat.aideSimplifierFactorisationUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFactorisation(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierFactorisation(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseSimplifierFactorisation(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "simplifierFraction" ? (
@@ -524,7 +645,9 @@ export function AppEquationRationnelle() {
               }
               aideActivee={etat.aideSimplifierFractionUtilisee}
               onActiverAide={() => setEtat(activerAideSimplifierFraction(etat))}
-              onValider={(numerateur, denominateur) => terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur))}
+              onValider={(numerateur, denominateur) =>
+                terminerEtape(soumettreReponseSimplifierFraction(etat, numerateur, denominateur), `${numerateur}/${denominateur}`)
+              }
               validation={validation}
             />
           ) : etat.phase === "isolement" ? (
@@ -539,7 +662,7 @@ export function AppEquationRationnelle() {
               texteAide="Multiplie chaque terme par le dénominateur commun pour éliminer les fractions, puis regroupe."
               aideActivee={etat.aideIsolementUtilisee}
               onActiverAide={() => setEtat(activerAideIsolement(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseIsolement(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "reconnaissance" ? (
@@ -549,7 +672,7 @@ export function AppEquationRationnelle() {
               tentativesMax={tentativesMax}
               recapitulatif={recapitulatif}
               question={QUESTION_FACTORISATION}
-              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix))}
+              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixCategorie(etat, choix), libelleCategorie(choix))}
               validation={validation}
             />
           ) : etat.phase === "champ1" ? (
@@ -561,7 +684,7 @@ export function AppEquationRationnelle() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideChamp1Utilisee}
               onActiverAide={() => setEtat(activerAideChamp1(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse))}
+              onValider={(reponse) => terminerEtape(soumettreReponseChamp1(etat, reponse), reponse)}
               validation={validation}
             />
           ) : etat.phase === "champ2" ? (
@@ -578,7 +701,7 @@ export function AppEquationRationnelle() {
               texteAide="Une fois l'équation factorisée, chaque facteur égalé à 0 donne une solution."
               aideActivee={etat.aideChamp2Utilisee}
               onActiverAide={() => setEtat(activerAideChamp2(etat))}
-              onValider={(racines) => terminerEtape(soumettreReponseChamp2(etat, racines))}
+              onValider={(racines) => terminerEtape(soumettreReponseChamp2(etat, racines), formatCoupleSaisi(racines, "x =", "Pas de solution"))}
               validation={validation}
             />
           ) : (
@@ -593,6 +716,10 @@ export function AppEquationRationnelle() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

@@ -1,19 +1,24 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceEquationsComplexes } from "./generateurs6e/equationsComplexes";
 import type { IdVarianteEquationsComplexes } from "./generateurs6e/equationsComplexes";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionEquationsComplexes, soumettreReponseEcran } from "./moteur6e/sessionEquationsComplexes";
-import type { EtatSessionEquationsComplexes } from "./moteur6e/typesEquationsComplexes";
+import { phasesPourExercice } from "./moteur6e/typesEquationsComplexes";
+import type { EtatSessionEquationsComplexes, PhaseEquationsComplexes } from "./moteur6e/typesEquationsComplexes";
 import { diagnostiquerEcran } from "./moteur6e/verificationEquationsComplexes";
 import { Katex } from "./components/Katex";
 import { EtapeChampsEquationsComplexes } from "./components6e/EtapeChampsEquationsComplexes";
 import { EtapeChoixEquationsComplexes } from "./components6e/EtapeChoixEquationsComplexes";
 import { EtapeListeEquationsComplexes } from "./components6e/EtapeListeEquationsComplexes";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { OPTIONS_EQUATION_B, OPTIONS_EQUATION_E, OPTIONS_SYSTEME_A, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, nombreCibleEnsemble, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatEquationsComplexes";
+import { LIBELLE_PHASE, OPTIONS_EQUATION_B, OPTIONS_EQUATION_E, OPTIONS_SYSTEME_A, blocDonnees, champsEcran, consigneEcran, consigneGenerale, formatReponseAttenduePhaseLatex, niveauAideMaxEcran, nombreCibleEnsemble, aideNiveau1 as formatAideNiveau1, aideNiveau2 as formatAideNiveau2 } from "./ui6e/formatEquationsComplexes";
 import { calculerRecapitulatifEquationsComplexes, calculerSegmentsProgressionEquationsComplexes } from "./ui6e/recapitulatifEquationsComplexes";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 /**
  * `6gen36` — Équations dans ℂ (chapitre 7, "Nombres complexes", TROISIÈME générateur de ce
@@ -38,11 +43,43 @@ interface TransitionEnAttente {
 export function App6gen36() {
   const [etat, setEtat] = useState<EtatSessionEquationsComplexes>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionEquationsComplexes`, jamais dans le moteur : la saisie de
+   * l'élève n'a aucune autre utilité une fois l'étape close. Remis à vide à chaque nouvel exercice,
+   * comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  /** Puce "aide" (jaune) : le moteur ne garde `niveauAide` que pour l'écran COURANT (remis à 0 au
+   * changement de phase) — on la persiste donc nous-mêmes ici, phase par phase, au même point que
+   * `historique`. */
+  const [aideParPhase, setAideParPhase] = useState<Partial<Record<PhaseEquationsComplexes, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionEquationsComplexes) {
+  /** `votreReponse` : UNIQUEMENT formaté/poussé dans l'historique quand l'étape se clôt RÉELLEMENT
+   * (même garde que la transition d'écran elle-même) — jamais à chaque tentative ratée. */
+  function terminerEtape(nouvelEtat: EtatSessionEquationsComplexes, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
-      setEnAttente({ etatSuivant: nouvelEtat, revele: nouvelEtat.derniereTransitionRevelee });
+      const phaseFermee = etat.phase;
+      const revele = nouvelEtat.derniereTransitionRevelee;
+      setAideParPhase((prev) => ({ ...prev, [phaseFermee]: etat.niveauAide > 0 }));
+      if (votreReponse !== undefined) {
+        setHistorique((h) => [
+          ...h,
+          {
+            titre: LIBELLE_PHASE[phaseFermee],
+            votreReponse,
+            correcte: !revele,
+            reponseAttendue: revele ? (
+              <span className="equation-box-termes">
+                {formatReponseAttenduePhaseLatex(exercice, phaseFermee).map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
+              </span>
+            ) : undefined,
+          },
+        ]);
+      }
+      setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }
     setEtat(nouvelEtat);
@@ -50,12 +87,20 @@ export function App6gen36() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideParPhase({});
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideParPhase({});
     setEtat(demarrerSessionEquationsComplexes(REGLAGES_DEMO, () => construireAvecVarianteId(id as IdVarianteEquationsComplexes)));
   }
 
@@ -106,20 +151,74 @@ export function App6gen36() {
 
   function rendreEcran() {
     if (phase === "aAvecEcran1" && exercice.famille === "A" && exercice.sousType === "avecBarre") {
-      return <EtapeChoixEquationsComplexes key={phase} {...aideCommun} {...ecranCommun} options={OPTIONS_SYSTEME_A(exercice)} onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))} />;
+      const options = OPTIONS_SYSTEME_A(exercice);
+      return (
+        <EtapeChoixEquationsComplexes
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          options={options}
+          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={options.find((o) => o.id === id)?.latex ?? id} />)}
+        />
+      );
     }
     if (phase === "bEcran1" && exercice.famille === "B") {
-      return <EtapeChoixEquationsComplexes key={phase} {...aideCommun} {...ecranCommun} options={OPTIONS_EQUATION_B(exercice)} onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))} />;
+      const options = OPTIONS_EQUATION_B(exercice);
+      return (
+        <EtapeChoixEquationsComplexes
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          options={options}
+          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={options.find((o) => o.id === id)?.latex ?? id} />)}
+        />
+      );
     }
     if (phase === "eEcran1" && exercice.famille === "E") {
-      return <EtapeChoixEquationsComplexes key={phase} {...aideCommun} {...ecranCommun} options={OPTIONS_EQUATION_E(exercice)} onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]))} />;
+      const options = OPTIONS_EQUATION_E(exercice);
+      return (
+        <EtapeChoixEquationsComplexes
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          options={options}
+          onValider={(id) => terminerEtape(soumettreReponseEcran(etat, [id]), <Katex expression={options.find((o) => o.id === id)?.latex ?? id} />)}
+        />
+      );
     }
     const nombreCible = nombreCibleEnsemble(exercice, phase);
     if (nombreCible > 0) {
-      return <EtapeListeEquationsComplexes key={phase} {...aideCommun} {...ecranCommun} nombreCible={nombreCible} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />;
+      return (
+        <EtapeListeEquationsComplexes
+          key={phase}
+          {...aideCommun}
+          {...ecranCommun}
+          nombreCible={nombreCible}
+          diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+          onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs), valeurs.join(", "))}
+        />
+      );
     }
-    return <EtapeChampsEquationsComplexes key={phase} {...aideCommun} {...ecranCommun} champs={champsEcran(exercice, phase)} diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)} onValider={(valeurs) => terminerEtape(soumettreReponseEcran(etat, valeurs))} />;
+    return (
+      <EtapeChampsEquationsComplexes
+        key={phase}
+        {...aideCommun}
+        {...ecranCommun}
+        champs={champsEcran(exercice, phase)}
+        diagnostiquer={(valeurs) => diagnostiquerEcran(exercice, phase, valeurs)}
+        onValider={(valeurs) =>
+          terminerEtape(soumettreReponseEcran(etat, valeurs), champsEcran(exercice, phase).map((c, i) => `${c.label} : ${valeurs[i]}`).join(" ; "))
+        }
+      />
+    );
   }
+
+  /** Surcharge locale de `calculerSegmentsProgressionEquationsComplexes` : "correcte" devient "aide"
+   * quand `aideParPhase` montre que l'écran a été fermé avec de l'aide active. */
+  const segmentsBase = calculerSegmentsProgressionEquationsComplexes(etat);
+  const segments: EtatPuceProgression[] = phasesPourExercice(exercice).map((p, i) =>
+    segmentsBase[i] === "correcte" && aideParPhase[p] ? "aide" : segmentsBase[i],
+  );
 
   return (
     <div className="app-shell">
@@ -127,12 +226,16 @@ export function App6gen36() {
         <p className="app-eyebrow">6e — Entraînement</p>
         <h1 className="app-title">Équations dans ℂ</h1>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <ProgressionPuces segments={calculerSegmentsProgressionEquationsComplexes(etat)} />
+        <ProgressionPuces segments={segments} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifEquationsComplexes(etat)} />
         {rendreEcran()}
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

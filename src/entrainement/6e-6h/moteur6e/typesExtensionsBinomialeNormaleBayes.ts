@@ -157,6 +157,10 @@ export interface EtatSessionExtensionsBinomialeNormaleBayes {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, number>>;
+  /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
+   * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
+   * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */
+  aidePartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceExtensionsBinomialeNormaleBayes[];
   terminee: boolean;

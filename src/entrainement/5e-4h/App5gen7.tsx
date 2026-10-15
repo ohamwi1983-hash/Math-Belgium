@@ -38,6 +38,8 @@ import { calculerRecapitulatifPolygonesArcsSecteurs } from "./ui5e/recapitulatif
 import { RecapitulatifPanel } from "./components5e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 
 const REGLAGES_DEMO: ReglagesSession5e = { nombreExercices: 1, tentativesMax: 3, penaliteActivee: true };
 
@@ -108,7 +110,10 @@ function sequenceDesPhases(exercice: ExercicePolygonesArcsSecteurs): PhasePolygo
  * voir `transitionApresEcran`, `moteur5e/sessionPolygonesArcsSecteurs.ts`) n'a pas de champ
  * `scoreSecteurMultiPasExercice` à la racine — jamais atteint ici puisque la 1re garde
  * (`phase === etat.phase`) le capture déjà comme "courante" tant que l'exercice est en cours. */
-function calculerSegmentsProgression(etat: EtatSessionPolygonesArcsSecteurs): EtatPuceProgression[] {
+function calculerSegmentsProgression(
+  etat: EtatSessionPolygonesArcsSecteurs,
+  aideUtiliseeParPhase: Partial<Record<string, boolean>>,
+): EtatPuceProgression[] {
   return sequenceDesPhases(etat.exerciceCourant).map((phase) => {
     if (phase === etat.phase) return "courante";
     const score =
@@ -128,9 +133,21 @@ function calculerSegmentsProgression(etat: EtatSessionPolygonesArcsSecteurs): Et
           : phase === "arcMultiPas"
             ? etat.arcMultiPasRevele
             : etat.secteurElementaireRevele;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
+
+/** Libellés courts pour la fiche de consultation — jamais de second vocabulaire pour les phases déjà
+ * nommées par `consigneGenerale`/les `Etape*.tsx` (phrases complètes, pas de libellé court dédié
+ * existant à réutiliser). */
+const LIBELLE_PHASE: Record<PhasePolygonesArcsSecteurs, string> = {
+  cercleEntier: "Cercle entier",
+  arcElementaire: "Arc élémentaire",
+  arcMultiPas: "Arc multi-pas",
+  secteurElementaire: "Secteur élémentaire",
+  secteurMultiPas: "Secteur multi-pas",
+};
 
 /** État tenu en attente dès qu'un écran se termine — l'état de session calculé par le moteur n'est
  * appliqué (`setEtat`) qu'au clic sur le bouton de `ValidationEcran` (convention CLAUDE.md). */
@@ -142,10 +159,41 @@ interface TransitionEnAttente {
 export function App5gen7() {
   const [etat, setEtat] = useState<EtatSessionPolygonesArcsSecteurs>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionPolygonesArcsSecteurs`, jamais dans le moteur. Remis à vide à
+   * chaque nouvel exercice. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+  const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<string, boolean>>>({});
 
-  function terminerEtape(nouvelEtat: EtatSessionPolygonesArcsSecteurs) {
+  /** Réutilise `reponseAttenduePhase` — EXACTEMENT la même source que la bannière `validation`
+   * ci-dessous pour l'écran COURANT revélé. */
+  function ajouterHistorique(votreReponse: ReactNode, phaseClose: PhasePolygonesArcsSecteurs, nouvelEtat: EtatSessionPolygonesArcsSecteurs) {
+    const revele = releveDeLaPhase(phaseClose, nouvelEtat);
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: LIBELLE_PHASE[phaseClose],
+        votreReponse,
+        correcte: !revele,
+        reponseAttendue: revele ? reponseAttenduePhase(nouvelEtat.exerciceCourant, phaseClose) : undefined,
+      },
+    ]);
+  }
+
+  /** `votreReponse` : UNIQUEMENT poussée dans l'historique quand l'écran se clôt RÉELLEMENT (même
+   * garde `transitionDEcran` que celui qui déclenche déjà `setEnAttente`), et JAMAIS pour la
+   * DERNIÈRE phase de l'exercice (variable selon la présence des écrans optionnels — "secteurMultiPas"
+   * ou "secteurElementaire", voir `sequenceDesPhases`) : détectée dynamiquement via
+   * `nouvelEtat.resultats.length > etat.resultats.length` plutôt que par un nom de phase fixe. */
+  function terminerEtape(nouvelEtat: EtatSessionPolygonesArcsSecteurs, votreReponse?: ReactNode) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
     if (transitionDEcran) {
+      setAideUtiliseeParPhase((m) => ({ ...m, [etat.phase]: etat.niveauAide > 0 }));
+      const exerciceTermine = nouvelEtat.resultats.length > etat.resultats.length;
+      if (!exerciceTermine && votreReponse !== undefined) {
+        ajouterHistorique(votreReponse, etat.phase, nouvelEtat);
+      }
       setEnAttente({ etatSuivant: nouvelEtat, revele: releveDeLaPhase(etat.phase, nouvelEtat) });
       return;
     }
@@ -154,12 +202,22 @@ export function App5gen7() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+      setAideUtiliseeParPhase({});
+      setFicheOuverteIndex(null);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
   function forcerVariante(id: string) {
     setEnAttente(null);
+    setHistorique([]);
+    setAideUtiliseeParPhase({});
+    setFicheOuverteIndex(null);
     setEtat(demarrerSessionPolygonesArcsSecteurs(REGLAGES_DEMO, () => construireAvecPresence(id[0] === "1", id[1] === "1")));
   }
 
@@ -182,7 +240,10 @@ export function App5gen7() {
       <header className="app-header">
         <p className="app-eyebrow">5e — Entraînement</p>
         <h1 className="app-title">Polygones, arcs et secteurs</h1>
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces
+          segments={calculerSegmentsProgression(etat, aideUtiliseeParPhase)}
+          onSegmentClick={(index) => setFicheOuverteIndex(index)}
+        />
       </header>
       <SelecteurVarianteDev options={OPTIONS_PRESENCE} onGenerer={forcerVariante} />
       <main className="card">
@@ -197,7 +258,7 @@ export function App5gen7() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEcran}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(r) => terminerEtape(soumettreReponseCercleEntier(etat, r))}
+              onValider={(r) => terminerEtape(soumettreReponseCercleEntier(etat, r), `Circonférence = ${r.circonference} ; Aire = ${r.aire}`)}
               diagnostiquer={(r) => diagnostiquerCercleEntier(exercice, r)}
               validation={validation}
             />
@@ -211,7 +272,7 @@ export function App5gen7() {
               niveauAide={etat.niveauAide}
               niveauAideMax={niveauAideMaxEcran}
               onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseEcranUnChamp(etat, texte))}
+              onValider={(texte) => terminerEtape(soumettreReponseEcranUnChamp(etat, texte), `${LIBELLE_PHASE[etat.phase]} = ${texte}`)}
               diagnostiquer={(texte) =>
                 diagnostiquerValeurArcSecteur(
                   texte,
@@ -223,6 +284,10 @@ export function App5gen7() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }
