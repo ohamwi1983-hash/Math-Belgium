@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { LEVELS } from '../content/chaptersIndex'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
 
 export function HomePage() {
+  useDocumentMeta(
+    'Chapitres de maths — FWB',
+    'Chapitres de cours de mathématiques narratifs pour la 4e, 5e et 6e (FWB), avec liens directs vers des exercices interactifs auto-corrigés.',
+    '/',
+  )
+
   return (
     <>
       <SiteHeader />

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /exercice
+Disallow: /entrainement/
+
+Sitemap: https://math-belgium.vercel.app/sitemap.xml
