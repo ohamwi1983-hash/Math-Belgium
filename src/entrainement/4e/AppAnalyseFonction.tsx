@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import type { Categorie } from "./core/generateur.types";
 import type { EtapeAnalyseFonction } from "./core/analyseFonction.types";
 import type { ReglagesSession } from "./core/session.types";
@@ -37,9 +38,11 @@ import { EtapeTableauSigneVariation } from "./components/EtapeTableauSigneVariat
 import { calculerRecapitulatifAnalyseFonction } from "./ui/recapitulatifAnalyseFonction";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
+import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
+import { FicheReponseEcran } from "../components/FicheReponseEcran";
 import { formatEnonceLatex } from "./ui/formatEquation";
 import { formatFonctionColoreeLatex, formatFonctionOrdreLatex } from "./ui/formatAnalyseFonction";
-import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL } from "./ui/categorieLabels";
+import { OPTIONS_CATEGORIE_SANS_CAS_GENERAL, libelleCategorie } from "./ui/categorieLabels";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 
@@ -138,6 +141,33 @@ function calculerSegmentsProgression(etat: EtatSessionAnalyseFonction): EtatPuce
 export function AppAnalyseFonction() {
   const [etat, setEtat] = useState<EtatSessionAnalyseFonction>(nouvelleSession);
   const [enAttente, setEnAttente] = useState<TransitionEnAttente | null>(null);
+  /** Consultation en lecture seule des écrans déjà clos (puces cliquables de `ProgressionPuces`) —
+   * tenu ICI, à part de `EtatSessionAnalyseFonction`, jamais dans le moteur : la saisie de l'élève
+   * n'a aucune autre utilité une fois l'étape close (le moteur ne garde qu'un score agrégé), donc
+   * pas de raison d'alourdir son état pour une fonctionnalité purement consultative côté UI.
+   * Remis à vide à chaque nouvel exercice, comme `enAttente`. */
+  const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
+  const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
+
+  /** Appelé juste avant `terminerEtape`, avec l'état DÉJÀ mis à jour par `soumettreReponseXxx` —
+   * réutilise `calculerRecapitulatifAnalyseFonction` (même mécanisme que le récapitulatif final)
+   * pour la réponse ATTENDUE : l'entrée qui vient d'être ajoutée est toujours la dernière du
+   * tableau, les étapes se closent dans l'ordre. `votreReponse` est formatée séparément par chaque
+   * appelant, qui seul connaît la forme précise de sa réponse. */
+  function ajouterHistorique(votreReponse: ReactNode, nouvelEtat: EtatSessionAnalyseFonction) {
+    const recap = calculerRecapitulatifAnalyseFonction(nouvelEtat);
+    const derniere = recap[recap.length - 1];
+    if (!derniere) return;
+    setHistorique((h) => [
+      ...h,
+      {
+        titre: derniere.libelle,
+        votreReponse,
+        correcte: !derniere.revele,
+        reponseAttendue: derniere.revele ? derniere.estLatex ? <Katex expression={derniere.valeur} /> : derniere.valeur : undefined,
+      },
+    ]);
+  }
 
   function terminerEtape(nouvelEtat: EtatSessionAnalyseFonction) {
     const transitionDEcran = nouvelEtat.phase !== etat.phase || nouvelEtat.terminee !== etat.terminee;
@@ -166,7 +196,12 @@ export function AppAnalyseFonction() {
 
   function passerEcranSuivant() {
     if (!enAttente) return;
-    setEtat(enAttente.etatSuivant.terminee ? nouvelleSession() : enAttente.etatSuivant);
+    if (enAttente.etatSuivant.terminee) {
+      setEtat(nouvelleSession());
+      setHistorique([]);
+    } else {
+      setEtat(enAttente.etatSuivant);
+    }
     setEnAttente(null);
   }
 
@@ -174,6 +209,7 @@ export function AppAnalyseFonction() {
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
+    setHistorique([]);
     setEtat(
       demarrerSessionAnalyseFonction(REGLAGES_DEMO, ETAPES_ACTIVES_DEMO, () => construireAvecVarianteId(varianteId as VarianteAnalyseFonctionId)),
     );
@@ -200,7 +236,7 @@ export function AppAnalyseFonction() {
         <h1 className="app-title">Analyse d'une fonction du second degré</h1>
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} onSegmentClick={(index) => setFicheOuverteIndex(index)} />
       </header>
 
       <main className="card">
@@ -220,7 +256,11 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               aideActivee={etat.aideCoefficientsUtilisee}
               onActiverAide={() => setEtat(activerAideCoefficients(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseCoefficients(etat, reponse))}
+              onValider={(reponse) => {
+                const nouvelEtat = soumettreReponseCoefficients(etat, reponse);
+                ajouterHistorique(`a = ${reponse.a} ; b = ${reponse.b} ; c = ${reponse.c}`, nouvelEtat);
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : etat.phase === "allure" ? (
@@ -229,7 +269,12 @@ export function AppAnalyseFonction() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
-              onValider={(reponse) => terminerEtape(soumettreReponseAllure(etat, reponse))}
+              onValider={(reponse) => {
+                const nouvelEtat = soumettreReponseAllure(etat, reponse);
+                const texteAB = reponse.signeAB === "0" ? "a·b = 0" : reponse.signeAB === "+" ? "a·b > 0" : "a·b < 0";
+                ajouterHistorique(`${reponse.signeA === "+" ? "a > 0" : "a < 0"} ; ${texteAB}`, nouvelEtat);
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : etat.phase === "axeSommet" ? (
@@ -240,7 +285,11 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideAxeSommetUtilisee}
               onActiverAide={() => setEtat(activerAideAxeSommet(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseAxeSommet(etat, reponse))}
+              onValider={(reponse) => {
+                const nouvelEtat = soumettreReponseAxeSommet(etat, reponse);
+                ajouterHistorique(`x = ${reponse.axeTexte} ; S(${reponse.xS} ; ${reponse.yS})`, nouvelEtat);
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : etat.phase === "domaineImage" ? (
@@ -251,7 +300,15 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               aideActivee={etat.aideDomaineImageUtilisee}
               onActiverAide={() => setEtat(activerAideDomaineImage(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseImage(etat, reponse))}
+              onValider={(reponse) => {
+                const nouvelEtat = soumettreReponseImage(etat, reponse);
+                const borne = (b: typeof reponse.borneGauche) => (b === "-inf" ? "-∞" : b === "+inf" ? "+∞" : String(b));
+                ajouterHistorique(
+                  `domf = ℝ ; imf = ${reponse.crochetGauche}${borne(reponse.borneGauche)} ; ${borne(reponse.borneDroite)}${reponse.crochetDroit}`,
+                  nouvelEtat,
+                );
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : etat.phase === "racinesReconnaissance" ? (
@@ -263,7 +320,11 @@ export function AppAnalyseFonction() {
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               question="Quelle est la méthode la plus rapide pour trouver les racines de f ?"
               options={OPTIONS_CATEGORIE_SANS_CAS_GENERAL}
-              onChoisir={(choix: Categorie) => terminerEtape(soumettreChoixRacinesCategorie(etat, choix))}
+              onChoisir={(choix: Categorie) => {
+                const nouvelEtat = soumettreChoixRacinesCategorie(etat, choix);
+                ajouterHistorique(libelleCategorie(choix), nouvelEtat);
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : etat.phase === "racinesChamp1" ? (
@@ -274,7 +335,11 @@ export function AppAnalyseFonction() {
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
               diagnostiquer={(v) => diagnostiquerChampPrincipal(etat.exerciceCourant.exercice, v)}
-              onValider={(reponse) => terminerEtape(soumettreReponseRacinesChamp1(etat, reponse))}
+              onValider={(reponse) => {
+                const nouvelEtat = soumettreReponseRacinesChamp1(etat, reponse);
+                ajouterHistorique(`${reponse} = 0`, nouvelEtat);
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : etat.phase === "racinesChamp2" ? (
@@ -284,7 +349,11 @@ export function AppAnalyseFonction() {
               tentativesMax={etat.reglages.tentativesMax}
               recapitulatif={recapitulatif}
               expressionAffichee={formatEnonceLatex(etat.exerciceCourant.exercice.enonce)}
-              onValider={(racines) => terminerEtape(soumettreReponseRacinesChamp2(etat, racines))}
+              onValider={(racines) => {
+                const nouvelEtat = soumettreReponseRacinesChamp2(etat, racines);
+                ajouterHistorique(racines.join(" ; "), nouvelEtat);
+                terminerEtape(nouvelEtat);
+              }}
               validation={validation}
             />
           ) : (
@@ -301,6 +370,10 @@ export function AppAnalyseFonction() {
           )}
         </div>
       </main>
+
+      {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (
+        <FicheReponseEcran entree={historique[ficheOuverteIndex]} onFermer={() => setFicheOuverteIndex(null)} />
+      )}
     </div>
   );
 }

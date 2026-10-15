@@ -174,6 +174,8 @@
   height: 6px;
   border-radius: 3px;
   background: var(--color-border);
+  border: none;
+  padding: 0;
 }
 
 .entrainement .progression-puce-correcte {
@@ -186,6 +188,22 @@
 
 .entrainement .progression-puce-courante {
   background: var(--color-primary);
+}
+
+/* Puce "correcte"/"revele" rendue comme <button> (voir `ProgressionPuces.onSegmentClick`) — même
+ * couleur que sa variante <span>, juste une affordance de clic en plus (jamais un changement de
+ * couleur, qui romprait la lecture rapide des puces non cliquables encore majoritaires sur le
+ * site). */
+.entrainement .progression-puce-cliquable {
+  cursor: pointer;
+  height: 9px;
+  margin-top: -1.5px;
+}
+
+.entrainement .progression-puce-cliquable:hover,
+.entrainement .progression-puce-cliquable:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text-muted);
+  outline: none;
 }
 
 .entrainement .progress-track {
@@ -772,6 +790,120 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
+}
+
+/* `FicheReponseEcran.tsx` — consultation en lecture seule d'un écran déjà clos, ouverte en cliquant
+ * une puce de `ProgressionPuces`. Même chrome overlay/panneau que `.calculatrice-overlay`/
+ * `-panneau` (fond ombré, fermeture au clic en dehors via `onClick={onFermer}` + `stopPropagation`
+ * sur le panneau), classes propres pour garder le nom lisible. */
+.entrainement .fiche-reponse-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background: rgba(24, 36, 48, 0.4);
+}
+
+.entrainement .fiche-reponse-panneau {
+  width: 100%;
+  max-width: 480px;
+  max-height: min(560px, calc(100vh - 32px));
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -8px 24px rgba(24, 36, 48, 0.22);
+  padding: 18px 20px 20px;
+}
+
+@media (min-width: 640px) {
+  .entrainement .fiche-reponse-overlay {
+    align-items: center;
+    padding: 16px;
+  }
+  .entrainement .fiche-reponse-panneau {
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 48px rgba(24, 36, 48, 0.22);
+  }
+}
+
+.entrainement .fiche-reponse-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.entrainement .fiche-reponse-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.entrainement .fiche-reponse-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  flex: none;
+}
+
+.entrainement .fiche-reponse-badge-correcte {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.entrainement .fiche-reponse-badge-incorrecte {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.entrainement .fiche-reponse-bloc {
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.entrainement .fiche-reponse-bloc-correcte {
+  background: var(--color-success-bg);
+}
+
+.entrainement .fiche-reponse-bloc-incorrecte {
+  background: var(--color-error-bg);
+}
+
+.entrainement .fiche-reponse-bloc-attendue {
+  background: var(--color-success-bg);
+  margin-bottom: 18px;
+}
+
+.entrainement .fiche-reponse-bloc-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.entrainement .fiche-reponse-bloc-valeur {
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.entrainement .fiche-reponse-fermer {
+  width: 100%;
 }
 
 /* "Ce qu'on sait déjà" (`RecapitulatifPanel.tsx`) — fond blanc/surface + bordure, même traitement
