@@ -182,6 +182,14 @@
   background: var(--color-success);
 }
 
+/* Correcte, mais avec le bouton "Aide" utilisé — même teinte que le bouton Aide/le bloc d'aide
+ * (`--color-tip`, déjà la couleur associée à "aide" partout sur le site), pour que l'élève associe
+ * immédiatement le jaune à "j'ai eu besoin d'un coup de pouce", distinct du vert (seul) et du rouge
+ * (tentatives épuisées). */
+.entrainement .progression-puce-aide {
+  background: var(--color-tip);
+}
+
 .entrainement .progression-puce-revele {
   background: var(--color-error);
 }

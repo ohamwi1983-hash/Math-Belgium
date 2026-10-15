@@ -1,11 +1,12 @@
-export type EtatPuceProgression = "correcte" | "revele" | "courante" | "a-venir";
+export type EtatPuceProgression = "correcte" | "aide" | "revele" | "courante" | "a-venir";
 
 interface Props {
   /** Une entrée par étape de l'exercice, DANS L'ORDRE où elles se déroulent — chaque appelant la
-   * construit à partir de ses propres champs `xxxRevele`/`scoreXxxExercice` déjà trackés par le
-   * moteur (jamais une valeur recalculée séparément) : "correcte" si `scoreXxx !== null &&
-   * !xxxRevele`, "revele" si `scoreXxx !== null && xxxRevele`, "courante" pour la phase
-   * actuellement affichée (`etat.phase === ...`), "a-venir" pour toute étape plus loin. */
+   * construit à partir de ses propres champs `xxxRevele`/`aideXxxUtilisee`/`scoreXxxExercice` déjà
+   * trackés par le moteur (jamais une valeur recalculée séparément) : "revele" si `scoreXxx !==
+   * null && xxxRevele`, "aide" si correcte MAIS avec `aideXxxUtilisee` (jamais pour une étape sans
+   * mécanisme d'aide), "correcte" si correcte sans aide, "courante" pour la phase actuellement
+   * affichée (`etat.phase === ...`), "a-venir" pour toute étape plus loin. */
   segments: EtatPuceProgression[];
   /** Consultation en lecture seule d'un écran déjà clos (voir `FicheReponseEcran.tsx`) — appelé
    * avec l'index du segment cliqué. Absent par défaut : les puces restent purement visuelles,
@@ -26,7 +27,7 @@ interface Props {
  */
 export function ProgressionPuces({ segments, onSegmentClick }: Props) {
   if (segments.length === 0) return null;
-  const nbClotures = segments.filter((etat) => etat === "correcte" || etat === "revele").length;
+  const nbClotures = segments.filter((etat) => etat === "correcte" || etat === "aide" || etat === "revele").length;
   const pourcentage = Math.round((nbClotures / segments.length) * 100);
 
   return (
@@ -37,14 +38,14 @@ export function ProgressionPuces({ segments, onSegmentClick }: Props) {
       </div>
       <div className="progression-puces-rangee">
         {segments.map((etat, index) => {
-          const consultable = onSegmentClick && (etat === "correcte" || etat === "revele");
+          const consultable = onSegmentClick && (etat === "correcte" || etat === "aide" || etat === "revele");
           return consultable ? (
             <button
               key={index}
               type="button"
               className={`progression-puce progression-puce-${etat} progression-puce-cliquable`}
               onClick={() => onSegmentClick(index)}
-              aria-label={`Revoir l'écran ${index + 1} (${etat === "revele" ? "incorrect" : "correct"})`}
+              aria-label={`Revoir l'écran ${index + 1} (${etat === "revele" ? "incorrect" : etat === "aide" ? "correct avec aide" : "correct"})`}
             />
           ) : (
             <span key={index} className={`progression-puce progression-puce-${etat}`} />

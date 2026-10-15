@@ -134,7 +134,11 @@ function calculerSegmentsProgression(etat: EtatSessionAnalyseFonction): EtatPuce
                 : phase === "racinesChamp1"
                   ? etat.racinesChamp1Revele
                   : etat.racinesChamp2Revele;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    // "allure"/"racines*" n'ont aucun mécanisme d'aide (toujours "correcte", jamais "aide").
+    const aideUtilisee =
+      phase === "coefficients" ? etat.aideCoefficientsUtilisee : phase === "axeSommet" ? etat.aideAxeSommetUtilisee : phase === "domaineImage" ? etat.aideDomaineImageUtilisee : false;
+    return aideUtilisee ? "aide" : "correcte";
   });
 }
 
