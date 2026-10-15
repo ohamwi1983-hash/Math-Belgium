@@ -1932,3 +1932,17 @@ paths:
   fichiers .js + les 4 fichiers TS/TSX modifiés — 2 avertissements de variable inutilisée trouvés
   et corrigés avant commit, `0` restant)/`npm run build` propres ; sitewide `regress_all_4321.mjs`
   sur les 23 chapitres : `0` erreur, `0` `NaN`/`undefined`, `0` `$` isolé.
+
+- **Nouvelle infra — formulaire de fin de chapitre** (`ChapterContent.formulaire`,
+  `components/chapter/Formulaire.tsx`, voir `.claude/rules/content-authoring.md`) : 4 maquettes
+  de présentation proposées à l'utilisateur dans un artifact (fiche de référence perforée / boîte
+  à outils par besoin / carte mentale relationnelle / accordéon par générateur), choix explicite
+  de la fiche de référence (« la A »). Prototypé sur `4e/equations-inequations-second-degre.ts`
+  (5 groupes thématiques — discriminant/racines, raccourcis, forme factorisée, signe du trinôme,
+  équation rationnelle — couvrant les 5 générateurs gen1-gen5 du chapitre). Rendu après `RecapFinal`
+  dans `ChapterPage`, style ajouté dans `index.css` (`.formulaire-*`, perforation en
+  `radial-gradient` répété, colonnes CSS `columns:2` → 1 sous 640px, sur le modèle déjà en place
+  pour `.synthese`). Vérifié par rendu navigateur réel (clair/sombre/mobile 390px) : `0`
+  `.katex-error`, `0` `$` isolé, aucun débordement horizontal sur mobile ; `tsc -b`/`npm run
+  build`/`npm run lint` propres (aucun avertissement nouveau). Rollout aux autres chapitres en
+  attente de confirmation utilisateur sur ce prototype.

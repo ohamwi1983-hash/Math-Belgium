@@ -44,6 +44,19 @@ ci-dessous.
 (`recap.table`, même forme que `featureTable`) sans liste à puces — cas rencontré dès qu'un
 chapitre récapitule plusieurs fonctions/objets comparables plutôt qu'une liste de principes.
 
+## `ChapterContent.formulaire` — formulaire de fin de chapitre
+
+Champ optionnel, sibling de `recap`, rendu après lui par `Formulaire`
+(`components/chapter/Formulaire.tsx`) — "fiche de référence" dense (perforation, 2 colonnes),
+design choisi par l'utilisateur parmi 4 propositions (voir `.claude/rules/content-history.md`).
+Contrairement à `recap` (synthèse narrative "ce qu'il faut retenir"), le formulaire ne rassemble
+QUE les formules effectivement nécessaires pour répondre aux questions des générateurs du
+chapitre — groupées par thème mathématique (`groups[].title` + `groups[].formulas`), jamais par
+générateur (une même formule sert souvent à plusieurs générateurs à la fois). `formulas[].text`
+et `formulas[].condition` passent par `RichText` (mêmes pièges `$...$`/`**gras**` que partout
+ailleurs) ; `groups[].title` est rendu en texte BRUT (comme les autres titres/labels listés
+ci-dessus), jamais de LaTeX dedans.
+
 ## Mini-syntaxe `RichText` (KaTeX + gras)
 
 Le texte de tous les champs `text`/`items`/`formula` supporte une mini-syntaxe : `$latex$` pour

@@ -2,6 +2,7 @@ import type { ChapterContent } from '../../content/types'
 import { RichText } from '../Math'
 import { BlockList } from './BlockRenderer'
 import { RecapFinal } from './RecapFinal'
+import { Formulaire } from './Formulaire'
 import { ExerciseGeneratorSection } from './ExerciseGeneratorSection'
 import { ExportSection } from './ExportSection'
 import { LectureAids } from './LectureAids'
@@ -85,6 +86,7 @@ export function ChapterPage({ chapter }: { chapter: ChapterContent }) {
         ))}
 
         <RecapFinal recap={chapter.recap} />
+        <Formulaire formulaire={chapter.formulaire} chapter={chapter} />
 
         <ExerciseGeneratorSection chapter={chapter} />
         <ExportSection chapter={chapter} />

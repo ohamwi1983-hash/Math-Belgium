@@ -1023,6 +1023,23 @@ export type Block =
       direction?: 'forward' | 'backward'
     }
 
+export interface FormulaireFormule {
+  /** Passe par `RichText` (`$latex$`/`**gras**`) — voir `.claude/rules/content-authoring.md`. */
+  text: string
+  /** Note courte sous la formule (ex. condition de validité, piège) — passe aussi par `RichText`. */
+  condition?: string
+}
+
+export interface FormulaireGroupe {
+  /** Titre court du groupe thématique (ex. "Discriminant & racines") — texte brut, pas de RichText. */
+  title: string
+  formulas: FormulaireFormule[]
+}
+
+export interface FormulaireData {
+  groups: FormulaireGroupe[]
+}
+
 export interface ChapterSection {
   id: string
   number: number
@@ -1047,6 +1064,13 @@ export interface ChapterContent {
     blocks: Block[]
   }
   sections: ChapterSection[]
+  /**
+   * Formulaire de fin de chapitre : toutes les formules nécessaires pour répondre aux questions
+   * des générateurs du chapitre, groupées par thème mathématique (pas par générateur — une même
+   * formule sert souvent à plusieurs générateurs à la fois). Rendu après `recap` par `Formulaire`
+   * (`components/chapter/Formulaire.tsx`). Optionnel : un chapitre peut ne pas (encore) en avoir.
+   */
+  formulaire?: FormulaireData
   recap: {
     /** Optionnel : certaines synthèses sont purement tabulaires (voir `table`), sans liste à puces. */
     items?: string[]

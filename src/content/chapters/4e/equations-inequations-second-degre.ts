@@ -1006,6 +1006,57 @@ export const equationsInequationsSecondDegre: ChapterContent = {
     },
   ],
 
+  formulaire: {
+    groups: [
+      {
+        title: 'Discriminant & racines',
+        formulas: [
+          { text: '$\\Delta = b^2-4ac$' },
+          {
+            text: '$x = \\dfrac{-b \\pm \\sqrt{\\Delta}}{2a}$',
+            condition: 'si $\\Delta \\ge 0$ — racine double si $\\Delta=0$',
+          },
+          { text: '$\\Delta < 0$ → aucune racine réelle' },
+        ],
+      },
+      {
+        title: 'Raccourcis avant Δ',
+        formulas: [
+          {
+            text: '$ax^2+bx=0 \\Rightarrow x(ax+b)=0$',
+            condition: '$x=0$ ou $x=-b/a$',
+          },
+          {
+            text: '$ax^2+c=0 \\Rightarrow x = \\pm\\sqrt{-c/a}$',
+            condition: 'valable seulement si $a$, $c$ de signes opposés',
+          },
+        ],
+      },
+      {
+        title: 'Forme factorisée',
+        formulas: [
+          { text: '$ax^2+bx+c = a(x-x_1)(x-x_2)$' },
+          { text: '$x_1+x_2=-b/a \\quad x_1 \\cdot x_2 = c/a$' },
+        ],
+      },
+      {
+        title: 'Signe du trinôme',
+        formulas: [
+          { text: '$\\Delta<0$ → signe de $a$, partout' },
+          { text: '$\\Delta=0$ → signe de $a$, nul en $x=r$' },
+          { text: '$\\Delta>0$ → signe de $a$ hors $[x_1;x_2]$, opposé entre' },
+        ],
+      },
+      {
+        title: 'Équation rationnelle',
+        formulas: [
+          { text: 'CE : dénominateur $\\neq 0$' },
+          { text: 'facteur $\\times$ facteur $=0$ → l\'un des deux $=0$' },
+        ],
+      },
+    ],
+  },
+
   recap: {
     items: [
       '**Résoudre** — regarde d\'abord si c=0, ou b=0, ou Δ=0 (carré parfait), ou si une ' +

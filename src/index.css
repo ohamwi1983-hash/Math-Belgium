@@ -845,6 +845,40 @@ figcaption {
   margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); font-size: 0.95rem; color: var(--ink-faint);
 }
 
+/* ---------- formulaire de fin de chapitre ("fiche de référence") ---------- */
+.formulaire {
+  margin-top: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; box-shadow: 0 1px 0 var(--line-soft);
+}
+.formulaire-perfore {
+  height: 14px; background-color: var(--surface); border-bottom: 1px dashed var(--line);
+  background-image: radial-gradient(circle at 50% 100%, var(--paper) 5px, transparent 5.5px);
+  background-size: 22px 100%; background-position: 11px 0;
+}
+.formulaire-entete {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 18px 24px 15px; border-bottom: 2px solid var(--accent);
+}
+.formulaire-entete h2 { font-size: 1.2rem; margin: 0; }
+.formulaire-meta {
+  margin: 0; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-align: right;
+  white-space: nowrap; line-height: 1.5;
+}
+.formulaire-corps { padding: 20px 24px 24px; columns: 2; column-gap: 28px; }
+@media (max-width: 640px) { .formulaire-corps { columns: 1; } }
+.formulaire-groupe { break-inside: avoid; margin-bottom: 20px; }
+.formulaire-groupe h3 {
+  font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent-ink); font-weight: 600; margin: 0 0 9px; padding-left: 9px; border-left: 2px solid var(--accent);
+}
+.formulaire-formule { padding: 8px 10px 8px 12px; border-left: 2px solid var(--line); margin-bottom: 7px; }
+.formulaire-f { display: block; font-size: 0.97rem; color: var(--ink); line-height: 1.5; }
+.formulaire-cond { display: block; font-size: 0.8rem; color: var(--ink-soft); margin-top: 3px; }
+.formulaire-pied {
+  display: flex; justify-content: space-between; gap: 10px; padding: 10px 24px; background: var(--surface-2);
+  border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--ink-faint);
+}
+
 /* ---------- chaîne d'opérations (operationChain) ---------- */
 .chain-row {
   display: flex; flex-wrap: wrap; align-items: center; gap: 4px 2px; margin: 20px 0;
