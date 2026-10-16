@@ -2509,6 +2509,12 @@
   stroke-width: 1.5;
 }
 
+.entrainement .croquis-equation-inequation-diagonale {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
 .entrainement .croquis-equation-inequation-label {
   font-size: 14px;
   font-weight: 700;

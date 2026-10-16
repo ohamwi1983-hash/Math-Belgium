@@ -22,6 +22,10 @@ export function CroquisEquationInequationSecondDegre({ croquis }: Props) {
       return <CroquisEnclosAdosseMur />;
     case "triangleRectangleCathetes":
       return <CroquisTriangleRectangleCathetes />;
+    case "cerfVolantDiagonales":
+      return <CroquisCerfVolantDiagonales />;
+    case "facadeMaisonToit":
+      return <CroquisFacadeMaisonToit />;
     case "perimetreAire":
       return <CroquisPerimetreAire />;
   }
@@ -158,6 +162,72 @@ function CroquisTriangleRectangleCathetes() {
         className="croquis-equation-inequation-angle-droit"
       />
       <text x={(sommetDroit.x + sommetBas.x) / 2} y={sommetBas.y + 20} className="croquis-equation-inequation-label">
+        x
+      </text>
+    </svg>
+  );
+}
+
+/**
+ * Famille B (`cerfVolantDiagonales`) — un losange/cerf-volant, formé de 2 (ou 4) triangles
+ * JUXTAPOSÉS le long de ses diagonales (demande explicite "encore d'autres formes... triangles
+ * juxtaposées") : les 2 diagonales, dessinées en pointillés pour montrer le découpage en
+ * triangles, ne sont pas elles-mêmes des côtés du quadrilatère (contour en trait plein). Seule la
+ * diagonale horizontale (x, nommée dans l'énoncé) est annotée — la diagonale verticale (S-x)
+ * n'est jamais nommée dans l'énoncé, donc jamais labellisée ici non plus.
+ */
+function CroquisCerfVolantDiagonales() {
+  const gauche = { x: 40, y: 80 };
+  const droite = { x: 180, y: 80 };
+  const haut = { x: 110, y: 20 };
+  const bas = { x: 110, y: 140 };
+
+  return (
+    <svg
+      className="croquis-equation-inequation"
+      viewBox="0 0 220 170"
+      role="img"
+      aria-label="Losange (cerf-volant) : diagonale horizontale x, diagonale verticale non nommée, découpé en triangles par ses diagonales"
+    >
+      <polygon points={`${haut.x},${haut.y} ${droite.x},${droite.y} ${bas.x},${bas.y} ${gauche.x},${gauche.y}`} className="croquis-equation-inequation-rectangle" />
+      <line x1={gauche.x} y1={gauche.y} x2={droite.x} y2={droite.y} className="croquis-equation-inequation-diagonale" />
+      <line x1={haut.x} y1={haut.y} x2={bas.x} y2={bas.y} className="croquis-equation-inequation-diagonale" />
+      <text x={(gauche.x + droite.x) / 2} y={gauche.y - 14} className="croquis-equation-inequation-label">
+        x
+      </text>
+    </svg>
+  );
+}
+
+/**
+ * Famille B (`facadeMaisonToit`) — UNIQUE figure du générateur combinant rectangle ET triangle
+ * JUXTAPOSÉS (demande explicite "rectangles avec triangles juxtaposées") : la façade est dessinée
+ * comme UN SEUL contour en forme de maison (mur rectangulaire + toit triangulaire), avec une ligne
+ * de séparation pointillée entre les deux pour visualiser la décomposition (mur en bas, toit en
+ * haut) sans jamais y inscrire de valeur chiffrée. Seule la largeur commune (x, nommée dans
+ * l'énoncé) est annotée, en bas — la hauteur du mur (S-x) et la hauteur du toit (fixe) ne sont
+ * jamais nommées par une lettre dans l'énoncé, donc jamais labellisées ici non plus.
+ */
+function CroquisFacadeMaisonToit() {
+  const basGauche = { x: 40, y: 140 };
+  const basDroit = { x: 180, y: 140 };
+  const hautGauche = { x: 40, y: 70 };
+  const hautDroit = { x: 180, y: 70 };
+  const faite = { x: 110, y: 25 };
+
+  return (
+    <svg
+      className="croquis-equation-inequation"
+      viewBox="0 0 220 170"
+      role="img"
+      aria-label="Façade d'une maison : mur rectangulaire de largeur x surmonté d'un toit triangulaire de même largeur"
+    >
+      <polygon
+        points={`${basGauche.x},${basGauche.y} ${basDroit.x},${basDroit.y} ${hautDroit.x},${hautDroit.y} ${faite.x},${faite.y} ${hautGauche.x},${hautGauche.y}`}
+        className="croquis-equation-inequation-rectangle"
+      />
+      <line x1={hautGauche.x} y1={hautGauche.y} x2={hautDroit.x} y2={hautDroit.y} className="croquis-equation-inequation-diagonale" />
+      <text x={(basGauche.x + basDroit.x) / 2} y={basGauche.y + 20} className="croquis-equation-inequation-label">
         x
       </text>
     </svg>

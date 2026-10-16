@@ -9,11 +9,14 @@
  *   DIRECTEMENT révélée dans l'énoncé (formule développée visible). Séquence à 4 écrans :
  *   `poserEquationInequation → resoudre → validation → interpretation`.
  * - **B — "construction géométrique"** (`rectanglePerimetre`/`enclosAdosseMur`/
- *   `triangleRectangleCathetes`) : AUCUNE formule révélée — seulement les données géométriques
- *   (périmètre/longueur de clôture/somme des cathètes fixés) et le seuil visé. L'élève doit
+ *   `triangleRectangleCathetes`/`cerfVolantDiagonales`/`facadeMaisonToit`) : AUCUNE formule
+ *   révélée — seulement les données géométriques (périmètre/longueur de clôture/somme des
+ *   cathètes ou des diagonales/dimensions de façade fixées) et le seuil visé. L'élève doit
  *   construire lui-même `f(x)` avant de poser l'équation/l'inéquation. Mêmes 4 écrans que A
  *   (réutilisés tels quels — seule la quantité d'information révélée dans l'énoncé change, pas le
- *   mécanisme de vérification).
+ *   mécanisme de vérification). Figures volontairement variées (rectangle, triangle rectangle,
+ *   losange/cerf-volant — triangles juxtaposés le long d'une diagonale —, façade en forme de
+ *   maison — rectangle ET triangle juxtaposés), pas seulement des rectangles.
  * - **C — "problèmes de nombres classiques"** (`produitEntiersConsecutifs`/`carreMoinsNombre`) :
  *   aucun contexte physique, une relation verbale entre un entier naturel et lui-même (produit de 2
  *   entiers consécutifs, carré diminué du nombre...). Construction DIFFÉRENTE de A/B (pas de sommet
@@ -41,6 +44,8 @@ export type FamilleEquationInequationSecondDegre =
   | "rectanglePerimetre"
   | "enclosAdosseMur"
   | "triangleRectangleCathetes"
+  | "cerfVolantDiagonales"
+  | "facadeMaisonToit"
   // C — problèmes de nombres classiques
   | "produitEntiersConsecutifs"
   | "carreMoinsNombre"
@@ -78,6 +83,8 @@ export type CroquisEquationInequationSecondDegre =
   | { type: "rectanglePerimetre" }
   | { type: "enclosAdosseMur" }
   | { type: "triangleRectangleCathetes" }
+  | { type: "cerfVolantDiagonales" }
+  | { type: "facadeMaisonToit" }
   | { type: "perimetreAire" };
 
 /** Toutes les données narratives — `phraseEnonce` NE révèle PAS toujours `f(x)` développée
