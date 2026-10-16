@@ -127,12 +127,12 @@ import {
   formatExpressionIsoleeNiveau4Latex,
   formatExpressionIsoleeSansFacteurCommunLatex,
 } from "./ui/formatInequationRationnelle";
-import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee } from "./ui/formatSimplification";
+import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee, formatPolynome } from "./ui/formatSimplification";
 import { formatLineaireDeveloppe } from "./ui/formatSignesProduit";
 import { formatFormeFactoriseeDepuisRacines, formatMembreGauche } from "./ui/formatEquation";
 import { formatSolutionEnsembleProduit } from "./ui/formatSolutionEnsembleProduit";
 import { libelleCategorie } from "./ui/categorieLabels";
-import { necessiteSimplification } from "./moteur/simplificationEquation";
+import { enonceSimplifie, facteurCommun, necessiteSimplification } from "./moteur/simplificationEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -151,6 +151,27 @@ function numerateurFacteurCommun(exercice: ExerciceInequationRationnelleFacteurC
   const n = exercice.fraction.numerateur;
   if (estPolynomeLineaire(n)) throw new Error("numerateurFacteurCommun : attendu un P2");
   return n;
+}
+
+/** "k(...)" — mise en évidence confirmée pour un P2 de la variante facteurCommun (D ou N), jamais
+ * divisée par k (voir moteur/verificationSimplification.ts) — même formule que
+ * `ui/recapitulatifInequationRationnelle.ts::formatMiseEnEvidence`, dupliquée ici car cette
+ * fonction n'est pas exportée. */
+function formatMiseEnEvidenceLatex(poly: Exercice): string {
+  return `${facteurCommun(poly.enonce)}(${formatMembreGauche(enonceSimplifie(poly.enonce))})`;
+}
+
+/** "Δ = ..." ou forme factorisée (KaTeX) pour un P2 dont le champ1 vient d'être confirmé — même
+ * disjonction que `ui/recapitulatifInequationRationnelle.ts::entreeChamp1`, réutilisée pour TOUTES
+ * les occurrences de ce motif dans `reponseAttenduePhase` (bug corrigé : plusieurs d'entre elles
+ * renvoyaient `null` sans jamais afficher la réponse attendue, voir en-tête de fonction). */
+function reponseChamp1Node(p2: Exercice, suffixe: string): ReactNode {
+  return (
+    <>
+      Réponse attendue ({suffixe}) :{" "}
+      {p2.categorie === "cas_general" ? `Δ = ${p2.solution.delta}` : <Katex expression={`${p2.solution.formeFactorisee} = 0`} />}
+    </>
+  );
 }
 
 const CONSIGNE_GENERALE = "Résous cette inéquation rationnelle.";
@@ -526,14 +547,21 @@ function releveRevelePhase(etat: EtatSessionInequationRationnelle, nouvelEtat: E
   }
 }
 
-/** Reproduit exactement ce que `ResultatPanelInequationRationnelle.tsx` affichait (bloc
- * "answer-reveal") pour UNE phase donnée, scopé à l'exercice/phase qui vient juste de se terminer
- * (`etat.exerciceCourant`/`etat.phase`, jamais l'état suivant). Cet ancien panneau n'avait PAS de
- * bloc "answer-reveal" pour plusieurs phases (seule la ligne colorée du récapitulatif existait :
- * "denomReduction", "denomReconnaissance", "denomChamp1", "reduction", "reconnaissance", "champ1",
- * et toutes les étapes "Réduction"/"Reconnaissance"/"Factorisation finale" du groupe "simplifier*"
- * — seuls "simplifierXxxChamp1/Champ2/Factorisation" et "isoler" en sansFacteurCommun manquent eux
- * aussi) — fidèlement reproduit ici par `null` (pas de contenu ajouté qui n'existait pas avant). */
+/** Calcule le bloc "Réponse attendue" affiché dans la fiche de consultation (`FicheReponseEcran`)
+ * pour UNE phase donnée, scopé à l'exercice/phase qui vient juste de se terminer
+ * (`etat.exerciceCourant`/`etat.phase`, jamais l'état suivant).
+ *
+ * Avait initialement reproduit tel quel un ancien panneau (`ResultatPanelInequationRationnelle.tsx`)
+ * qui n'avait PAS de bloc "answer-reveal" pour plusieurs phases — `null` partout pour "isoler" en
+ * sansFacteurCommun, "denomReduction"/"denomReconnaissance"/"denomChamp1",
+ * "reduction"/"reconnaissance"/"champ1", "simplifierDenomReduction"/"simplifierNumReduction" — ce
+ * qui faisait disparaître silencieusement "Réponse attendue" dans la fiche de consultation pour ces
+ * phases dès qu'elles étaient ratées (bug signalé par l'utilisateur, 2026-10-16 : "on ne voit pas
+ * toujours réponse attendue dans la consultation des écrans précédents"). Corrigé en complétant
+ * chaque branche manquante avec exactement la même logique/formatage que
+ * `ui/recapitulatifInequationRationnelle.ts::calculerRecapitulatifInequationRationnelle`, qui
+ * calculait déjà ces valeurs pour le récapitulatif live mais n'était jamais consultée ici — source
+ * du décalage entre les deux fonctions. */
 function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode {
   const exercice = etat.exerciceCourant;
   switch (etat.phase) {
@@ -560,6 +588,12 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         return (
           <>
             Forme isolée attendue : <Katex expression={formatExpressionIsoleeDenominateurCarreLatex(exercice)} />
+          </>
+        );
+      if (exercice.niveau === "sansFacteurCommun")
+        return (
+          <>
+            Forme isolée attendue : <Katex expression={formatExpressionIsoleeSansFacteurCommunLatex(exercice)} />
           </>
         );
       return null;
@@ -604,8 +638,18 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       }
       return null;
     case "denomReduction":
+      if (exercice.niveau === "sansFacteurCommun")
+        return (
+          <>
+            Dénominateur réduit attendu : <Katex expression={formatPolynome(exercice.denominateur)} />
+          </>
+        );
+      return null;
     case "denomReconnaissance":
+      if (exercice.niveau === "sansFacteurCommun") return <>Méthode attendue (dénominateur) : {libelleCategorie(exercice.denominateur.categorie)}</>;
+      return null;
     case "denomChamp1":
+      if (exercice.niveau === "sansFacteurCommun") return reponseChamp1Node(exercice.denominateur, "dénominateur");
       return null;
     case "denomFactorisation":
       if (exercice.niveau === "sansFacteurCommun") {
@@ -628,8 +672,28 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
         );
       return null;
     case "reduction":
+      if (exercice.niveau === "niveau3" || exercice.niveau === "niveau4" || exercice.niveau === "denominateurCarre" || exercice.niveau === "sansFacteurCommun")
+        return (
+          <>
+            Numérateur combiné réduit attendu : <Katex expression={formatPolynome(exercice.numerateur)} />
+          </>
+        );
+      if (exercice.niveau === "cubique")
+        return (
+          <>
+            Facteur quadratique réduit attendu : <Katex expression={formatPolynome(exercice.numerateur)} />
+          </>
+        );
+      return null;
     case "reconnaissance":
+      if (exercice.niveau === "niveau3" || exercice.niveau === "niveau4" || exercice.niveau === "denominateurCarre" || exercice.niveau === "sansFacteurCommun")
+        return <>Méthode attendue (numérateur combiné) : {libelleCategorie(exercice.numerateur.categorie)}</>;
+      if (exercice.niveau === "cubique") return <>Méthode attendue (facteur quadratique) : {libelleCategorie(exercice.numerateur.categorie)}</>;
+      return null;
     case "champ1":
+      if (exercice.niveau === "niveau3" || exercice.niveau === "niveau4" || exercice.niveau === "denominateurCarre" || exercice.niveau === "sansFacteurCommun")
+        return reponseChamp1Node(exercice.numerateur, "numérateur combiné");
+      if (exercice.niveau === "cubique") return reponseChamp1Node(exercice.numerateur, "facteur quadratique");
       return null;
     case "champ2":
       if (
@@ -661,6 +725,13 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       }
       return null;
     case "simplifierDenomReduction":
+      if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.denominateur) {
+        return (
+          <>
+            Dénominateur mis en évidence attendu : <Katex expression={formatMiseEnEvidenceLatex(exercice.fraction.denominateur)} />
+          </>
+        );
+      }
       return null;
     case "simplifierDenomReconnaissance":
       if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.denominateur) {
@@ -669,17 +740,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       return null;
     case "simplifierDenomChamp1":
       if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.denominateur) {
-        const d = exercice.fraction.denominateur;
-        return (
-          <>
-            Réponse attendue (dénominateur) :{" "}
-            {d.categorie === "cas_general" ? (
-              `Δ = ${d.solution.delta}`
-            ) : (
-              <Katex expression={`${d.solution.formeFactorisee} = 0`} />
-            )}
-          </>
-        );
+        return reponseChamp1Node(exercice.fraction.denominateur, "dénominateur");
       }
       return null;
     case "simplifierDenomChamp2":
@@ -698,6 +759,13 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       }
       return null;
     case "simplifierNumReduction":
+      if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.numerateur) {
+        return (
+          <>
+            Numérateur mis en évidence attendu : <Katex expression={formatMiseEnEvidenceLatex(exercice.fraction.numerateur)} />
+          </>
+        );
+      }
       return null;
     case "simplifierNumReconnaissance":
       if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.numerateur) {
@@ -706,17 +774,7 @@ function reponseAttenduePhase(etat: EtatSessionInequationRationnelle): ReactNode
       return null;
     case "simplifierNumChamp1":
       if (exercice.niveau === "facteurCommun" && "categorie" in exercice.fraction.numerateur) {
-        const n = exercice.fraction.numerateur;
-        return (
-          <>
-            Réponse attendue (numérateur) :{" "}
-            {n.categorie === "cas_general" ? (
-              `Δ = ${n.solution.delta}`
-            ) : (
-              <Katex expression={`${n.solution.formeFactorisee} = 0`} />
-            )}
-          </>
-        );
+        return reponseChamp1Node(exercice.fraction.numerateur, "numérateur");
       }
       return null;
     case "simplifierNumChamp2":
