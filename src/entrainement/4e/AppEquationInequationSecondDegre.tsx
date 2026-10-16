@@ -3,15 +3,9 @@ import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
   demarrerSessionEquationInequationSecondDegre,
-  soumettreReponseContrainteEtGrandeur,
-  soumettreReponseDomaine,
-  soumettreReponseEliminerSysteme,
-  soumettreReponseIdentification,
   soumettreReponseInterpretation,
   soumettreReponsePoserEquationInequation,
-  soumettreReponsePoserSysteme,
   soumettreReponseResoudre,
-  soumettreReponseSysteme,
   soumettreReponseValidationEquation,
   soumettreReponseValidationInequation,
 } from "./moteur/sessionEquationInequationSecondDegre";
@@ -27,25 +21,12 @@ import type { FamilleEquationInequationSecondDegre, VarianteEquationInequationSe
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationInequationSecondDegre } from "./ui/recapitulatifEquationInequationSecondDegre";
-import { EtapePoserSystemeEquationInequationSecondDegre } from "./components/EtapePoserSystemeEquationInequationSecondDegre";
-import { EtapeEliminerSystemeEquationInequationSecondDegre } from "./components/EtapeEliminerSystemeEquationInequationSecondDegre";
-import { EtapeIdentificationOptimisation } from "./components/EtapeIdentificationOptimisation";
-import { EtapeContrainteEtGrandeurOptimisation } from "./components/EtapeContrainteEtGrandeurOptimisation";
-import { EtapeSystemeOptimisation } from "./components/EtapeSystemeOptimisation";
-import { EtapeDomaineOptimisation } from "./components/EtapeDomaineOptimisation";
 import { EtapePoserEquationInequationSecondDegre } from "./components/EtapePoserEquationInequationSecondDegre";
 import { EtapeResoudreEquationInequationSecondDegre } from "./components/EtapeResoudreEquationInequationSecondDegre";
 import { EtapeValidationEquationInequationSecondDegre } from "./components/EtapeValidationEquationInequationSecondDegre";
 import { EtapeInterpretationEquationInequationSecondDegre } from "./components/EtapeInterpretationEquationInequationSecondDegre";
 import { QuestionFinale } from "./components/QuestionFinale";
-import { formatDomaineLatex, formatFonctionDeveloppeeLatex, formatSystemeAccoladeLatex } from "./ui/formatOptimisation";
-import {
-  formatEquationInequationLatex,
-  formatResolutionAttendueTexte,
-  formatValidationAttendueTexte,
-  texteAideEliminerSystemeNiveau2,
-  texteAidePoserSystemeNiveau2,
-} from "./ui/formatEquationInequationSecondDegre";
+import { formatEquationInequationLatex, formatResolutionAttendueTexte, formatValidationAttendueTexte } from "./ui/formatEquationInequationSecondDegre";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -75,12 +56,6 @@ const OPTIONS_DEV = PAIRES_VALIDES.map((p) => ({
 }));
 
 const LIBELLE_PHASE: Record<PhaseEquationInequationSecondDegre, string> = {
-  poserSysteme: "Poser le système",
-  eliminerSysteme: "Éliminer le terme xy",
-  identification: "Identifier x et y",
-  contrainteEtGrandeur: "Poser la contrainte et exprimer la grandeur",
-  systeme: "Résoudre le système",
-  domaine: "Domaine de validité",
   poserEquationInequation: "Poser l'équation/l'inéquation",
   resoudre: "Résolution",
   validation: "Validation contextuelle",
@@ -105,18 +80,6 @@ export function AppEquationInequationSecondDegre() {
     if (transitionDEcran) {
       const revele = (() => {
         switch (etat.phase) {
-          case "poserSysteme":
-            return nouvelEtat.poserSystemeRevele;
-          case "eliminerSysteme":
-            return nouvelEtat.eliminerSystemeRevele;
-          case "identification":
-            return nouvelEtat.identificationRevele;
-          case "contrainteEtGrandeur":
-            return nouvelEtat.contrainteEtGrandeurRevele;
-          case "systeme":
-            return nouvelEtat.systemeRevele;
-          case "domaine":
-            return nouvelEtat.domaineRevele;
           case "poserEquationInequation":
             return nouvelEtat.poserEquationInequationRevele;
           case "resoudre":
@@ -155,22 +118,6 @@ export function AppEquationInequationSecondDegre() {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
           switch (etat.phase) {
-            case "poserSysteme":
-              return <Katex expression={texteAidePoserSystemeNiveau2(exercice)} />;
-            case "eliminerSysteme":
-              return <Katex expression={texteAideEliminerSystemeNiveau2(exercice)} />;
-            case "identification":
-              return undefined;
-            case "contrainteEtGrandeur":
-              return exercice.base.variante === "modelisation" ? (
-                <Katex expression={formatSystemeAccoladeLatex(exercice.base)} />
-              ) : undefined;
-            case "systeme":
-              return exercice.base.variante === "modelisation" ? (
-                <Katex expression={formatFonctionDeveloppeeLatex(exercice.base.fonction, exercice.base.contexte.labelVariable)} />
-              ) : undefined;
-            case "domaine":
-              return <Katex expression={formatDomaineLatex(exercice.base.domaine, exercice.base.contexte.labelVariable)} />;
             case "poserEquationInequation":
               return <Katex expression={formatEquationInequationLatex(exercice)} />;
             case "resoudre":
@@ -205,65 +152,7 @@ export function AppEquationInequationSecondDegre() {
         <div className="card-body">
           <RecapitulatifPanel entrees={recapitulatif} />
           <QuestionFinale question={exercice.questionFinale} />
-          {etat.phase === "poserSysteme" ? (
-            <EtapePoserSystemeEquationInequationSecondDegre
-              exercice={exercice}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAidePoserSysteme}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponsePoserSysteme(etat, reponse))}
-              validation={validation}
-            />
-          ) : etat.phase === "eliminerSysteme" ? (
-            <EtapeEliminerSystemeEquationInequationSecondDegre
-              exercice={exercice}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAideEliminerSysteme}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseEliminerSysteme(etat, texte))}
-              validation={validation}
-            />
-          ) : etat.phase === "identification" && exercice.base.variante === "modelisation" ? (
-            <EtapeIdentificationOptimisation
-              exercice={exercice.base}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              onValider={(reponse) => terminerEtape(soumettreReponseIdentification(etat, reponse))}
-              validation={validation}
-            />
-          ) : etat.phase === "contrainteEtGrandeur" && exercice.base.variante === "modelisation" ? (
-            <EtapeContrainteEtGrandeurOptimisation
-              exercice={exercice.base}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAideContrainteEtGrandeur}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseContrainteEtGrandeur(etat, reponse))}
-              validation={validation}
-            />
-          ) : etat.phase === "systeme" && exercice.base.variante === "modelisation" ? (
-            <EtapeSystemeOptimisation
-              exercice={exercice.base}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAideSysteme}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(texte) => terminerEtape(soumettreReponseSysteme(etat, texte))}
-              validation={validation}
-            />
-          ) : etat.phase === "domaine" && exercice.base.variante === "modelisation" ? (
-            <EtapeDomaineOptimisation
-              exercice={exercice.base}
-              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
-              tentativesMax={etat.reglages.tentativesMax}
-              niveauAide={etat.niveauAideDomaine}
-              onActiverAide={() => setEtat(activerAideSuivante(etat))}
-              onValider={(reponse) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
-              validation={validation}
-            />
-          ) : etat.phase === "poserEquationInequation" ? (
+          {etat.phase === "poserEquationInequation" ? (
             <EtapePoserEquationInequationSecondDegre
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}

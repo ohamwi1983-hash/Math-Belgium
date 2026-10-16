@@ -1,19 +1,14 @@
 /**
  * Couche B — vérification pour "Équations/inéquations du second degré en contexte" (position 57).
- * Écrans 1-4 (identification/contrainteEtGrandeur/systeme/domaine) : réutilisent DIRECTEMENT
- * `verifierIdentification`/`verifierContrainteEtGrandeur`/`verifierSysteme`/`verifierDomaine`
- * (`moteur/verificationOptimisation.ts`, moteur→moteur explicitement autorisé) sur `exercice.base`
- * — voir CLAUDE.md pour la justification complète de cette réutilisation directe. Ce module ne
- * porte donc que les écrans 0a/0b (`voieSysteme`) et 5-8, propres à ce générateur.
- * `evaluerQuadratiqueLocal` est une PETITE fonction dupliquée depuis
- * `generateurs/optimisation/optimum.ts::evaluerQuadratique` (déjà dupliquée à l'identique dans
- * `verificationOptimisation.ts` — même principe, `src/moteur/` n'importe jamais `src/generateurs/`).
+ * Ce module ne porte plus que les écrans "poserEquationInequation"/"resoudre"/"validation"/
+ * "interpretation", les 4 seuls restants depuis la refonte (voir
+ * `core/equationInequationSecondDegre.types.ts`, en-tête) — toutes les fonctions liées au système à
+ * 2 inconnues (`diagnostiquerSystemeReel`/`diagnostiquerSystemeHypothetique`/
+ * `diagnostiquerEliminationSysteme`, ancienne famille `achatGroupe`) ont disparu avec lui.
  */
-import type { CoefficientsQuadratiques } from "../core/optimisation.types";
-import type { ExerciceEquationInequationSecondDegre, IntervalleBorne } from "../core/equationInequationSecondDegre.types";
+import type { CoefficientsQuadratiques, ExerciceEquationInequationSecondDegre, IntervalleBorne } from "../core/equationInequationSecondDegre.types";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
 import { parserNombreOuFraction } from "./verificationAnalyseFonction";
-import { diagnostiquerEquivalenceQuadratiqueXY } from "./verificationEquationCercle";
 import type { StatutVerification } from "./statutVerification";
 
 function evaluerQuadratiqueLocal(fonction: CoefficientsQuadratiques, x: number): number {
@@ -23,61 +18,6 @@ function evaluerQuadratiqueLocal(fonction: CoefficientsQuadratiques, x: number):
 const POINTS_ECHANTILLON = [-3, -2, -1, 1, 2, 3, 4, 5, 7];
 const TOLERANCE_EQUATION = 1e-4;
 const TOLERANCE = 0.005;
-
-// ============================================================================
-// Écrans "poserSysteme"/"eliminerSysteme" — `voieSysteme` uniquement (famille `achatGroupe`).
-// Réutilisent DIRECTEMENT `diagnostiquerEquivalenceQuadratiqueXY` (`verificationEquationCercle.ts`,
-// moteur→moteur, déjà exportée et généralisée à "une cible quadratique à 2 variables quelconque" —
-// voir CLAUDE.md, "Création — cinquante-septième exercice"). L'ancrage `(x0,y0)` de vérification est
-// TOUJOURS le point (prix réel, quantité réelle) — l'unique racine valide et la quantité qui lui
-// correspond via la contrainte isolée — qui satisfait par construction les 3 équations (réelle,
-// hypothétique, éliminée), voir `generateurs/equationInequationSecondDegre/familles/achatGroupe.ts`.
-// ============================================================================
-
-function ancrageSysteme(exercice: Extract<ExerciceEquationInequationSecondDegre, { variante: "equation" }>): { x0: number; y0: number } {
-  const x0 = exercice.racinesValides[0]!;
-  // `voieSysteme` (achatGroupe, seule consommatrice) est toujours `base.variante==="modelisation"`
-  // (jamais fonctionDonnee) — voir en-tête de fichier et `familles/achatGroupe.ts`.
-  if (exercice.base.variante !== "modelisation") throw new Error("ancrageSysteme : accessible uniquement pour une famille voieSysteme, toujours en voie modelisation");
-  const y0 = exercice.base.contrainte.pente * x0 + exercice.base.contrainte.ordonnee;
-  return { x0, y0 };
-}
-
-export function diagnostiquerSystemeReel(exercice: ExerciceEquationInequationSecondDegre, texte: string): StatutVerification {
-  if (exercice.variante !== "equation" || !exercice.systeme) return "parse_error";
-  const { x0, y0 } = ancrageSysteme(exercice);
-  const { M } = exercice.systeme;
-  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, (x, y) => x * y - M);
-}
-
-export function verifierSystemeReel(exercice: ExerciceEquationInequationSecondDegre, texte: string): boolean {
-  return diagnostiquerSystemeReel(exercice, texte) === "correct";
-}
-
-export function diagnostiquerSystemeHypothetique(exercice: ExerciceEquationInequationSecondDegre, texte: string): StatutVerification {
-  if (exercice.variante !== "equation" || !exercice.systeme) return "parse_error";
-  const { x0, y0 } = ancrageSysteme(exercice);
-  const { M, a, b } = exercice.systeme;
-  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, (x, y) => (x + a) * (y - b) - M);
-}
-
-export function verifierSystemeHypothetique(exercice: ExerciceEquationInequationSecondDegre, texte: string): boolean {
-  return diagnostiquerSystemeHypothetique(exercice, texte) === "correct";
-}
-
-/** Relation LINÉAIRE obtenue en soustrayant les 2 équations du système (élimination du terme croisé
- * `xy`) — `a·y-b·x=a·b`, cible purement linéaire, la primitive ne fait aucune hypothèse de degré
- * (même principe déjà établi pour la directrice d'une parabole, gen54). */
-export function diagnostiquerEliminationSysteme(exercice: ExerciceEquationInequationSecondDegre, texte: string): StatutVerification {
-  if (exercice.variante !== "equation" || !exercice.systeme) return "parse_error";
-  const { x0, y0 } = ancrageSysteme(exercice);
-  const { a, b } = exercice.systeme;
-  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, (x, y) => a * y - b * x - a * b);
-}
-
-export function verifierEliminationSysteme(exercice: ExerciceEquationInequationSecondDegre, texte: string): boolean {
-  return diagnostiquerEliminationSysteme(exercice, texte) === "correct";
-}
 
 // ============================================================================
 // Écran "poserEquationInequation".

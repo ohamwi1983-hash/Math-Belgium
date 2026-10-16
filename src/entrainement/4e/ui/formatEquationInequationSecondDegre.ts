@@ -1,10 +1,9 @@
 /**
- * Couche présentation — "Équations/inéquations du second degré en contexte" (position 57). Ne porte
- * que les écrans 0a/0b (`poserSysteme`/`eliminerSysteme`, `voieSysteme` uniquement) et 5-8
- * (`poserEquationInequation`/`resoudre`/`validation`/`interpretation`), propres à ce générateur —
- * les écrans 1-4 réutilisent directement les fonctions de `ui/formatOptimisation.ts`
- * (`consigneContrainteEtGrandeur`/`consigneSysteme`/`consigneDomaine`, etc., via `exercice.base`) —
- * voir CLAUDE.md pour la justification complète de cette réutilisation. Réutilise `formatFonctionDeveloppeeLatex`/
+ * Couche présentation — "Équations/inéquations du second degré en contexte" (position 57). Depuis
+ * la refonte (voir `core/equationInequationSecondDegre.types.ts`, en-tête), ce module ne porte plus
+ * que les 4 écrans restants (`poserEquationInequation`/`resoudre`/`validation`/`interpretation`) —
+ * les anciens écrans "poserSysteme"/"eliminerSysteme" (système à 2 inconnues, famille `achatGroupe`)
+ * et toute réutilisation de gen55 ont disparu. Réutilise `formatFonctionDeveloppeeLatex`/
  * `formatDomaineLatex` (`ui/formatOptimisation.ts`, ui→ui) plutôt que de dupliquer le formatage d'un
  * polynôme développé.
  */
@@ -81,50 +80,6 @@ export function formatDonneesAvecResolutionLatex(exercice: ExerciceEquationInequ
 /** État actuel — écran "interpretation" : + le résultat validé (intersecté avec le domaine). */
 export function formatDonneesFinalesLatex(exercice: ExerciceEquationInequationSecondDegre): string {
   return gathered([ligneFonction(exercice), ligneDomaine(exercice), formatEquationInequationLatex(exercice), ligneResolution(exercice), ligneValidation(exercice)]);
-}
-
-// ============================================================================
-// Écrans "poserSysteme"/"eliminerSysteme" — `voieSysteme` uniquement (famille `achatGroupe`).
-// ============================================================================
-
-export function consignePoserSysteme(): string {
-  return "Traduis la situation réelle et la situation hypothétique du contexte sous la forme de 2 équations à 2 inconnues (x et y).";
-}
-
-export function consigneEliminerSysteme(): string {
-  return "Soustrais les 2 équations du système pour éliminer le terme x·y, et donne la relation linéaire obtenue.";
-}
-
-/** État actuel — écran "eliminerSysteme" : le système confirmé à l'écran précédent
- * ("poserSysteme") — audit checklist chapitre 1, point 1 : tout écran ≥2 doit montrer un bloc "état
- * actuel" (seul écran qui en manquait). Réutilise le même format que `texteAidePoserSystemeNiveau2`
- * (jamais dupliqué). */
-export function formatSystemeConfirmeLatex(exercice: ExerciceEquationInequationSecondDegre): string {
-  if (!exercice.systeme) return "";
-  const { M, a, b } = exercice.systeme;
-  return gathered([`x \\cdot y = ${M}`, `(x+${a})(y-${b}) = ${M}`]);
-}
-
-export function texteAidePoserSystemeNiveau1(): string {
-  return "Rappel : la situation réelle donne un produit x·y égal au montant total. La situation hypothétique modifie x et y mais donne le même montant.";
-}
-
-/** LaTeX pur — l'appelant préfixe son propre texte avant de rendre via `<Katex>`. */
-export function texteAidePoserSystemeNiveau2(exercice: ExerciceEquationInequationSecondDegre): string {
-  if (!exercice.systeme) return "";
-  const { M, a, b } = exercice.systeme;
-  return gathered([`x \\cdot y = ${M}`, `(x+${a})(y-${b}) = ${M}`]);
-}
-
-export function texteAideEliminerSystemeNiveau1(): string {
-  return "Rappel : développe la seconde équation, puis soustrais-la à la première — le terme x·y s'annule.";
-}
-
-/** LaTeX pur — l'appelant préfixe son propre texte avant de rendre via `<Katex>`. */
-export function texteAideEliminerSystemeNiveau2(exercice: ExerciceEquationInequationSecondDegre): string {
-  if (!exercice.systeme) return "";
-  const { a, b } = exercice.systeme;
-  return `${a}y - ${b}x = ${a * b}`;
 }
 
 // ============================================================================

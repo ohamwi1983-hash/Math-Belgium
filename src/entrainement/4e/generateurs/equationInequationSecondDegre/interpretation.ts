@@ -6,8 +6,7 @@
  * (`generateurs/equationReference/interpretation.ts`), qui a corrigé un bug réel de textes dupliqués
  * trouvé par Playwright — verrouillé ici dès la conception plutôt que découvert après coup.
  */
-import type { IntervalleBorne } from "../../core/equationInequationSecondDegre.types";
-import type { OptionInterpretation } from "../../core/optimisation.types";
+import type { IntervalleBorne, OptionInterpretationEquationInequation } from "../../core/equationInequationSecondDegre.types";
 import { melanger } from "./aleatoire";
 
 interface ParametresCommuns {
@@ -28,6 +27,7 @@ interface ParametresEquation extends ParametresCommuns {
 
 interface ParametresInequation extends ParametresCommuns {
   variante: "inequation";
+  sens: "gt" | "lt";
   intervalleValide: IntervalleBorne;
   intervalleBrut: IntervalleBorne;
 }
@@ -96,7 +96,7 @@ export function formatQuestionFinaleEquationInequation(p: ParametresQuestionFina
   return `Pour quelles valeurs de ${v} ${p.nomGrandeur} ${relation} ${p.k} ${p.uniteGrandeur} ?`;
 }
 
-function optionsEquation(p: ParametresEquation): OptionInterpretation[] {
+function optionsEquation(p: ParametresEquation): OptionInterpretationEquationInequation[] {
   const correcte = phraseAtteintValeurs(p, p.racinesValides, p.uniteGrandeur);
   const dejaUtilises = new Set([correcte]);
 
@@ -119,8 +119,12 @@ function optionsEquation(p: ParametresEquation): OptionInterpretation[] {
   ]);
 }
 
-function optionsInequation(p: ParametresInequation): OptionInterpretation[] {
-  const sensTexte = "dépasse";
+function optionsInequation(p: ParametresInequation): OptionInterpretationEquationInequation[] {
+  /** Dérivé de `p.sens` — BUG trouvé en vérification Playwright (la version précédente codait en
+   * dur "dépasse" quelle que soit `sens`, produisant une phrase correcte contredisant
+   * l'inéquation réellement posée pour toute famille `"lt"` — ex. `distanceFreinage`/
+   * `triangleRectanglePerimetre`, déjà présentes avant cette refonte). */
+  const sensTexte = p.sens === "gt" ? "dépasse" : "est en dessous de";
   const correcte = phraseIntervalle(p, sensTexte, p.intervalleValide, p.uniteGrandeur);
   const dejaUtilises = new Set([correcte]);
 
@@ -146,6 +150,6 @@ function optionsInequation(p: ParametresInequation): OptionInterpretation[] {
   ]);
 }
 
-export function construireOptionsInterpretationEquationInequation(p: ParametresInterpretationEquationInequation): OptionInterpretation[] {
+export function construireOptionsInterpretationEquationInequation(p: ParametresInterpretationEquationInequation): OptionInterpretationEquationInequation[] {
   return p.variante === "equation" ? optionsEquation(p) : optionsInequation(p);
 }
