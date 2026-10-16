@@ -1,10 +1,10 @@
 /**
  * Couche A — "Équations/inéquations du second degré en contexte" (position 57). Dispatch vers les
- * mini-générateurs de famille (`familles/*.ts`) — 9 familles couvrant 4 architectures distinctes
+ * mini-générateurs de famille (`familles/*.ts`) — 10 familles couvrant 4 architectures distinctes
  * (voir `core/equationInequationSecondDegre.types.ts`, en-tête) : A "fonction donnée" (3), B
- * "construction géométrique" (2), C "problèmes de nombres classiques" (2), D "système à 2
- * inconnues" (2). Les 2 axes (famille × variante) restent ENTIÈREMENT INDÉPENDANTS pour LES 9
- * FAMILLES : `PAIRES_VALIDES` est le produit cartésien complet, 9×2=18 paires.
+ * "construction géométrique" (3), C "problèmes de nombres classiques" (2), D "système à 2
+ * inconnues" (2). Les 2 axes (famille × variante) restent ENTIÈREMENT INDÉPENDANTS pour LES 10
+ * FAMILLES : `PAIRES_VALIDES` est le produit cartésien complet, 10×2=20 paires.
  */
 import type { ExerciceEquationInequationSecondDegre, FamilleEquationInequationSecondDegre, VarianteEquationInequationSecondDegre } from "../../core/equationInequationSecondDegre.types";
 import { construireJetEau } from "./familles/jetEau";
@@ -12,6 +12,7 @@ import { construireConsommationCarburant } from "./familles/consommationCarburan
 import { construirePopulationPoissons } from "./familles/populationPoissons";
 import { construireRectanglePerimetre } from "./familles/rectanglePerimetre";
 import { construireEnclosAdosseMur } from "./familles/enclosAdosseMur";
+import { construireTriangleRectangleCathetes } from "./familles/triangleRectangleCathetes";
 import { construireProduitEntiersConsecutifs } from "./familles/produitEntiersConsecutifs";
 import { construireCarreMoinsNombre } from "./familles/carreMoinsNombre";
 import { construireSommeProduit } from "./familles/sommeProduit";
@@ -26,6 +27,7 @@ export const CATALOGUE_FAMILLES: { id: FamilleEquationInequationSecondDegre; lab
   // B — construction géométrique
   { id: "rectanglePerimetre", label: "B · Rectangle à périmètre fixé (construction)" },
   { id: "enclosAdosseMur", label: "B · Enclos adossé à un mur (construction)" },
+  { id: "triangleRectangleCathetes", label: "B · Triangle rectangle, somme des cathètes (construction)" },
   // C — problèmes de nombres classiques
   { id: "produitEntiersConsecutifs", label: "C · Produit de 2 entiers consécutifs (nombres)" },
   { id: "carreMoinsNombre", label: "C · Carré diminué du nombre (nombres)" },
@@ -50,6 +52,7 @@ const CONSTRUCTEURS: Record<FamilleEquationInequationSecondDegre, Constructeur> 
   populationPoissons: construirePopulationPoissons,
   rectanglePerimetre: construireRectanglePerimetre,
   enclosAdosseMur: construireEnclosAdosseMur,
+  triangleRectangleCathetes: construireTriangleRectangleCathetes,
   produitEntiersConsecutifs: construireProduitEntiersConsecutifs,
   carreMoinsNombre: construireCarreMoinsNombre,
   sommeProduit: construireSommeProduit,

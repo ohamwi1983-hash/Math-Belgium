@@ -55,5 +55,6 @@ export const construireJetEau = construireAvecParametres(() => {
     uniteVariable: "m",
     uniteGrandeur: "m",
     uniteGrandeurFautive: "m/s",
+    croquis: { type: "jetEau" },
   };
 });

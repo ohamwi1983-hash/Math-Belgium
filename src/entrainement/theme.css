@@ -2491,6 +2491,24 @@
   stroke-width: 1.5;
 }
 
+.entrainement .croquis-equation-inequation-axe {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.entrainement .croquis-equation-inequation-trajectoire {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.entrainement .croquis-equation-inequation-angle-droit {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
 .entrainement .croquis-equation-inequation-label {
   font-size: 14px;
   font-weight: 700;

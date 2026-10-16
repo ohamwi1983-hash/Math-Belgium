@@ -14,13 +14,46 @@ interface Props {
  */
 export function CroquisEquationInequationSecondDegre({ croquis }: Props) {
   switch (croquis.type) {
+    case "jetEau":
+      return <CroquisJetEau />;
     case "rectanglePerimetre":
       return <CroquisRectanglePerimetre />;
     case "enclosAdosseMur":
       return <CroquisEnclosAdosseMur />;
+    case "triangleRectangleCathetes":
+      return <CroquisTriangleRectangleCathetes />;
     case "perimetreAire":
       return <CroquisPerimetreAire />;
   }
+}
+
+/**
+ * Famille A (`jetEau`) — SEULE figure du générateur qui ne soit pas un polygone : une trajectoire
+ * courbe (arc), pour visualiser "hauteur en fonction de la distance horizontale" quand `f(x)` est
+ * pourtant déjà révélée en toutes lettres dans l'énoncé (la formule reste abstraite sans un visuel
+ * de la forme réelle du jet). Aucune valeur chiffrée, aucun point de la courbe n'est marqué comme
+ * "la" hauteur maximale réelle (`yS` varie par instance) — seuls les 2 AXES (x horizontal, h
+ * vertical) et leurs lettres sont annotés, jamais un point précis de la courbe.
+ */
+function CroquisJetEau() {
+  return (
+    <svg
+      className="croquis-equation-inequation"
+      viewBox="0 0 220 170"
+      role="img"
+      aria-label="Trajectoire en arc d'un jet d'eau : hauteur h en fonction de la distance horizontale x"
+    >
+      <line x1="30" y1="140" x2="200" y2="140" className="croquis-equation-inequation-axe" />
+      <line x1="30" y1="140" x2="30" y2="25" className="croquis-equation-inequation-axe" />
+      <path d="M 35 135 Q 112 15 195 135" className="croquis-equation-inequation-trajectoire" />
+      <text x="205" y="140" className="croquis-equation-inequation-label">
+        x
+      </text>
+      <text x="30" y="16" className="croquis-equation-inequation-label">
+        h
+      </text>
+    </svg>
+  );
 }
 
 const RECT = { gauche: 40, droite: 180, haut: 30, bas: 130 };
@@ -94,6 +127,38 @@ function CroquisEnclosAdosseMur() {
       </text>
       <text x={(RECT.gauche + RECT.droite) / 2} y={RECT.bas + 20} className="croquis-equation-inequation-legende">
         mur existant
+      </text>
+    </svg>
+  );
+}
+
+/**
+ * Famille B (`triangleRectangleCathetes`) — UNIQUE figure non-rectangulaire du générateur parmi les
+ * architectures B/D : un triangle rectangle, angle droit marqué par un petit carré (convention
+ * géométrique standard, jamais la couleur seule). La cathète horizontale (x, nommée dans l'énoncé)
+ * est annotée en bas — l'autre cathète (verticale, S-x) n'est jamais nommée dans l'énoncé, donc
+ * jamais labellisée ici non plus (même principe que `CroquisRectanglePerimetre`).
+ */
+function CroquisTriangleRectangleCathetes() {
+  const sommetDroit = { x: 40, y: 130 };
+  const sommetHaut = { x: 40, y: 30 };
+  const sommetBas = { x: 180, y: 130 };
+  const tailleAngleDroit = 12;
+
+  return (
+    <svg
+      className="croquis-equation-inequation"
+      viewBox="0 0 220 170"
+      role="img"
+      aria-label="Triangle rectangle : cathète horizontale x, cathète verticale non nommée, hypoténuse"
+    >
+      <polygon points={`${sommetDroit.x},${sommetDroit.y} ${sommetHaut.x},${sommetHaut.y} ${sommetBas.x},${sommetBas.y}`} className="croquis-equation-inequation-rectangle" />
+      <polyline
+        points={`${sommetDroit.x},${sommetDroit.y - tailleAngleDroit} ${sommetDroit.x + tailleAngleDroit},${sommetDroit.y - tailleAngleDroit} ${sommetDroit.x + tailleAngleDroit},${sommetDroit.y}`}
+        className="croquis-equation-inequation-angle-droit"
+      />
+      <text x={(sommetDroit.x + sommetBas.x) / 2} y={sommetBas.y + 20} className="croquis-equation-inequation-label">
+        x
       </text>
     </svg>
   );

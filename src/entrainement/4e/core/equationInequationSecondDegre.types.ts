@@ -8,11 +8,12 @@
  * - **A — "fonction donnée"** (`jetEau`/`consommationCarburant`/`populationPoissons`) : `f(x)`
  *   DIRECTEMENT révélée dans l'énoncé (formule développée visible). Séquence à 4 écrans :
  *   `poserEquationInequation → resoudre → validation → interpretation`.
- * - **B — "construction géométrique"** (`rectanglePerimetre`/`enclosAdosseMur`) : AUCUNE formule
- *   révélée — seulement les données géométriques (périmètre/longueur de clôture fixés) et le seuil
- *   visé. L'élève doit construire lui-même `f(x)` avant de poser l'équation/l'inéquation. Mêmes 4
- *   écrans que A (réutilisés tels quels — seule la quantité d'information révélée dans l'énoncé
- *   change, pas le mécanisme de vérification).
+ * - **B — "construction géométrique"** (`rectanglePerimetre`/`enclosAdosseMur`/
+ *   `triangleRectangleCathetes`) : AUCUNE formule révélée — seulement les données géométriques
+ *   (périmètre/longueur de clôture/somme des cathètes fixés) et le seuil visé. L'élève doit
+ *   construire lui-même `f(x)` avant de poser l'équation/l'inéquation. Mêmes 4 écrans que A
+ *   (réutilisés tels quels — seule la quantité d'information révélée dans l'énoncé change, pas le
+ *   mécanisme de vérification).
  * - **C — "problèmes de nombres classiques"** (`produitEntiersConsecutifs`/`carreMoinsNombre`) :
  *   aucun contexte physique, une relation verbale entre un entier naturel et lui-même (produit de 2
  *   entiers consécutifs, carré diminué du nombre...). Construction DIFFÉRENTE de A/B (pas de sommet
@@ -39,6 +40,7 @@ export type FamilleEquationInequationSecondDegre =
   // B — construction géométrique
   | "rectanglePerimetre"
   | "enclosAdosseMur"
+  | "triangleRectangleCathetes"
   // C — problèmes de nombres classiques
   | "produitEntiersConsecutifs"
   | "carreMoinsNombre"
@@ -64,13 +66,19 @@ export interface CoefficientsQuadratiques {
 
 export type GenreGrandeur = "masculin" | "feminin";
 
-/** Croquis SVG purement illustratif (architecture B/D uniquement — voir
- * `components/CroquisEquationInequationSecondDegre.tsx`) : coordonnées FIXES par variante, jamais
- * recalculées depuis l'instance réelle (même principe que `CroquisOptimisation.tsx`, gen55 —
- * composant INDÉPENDANT, jamais réutilisé depuis ce générateur, cohérent avec "SANS AUCUNE
- * dépendance vers gen55" en tête de ce fichier). `undefined` pour les familles sans figure
- * géométrique naturelle (A "fonction donnée", C "nombres", D `sommeProduit`). */
-export type CroquisEquationInequationSecondDegre = { type: "rectanglePerimetre" } | { type: "enclosAdosseMur" } | { type: "perimetreAire" };
+/** Croquis SVG purement illustratif — coordonnées FIXES par variante, jamais recalculées depuis
+ * l'instance réelle (même principe que `CroquisOptimisation.tsx`, gen55 — composant INDÉPENDANT,
+ * jamais réutilisé depuis ce générateur, cohérent avec "SANS AUCUNE dépendance vers gen55" en tête
+ * de ce fichier). Volontairement varié dans la NATURE de la figure (rectangle, triangle rectangle,
+ * trajectoire courbe), pas seulement des rectangles. `undefined` pour les familles sans figure
+ * géométrique naturelle (`consommationCarburant`/`populationPoissons`, C "nombres", D
+ * `sommeProduit`). */
+export type CroquisEquationInequationSecondDegre =
+  | { type: "jetEau" }
+  | { type: "rectanglePerimetre" }
+  | { type: "enclosAdosseMur" }
+  | { type: "triangleRectangleCathetes" }
+  | { type: "perimetreAire" };
 
 /** Toutes les données narratives — `phraseEnonce` NE révèle PAS toujours `f(x)` développée
  * (architectures B/C/D, voir en-tête de fichier) : seules les données nécessaires à sa
