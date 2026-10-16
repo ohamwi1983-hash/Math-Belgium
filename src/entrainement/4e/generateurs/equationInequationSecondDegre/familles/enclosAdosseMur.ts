@@ -53,5 +53,6 @@ export const construireEnclosAdosseMur = construireAvecParametres(() => {
     uniteVariable: "m",
     uniteGrandeur: "m²",
     uniteGrandeurFautive: "m",
+    croquis: { type: "enclosAdosseMur" },
   };
 });

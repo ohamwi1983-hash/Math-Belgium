@@ -17,6 +17,7 @@
  */
 import type {
   BaseEquationInequationSecondDegre,
+  CroquisEquationInequationSecondDegre,
   ExerciceEquationInequationSecondDegre,
   ExerciceEquationSecondDegre,
   ExerciceInequationSecondDegre,
@@ -44,6 +45,9 @@ export interface ParametresSystemeSubstitution {
   uniteVariable: string;
   uniteGrandeur: string;
   uniteGrandeurFautive: string;
+  /** Voir `core/equationInequationSecondDegre.types.ts::CroquisEquationInequationSecondDegre` —
+   * absent pour les familles sans figure géométrique naturelle (ex. `sommeProduit`). */
+  croquis?: CroquisEquationInequationSecondDegre;
 }
 
 type Constructeur = {
@@ -86,6 +90,7 @@ export function construireDepuisSysteme(p: ParametresSystemeSubstitution, varian
       uniteGrandeur: p.uniteGrandeur,
       uniteGrandeurFautive: p.uniteGrandeurFautive,
       questionFinale: null,
+      croquis: p.croquis,
     },
     fonction: { a, b, c },
     domaine,

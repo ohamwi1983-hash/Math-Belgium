@@ -6,6 +6,7 @@ import { NIVEAU_AIDE_MAX_POSER_SYSTEME } from "../moteur/sessionEquationInequati
 import { consignePoserSysteme, texteAidePoserSystemeNiveau1, texteAidePoserSystemeNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { CroquisEquationInequationSecondDegre } from "./CroquisEquationInequationSecondDegre";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
@@ -44,6 +45,7 @@ export function EtapePoserSystemeEquationInequationSecondDegre({ exercice, tenta
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
+      {exercice.base.contexte.croquis && <CroquisEquationInequationSecondDegre croquis={exercice.base.contexte.croquis} />}
       <p className="prompt-text">{consignePoserSysteme()}</p>
 
       <div className="field">

@@ -5,6 +5,7 @@ import { NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION } from "../moteur/sessionEqua
 import { consignePoserEquationInequation, texteAidePoserEquationInequationNiveau1, texteAidePoserEquationInequationNiveau2 } from "../ui/formatEquationInequationSecondDegre";
 import { segmentsPhraseEnonce } from "../ui/formatOptimisation";
 import { formatMessageErreur } from "../ui/messageErreur";
+import { CroquisEquationInequationSecondDegre } from "./CroquisEquationInequationSecondDegre";
 import { EnTeteExercice } from "./EnTeteExercice";
 import { Katex } from "./Katex";
 import { QuestionFinale } from "./QuestionFinale";
@@ -40,6 +41,7 @@ export function EtapePoserEquationInequationSecondDegre({ exercice, tentativesUt
         consigneGenerale={<SegmentsInline segments={segmentsPhraseEnonce(exercice.base.contexte.phraseEnonce)} />}
         blocDonnees={<QuestionFinale question={exercice.base.contexte.questionFinale} />}
       />
+      {exercice.base.contexte.croquis && <CroquisEquationInequationSecondDegre croquis={exercice.base.contexte.croquis} />}
       <p className="prompt-text">{consignePoserEquationInequation(exercice)}</p>
       <div className="field">
         <label className="field-label" htmlFor="equation-inequation-poser">

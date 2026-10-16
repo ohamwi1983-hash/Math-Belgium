@@ -64,6 +64,14 @@ export interface CoefficientsQuadratiques {
 
 export type GenreGrandeur = "masculin" | "feminin";
 
+/** Croquis SVG purement illustratif (architecture B/D uniquement — voir
+ * `components/CroquisEquationInequationSecondDegre.tsx`) : coordonnées FIXES par variante, jamais
+ * recalculées depuis l'instance réelle (même principe que `CroquisOptimisation.tsx`, gen55 —
+ * composant INDÉPENDANT, jamais réutilisé depuis ce générateur, cohérent avec "SANS AUCUNE
+ * dépendance vers gen55" en tête de ce fichier). `undefined` pour les familles sans figure
+ * géométrique naturelle (A "fonction donnée", C "nombres", D `sommeProduit`). */
+export type CroquisEquationInequationSecondDegre = { type: "rectanglePerimetre" } | { type: "enclosAdosseMur" } | { type: "perimetreAire" };
+
 /** Toutes les données narratives — `phraseEnonce` NE révèle PAS toujours `f(x)` développée
  * (architectures B/C/D, voir en-tête de fichier) : seules les données nécessaires à sa
  * CONSTRUCTION par l'élève y figurent. `questionFinale` reste `null` ici (toujours une chaîne
@@ -79,6 +87,7 @@ export interface ContexteEquationInequationSecondDegre {
   uniteGrandeur: string;
   uniteGrandeurFautive: string;
   questionFinale: null;
+  croquis?: CroquisEquationInequationSecondDegre;
 }
 
 export interface BaseEquationInequationSecondDegre {

@@ -50,5 +50,6 @@ export const construirePerimetreAire = construireAvecParametresSysteme(() => {
     uniteVariable: "m",
     uniteGrandeur: "m²",
     uniteGrandeurFautive: "m",
+    croquis: { type: "perimetreAire" },
   };
 });

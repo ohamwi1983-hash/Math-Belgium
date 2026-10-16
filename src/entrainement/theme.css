@@ -2448,6 +2448,65 @@
   stroke-width: 2;
 }
 
+/* "Équations/inéquations du second degré en contexte" (position 57) — croquis des architectures B
+   ("construction géométrique") et D ("système à 2 inconnues"), composant INDÉPENDANT de
+   CroquisOptimisation.tsx (gen55) — voir CroquisEquationInequationSecondDegre.tsx, en-tête. */
+.entrainement .croquis-equation-inequation {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 12px auto 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+}
+
+.entrainement .croquis-equation-inequation-rectangle {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.entrainement .croquis-equation-inequation-cloture {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 4;
+  stroke-linecap: square;
+  stroke-linejoin: round;
+}
+
+.entrainement .croquis-equation-inequation-mur {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+}
+
+.entrainement .croquis-equation-inequation-hachure-trait {
+  stroke: var(--color-text-muted);
+  stroke-width: 2;
+}
+
+.entrainement .croquis-equation-inequation-cote {
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+}
+
+.entrainement .croquis-equation-inequation-label {
+  font-size: 14px;
+  font-weight: 700;
+  fill: var(--color-primary);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.entrainement .croquis-equation-inequation-legende {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
 .entrainement .triangle-lies-sketch {
   display: block;
   width: 100%;

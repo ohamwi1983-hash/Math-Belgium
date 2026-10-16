@@ -14,6 +14,7 @@
  */
 import type {
   BaseEquationInequationSecondDegre,
+  CroquisEquationInequationSecondDegre,
   ExerciceEquationInequationSecondDegre,
   ExerciceEquationSecondDegre,
   ExerciceInequationSecondDegre,
@@ -49,6 +50,9 @@ export interface ParametresVertexForm {
   uniteVariable: string;
   uniteGrandeur: string;
   uniteGrandeurFautive: string;
+  /** Voir `core/equationInequationSecondDegre.types.ts::CroquisEquationInequationSecondDegre` —
+   * absent pour les familles sans figure géométrique naturelle. */
+  croquis?: CroquisEquationInequationSecondDegre;
 }
 
 type Constructeur = {
@@ -123,6 +127,7 @@ export function construireDepuisSommet(p: ParametresVertexForm, variante: Varian
       uniteGrandeur: p.uniteGrandeur,
       uniteGrandeurFautive: p.uniteGrandeurFautive,
       questionFinale: null,
+      croquis: p.croquis,
     },
     fonction: { a, b, c },
     domaine,

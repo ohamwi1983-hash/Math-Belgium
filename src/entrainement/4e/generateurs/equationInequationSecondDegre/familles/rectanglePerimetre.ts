@@ -60,5 +60,6 @@ export const construireRectanglePerimetre = construireAvecParametres(() => {
     uniteVariable: "m",
     uniteGrandeur: "m²",
     uniteGrandeurFautive: "m",
+    croquis: { type: "rectanglePerimetre" },
   };
 });
