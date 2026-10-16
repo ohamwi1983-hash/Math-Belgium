@@ -59,7 +59,14 @@ import {
 } from "./ui/formatEquationRationnelle";
 import { formatEquationDenominateur, formatEquationNumerateur, formatFractionSimplifiee } from "./ui/formatSimplification";
 import { libelleCategorie } from "./ui/categorieLabels";
-import { estSolutionUnique, formatEnonceLatex, formatFormeFactoriseeDepuisRacines, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
+import {
+  estSolutionUnique,
+  formatEnonceLatex,
+  formatFormeFactoriseeDepuisRacines,
+  formatMembreGauche,
+  formatTermesZerosAttendusLatex,
+} from "./ui/formatEquation";
+import { enonceSimplifie, facteurCommun } from "./moteur/simplificationEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -88,6 +95,14 @@ function p2DeFractionGauche(exercice: ExerciceEquationRationnelle): Exercice {
 function expressionP2(exercice: ExerciceEquationRationnelle): string {
   const p2 = p2DeFractionGauche(exercice);
   return exercice.fractionGauche?.type === "P2/P1" ? formatEquationNumerateur(p2) : formatEquationDenominateur(p2);
+}
+
+/** "k(...)" — mise en évidence confirmée pour le P2 de `fractionGauche` (cas 4a/4b), jamais divisée
+ * par k (voir moteur/verificationSimplification.ts) — même formule que
+ * `ui/recapitulatifEquationRationnelle.ts::formatMiseEnEvidence`, dupliquée ici car cette fonction
+ * n'est pas exportée. */
+function formatMiseEnEvidenceLatex(poly: Exercice): string {
+  return `${facteurCommun(poly.enonce)}(${formatMembreGauche(enonceSimplifie(poly.enonce))})`;
 }
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -272,12 +287,18 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Reproduit exactement ce que `ResultatPanelEquationRationnelle.tsx` affichait (bloc
- * "answer-reveal") pour UNE phase donnée, scopé à l'exercice/phase qui vient juste de se terminer
- * (`etat.exerciceCourant`/`etat.phase`, jamais l'état suivant). Cet ancien panneau n'avait PAS de
- * bloc "answer-reveal" pour "simplifierReduction" ni pour "reconnaissance" (seule la ligne colorée
- * du récapitulatif existait) — fidèlement reproduit ici par `null` (pas de contenu ajouté qui
- * n'existait pas avant). */
+/** Calcule le bloc "Réponse attendue" pour UNE phase donnée, scopé à l'exercice/phase qui vient
+ * juste de se terminer (`etat.exerciceCourant`/`etat.phase`, jamais l'état suivant) — affiché à la
+ * fois dans le reveal immédiat (`validation.reponseAttendue`) et dans la fiche de consultation d'un
+ * écran déjà clos (`historique`/`FicheReponseEcran`).
+ *
+ * Avait initialement reproduit tel quel un ancien panneau (`ResultatPanelEquationRationnelle.tsx`)
+ * qui n'avait PAS de bloc "answer-reveal" pour "simplifierReduction" ni pour "reconnaissance" —
+ * `null` pour ces deux phases, qui faisait disparaître silencieusement "Réponse attendue" dès
+ * qu'elles étaient ratées (même bug que gen6/`AppInequationRationnelle.tsx`, trouvé par le même
+ * audit). Corrigé en reprenant exactement la logique/formatage déjà calculée pour le récapitulatif
+ * live par `ui/recapitulatifEquationRationnelle.ts::calculerRecapitulatifEquationRationnelle`
+ * ("Mise en évidence (fraction)"/"Méthode"), qui n'était jamais consultée ici. */
 function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
   const exercice = etat.exerciceCourant;
   switch (etat.phase) {
@@ -297,8 +318,14 @@ function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
           ))}
         </>
       );
-    case "simplifierReduction":
-      return null;
+    case "simplifierReduction": {
+      const p2 = p2DeFractionGauche(exercice);
+      return (
+        <>
+          Mise en évidence attendue (fraction) : <Katex expression={formatMiseEnEvidenceLatex(p2)} />
+        </>
+      );
+    }
     case "simplifierReconnaissance": {
       const p2 = p2DeFractionGauche(exercice);
       return <>Méthode attendue (fraction) : {libelleCategorie(p2.categorie)}</>;
@@ -348,7 +375,7 @@ function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
         </>
       );
     case "reconnaissance":
-      return null;
+      return <>Méthode attendue : {libelleCategorie(exercice.equationIsolee.categorie)}</>;
     case "champ1":
       return (
         <>

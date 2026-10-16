@@ -30,7 +30,7 @@ import { EtapeZeros } from "./components/EtapeZeros";
 import { Katex } from "./components/Katex";
 import { calculerRecapitulatif } from "./ui/recapitulatif";
 import { libelleCategorie } from "./ui/categorieLabels";
-import { formatEnonceAffichage, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
+import { formatEnonceAffichage, formatEnonceLatex, formatEquationIsoleeNonDeveloppee, formatTermesZerosAttendusLatex } from "./ui/formatEquation";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
 import { ProgressionPuces } from "../components/ProgressionPuces";
 import type { EntreeHistoriqueEtape } from "../components/FicheReponseEcran";
@@ -218,8 +218,29 @@ export function AppMethodeRapide() {
   const exercice = etat.exerciceCourant;
   const phase = etat.phase;
 
+  /** Couvre les 6 phases — reprend exactement la logique/formatage déjà calculée pour le
+   * récapitulatif live par `ui/recapitulatif.ts::calculerRecapitulatif` ("Équation simplifiée"/
+   * "Équation isolée"/"Équation développée"/"Méthode"). Les 4 premières phases renvoyaient `null`
+   * ici auparavant (bug trouvé par le même audit que gen6/`AppInequationRationnelle.tsx` : le
+   * reveal immédiat affichait "✗ Incorrect" sans jamais montrer la réponse attendue, sur TOUS les
+   * exercices puisque ces 4 phases ne dépendent d'aucune niveau/variante). */
   const reponseAttendue =
-    phase === "champ1" ? (
+    phase === "simplification" ? (
+      <>
+        Équation simplifiée attendue :{" "}
+        <Katex expression={formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel)} />
+      </>
+    ) : phase === "isolement" ? (
+      <>
+        Équation isolée attendue : <Katex expression={formatEquationIsoleeNonDeveloppee(exercice)} />
+      </>
+    ) : phase === "developper" ? (
+      <>
+        Équation développée attendue : <Katex expression={formatEnonceLatex(exercice.enonce)} />
+      </>
+    ) : phase === "reconnaissance" ? (
+      <>Méthode attendue : {libelleCategorie(exercice.categorie)}</>
+    ) : phase === "champ1" ? (
       <Katex expression={exercice.categorie === "cas_general" ? `\\Delta = ${exercice.solution.delta}` : `${exercice.solution.formeFactorisee} = 0`} />
     ) : phase === "champ2" ? (
       <span className="equation-box-termes">
