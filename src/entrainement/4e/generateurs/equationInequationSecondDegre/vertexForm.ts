@@ -73,6 +73,19 @@ export function deriveAAbsSurDomaine(yS: number, ratioMinimum = 0.5): number {
   return Math.max(0.01, Math.floor(brut * 100) / 100);
 }
 
+/**
+ * Symétrique de `deriveAAbsSurDomaine` pour une parabole CONVEXE (`signe:+1`, minimum en `xS`) :
+ * `f` ne peut pas devenir négative (elle ne fait que croître de part et d'autre du minimum `yS`),
+ * mais elle peut devenir ABSURDEMENT GRANDE loin de `xS` si `aAbs` est trop élevé (bug signalé :
+ * une consommation de carburant jusqu'à 249 L/100km, un coût d'entretien jusqu'à 2266 € en bord de
+ * domaine). Dérive `aAbs` pour que `f` ne dépasse jamais `plafondRealiste` nulle part dans le
+ * domaine. Arrondi vers le bas pour ne jamais affaiblir la garantie après arrondi.
+ */
+export function deriveAAbsVersPlafond(yS: number, plafondRealiste: number): number {
+  const brut = (plafondRealiste - yS) / (ECART_MAX_DEPUIS_XS * ECART_MAX_DEPUIS_XS);
+  return Math.max(0.01, Math.floor(brut * 100) / 100);
+}
+
 export function construireDepuisSommet(p: ParametresVertexForm, variante: "equation"): ExerciceEquationSecondDegre;
 export function construireDepuisSommet(p: ParametresVertexForm, variante: "inequation"): ExerciceInequationSecondDegre;
 export function construireDepuisSommet(p: ParametresVertexForm, variante: VarianteEquationInequationSecondDegre): ExerciceEquationInequationSecondDegre {

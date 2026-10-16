@@ -2,10 +2,13 @@
  * Famille "coutEntretienMachine" — coût d'entretien annuel E(x) (€) d'une machine industrielle en
  * fonction de son âge x (années) : une machine neuve nécessite peu d'entretien, une machine âgée
  * aussi (après une période creuse où les pièces sont encore fiables) — parabole convexe
- * (`signe: +1`), coût minimal pour un âge `xS`.
+ * (`signe: +1`), coût minimal pour un âge `xS`. `yS` (coût minimal) et `plafond` (coût maximal
+ * réaliste en bord de domaine) choisis EN PREMIER, `aAbs` DÉRIVÉ par `deriveAAbsVersPlafond` pour
+ * qu'aucune valeur de l'exercice ne dépasse `plafond` (bug signalé : un coût jusqu'à 2266 € en bord
+ * de domaine avant ce correctif).
  */
 import { formatFonctionNarrativeLatex } from "../formatNarratif";
-import { construireAvecParametres } from "../vertexForm";
+import { construireAvecParametres, deriveAAbsVersPlafond } from "../vertexForm";
 import { randomInt } from "../aleatoire";
 
 interface SkinCoutEntretienMachine {
@@ -33,20 +36,23 @@ const SKINS: SkinCoutEntretienMachine[] = [
 
 const X_S_MIN = 12;
 const X_S_MAX = 20;
-const A_ABS_MIN = 5;
-const A_ABS_MAX = 15;
 const Y_S_MIN = 200;
 const Y_S_MAX = 500;
+/** Coût d'entretien maximal réaliste toléré en bord de domaine (machine industrielle âgée) — voir
+ * en-tête de fichier. */
+const PLAFOND_MIN = 1000;
+const PLAFOND_MAX = 1800;
 
 export const construireCoutEntretienMachine = construireAvecParametres(() => {
   const skin = SKINS[randomInt(0, SKINS.length - 1)]!;
+  const yS = randomInt(Y_S_MIN, Y_S_MAX);
 
   return {
     famille: "coutEntretienMachine",
     xS: randomInt(X_S_MIN, X_S_MAX),
-    aAbs: randomInt(A_ABS_MIN, A_ABS_MAX),
+    aAbs: deriveAAbsVersPlafond(yS, randomInt(PLAFOND_MIN, PLAFOND_MAX)),
     signe: 1,
-    yS: randomInt(Y_S_MIN, Y_S_MAX),
+    yS,
     xMinPossible: 0,
     phraseEnonce: (a, b, c) => skin.phraseEnonce(skin.machine, a, b, c),
     labelVariable: "x",
