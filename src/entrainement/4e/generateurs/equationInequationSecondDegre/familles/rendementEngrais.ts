@@ -2,10 +2,11 @@
  * Famille "rendementEngrais" — rendement R(x) (kg/are) d'une culture en fonction de la quantité
  * d'engrais x (kg/are) épandue : trop peu d'engrais limite la croissance, trop en épandre
  * endommage la culture (sursaturation) — parabole concave (`signe: -1`), maximum atteint pour une
- * dose optimale `xS`.
+ * dose optimale `xS`. `yS` (rendement maximal, réaliste) choisi EN PREMIER, `aAbs` DÉRIVÉ par
+ * `deriveAAbsSurDomaine` pour garantir un rendement jamais négatif sur tout le domaine.
  */
 import { formatFonctionNarrativeLatex } from "../formatNarratif";
-import { construireAvecParametres } from "../vertexForm";
+import { construireAvecParametres, deriveAAbsSurDomaine } from "../vertexForm";
 import { randomInt } from "../aleatoire";
 
 interface SkinRendementEngrais {
@@ -33,20 +34,19 @@ const SKINS: SkinRendementEngrais[] = [
 
 const X_S_MIN = 12;
 const X_S_MAX = 20;
-const A_ABS_MIN = 1;
-const A_ABS_MAX = 2;
 const Y_S_MIN = 40;
 const Y_S_MAX = 70;
 
 export const construireRendementEngrais = construireAvecParametres(() => {
   const skin = SKINS[randomInt(0, SKINS.length - 1)]!;
+  const yS = randomInt(Y_S_MIN, Y_S_MAX);
 
   return {
     famille: "rendementEngrais",
     xS: randomInt(X_S_MIN, X_S_MAX),
-    aAbs: randomInt(A_ABS_MIN, A_ABS_MAX),
+    aAbs: deriveAAbsSurDomaine(yS),
     signe: -1,
-    yS: randomInt(Y_S_MIN, Y_S_MAX),
+    yS,
     xMinPossible: 0,
     phraseEnonce: (a, b, c) => skin.phraseEnonce(skin.culture, a, b, c),
     labelVariable: "x",

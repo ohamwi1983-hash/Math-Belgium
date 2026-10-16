@@ -25,10 +25,15 @@ export interface DeltaEtDomaine {
 }
 
 const DELTA_MIN = 3;
-const DELTA_MAX = 8;
+export const DELTA_MAX = 8;
 const MARGE_LARGE_MIN = 1;
-const MARGE_LARGE_MAX = 3;
+export const MARGE_LARGE_MAX = 3;
 const RATIO_CLIP = 0.5;
+
+/** Écart maximal possible entre `xS` et une borne du domaine — `DELTA_MAX+MARGE_LARGE_MAX`, voir
+ * ci-dessus. Exporté pour `vertexForm.ts::garantirNonNegativite` (doit garantir une grandeur
+ * positive jusqu'à CET écart, le pire cas que `genererDeltaEtDomaine` puisse produire). */
+export const ECART_MAX_DEPUIS_XS = DELTA_MAX + MARGE_LARGE_MAX;
 
 export function genererDeltaEtDomaine(xS: number, xMinPossible: number): DeltaEtDomaine {
   const delta = randomInt(DELTA_MIN, DELTA_MAX);

@@ -21,7 +21,7 @@ import type {
   VarianteEquationInequationSecondDegre,
 } from "../../core/equationInequationSecondDegre.types";
 import { construireOptionsInterpretationEquationInequation, formatQuestionFinaleEquationInequation } from "./interpretation";
-import { genererDeltaEtDomaine, intervalleIntersecte, racinesDansDomaine } from "./racines";
+import { ECART_MAX_DEPUIS_XS, genererDeltaEtDomaine, intervalleIntersecte, racinesDansDomaine } from "./racines";
 
 export interface ParametresVertexForm {
   famille: FamilleEquationInequationSecondDegre;
@@ -56,15 +56,48 @@ type Constructeur = {
   (variante: "inequation"): ExerciceInequationSecondDegre;
 };
 
+/**
+ * Pour une parabole CONCAVE (`signe:-1`, maximum en `xS`), `f` décroît de part et d'autre du
+ * sommet et peut devenir négative loin de `xS` — physiquement absurde pour une grandeur comme une
+ * hauteur, une longueur, un rendement ou une population (bug trouvé en vérification manuelle : une
+ * hauteur de jet d'eau de -123 m, un rendement ou une distance de saut négatifs). Le pire écart que
+ * `genererDeltaEtDomaine` puisse produire entre `xS` et une borne du domaine est `ECART_MAX_DEPUIS_XS`
+ * (voir `racines.ts`) — cette fonction DÉRIVE `aAbs` À PARTIR d'un `yS` choisi en premier (réaliste,
+ * cf. chaque famille) de sorte que `f` ne descende jamais sous `yS·ratioMinimum` nulle part dans le
+ * domaine, garantissant à la fois la positivité ET une grandeur dont l'amplitude de variation reste
+ * raisonnable (ni plate, ni absurdement grande). Arrondi par défaut (toujours vers le bas) pour ne
+ * jamais affaiblir la garantie après arrondi.
+ */
+export function deriveAAbsSurDomaine(yS: number, ratioMinimum = 0.5): number {
+  const brut = (yS * (1 - ratioMinimum)) / (ECART_MAX_DEPUIS_XS * ECART_MAX_DEPUIS_XS);
+  return Math.max(0.01, Math.floor(brut * 100) / 100);
+}
+
 export function construireDepuisSommet(p: ParametresVertexForm, variante: "equation"): ExerciceEquationSecondDegre;
 export function construireDepuisSommet(p: ParametresVertexForm, variante: "inequation"): ExerciceInequationSecondDegre;
 export function construireDepuisSommet(p: ParametresVertexForm, variante: VarianteEquationInequationSecondDegre): ExerciceEquationInequationSecondDegre {
-  const a = p.signe * p.aAbs;
-  const b = -2 * a * p.xS;
-  const c = a * p.xS * p.xS + p.yS;
+  if (p.signe === -1 && p.yS - p.aAbs * ECART_MAX_DEPUIS_XS * ECART_MAX_DEPUIS_XS <= 0) {
+    throw new Error(
+      `construireDepuisSommet (${p.famille}) : aAbs trop grand pour yS=${p.yS} — la grandeur deviendrait négative dans le domaine (voir deriveAAbsSurDomaine).`,
+    );
+  }
+
+  /** `aAbs` peut être décimal (voir `deriveAAbsSurDomaine`) — sans cet arrondi, le bruit de
+   * virgule flottante binaire s'affiche tel quel à l'élève (ex. `-11.280000000000001` au lieu de
+   * `-11.28`, bug trouvé en vérification manuelle). Arrondi à 1e-6 — assez fin pour ne RIEN changer
+   * mathématiquement (`diagnostiquerPoserEquationInequation` tolère `1e-4`, 100× plus large), assez
+   * grossier pour effacer le bruit binaire (qui apparaît ~1e-13 à 1e-15). Un arrondi au centième
+   * aurait introduit une vraie erreur (jusqu'à ±0.005 par coefficient, cumulée sur `b` ET `c`) qui
+   * aurait pu désynchroniser la fonction affichée de `k`/des racines au-delà de la tolérance de
+   * vérification — jamais fait cette erreur-là. */
+  const arrondir = (n: number) => Math.round(n * 1e6) / 1e6;
+
+  const a = arrondir(p.signe * p.aAbs);
+  const b = arrondir(-2 * a * p.xS);
+  const c = arrondir(a * p.xS * p.xS + p.yS);
 
   const { delta, domaine } = genererDeltaEtDomaine(p.xS, p.xMinPossible);
-  const k = a * delta * delta + p.yS;
+  const k = arrondir(a * delta * delta + p.yS);
 
   const base: BaseEquationInequationSecondDegre = {
     contexte: {

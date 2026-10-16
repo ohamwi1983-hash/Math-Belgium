@@ -2,10 +2,12 @@
  * Famille "populationPoissons" — population P(x) (poissons) d'un étang piscicole en fonction de la
  * quantité de nourriture x (kg/semaine) distribuée : trop peu de nourriture limite la population,
  * trop en distribuer dégrade la qualité de l'eau (eutrophisation) et la fait chuter — parabole
- * concave (`signe: -1`), population maximale pour une quantité optimale `xS`.
+ * concave (`signe: -1`), population maximale pour une quantité optimale `xS`. `yS` (population
+ * maximale, réaliste) choisi EN PREMIER, `aAbs` DÉRIVÉ par `deriveAAbsSurDomaine` pour garantir une
+ * population jamais négative sur tout le domaine.
  */
 import { formatFonctionNarrativeLatex } from "../formatNarratif";
-import { construireAvecParametres } from "../vertexForm";
+import { construireAvecParametres, deriveAAbsSurDomaine } from "../vertexForm";
 import { randomInt } from "../aleatoire";
 
 interface SkinPopulationPoissons {
@@ -33,20 +35,19 @@ const SKINS: SkinPopulationPoissons[] = [
 
 const X_S_MIN = 15;
 const X_S_MAX = 25;
-const A_ABS_MIN = 3;
-const A_ABS_MAX = 8;
-const Y_S_MIN = 500;
-const Y_S_MAX = 900;
+const Y_S_MIN = 300;
+const Y_S_MAX = 600;
 
 export const construirePopulationPoissons = construireAvecParametres(() => {
   const skin = SKINS[randomInt(0, SKINS.length - 1)]!;
+  const yS = randomInt(Y_S_MIN, Y_S_MAX);
 
   return {
     famille: "populationPoissons",
     xS: randomInt(X_S_MIN, X_S_MAX),
-    aAbs: randomInt(A_ABS_MIN, A_ABS_MAX),
+    aAbs: deriveAAbsSurDomaine(yS),
     signe: -1,
-    yS: randomInt(Y_S_MIN, Y_S_MAX),
+    yS,
     xMinPossible: 0,
     phraseEnonce: (a, b, c) => skin.phraseEnonce(skin.etang, a, b, c),
     labelVariable: "x",
