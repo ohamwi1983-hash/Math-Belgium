@@ -1,9 +1,9 @@
 /**
- * Couche présentation — "Équations/inéquations du second degré en contexte" (position 57). Depuis
- * la refonte (voir `core/equationInequationSecondDegre.types.ts`, en-tête), ce module ne porte plus
- * que les 4 écrans restants (`poserEquationInequation`/`resoudre`/`validation`/`interpretation`) —
- * les anciens écrans "poserSysteme"/"eliminerSysteme" (système à 2 inconnues, famille `achatGroupe`)
- * et toute réutilisation de gen55 ont disparu. Réutilise `formatFonctionDeveloppeeLatex`/
+ * Couche présentation — "Équations/inéquations du second degré en contexte" (position 57). Porte
+ * l'écran "poserSysteme" (architecture D uniquement, voir `core/equationInequationSecondDegre.types.ts`,
+ * en-tête) en plus des 4 écrans communs aux 4 architectures (l'écran "isolerSubstituer" réutilise
+ * directement `consignePoserEquationInequation`/les aides de "poserEquationInequation", même
+ * composant — voir `AppEquationInequationSecondDegre.tsx`). Réutilise `formatFonctionDeveloppeeLatex`/
  * `formatDomaineLatex` (`ui/formatOptimisation.ts`, ui→ui) plutôt que de dupliquer le formatage d'un
  * polynôme développé.
  */
@@ -80,6 +80,30 @@ export function formatDonneesAvecResolutionLatex(exercice: ExerciceEquationInequ
 /** État actuel — écran "interpretation" : + le résultat validé (intersecté avec le domaine). */
 export function formatDonneesFinalesLatex(exercice: ExerciceEquationInequationSecondDegre): string {
   return gathered([ligneFonction(exercice), ligneDomaine(exercice), formatEquationInequationLatex(exercice), ligneResolution(exercice), ligneValidation(exercice)]);
+}
+
+// ============================================================================
+// Écran "poserSysteme" — architecture D uniquement (`voieSysteme`).
+// ============================================================================
+
+export function consignePoserSysteme(): string {
+  return "Traduis les deux relations décrites dans l'énoncé sous la forme de 2 équations à 2 inconnues (x et y).";
+}
+
+export function texteAidePoserSystemeNiveau1(exercice: ExerciceEquationInequationSecondDegre): string {
+  if (!exercice.systeme) return "";
+  return `Rappel : "${exercice.systeme.label1}" et "${exercice.systeme.label2}" se traduisent chacune directement par une égalité entre x et y.`;
+}
+
+/** LaTeX pur — l'appelant préfixe son propre texte avant de rendre via `<Katex>`. Dérivé de
+ * `(x0,y0)` (le point-solution ancré sur `exercice.systeme`) — `x0+y0`/`x0·y0` sont TOUJOURS une
+ * forme canonique valide des 2 relations (`diagnostiquerEquivalenceQuadratiqueXY` accepte toute
+ * mise à l'échelle non nulle, voir `generateurs/.../systemeSubstitution.ts`, en-tête), même quand
+ * la grandeur narrativement nommée est une mise à l'échelle (ex. un périmètre = 2·(x+y)). */
+export function texteAidePoserSystemeNiveau2(exercice: ExerciceEquationInequationSecondDegre): string {
+  if (!exercice.systeme) return "";
+  const { x0, y0 } = exercice.systeme;
+  return gathered([`x + y = ${formatNombre(x0 + y0)}`, `x \\cdot y = ${formatNombre(x0 * y0)}`]);
 }
 
 // ============================================================================

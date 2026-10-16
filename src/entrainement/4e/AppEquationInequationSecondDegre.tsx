@@ -4,7 +4,9 @@ import {
   activerAideSuivante,
   demarrerSessionEquationInequationSecondDegre,
   soumettreReponseInterpretation,
+  soumettreReponseIsolerSubstituer,
   soumettreReponsePoserEquationInequation,
+  soumettreReponsePoserSysteme,
   soumettreReponseResoudre,
   soumettreReponseValidationEquation,
   soumettreReponseValidationInequation,
@@ -21,12 +23,13 @@ import type { FamilleEquationInequationSecondDegre, VarianteEquationInequationSe
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationInequationSecondDegre } from "./ui/recapitulatifEquationInequationSecondDegre";
+import { EtapePoserSystemeEquationInequationSecondDegre } from "./components/EtapePoserSystemeEquationInequationSecondDegre";
 import { EtapePoserEquationInequationSecondDegre } from "./components/EtapePoserEquationInequationSecondDegre";
 import { EtapeResoudreEquationInequationSecondDegre } from "./components/EtapeResoudreEquationInequationSecondDegre";
 import { EtapeValidationEquationInequationSecondDegre } from "./components/EtapeValidationEquationInequationSecondDegre";
 import { EtapeInterpretationEquationInequationSecondDegre } from "./components/EtapeInterpretationEquationInequationSecondDegre";
 import { QuestionFinale } from "./components/QuestionFinale";
-import { formatEquationInequationLatex, formatResolutionAttendueTexte, formatValidationAttendueTexte } from "./ui/formatEquationInequationSecondDegre";
+import { formatEquationInequationLatex, formatResolutionAttendueTexte, formatValidationAttendueTexte, texteAidePoserSystemeNiveau2 } from "./ui/formatEquationInequationSecondDegre";
 import { Katex } from "./components/Katex";
 
 const REGLAGES_DEMO: ReglagesSession = {
@@ -56,6 +59,8 @@ const OPTIONS_DEV = PAIRES_VALIDES.map((p) => ({
 }));
 
 const LIBELLE_PHASE: Record<PhaseEquationInequationSecondDegre, string> = {
+  poserSysteme: "Poser le système",
+  isolerSubstituer: "Isoler et substituer",
   poserEquationInequation: "Poser l'équation/l'inéquation",
   resoudre: "Résolution",
   validation: "Validation contextuelle",
@@ -80,6 +85,10 @@ export function AppEquationInequationSecondDegre() {
     if (transitionDEcran) {
       const revele = (() => {
         switch (etat.phase) {
+          case "poserSysteme":
+            return nouvelEtat.poserSystemeRevele;
+          case "isolerSubstituer":
+            return nouvelEtat.isolerSubstituerRevele;
           case "poserEquationInequation":
             return nouvelEtat.poserEquationInequationRevele;
           case "resoudre":
@@ -118,6 +127,10 @@ export function AppEquationInequationSecondDegre() {
         revele: enAttente.revele,
         reponseAttendue: !etat.reglages.affichageReponseApresEchec ? undefined : (() => {
           switch (etat.phase) {
+            case "poserSysteme":
+              return <Katex expression={texteAidePoserSystemeNiveau2(exercice)} />;
+            case "isolerSubstituer":
+              return <Katex expression={formatEquationInequationLatex(exercice)} />;
             case "poserEquationInequation":
               return <Katex expression={formatEquationInequationLatex(exercice)} />;
             case "resoudre":
@@ -152,7 +165,27 @@ export function AppEquationInequationSecondDegre() {
         <div className="card-body">
           <RecapitulatifPanel entrees={recapitulatif} />
           <QuestionFinale question={exercice.questionFinale} />
-          {etat.phase === "poserEquationInequation" ? (
+          {etat.phase === "poserSysteme" ? (
+            <EtapePoserSystemeEquationInequationSecondDegre
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAidePoserSysteme}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(reponse) => terminerEtape(soumettreReponsePoserSysteme(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "isolerSubstituer" ? (
+            <EtapePoserEquationInequationSecondDegre
+              exercice={exercice}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideIsolerSubstituer}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
+              onValider={(texte) => terminerEtape(soumettreReponseIsolerSubstituer(etat, texte))}
+              validation={validation}
+            />
+          ) : etat.phase === "poserEquationInequation" ? (
             <EtapePoserEquationInequationSecondDegre
               exercice={exercice}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}

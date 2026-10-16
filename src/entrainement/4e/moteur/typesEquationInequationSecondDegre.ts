@@ -2,15 +2,21 @@ import type { ExerciceEquationInequationSecondDegre, GenerateurExerciceEquationI
 import type { ReglagesSession } from "../core/session.types";
 import type { EtatEtapeTentatives } from "./etapeTentatives";
 
-/** Séquence UNIQUE à 4 écrans, pour TOUTES les familles depuis la refonte (voir
- * `core/equationInequationSecondDegre.types.ts`, en-tête) : `poserEquationInequation → resoudre →
- * validation → interpretation` (terminale) — plus aucune variation par famille (l'ancienne
- * version avait une séquence à 4, 6 ou 9 écrans selon `voieSysteme`/`base.variante`). */
-export type PhaseEquationInequationSecondDegre = "poserEquationInequation" | "resoudre" | "validation" | "interpretation";
+/** Séquence à 4 ou 6 écrans selon `exercice.voieSysteme` (architecture D uniquement — voir
+ * `core/equationInequationSecondDegre.types.ts`, en-tête) : `voieSysteme=false` (architectures
+ * A/B/C) → `poserEquationInequation → resoudre → validation → interpretation` ; `voieSysteme=true`
+ * (architecture D) → `poserSysteme → isolerSubstituer → resoudre → validation → interpretation`. */
+export type PhaseEquationInequationSecondDegre = "poserSysteme" | "isolerSubstituer" | "poserEquationInequation" | "resoudre" | "validation" | "interpretation";
 
 export interface ResultatExerciceEquationInequationSecondDegre {
   variante: ExerciceEquationInequationSecondDegre["variante"];
   famille: ExerciceEquationInequationSecondDegre["famille"];
+  scorePoserSysteme: number | null;
+  poserSystemeRevele: boolean;
+  niveauAidePoserSysteme: number;
+  scoreIsolerSubstituer: number | null;
+  isolerSubstituerRevele: boolean;
+  niveauAideIsolerSubstituer: number;
   scorePoserEquationInequation: number | null;
   poserEquationInequationRevele: boolean;
   niveauAidePoserEquationInequation: number;
@@ -32,10 +38,16 @@ export interface EtatSessionEquationInequationSecondDegre {
   exerciceCourant: ExerciceEquationInequationSecondDegre;
   phase: PhaseEquationInequationSecondDegre;
   etapeCourante: EtatEtapeTentatives;
+  niveauAidePoserSysteme: number;
+  niveauAideIsolerSubstituer: number;
   niveauAidePoserEquationInequation: number;
   niveauAideResoudre: number;
   niveauAideValidation: number;
   niveauAideInterpretation: number;
+  scorePoserSystemeExercice: number | null;
+  poserSystemeRevele: boolean;
+  scoreIsolerSubstituerExercice: number | null;
+  isolerSubstituerRevele: boolean;
   scorePoserEquationInequationExercice: number | null;
   poserEquationInequationRevele: boolean;
   scoreResoudreExercice: number | null;

@@ -2,32 +2,46 @@
  * Couche B — moteur de session pour "Équations/inéquations du second degré en contexte" (position
  * 57). N'importe jamais rien de `src/generateurs/`.
  *
- * Séquence UNIQUE à 4 écrans depuis la refonte (voir `core/equationInequationSecondDegre.types.ts`,
- * en-tête) : `poserEquationInequation → resoudre → validation → interpretation` (terminale) —
- * aucune variation par famille (toutes les 7 familles démarrent directement à
- * "poserEquationInequation", la fonction et le domaine étant toujours directement donnés dans
- * l'énoncé).
+ * Séquence à 4 ou 6 écrans selon `exercice.voieSysteme` (architecture D uniquement — voir
+ * `core/equationInequationSecondDegre.types.ts`, en-tête) : `poserSysteme → isolerSubstituer →
+ * resoudre → validation → interpretation` (D) ou directement `poserEquationInequation → resoudre →
+ * validation → interpretation` (A/B/C).
  */
 import type { GenerateurExerciceEquationInequationSecondDegre } from "../core/equationInequationSecondDegre.types";
 import type { ReglagesSession } from "../core/session.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentatives";
 import type { ReglagesEtape } from "./etapeTentatives";
-import type { ReponseIntervalle } from "./verificationEquationInequationSecondDegre";
-import { verifierInterpretation, verifierPoserEquationInequation, verifierResoudre, verifierValidationEquation, verifierValidationInequation } from "./verificationEquationInequationSecondDegre";
+import type { ReponseIntervalle, ReponseSysteme } from "./verificationEquationInequationSecondDegre";
+import {
+  verifierInterpretation,
+  verifierPoserEquationInequation,
+  verifierResoudre,
+  verifierSysteme,
+  verifierValidationEquation,
+  verifierValidationInequation,
+} from "./verificationEquationInequationSecondDegre";
 import type { EtatSessionEquationInequationSecondDegre, PhaseEquationInequationSecondDegre, ResultatExerciceEquationInequationSecondDegre } from "./typesEquationInequationSecondDegre";
 
 const POINTS_DE_BASE = 100;
 const PENALITE_PAR_NIVEAU_AIDE = 20;
+export const NIVEAU_AIDE_MAX_POSER_SYSTEME = 2;
+export const NIVEAU_AIDE_MAX_ISOLER_SUBSTITUER = 2;
 export const NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION = 2;
 export const NIVEAU_AIDE_MAX_RESOUDRE = 2;
 export const NIVEAU_AIDE_MAX_VALIDATION = 3;
 export const NIVEAU_AIDE_MAX_INTERPRETATION = 1;
 
 const ETAT_TRANSITOIRE_INITIAL = {
+  niveauAidePoserSysteme: 0,
+  niveauAideIsolerSubstituer: 0,
   niveauAidePoserEquationInequation: 0,
   niveauAideResoudre: 0,
   niveauAideValidation: 0,
   niveauAideInterpretation: 0,
+  scorePoserSystemeExercice: null,
+  poserSystemeRevele: false,
+  scoreIsolerSubstituerExercice: null,
+  isolerSubstituerRevele: false,
   scorePoserEquationInequationExercice: null,
   poserEquationInequationRevele: false,
   scoreResoudreExercice: null,
@@ -36,8 +50,8 @@ const ETAT_TRANSITOIRE_INITIAL = {
   validationRevele: false,
 } as const;
 
-function phaseInitiale(): PhaseEquationInequationSecondDegre {
-  return "poserEquationInequation";
+function phaseInitiale(exercice: EtatSessionEquationInequationSecondDegre["exerciceCourant"]): PhaseEquationInequationSecondDegre {
+  return exercice.voieSysteme ? "poserSysteme" : "poserEquationInequation";
 }
 
 export function demarrerSessionEquationInequationSecondDegre(
@@ -50,7 +64,7 @@ export function demarrerSessionEquationInequationSecondDegre(
     generateur,
     indexExercice: 0,
     exerciceCourant,
-    phase: phaseInitiale(),
+    phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     ...ETAT_TRANSITOIRE_INITIAL,
     resultats: [],
@@ -73,6 +87,14 @@ function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
 export function activerAideSuivante(etat: EtatSessionEquationInequationSecondDegre): EtatSessionEquationInequationSecondDegre {
   if (etat.terminee) {
     throw new Error("activerAideSuivante : la session est déjà terminée");
+  }
+  if (etat.phase === "poserSysteme") {
+    if (etat.niveauAidePoserSysteme >= NIVEAU_AIDE_MAX_POSER_SYSTEME) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+    return { ...etat, niveauAidePoserSysteme: etat.niveauAidePoserSysteme + 1 };
+  }
+  if (etat.phase === "isolerSubstituer") {
+    if (etat.niveauAideIsolerSubstituer >= NIVEAU_AIDE_MAX_ISOLER_SUBSTITUER) throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+    return { ...etat, niveauAideIsolerSubstituer: etat.niveauAideIsolerSubstituer + 1 };
   }
   if (etat.phase === "poserEquationInequation") {
     if (etat.niveauAidePoserEquationInequation >= NIVEAU_AIDE_MAX_POSER_EQUATION_INEQUATION)
@@ -108,9 +130,53 @@ function cloturerExerciceOuSuivant(
     resultats,
     indexExercice,
     exerciceCourant,
-    phase: phaseInitiale(),
+    phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     ...ETAT_TRANSITOIRE_INITIAL,
+  };
+}
+
+export function soumettreReponsePoserSysteme(etat: EtatSessionEquationInequationSecondDegre, reponse: ReponseSysteme): EtatSessionEquationInequationSecondDegre {
+  if (etat.terminee || etat.phase !== "poserSysteme") throw new Error("soumettreReponsePoserSysteme : la session n'est pas à l'étape poserSysteme");
+  const exerciceCourant = etat.exerciceCourant;
+
+  const etapeCourante = soumettreEtapeTentatives<ReponseSysteme>(etat.etapeCourante, reponse, {
+    ...reglagesEtape(etat),
+    verifier: (r) => verifierSysteme(exerciceCourant, r),
+    revelerReponse: () => {},
+  });
+
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+
+  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAidePoserSysteme);
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    phase: "isolerSubstituer",
+    scorePoserSystemeExercice: score,
+    poserSystemeRevele: etapeCourante.revelee,
+  };
+}
+
+export function soumettreReponseIsolerSubstituer(etat: EtatSessionEquationInequationSecondDegre, texte: string): EtatSessionEquationInequationSecondDegre {
+  if (etat.terminee || etat.phase !== "isolerSubstituer") throw new Error("soumettreReponseIsolerSubstituer : la session n'est pas à l'étape isolerSubstituer");
+  const exerciceCourant = etat.exerciceCourant;
+
+  const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
+    ...reglagesEtape(etat),
+    verifier: (r) => verifierPoserEquationInequation(exerciceCourant, r),
+    revelerReponse: () => {},
+  });
+
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+
+  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIsolerSubstituer);
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    phase: "resoudre",
+    scoreIsolerSubstituerExercice: score,
+    isolerSubstituerRevele: etapeCourante.revelee,
   };
 }
 
@@ -220,6 +286,12 @@ export function soumettreReponseInterpretation(etat: EtatSessionEquationInequati
   return cloturerExerciceOuSuivant(etat, {
     variante: exerciceCourant.variante,
     famille: exerciceCourant.famille,
+    scorePoserSysteme: etat.scorePoserSystemeExercice,
+    poserSystemeRevele: etat.poserSystemeRevele,
+    niveauAidePoserSysteme: etat.niveauAidePoserSysteme,
+    scoreIsolerSubstituer: etat.scoreIsolerSubstituerExercice,
+    isolerSubstituerRevele: etat.isolerSubstituerRevele,
+    niveauAideIsolerSubstituer: etat.niveauAideIsolerSubstituer,
     scorePoserEquationInequation: etat.scorePoserEquationInequationExercice,
     poserEquationInequationRevele: etat.poserEquationInequationRevele,
     niveauAidePoserEquationInequation: etat.niveauAidePoserEquationInequation,

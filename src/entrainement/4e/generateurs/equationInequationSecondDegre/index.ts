@@ -1,29 +1,37 @@
 /**
  * Couche A — "Équations/inéquations du second degré en contexte" (position 57). Dispatch vers les
- * mini-générateurs de famille (`familles/*.ts`). Depuis la refonte (voir
- * `core/equationInequationSecondDegre.types.ts`, en-tête), les 2 axes (famille × variante) sont
- * ENTIÈREMENT INDÉPENDANTS pour LES 7 FAMILLES (plus d'exception "système à 2 inconnues" —
- * l'ancienne famille `achatGroupe` a disparu avec toute la machinerie système) : `PAIRES_VALIDES`
- * est donc simplement le produit cartésien complet, 7×2=14 paires.
+ * mini-générateurs de famille (`familles/*.ts`) — 9 familles couvrant 4 architectures distinctes
+ * (voir `core/equationInequationSecondDegre.types.ts`, en-tête) : A "fonction donnée" (3), B
+ * "construction géométrique" (2), C "problèmes de nombres classiques" (2), D "système à 2
+ * inconnues" (2). Les 2 axes (famille × variante) restent ENTIÈREMENT INDÉPENDANTS pour LES 9
+ * FAMILLES : `PAIRES_VALIDES` est le produit cartésien complet, 9×2=18 paires.
  */
 import type { ExerciceEquationInequationSecondDegre, FamilleEquationInequationSecondDegre, VarianteEquationInequationSecondDegre } from "../../core/equationInequationSecondDegre.types";
 import { construireJetEau } from "./familles/jetEau";
-import { construireRendementEngrais } from "./familles/rendementEngrais";
 import { construireConsommationCarburant } from "./familles/consommationCarburant";
-import { construirePubliciteAudience } from "./familles/publiciteAudience";
-import { construireCoutEntretienMachine } from "./familles/coutEntretienMachine";
 import { construirePopulationPoissons } from "./familles/populationPoissons";
-import { construireSautEnLongueur } from "./familles/sautEnLongueur";
+import { construireRectanglePerimetre } from "./familles/rectanglePerimetre";
+import { construireEnclosAdosseMur } from "./familles/enclosAdosseMur";
+import { construireProduitEntiersConsecutifs } from "./familles/produitEntiersConsecutifs";
+import { construireCarreMoinsNombre } from "./familles/carreMoinsNombre";
+import { construireSommeProduit } from "./familles/sommeProduit";
+import { construirePerimetreAire } from "./familles/perimetreAire";
 import { randomInt } from "./aleatoire";
 
 export const CATALOGUE_FAMILLES: { id: FamilleEquationInequationSecondDegre; label: string }[] = [
-  { id: "jetEau", label: "Hauteur d'un jet d'eau" },
-  { id: "rendementEngrais", label: "Rendement d'une culture selon l'engrais" },
-  { id: "consommationCarburant", label: "Consommation de carburant selon la vitesse" },
-  { id: "publiciteAudience", label: "Audience d'une campagne publicitaire" },
-  { id: "coutEntretienMachine", label: "Coût d'entretien d'une machine selon son âge" },
-  { id: "populationPoissons", label: "Population piscicole selon la nourriture distribuée" },
-  { id: "sautEnLongueur", label: "Distance d'un saut en longueur selon la vitesse d'élan" },
+  // A — fonction donnée
+  { id: "jetEau", label: "A · Hauteur d'un jet d'eau (fonction donnée)" },
+  { id: "consommationCarburant", label: "A · Consommation de carburant (fonction donnée)" },
+  { id: "populationPoissons", label: "A · Population piscicole (fonction donnée)" },
+  // B — construction géométrique
+  { id: "rectanglePerimetre", label: "B · Rectangle à périmètre fixé (construction)" },
+  { id: "enclosAdosseMur", label: "B · Enclos adossé à un mur (construction)" },
+  // C — problèmes de nombres classiques
+  { id: "produitEntiersConsecutifs", label: "C · Produit de 2 entiers consécutifs (nombres)" },
+  { id: "carreMoinsNombre", label: "C · Carré diminué du nombre (nombres)" },
+  // D — système à 2 inconnues
+  { id: "sommeProduit", label: "D · Somme et produit de 2 nombres (système)" },
+  { id: "perimetreAire", label: "D · Périmètre et aire d'un rectangle (système)" },
 ];
 
 export const CATALOGUE_VARIANTES: { id: VarianteEquationInequationSecondDegre; label: string }[] = [
@@ -38,12 +46,14 @@ type Constructeur = {
 
 const CONSTRUCTEURS: Record<FamilleEquationInequationSecondDegre, Constructeur> = {
   jetEau: construireJetEau,
-  rendementEngrais: construireRendementEngrais,
   consommationCarburant: construireConsommationCarburant,
-  publiciteAudience: construirePubliciteAudience,
-  coutEntretienMachine: construireCoutEntretienMachine,
   populationPoissons: construirePopulationPoissons,
-  sautEnLongueur: construireSautEnLongueur,
+  rectanglePerimetre: construireRectanglePerimetre,
+  enclosAdosseMur: construireEnclosAdosseMur,
+  produitEntiersConsecutifs: construireProduitEntiersConsecutifs,
+  carreMoinsNombre: construireCarreMoinsNombre,
+  sommeProduit: construireSommeProduit,
+  perimetreAire: construirePerimetreAire,
 };
 
 /** Toutes les combinaisons (famille, variante) tirables — produit cartésien complet, voir en-tête

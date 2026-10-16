@@ -1,32 +1,50 @@
 /**
- * Couche core — "Équations/inéquations du second degré en contexte" (position 57), REFONTE
- * TOTALE : générateur entièrement autonome, SANS AUCUNE dépendance vers gen55 ("Problèmes
- * d'optimisation") ou `core/optimisation.types.ts` — contrairement à la version précédente, qui
- * embarquait `base: ExerciceOptimisation` et réutilisait 4 écrans/4 fonctions de vérification de
- * gen55 pour les familles "modelisation", plus 2 écrans additionnels pour une famille à système
- * à 2 inconnues ("achatGroupe"). Les 2 axes orthogonaux `voieSysteme`/`base.variante` ont disparu
- * avec eux : CHAQUE famille se résume désormais à une seule fonction quadratique `f(x)=ax²+bx+c`
- * DIRECTEMENT communiquée dans l'énoncé (narrativement justifiée, jamais issue d'un système à 2
- * équations), sur un domaine borné, lui aussi directement déductible du contexte.
+ * Couche core — "Équations/inéquations du second degré en contexte" (position 57). SANS AUCUNE
+ * dépendance vers gen55 ("Problèmes d'optimisation") ou `core/optimisation.types.ts`.
  *
- * Toutes les 7 familles supportent les 2 variantes (`equation`/`inequation`), tirées aléatoirement
- * — aucune exception de type "cette famille n'existe qu'en équation" (contrairement à l'ancienne
- * famille "achatGroupe", retirée avec son système).
+ * **4 architectures distinctes** (demande explicite : ne pas se limiter à "f(x) donnée, pose
+ * f(x)=k, résous" avec simplement un habillage narratif différent — un vrai type de problème
+ * différent, pas un skin) :
+ * - **A — "fonction donnée"** (`jetEau`/`consommationCarburant`/`populationPoissons`) : `f(x)`
+ *   DIRECTEMENT révélée dans l'énoncé (formule développée visible). Séquence à 4 écrans :
+ *   `poserEquationInequation → resoudre → validation → interpretation`.
+ * - **B — "construction géométrique"** (`rectanglePerimetre`/`enclosAdosseMur`) : AUCUNE formule
+ *   révélée — seulement les données géométriques (périmètre/longueur de clôture fixés) et le seuil
+ *   visé. L'élève doit construire lui-même `f(x)` avant de poser l'équation/l'inéquation. Mêmes 4
+ *   écrans que A (réutilisés tels quels — seule la quantité d'information révélée dans l'énoncé
+ *   change, pas le mécanisme de vérification).
+ * - **C — "problèmes de nombres classiques"** (`produitEntiersConsecutifs`/`carreMoinsNombre`) :
+ *   aucun contexte physique, une relation verbale entre un entier naturel et lui-même (produit de 2
+ *   entiers consécutifs, carré diminué du nombre...). Construction DIFFÉRENTE de A/B (pas de sommet
+ *   positif confortable — le "sommet" de ces équations est toujours proche de 0 ou négatif, une
+ *   seule racine est physiquement valable, voir `generateurs/.../problemeNombre.ts`) mais mêmes 4
+ *   écrans.
+ * - **D — "système à 2 inconnues réduit par substitution"** (`sommeProduit`/`perimetreAire`) :
+ *   l'énoncé donne littéralement 2 relations entre 2 grandeurs (x et y) — l'élève pose le système,
+ *   PUIS isole une variable et substitue pour obtenir une équation à une inconnue, PUIS résout comme
+ *   A/B/C. Séquence à 6 écrans : `poserSysteme → isolerSubstituer → resoudre → validation →
+ *   interpretation`. `voieSysteme`/`systeme` non `null` ssi cette architecture (voir
+ *   `generateurs/.../systemeSubstitution.ts`).
  *
- * Séquence UNIQUE à 4 écrans, pour toutes les familles : `poserEquationInequation → resoudre →
- * validation → interpretation` (terminale) — voir `moteur/typesEquationInequationSecondDegre.ts`.
+ * Toutes les 9 familles supportent les 2 variantes (`equation`/`inequation`), tirées aléatoirement.
  */
 
 export type VarianteEquationInequationSecondDegre = "equation" | "inequation";
 
 export type FamilleEquationInequationSecondDegre =
+  // A — fonction donnée
   | "jetEau"
-  | "rendementEngrais"
   | "consommationCarburant"
-  | "publiciteAudience"
-  | "coutEntretienMachine"
   | "populationPoissons"
-  | "sautEnLongueur";
+  // B — construction géométrique
+  | "rectanglePerimetre"
+  | "enclosAdosseMur"
+  // C — problèmes de nombres classiques
+  | "produitEntiersConsecutifs"
+  | "carreMoinsNombre"
+  // D — système à 2 inconnues réduit par substitution
+  | "sommeProduit"
+  | "perimetreAire";
 
 export interface IntervalleBorne {
   inf: number;
@@ -46,13 +64,11 @@ export interface CoefficientsQuadratiques {
 
 export type GenreGrandeur = "masculin" | "feminin";
 
-/** Toutes les données narratives, directement lisibles dans l'énoncé — plus aucun champ hérité de
- * gen55 (`sommet`/`optimal`/`identificationXY`/`contrainte`...), aucun n'étant utilisé par les 4
- * écrans de ce générateur. `questionFinale` reste `null` ici (toujours une chaîne vide au niveau
- * de ce type) : la VRAIE question finale est `ExerciceEquationInequationCommun.questionFinale`
- * ci-dessous, affichée séparément et en permanence (`components/QuestionFinale.tsx`) — les écrans
- * réutilisés affichent néanmoins ce champ (toujours `null`) via leur propre bloc `QuestionFinale`
- * interne, convention héritée telle quelle de l'ancienne version. */
+/** Toutes les données narratives — `phraseEnonce` NE révèle PAS toujours `f(x)` développée
+ * (architectures B/C/D, voir en-tête de fichier) : seules les données nécessaires à sa
+ * CONSTRUCTION par l'élève y figurent. `questionFinale` reste `null` ici (toujours une chaîne
+ * vide) : la VRAIE question finale est `ExerciceEquationInequationCommun.questionFinale`
+ * ci-dessous, affichée séparément et en permanence (`components/QuestionFinale.tsx`). */
 export interface ContexteEquationInequationSecondDegre {
   phraseEnonce: string;
   labelVariable: string;
@@ -76,20 +92,38 @@ export interface OptionInterpretationEquationInequation {
   correcte: boolean;
 }
 
+/** Architecture D uniquement (`voieSysteme`) — les 2 relations littérales entre `x` et `y` que
+ * l'élève doit poser à l'écran "poserSysteme", vérifiées via `diagnostiquerEquivalenceQuadratiqueXY`
+ * (moteur→moteur, `verificationEquationCercle.ts`) ancrée au point `(x0,y0)` — une solution réelle
+ * du système, qui satisfait les 2 relations par construction. `cible1`/`cible2` sont les fonctions
+ * `(x,y) => 0` correspondant à chaque relation (ex. `(x,y) => x+y-S` pour "la somme vaut S"). */
+export interface SystemeEquationInequation {
+  label1: string;
+  label2: string;
+  x0: number;
+  y0: number;
+  cible1: (x: number, y: number) => number;
+  cible2: (x: number, y: number) => number;
+}
+
 interface ExerciceEquationInequationCommun {
   famille: FamilleEquationInequationSecondDegre;
   base: BaseEquationInequationSecondDegre;
-  /** Seuil introduit à l'écran "poserEquationInequation". */
+  /** Seuil introduit à l'écran "poserEquationInequation"/"isolerSubstituer". */
   k: number;
+  /** `true` ssi architecture D (`sommeProduit`/`perimetreAire`) — voir en-tête de fichier. */
+  voieSysteme: boolean;
+  /** Non `null` ssi `voieSysteme`. */
+  systeme: SystemeEquationInequation | null;
   optionsInterpretation: OptionInterpretationEquationInequation[];
   /** Question finale de l'exercice (ex. "Pour quelle valeur de x le bénéfice vaut-il exactement
-   * 450 € ?"), affichée PERSISTANTE sur les 4 écrans — toujours une chaîne réelle. */
+   * 450 € ?"), affichée PERSISTANTE sur tous les écrans — toujours une chaîne réelle. */
   questionFinale: string;
 }
 
 /** `variante: "equation"` — `racinesCandidates` a TOUJOURS exactement 2 éléments triés croissant
- * (discriminant strictement positif par construction, jamais 0 ni 1 — voir `racines.ts`) ;
- * `racinesValides` = le sous-ensemble (0, 1 ou 2) qui tombe dans `base.domaine`. */
+ * (discriminant strictement positif par construction) ; `racinesValides` = le sous-ensemble (0, 1
+ * ou 2) qui tombe dans `base.domaine`. */
 export interface ExerciceEquationSecondDegre extends ExerciceEquationInequationCommun {
   variante: "equation";
   racinesCandidates: [number, number];
@@ -101,7 +135,7 @@ export interface ExerciceEquationSecondDegre extends ExerciceEquationInequationC
  * les racines), `"lt"` pour une parabole convexe (f(x)<k = intervalle borné entre les racines).
  * `intervalleBrut` = solution de l'inéquation sur R (toujours un intervalle BORNÉ par
  * construction) ; `intervalleValide` = intersection avec `base.domaine`, TOUJOURS non vide par
- * construction (voir `racines.ts`). */
+ * construction. */
 export interface ExerciceInequationSecondDegre extends ExerciceEquationInequationCommun {
   variante: "inequation";
   sens: "gt" | "lt";

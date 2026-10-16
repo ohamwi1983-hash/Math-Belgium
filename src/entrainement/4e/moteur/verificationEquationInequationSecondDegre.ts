@@ -1,15 +1,51 @@
 /**
  * Couche B — vérification pour "Équations/inéquations du second degré en contexte" (position 57).
- * Ce module ne porte plus que les écrans "poserEquationInequation"/"resoudre"/"validation"/
- * "interpretation", les 4 seuls restants depuis la refonte (voir
- * `core/equationInequationSecondDegre.types.ts`, en-tête) — toutes les fonctions liées au système à
- * 2 inconnues (`diagnostiquerSystemeReel`/`diagnostiquerSystemeHypothetique`/
- * `diagnostiquerEliminationSysteme`, ancienne famille `achatGroupe`) ont disparu avec lui.
+ * Porte les écrans "poserSysteme"/"isolerSubstituer" (architecture D uniquement — voir
+ * `core/equationInequationSecondDegre.types.ts`, en-tête) en plus des 4 écrans communs aux 4
+ * architectures. `diagnostiquerRelation1`/`2` RÉUTILISENT DIRECTEMENT
+ * `diagnostiquerEquivalenceQuadratiqueXY` (`verificationEquationCercle.ts`, moteur→moteur) — exactement
+ * le même principe que l'ancienne famille "achatGroupe" (retirée lors de la refonte), mais sans son
+ * mécanisme d'élimination : ici chaque relation est vérifiée indépendamment, aucune étape
+ * d'élimination séparée.
  */
 import type { CoefficientsQuadratiques, ExerciceEquationInequationSecondDegre, IntervalleBorne } from "../core/equationInequationSecondDegre.types";
 import { evaluerExpressionGenerale } from "./expressionGenerale";
 import { parserNombreOuFraction } from "./verificationAnalyseFonction";
+import { diagnostiquerEquivalenceQuadratiqueXY } from "./verificationEquationCercle";
 import type { StatutVerification } from "./statutVerification";
+
+// ============================================================================
+// Écran "poserSysteme" — architecture D uniquement (`voieSysteme`).
+// ============================================================================
+
+export function diagnostiquerRelation1(exercice: ExerciceEquationInequationSecondDegre, texte: string): StatutVerification {
+  if (!exercice.systeme) return "parse_error";
+  const { x0, y0, cible1 } = exercice.systeme;
+  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, cible1);
+}
+
+export function verifierRelation1(exercice: ExerciceEquationInequationSecondDegre, texte: string): boolean {
+  return diagnostiquerRelation1(exercice, texte) === "correct";
+}
+
+export function diagnostiquerRelation2(exercice: ExerciceEquationInequationSecondDegre, texte: string): StatutVerification {
+  if (!exercice.systeme) return "parse_error";
+  const { x0, y0, cible2 } = exercice.systeme;
+  return diagnostiquerEquivalenceQuadratiqueXY(texte, x0, y0, cible2);
+}
+
+export function verifierRelation2(exercice: ExerciceEquationInequationSecondDegre, texte: string): boolean {
+  return diagnostiquerRelation2(exercice, texte) === "correct";
+}
+
+export interface ReponseSysteme {
+  relation1: string;
+  relation2: string;
+}
+
+export function verifierSysteme(exercice: ExerciceEquationInequationSecondDegre, reponse: ReponseSysteme): boolean {
+  return verifierRelation1(exercice, reponse.relation1) && verifierRelation2(exercice, reponse.relation2);
+}
 
 function evaluerQuadratiqueLocal(fonction: CoefficientsQuadratiques, x: number): number {
   return fonction.a * x * x + fonction.b * x + fonction.c;

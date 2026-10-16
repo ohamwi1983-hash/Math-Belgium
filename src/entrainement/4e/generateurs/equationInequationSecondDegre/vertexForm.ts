@@ -137,6 +137,8 @@ export function construireDepuisSommet(p: ParametresVertexForm, variante: Varian
       famille: p.famille,
       base,
       k,
+      voieSysteme: false,
+      systeme: null,
       racinesCandidates,
       racinesValides,
       questionFinale: formatQuestionFinaleEquationInequation({
@@ -177,6 +179,8 @@ export function construireDepuisSommet(p: ParametresVertexForm, variante: Varian
     famille: p.famille,
     base,
     k,
+    voieSysteme: false,
+    systeme: null,
     sens,
     intervalleBrut,
     intervalleValide,

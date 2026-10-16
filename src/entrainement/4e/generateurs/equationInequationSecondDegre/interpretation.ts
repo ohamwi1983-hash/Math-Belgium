@@ -46,12 +46,20 @@ function formatValeurs(valeurs: number[], labelVariable: string): string {
   return valeurs.map((v) => `${labelVariable} = ${v}`).join(" ou ");
 }
 
+/** `${valeur} ${unite}` sauf si `unite` est vide (familles "nombres", `uniteVariable`/
+ * `uniteGrandeur` volontairement vides — voir `problemeNombre.ts`/`systemeSubstitution.ts`) : sans
+ * ce garde, l'espace reste collé à la ponctuation qui suit (ex. "27 ." — bug trouvé en vérification
+ * manuelle), le français ne met jamais d'espace avant un point. */
+function avecUnite(valeur: number | string, unite: string): string {
+  return unite ? `${valeur} ${unite}` : `${valeur}`;
+}
+
 function phraseAtteintValeurs(p: ParametresCommuns, valeurs: number[], uniteGrandeur: string): string {
-  return `${capitaliser(p.nomGrandeur)} ${accordGenre("atteint", p.genreGrandeur)} ${p.k} ${uniteGrandeur} pour ${formatValeurs(valeurs, p.labelVariable)} ${p.uniteVariable}.`;
+  return `${capitaliser(p.nomGrandeur)} ${accordGenre("atteint", p.genreGrandeur)} ${avecUnite(p.k, uniteGrandeur)} pour ${avecUnite(formatValeurs(valeurs, p.labelVariable), p.uniteVariable)}.`;
 }
 
 function phraseIntervalle(p: ParametresCommuns, sens: string, intervalle: IntervalleBorne, uniteGrandeur: string): string {
-  return `${capitaliser(p.nomGrandeur)} ${sens} ${p.k} ${uniteGrandeur} pour ${p.labelVariable} compris entre ${intervalle.inf} et ${intervalle.sup} ${p.uniteVariable}.`;
+  return `${capitaliser(p.nomGrandeur)} ${sens} ${avecUnite(p.k, uniteGrandeur)} pour ${p.labelVariable} compris entre ${intervalle.inf} et ${avecUnite(intervalle.sup, p.uniteVariable)}.`;
 }
 
 function choisirTexteDistinct(candidats: string[], dejaUtilises: Set<string>, filet: string): string {
