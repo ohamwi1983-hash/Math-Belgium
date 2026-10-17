@@ -115,16 +115,24 @@ const STYLE_IMPRESSION = `
 }
 `
 
-/** Diagrammes réduits à 40% de leur taille réelle — demande explicite, propre à ce format. Réduit
- * le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre, pas seulement le SVG à
- * l'intérieur (sinon le cadre resterait pleine largeur avec le dessin flottant au milieu, entouré
- * de vide) ; le SVG repasse à 100% pour remplir son cadre déjà réduit. Exclut les mini-diagrammes
- * d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur propre colonne de grille, un
- * second rétrécissement à 40% de cette largeur les rendrait illisibles.
+/** Règle générale de taille des diagrammes à l'impression : assez grands pour que le texte du
+ * diagramme (graduations, étiquettes) reste lisible à côté du corps de texte environnant, sans
+ * prendre pour autant une pleine largeur de page inutile. Calibrée empiriquement (captures d'écran
+ * en simulation d'impression A4, comparées côte à côte avec le texte voisin) : à 40% (réglage
+ * précédent), les graduations/étiquettes d'un diagramme ressortaient nettement plus petites que le
+ * texte courant — illisibles à l'impression — alors qu'à 70% un diagramme simple (ex. une seule
+ * parabole) occupait une hauteur de page disproportionnée par rapport à son contenu réel. 55% est
+ * le point où le texte du diagramme rejoint la taille du texte courant, vérifié à la fois sur un
+ * diagramme simple (`fonction-second-degre`) et sur un diagramme dense à plusieurs étiquettes
+ * (`lieux-geometriques`). Réduit le CADRE (`.diagram-frame`, bordure + fond) lui-même et le centre,
+ * pas seulement le SVG à l'intérieur (sinon le cadre resterait pleine largeur avec le dessin
+ * flottant au milieu, entouré de vide) ; le SVG repasse à 100% pour remplir son cadre déjà réduit.
+ * Exclut les mini-diagrammes d'un `illustrationGroup` (`.diag-multi`) : déjà réduits par leur
+ * propre colonne de grille, un second rétrécissement à cette échelle les rendrait illisibles.
  *
  * Ce format reste du vrai DOM/CSS — jamais rasterisé — donc un `width` en `%` sur un `<svg>` s'y
  * résout normalement, sans risque de mauvaise résolution/déformation. */
-const ECHELLE_DIAGRAMMES_HTML = 40
+const ECHELLE_DIAGRAMMES_HTML = 55
 const STYLE_DIAGRAMMES = `
 .diagram-frame { width: ${ECHELLE_DIAGRAMMES_HTML}% !important; margin: 0 auto !important; }
 .diagram-frame svg { width: 100% !important; margin: 0 !important; }
