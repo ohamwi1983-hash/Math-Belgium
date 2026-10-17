@@ -92,7 +92,11 @@ export function SolidCavaliere({ size, showAxes, vertexLabels, highlightedPlane,
     >
       {showAxes && (
         <defs>
-          <marker id={`${markerId}-axe`} viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          {/* markerUnits="userSpaceOnUse" + markerWidth/Height compensés par le strokeWidth=1.5 des
+              lignes qui la référencent — voir le commentaire détaillé dans ChainDiagram.tsx.
+              refX/refY/viewBox/le path interne restent inchangés : ce marqueur a son propre viewBox,
+              donc indépendants de markerUnits. */}
+          <marker id={`${markerId}-axe`} viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="9.75" markerHeight="9.75" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
             <path d="M0,0 L8,4 L0,8 Z" style={{ fill: 'var(--ink-soft)' }} />
           </marker>
         </defs>

@@ -44,11 +44,18 @@ export function PlaneSketch({ width, height, planes, lines, points, freeLabels }
   return (
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Schéma géométrique">
       <defs>
-        {tones.map((tone) => (
-          <marker key={tone} id={`${markerId}-${tone}`} viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" style={{ fill: ARROW_FILL[tone] }} />
-          </marker>
-        ))}
+        {/* markerUnits="userSpaceOnUse" + markerWidth/Height compensés par le strokeWidth de la ligne
+            qui référence CE ton (2.4 pour accent/good, 1.8 pour les autres, voir plus bas) — voir le
+            commentaire détaillé dans ChainDiagram.tsx. refX/refY/viewBox/le path interne restent
+            inchangés : ce marqueur a son propre viewBox, donc indépendants de markerUnits. */}
+        {tones.map((tone) => {
+          const outerSize = (tone === 'accent' || tone === 'good' ? 2.4 : 1.8) * 6
+          return (
+            <marker key={tone} id={`${markerId}-${tone}`} viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth={outerSize} markerHeight={outerSize} markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" style={{ fill: ARROW_FILL[tone] }} />
+            </marker>
+          )
+        })}
       </defs>
 
       {planes?.map((plane, i) => (

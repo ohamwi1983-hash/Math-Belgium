@@ -117,3 +117,25 @@ plusieurs). Sans `_`, le texte ressort inchangé — fonction sans effet de bord
 n'en ont pas besoin. Appliquée dans `CurvePlot.tsx` et `SequencePlot.tsx` (les deux seuls
 composants dont des chapitres déjà en production utilisent cette notation) ; à réutiliser pour tout
 futur label d'illustration qui en aurait besoin ailleurs plutôt que de laisser passer un `_` brut.
+
+## Marqueurs de flèche d'axe (`<marker markerUnits="userSpaceOnUse">`)
+
+Les ~14 composants qui dessinent une flèche de bout d'axe (`cp-arrow`, `fg-arrow`, `domain-arrow`,
+etc. — convention commune documentée dans `.claude/rules/content-history.md`) déclarent TOUJOURS
+`markerUnits="userSpaceOnUse"` sur leur `<marker>`, jamais la valeur par défaut
+(`markerUnits="strokeWidth"`, implicite si l'attribut est omis). Bug constaté à l'écran (signalé
+par l'utilisateur sur un export A4 imprimé, chapitre `fonctions-logarithmes`) : avec la valeur par
+défaut, le marqueur reste à une taille FIXE en pixels d'écran dès que `vector-effect:
+non-scaling-stroke` est posé sur la ligne qui le référence (toutes les lignes d'axe du site, voir
+plus haut) — il ne suit PAS la réduction CSS du cadre (`.diagram-frame { width: N% }`, utilisée à
+la fois par l'export HTML A4 et par toute réduction manuelle d'un diagramme), devenant
+disproportionné dès que le diagramme est nettement rétréci. `userSpaceOnUse` corrige ce
+comportement, mais change aussi le calcul de taille du marqueur (il n'est plus multiplié par le
+`strokeWidth` de la ligne) : pour garder un rendu identique à l'écran normal, `markerWidth`/
+`markerHeight`/`refX`/`refY` et les coordonnées du `<path>` interne (quand le marker n'a pas son
+propre `viewBox`) doivent être multipliés par le `strokeWidth` de la ligne qui le référence (ex.
+`markerWidth="8"` × `strokeWidth="1.5"` → `markerWidth="12"`). Pour un marker qui a déjà son propre
+`viewBox` (ex. `PlaneSketch.tsx`, `SolidCavaliere.tsx`), seuls `markerWidth`/`markerHeight` ont
+besoin de cette compensation — `refX`/`refY`/le path interne restent dans le repère du `viewBox`,
+indépendants de `markerUnits`. Tout nouveau marker d'axe doit suivre cette même convention dès sa
+création, jamais la valeur par défaut.

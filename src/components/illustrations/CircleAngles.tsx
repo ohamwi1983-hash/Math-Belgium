@@ -83,11 +83,13 @@ export function CircleAngles({
         <clipPath id={`clip-${markerId}`}>
           <rect x="0" y="0" width={SIZE} height={SIZE} />
         </clipPath>
-        <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" className="svg-line" fill="currentColor" />
+        {/* markerUnits="userSpaceOnUse" + dimensions compensées par le strokeWidth des lignes qui
+            les référencent (1.3 et 1.5) — voir le commentaire détaillé dans ChainDiagram.tsx. */}
+        <marker id={markerId} markerWidth="10.4" markerHeight="10.4" refX="7.8" refY="5.2" markerUnits="userSpaceOnUse" orient="auto">
+          <path d="M0,0 L10.4,5.2 L0,10.4 Z" className="svg-line" fill="currentColor" />
         </marker>
-        <marker id={`${markerId}-accent`} markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-          <path d="M0,0 L7,3.5 L0,7 Z" className="svg-accent" fill="currentColor" />
+        <marker id={`${markerId}-accent`} markerWidth="10.5" markerHeight="10.5" refX="7.5" refY="5.25" markerUnits="userSpaceOnUse" orient="auto">
+          <path d="M0,0 L10.5,5.25 L0,10.5 Z" className="svg-accent" fill="currentColor" />
         </marker>
       </defs>
 

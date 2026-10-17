@@ -60,8 +60,10 @@ export function ComplexPlane({ xMin, xMax, yMin, yMax, circle, polygon, vectors,
     <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label="Plan d'Argand">
       <defs>
         {(['accent', 'good', 'bad', 'faint'] as const).map((tone) => (
-          <marker key={tone} id={`${markerId}-${tone}`} markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" className={LINE_TONE_CLASS[tone]} />
+          // markerUnits="userSpaceOnUse" + dimensions compensées par le strokeWidth=1.8 des vecteurs
+          // qui la référencent — voir le commentaire détaillé dans ChainDiagram.tsx.
+          <marker key={tone} id={`${markerId}-${tone}`} markerWidth="14.4" markerHeight="14.4" refX="10.8" refY="7.2" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M0,0 L14.4,7.2 L0,14.4 Z" className={LINE_TONE_CLASS[tone]} />
           </marker>
         ))}
       </defs>

@@ -11,8 +11,10 @@ export function MachineDiagram() {
       <rect x="390" y="30" width="230" height="80" rx="3" className="svg-faint" fill="none" strokeWidth="1.5" strokeDasharray="3 4" />
       <text x="505" y="76" textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontSize="22" fontStyle="italic">f(x)</text>
       <defs>
-        <marker id="machine-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" className="svg-line" fill="currentColor" />
+        {/* markerUnits="userSpaceOnUse" + dimensions compensées par le strokeWidth=2 des lignes qui
+            la référencent — voir le commentaire détaillé dans ChainDiagram.tsx. */}
+        <marker id="machine-arrow" markerWidth="16" markerHeight="16" refX="12" refY="8" markerUnits="userSpaceOnUse" orient="auto">
+          <path d="M0,0 L16,8 L0,16 Z" className="svg-line" fill="currentColor" />
         </marker>
       </defs>
     </svg>

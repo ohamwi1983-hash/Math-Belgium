@@ -53,8 +53,14 @@ export function ChainDiagram({ stages, highlightIndex, outputLabel }: Props) {
       </text>
 
       <defs>
-        <marker id="chain-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" className="svg-line" fill="currentColor" />
+        {/* markerUnits="userSpaceOnUse" (+ dimensions compensées par le strokeWidth=2 des lignes qui
+            la référencent, pour un rendu identique à avant) — sans ça, le marqueur par défaut
+            (markerUnits="strokeWidth") ne suit pas l'échelle de `vector-effect: non-scaling-stroke`
+            posée sur les lignes : la flèche garde une taille FIXE en pixels d'écran quelle que soit
+            la réduction CSS du cadre (ex. export A4 à 55%), donc devient disproportionnée dès que le
+            diagramme est nettement rétréci — constaté à l'écran sur l'export imprimé. */}
+        <marker id="chain-arrow" markerWidth="16" markerHeight="16" refX="12" refY="8" markerUnits="userSpaceOnUse" orient="auto">
+          <path d="M0,0 L16,8 L0,16 Z" className="svg-line" fill="currentColor" />
         </marker>
       </defs>
     </svg>

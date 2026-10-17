@@ -16,8 +16,10 @@ export function CompositionIntroDiagram() {
       <path d="M155,135 Q355,175 600,135" fill="none" className="svg-accent-outline" strokeWidth="1.5" strokeDasharray="2 3" />
       <text x="355" y="158" textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">f ∘ g</text>
       <defs>
-        <marker id="ci-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" className="svg-line" fill="currentColor" />
+        {/* markerUnits="userSpaceOnUse" + dimensions compensées par le strokeWidth=2 des lignes qui
+            la référencent — voir le commentaire détaillé dans ChainDiagram.tsx. */}
+        <marker id="ci-arrow" markerWidth="16" markerHeight="16" refX="12" refY="8" markerUnits="userSpaceOnUse" orient="auto">
+          <path d="M0,0 L16,8 L0,16 Z" className="svg-line" fill="currentColor" />
         </marker>
       </defs>
     </svg>

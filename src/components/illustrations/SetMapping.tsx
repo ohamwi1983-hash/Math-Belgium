@@ -21,8 +21,10 @@ export function SetMapping({ setALabel, setBLabel, pointsA, pointsB, arrows }: P
   return (
     <svg viewBox="0 0 150 150" role="img" aria-label={`Diagramme d'application entre les ensembles ${setALabel} et ${setBLabel}`}>
       <defs>
-        <marker id={markerId} markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" className="svg-line" fill="currentColor" />
+        {/* markerUnits="userSpaceOnUse" + dimensions compensées par le strokeWidth=1.5 des lignes qui
+            la référencent — voir le commentaire détaillé dans ChainDiagram.tsx. */}
+        <marker id={markerId} markerWidth="12" markerHeight="12" refX="9" refY="6" markerUnits="userSpaceOnUse" orient="auto">
+          <path d="M0,0 L12,6 L0,12 Z" className="svg-line" fill="currentColor" />
         </marker>
       </defs>
 
