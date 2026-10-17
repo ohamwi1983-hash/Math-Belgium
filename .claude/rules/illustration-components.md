@@ -104,3 +104,16 @@ figure/diagram-frame/figcaption pour toute illustration ; bascule sur `Illustrat
 Toutes les illustrations utilisent les classes CSS `svg-ink` / `svg-line` / `svg-accent` /
 `svg-good` / `svg-bad` / `svg-faint` définies dans `src/index.css`, qui pointent vers les variables
 de thème — elles s'adaptent donc automatiquement au thème sombre.
+
+## Indices dans les étiquettes (`mathLabel.tsx`)
+
+Les labels d'illustration (`points[].label`, `yAxisLabel`, `textLabels[].text`, etc.) sont du texte
+BRUT dans un `<text>` SVG — ils ne passent jamais par `RichText`/KaTeX (voir
+`.claude/rules/content-authoring.md`). Pour un indice (ex. "u_n", notation très fréquente dans le
+chapitre Suites), la convention LaTeX `_` est reconnue par `mathLabelTspans(text, fontSize)`
+(`src/components/illustrations/mathLabel.tsx`) : elle découpe la chaîne en `<tspan>` SVG avec un
+vrai décalage de ligne de base pour tout ce qui suit un `_` (`_n` un seul caractère, `_{...}` pour
+plusieurs). Sans `_`, le texte ressort inchangé — fonction sans effet de bord sur les labels qui
+n'en ont pas besoin. Appliquée dans `CurvePlot.tsx` et `SequencePlot.tsx` (les deux seuls
+composants dont des chapitres déjà en production utilisent cette notation) ; à réutiliser pour tout
+futur label d'illustration qui en aurait besoin ailleurs plutôt que de laisser passer un `_` brut.

@@ -1,4 +1,5 @@
 import type { IllustrationSpec } from '../../content/types'
+import { mathLabelTspans } from './mathLabel'
 
 type Props = Omit<Extract<IllustrationSpec, { kind: 'curvePlot' }>, 'caption'>
 
@@ -180,11 +181,11 @@ export function CurvePlot({
         </g>
       )}
       <text x={X_RIGHT} y={zeroY - 8} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
-        {xAxisLabel}
+        {mathLabelTspans(xAxisLabel, 13.5)}
       </text>
       {showYAxis && (
         <text x={zeroX + 8} y={Y_TOP + 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
-          {yAxisLabel}
+          {mathLabelTspans(yAxisLabel, 13.5)}
         </text>
       )}
 
@@ -207,7 +208,7 @@ export function CurvePlot({
             fontStyle="italic"
             fontSize="14.5"
           >
-            {axisOfSymmetry.label}
+            {mathLabelTspans(axisOfSymmetry.label, 14.5)}
           </text>
         </>
       )}
@@ -232,7 +233,7 @@ export function CurvePlot({
                 fontFamily="IBM Plex Mono, monospace"
                 fontSize="13.5"
               >
-                {a.label}
+                {mathLabelTspans(a.label, 13.5)}
               </text>
             )}
           </g>
@@ -254,7 +255,7 @@ export function CurvePlot({
                 fontFamily="IBM Plex Mono, monospace"
                 fontSize="13.5"
               >
-                {a.label}
+                {mathLabelTspans(a.label, 13.5)}
               </text>
             )}
           </g>
@@ -272,7 +273,7 @@ export function CurvePlot({
             <line x1={xScale(xMin)} y1={yScale(y1)} x2={xScale(xMax)} y2={yScale(y2)} className="svg-good-outline" strokeWidth="1.6" strokeDasharray="5 4" />
             {asym.label && (
               <text x={X_RIGHT - 4} y={labelY} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
-                {asym.label}
+                {mathLabelTspans(asym.label, 13.5)}
               </text>
             )}
           </g>
@@ -307,7 +308,7 @@ export function CurvePlot({
           <circle cx={xScale(r.x)} cy={zeroY} r="5" className="svg-accent" />
           {r.label && (
             <text x={xScale(r.x)} y={zeroY + 34} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">
-              {r.label}
+              {mathLabelTspans(r.label, 14.5)}
             </text>
           )}
         </g>
@@ -336,7 +337,7 @@ export function CurvePlot({
               strokeWidth={p.style === 'open' ? '2.5' : undefined}
             />
             <text {...textProps} className={POINT_TONE_CLASS[p.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">
-              {p.label}
+              {mathLabelTspans(p.label, 14.5)}
             </text>
           </g>
         )
@@ -352,7 +353,7 @@ export function CurvePlot({
           fontFamily="IBM Plex Mono, monospace"
           fontSize="13.5"
         >
-          {t.text}
+          {mathLabelTspans(t.text, 13.5)}
         </text>
       ))}
 
