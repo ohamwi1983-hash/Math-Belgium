@@ -58,7 +58,12 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
       <text x={X_RIGHT} y={Y_BOTTOM + 32} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {xAxisLabel}
       </text>
-      <text x={X_LEFT - 8} y={Y_TOP - 4} textAnchor="start" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
+      {/* y=Y_TOP-18 (pas Y_TOP-4) : remonté AU-DESSUS de la flèche (pointe en Y_TOP-8) plutôt que
+          poussé vers le bas — un décalage vers le bas retombait sur l'étiquette du premier point
+          dès que celui-ci est proche du haut du cadre (suite décroissante), constaté à l'écran
+          sur un second diagramme après un premier correctif insuffisant. Indépendant des données
+          affichées, contrairement à un décalage vers le bas. */}
+      <text x={X_LEFT - 8} y={Y_TOP - 18} textAnchor="start" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {yAxisLabel}
       </text>
 

@@ -254,11 +254,15 @@ export const limitesAsymptotes: ChapterContent = {
             curves: [{ fn: (x) => Math.sqrt(x * x + 1) - x, tone: 'accent' }],
             xMin: 0,
             xMax: 20,
-            xTicks: [10],
+            // Pas de graduation en x=10 : coïncide avec le point f(10) juste en dessous, qui
+            // affiche déjà cette valeur — chevauchement constaté à l'écran.
+            xTicks: [],
             fixedYRange: { min: 0, max: 1.1 },
             horizontalAsymptotes: [{ y: 0, label: 'y=0' }],
             points: [
-              { x: 0, y: 1, label: 'f(0)=1', tone: 'accent', labelPos: 'above' },
+              // 'right' plutôt que 'above' par défaut : x=0 coïncide avec l'axe des y, "f(0)=1"
+              // en 'above' chevauchait l'étiquette "f(x)" de l'axe — chevauchement constaté.
+              { x: 0, y: 1, label: 'f(0)=1', tone: 'accent', labelPos: 'right' },
               { x: 10, y: Math.sqrt(101) - 10, label: 'f(10)≈0,05', tone: 'accent', labelPos: 'below' },
             ],
             xAxisLabel: 'x',

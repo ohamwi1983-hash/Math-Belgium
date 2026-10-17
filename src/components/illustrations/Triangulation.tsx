@@ -21,7 +21,9 @@ export function Triangulation({ labels }: Props) {
 
       <path d={`M${A.x + 24},${A.y} A24,24 0 0 0 ${A.x + 24 * Math.cos(Math.atan2(S.y - A.y, S.x - A.x) * -1)},${A.y + 24 * Math.sin(Math.atan2(S.y - A.y, S.x - A.x) * -1)}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
       <path d={`M${B.x + 24},${B.y} A24,24 0 0 0 ${B.x + 24 * Math.cos(Math.atan2(S.y - B.y, S.x - B.x) * -1)},${B.y + 24 * Math.sin(Math.atan2(S.y - B.y, S.x - B.x) * -1)}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
-      <text x={A.x + 33} y={A.y - 14} fontSize="14.5" className="svg-accent" fontStyle="italic">
+      {/* Rapproché de A et remonté (était +33/-14) : chevauchait `distanceLabel`, centré entre A
+          et B juste au-dessus du segment — constaté à l'écran. */}
+      <text x={A.x + 20} y={A.y - 20} fontSize="14.5" className="svg-accent" fontStyle="italic">
         {labels.angleAtA}
       </text>
       <text x={B.x + 30} y={B.y - 15} fontSize="14.5" className="svg-accent" fontStyle="italic">

@@ -60,7 +60,9 @@ export const fonctionSecondDegre: ChapterContent = {
           xMax: 3,
           xTicks: [-3, -2, -1, 1, 2, 3],
           yTicks: [1, 2, 3, 4, 5, 6, 7, 8],
-          points: [{ x: 0, y: 0, label: '(0 ; 0)', tone: 'good' }],
+          // 'right' plutôt que le défaut 'above' : le sommet est sur l'axe des y, et "(0 ; 0)"
+          // centré au-dessus chevauchait la graduation "1" de l'axe des y — constaté à l'écran.
+          points: [{ x: 0, y: 0, label: '(0 ; 0)', tone: 'good', labelPos: 'right' }],
           xAxisLabel: 'x',
           yAxisLabel: 'y',
           caption: 'f(x) = x² : sommet (0 ; 0), tournée vers le haut',
@@ -317,8 +319,10 @@ export const fonctionSecondDegre: ChapterContent = {
             // reste de toute façon la plus évidente du graphe (origine des axes).
             roots: [{ x: 0 }, { x: 4, label: '4' }],
             points: [{ x: 2, y: 2, label: 'S(2 ; 2)', tone: 'accent' }],
+            // x=2.5 (plutôt que 3.2) et y=-3.4 (plutôt que -3) : le label "g(x) = ..." empiétait
+            // sur la racine "4" tracée sous l'axe en x=4 — chevauchement constaté à l'écran.
             textLabels: [
-              { x: 3.2, y: -3, text: 'g(x) = x² − 4x', tone: 'ink' },
+              { x: 2.5, y: -3.4, text: 'g(x) = x² − 4x', tone: 'ink' },
               { x: 2.3, y: 7.2, text: 'f(x) = x² − 4x + 6', tone: 'accent' },
             ],
             xAxisLabel: 'x',

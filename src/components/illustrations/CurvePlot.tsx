@@ -217,8 +217,9 @@ export function CurvePlot({
         // Une asymptote horizontale proche du haut du cadre (yTop) place son label tout près de
         // yAxisLabel, positionné lui aussi juste sous Y_TOP — collision fréquente dès que la
         // borne haute de la fenêtre y est proche de la valeur de l'asymptote. On décale alors le
-        // label horizontalement, au-delà de yAxisLabel, plutôt que de rivaliser pour la même
-        // bande verticale.
+        // label horizontalement ET verticalement, au-delà de yAxisLabel, plutôt que de rivaliser
+        // pour la même bande (décalage horizontal seul insuffisant une fois les polices
+        // agrandies — "hauteur (m)"/"max = 32" encore chevauchés malgré lui, constaté à l'écran).
         const nearYAxisLabel = showYAxis && Math.abs(labelY - (Y_TOP + 10)) < 20
         return (
           <g key={i}>
@@ -226,7 +227,7 @@ export function CurvePlot({
             {a.label && (
               <text
                 x={nearYAxisLabel ? zeroX + 28 : X_LEFT + 6}
-                y={labelY}
+                y={nearYAxisLabel ? labelY + 16 : labelY}
                 className="svg-ink"
                 fontFamily="IBM Plex Mono, monospace"
                 fontSize="13.5"

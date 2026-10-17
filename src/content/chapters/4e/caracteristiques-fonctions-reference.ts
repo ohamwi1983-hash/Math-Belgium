@@ -348,7 +348,10 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             ],
             xMin: -2,
             xMax: 5,
-            xTicks: [-1],
+            // Pas de graduation en x=-1 : coïncide avec le point "zéro" juste en dessous, qui
+            // affiche déjà cette valeur — chevauchement constaté à l'écran (étiquette "zéro" sur
+            // la graduation "-1").
+            xTicks: [],
             verticalAsymptotes: [{ x: 2, label: 'x = 2 (AV)' }],
             horizontalAsymptotes: [{ y: 1, label: 'y = 1 (AH)' }],
             points: [

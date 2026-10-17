@@ -594,7 +594,11 @@ export const geometrieDansEspace: ChapterContent = {
               { x: 152, y: 122, text: 'b', tone: 'good' },
               { x: 200, y: 90, text: 'π', tone: 'plan' },
               { x: 26, y: 150, text: 'α', tone: 'plan' },
-              { x: 122, y: 128, text: 'point de percée', tone: 'ink' },
+              // Déplacé sous le point et vers la gauche (était 90,150, puis 122,128 avant ça) :
+              // à 90,150 le texte était traversé par la droite d (qui se termine en 118,150) et
+              // frôlé par l'extrémité gauche de b (68,140) — constaté à l'écran. En 35,172, le
+              // texte passe sous les deux extrémités de droites, dans la marge basse du cadre.
+              { x: 35, y: 172, text: 'point de percée', tone: 'ink' },
             ],
             caption:
               'π contient d et coupe α suivant b. Le point de percée cherché est l\'intersection ' +

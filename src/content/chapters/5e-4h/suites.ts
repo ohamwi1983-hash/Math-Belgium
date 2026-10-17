@@ -131,7 +131,9 @@ export const suites: ChapterContent = {
               { x: 4, y: 6.5, label: '', tone: 'bad' },
               { x: 5, y: 5, label: '', tone: 'bad' },
               { x: 6, y: 3.5, label: '', tone: 'bad' },
-              { x: 7, y: 2, label: '(v_n) r<0', tone: 'bad', labelPos: 'below' },
+              // 'left' plutôt que 'below' : le point est proche du coin inférieur droit du cadre,
+              // où l'étiquette 'below' chevauchait le label "n" de l'axe des x — constaté à l'écran.
+              { x: 7, y: 2, label: '(v_n) r<0', tone: 'bad', labelPos: 'left' },
             ],
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',
@@ -308,9 +310,12 @@ export const suites: ChapterContent = {
               { x: 2, y: 2.1, label: '', tone: 'bad' },
               { x: 3, y: 1.26, label: '', tone: 'bad' },
               { x: 4, y: 0.756, label: '', tone: 'bad' },
-              { x: 5, y: 0.4536, label: '', tone: 'bad' },
+              // Label porté par le point n=5 plutôt que n=7 : à n=7, l'étiquette chevauchait à la
+              // fois la graduation "6" et le label "n" de l'axe (coin inférieur droit trop
+              // encombré) — constaté à l'écran.
+              { x: 5, y: 0.4536, label: '(v_n) q=0,6', tone: 'bad' },
               { x: 6, y: 0.27216, label: '', tone: 'bad' },
-              { x: 7, y: 0.163296, label: '(v_n) q=0,6', tone: 'bad', labelPos: 'left' },
+              { x: 7, y: 0.163296, label: '', tone: 'bad' },
             ],
             xAxisLabel: 'n',
             yAxisLabel: 'u_n',

@@ -1014,7 +1014,9 @@ export const trigonometrie: ChapterContent = {
                 xMin: 0,
                 xMax: 12,
                 xTicks: [4, 8, 12],
-                horizontalAsymptotes: [{ y: 2, label: 'min = 2' }, { y: 32, label: 'max = 32' }],
+                // Pas d'étiquette sur la droite y=2 : coïncide avec le point "t=0" juste en
+                // dessous, qui affiche déjà cette valeur (hauteur=2) — chevauchement constaté.
+                horizontalAsymptotes: [{ y: 2 }, { y: 32, label: 'max = 32' }],
                 points: [
                   { x: 0, y: 2, label: 't=0', tone: 'accent' },
                   { x: 4, y: 32, label: '', tone: 'accent' },
