@@ -49,7 +49,7 @@ export function StepFunction({ jumps, levels, levelLabels, xMin, xMax, yMax = 1,
       {jumps.map((x, i) => (
         <g key={`tick-${i}`}>
           <line x1={mapX(x)} y1={BOTTOM - 3} x2={mapX(x)} y2={BOTTOM + 3} className="svg-line" strokeWidth="1.2" />
-          <text x={mapX(x)} y={BOTTOM + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+          <text x={mapX(x)} y={BOTTOM + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
             {x}
           </text>
         </g>
@@ -61,16 +61,16 @@ export function StepFunction({ jumps, levels, levelLabels, xMin, xMax, yMax = 1,
         const to = bounds[i + 2] ?? xMax
         const midX = mapX((from + to) / 2)
         return (
-          <text key={`lvl-${i}`} x={midX} y={mapY(levels[i + 1]) - 8} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="12" fontWeight={700}>
+          <text key={`lvl-${i}`} x={midX} y={mapY(levels[i + 1]) - 8} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" fontWeight={700}>
             {label}
           </text>
         )
       })}
 
-      <text x="10" y={TOP - 8} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x="10" y={TOP - 8} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {yAxisLabel}
       </text>
-      <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {xAxisLabel}
       </text>
     </svg>

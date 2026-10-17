@@ -92,7 +92,7 @@ export function CircleAngles({
       </defs>
 
       {showQuadrants && (
-        <g className="svg-quadrant" fontFamily="Fraunces, serif" fontSize="14" textAnchor="middle">
+        <g className="svg-quadrant" fontFamily="Fraunces, serif" fontSize="15.5" textAnchor="middle">
           <text x={CX + R * 0.55} y={CY - R * 0.55}>I</text>
           <text x={CX - R * 0.55} y={CY - R * 0.55}>II</text>
           <text x={CX - R * 0.55} y={CY + R * 0.6}>III</text>
@@ -117,7 +117,7 @@ export function CircleAngles({
                 <circle cx={CX + R} cy={py} r="4" className="svg-good" />
                 <rect x={CX + R - 9} y={py < CY ? CY - 9 : CY} width="9" height="9" fill="none" className="svg-line" strokeWidth="1" />
                 {tangentConstruction.label && (
-                  <text x={CX + R + 6} y={py - 6} className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+                  <text x={CX + R + 6} y={py - 6} className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                     {tangentConstruction.label}
                   </text>
                 )}
@@ -143,7 +143,7 @@ export function CircleAngles({
                 const lx = CX + (a.radiusPx + 14) * Math.cos(mid)
                 const ly = CY - (a.radiusPx + 14) * Math.sin(mid)
                 return (
-                  <text x={lx} y={ly} textAnchor="middle" className={TONE_CLASS[a.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="11.5" fontStyle="italic">
+                  <text x={lx} y={ly} textAnchor="middle" className={TONE_CLASS[a.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="13" fontStyle="italic">
                     {a.label}
                   </text>
                 )
@@ -171,7 +171,7 @@ export function CircleAngles({
       {freeLabels?.map((l, i) => {
         const p = toPx(l.x, l.y)
         return (
-          <text key={i} x={p.x} y={p.y} textAnchor="middle" className={LABEL_TONE_CLASS[l.tone ?? 'ink']} fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+          <text key={i} x={p.x} y={p.y} textAnchor="middle" className={LABEL_TONE_CLASS[l.tone ?? 'ink']} fontFamily="IBM Plex Mono, monospace" fontSize="14">
             {l.text}
           </text>
         )
@@ -199,7 +199,7 @@ export function CircleAngles({
             className={TONE_CLASS[p.tone]}
             fontFamily={pointLabelStyle === 'mono' ? 'IBM Plex Mono, monospace' : 'Fraunces, serif'}
             fontStyle={pointLabelStyle === 'mono' ? undefined : 'italic'}
-            fontSize={pointLabelStyle === 'mono' ? '11' : '14'}
+            fontSize={pointLabelStyle === 'mono' ? '12.5' : '15.5'}
           >
             {p.label}
             {p.sublabel && (
@@ -217,13 +217,13 @@ export function CircleAngles({
           textAnchor="end"
           className="svg-ink"
           fontFamily="IBM Plex Mono, monospace"
-          fontSize="12"
+          fontSize="13.5"
         >
           {horizontalLine.label}
         </text>
       )}
       {verticalLine && (
-        <text x={CX + R * verticalLine.x + 6} y={CY - R - 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+        <text x={CX + R * verticalLine.x + 6} y={CY - R - 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {verticalLine.label}
         </text>
       )}

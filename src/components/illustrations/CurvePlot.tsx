@@ -163,7 +163,7 @@ export function CurvePlot({
         <line x1={X_LEFT} y1={zeroY} x2={X_RIGHT} y2={zeroY} className="svg-line" strokeWidth="1.5" markerEnd="url(#cp-arrow)" />
       )}
 
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
         {xTicks.map((t) => (
           <text key={t} x={xScale(t)} y={zeroY + 16} textAnchor="middle">
             {xTickLabels?.[t] ?? t}
@@ -171,7 +171,7 @@ export function CurvePlot({
         ))}
       </g>
       {showYAxis && yTicks && (
-        <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+        <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
           {yTicks.map((t) => (
             <text key={t} x={zeroX - 8} y={yScale(t) + 4} textAnchor="end">
               {yTickLabels?.[t] ?? t}
@@ -179,11 +179,11 @@ export function CurvePlot({
           ))}
         </g>
       )}
-      <text x={X_RIGHT} y={zeroY - 8} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={X_RIGHT} y={zeroY - 8} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {xAxisLabel}
       </text>
       {showYAxis && (
-        <text x={zeroX + 8} y={Y_TOP + 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+        <text x={zeroX + 8} y={Y_TOP + 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {yAxisLabel}
         </text>
       )}
@@ -205,7 +205,7 @@ export function CurvePlot({
             className="svg-ink"
             fontFamily="Fraunces, serif"
             fontStyle="italic"
-            fontSize="13"
+            fontSize="14.5"
           >
             {axisOfSymmetry.label}
           </text>
@@ -229,7 +229,7 @@ export function CurvePlot({
                 y={labelY}
                 className="svg-ink"
                 fontFamily="IBM Plex Mono, monospace"
-                fontSize="12"
+                fontSize="13.5"
               >
                 {a.label}
               </text>
@@ -251,7 +251,7 @@ export function CurvePlot({
                 y={nearYAxis ? Y_TOP + 26 : Y_TOP + 12}
                 className="svg-ink"
                 fontFamily="IBM Plex Mono, monospace"
-                fontSize="12"
+                fontSize="13.5"
               >
                 {a.label}
               </text>
@@ -270,7 +270,7 @@ export function CurvePlot({
           <g key={i}>
             <line x1={xScale(xMin)} y1={yScale(y1)} x2={xScale(xMax)} y2={yScale(y2)} className="svg-good-outline" strokeWidth="1.6" strokeDasharray="5 4" />
             {asym.label && (
-              <text x={X_RIGHT - 4} y={labelY} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+              <text x={X_RIGHT - 4} y={labelY} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                 {asym.label}
               </text>
             )}
@@ -305,7 +305,7 @@ export function CurvePlot({
         <g key={i}>
           <circle cx={xScale(r.x)} cy={zeroY} r="5" className="svg-accent" />
           {r.label && (
-            <text x={xScale(r.x)} y={zeroY + 34} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">
+            <text x={xScale(r.x)} y={zeroY + 34} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">
               {r.label}
             </text>
           )}
@@ -334,7 +334,7 @@ export function CurvePlot({
               style={p.style === 'open' ? { fill: 'var(--surface)' } : undefined}
               strokeWidth={p.style === 'open' ? '2.5' : undefined}
             />
-            <text {...textProps} className={POINT_TONE_CLASS[p.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">
+            <text {...textProps} className={POINT_TONE_CLASS[p.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">
               {p.label}
             </text>
           </g>
@@ -349,7 +349,7 @@ export function CurvePlot({
           textAnchor={t.anchor ?? 'start'}
           className={LABEL_TONE_CLASS[t.tone ?? 'ink']}
           fontFamily="IBM Plex Mono, monospace"
-          fontSize="12"
+          fontSize="13.5"
         >
           {t.text}
         </text>

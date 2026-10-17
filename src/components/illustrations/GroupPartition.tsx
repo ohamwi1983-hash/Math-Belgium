@@ -40,7 +40,7 @@ export function GroupPartition({ poolLabel, groups, formulaLabel }: Props) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${total} éléments répartis en ${groups.length} groupes de tailles ${groups.map((g) => g.size).join(', ')}`}>
-      <text x={W / 2} y="16" textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={W / 2} y="16" textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {poolLabel}
       </text>
       {poolTones.map((tone, i) => (
@@ -50,7 +50,7 @@ export function GroupPartition({ poolLabel, groups, formulaLabel }: Props) {
       {boxes.map((b, i) => (
         <g key={`c${i}`}>
           <line x1={b.cx} y1="48" x2={b.cx} y2={BOX_TOP - 26} className="svg-faint" strokeWidth="1.2" strokeDasharray="4 3" />
-          <text x={b.cx} y={BOX_TOP - 12} textAnchor="middle" className={TOKEN_CLASS[b.tone]} stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14" fontWeight="700">
+          <text x={b.cx} y={BOX_TOP - 12} textAnchor="middle" className={TOKEN_CLASS[b.tone]} stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="15.5" fontWeight="700">
             {b.size}
           </text>
         </g>
@@ -84,7 +84,7 @@ export function GroupPartition({ poolLabel, groups, formulaLabel }: Props) {
         )
       })}
 
-      <text x={W / 2} y={H - 10} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+      <text x={W / 2} y={H - 10} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="14">
         {formulaLabel}
       </text>
     </svg>

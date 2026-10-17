@@ -14,7 +14,7 @@ export function CompositionIntroDiagram() {
       <rect x="510" y="40" width="180" height="80" rx="3" className="svg-faint" fill="none" strokeWidth="1.5" strokeDasharray="3 4" />
       <text x="600" y="88" textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontSize="19" fontStyle="italic">f(g(x))</text>
       <path d="M155,135 Q355,175 600,135" fill="none" className="svg-accent-outline" strokeWidth="1.5" strokeDasharray="2 3" />
-      <text x="355" y="158" textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13">f ∘ g</text>
+      <text x="355" y="158" textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">f ∘ g</text>
       <defs>
         <marker id="ci-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
           <path d="M0,0 L8,4 L0,8 Z" className="svg-line" fill="currentColor" />

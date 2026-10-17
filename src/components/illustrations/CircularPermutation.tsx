@@ -39,7 +39,7 @@ export function CircularPermutation({ n, mode, symmetryLabel }: Props) {
       {mode === 'reflection' && (
         <>
           <line x1={CX} y1={CY - R - 24} x2={CX} y2={CY + R + 24} className="svg-good" strokeWidth="2" />
-          <text x={CX + 10} y={CY - R - 28} className="svg-good" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12" fontWeight="600">
+          <text x={CX + 10} y={CY - R - 28} className="svg-good" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" fontWeight="600">
             {label}
           </text>
         </>
@@ -48,7 +48,7 @@ export function CircularPermutation({ n, mode, symmetryLabel }: Props) {
       {mode === 'rotation' && (
         <>
           <path d={arcPath(CX, CY, 34, 80, 10)} fill="none" className="svg-line" strokeWidth="1.4" />
-          <text x={CX} y={CY - 42} textAnchor="middle" className="svg-accent" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12" fontWeight="600">
+          <text x={CX} y={CY - 42} textAnchor="middle" className="svg-accent" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" fontWeight="600">
             {label}
           </text>
         </>
@@ -68,7 +68,7 @@ export function CircularPermutation({ n, mode, symmetryLabel }: Props) {
             textAnchor="middle"
             className="svg-ink"
             fontFamily="IBM Plex Mono, monospace"
-            fontSize="12"
+            fontSize="13.5"
           >
             {i + 1}
           </text>

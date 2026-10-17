@@ -32,7 +32,7 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, signL
         {extraTicks?.map((tick, i) => (
           <g key={i}>
             <line x1={toX(tick.value)} y1={AXIS_Y - 5} x2={toX(tick.value)} y2={AXIS_Y + 5} className="svg-faint" strokeWidth="1" />
-            <text x={toX(tick.value)} y={AXIS_Y + 42} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12" opacity="0.7">
+            <text x={toX(tick.value)} y={AXIS_Y + 42} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" opacity="0.7">
               {tick.label}
             </text>
           </g>
@@ -57,11 +57,11 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, signL
                 style={{ fill: pt.closed ? toneVar : 'var(--surface)', stroke: toneVar }}
                 strokeWidth={pt.closed ? 1.5 : 2.5}
               />
-              <text x={x} y={AXIS_Y + 25} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="14" fontWeight="600">
+              <text x={x} y={AXIS_Y + 25} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="15.5" fontWeight="600">
                 {pt.label}
               </text>
               {pt.sublabel && (
-                <text x={x} y={AXIS_Y + 45} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="11">
+                <text x={x} y={AXIS_Y + 45} textAnchor="middle" className={toneClass} fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
                   {pt.sublabel}
                 </text>
               )}
@@ -77,7 +77,7 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, signL
               <line x1={x1} y1="18" x2={x2} y2="18" className="svg-line" strokeWidth="1.2" />
               <line x1={x1} y1="12" x2={x1} y2="24" className="svg-line" strokeWidth="1.2" />
               <line x1={x2} y1="12" x2={x2} y2="24" className="svg-line" strokeWidth="1.2" />
-              <text x={(x1 + x2) / 2} y="10" textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+              <text x={(x1 + x2) / 2} y="10" textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
                 {r.label}
               </text>
             </g>
@@ -93,7 +93,7 @@ export function DomainNumberLine({ min, max, segments, points, extraTicks, signL
             className={s.sign === '+' ? 'svg-good' : 'svg-bad'}
             fontFamily="Fraunces, serif"
             fontStyle="italic"
-            fontSize="14"
+            fontSize="15.5"
           >
             {s.sign}
           </text>

@@ -55,7 +55,7 @@ export function UnitCircleArc({ mode, angle }: Props) {
       {mode === 'sin' && (
         <>
           <line x1={pointX} y1={pointY} x2={CX - R - 16} y2={pointY} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
-          <text x={CX - R - 20} y={pointY + 4} textAnchor="end" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+          <text x={CX - R - 20} y={pointY + 4} textAnchor="end" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
             x
           </text>
         </>
@@ -63,7 +63,7 @@ export function UnitCircleArc({ mode, angle }: Props) {
       {mode === 'cos' && (
         <>
           <line x1={pointX} y1={pointY} x2={pointX} y2={CY + R + 16} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
-          <text x={pointX} y={CY + R + 28} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+          <text x={pointX} y={CY + R + 28} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
             x
           </text>
         </>
@@ -79,7 +79,7 @@ export function UnitCircleArc({ mode, angle }: Props) {
         className="svg-accent"
         fontFamily="Fraunces, serif"
         fontStyle="italic"
-        fontSize="13"
+        fontSize="14.5"
       >
         y
       </text>

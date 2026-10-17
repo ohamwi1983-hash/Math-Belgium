@@ -39,12 +39,12 @@ export function TriangleGeneric({ A, B, C, angleArcsAt, heightFromC, coordinateC
           <line x1={C.x} y1={C.y} x2={H.x} y2={H.y} className="svg-faint" strokeWidth="1.3" strokeDasharray="4 3" />
           <rect x={H.x - 10} y={H.y - 10} width="10" height="10" fill="none" className="svg-line" strokeWidth="1.1" />
           {heightFromC.footLabel && (
-            <text x={H.x + 6} y={H.y + 18} fontSize="12.5" className="svg-ink">
+            <text x={H.x + 6} y={H.y + 18} fontSize="14" className="svg-ink">
               {heightFromC.footLabel}
             </text>
           )}
           {heightFromC.hLabel && (
-            <text x={H.x - 6} y={(H.y + C.y) / 2} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="13" className="svg-ink">
+            <text x={H.x - 6} y={(H.y + C.y) / 2} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" className="svg-ink">
               {heightFromC.hLabel}
             </text>
           )}
@@ -58,10 +58,10 @@ export function TriangleGeneric({ A, B, C, angleArcsAt, heightFromC, coordinateC
           <line x1={A.x} y1={A.y + 8} x2={A.x} y2={A.y + 14} className="svg-faint" strokeWidth="1.1" />
           <line x1={H.x} y1={H.y + 8} x2={H.x} y2={H.y + 14} className="svg-faint" strokeWidth="1.1" />
           <line x1={A.x} y1={A.y + 11} x2={H.x} y2={H.y + 11} className="svg-faint" strokeWidth="1.1" />
-          <text x={(A.x + H.x) / 2} y={A.y + 28} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" className="svg-ink">
+          <text x={(A.x + H.x) / 2} y={A.y + 28} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="14" className="svg-ink">
             {coordinateConstruction.horizontalLabel}
           </text>
-          <text x={H.x + 8} y={(H.y + C.y) / 2} fontFamily="IBM Plex Mono, monospace" fontSize="12.5" className="svg-ink">
+          <text x={H.x + 8} y={(H.y + C.y) / 2} fontFamily="IBM Plex Mono, monospace" fontSize="14" className="svg-ink">
             {coordinateConstruction.verticalLabel}
           </text>
         </>
@@ -71,22 +71,22 @@ export function TriangleGeneric({ A, B, C, angleArcsAt, heightFromC, coordinateC
       {angleArcsAt?.includes('B') && <path d={vertexArc(B, A, C, 26)} fill="none" className="svg-accent-outline" strokeWidth="1.4" />}
       {angleArcsAt?.includes('C') && <path d={vertexArc(C, A, B, 24)} fill="none" className="svg-accent-outline" strokeWidth="1.4" />}
 
-      <text x={A.x - 14} y={A.y + 6} fontSize="14" className="svg-ink">A</text>
-      <text x={B.x + 10} y={B.y + 6} fontSize="14" className="svg-ink">B</text>
-      <text x={C.x} y={C.y - 12} textAnchor="middle" fontSize="14" className="svg-ink">C</text>
+      <text x={A.x - 14} y={A.y + 6} fontSize="15.5" className="svg-ink">A</text>
+      <text x={B.x + 10} y={B.y + 6} fontSize="15.5" className="svg-ink">B</text>
+      <text x={C.x} y={C.y - 12} textAnchor="middle" fontSize="15.5" className="svg-ink">C</text>
 
       {sideLabels?.c && (
-        <text x={(A.x + B.x) / 2} y={A.y + 20} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontStyle="italic" className="svg-ink">
+        <text x={(A.x + B.x) / 2} y={A.y + 20} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontStyle="italic" className="svg-ink">
           {sideLabels.c}
         </text>
       )}
       {sideLabels?.a && (
-        <text x={(B.x + C.x) / 2 + 10} y={(B.y + C.y) / 2} fontFamily="IBM Plex Mono, monospace" fontSize="13" fontStyle="italic" className="svg-ink">
+        <text x={(B.x + C.x) / 2 + 10} y={(B.y + C.y) / 2} fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontStyle="italic" className="svg-ink">
           {sideLabels.a}
         </text>
       )}
       {sideLabels?.b && (
-        <text x={(A.x + C.x) / 2 - 10} y={(A.y + C.y) / 2} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontStyle="italic" className="svg-ink">
+        <text x={(A.x + C.x) / 2 - 10} y={(A.y + C.y) / 2} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontStyle="italic" className="svg-ink">
           {sideLabels.b}
         </text>
       )}

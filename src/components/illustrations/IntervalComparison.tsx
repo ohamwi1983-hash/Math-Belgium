@@ -27,7 +27,7 @@ export function IntervalComparison({ min, max, ticks, rows }: Props) {
             {ticks.map((t) => (
               <g key={t}>
                 <line x1={mapX(t)} y1={lineY - 4} x2={mapX(t)} y2={lineY + 4} className="svg-line" strokeWidth="1.2" />
-                <text x={mapX(t)} y={lineY + 20} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+                <text x={mapX(t)} y={lineY + 20} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                   {t}
                 </text>
               </g>
@@ -40,7 +40,7 @@ export function IntervalComparison({ min, max, ticks, rows }: Props) {
               return (
                 <g key={i}>
                   <rect x={x1} y={pillY} width={x2 - x1} height={PILL_H} rx={PILL_H / 2} fill={FILL[range.tone]} opacity={0.7} />
-                  <text x={(x1 + x2) / 2} y={pillY - 8} textAnchor="middle" className={TEXT_CLASS[range.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="12" fontWeight={700}>
+                  <text x={(x1 + x2) / 2} y={pillY - 8} textAnchor="middle" className={TEXT_CLASS[range.tone]} fontFamily="IBM Plex Mono, monospace" fontSize="13.5" fontWeight={700}>
                     {range.label}
                   </text>
                 </g>

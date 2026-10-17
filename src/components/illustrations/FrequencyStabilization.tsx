@@ -31,7 +31,7 @@ export function FrequencyStabilization({ frequencies, step, target, yMin, yMax, 
       <line x1={LEFT} y1={BOTTOM} x2={LEFT} y2={TOP} className="svg-line" strokeWidth="1.5" />
 
       <line x1={LEFT} y1={targetY} x2={RIGHT} y2={targetY} className="svg-good" strokeWidth="1.4" strokeDasharray="4 3" />
-      <text x={RIGHT + 8} y={targetY + 4} className="svg-good" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={RIGHT + 8} y={targetY + 4} className="svg-good" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {target.label}
       </text>
 
@@ -43,16 +43,16 @@ export function FrequencyStabilization({ frequencies, step, target, yMin, yMax, 
       {xTicks?.map((t) => (
         <g key={t}>
           <line x1={px(t)} y1={BOTTOM} x2={px(t)} y2={BOTTOM + 4} className="svg-line" strokeWidth="1" />
-          <text x={px(t)} y={BOTTOM + 17} textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+          <text x={px(t)} y={BOTTOM + 17} textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
             {t}
           </text>
         </g>
       ))}
 
-      <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {xAxisLabel}
       </text>
-      <text x="8" y={TOP - 6} className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x="8" y={TOP - 6} className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {yAxisLabel}
       </text>
     </svg>

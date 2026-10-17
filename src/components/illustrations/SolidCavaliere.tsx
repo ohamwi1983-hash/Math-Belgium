@@ -103,19 +103,19 @@ export function SolidCavaliere({ size, showAxes, vertexLabels, highlightedPlane,
           <line x1={70} y1={190} x2={255} y2={190} className="svg-line" strokeWidth="1.5" markerEnd={`url(#${markerId}-axe)`} />
           <line x1={70} y1={190} x2={70} y2={18} className="svg-line" strokeWidth="1.5" markerEnd={`url(#${markerId}-axe)`} />
           <line x1={70} y1={190} x2={158} y2={102} className="svg-line" strokeWidth="1.5" strokeDasharray="4 3" markerEnd={`url(#${markerId}-axe)`} />
-          <text x={262} y={194} fontSize="14" className="svg-ink" fontStyle="italic" fontFamily="Fraunces, serif">
+          <text x={262} y={194} fontSize="15.5" className="svg-ink" fontStyle="italic" fontFamily="Fraunces, serif">
             x
           </text>
-          <text x={70} y={10} fontSize="14" className="svg-ink" fontStyle="italic" fontFamily="Fraunces, serif" textAnchor="middle">
+          <text x={70} y={10} fontSize="15.5" className="svg-ink" fontStyle="italic" fontFamily="Fraunces, serif" textAnchor="middle">
             z
           </text>
-          <text x={166} y={98} fontSize="14" className="svg-ink" fontStyle="italic" fontFamily="Fraunces, serif">
+          <text x={166} y={98} fontSize="15.5" className="svg-ink" fontStyle="italic" fontFamily="Fraunces, serif">
             y
           </text>
-          <text x={107} y={167} fontSize="11" className="svg-ink-faint">
+          <text x={107} y={167} fontSize="12.5" className="svg-ink-faint">
             45°
           </text>
-          <text x={118} y={140} fontSize="10.5" className="svg-ink-faint">
+          <text x={118} y={140} fontSize="12" className="svg-ink-faint">
             × ½
           </text>
         </g>
@@ -164,7 +164,7 @@ export function SolidCavaliere({ size, showAxes, vertexLabels, highlightedPlane,
         <g key={i}>
           <circle cx={p.x} cy={p.y} r="4.5" className={p.tone === 'accent' ? 'svg-accent' : 'svg-ink'} />
           {p.label && (
-            <text x={p.x - 20} y={p.y + 4} fontSize="14" className={p.tone === 'accent' ? 'svg-accent' : 'svg-ink'} fontStyle="italic" fontFamily="Fraunces, serif">
+            <text x={p.x - 20} y={p.y + 4} fontSize="15.5" className={p.tone === 'accent' ? 'svg-accent' : 'svg-ink'} fontStyle="italic" fontFamily="Fraunces, serif">
               {p.label}
             </text>
           )}
@@ -182,7 +182,7 @@ export function SolidCavaliere({ size, showAxes, vertexLabels, highlightedPlane,
               x={p.x + offset.dx}
               y={p.y + offset.dy}
               textAnchor={offset.anchor}
-              fontSize="14"
+              fontSize="15.5"
               className={LABEL_TONE_CLASS[vl.tone ?? 'ink']}
               fontStyle="italic"
               fontFamily="Fraunces, serif"

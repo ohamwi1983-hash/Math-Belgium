@@ -44,11 +44,11 @@ export function CompositionNumericDiagram({ fLabel, gLabel, a, fa, gfa, xMax, to
   return (
     <svg viewBox="0 0 640 320" role="img" aria-label={`Deux graphes gradués illustrant (g∘f)(${a}) = ${gfa}`}>
       <text x="20" y="20" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="16">
-        C<tspan baselineShift="sub" fontSize="11">{fLabel}</tspan>
+        C<tspan baselineShift="sub" fontSize="12.5">{fLabel}</tspan>
       </text>
       <line x1={X_LEFT} y1="20" x2={X_LEFT} y2="140" className="svg-line" strokeWidth="1.5" markerEnd="url(#cn-arrow)" />
       <line x1={X_LEFT} y1="140" x2={X_RIGHT} y2="140" className="svg-line" strokeWidth="1.5" markerEnd="url(#cn-arrow)" />
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
         {xTicks.map((t) => (
           <text key={t} x={xScale(t)} y="155" textAnchor="middle">{t}</text>
         ))}
@@ -59,15 +59,15 @@ export function CompositionNumericDiagram({ fLabel, gLabel, a, fa, gfa, xMax, to
       <line x1={markAx} y1="140" x2={markAx} y2={markFaY} className="svg-accent" strokeWidth="1.5" strokeDasharray="3 3" />
       <circle cx={markAx} cy={markFaY} r="4" className="svg-accent" />
       <line x1={markAx} y1={markFaY} x2={X_LEFT} y2={markFaY} className="svg-accent" strokeWidth="1.5" strokeDasharray="3 3" />
-      <text x={markAx} y="175" textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">a={a}</text>
-      <text x={X_LEFT - 28} y={markFaY + 4} textAnchor="end" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">{fLabel}({a})={fa}</text>
+      <text x={markAx} y="175" textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">a={a}</text>
+      <text x={X_LEFT - 28} y={markFaY + 4} textAnchor="end" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">{fLabel}({a})={fa}</text>
 
       <text x="20" y="196" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="16">
-        C<tspan baselineShift="sub" fontSize="11">{gLabel}</tspan>
+        C<tspan baselineShift="sub" fontSize="12.5">{gLabel}</tspan>
       </text>
       <line x1={X_LEFT} y1="196" x2={X_LEFT} y2="300" className="svg-line" strokeWidth="1.5" markerEnd="url(#cn-arrow)" />
       <line x1={X_LEFT} y1="300" x2={X_RIGHT} y2="300" className="svg-line" strokeWidth="1.5" markerEnd="url(#cn-arrow)" />
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
         {xTicks.map((t) => (
           <text key={t} x={xScale(t)} y="315" textAnchor="middle">{t}</text>
         ))}
@@ -78,8 +78,8 @@ export function CompositionNumericDiagram({ fLabel, gLabel, a, fa, gfa, xMax, to
       <line x1={markFaX} y1="300" x2={markFaX} y2={markGfaY} className="svg-good" strokeWidth="1.5" strokeDasharray="3 3" />
       <circle cx={markFaX} cy={markGfaY} r="4" className="svg-good" />
       <line x1={markFaX} y1={markGfaY} x2={X_LEFT} y2={markGfaY} className="svg-good" strokeWidth="1.5" strokeDasharray="3 3" />
-      <text x={markFaX} y="335" textAnchor="middle" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">{fLabel}({a})={fa}</text>
-      <text x={X_LEFT - 28} y={markGfaY + 4} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">{gLabel}({fa})={gfa}</text>
+      <text x={markFaX} y="335" textAnchor="middle" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">{fLabel}({a})={fa}</text>
+      <text x={X_LEFT - 28} y={markGfaY + 4} textAnchor="end" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">{gLabel}({fa})={gfa}</text>
 
       <defs>
         <marker id="cn-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">

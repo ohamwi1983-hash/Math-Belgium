@@ -751,6 +751,23 @@ figcaption {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
 }
 .diagram-frame--compact { max-width: 50%; margin: 0 auto; }
+/* Un viewBox SVG fixe (ex. 640×290) combiné à `width: 100%` rétrécit PROPORTIONNELLEMENT texte et
+   traits sur un petit écran (ex. ~45 % de leur taille voulue sur un téléphone, vs. desktop) —
+   signalé par l'utilisateur comme illisible sur mobile. Deux leviers indépendants :
+   1. Rendre plus de pixels réels disponibles au SVG (moins de padding, pas de bridage à 50 % de
+      largeur pour un diagramme "compact" — pensé pour un affichage desktop à mi-page, pas pour un
+      écran déjà étroit).
+   2. `vector-effect: non-scaling-stroke` (natif SVG) sur toutes les formes tracées : un trait
+      ainsi marqué garde une épaisseur CONSTANTE en pixels d'écran, quelle que soit l'échelle du
+      viewBox — contrairement à `font-size`, qui n'a pas d'équivalent natif (la taille du texte a
+      donc été remontée directement dans chaque composant, voir `components/illustrations/*.tsx`).
+   N'affecte que les formes AVEC un trait (`stroke="none"` → aucun effet visible), donc sans risque
+   pour les remplissages purs (`svg-ink`, zones ombrées). */
+.diagram-frame svg :is(line, path, circle, rect, polygon, polyline, ellipse) { vector-effect: non-scaling-stroke; }
+@media (max-width: 480px) {
+  .diagram-frame { padding: 8px; }
+  .diagram-frame--compact { max-width: 100%; }
+}
 .svg-ink { fill: var(--ink); }
 .svg-ink-faint { fill: var(--ink-faint); }
 /* Stroke+fill counterpart of .svg-ink, for lines/curves/arrow-marker triangles — matches the

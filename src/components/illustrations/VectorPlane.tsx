@@ -141,10 +141,10 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
         <>
           <line x1={0} y1={axisY0} x2={L} y2={axisY0} className="svg-line" strokeWidth="1.2" />
           <line x1={axisX0} y1={H} x2={axisX0} y2={0} className="svg-line" strokeWidth="1.2" />
-          <text x={L - 6} y={axisY0 - 8} textAnchor="end" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+          <text x={L - 6} y={axisY0 - 8} textAnchor="end" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
             x
           </text>
-          <text x={axisX0 + 8} y={12} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+          <text x={axisX0 + 8} y={12} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
             y
           </text>
         </>
@@ -187,7 +187,7 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
           <g key={i}>
             <path d={d} style={{ fill: 'none' }} className={a.tone ? LINE_TONE_CLASS[a.tone] : 'svg-line'} strokeWidth="1.5" />
             {a.label && (
-              <text x={midX} y={midY} textAnchor="middle" dominantBaseline="middle" className={a.tone ? POINT_TONE_CLASS[a.tone] : 'svg-ink'} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+              <text x={midX} y={midY} textAnchor="middle" dominantBaseline="middle" className={a.tone ? POINT_TONE_CLASS[a.tone] : 'svg-ink'} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
                 {a.label}
               </text>
             )}
@@ -232,7 +232,7 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
           <g key={i}>
             {p.node !== false && <circle cx={cx} cy={cy} r="3.6" className={POINT_TONE_CLASS[p.tone]} />}
             {p.vectorLabel ? (
-              <text x={cx + offset.dx} y={cy + offset.dy} textAnchor={offset.anchor} className={POINT_TONE_CLASS[p.tone]} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+              <text x={cx + offset.dx} y={cy + offset.dy} textAnchor={offset.anchor} className={POINT_TONE_CLASS[p.tone]} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
                 {p.vectorLabel.map((run, j) =>
                   run.vector ? (
                     <tspan key={j}>
@@ -249,7 +249,7 @@ export function VectorPlane({ xMin, xMax, yMin, yMax, showAxes = true, grid = fa
               </text>
             ) : (
               p.label && (
-                <text x={cx + offset.dx} y={cy + offset.dy} textAnchor={offset.anchor} className={POINT_TONE_CLASS[p.tone]} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+                <text x={cx + offset.dx} y={cy + offset.dy} textAnchor={offset.anchor} className={POINT_TONE_CLASS[p.tone]} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
                   {p.label}
                 </text>
               )

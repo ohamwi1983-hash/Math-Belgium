@@ -16,7 +16,7 @@ export function FencedEnclosure({ wallLabel, sideLabel, baseLabel }: Props) {
           <line key={x} x1={x} y1="40" x2={x - 10} y2="52" />
         ))}
       </g>
-      <text x="230" y="24" textAnchor="middle" fontFamily="Work Sans, sans-serif" fontSize="12.5" className="svg-ink">
+      <text x="230" y="24" textAnchor="middle" fontFamily="Work Sans, sans-serif" fontSize="14" className="svg-ink">
         {wallLabel}
       </text>
 

@@ -29,20 +29,20 @@ export function RightTriangle({ legs, sideLabels, angleLabels }: Props) {
 
       {/* arc d'angle en bas à gauche */}
       <path d={`M${bottomLeft.x + 26},${bottomLeft.y} A26,26 0 0 0 ${bottomLeft.x + 26 * Math.cos(Math.atan2(h, w))},${bottomLeft.y - 26 * Math.sin(Math.atan2(h, w))}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
-      <text x={bottomLeft.x + 32} y={bottomLeft.y - 12} fontSize="12" className="svg-accent">
+      <text x={bottomLeft.x + 32} y={bottomLeft.y - 12} fontSize="13.5" className="svg-accent">
         {angleLabels.atLeft}
       </text>
 
       {/* arc d'angle en haut */}
       <path d={`M${top.x},${top.y + 24} A24,24 0 0 1 ${top.x - 24 * Math.sin(Math.atan2(w, h))},${top.y + 24 * Math.cos(Math.atan2(w, h))}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
-      <text x={top.x - 8} y={top.y + 36} textAnchor="end" fontSize="12" className="svg-accent">
+      <text x={top.x - 8} y={top.y + 36} textAnchor="end" fontSize="13.5" className="svg-accent">
         {angleLabels.atRight}
       </text>
 
-      <text x={(bottomLeft.x + bottomRight.x) / 2} y={bottomLeft.y + 20} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="13" className="svg-ink">
+      <text x={(bottomLeft.x + bottomRight.x) / 2} y={bottomLeft.y + 20} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" className="svg-ink">
         {sideLabels.horizontal}
       </text>
-      <text x={bottomRight.x + 16} y={(bottomRight.y + top.y) / 2} fontFamily="IBM Plex Mono, monospace" fontSize="13" className="svg-ink">
+      <text x={bottomRight.x + 16} y={(bottomRight.y + top.y) / 2} fontFamily="IBM Plex Mono, monospace" fontSize="14.5" className="svg-ink">
         {sideLabels.vertical}
       </text>
       <text
@@ -50,7 +50,7 @@ export function RightTriangle({ legs, sideLabels, angleLabels }: Props) {
         y={(bottomLeft.y + top.y) / 2}
         textAnchor="end"
         fontFamily="IBM Plex Mono, monospace"
-        fontSize="13"
+        fontSize="14.5"
         className="svg-ink"
       >
         {sideLabels.hypotenuse}

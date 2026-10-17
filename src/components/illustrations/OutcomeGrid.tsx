@@ -31,12 +31,12 @@ export function OutcomeGrid({ xMax, yMax, xAxisLabel, yAxisLabel, highlighted }:
       <line x1={PAD} y1={0} x2={PAD} y2={H} className="svg-line" strokeWidth="1.5" />
 
       {xs.map((x) => (
-        <text key={`xt${x}`} x={xScale(x)} y={H + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11.5">
+        <text key={`xt${x}`} x={xScale(x)} y={H + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13">
           {x}
         </text>
       ))}
       {ys.map((y) => (
-        <text key={`yt${y}`} x={PAD - 10} y={yScale(y) + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11.5">
+        <text key={`yt${y}`} x={PAD - 10} y={yScale(y) + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13">
           {y}
         </text>
       ))}
@@ -45,10 +45,10 @@ export function OutcomeGrid({ xMax, yMax, xAxisLabel, yAxisLabel, highlighted }:
         ys.map((y) => <circle key={`${x}-${y}`} cx={xScale(x)} cy={yScale(y)} r={isHighlighted(x, y) ? 5 : 2.6} className={isHighlighted(x, y) ? 'svg-accent' : 'svg-ink-faint'} />),
       )}
 
-      <text x={L + 10} y={H + 4} textAnchor="end" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+      <text x={L + 10} y={H + 4} textAnchor="end" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
         {xAxisLabel}
       </text>
-      <text x={PAD - 30} y={10} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+      <text x={PAD - 30} y={10} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
         {yAxisLabel}
       </text>
     </svg>

@@ -28,7 +28,7 @@ const COLUMN_X = [26, 186, 356]
 export function NaturalFrequencies({ headline, columns }: Props) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={headline}>
-      <text x={W / 2} y="20" textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="700">
+      <text x={W / 2} y="20" textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="700">
         {headline}
       </text>
 
@@ -63,14 +63,14 @@ export function NaturalFrequencies({ headline, columns }: Props) {
                 className={col.titleTone === 'accent' ? 'svg-accent' : 'svg-good'}
                 stroke="none"
                 fontFamily="IBM Plex Mono, monospace"
-                fontSize="12"
+                fontSize="13.5"
                 fontWeight="700"
               >
                 {col.title}
               </text>
             )}
 
-            <g className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="11.5" textAnchor={anchor}>
+            <g className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13" textAnchor={anchor}>
               {placed.map((seg, si) => (
                 <text key={si} x={labelX} y={seg.y + seg.h / 2 + 4}>
                   {seg.label}
@@ -78,7 +78,7 @@ export function NaturalFrequencies({ headline, columns }: Props) {
               ))}
             </g>
 
-            <text x={x + BAR_W / 2} y={BAR_TOP + BAR_H + 20} textAnchor="middle" className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+            <text x={x + BAR_W / 2} y={BAR_TOP + BAR_H + 20} textAnchor="middle" className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
               {col.footLabel}
             </text>
           </g>

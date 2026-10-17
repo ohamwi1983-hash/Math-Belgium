@@ -44,7 +44,7 @@ export function PascalTriangle({ rowCount, pascalRelation }: Props) {
 
       {rows.map((row, n) => (
         <g key={`row${n}`}>
-          <text x="16" y={posOf(n, 0).y + 5} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+          <text x="16" y={posOf(n, 0).y + 5} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
             n={n}
           </text>
           {row.map((value, k) => {
@@ -59,7 +59,7 @@ export function PascalTriangle({ rowCount, pascalRelation }: Props) {
                 className={cls}
                 stroke="none"
                 fontFamily="IBM Plex Mono, monospace"
-                fontSize="14"
+                fontSize="15.5"
                 fontWeight={isChild(n, k) || isParent(n, k) ? 700 : 600}
               >
                 {value}

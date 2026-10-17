@@ -38,7 +38,7 @@ export function UniversePartition({ parts, universeLabel, eventLabel, formulaLab
         />
       ))}
 
-      <g className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13" textAnchor="middle">
+      <g className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" textAnchor="middle">
         {parts.map((p, i) => (
           <text key={i} x={BOX_X + (i + 0.5) * stripW} y={BOX_Y - 12}>
             {p}
@@ -50,15 +50,15 @@ export function UniversePartition({ parts, universeLabel, eventLabel, formulaLab
         <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="var(--accent)" fillOpacity="0.16" />
         <ellipse cx={cx} cy={cy} rx={rx} ry={ry} className="svg-accent-outline" strokeWidth="1.8" />
       </g>
-      <text x={cx} y={cy - ry - 8} textAnchor="middle" className="svg-accent" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14" fontWeight="700">
+      <text x={cx} y={cy - ry - 8} textAnchor="middle" className="svg-accent" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="15.5" fontWeight="700">
         {eventLabel}
       </text>
 
-      <text x={BOX_X + 8} y={BOX_Y + BOX_H - 10} className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13">
+      <text x={BOX_X + 8} y={BOX_Y + BOX_H - 10} className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">
         {universeLabel}
       </text>
 
-      <text x={W / 2} y={H - 14} textAnchor="middle" className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={W / 2} y={H - 14} textAnchor="middle" className="svg-ink-faint" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {formulaLabel}
       </text>
     </svg>

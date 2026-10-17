@@ -21,29 +21,29 @@ export function Triangulation({ labels }: Props) {
 
       <path d={`M${A.x + 24},${A.y} A24,24 0 0 0 ${A.x + 24 * Math.cos(Math.atan2(S.y - A.y, S.x - A.x) * -1)},${A.y + 24 * Math.sin(Math.atan2(S.y - A.y, S.x - A.x) * -1)}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
       <path d={`M${B.x + 24},${B.y} A24,24 0 0 0 ${B.x + 24 * Math.cos(Math.atan2(S.y - B.y, S.x - B.x) * -1)},${B.y + 24 * Math.sin(Math.atan2(S.y - B.y, S.x - B.x) * -1)}`} fill="none" className="svg-accent-outline" strokeWidth="1.4" />
-      <text x={A.x + 33} y={A.y - 14} fontSize="13" className="svg-accent" fontStyle="italic">
+      <text x={A.x + 33} y={A.y - 14} fontSize="14.5" className="svg-accent" fontStyle="italic">
         {labels.angleAtA}
       </text>
-      <text x={B.x + 30} y={B.y - 15} fontSize="13" className="svg-accent" fontStyle="italic">
+      <text x={B.x + 30} y={B.y - 15} fontSize="14.5" className="svg-accent" fontStyle="italic">
         {labels.angleAtB}
       </text>
 
-      <text x={(A.x + B.x) / 2} y={A.y - 6} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="12" className="svg-ink">
+      <text x={(A.x + B.x) / 2} y={A.y - 6} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" className="svg-ink">
         {labels.distanceLabel}
       </text>
-      <text x={A.x} y={A.y + 22} textAnchor="middle" fontSize="14" className="svg-ink">
+      <text x={A.x} y={A.y + 22} textAnchor="middle" fontSize="15.5" className="svg-ink">
         {labels.A}
       </text>
-      <text x={B.x} y={B.y + 22} textAnchor="middle" fontSize="14" className="svg-ink">
+      <text x={B.x} y={B.y + 22} textAnchor="middle" fontSize="15.5" className="svg-ink">
         {labels.B}
       </text>
-      <text x={F.x + 10} y={F.y + 18} fontSize="14" className="svg-ink">
+      <text x={F.x + 10} y={F.y + 18} fontSize="15.5" className="svg-ink">
         {labels.F}
       </text>
-      <text x={S.x} y={S.y - 12} textAnchor="middle" fontSize="14" className="svg-ink">
+      <text x={S.x} y={S.y - 12} textAnchor="middle" fontSize="15.5" className="svg-ink">
         {labels.S}
       </text>
-      <text x={F.x - 14} y={(F.y + S.y) / 2} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontStyle="italic" className="svg-ink">
+      <text x={F.x - 14} y={(F.y + S.y) / 2} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontStyle="italic" className="svg-ink">
         {labels.heightLabel}
       </text>
     </svg>

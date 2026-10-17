@@ -43,17 +43,17 @@ export function BoxPlot({ series, xAxisLabel }: Props) {
             <line x1={xScale(s.median)} y1={cy - BOX_HALF} x2={xScale(s.median)} y2={cy + BOX_HALF} className={tone.median} strokeWidth="2.2" />
 
             {s.label && (
-              <text x={X_LEFT - 12} y={cy + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+              <text x={X_LEFT - 12} y={cy + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="14">
                 {s.label}
               </text>
             )}
             {s.iqrLabel && (
-              <text x={xScale(s.median)} y={cy - BOX_HALF - 10} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+              <text x={xScale(s.median)} y={cy - BOX_HALF - 10} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
                 {s.iqrLabel}
               </text>
             )}
             {single && (
-              <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12" textAnchor="middle">
+              <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5" textAnchor="middle">
                 {[
                   ['min', s.min],
                   ['Q1', s.q1],
@@ -77,7 +77,7 @@ export function BoxPlot({ series, xAxisLabel }: Props) {
       {!single && (
         <>
           <line x1={X_LEFT - 10} y1={axisY} x2={X_RIGHT + 10} y2={axisY} className="svg-line" strokeWidth="1.4" />
-          <text x={X_RIGHT + 16} y={axisY + 4} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+          <text x={X_RIGHT + 16} y={axisY + 4} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
             {xAxisLabel}
           </text>
         </>

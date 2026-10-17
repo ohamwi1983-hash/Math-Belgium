@@ -49,7 +49,7 @@ export function CategoricalBarChart({
           const y = TOP + i * ROW_H
           return (
             <g key={i}>
-              <text x={LABEL_RIGHT} y={y + ROW_H / 2 + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+              <text x={LABEL_RIGHT} y={y + ROW_H / 2 + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                 {b.label}
               </text>
               <rect x={LEFT} y={y + (ROW_H - 18) / 2} width={len} height="18" rx="2" fill={BAR_FILL[tone]} opacity={BAR_OPACITY[tone]} />
@@ -59,7 +59,7 @@ export function CategoricalBarChart({
                 className={colorValueLabels ? TEXT_CLASS[tone] : 'svg-ink-faint'}
                 stroke="none"
                 fontFamily="IBM Plex Mono, monospace"
-                fontSize="12"
+                fontSize="13.5"
               >
                 {b.valueLabel ?? b.value}
               </text>
@@ -67,7 +67,7 @@ export function CategoricalBarChart({
           )
         })}
         {footnote && (
-          <text x={W / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+          <text x={W / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
             {footnote}
           </text>
         )}
@@ -103,12 +103,12 @@ export function CategoricalBarChart({
               className={colorValueLabels ? TEXT_CLASS[tone] : 'svg-ink-faint'}
               stroke="none"
               fontFamily="IBM Plex Mono, monospace"
-              fontSize="12"
+              fontSize="13.5"
               fontWeight={colorValueLabels ? 700 : 400}
             >
               {b.valueLabel ?? b.value}
             </text>
-            <text x={x + barW / 2} y={BOTTOM + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+            <text x={x + barW / 2} y={BOTTOM + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
               {b.label}
             </text>
           </g>
@@ -116,17 +116,17 @@ export function CategoricalBarChart({
       })}
 
       {yAxisLabel && (
-        <text x="10" y={TOP - 12} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+        <text x="10" y={TOP - 12} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {yAxisLabel}
         </text>
       )}
       {xAxisLabel && (
-        <text x={(LEFT + RIGHT) / 2} y={BOTTOM + 44} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+        <text x={(LEFT + RIGHT) / 2} y={BOTTOM + 44} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {xAxisLabel}
         </text>
       )}
       {footnote && (
-        <text x={(LEFT + RIGHT) / 2} y={H - 6} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+        <text x={(LEFT + RIGHT) / 2} y={H - 6} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {footnote}
         </text>
       )}

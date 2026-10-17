@@ -23,34 +23,34 @@ export function ProductAreaSquare({ p1, p1Label, p2, p2Label, productLabel, axis
       <line x1={xP1} y1={TOP} x2={xP1} y2={BOTTOM} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
       <line x1={LEFT} y1={yP2} x2={RIGHT} y2={yP2} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
 
-      <text x={LEFT} y={BOTTOM + 18} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={LEFT} y={BOTTOM + 18} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         0
       </text>
-      <text x={xP1} y={BOTTOM + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={xP1} y={BOTTOM + 18} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {p1Label}
       </text>
-      <text x={RIGHT} y={BOTTOM + 18} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={RIGHT} y={BOTTOM + 18} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         1
       </text>
 
-      <text x={LEFT - 8} y={BOTTOM + 4} textAnchor="end" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={LEFT - 8} y={BOTTOM + 4} textAnchor="end" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         0
       </text>
-      <text x={LEFT - 8} y={yP2 + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={LEFT - 8} y={yP2 + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {p2Label}
       </text>
-      <text x={LEFT - 8} y={TOP + 4} textAnchor="end" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={LEFT - 8} y={TOP + 4} textAnchor="end" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         1
       </text>
 
-      <text x={(LEFT + xP1) / 2} y={(yP2 + BOTTOM) / 2 + 4} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight={700}>
+      <text x={(LEFT + xP1) / 2} y={(yP2 + BOTTOM) / 2 + 4} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight={700}>
         {productLabel}
       </text>
 
-      <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={(LEFT + RIGHT) / 2} y={H - 8} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {axisLabel1}
       </text>
-      <text x="8" y={TOP - 10} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x="8" y={TOP - 10} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {axisLabel2}
       </text>
     </svg>

@@ -80,7 +80,7 @@ export function LetterTiles({ letters, legend }: Props) {
               stroke={item.tone === 'outline' ? 'var(--ink)' : 'none'}
               strokeWidth={item.tone === 'outline' ? 1.4 : 0}
             />
-            <text x={x + 21} y={H - 32} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+            <text x={x + 21} y={H - 32} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="14">
               {item.letter} × {item.count}
             </text>
           </g>

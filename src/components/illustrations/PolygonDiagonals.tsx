@@ -62,7 +62,7 @@ export function PolygonDiagonals({ sides, vertexLabels, summaryLabel }: Props) {
             textAnchor="middle"
             className="svg-ink"
             fontFamily="IBM Plex Mono, monospace"
-            fontSize="12"
+            fontSize="13.5"
           >
             {vertexLabels?.[i] ?? i + 1}
           </text>
@@ -70,7 +70,7 @@ export function PolygonDiagonals({ sides, vertexLabels, summaryLabel }: Props) {
       })}
 
       {summaryLabel && (
-        <text x={CX} y={H - 10} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600" stroke="none">
+        <text x={CX} y={H - 10} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600" stroke="none">
           {summaryLabel}
         </text>
       )}

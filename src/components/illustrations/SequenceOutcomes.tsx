@@ -30,22 +30,22 @@ export function SequenceOutcomes({ rows, bracketLabel, footer }: Props) {
         const y = rowY(i)
         return (
           <g key={i}>
-            <text x="10" y={y + 4} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+            <text x="10" y={y + 4} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="14">
               {row.label}
             </text>
             {row.steps.map((step, k) => (
               <g key={k}>
                 {k > 0 && <line x1={NODE_X[k - 1] + NODE_R} y1={y} x2={NODE_X[k] - NODE_R} y2={y} className="svg-line" strokeWidth="1.2" />}
                 <circle cx={NODE_X[k]} cy={y} r={NODE_R} className={NODE_CLASS[step.tone]} stroke="none" />
-                <text x={NODE_X[k]} y={y + 4} textAnchor="middle" fill="var(--surface)" fontFamily="IBM Plex Mono, monospace" fontWeight="700" fontSize="12">
+                <text x={NODE_X[k]} y={y + 4} textAnchor="middle" fill="var(--surface)" fontFamily="IBM Plex Mono, monospace" fontWeight="700" fontSize="13.5">
                   {step.label}
                 </text>
-                <text x={NODE_X[k]} y={y + 26} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="11.5">
+                <text x={NODE_X[k]} y={y + 26} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13">
                   {step.prob}
                 </text>
               </g>
             ))}
-            <text x={RESULT_X} y={y + 4} className="svg-accent" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" fontWeight="600">
+            <text x={RESULT_X} y={y + 4} className="svg-accent" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14" fontWeight="600">
               {row.resultLabel}
             </text>
           </g>
@@ -64,14 +64,14 @@ export function SequenceOutcomes({ rows, bracketLabel, footer }: Props) {
           className="svg-good"
           stroke="none"
           fontFamily="IBM Plex Mono, monospace"
-          fontSize="12"
+          fontSize="13.5"
           fontWeight="600"
         >
           {line}
         </text>
       ))}
 
-      <text x={W / 2} y={H - 12} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={W / 2} y={H - 12} textAnchor="middle" className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {footer}
       </text>
     </svg>

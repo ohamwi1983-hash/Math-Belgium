@@ -7,7 +7,7 @@ export function MachineDiagram() {
       <rect x="130" y="30" width="140" height="80" rx="3" fill="none" className="svg-accent-outline" strokeWidth="2" />
       <text x="200" y="76" textAnchor="middle" className="svg-accent" fontFamily="Fraunces, serif" fontSize="26" fontStyle="italic">f</text>
       <line x1="270" y1="70" x2="380" y2="70" className="svg-line" strokeWidth="2" markerEnd="url(#machine-arrow)" />
-      <text x="325" y="55" textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="14">calcul</text>
+      <text x="325" y="55" textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="15.5">calcul</text>
       <rect x="390" y="30" width="230" height="80" rx="3" className="svg-faint" fill="none" strokeWidth="1.5" strokeDasharray="3 4" />
       <text x="505" y="76" textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontSize="22" fontStyle="italic">f(x)</text>
       <defs>

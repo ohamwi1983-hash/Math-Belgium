@@ -55,10 +55,10 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
     <svg viewBox="0 0 540 240" role="img" aria-label="Points d'une suite">
       <line x1={X_LEFT} y1={zeroY} x2={X_RIGHT + 8} y2={zeroY} className="svg-line" strokeWidth="1.5" markerEnd={`url(#${markerId})`} />
       <line x1={X_LEFT} y1={Y_BOTTOM} x2={X_LEFT} y2={Y_TOP - 8} className="svg-line" strokeWidth="1.5" markerEnd={`url(#${markerId})`} />
-      <text x={X_RIGHT} y={Y_BOTTOM + 32} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={X_RIGHT} y={Y_BOTTOM + 32} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {xAxisLabel}
       </text>
-      <text x={X_LEFT - 8} y={Y_TOP - 4} textAnchor="start" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+      <text x={X_LEFT - 8} y={Y_TOP - 4} textAnchor="start" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
         {yAxisLabel}
       </text>
 
@@ -73,7 +73,7 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
           return (
             <>
               <line x1={X_LEFT} y1={refY} x2={X_RIGHT} y2={refY} className="svg-good" strokeWidth="1.5" strokeDasharray="4 3" />
-              <text x={X_RIGHT + 6} y={refY + labelOffset} className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+              <text x={X_RIGHT + 6} y={refY + labelOffset} className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                 {referenceLine.label}
               </text>
             </>
@@ -91,7 +91,7 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
             <>
               <line x1={a.x} y1={a.y} x2={a.x} y2={b.y} className="svg-good" strokeWidth="2" />
               <line x1={a.x} y1={b.y} x2={b.x} y2={b.y} className="svg-good" strokeWidth="2" />
-              <text x={(a.x + b.x) / 2} y={b.y - 8} textAnchor="middle" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+              <text x={(a.x + b.x) / 2} y={b.y - 8} textAnchor="middle" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
                 {stepIndicator.label}
               </text>
             </>
@@ -101,7 +101,7 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
       {coords.map((c, i) => (
         <circle key={i} cx={c.x} cy={c.y} r="5" className="svg-accent" />
       ))}
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="middle">
+      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" textAnchor="middle">
         {coords.map((c, i) => (
           <text key={i} x={c.x} y={Y_BOTTOM + 16}>
             {c.n}
@@ -109,7 +109,7 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
         ))}
       </g>
       {yTicks && (
-        <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="end">
+        <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" textAnchor="end">
           {yTicks.map((t) => (
             <g key={t}>
               <line x1={X_LEFT - 4} y1={yScale(t)} x2={X_RIGHT} y2={yScale(t)} className="svg-faint" strokeWidth="1" strokeDasharray="3 3" />
@@ -120,7 +120,7 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
           ))}
         </g>
       )}
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="middle">
+      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" textAnchor="middle">
         {coords.map((c, i) => (
           <text key={i} x={c.x} y={c.y - 10}>
             {c.label}
@@ -138,12 +138,12 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
               <line x1={X_LEFT} y1={c.y} x2={c.x} y2={c.y} className="svg-faint" strokeWidth="1.2" strokeDasharray="3 3" />
               <circle cx={c.x} cy={c.y} r="5" className="svg-bad" />
               {highlightPoint.xLabel && (
-                <text x={c.x} y={Y_BOTTOM + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" fontWeight="700">
+                <text x={c.x} y={Y_BOTTOM + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" fontWeight="700">
                   {highlightPoint.xLabel}
                 </text>
               )}
               {highlightPoint.yLabel && (
-                <text x={X_LEFT - 8} y={c.y + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11" fontWeight="700">
+                <text x={X_LEFT - 8} y={c.y + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5" fontWeight="700">
                   {highlightPoint.yLabel}
                 </text>
               )}
@@ -153,7 +153,7 @@ export function SequencePlot({ points, connector = 'straight', stepIndicator, re
 
       {trendLabel &&
         coords[trendLabel.afterIndex] && (
-          <text x={coords[trendLabel.afterIndex].x} y={coords[trendLabel.afterIndex].y - 22} textAnchor="middle" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="10">
+          <text x={coords[trendLabel.afterIndex].x} y={coords[trendLabel.afterIndex].y - 22} textAnchor="middle" className="svg-good" fontFamily="IBM Plex Mono, monospace" fontSize="11.5">
             {trendLabel.text}
           </text>
         )}

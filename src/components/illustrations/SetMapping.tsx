@@ -46,10 +46,10 @@ export function SetMapping({ setALabel, setBLabel, pointsA, pointsB, arrows }: P
         <circle key={`b${i}`} cx={X_B} cy={yFor(f)} r="5" className="svg-ink" />
       ))}
 
-      <text x={X_A} y={LABEL_Y} textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+      <text x={X_A} y={LABEL_Y} textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
         {setALabel}
       </text>
-      <text x={X_B} y={LABEL_Y} textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+      <text x={X_B} y={LABEL_Y} textAnchor="middle" className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
         {setBLabel}
       </text>
     </svg>

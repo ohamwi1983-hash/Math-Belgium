@@ -26,11 +26,11 @@ export function WeightedTree({ firstLevel, secondLevel }: Props) {
       {firstLevel.map((b, i) => (
         <g key={i}>
           <line x1={ROOT_X} y1={rootY} x2={LVL1_X} y2={y1[i]} className="svg-line" strokeWidth="1.4" />
-          <text x={(ROOT_X + LVL1_X) / 2} y={(rootY + y1[i]) / 2 - 6} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13">
+          <text x={(ROOT_X + LVL1_X) / 2} y={(rootY + y1[i]) / 2 - 6} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">
             {b.prob}
           </text>
           <circle cx={LVL1_X} cy={y1[i]} r="3" className="svg-ink" />
-          <text x={LVL1_X + 10} y={y1[i] - 14} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+          <text x={LVL1_X + 10} y={y1[i] - 14} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
             {b.label}
           </text>
         </g>
@@ -39,15 +39,15 @@ export function WeightedTree({ firstLevel, secondLevel }: Props) {
       {secondLevel.map((b, i) => (
         <g key={i}>
           <line x1={LVL1_X} y1={y1[b.fromFirst]} x2={LVL2_X} y2={y2[i]} className={b.highlight ? 'svg-accent' : 'svg-line'} strokeWidth={b.highlight ? 2 : 1.4} />
-          <text x={LVL1_X + (LVL2_X - LVL1_X) * 0.7} y={y1[b.fromFirst] + (y2[i] - y1[b.fromFirst]) * 0.7 - 6} textAnchor="middle" className={b.highlight ? 'svg-accent' : 'svg-good'} fontFamily="IBM Plex Mono, monospace" fontSize="13">
+          <text x={LVL1_X + (LVL2_X - LVL1_X) * 0.7} y={y1[b.fromFirst] + (y2[i] - y1[b.fromFirst]) * 0.7 - 6} textAnchor="middle" className={b.highlight ? 'svg-accent' : 'svg-good'} fontFamily="IBM Plex Mono, monospace" fontSize="14.5">
             {b.prob}
           </text>
           <circle cx={LVL2_X} cy={y2[i]} r="3" className={b.highlight ? 'svg-accent' : 'svg-ink'} />
-          <text x={LVL2_X + 10} y={y2[i] - 8} className={b.highlight ? 'svg-accent' : 'svg-ink'} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+          <text x={LVL2_X + 10} y={y2[i] - 8} className={b.highlight ? 'svg-accent' : 'svg-ink'} fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
             {b.label}
           </text>
           {b.pathProb && (
-            <text x={LABEL_X} y={y2[i] + 4} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+            <text x={LABEL_X} y={y2[i] + 4} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
               {b.pathProb}
             </text>
           )}

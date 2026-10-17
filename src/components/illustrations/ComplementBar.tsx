@@ -25,7 +25,7 @@ export function ComplementBar({ headline, parts, footer, warning }: Props) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={headline}>
-      <text x={W / 2} y="24" textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="700">
+      <text x={W / 2} y="24" textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="700">
         {headline}
       </text>
 
@@ -52,7 +52,7 @@ export function ComplementBar({ headline, parts, footer, warning }: Props) {
               className={p.tone === 'accent' ? 'svg-accent' : 'svg-ink-faint'}
               stroke="none"
               fontFamily="IBM Plex Mono, monospace"
-              fontSize="12.5"
+              fontSize="14"
               fontWeight="700"
             >
               {p.label}
@@ -62,11 +62,11 @@ export function ComplementBar({ headline, parts, footer, warning }: Props) {
         )
       })}
 
-      <text x={W / 2} y={BAR_Y + BAR_H + 30} textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+      <text x={W / 2} y={BAR_Y + BAR_H + 30} textAnchor="middle" className="svg-ink" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14">
         {footer}
       </text>
       {warning && (
-        <text x={W / 2} y={BAR_Y + BAR_H + 54} textAnchor="middle" className="svg-bad" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+        <text x={W / 2} y={BAR_Y + BAR_H + 54} textAnchor="middle" className="svg-bad" stroke="none" fontFamily="IBM Plex Mono, monospace" fontSize="14">
           {warning}
         </text>
       )}

@@ -84,7 +84,7 @@ export function PlaneSketch({ width, height, planes, lines, points, freeLabels }
             <text
               x={p.x + (p.labelDx ?? 10)}
               y={p.y + (p.labelDy ?? -8)}
-              fontSize="14"
+              fontSize="15.5"
               className={POINT_TONE_CLASS[p.tone ?? 'ink']}
               fontStyle="italic"
               fontFamily="Fraunces, serif"
@@ -109,7 +109,7 @@ export function PlaneSketch({ width, height, planes, lines, points, freeLabels }
             key={i}
             x={l.x}
             y={l.y}
-            fontSize={isCheckOrCross ? 22 : isSymbol ? 15 : 12}
+            fontSize={isCheckOrCross ? 22 : isSymbol ? 15 : 13.5}
             className={LABEL_TONE_CLASS[l.tone ?? 'ink']}
             fontStyle={isSymbol ? 'italic' : 'normal'}
             fontFamily={isCheckOrCross ? undefined : isSymbol ? 'Fraunces, serif' : 'Work Sans, sans-serif'}

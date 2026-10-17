@@ -57,7 +57,7 @@ export function VennDiagram({ labelA, labelB, mode, counts }: Props) {
           <text x={CX_B + 34} y={CY} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="15">
             {counts.bOnly}
           </text>
-          <text x={20} y={H - 14} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="13">
+          <text x={20} y={H - 14} className="svg-ink-faint" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">
             hors A et B : {counts.neither}
           </text>
         </>

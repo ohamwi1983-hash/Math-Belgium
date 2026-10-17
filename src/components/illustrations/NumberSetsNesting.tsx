@@ -34,7 +34,7 @@ export function NumberSetsNesting({ rings, examplePoints }: Props) {
             textAnchor={p.anchor ?? 'middle'}
             className="svg-ink"
             fontFamily="IBM Plex Mono, monospace"
-            fontSize="12"
+            fontSize="13.5"
           >
             {p.label}
           </text>

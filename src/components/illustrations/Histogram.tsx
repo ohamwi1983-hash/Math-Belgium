@@ -33,7 +33,7 @@ export function Histogram({ bars, xAxisLabel, yAxisLabel }: Props) {
       {yTicks.map((t) => (
         <g key={t}>
           <line x1={X_LEFT - 5} y1={yScale(t)} x2={X_RIGHT} y2={yScale(t)} className="svg-faint" strokeWidth="1" strokeDasharray="3 3" />
-          <text x={X_LEFT - 8} y={yScale(t) + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11.5">
+          <text x={X_LEFT - 8} y={yScale(t) + 4} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13">
             {t}
           </text>
         </g>
@@ -46,14 +46,14 @@ export function Histogram({ bars, xAxisLabel, yAxisLabel }: Props) {
       <line x1={X_LEFT} y1={Y_BOTTOM} x2={X_RIGHT} y2={Y_BOTTOM} className="svg-line" strokeWidth="1.5" />
       <line x1={X_LEFT} y1={Y_BOTTOM} x2={X_LEFT} y2={Y_TOP} className="svg-line" strokeWidth="1.5" />
       {xTicks.map((t) => (
-        <text key={t} x={xScale(t)} y={Y_BOTTOM + 15} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11.5">
+        <text key={t} x={xScale(t)} y={Y_BOTTOM + 15} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13">
           {t}
         </text>
       ))}
-      <text x={X_RIGHT + 6} y={Y_BOTTOM + 6} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+      <text x={X_RIGHT + 6} y={Y_BOTTOM + 6} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
         {xAxisLabel}
       </text>
-      <text x={X_LEFT - 20} y={Y_TOP - 8} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="13">
+      <text x={X_LEFT - 20} y={Y_TOP - 8} className="svg-ink" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14.5">
         {yAxisLabel}
       </text>
     </svg>

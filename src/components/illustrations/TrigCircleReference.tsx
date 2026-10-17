@@ -24,7 +24,7 @@ export function TrigCircleReference({ angles }: Props) {
           <g key={i}>
             <line x1={CX} y1={CY} x2={x} y2={y} className="svg-faint" strokeWidth="1" />
             <circle cx={x} cy={y} r="2.5" className="svg-accent" />
-            <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+            <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
               {a.label}
             </text>
           </g>

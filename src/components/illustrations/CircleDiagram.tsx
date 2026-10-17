@@ -77,12 +77,12 @@ export function CircleDiagram({
           <circle cx={ptA[0]} cy={ptA[1]} r="2.5" className="svg-ink" />
           <circle cx={ptB[0]} cy={ptB[1]} r="2.5" className="svg-ink" />
           {pointALabel && (
-            <text x={ptA[0] + (ptA[0] > CX ? 10 : -10)} y={ptA[1]} textAnchor={ptA[0] > CX ? 'start' : 'end'} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13">
+            <text x={ptA[0] + (ptA[0] > CX ? 10 : -10)} y={ptA[1]} textAnchor={ptA[0] > CX ? 'start' : 'end'} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">
               {pointALabel}
             </text>
           )}
           {pointBLabel && (
-            <text x={ptB[0] + (ptB[0] > CX ? 10 : -10)} y={ptB[1]} textAnchor={ptB[0] > CX ? 'start' : 'end'} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13">
+            <text x={ptB[0] + (ptB[0] > CX ? 10 : -10)} y={ptB[1]} textAnchor={ptB[0] > CX ? 'start' : 'end'} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="14.5">
               {pointBLabel}
             </text>
           )}
@@ -92,7 +92,7 @@ export function CircleDiagram({
               const lx = CX + 28 * Math.cos(mid)
               const ly = CY - 28 * Math.sin(mid)
               return (
-                <text x={lx} y={ly} textAnchor="middle" className="svg-accent" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="14">
+                <text x={lx} y={ly} textAnchor="middle" className="svg-accent" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="15.5">
                   {angleLabel}
                 </text>
               )
@@ -105,7 +105,7 @@ export function CircleDiagram({
               className="svg-ink"
               fontFamily="Fraunces, serif"
               fontStyle="italic"
-              fontSize="14"
+              fontSize="15.5"
             >
               {radiusLabel}
             </text>
@@ -122,7 +122,7 @@ export function CircleDiagram({
               <line x1={CX} y1={CY} x2={mx} y2={my} className="svg-faint" strokeWidth="1.3" strokeDasharray="2 3" />
               <circle cx={mx} cy={my} r="5" className="svg-accent" />
               {markedPoint.label && (
-                <text x={mx} y={my + (my > CY ? 20 : -14)} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+                <text x={mx} y={my + (my > CY ? 20 : -14)} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
                   {markedPoint.label}
                 </text>
               )}
@@ -132,7 +132,7 @@ export function CircleDiagram({
 
       <circle cx={CX} cy={CY} r="2.5" className="svg-ink" />
       {centerLabel && (
-        <text x={CX - 10} y={CY + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">
+        <text x={CX - 10} y={CY + 16} textAnchor="middle" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {centerLabel}
         </text>
       )}

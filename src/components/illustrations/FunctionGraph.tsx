@@ -30,24 +30,24 @@ export function FunctionGraph({ fn, xMin, xMax, xAxisMin = 0, xTicks, markX, mar
     <svg viewBox="0 0 640 290" role="img" aria-label={`Graphe de la fonction, courbe avec le point marqué ${markLabel}`}>
       <line x1={X_LEFT} y1={Y_BOTTOM} x2={X_LEFT} y2={Y_TOP} className="svg-line" strokeWidth="1.5" markerEnd="url(#fg-arrow)" />
       <line x1={X_LEFT} y1={Y_BOTTOM} x2={X_RIGHT} y2={Y_BOTTOM} className="svg-line" strokeWidth="1.5" markerEnd="url(#fg-arrow)" />
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="11">
+      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
         {xTicks.map((t) => (
           <text key={t} x={xScale(t)} y={Y_BOTTOM + 15} textAnchor="middle">{t}</text>
         ))}
         <text x={X_LEFT - 15} y={Y_BOTTOM + 4} textAnchor="end">0</text>
       </g>
-      <text x={X_RIGHT} y={Y_BOTTOM - 5} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">{xAxisLabel}</text>
-      <text x={X_LEFT + 8} y={Y_TOP + 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12">{yAxisLabel}</text>
+      <text x={X_RIGHT} y={Y_BOTTOM - 5} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">{xAxisLabel}</text>
+      <text x={X_LEFT + 8} y={Y_TOP + 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">{yAxisLabel}</text>
 
       <path d={pathD} fill="none" className="svg-line" strokeWidth="2.5" strokeLinejoin="round" />
 
       <line x1={markPixelX} y1={Y_BOTTOM} x2={markPixelX} y2={markPixelY} className="svg-accent" strokeWidth="1.5" strokeDasharray="3 3" />
       <circle cx={markPixelX} cy={markPixelY} r="4.5" className="svg-accent" />
       <line x1={markPixelX} y1={markPixelY} x2={X_LEFT} y2={markPixelY} className="svg-accent" strokeWidth="1.5" strokeDasharray="3 3" />
-      <text x={markPixelX} y={Y_BOTTOM + 20} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">
+      <text x={markPixelX} y={Y_BOTTOM + 20} textAnchor="middle" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">
         r={markX}
       </text>
-      <text x={X_LEFT - 10} y={markPixelY + 4} textAnchor="end" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="13" fontWeight="600">
+      <text x={X_LEFT - 10} y={markPixelY + 4} textAnchor="end" className="svg-accent" fontFamily="IBM Plex Mono, monospace" fontSize="14.5" fontWeight="600">
         {markLabel}
       </text>
 

@@ -54,7 +54,7 @@ export function SolidRevolution({ variant, outerRadius, startLabel, endLabel, mi
 
       <ellipse cx={PX_END} cy={AXIS_Y} rx={rxEnd} ry={rEnd} fill={variant === 'cone' ? 'var(--surface)' : 'none'} className="svg-line" strokeWidth="1.5" />
 
-      <g fontFamily="IBM Plex Mono, monospace" fontSize="10.5" className="svg-ink-faint">
+      <g fontFamily="IBM Plex Mono, monospace" fontSize="12" className="svg-ink-faint">
         <text x={PX_START} y={AXIS_Y + rEnd + 20} textAnchor="middle">
           {startLabel}
         </text>
@@ -68,7 +68,7 @@ export function SolidRevolution({ variant, outerRadius, startLabel, endLabel, mi
         textAnchor="middle"
         className="svg-accent"
         fontFamily="IBM Plex Mono, monospace"
-        fontSize="11"
+        fontSize="12.5"
         fontWeight="600"
       >
         {midLabel}
