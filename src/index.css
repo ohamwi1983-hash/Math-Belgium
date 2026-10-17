@@ -269,14 +269,14 @@ img, svg { max-width: 100%; }
   column-gap: 28px;
 }
 .home-chapter-card {
-  display: flex; align-items: flex-start; gap: 14px;
+  display: flex; align-items: flex-start; gap: 16px;
   padding: 16px 0; border-bottom: 1px solid var(--line);
   text-decoration: none; color: inherit;
   transition: border-color .15s ease;
 }
 .home-chapter-card:hover { border-bottom-color: var(--level-c); }
-.home-chapter-icon { flex: none; width: 26px; height: 26px; color: var(--level-c); transition: color .15s ease; }
-.home-chapter-card:hover .home-chapter-icon { color: var(--level-c-ink); }
+.home-chapter-icon { flex: none; width: 36px; height: 36px; transition: transform .15s ease; }
+.home-chapter-card:hover .home-chapter-icon { transform: scale(1.08); }
 .home-chapter-num {
   display: block; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-bottom: 3px;
 }
