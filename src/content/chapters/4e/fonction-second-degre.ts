@@ -556,7 +556,6 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'entrainement',
           title: "Analyse d'une fonction du second degré",
           generatorId: 'gen7',
-          widgetTag: 'gen7-widget',
           description: [
             'Les 6 notions de cette partie, réunies en un seul exercice : coefficients, allure, ' +
               'axe et sommet, domaine/image, racines, tableau de signes et de variation. Ton ' +
@@ -695,7 +694,6 @@ export const fonctionSecondDegre: ChapterContent = {
           kind: 'entrainement',
           title: 'Transformations graphiques',
           generatorId: 'gen8',
-          widgetTag: 'gen8-widget',
           description: [
             'Lis p, q, l’étirement/la compression (EV/CV) et la symétrie (SOX) directement sur ' +
               'un graphe Mafs interactif.',
