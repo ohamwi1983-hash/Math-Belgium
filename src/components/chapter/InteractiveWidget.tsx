@@ -3,10 +3,9 @@ import type { InteractiveWidgetTag } from '../../content/types'
 
 /** Charge (à la demande, `import()` dynamique) le module qui enregistre le Web Component
  * correspondant — l'ordre interne de chaque module gère lui-même ses propres dépendances
- * (ex. gen8-widget a besoin de Gen7Core déjà chargé), voir `src/interactive/register-*.js`. */
+ * (un widget dépendant d'un module partagé doit l'importer avant son propre fichier), voir
+ * `src/interactive/register-*.js`. */
 const REGISTER: Record<InteractiveWidgetTag, () => Promise<unknown>> = {
-  'gen7-widget': () => import('../../interactive/register-gen7-widget.js'),
-  'gen8-widget': () => import('../../interactive/register-gen8-widget.js'),
   'parabole-widget': () => import('../../interactive/register-parabole-widget.js'),
   'transformations-widget': () => import('../../interactive/register-transformations-widget.js'),
   'archimede-widget': () => import('../../interactive/register-archimede-widget.js'),

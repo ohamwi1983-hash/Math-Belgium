@@ -552,19 +552,6 @@ export const fonctionSecondDegre: ChapterContent = {
             },
           ],
         },
-        {
-          kind: 'entrainement',
-          title: "Analyse d'une fonction du second degré",
-          generatorId: 'gen7',
-          widgetTag: 'gen7-widget',
-          description: [
-            'Les 6 notions de cette partie, réunies en un seul exercice : coefficients, allure, ' +
-              'axe et sommet, domaine/image, racines, tableau de signes et de variation. Ton ' +
-              'professeur peut les activer une par une.',
-          ],
-          chantier: '4e',
-          whereLabel: '4e → « 7. Analyse d’une fonction du second degré »',
-        },
       ],
     },
     {
@@ -690,18 +677,6 @@ export const fonctionSecondDegre: ChapterContent = {
           caption:
             'Coche AS, S ou OAO pour faire apparaître l’axe de symétrie, le sommet et l’ordonnée ' +
             'à l’origine directement sur le graphe, en direct.',
-        },
-        {
-          kind: 'entrainement',
-          title: 'Transformations graphiques',
-          generatorId: 'gen8',
-          widgetTag: 'gen8-widget',
-          description: [
-            'Lis p, q, l’étirement/la compression (EV/CV) et la symétrie (SOX) directement sur ' +
-              'un graphe Mafs interactif.',
-          ],
-          chantier: '4e',
-          whereLabel: '4e → « 8. Transformations graphiques »',
         },
         { kind: 'subheading', text: 'La forme canonique' },
         {

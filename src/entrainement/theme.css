@@ -1421,8 +1421,8 @@
 }
 
 /* Combobox personnalisé : le <select> natif perd sa flèche par défaut (`appearance: none`), une
- * flèche dessinée en CSS (::after sur le conteneur, jamais une image) la remplace — même langage
- * que .toc-plier/.section-chevron du site principal, pas une icône importée. */
+ * flèche dessinée en CSS (::after sur le conteneur, jamais une image) la remplace — pas une icône
+ * importée, même principe que le chevron ci-dessous (`.selecteur-variante-toggle-chevron`). */
 .entrainement .selecteur-variante-select-wrap {
   position: relative;
   flex: 1 1 200px;

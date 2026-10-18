@@ -19,7 +19,6 @@ interface GenerateurRepere {
 interface VideoRepere {
   title: string
   youtubeId: string
-  sectionId: string | null
   sectionTitle: string
 }
 
@@ -51,15 +50,16 @@ function genererateursDuChapitre(chapter: ChapterContent): GenerateurRepere[] {
 function videosDuChapitre(chapter: ChapterContent): VideoRepere[] {
   return blocsDuChapitre(chapter, 'video')
     .filter(({ block }) => !!block.youtubeId)
-    .map(({ block, sectionId, sectionTitle }) => ({ title: block.title, youtubeId: block.youtubeId as string, sectionId, sectionTitle }))
+    .map(({ block, sectionTitle }) => ({ title: block.title, youtubeId: block.youtubeId as string, sectionTitle }))
 }
 
 /**
- * Aides de navigation pour un chapitre long, pensées pour la lecture sur smartphone (où le
- * repliement des sections — déjà en place, voir `ChapterPage` — ne suffit pas à lui seul : une
- * fois DANS une section, ou au milieu d'un long défilement, deux besoins restent entiers : "où
- * j'en suis ?" et "comment sauter ailleurs sans tout remonter ?"). Comparées et validées avec
- * l'utilisateur via un artefact interactif avant implémentation ("Je prends toutes les options") :
+ * Aides de navigation pour un chapitre long, pensées pour la lecture sur smartphone : une fois
+ * DANS une section, ou au milieu d'un long défilement, deux besoins restent entiers : "où j'en
+ * suis ?" et "comment sauter ailleurs sans tout remonter ?" (les sections ne se replient plus,
+ * voir `ChapterPage` — ce mécanisme-ci reste nécessaire indépendamment de ça). Comparées et
+ * validées avec l'utilisateur via un artefact interactif avant implémentation ("Je prends toutes
+ * les options") :
  *
  * - barre de progression (fixe, tout en haut) ;
  * - en-tête de section collant, juste en dessous (numéro + titre de la section actuellement lue) ;
@@ -68,9 +68,8 @@ function videosDuChapitre(chapter: ChapterContent): VideoRepere[] {
  *   correspondantes du chapitre, validé via un artefact interactif avant implémentation ;
  * - bouton flottant "remonter en haut" (bas, droite), visible seulement après un peu de défilement.
  *
- * Toutes du DOM direct (pas de refs par section) : la liste des `<details class="chapter-section"
- * data-repliable>` est retrouvée par le même sélecteur que `toutesLesSections` dans `ChapterPage`,
- * pour rester une SEULE source de vérité sur "qu'est-ce qu'une section repliable de ce chapitre".
+ * Toutes du DOM direct (pas de refs par section) : chaque section est retrouvée par
+ * `document.getElementById(section.id)`, le même id que celui posé par `ChapterPage`.
  */
 export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   const sections: SectionRepere[] = chapter.sections.map((s) => ({ id: s.id, number: s.number, title: s.title }))
@@ -136,33 +135,25 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   }, [tiroirOuvert])
 
   // Arrivée directe sur `#sectionId` (ex. lien "Retour à la section" depuis une page de
-  // générateur, voir `EntrainementPage`) : un `<details>` fermé n'auto-scroll pas tout seul, et
-  // React n'a pas encore peint la section au moment où le navigateur tenterait son ancrage natif
-  // — il faut rouvrir puis scroller nous-mêmes, une fois montés, comme `allerASection` au clic.
+  // générateur, voir `EntrainementPage`) : React n'a pas encore peint la section au moment où le
+  // navigateur tenterait son ancrage natif — on scrolle nous-mêmes, une fois montés, comme
+  // `allerASection` au clic.
   useEffect(() => {
     const id = window.location.hash.slice(1)
     if (!id) return
-    const details = document.getElementById(id) as HTMLDetailsElement | null
-    if (!details || !details.matches('details.chapter-section')) return
-    details.open = true
-    requestAnimationFrame(() => details.scrollIntoView({ block: 'start' }))
+    const section = document.getElementById(id)
+    if (!section || !section.matches('.chapter-section')) return
+    requestAnimationFrame(() => section.scrollIntoView({ block: 'start' }))
   }, [chapter.slug]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (sections.length === 0) return null
 
-  function ouvrirSection(sectionId: string) {
-    const details = document.getElementById(sectionId) as HTMLDetailsElement | null
-    if (details) details.open = true
-    return details
-  }
-
   function allerASection(section: SectionRepere) {
-    ouvrirSection(section.id)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    document.getElementById(section.id)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
     setTiroirOuvert(false)
   }
 
   function allerAVideo(video: VideoRepere) {
-    if (video.sectionId) ouvrirSection(video.sectionId)
     document.getElementById(`video-${video.youtubeId}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
     setTiroirOuvert(false)
   }
