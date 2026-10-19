@@ -888,7 +888,21 @@ figcaption {
   }
 }
 @media (min-width: 760px) {
+  /* Confirmation explicite de l'utilisateur pour empiéter sur la zone de la TOC collante : 268px =
+     240px (largeur de `.chapter-sidebar`) + 28px (`gap` de `.chapter-layout`, voir plus haut) — des
+     constantes FIXES du gabarit, pas une estimation de largeur de viewport (c'est précisément ce
+     qui avait débordé la première fois). Contrairement au calcul en vw, celui-ci reste correct à
+     N'IMPORTE QUELLE largeur ≥760px car il ne dépend que de la largeur de SA PROPRE colonne
+     (`100%`, quelle qu'elle soit) + ce décalage constant — jamais du viewport entier. La carte
+     n'a PAS de z-index propre et vient APRÈS la TOC dans le DOM (grille : TOC puis colonne de
+     contenu) : à ordre d'empilement par défaut, elle s'affiche donc PAR-DESSUS la TOC aux positions
+     de défilement où les deux se chevauchent (la TOC, collante, reste visible tout du long) — un
+     recouvrement temporaire du sommaire plutôt qu'un plantage visuel, vérifié par capture d'écran
+     avant de pousser. */
   #atelier-cercle-trigo-widget {
+    width: calc(100% + 268px);
+    margin-left: -268px;
+    margin-right: 0;
     padding-left: 8px;
     padding-right: 8px;
   }
