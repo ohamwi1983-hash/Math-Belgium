@@ -70,7 +70,7 @@
     '.legende-f{fill:var(--accent-ink,#7a3212);}' +
     '.legende-finv{fill:var(--good,#2f7a4f);}' +
     '.legende-diag{fill:var(--ink-faint,#9c9083);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:20px;flex-wrap:wrap;}' +
     '.stat{flex:1 1 130px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 6px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -85,13 +85,13 @@
     '<option value="cubique">f(x) = x³</option>' +
     '</select></div>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    '<div class="curseur"><label for="x">x</label><div class="curseur-row">' +
+    '<input type="range" id="x" min="0" max="1" step="0.001" value="0.5">' +
+    '<span class="curseur-valeur" id="x-valeur"></span></div></div>' +
     '<div class="stats">' +
     '<div class="stat"><span class="stat-label">point sur f</span><span class="stat-value" id="val-point-f"></span></div>' +
     '<div class="stat"><span class="stat-label">symétrique sur f⁻¹</span><span class="stat-value" id="val-point-finv"></span></div>' +
-    '</div>' +
-    '<div class="curseur"><label for="x">x</label><div class="curseur-row">' +
-    '<input type="range" id="x" min="0" max="1" step="0.001" value="0.5">' +
-    '<span class="curseur-valeur" id="x-valeur"></span></div></div>';
+    '</div>';
 
   class ReciproqueMiroirWidgetClass extends HTMLElement {
     constructor() {

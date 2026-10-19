@@ -49,7 +49,7 @@
     '.legende-f{fill:var(--accent-ink,#7a3212);}' +
     '.legende-tangente{fill:var(--plan,#5b4ea3);}' +
     '.legende-derivee{fill:var(--good,#2f7a4f);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-bottom:20px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:20px;}' +
     '.stat{flex:1 1 0;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -69,10 +69,6 @@
     '</style>' +
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">a</span><span class="stat-value" id="val-a"></span></div>' +
-    '<div class="stat"><span class="stat-label">f\'(0) = ln(a)</span><span class="stat-value" id="val-fprime0"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="a">a — base</label><div class="curseur-row">' +
     '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT_A + '">' +
@@ -82,6 +78,10 @@
     '<label class="case case-derivee"><input type="checkbox" id="case-derivee">f\'(x)</label>' +
     '</div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">a</span><span class="stat-value" id="val-a"></span></div>' +
+    '<div class="stat"><span class="stat-label">f\'(0) = ln(a)</span><span class="stat-value" id="val-fprime0"></span></div>' +
     '</div>';
 
   class TangenteExponentielleWidgetClass extends HTMLElement {

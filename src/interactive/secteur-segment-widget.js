@@ -52,11 +52,11 @@
     '.etiquette-sommet{font-size:12.5px;font-weight:700;fill:var(--ink,#241f1a);font-family:var(--sans,sans-serif);}' +
     '.etiquette-theta{font-size:11.5px;font-weight:600;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.etiquette-segment{font-size:11.5px;font-weight:700;fill:var(--accent-ink,#7a3212);font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin:14px 0;}' +
     '.stat{flex:1 1 110px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 6px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.92rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
-    '.verif{text-align:center;font-size:0.86rem;color:var(--ink-soft,#6b6055);margin:0 0 18px;padding:10px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
+    '.verif{text-align:center;font-size:0.86rem;color:var(--ink-soft,#6b6055);margin:0;padding:10px 12px;background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);}' +
     '.verif strong{color:var(--good,#2f7a4f);}' +
     '.controles{display:flex;flex-direction:column;gap:12px;}' +
     '.curseur{display:flex;flex-direction:column;gap:6px;}' +
@@ -71,13 +71,6 @@
     // cercle-trigo-widget.js (même piège de taille de remplacement SVG par défaut, invisible ici
     // seulement parce que TAILLE=300 coïncide avec cette valeur par défaut).
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" width="' + TAILLE + '" height="' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">aire secteur OAB</span><span class="stat-value" id="val-secteur"></span></div>' +
-    '<div class="stat"><span class="stat-label">aire triangle OAB</span><span class="stat-value" id="val-triangle"></span></div>' +
-    '<div class="stat"><span class="stat-label">aire segment</span><span class="stat-value" id="val-segment"></span></div>' +
-    '<div class="stat"><span class="stat-label">corde AB</span><span class="stat-value" id="val-corde"></span></div>' +
-    '</div>' +
-    '<p class="verif" id="verif"></p>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="n">n — nombre de côtés</label><div class="curseur-row">' +
     '<input type="range" id="n" min="' + BORNES_N.min + '" max="' + BORNES_N.max + '" step="' + BORNES_N.step + '" value="' + DEFAUT.n + '">' +
@@ -86,7 +79,14 @@
     '<input type="range" id="r" min="' + BORNES_R.min + '" max="' + BORNES_R.max + '" step="' + BORNES_R.step + '" value="' + DEFAUT.r + '">' +
     '<span class="curseur-valeur" id="r-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
-    '</div>';
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">aire secteur OAB</span><span class="stat-value" id="val-secteur"></span></div>' +
+    '<div class="stat"><span class="stat-label">aire triangle OAB</span><span class="stat-value" id="val-triangle"></span></div>' +
+    '<div class="stat"><span class="stat-label">aire segment</span><span class="stat-value" id="val-segment"></span></div>' +
+    '<div class="stat"><span class="stat-label">corde AB</span><span class="stat-value" id="val-corde"></span></div>' +
+    '</div>' +
+    '<p class="verif" id="verif"></p>';
 
   class SecteurSegmentWidgetClass extends HTMLElement {
     constructor() {

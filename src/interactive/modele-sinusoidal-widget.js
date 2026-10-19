@@ -79,7 +79,7 @@
     '.guide{stroke:var(--ink-faint,#c9beae);stroke-width:1;stroke-dasharray:3 3;}' +
     '.etiquette{font-size:11px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.legende-panneau{text-align:center;font-size:0.8rem;color:var(--ink-faint,#9c9083);margin:4px 0 0;font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 78px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -107,12 +107,6 @@
     '<div><div class="panneau"><svg id="svg-graphe" viewBox="0 0 ' + G_LARGEUR + ' ' + G_HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<p class="legende-panneau">hauteur(t)</p></div>' +
     '</div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">A</span><span class="stat-value" id="val-a"></span></div>' +
-    '<div class="stat"><span class="stat-label">b</span><span class="stat-value" id="val-b"></span></div>' +
-    '<div class="stat"><span class="stat-label">ω</span><span class="stat-value" id="val-omega"></span></div>' +
-    '<div class="stat"><span class="stat-label">φ</span><span class="stat-value" id="val-phi"></span></div>' +
-    '</div>' +
     '<p class="verif" id="verif"></p>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="r">r — rayon (m)</label><div class="curseur-row">' +
@@ -125,6 +119,12 @@
     '<input type="range" id="t" min="' + BORNES_T.min + '" max="' + BORNES_T.max + '" step="' + BORNES_T.step + '" value="' + DEFAUT.t + '">' +
     '<span class="curseur-valeur" id="t-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">A</span><span class="stat-value" id="val-a"></span></div>' +
+    '<div class="stat"><span class="stat-label">b</span><span class="stat-value" id="val-b"></span></div>' +
+    '<div class="stat"><span class="stat-label">ω</span><span class="stat-value" id="val-omega"></span></div>' +
+    '<div class="stat"><span class="stat-label">φ</span><span class="stat-value" id="val-phi"></span></div>' +
     '</div>';
 
   class ModeleSinusoidalWidgetClass extends HTMLElement {

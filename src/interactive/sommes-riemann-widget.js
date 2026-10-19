@@ -51,7 +51,7 @@
     '.forme-majorant{fill:var(--good,#2f7a4f);fill-opacity:0.32;stroke:var(--good,#2f7a4f);stroke-width:1;}' +
     '.forme-trapeze{fill:var(--plan,#5b4ea3);fill-opacity:0.32;stroke:var(--plan,#5b4ea3);stroke-width:1;}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 100px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -72,16 +72,16 @@
     '</select></div>' +
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">approximation</span><span class="stat-value" id="val-approx"></span></div>' +
-    '<div class="stat"><span class="stat-label">valeur exacte</span><span class="stat-value" id="val-exact"></span></div>' +
-    '<div class="stat"><span class="stat-label">erreur</span><span class="stat-value" id="val-erreur"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="n">n — sous-intervalles</label><div class="curseur-row">' +
     '<input type="range" id="n" min="' + BORNES_N.min + '" max="' + BORNES_N.max + '" step="' + BORNES_N.step + '" value="' + DEFAUT_N + '">' +
     '<span class="curseur-valeur" id="n-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">approximation</span><span class="stat-value" id="val-approx"></span></div>' +
+    '<div class="stat"><span class="stat-label">valeur exacte</span><span class="stat-value" id="val-exact"></span></div>' +
+    '<div class="stat"><span class="stat-label">erreur</span><span class="stat-value" id="val-erreur"></span></div>' +
     '</div>';
 
   class SommesRiemannWidgetClass extends HTMLElement {

@@ -52,7 +52,7 @@
     '.legende-exp{fill:var(--good,#2f7a4f);}' +
     '.legende-log{fill:var(--accent-ink,#7a3212);}' +
     '.legende-diag{fill:var(--ink-faint,#9c9083);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:20px;flex-wrap:wrap;}' +
     '.stat{flex:1 1 130px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 6px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -63,16 +63,16 @@
     '.curseur-valeur{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft,#6b6055);min-width:56px;text-align:right;font-size:0.92rem;}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + TAILLE + ' ' + TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">point sur expₐ</span><span class="stat-value" id="val-point-exp"></span></div>' +
-    '<div class="stat"><span class="stat-label">symétrique sur logₐ</span><span class="stat-value" id="val-point-log"></span></div>' +
-    '</div>' +
     '<div class="curseur"><label for="a">a — base</label><div class="curseur-row">' +
     '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT.a + '">' +
     '<span class="curseur-valeur" id="a-valeur"></span></div></div>' +
     '<div class="curseur"><label for="r">r</label><div class="curseur-row">' +
     '<input type="range" id="r" min="' + R_MIN + '" max="' + R_MAX + '" step="0.02" value="' + DEFAUT.r + '">' +
-    '<span class="curseur-valeur" id="r-valeur"></span></div></div>';
+    '<span class="curseur-valeur" id="r-valeur"></span></div></div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">point sur expₐ</span><span class="stat-value" id="val-point-exp"></span></div>' +
+    '<div class="stat"><span class="stat-label">symétrique sur logₐ</span><span class="stat-value" id="val-point-log"></span></div>' +
+    '</div>';
 
   class LogExpMiroirWidgetClass extends HTMLElement {
     constructor() {

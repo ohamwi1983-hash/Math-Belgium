@@ -61,7 +61,7 @@
     '.guide-th{stroke:var(--plan,#5b4ea3);stroke-width:1.2;stroke-dasharray:3 3;opacity:0.75;}' +
     '.etiquette-point{font-size:11.5px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--mono,monospace);}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:16px;}' +
     '.stat{flex:1 1 90px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--plan,#5b4ea3);white-space:nowrap;}' +
@@ -88,9 +88,6 @@
     '</select></div>' +
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">point caractéristique</span><span class="stat-value" id="val-point"></span></div>' +
-    '</div>' +
     '<div class="cases">' +
     '<label class="case"><input type="checkbox" id="sox">SOX (symétrie Ox)</label>' +
     '<label class="case"><input type="checkbox" id="soy">SOY (symétrie Oy)</label>' +
@@ -109,6 +106,9 @@
     '<input type="range" id="kv" min="' + BORNES_K.min + '" max="' + BORNES_K.max + '" step="' + BORNES_K.step + '" value="' + DEFAUT.kv + '">' +
     '<span class="curseur-valeur" id="kv-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">point caractéristique</span><span class="stat-value" id="val-point"></span></div>' +
     '</div>';
 
   class Transformation8ParametresWidgetClass extends HTMLElement {

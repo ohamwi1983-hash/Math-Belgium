@@ -47,7 +47,7 @@
     '.point-x{fill:var(--accent,#a8471f);}' +
     '.etiquette-plancher{font-size:11.5px;font-weight:700;fill:var(--good,#2f7a4f);font-family:var(--mono,monospace);}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 110px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -62,10 +62,6 @@
     '</style>' +
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">Cᵤ(x)</span><span class="stat-value" id="val-cu"></span></div>' +
-    '<div class="stat"><span class="stat-label">écart au plancher</span><span class="stat-value" id="val-ecart"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="f">F — coût fixe (€)</label><div class="curseur-row">' +
     '<input type="range" id="f" min="' + BORNES_F.min + '" max="' + BORNES_F.max + '" step="' + BORNES_F.step + '" value="' + DEFAUT.f + '">' +
@@ -77,6 +73,10 @@
     '<input type="range" id="x" min="' + BORNES_X.min + '" max="' + BORNES_X.max + '" step="' + BORNES_X.step + '" value="' + DEFAUT.x + '">' +
     '<span class="curseur-valeur" id="x-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">Cᵤ(x)</span><span class="stat-value" id="val-cu"></span></div>' +
+    '<div class="stat"><span class="stat-label">écart au plancher</span><span class="stat-value" id="val-ecart"></span></div>' +
     '</div>';
 
   class PlancherPlafondWidgetClass extends HTMLElement {

@@ -42,7 +42,7 @@
     '.racine{fill:var(--ink,#241f1a);}' +
     '.etiquette{font-size:12px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.etiquette-racine{font-size:11.5px;font-weight:600;fill:var(--ink,#241f1a);font-family:var(--mono,monospace);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:20px;flex-wrap:wrap;}' +
     '.stat{flex:1 1 150px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 6px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -60,10 +60,6 @@
     '</style>' +
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">Δ = b² − 4ac</span><span class="stat-value" id="val-delta"></span></div>' +
-    '<div class="stat"><span class="stat-label">solutions</span><span class="stat-value" id="val-solutions"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="a">a</label><div class="curseur-row">' +
     '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT.a + '">' +
@@ -75,6 +71,10 @@
     '<input type="range" id="c" min="' + BORNES_C.min + '" max="' + BORNES_C.max + '" step="' + BORNES_C.step + '" value="' + DEFAUT.c + '">' +
     '<span class="curseur-valeur" id="c-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">Δ = b² − 4ac</span><span class="stat-value" id="val-delta"></span></div>' +
+    '<div class="stat"><span class="stat-label">solutions</span><span class="stat-value" id="val-solutions"></span></div>' +
     '</div>';
 
   class DiscriminantRacinesWidgetClass extends HTMLElement {

@@ -183,7 +183,7 @@
     '.etiquette{font-size:11.5px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
     '.etiquette-angle{font-size:12px;font-weight:600;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.legende-panneau{text-align:center;font-size:0.82rem;color:var(--ink-faint,#9c9083);margin:4px 0 0;font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 0;min-width:88px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -214,11 +214,6 @@
     '<div class="panneau"><svg id="svg-cercle" viewBox="0 0 ' + C_TAILLE + ' ' + C_TAILLE + '" width="' + C_TAILLE + '" height="' + C_TAILLE + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<div class="panneau"><svg id="svg-graphe" viewBox="0 0 ' + G_LARGEUR + ' ' + G_HAUTEUR + '" width="' + G_LARGEUR + '" height="' + G_HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '</div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">x (rad)</span><span class="stat-value" id="val-x-rad"></span></div>' +
-    '<div class="stat"><span class="stat-label">x (en π)</span><span class="stat-value" id="val-x-pi"></span></div>' +
-    '<div class="stat"><span class="stat-label" id="label-fn"></span><span class="stat-value" id="val-fn"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="ligne-select"><label for="fn">Fonction</label>' +
     '<select id="fn"><option value="sin">sin(x)</option><option value="cos">cos(x)</option><option value="tan">tan(x)</option></select>' +
@@ -227,6 +222,11 @@
     '<input type="range" id="x" min="0" max="' + X_MAX + '" step="0.01" value="' + DEFAUT_X + '">' +
     '<span class="curseur-valeur" id="x-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">x (rad)</span><span class="stat-value" id="val-x-rad"></span></div>' +
+    '<div class="stat"><span class="stat-label">x (en π)</span><span class="stat-value" id="val-x-pi"></span></div>' +
+    '<div class="stat"><span class="stat-label" id="label-fn"></span><span class="stat-value" id="val-fn"></span></div>' +
     '</div>';
 
   class CercleTrigoWidgetClass extends HTMLElement {

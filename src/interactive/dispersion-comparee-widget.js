@@ -52,7 +52,7 @@
     '.etiquette-xbarre{font-size:12px;font-weight:700;fill:var(--plan,#5b4ea3);font-family:var(--mono,monospace);}' +
     '.etiquette-valeur{font-size:11.5px;font-weight:700;fill:var(--accent-ink,#7a3212);font-family:var(--mono,monospace);}' +
     '.etiquette-ecart{font-size:11.5px;font-weight:600;fill:var(--accent-ink,#7a3212);font-family:var(--sans,sans-serif);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 100px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -66,16 +66,16 @@
     '.btn-reset:hover{background:var(--accent-soft-line,#e8c4a4);}' +
     '</style>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">x̄ (fixe)</span><span class="stat-value" id="val-xbarre"></span></div>' +
-    '<div class="stat"><span class="stat-label">variance</span><span class="stat-value" id="val-variance"></span></div>' +
-    '<div class="stat"><span class="stat-label">écart-type</span><span class="stat-value" id="val-ecarttype"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="d">d — demi-écart à x̄</label><div class="curseur-row">' +
     '<input type="range" id="d" min="' + BORNES_D.min + '" max="' + BORNES_D.max + '" step="' + BORNES_D.step + '" value="' + DEFAUT_D + '">' +
     '<span class="curseur-valeur" id="d-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">x̄ (fixe)</span><span class="stat-value" id="val-xbarre"></span></div>' +
+    '<div class="stat"><span class="stat-label">variance</span><span class="stat-value" id="val-variance"></span></div>' +
+    '<div class="stat"><span class="stat-label">écart-type</span><span class="stat-value" id="val-ecarttype"></span></div>' +
     '</div>';
 
   class DispersionCompareeWidgetClass extends HTMLElement {

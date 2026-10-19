@@ -52,7 +52,7 @@
     '.etiquette-e{font-size:11.5px;font-weight:600;fill:var(--good,#2f7a4f);font-family:var(--mono,monospace);}' +
     '.case{display:flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:0.92rem;cursor:pointer;color:var(--good,#2f7a4f);margin-bottom:16px;}' +
     '.case input[type="checkbox"]{width:16px;height:16px;cursor:pointer;accent-color:var(--good,#2f7a4f);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-top:20px;flex-wrap:wrap;}' +
     '.stat{flex:1 1 130px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 6px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.94rem;font-weight:600;color:var(--accent-ink,#7a3212);white-space:nowrap;}' +
@@ -68,10 +68,6 @@
     '<p class="formule" id="formule"></p>' +
     '<div class="graphe-zone"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<label class="case"><input type="checkbox" id="case-e">Révéler le point en x=e</label>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">f(1) = a</span><span class="stat-value" id="val-f1"></span></div>' +
-    '<div class="stat"><span class="stat-label">f\'(1) = b</span><span class="stat-value" id="val-fp1"></span></div>' +
-    '</div>' +
     '<div class="controles">' +
     '<div class="curseur"><label for="a">a</label><div class="curseur-row">' +
     '<input type="range" id="a" min="' + BORNES_A.min + '" max="' + BORNES_A.max + '" step="' + BORNES_A.step + '" value="' + DEFAUT.a + '">' +
@@ -80,6 +76,10 @@
     '<input type="range" id="b" min="' + BORNES_B.min + '" max="' + BORNES_B.max + '" step="' + BORNES_B.step + '" value="' + DEFAUT.b + '">' +
     '<span class="curseur-valeur" id="b-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">f(1) = a</span><span class="stat-value" id="val-f1"></span></div>' +
+    '<div class="stat"><span class="stat-label">f\'(1) = b</span><span class="stat-value" id="val-fp1"></span></div>' +
     '</div>';
 
   class ParametresGraphiquesWidgetClass extends HTMLElement {

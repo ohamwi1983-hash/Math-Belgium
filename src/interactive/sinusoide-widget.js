@@ -139,7 +139,7 @@
     '.vecteur-vert-tete{fill:var(--good,#2f7a4f);}' +
     '.guide-position{stroke:var(--plan,#5b4ea3);stroke-width:1.2;stroke-dasharray:3 3;}' +
     '.point-position{fill:var(--plan,#5b4ea3);}' +
-    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:20px;}' +
+    '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:20px;}' +
     '.stat{flex:1 1 90px;min-width:0;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
     '.stat-label{display:block;font-family:var(--mono,monospace);font-size:10px;letter-spacing:0.02em;color:var(--ink-faint,#9c9083);margin-bottom:5px;}' +
     '.stat-value{display:block;font-variant-numeric:tabular-nums;font-size:0.98rem;font-weight:600;color:var(--ink,#241f1a);white-space:nowrap;}' +
@@ -157,12 +157,6 @@
     '<div class="panneau"><svg id="svg-cercle" viewBox="0 0 ' + CERCLE_LARGEUR + ' ' + CERCLE_HAUTEUR + '" width="' + CERCLE_LARGEUR + '" height="' + CERCLE_HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '<div class="panneau"><svg id="svg" viewBox="0 0 ' + LARGEUR + ' ' + HAUTEUR + '" width="' + LARGEUR + '" height="' + HAUTEUR + '" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
     '</div>' +
-    '<div class="stats">' +
-    '<div class="stat"><span class="stat-label">x</span><span class="stat-value" id="val-x"></span></div>' +
-    '<div class="stat"><span class="stat-label">f(x)</span><span class="stat-value" id="val-fx"></span></div>' +
-    '<div class="stat"><span class="stat-label">Maximum</span><span class="stat-value" id="val-max"></span></div>' +
-    '<div class="stat"><span class="stat-label">Minimum</span><span class="stat-value" id="val-min"></span></div>' +
-    '</div>' +
     '<div class="curseurs">' +
     '<div class="curseur"><label for="a">A — amplitude</label><div class="curseur-row"><input type="range" id="a" min="' + BORNES.a.min + '" max="' + BORNES.a.max + '" step="' + BORNES.a.step + '" value="' + DEFAUT.a + '"><span class="curseur-valeur" id="a-valeur"></span></div></div>' +
     '<div class="curseur"><label for="t">T — période</label><div class="curseur-row"><input type="range" id="t" min="' + BORNES.t.min + '" max="' + BORNES.t.max + '" step="' + BORNES.t.step + '"><span class="curseur-valeur" id="t-valeur"></span></div></div>' +
@@ -171,6 +165,12 @@
     '<div class="curseur"><label for="b">b — décalage vertical</label><div class="curseur-row"><input type="range" id="b" min="' + BORNES.b.min + '" max="' + BORNES.b.max + '" step="' + BORNES.b.step + '" value="' + DEFAUT.b + '"><span class="curseur-valeur" id="b-valeur"></span></div></div>' +
     '<div class="curseur"><label for="x">x — position observée</label><div class="curseur-row"><input type="range" id="x" min="' + BORNES.x.min + '" max="' + BORNES.x.max + '" step="' + BORNES.x.step + '" value="' + DEFAUT.x + '"><span class="curseur-valeur" id="x-valeur"></span></div></div>' +
     '<button class="btn-reset" id="reset" type="button">Réinitialiser</button>' +
+    '</div>' +
+    '<div class="stats">' +
+    '<div class="stat"><span class="stat-label">x</span><span class="stat-value" id="val-x"></span></div>' +
+    '<div class="stat"><span class="stat-label">f(x)</span><span class="stat-value" id="val-fx"></span></div>' +
+    '<div class="stat"><span class="stat-label">Maximum</span><span class="stat-value" id="val-max"></span></div>' +
+    '<div class="stat"><span class="stat-label">Minimum</span><span class="stat-value" id="val-min"></span></div>' +
     '</div>';
 
   class SinusoideWidgetClass extends HTMLElement {
