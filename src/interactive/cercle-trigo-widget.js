@@ -3,28 +3,31 @@
 
   /* ================================================================
    * <cercle-trigo-widget> — cercle trigonométrique (gauche) relié à un graphe
-   * sin/cos/tan qui se trace au fur et à mesure (droite), x de 0 à 2π.
+   * sin/cos/tan qui se trace au fur et à mesure (droite), x de 0 à 3π.
    * Web Component (Shadow DOM), couleurs empruntées aux variables CSS du thème.
    * ================================================================ */
 
   var DEUX_PI = 2 * Math.PI;
-  // Capé à 2π (plutôt que 3π auparavant) pour laisser la place à l'axe des x du graphe d'utiliser
-  // la MÊME échelle que le cercle (voir G_LARGEUR ci-dessous) — un tour complet est de toute façon
-  // suffisant pour illustrer sin/cos/tan.
-  var X_MAX = DEUX_PI;
+  // Remonté à 3π (demande explicite) — redescendu un temps à 2π pour une raison esthétique (voir
+  // C_R ci-dessous), mais l'égalité de longueur entre les deux panneaux ne dépend PAS de cette
+  // valeur : elle est garantie par le partage proportionnel des deux <svg> (flex-basis en %, voir
+  // `.panneaux`/`.panneau` plus bas), qui préserve le MÊME facteur d'échelle quelle que soit la
+  // largeur de conteneur — jamais besoin que chaque panneau tienne nativement sous un plafond
+  // donné pour que l'égalité reste vraie. Au-delà de 2π, seul l'indicateur d'angle orienté
+  // s'enroule en "ressort circulaire" (voir `rayonAngleIndicateur`, déjà indépendant de X_MAX) ;
+  // le cercle, le point mobile et le rayon restent toujours sur le vrai cercle.
+  var X_MAX = 3 * Math.PI;
   var DEFAUT_X = Math.PI / 4;
 
   // --- Panneau cercle -------------------------------------------------
-  // C_R choisi pour que le panneau graphe (large de G_MARGE_G + G_MARGE_D + X_MAX×C_R, voir plus
-  // bas) tienne NATIVEMENT sous le plafond de `.widget-host` (560px, `index.css`) — indispensable
-  // pour l'égalité des longueurs visuelles (segment/flèche) demandée entre les deux panneaux : si
-  // le panneau graphe devait rétrécir sous son propre viewBox pour tenir dans ce plafond alors que
-  // le panneau cercle (bien plus étroit) n'a pas besoin de rétrécir, les deux panneaux finiraient
-  // à des échelles d'affichage DIFFÉRENTES malgré un même C_R "en unités de viewBox" — voir le
-  // commentaire de tête de la section "Panneau graphe" ci-dessous pour le principe d'échelle
-  // partagée lui-même. Avec X_MAX=2π et les marges actuelles, C_R=75 donne une largeur de panneau
-  // graphe d'environ 515px (+ padding), confortablement sous 560px.
-  var C_R = 75;
+  // C_R recalculé pour 3π (réduit depuis 75, utilisé quand X_MAX était à 2π) afin de garder le
+  // panneau graphe (large de G_MARGE_G + G_MARGE_D + X_MAX×C_R, voir plus bas) proche de sa taille
+  // native d'alors (~515px) une fois affiché à sa taille maximale (grand écran, voir le
+  // commentaire de tête de la section "Panneau graphe" plus bas pour le principe d'échelle
+  // partagée) — un confort d'affichage, pas une condition de correction : sur un conteneur plus
+  // étroit (mobile), les deux panneaux rétrécissent de toute façon ENSEMBLE, dans la même
+  // proportion, quelle que soit cette taille native.
+  var C_R = 50;
   var C_CX = C_R + 40, C_CY = C_CX, C_TAILLE = 2 * C_CX;
   // L'INDICATEUR D'ANGLE ORIENTÉ (petit arc près du sommet, PAS l'arc balayé sur la circonférence
   // ni le rayon/point mobile) est le seul élément dont le rayon grandit au-delà de 2π — corrigé
