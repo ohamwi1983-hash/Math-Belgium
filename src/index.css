@@ -860,6 +860,26 @@ figcaption {
    visible. `none` plutôt qu'une valeur fixe : la vraie limite reste `.page` (largeur de lecture du
    chapitre, 760px) ou `.generator-body` (déjà sans plafond) — jamais ce plafond-ci à lui seul. */
 .widget-host:has(cercle-trigo-widget) { max-width: none; }
+/* Sur mobile, ce plafond n'était de toute façon JAMAIS la contrainte active (la largeur de l'écran
+   l'était déjà) — l'agrandissement interne ×1,5 du widget restait donc invisible sur téléphone tant
+   que son véritable goulot n'était pas traité : le padding de `.atelier-frame-wrap` (24px, voir
+   plus haut) cumulé à celui de `.page` (16px en dessous de 480px) mangeait l'essentiel d'un écran
+   étroit. Le débordement pleine largeur ci-dessous (bord à bord avec l'écran, carte comprise, PAS
+   seulement le widget) est scopé par id à CETTE carte-atelier uniquement — jamais les ~70 autres
+   ateliers du site — et seulement sous ce point de rupture (desktop déjà correct via la règle
+   ci-dessus, voir le commentaire de tête). `.page`/`.atelier-frame-wrap` sont déjà étirés sur toute
+   la largeur de l'écran à cette étroitesse (centrage par `margin:auto` sans effet réel), donc
+   recentrer via `calc(50% - 50vw)` revient ici à aligner sur les bords RÉELS de l'écran. */
+@media (max-width: 640px) {
+  #atelier-cercle-trigo-widget {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    border-radius: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
 
 /* ---------- synthèse finale ---------- */
 .synthese {
