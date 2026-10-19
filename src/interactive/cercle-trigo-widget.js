@@ -19,6 +19,16 @@
   var X_MAX = 3 * Math.PI;
   var DEFAUT_X = Math.PI / 4;
 
+  // Agrandissement global demandé (cercle + graphe, ×1,5) : UN SEUL facteur multiplie TOUTES les
+  // constantes de TAILLE ci-dessous (rayons, marges, marqueurs, épaisseurs de trait, police des
+  // étiquettes SVG) via `tx()` — jamais une valeur changée isolément — pour que les deux panneaux
+  // restent un agrandissement fidèle (mêmes proportions, même "feel") de la version précédente, et
+  // pas juste des panneaux plus larges avec des traits/texte restés à leur ancienne taille absolue.
+  // Ne s'applique qu'à l'INTÉRIEUR des deux <svg> (le cercle et le graphe eux-mêmes) — pas aux
+  // contrôles HTML (select, curseur, boutons) ni aux encadrés de stats, qui restent à taille normale.
+  var FACTEUR_TAILLE = 1.5;
+  function tx(n) { return Math.round(n * FACTEUR_TAILLE * 100) / 100; }
+
   // --- Panneau cercle -------------------------------------------------
   // C_R recalculé pour 3π (réduit depuis 75, utilisé quand X_MAX était à 2π) afin de garder le
   // panneau graphe (large de G_MARGE_G + G_MARGE_D + X_MAX×C_R, voir plus bas) proche de sa taille
@@ -26,17 +36,24 @@
   // commentaire de tête de la section "Panneau graphe" plus bas pour le principe d'échelle
   // partagée) — un confort d'affichage, pas une condition de correction : sur un conteneur plus
   // étroit (mobile), les deux panneaux rétrécissent de toute façon ENSEMBLE, dans la même
-  // proportion, quelle que soit cette taille native.
-  var C_R = 50;
-  var C_CX = C_R + 40, C_CY = C_CX, C_TAILLE = 2 * C_CX;
+  // proportion, quelle que soit cette taille native. Puis multiplié par FACTEUR_TAILLE (agrandissement
+  // demandé) comme toutes les autres constantes de taille de cette section.
+  var C_R = tx(50);
+  var C_CX = C_R + tx(40), C_CY = C_CX, C_TAILLE = 2 * C_CX;
+  // Débord des deux axes (horizontal/vertical) au-delà du cercle, de part et d'autre — scale avec
+  // FACTEUR_TAILLE comme le reste de la géométrie du panneau cercle.
+  var C_AXE_DEBORD = tx(20);
+  // Rayons des petits marqueurs ponctuels (point mobile sur le cercle, point rouge sur le graphe).
+  var POINT_MOBILE_R = tx(4.5);
+  var POINT_ROUGE_R = tx(4);
   // L'INDICATEUR D'ANGLE ORIENTÉ (petit arc près du sommet, PAS l'arc balayé sur la circonférence
   // ni le rayon/point mobile) est le seul élément dont le rayon grandit au-delà de 2π — corrigé
   // sur retour utilisateur : la première version faisait grandir l'arc SUR le cercle (et le point
   // mobile avec), ce qui déformait à tort la référence fixe. Le cercle, le point mobile et le
   // rayon restent maintenant TOUJOURS sur le vrai cercle (rayon C_R constant, jamais déformé) ;
   // seul ce petit indicateur près du centre s'enroule en "ressort circulaire" au-delà d'un tour.
-  var R_ANGLE_BASE = 20;
-  var ANGLE_RESSORT_CROISSANCE = 34;
+  var R_ANGLE_BASE = tx(20);
+  var ANGLE_RESSORT_CROISSANCE = tx(34);
 
   // --- Panneau graphe ---------------------------------------------------
   // La longueur du segment violet (0 à x sur l'axe des x) doit être visuellement égale à l'arc
@@ -50,7 +67,8 @@
   // large, romprait l'égalité des échelles dès lors que zoneH (hauteur de panneau, en pixels, fixe
   // pour les 3 fonctions) ne peut correspondre à C_R que pour UNE seule largeur de fenêtre à la
   // fois.
-  var G_MARGE_G = 30, G_MARGE_D = 14, G_MARGE_H = 16, G_MARGE_B = 30;
+  var G_MARGE_G = tx(30), G_MARGE_D = tx(14), G_MARGE_H = tx(16), G_MARGE_B = tx(30);
+  // Fenêtre MATHÉMATIQUE (pas une taille en pixels) — ne multiplie JAMAIS par FACTEUR_TAILLE.
   var VALEUR_Y_MAX = 1.4;
   var FENETRES_Y = {
     sin: { min: -VALEUR_Y_MAX, max: VALEUR_Y_MAX },
@@ -105,9 +123,9 @@
   function dessinerTeteFleche(ns, svg, x1, y1, x2, y2, classeTete) {
     var dx = x2 - x1, dy = y2 - y1;
     var longueur = Math.hypot(dx, dy);
-    if (longueur < 0.5) return;
+    if (longueur < tx(0.5)) return;
     var ux = dx / longueur, uy = dy / longueur;
-    var taille = 8, largeur = 4.5;
+    var taille = tx(8), largeur = tx(4.5);
     var baseX = x2 - ux * taille, baseY = y2 - uy * taille;
     var perpX = -uy, perpY = ux;
     var p1x = baseX + perpX * largeur, p1y = baseY + perpY * largeur;
@@ -166,25 +184,25 @@
     '.panneau:nth-child(2){flex:0 1 ' + PART_GRAPHE_PCT.toFixed(3) + '%;}' +
     '#svg-cercle{width:100%;max-width:' + C_TAILLE + 'px;height:auto;display:block;}' +
     '#svg-graphe{width:100%;max-width:' + G_LARGEUR + 'px;height:auto;display:block;}' +
-    '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:1.3;}' +
-    '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:1;}' +
-    '.cercle-ref{stroke:var(--ink-faint,#9c9083);stroke-width:1.4;fill:none;}' +
-    '.arc-cercle-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;fill:none;stroke-linecap:round;}' +
-    '.angle-oriente{stroke:var(--plan,#5b4ea3);stroke-width:2;fill:none;stroke-linecap:round;opacity:0.85;}' +
+    '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:' + tx(1.3) + ';}' +
+    '.grille{stroke:var(--line-soft,#ede5d7);stroke-width:' + tx(1) + ';}' +
+    '.cercle-ref{stroke:var(--ink-faint,#9c9083);stroke-width:' + tx(1.4) + ';fill:none;}' +
+    '.arc-cercle-violet{stroke:var(--plan,#5b4ea3);stroke-width:' + tx(3.4) + ';fill:none;stroke-linecap:round;}' +
+    '.angle-oriente{stroke:var(--plan,#5b4ea3);stroke-width:' + tx(2) + ';fill:none;stroke-linecap:round;opacity:0.85;}' +
     '.angle-oriente-tete{fill:var(--plan,#5b4ea3);opacity:0.85;}' +
-    '.rayon-violet{stroke:var(--plan,#5b4ea3);stroke-width:2.6;stroke-linecap:round;}' +
+    '.rayon-violet{stroke:var(--plan,#5b4ea3);stroke-width:' + tx(2.6) + ';stroke-linecap:round;}' +
     '.point-mobile{fill:var(--plan,#5b4ea3);}' +
-    '.segment-rouge{stroke:var(--bad,#b23a3a);stroke-width:2.8;stroke-linecap:round;}' +
+    '.segment-rouge{stroke:var(--bad,#b23a3a);stroke-width:' + tx(2.8) + ';stroke-linecap:round;}' +
     '.point-rouge{fill:var(--bad,#b23a3a);}' +
-    '.guide-rouge{stroke:var(--bad,#b23a3a);stroke-width:1.1;stroke-dasharray:3 3;}' +
-    '.vecteur-vert-ligne{stroke:var(--good,#2f7a4f);stroke-width:2.4;stroke-linecap:round;}' +
+    '.guide-rouge{stroke:var(--bad,#b23a3a);stroke-width:' + tx(1.1) + ';stroke-dasharray:' + tx(3) + ' ' + tx(3) + ';}' +
+    '.vecteur-vert-ligne{stroke:var(--good,#2f7a4f);stroke-width:' + tx(2.4) + ';stroke-linecap:round;}' +
     '.vecteur-vert-tete{fill:var(--good,#2f7a4f);}' +
-    '.prolongement-tan{stroke:var(--plan,#5b4ea3);stroke-width:1.3;stroke-dasharray:4 3;opacity:0.7;}' +
-    '.axe-x-violet{stroke:var(--plan,#5b4ea3);stroke-width:3.4;stroke-linecap:round;}' +
-    '.courbe{stroke:var(--accent,#a8471f);stroke-width:2.4;fill:none;}' +
-    '.asymptote{stroke:var(--line,#e2d8c8);stroke-width:1;stroke-dasharray:4 3;}' +
-    '.etiquette{font-size:11.5px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
-    '.etiquette-angle{font-size:12px;font-weight:600;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
+    '.prolongement-tan{stroke:var(--plan,#5b4ea3);stroke-width:' + tx(1.3) + ';stroke-dasharray:' + tx(4) + ' ' + tx(3) + ';opacity:0.7;}' +
+    '.axe-x-violet{stroke:var(--plan,#5b4ea3);stroke-width:' + tx(3.4) + ';stroke-linecap:round;}' +
+    '.courbe{stroke:var(--accent,#a8471f);stroke-width:' + tx(2.4) + ';fill:none;}' +
+    '.asymptote{stroke:var(--line,#e2d8c8);stroke-width:' + tx(1) + ';stroke-dasharray:' + tx(4) + ' ' + tx(3) + ';}' +
+    '.etiquette{font-size:' + tx(11.5) + 'px;fill:var(--ink-soft,#6b6055);font-family:var(--sans,sans-serif);}' +
+    '.etiquette-angle{font-size:' + tx(12) + 'px;font-weight:600;fill:var(--plan,#5b4ea3);font-family:var(--sans,sans-serif);}' +
     '.legende-panneau{text-align:center;font-size:0.82rem;color:var(--ink-faint,#9c9083);margin:4px 0 0;font-family:var(--sans,sans-serif);}' +
     '.stats{display:flex;align-items:stretch;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:18px;}' +
     '.stat{flex:1 1 0;min-width:88px;border:1px solid var(--line,#e2d8c8);border-radius:var(--radius,3px);padding:8px 4px;text-align:center;background:var(--surface,#fff);}' +
@@ -292,8 +310,8 @@
     var x = this._x, fn = this._fn;
 
     svg.appendChild(svgEl(ns, "circle", { cx: C_CX, cy: C_CY, r: C_R, class: "cercle-ref" }));
-    svg.appendChild(svgEl(ns, "line", { x1: C_CX - C_R - 20, x2: C_CX + C_R + 20, y1: C_CY, y2: C_CY, class: "axe" }));
-    svg.appendChild(svgEl(ns, "line", { x1: C_CX, x2: C_CX, y1: C_CY - C_R - 20, y2: C_CY + C_R + 20, class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: C_CX - C_R - C_AXE_DEBORD, x2: C_CX + C_R + C_AXE_DEBORD, y1: C_CY, y2: C_CY, class: "axe" }));
+    svg.appendChild(svgEl(ns, "line", { x1: C_CX, x2: C_CX, y1: C_CY - C_R - C_AXE_DEBORD, y2: C_CY + C_R + C_AXE_DEBORD, class: "axe" }));
 
     // Point vrai sur le cercle de référence — rayon TOUJOURS fixe (= C_R), jamais déformé par x,
     // quel que soit le nombre de tours. Utilisé pour le rayon, le point mobile, le vecteur vert et
@@ -345,7 +363,7 @@
 
     // Rayon + point mobile : toujours sur le vrai cercle, jamais de rayon variable.
     svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxVrai.toFixed(2), y2: pyVrai.toFixed(2), class: "rayon-violet" }));
-    svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4.5, class: "point-mobile" }));
+    svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: POINT_MOBILE_R, class: "point-mobile" }));
 
     // cos(x) : inchangé — segment rouge (centre -> abscisse du point) ET vecteur vert par-dessus
     // (les deux coïncident géométriquement ; le vecteur vert, dessiné en second, reste visible).
@@ -355,7 +373,7 @@
     // sur la droite tangente x=1 pour tan).
     if (fn === "cos") {
       svg.appendChild(svgEl(ns, "line", { x1: C_CX, y1: C_CY, x2: pxVrai.toFixed(2), y2: C_CY, class: "segment-rouge" }));
-      svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: 4, class: "point-rouge" }));
+      svg.appendChild(svgEl(ns, "circle", { cx: pxVrai.toFixed(2), cy: pyVrai.toFixed(2), r: POINT_ROUGE_R, class: "point-rouge" }));
       dessinerVecteur(ns, svg, C_CX, C_CY, pxVrai.toFixed(2), C_CY, "vecteur-vert-ligne", "vecteur-vert-tete");
     } else if (fn === "sin") {
       // Vecteur vert de l'axe des x jusqu'au point du cercle qui correspond à sin(x).
@@ -401,7 +419,7 @@
     }
 
     // Indication : valeur de l'angle en π rad, directement sur le cercle.
-    var etiqAngle = svgEl(ns, "text", { x: C_CX, y: C_TAILLE - 6, "text-anchor": "middle", class: "etiquette-angle" });
+    var etiqAngle = svgEl(ns, "text", { x: C_CX, y: C_TAILLE - tx(6), "text-anchor": "middle", class: "etiquette-angle" });
     etiqAngle.textContent = "x = " + formatEnPi(x);
     svg.appendChild(etiqAngle);
   };
@@ -441,10 +459,10 @@
     svg.appendChild(svgEl(ns, "line", { x1: G_MARGE_G, x2: G_LARGEUR - G_MARGE_D, y1: origine[1].toFixed(2), y2: origine[1].toFixed(2), class: "axe" }));
     svg.appendChild(svgEl(ns, "line", { x1: G_MARGE_G, x2: G_MARGE_G, y1: G_MARGE_H, y2: G_HAUTEUR - G_MARGE_B, class: "axe" }));
 
-    var etiqX = svgEl(ns, "text", { x: G_LARGEUR - G_MARGE_D + 2, y: origine[1] + 4, class: "etiquette" });
+    var etiqX = svgEl(ns, "text", { x: G_LARGEUR - G_MARGE_D + tx(2), y: origine[1] + tx(4), class: "etiquette" });
     etiqX.textContent = "x";
     svg.appendChild(etiqX);
-    var etiqY = svgEl(ns, "text", { x: G_MARGE_G + 4, y: G_MARGE_H - 4, class: "etiquette" });
+    var etiqY = svgEl(ns, "text", { x: G_MARGE_G + tx(4), y: G_MARGE_H - tx(4), class: "etiquette" });
     etiqY.textContent = "y";
     svg.appendChild(etiqY);
 
@@ -454,7 +472,7 @@
       svg.appendChild(svgEl(ns, "line", { x1: pViolet0[0].toFixed(2), x2: pViolet1[0].toFixed(2), y1: pViolet0[1].toFixed(2), y2: pViolet1[1].toFixed(2), class: "axe-x-violet" }));
 
       // Indication : valeur de l'angle en π rad, sur l'abscisse du segment qui évolue.
-      var etiqAbsc = svgEl(ns, "text", { x: pViolet1[0].toFixed(2), y: (origine[1] + 16).toFixed(2), "text-anchor": "middle", class: "etiquette-angle" });
+      var etiqAbsc = svgEl(ns, "text", { x: pViolet1[0].toFixed(2), y: (origine[1] + tx(16)).toFixed(2), "text-anchor": "middle", class: "etiquette-angle" });
       etiqAbsc.textContent = formatEnPi(x);
       svg.appendChild(etiqAbsc);
     }
@@ -500,7 +518,7 @@
         var pAbscisse = toPx(x, 0);
         dessinerVecteur(ns, svg, pAbscisse[0].toFixed(2), pAbscisse[1].toFixed(2), pPointe[0].toFixed(2), pPointe[1].toFixed(2), "vecteur-vert-ligne", "vecteur-vert-tete");
         svg.appendChild(svgEl(ns, "line", { x1: G_MARGE_G, x2: pPointe[0].toFixed(2), y1: pPointe[1].toFixed(2), y2: pPointe[1].toFixed(2), class: "guide-rouge" }));
-        svg.appendChild(svgEl(ns, "circle", { cx: pPointe[0].toFixed(2), cy: pPointe[1].toFixed(2), r: 4, class: "point-rouge" }));
+        svg.appendChild(svgEl(ns, "circle", { cx: pPointe[0].toFixed(2), cy: pPointe[1].toFixed(2), r: POINT_ROUGE_R, class: "point-rouge" }));
       }
     }
   };

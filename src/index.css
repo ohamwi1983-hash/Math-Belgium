@@ -854,6 +854,12 @@ figcaption {
 /* ---------- widget interactif porté (Web Component autonome, Shadow DOM) ---------- */
 .widget-host { display: block; width: 100%; max-width: 560px; margin: 0 auto; min-height: 40px; }
 .generator-body .widget-host { max-width: none; margin: 0 0 16px; }
+/* cercle-trigo-widget : cercle + graphe agrandis ×1,5 en interne (voir le fichier du widget) —
+   sans lever ce plafond pour LUI SEUL, les 560px ci-dessus l'auraient de toute façon rétréci à
+   l'identique de sa taille d'avant (déjà atteint avant l'agrandissement), annulant tout effet
+   visible. `none` plutôt qu'une valeur fixe : la vraie limite reste `.page` (largeur de lecture du
+   chapitre, 760px) ou `.generator-body` (déjà sans plafond) — jamais ce plafond-ci à lui seul. */
+.widget-host:has(cercle-trigo-widget) { max-width: none; }
 
 /* ---------- synthèse finale ---------- */
 .synthese {
