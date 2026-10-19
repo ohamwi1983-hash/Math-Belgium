@@ -22,11 +22,17 @@ interface VideoRepere {
   sectionTitle: string
 }
 
-type Onglet = 'contenu' | 'exercices' | 'videos'
+interface AtelierRepere {
+  title: string
+  tag: string
+  sectionTitle: string
+}
+
+type Onglet = 'contenu' | 'exercices' | 'videos' | 'ateliers'
 
 /** Scanne l'intro + chaque section du chapitre et ne garde que les blocs du `kind` demandé —
  * même source que `CarteEntrainement`/`BlockRenderer`, jamais une liste entretenue à part. */
-function blocsDuChapitre<K extends 'entrainement' | 'video'>(chapter: ChapterContent, kind: K) {
+function blocsDuChapitre<K extends 'entrainement' | 'video' | 'atelier'>(chapter: ChapterContent, kind: K) {
   const blocsIntro = chapter.intro?.blocks ?? []
   const toutesLesSections = [{ id: null as string | null, title: chapter.intro?.title ?? '', blocks: blocsIntro }, ...chapter.sections]
   return toutesLesSections.flatMap((section) =>
@@ -53,6 +59,17 @@ function videosDuChapitre(chapter: ChapterContent): VideoRepere[] {
     .map(({ block, sectionTitle }) => ({ title: block.title, youtubeId: block.youtubeId as string, sectionTitle }))
 }
 
+/** `block.label` porte systématiquement le préfixe "Manipule toi-même — "/"Manipule toi-même : "
+ * (convention des 55 ateliers du site, vérifiée par grep) — retiré ici pour un intitulé de liste
+ * plus court, l'onglet "Ateliers" portant déjà cette idée de manipulation. */
+function ateliersDuChapitre(chapter: ChapterContent): AtelierRepere[] {
+  return blocsDuChapitre(chapter, 'atelier').map(({ block, sectionTitle }) => ({
+    title: block.label.replace(/^Manipule toi-même\s*[:—]\s*/, ''),
+    tag: block.tag,
+    sectionTitle,
+  }))
+}
+
 /**
  * Aides de navigation pour un chapitre long, pensées pour la lecture sur smartphone : une fois
  * DANS une section, ou au milieu d'un long défilement, deux besoins restent entiers : "où j'en
@@ -63,9 +80,13 @@ function videosDuChapitre(chapter: ChapterContent): VideoRepere[] {
  *
  * - barre de progression (fixe, tout en haut) ;
  * - en-tête de section collant, juste en dessous (numéro + titre de la section actuellement lue) ;
- * - bouton flottant "Sections" (bas, gauche) qui ouvre un tiroir à 3 onglets (Contenu / Exercices
- *   / Vidéos — seuls ceux ayant au moins une entrée sont affichés), chacun listant les cibles
- *   correspondantes du chapitre, validé via un artefact interactif avant implémentation ;
+ * - bouton flottant "Sections" (bas, gauche) qui ouvre un tiroir à onglets (Contenu / Exercices /
+ *   Vidéos / Ateliers — seuls ceux ayant au moins une entrée sont affichés), chacun listant les
+ *   cibles correspondantes du chapitre, validé via un artefact interactif avant implémentation.
+ *   L'onglet "Ateliers" (widgets `kind: 'atelier'`, voir `BlockRenderer`) a été ajouté après coup,
+ *   sur demande explicite, avec maquette comparée avant implémentation (3 pistes : 4e onglet au
+ *   texte raccourci "Ateliers" plutôt que "Simulations" — trop long pour tenir à largeur égale sur
+ *   petit écran ; bandeau scrollable ; fusion dans l'onglet Exercices) — la première a été retenue ;
  * - bouton flottant "remonter en haut" (bas, droite), visible seulement après un peu de défilement.
  *
  * Toutes du DOM direct (pas de refs par section) : chaque section est retrouvée par
@@ -75,6 +96,7 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
   const sections: SectionRepere[] = chapter.sections.map((s) => ({ id: s.id, number: s.number, title: s.title }))
   const generateurs = genererateursDuChapitre(chapter)
   const videos = videosDuChapitre(chapter)
+  const ateliers = ateliersDuChapitre(chapter)
 
   const [progression, setProgression] = useState(0)
   const [indexCourant, setIndexCourant] = useState(0)
@@ -158,6 +180,11 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
     setTiroirOuvert(false)
   }
 
+  function allerAAtelier(atelier: AtelierRepere) {
+    document.getElementById(`atelier-${atelier.tag}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    setTiroirOuvert(false)
+  }
+
   function remonterEnHaut() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -167,10 +194,11 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
     { id: 'contenu', label: 'Contenu' },
     ...(generateurs.length > 0 ? [{ id: 'exercices' as const, label: 'Exercices' }] : []),
     ...(videos.length > 0 ? [{ id: 'videos' as const, label: 'Vidéos' }] : []),
+    ...(ateliers.length > 0 ? [{ id: 'ateliers' as const, label: 'Ateliers' }] : []),
   ]
   const ongletCourant = onglets.some((o) => o.id === ongletActif) ? ongletActif : 'contenu'
 
-  /** Liste d'un onglet (Contenu/Exercices/Vidéos) — partagée entre le tiroir mobile et le
+  /** Liste d'un onglet (Contenu/Exercices/Vidéos/Ateliers) — partagée entre le tiroir mobile et le
    * sommaire permanent desktop/tablette (`.chapter-sidebar`, voir `ChapterPage`) : même données,
    * seule la fermeture du tiroir (`fermerApres`) diffère, puisque le sommaire fixe n'a rien à
    * fermer. */
@@ -198,9 +226,9 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
             const contenu = (
               <>
                 <span className="lecture-sheet-exercice-id">{g.generatorId}</span>
-                <span className="lecture-sheet-exercice-texte">
+                <span className="lecture-sheet-item-texte">
                   <span>{g.title}</span>
-                  <span className="lecture-sheet-exercice-section">{g.sectionTitle}</span>
+                  <span className="lecture-sheet-item-section">{g.sectionTitle}</span>
                 </span>
                 {!migre && (
                   <span className="arrow" aria-hidden="true">
@@ -238,12 +266,39 @@ export function LectureAids({ chapter }: { chapter: ChapterContent }) {
               <span>{v.title}</span>
             </button>
           ))}
+
+        {ongletCourant === 'ateliers' &&
+          ateliers.map((a, i) => (
+            <button key={a.tag + i} type="button" className={`${prefixeClasse}-item lecture-sheet-item-atelier`} onClick={() => allerAAtelier(a)}>
+              <span className="lecture-sheet-atelier-icon" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <circle cx="9" cy="7" r="2" fill="currentColor" stroke="none" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                  <circle cx="11" cy="17" r="2" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+              <span className="lecture-sheet-item-texte">
+                <span>{a.title}</span>
+                <span className="lecture-sheet-item-section">{a.sectionTitle}</span>
+              </span>
+            </button>
+          ))}
       </>
     )
   }
 
+  // 4 onglets (avec "Ateliers") ne tiennent plus sur une seule ligne dans le sommaire desktop/
+  // tablette, large de 240px (.chapter-sidebar) — contrairement au tiroir mobile, nettement plus
+  // large (354px+), où 4 onglets en largeur égale continuent de tenir sans accroc (vérifié par
+  // capture d'écran à 390px et 360px). `.lecture-sheet-tabs-wrap` ne change donc que le rendu du
+  // sommaire fixe (voir la règle CSS `.chapter-sidebar .lecture-sheet-tabs-wrap`), repliant les 4
+  // pastilles en grille 2×2 — jamais le cas à 3 onglets ou moins, qui continue de tenir sur une
+  // seule ligne telle quelle.
   const ongletsNav = onglets.length > 1 && (
-    <div className="lecture-sheet-tabs" role="tablist">
+    <div className={`lecture-sheet-tabs${onglets.length > 3 ? ' lecture-sheet-tabs-wrap' : ''}`} role="tablist">
       {onglets.map((o) => (
         <button
           key={o.id}

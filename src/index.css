@@ -500,8 +500,8 @@ a.lecture-sheet-item { text-decoration: none; }
   border-radius: 2px;
   white-space: nowrap;
 }
-.lecture-sheet-exercice-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.lecture-sheet-exercice-section {
+.lecture-sheet-item-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lecture-sheet-item-section {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--ink-faint);
@@ -516,6 +516,23 @@ a.lecture-sheet-item { text-decoration: none; }
   background: var(--surface-2);
   border: 1px solid var(--line-soft);
   color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lecture-sheet-item-atelier { align-items: center; }
+/* Violet (--plan), pas l'accent orange des exercices/vidéos : un atelier est un widget LIBRE (pas
+   de correction ni de score, voir .claude/rules/interactive-widgets.md), teinte déjà réutilisée
+   sur ce principe par le callout "intuition" — distinguer visuellement "manipuler" de "s'exercer"
+   dans le tiroir, sans inventer une nouvelle couleur hors palette. */
+.lecture-sheet-atelier-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--plan-soft);
+  border: 1px solid var(--plan);
+  color: var(--plan);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -579,6 +596,14 @@ a.lecture-sheet-item { text-decoration: none; }
   }
   .chapter-sidebar .lecture-sheet-title { margin: 0 0 12px; }
   .chapter-sidebar .lecture-sheet-tabs { margin: 0 0 10px; }
+  /* 4 onglets (avec "Ateliers") ne tiennent plus sur une seule ligne dans ce sommaire, large de
+     240px seulement — "Exercices" à lui seul y occupe près de 70px, contre ~202px de largeur utile
+     pour les 4 pastilles. Repliées en grille 2×2 plutôt que rétrécies (taille de police illisible)
+     ou tronquées. Seul le sommaire desktop est concerné : le tiroir mobile (`.lecture-sheet`, bien
+     plus large) garde sa ligne unique, `.lecture-sheet-tabs-wrap` n'étant posée que si 4 onglets ou
+     plus (voir `LectureAids.tsx`) et scopée ici à `.chapter-sidebar`. */
+  .chapter-sidebar .lecture-sheet-tabs-wrap { flex-wrap: wrap; }
+  .chapter-sidebar .lecture-sheet-tabs-wrap .lecture-sheet-tab { flex: 1 1 42%; }
   .lecture-sidebar-list { display: flex; flex-direction: column; }
   .lecture-sidebar-item {
     display: flex;

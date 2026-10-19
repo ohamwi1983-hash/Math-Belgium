@@ -74,7 +74,7 @@ export function BlockRenderer({ block }: { block: Block }) {
       return <CarteEntrainement block={block} />
     case 'atelier':
       return (
-        <div className="atelier-frame-wrap no-export">
+        <div className="atelier-frame-wrap no-export" id={`atelier-${block.tag}`}>
           <p className="atelier-label">
             <span aria-hidden="true">🛠️</span> {block.label}
           </p>
