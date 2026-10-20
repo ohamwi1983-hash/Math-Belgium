@@ -1,68 +1,64 @@
+import { calculerEtatsArgument, etatVersValeur, valeurReelleEtatFinal } from "../core6e/decompositionLogarithme";
+import type { VariablesLibres } from "../core6e/decompositionLogarithme";
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { diagnostiquerValeur } from "./equivalenceExponentielle";
 import { evaluerExpressionExponentielle } from "./expressionExponentielle";
+import { estEcranNumerique } from "./typesProprietesLogarithme";
+import type { PhaseProprietesLogarithme } from "./typesProprietesLogarithme";
 
 /**
- * Couche B (6e) — vérification pour `6gen13`. N'importe jamais rien de `src/generateurs6e/` — voir
- * `verificationProprietesLogarithme.test.ts` pour la preuve avec des exercices factices définis
- * localement (même principe que `verificationExponentiellesProblemes.ts`, 6gen12).
+ * Couche B (6e) — vérification pour `6gen13`, REFONTE TOTALE. Toujours **pas de bibliothèque
+ * d'algèbre symbolique** (aucune installée sur ce projet) : m/n/q/r/c (voir
+ * `core6e/decompositionLogarithme.ts`) restent des VARIABLES LIBRES INDÉPENDANTES échantillonnées à
+ * plusieurs points fixes, comparées à une référence fermée `(vars) => number` — même principe que
+ * l'ancienne version, étendu de 2 variables libres (m,n) à 5 (m,n,q,r,c), TOUJOURS fournies toutes
+ * les 5 même quand une exercice donné n'en utilise qu'une partie (les variables non référencées
+ * dans le texte élève sont simplement ignorées par l'évaluateur — jamais besoin de calculer au
+ * préalable lesquelles sont "pertinentes" pour cet exercice précis).
  *
- * **Écran 1 — pas de bibliothèque d'algèbre symbolique** (aucune installée sur ce projet, "vérif.
- * symbolique" des specs source désigne en réalité l'échantillonnage numérique déjà en place partout
- * ailleurs sur la plateforme) : la base `a` n'est jamais résolue, donc `m=log_a(M)` et
- * `n=log_a(N)` sont traités comme 2 VARIABLES LIBRES INDÉPENDANTES — exactement les 2 noms déjà
- * utilisés côté génération/affichage. `diagnostiquerEquivalenceLogarithme` échantillonne plusieurs
- * paires `(m,n)` indépendantes et compare le texte élève (évalué par
- * `evaluerExpressionExponentielle`, déjà MULTI-VARIABLE) à une référence fermée `(m,n)=>number` —
- * copie LOCALE à 2 variables de `diagnostiquerEquivalenceFonction`
- * (`equivalenceExponentielle.ts`, 1 seule variable) : fonction NOUVELLE, jamais une modification du
- * fichier partagé dont dépendent inchangés les autres générateurs du chapitre 2.
+ * **Écrans algébriques** (tous sauf le dernier) — référence = l'état de décomposition CIBLE de
+ * cette étape (voir `core6e/decompositionLogarithme.ts::calculerEtatsArgument`), ou, pour l'étape de
+ * changement de base (toujours la dernière étape algébrique quand elle existe), l'état final
+ * multiplié par `c`.
+ * **Écran numérique final** — valeur CIBLE unique (pas une fonction), recalculée PUREMENT depuis les
+ * vraies valeurs connues de l'exercice (`m`/`n`/`q`/`c`), jamais une saisie élève d'un écran
+ * précédent.
  *
- * **Écran 2** — simple valeur numérique substituée : réutilise `diagnostiquerValeur` (moteur→
- * moteur, déjà établi) avec la référence de l'écran 1 évaluée aux VRAIES valeurs `exercice.m`/
- * `exercice.n` (jamais une valeur re-saisie par l'élève à l'écran précédent).
- *
- * **Tolérances** :
- * - `TOLERANCE_EXPRESSION` (0,01) — comparaison ALGÉBRIQUE écran 1 : `m`,`n` sont des variables
- *   libres échantillonnées sur des points variés, une expression juste correspond à la référence à
- *   la précision flottante près, une expression fausse (mauvaise propriété appliquée) s'en écarte
- *   largement — même raisonnement que `TOLERANCE_EXPRESSION` de
- *   `verificationExponentiellesProblemes.ts`.
- * - `TOLERANCE_VALEUR` (0,005) — valeur numérique finale de l'écran 2 : `m`/`n` sont donnés avec 3
- *   décimales EXACTES (jamais elles-mêmes ré-arrondies pour l'affichage, contrairement à
- *   `v2Affiche` de 6gen12), donc aucune erreur d'arrondi ne se propage depuis la donnée — la seule
- *   source d'écart possible est le calcul MANUEL de l'élève (division/produit à la main) ; ±0,005
- *   (borne haute de la fourchette ±0,002-0,005 suggérée pour ce générateur) couvre un arrondi
- *   intermédiaire raisonnable sans jamais accepter une vraie erreur de méthode (un écart dû à une
- *   mauvaise propriété appliquée à l'écran 1 est typiquement très supérieur à 0,005, vu que
- *   `m,n∈[1;9,999]`).
+ * **Tolérances** — mêmes valeurs et même raisonnement que la version précédente :
+ * - `TOLERANCE_EXPRESSION` (0,01) pour les écrans algébriques (variables libres échantillonnées).
+ * - `TOLERANCE_VALEUR` (0,005) pour l'écran numérique final (m/n/q/c donnés à 3 décimales EXACTES,
+ *   seule source d'écart possible : un arrondi intermédiaire raisonnable du calcul élève).
  */
 const TOLERANCE_EXPRESSION = 0.01;
 const TOLERANCE_VALEUR = 0.005;
 
-/** 7 paires `(m,n)` FIXES et variées (positives/négatives, décimales) — suffisant pour distinguer
- * toute paire de propriétés confondues (produit/puissance, m-n/n-m, etc.). Jamais liées aux plages
- * de génération réelles (1 à 9,999) : ici `m`/`n` sont de simples variables libres, leur "sens"
- * logarithmique n'a aucune incidence sur la vérification algébrique. */
+/** 7 valeurs FIXES et variées (positives/négatives, décimales) par variable libre — jamais liées
+ * aux plages de génération réelles (1 à 9,999) : ici ce sont de simples variables libres, leur
+ * "sens" logarithmique n'a aucune incidence sur la vérification algébrique. Des jeux DIFFÉRENTS par
+ * variable (jamais le même tableau réutilisé) pour qu'une confusion entre deux variables libres
+ * (ex. élève qui écrit `n` au lieu de `q`) soit bien détectée par l'échantillonnage. */
 const POINTS_M = [1.234, 5.5, -0.375, 8.9, 2.02, 6.66, 0.1];
 const POINTS_N = [2.876, -1.25, 4.4, 0.5, 9.99, -3.33, 7.77];
+const POINTS_Q = [3.333, 0.8, -2.5, 6.123, 1.01, -5.5, 4.44];
+const POINTS_R = [4.567, -0.6, 7.25, 1.11, -3.8, 5.05, 0.99];
+const POINTS_C = [1.789, 3.14, -1.1, 0.654, 8.2, -2.22, 6.05];
 
-/**
- * Compare un texte (variables libres `m`,`n`) à une référence fermée `reference(m,n)`, en
- * échantillonnant plusieurs paires indépendantes — jamais de bibliothèque d'algèbre symbolique
- * (voir en-tête de fichier). Copie LOCALE à 2 variables de `diagnostiquerEquivalenceFonction`.
- */
-export function diagnostiquerEquivalenceLogarithme(texte: string, reference: (m: number, n: number) => number, tolerance: number = TOLERANCE_EXPRESSION): StatutVerification {
+/** Compare un texte (variables libres m,n,q,r,c) à une référence fermée, en échantillonnant 7
+ * points indépendants — jamais de bibliothèque d'algèbre symbolique (voir en-tête de fichier). */
+export function diagnostiquerEquivalenceLogarithme(
+  texte: string,
+  reference: (vars: VariablesLibres) => number,
+  tolerance: number = TOLERANCE_EXPRESSION,
+): StatutVerification {
   let comparables = 0;
   for (let i = 0; i < POINTS_M.length; i++) {
-    const m = POINTS_M[i];
-    const n = POINTS_N[i];
-    const attendu = reference(m, n);
+    const vars: VariablesLibres = { m: POINTS_M[i], n: POINTS_N[i], q: POINTS_Q[i], r: POINTS_R[i], c: POINTS_C[i] };
+    const attendu = reference(vars);
     if (!Number.isFinite(attendu)) continue;
     let soumis: number;
     try {
-      soumis = evaluerExpressionExponentielle(texte, { m, n });
+      soumis = evaluerExpressionExponentielle(texte, vars as unknown as Record<string, number>);
     } catch {
       return "parse_error";
     }
@@ -75,37 +71,37 @@ export function diagnostiquerEquivalenceLogarithme(texte: string, reference: (m:
   return "correct";
 }
 
-/** Référence algébrique de l'écran 1 — DISPATCH sur le type de question, `(m,n)` restent des
- * variables libres. Réutilisée telle quelle pour l'écran 2 (évaluée aux VRAIES valeurs
- * `exercice.m`/`exercice.n`). */
-export function referenceEcran1(exercice: ExerciceProprieteLogarithme): (m: number, n: number) => number {
-  switch (exercice.type) {
-    case "produit":
-      return (m, n) => m + n;
-    case "quotient":
-      return (m, n) => m - n;
-    case "puissance":
-      return (m) => exercice.p * m;
-    case "racine":
-      return (_m, n) => n / exercice.k;
-    case "compose":
-      return exercice.sousType === "racineQuotient" ? (m, n) => (m - n) / exercice.k : (m, n) => exercice.p * m + n;
+/** Référence (fonction de variables libres) de l'écran algébrique `phase` — jamais appelée sur
+ * l'écran numérique final (voir `referenceEcranNumerique`). */
+export function referenceEcranAlgebrique(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): (vars: VariablesLibres) => number {
+  const etats = calculerEtatsArgument(exercice.arbre);
+  const etapesArgument = etats.length - 1;
+  if (phase < etapesArgument) {
+    const etatCible = etats[phase + 1];
+    return (vars) => etatVersValeur(etatCible, vars);
   }
+  // Étape de changement de base — toujours la DERNIÈRE étape algébrique quand elle existe
+  // (`phase === etapesArgument`), jamais atteinte autrement (garde-fou côté appelant).
+  const etatFinal = etats[etapesArgument];
+  return (vars) => etatVersValeur(etatFinal, vars) * (vars.c as number);
 }
 
-export function diagnostiquerEcran1(exercice: ExerciceProprieteLogarithme, texte: string): StatutVerification {
-  return diagnostiquerEquivalenceLogarithme(texte, referenceEcran1(exercice));
+/** Valeur CIBLE unique de l'écran numérique final — recalculée depuis les vraies valeurs connues de
+ * l'exercice, jamais une saisie élève. */
+export function referenceEcranNumerique(exercice: ExerciceProprieteLogarithme): number {
+  const etats = calculerEtatsArgument(exercice.arbre);
+  const etatFinal = etats[etats.length - 1];
+  const valeurArgument = valeurReelleEtatFinal(etatFinal, { m: exercice.m, n: exercice.n, q: exercice.q });
+  return exercice.avecChangementBase ? valeurArgument * (exercice.c as number) : valeurArgument;
 }
 
-export function diagnostiquerEcran2(exercice: ExerciceProprieteLogarithme, texte: string): StatutVerification {
-  const cible = referenceEcran1(exercice)(exercice.m, exercice.n);
-  return diagnostiquerValeur(texte, cible, TOLERANCE_VALEUR);
+export function diagnostiquerEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme, texte: string): StatutVerification {
+  if (estEcranNumerique(exercice, phase)) {
+    return diagnostiquerValeur(texte, referenceEcranNumerique(exercice), TOLERANCE_VALEUR);
+  }
+  return diagnostiquerEquivalenceLogarithme(texte, referenceEcranAlgebrique(exercice, phase));
 }
 
-export function verifierEcran1(exercice: ExerciceProprieteLogarithme, texte: string): boolean {
-  return diagnostiquerEcran1(exercice, texte) === "correct";
-}
-
-export function verifierEcran2(exercice: ExerciceProprieteLogarithme, texte: string): boolean {
-  return diagnostiquerEcran2(exercice, texte) === "correct";
+export function verifierEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme, texte: string): boolean {
+  return diagnostiquerEcran(exercice, phase, texte) === "correct";
 }

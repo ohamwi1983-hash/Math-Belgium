@@ -1,59 +1,56 @@
-import type { ExerciceProprieteLogarithme, TypeProprieteLog } from "../../core6e/proprietesLogarithme.types";
+import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarithme.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import {
-  aideNiveau2,
-  blocDonnees,
-  CONSIGNE_GENERALE,
-  consigneEcran,
-  expressionDemandeeLatex,
-  formatExpressionMN,
-  formatReponseAttenduePhaseLatex,
-} from "../../ui6e/formatProprietesLogarithme";
+import { nombreEcransTotal } from "../../moteur6e/typesProprietesLogarithme";
+import { aideNiveau2, blocDonnees, consigneGenerale, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProprietesLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceProprieteLogarithme>` pour `6gen13` (Propriétés du
- * logarithme) — feuille d'évaluation, voir `generateurs/analyseFonction/exportWord.ts` pour le
- * mécanisme générique de référence.
- *
- * Condense les 2 écrans FIXES côté interactif (`App6gen13.tsx`, `ui6e/formatProprietesLogarithme.ts`)
- * en 2 questions écrites, dans le même ordre : a) exprimer log_a(...) en fonction de m et/ou n
- * (propriété du logarithme), b) substituer puis calculer la valeur numérique arrondie. Réutilise
- * directement les textes/formats déjà écrits côté écran (`consigneEcran`, `formatExpressionMN`,
- * `aideNiveau2`, `formatReponseAttenduePhaseLatex`) — jamais recalculés indépendamment.
+ * logarithme) — feuille d'évaluation, REFONTE TOTALE : le nombre de questions par instance n'est
+ * plus FIXE (2) mais dépend de la combinaison de caractéristiques tirée (1 à 4 étapes algébriques +
+ * 1 question numérique finale, voir `moteur6e/typesProprietesLogarithme.ts::nombreEcransTotal`) —
+ * boucle sur tous les écrans plutôt que 2 appels écrits en dur, réutilise directement les textes/
+ * formats déjà écrits côté écran interactif (`consigneEcran`, `aideNiveau2`,
+ * `formatReponseAttenduePhaseLatex`), jamais recalculés indépendamment.
  */
 
 function construireEnonceProprietesLogarithme(exercice: ExerciceProprieteLogarithme): SectionExercice {
+  const total = nombreEcransTotal(exercice);
   return {
     enteteFragments: [
-      texte(CONSIGNE_GENERALE + " Données : "),
+      texte(consigneGenerale(exercice) + " Données : "),
       latex(blocDonnees(exercice).join(",\\quad ")),
       texte(". Calcule : "),
       latex(expressionDemandeeLatex(exercice)),
       texte("."),
     ],
-    questions: [
-      { consigne: [texte(consigneEcran(exercice, "ecran1"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "ecran2"))], reponse: { type: "lignes", nombre: 2 } },
-    ],
+    questions: Array.from({ length: total }, (_, phase) => ({ consigne: [texte(consigneEcran(exercice, phase))], reponse: { type: "lignes" as const, nombre: 2 } })),
   };
 }
 
 function construireCorrectionProprietesLogarithme(exercice: ExerciceProprieteLogarithme): BlocCorrection[] {
-  return [
-    { type: "paragraphe", fragments: [texte("a) Expression en fonction de m et/ou n : "), latex(formatExpressionMN(exercice)), texte(".")] },
-    {
-      type: "paragraphe",
+  const total = nombreEcransTotal(exercice);
+  return Array.from({ length: total }, (_, phase) => {
+    const lettre = String.fromCharCode(97 + phase); // a), b), c)...
+    const derniere = phase === total - 1;
+    if (derniere) {
+      return {
+        type: "paragraphe" as const,
+        fragments: [texte(`${lettre}) Valeur numérique : `), latex(formatReponseAttenduePhaseLatex(exercice, phase)[0]), texte(".")],
+      };
+    }
+    return {
+      type: "paragraphe" as const,
       fragments: [
-        texte("b) Substitution : "),
-        latex(aideNiveau2(exercice, "ecran2").latex ?? ""),
-        texte(" ≈ "),
-        latex(formatReponseAttenduePhaseLatex(exercice, "ecran2")[0]),
+        texte(`${lettre}) Étape intermédiaire : `),
+        latex(aideNiveau2(exercice, phase).latex ?? ""),
+        texte(" = "),
+        latex(formatReponseAttenduePhaseLatex(exercice, phase)[0]),
         texte("."),
       ],
-    },
-  ];
+    };
+  });
 }
 
 export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercices<ExerciceProprieteLogarithme> = {
@@ -61,11 +58,10 @@ export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercice
   nomFichierBase: "proprietes-logarithme",
   genererInstance: genererExerciceProprietesLogarithme,
   catalogueVariantes: CATALOGUE_VARIANTES,
-  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id as TypeProprieteLog),
+  genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceProprietesLogarithme,
   construireCorrection: construireCorrectionProprietesLogarithme,
-  // 2 questions par instance (propriété puis calcul numérique) et consigne de l'écran 1 dépendante
-  // du type (`NOM_PROPRIETE[exercice.type]`, voir `ui6e/formatProprietesLogarithme.ts::consigneEcran`)
-  // — ni "1 seule question", ni "consigne générique" : `regroupable` reste absent (voir
-  // `AdaptateurFeuilleExercices.regroupable`).
+  // Nombre de questions VARIABLE par instance (1 à 5, selon la combinaison tirée) et consigne de
+  // chaque écran dépendante de la caractéristique réellement testée — ni "1 seule question", ni
+  // "consigne générique" : `regroupable` reste absent (voir `AdaptateurFeuilleExercices.regroupable`).
 };

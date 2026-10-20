@@ -20,6 +20,9 @@ interface Props {
    * bloc de données m/n/M/N. */
   expressionLatex: string;
   blocDonnees: string[];
+  /** `null` — jamais rendu — quand cet écran ne dépend d'aucun écran précédent (toute première
+   * étape d'un exercice) — même convention que `EtapeChampHyperboliques.tsx`. */
+  etatActuel: string[] | null;
   consigneEcran: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -50,6 +53,7 @@ export function EtapeProprieteLogarithme({
   consigneGenerale,
   expressionLatex,
   blocDonnees,
+  etatActuel,
   consigneEcran,
   placeholder,
   aideNiveau1,
@@ -91,6 +95,13 @@ export function EtapeProprieteLogarithme({
           </>
         }
       />
+      {etatActuel && (
+        <div className="etat-actuel-box">
+          {etatActuel.map((frag, i) => (
+            <Katex key={i} expression={frag} block />
+          ))}
+        </div>
+      )}
       <p className="prompt-text">{consigneEcran}</p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">

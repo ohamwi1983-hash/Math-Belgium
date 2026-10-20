@@ -2,13 +2,14 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./generateurs6e/proprietesLogarithme";
-import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesLogarithme, soumettreReponseEcran1, soumettreReponseEcran2 } from "./moteur6e/sessionProprietesLogarithme";
+import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesLogarithme, soumettreReponse } from "./moteur6e/sessionProprietesLogarithme";
+import { estEcranNumerique } from "./moteur6e/typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme, PhaseProprietesLogarithme } from "./moteur6e/typesProprietesLogarithme";
-import { diagnostiquerEcran1, diagnostiquerEcran2 } from "./moteur6e/verificationProprietesLogarithme";
+import { diagnostiquerEcran } from "./moteur6e/verificationProprietesLogarithme";
 import { Katex } from "./components/Katex";
 import { EtapeProprieteLogarithme } from "./components6e/EtapeProprieteLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { CONSIGNE_GENERALE, LIBELLE_PHASE, aideNiveau1, aideNiveau2, blocDonnees, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "./ui6e/formatProprietesLogarithme";
+import { consigneGenerale, etatActuel, expressionDemandeeLatex, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
 import { calculerRecapitulatifProprietesLogarithme, calculerSegmentsProgressionProprietesLogarithme } from "./ui6e/recapitulatifProprietesLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -21,9 +22,6 @@ const REGLAGES_DEMO: ReglagesSession6e = { nombreExercices: 1, tentativesMax: 3,
 function nouvelleSession(): EtatSessionProprietesLogarithme {
   return demarrerSessionProprietesLogarithme(REGLAGES_DEMO, genererExerciceProprietesLogarithme);
 }
-
-/** Séquence FIXE à 2 écrans (`typesProprietesLogarithme.ts`, "UNE SEULE famille, 2 écrans FIXES"). */
-const SEQUENCE: PhaseProprietesLogarithme[] = ["ecran1", "ecran2"];
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -42,9 +40,10 @@ export function App6gen13() {
    * chaque nouvel exercice (mêmes endroits que `enAttente`). */
   const [historique, setHistorique] = useState<EntreeHistoriqueEtape[]>([]);
   const [ficheOuverteIndex, setFicheOuverteIndex] = useState<number | null>(null);
-  /** Aide utilisée PAR PHASE DÉJÀ CLOSE — le moteur ne garde aucune trace persistante de l'aide une
-   * fois la phase refermée (`niveauAide` est remis à 0 à chaque transition), capturé ICI au moment
-   * exact de la clôture réelle (même garde que `terminerEtape`). Remis à vide comme `historique`. */
+  /** Aide utilisée PAR ÉCRAN DÉJÀ CLOS (indexé par `phase`, le même index numérique que les
+   * segments de `ProgressionPuces`) — le moteur ne garde aucune trace persistante de l'aide une fois
+   * l'écran refermé (`niveauAide` est remis à 0 à chaque transition), capturé ICI au moment exact de
+   * la clôture réelle (même garde que `terminerEtape`). Remis à vide comme `historique`. */
   const [aideUtiliseeParPhase, setAideUtiliseeParPhase] = useState<Partial<Record<PhaseProprietesLogarithme, boolean>>>({});
 
   function terminerEtape(nouvelEtat: EtatSessionProprietesLogarithme, votreReponse?: ReactNode) {
@@ -58,7 +57,7 @@ export function App6gen13() {
         setHistorique((h) => [
           ...h,
           {
-            titre: LIBELLE_PHASE[etat.phase],
+            titre: libellePhase(exercice, etat.phase),
             votreReponse,
             correcte: !revele,
             reponseAttendue: revele ? (
@@ -96,7 +95,7 @@ export function App6gen13() {
     setEnAttente(null);
     setHistorique([]);
     setAideUtiliseeParPhase({});
-    setEtat(demarrerSessionProprietesLogarithme(REGLAGES_DEMO, () => construireAvecVarianteId(id as Parameters<typeof construireAvecVarianteId>[0])));
+    setEtat(demarrerSessionProprietesLogarithme(REGLAGES_DEMO, () => construireAvecVarianteId(id)));
   }
 
   const exercice = etat.exerciceCourant;
@@ -121,9 +120,10 @@ export function App6gen13() {
     : null;
 
   const propsCommun = {
-    consigneGenerale: CONSIGNE_GENERALE,
+    consigneGenerale: consigneGenerale(exercice),
     expressionLatex: expressionDemandeeLatex(exercice),
     blocDonnees: blocDonnees(exercice),
+    etatActuel: etatActuel(exercice, phase),
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: aideNiveau1(exercice, phase),
     aideNiveau2: aideNiveau2(exercice, phase),
@@ -136,9 +136,11 @@ export function App6gen13() {
   };
 
   // "aide" (puce jaune) : post-traite les segments déjà calculés par `calculerSegmentsProgressionProprietesLogarithme`
-  // avec `aideUtiliseeParPhase` capturé localement ci-dessus.
+  // avec `aideUtiliseeParPhase` capturé localement ci-dessus — indexé directement par `phase` (index
+  // numérique), jamais besoin d'une séquence de noms à traduire (contrairement à l'ancienne version
+  // à 2 écrans fixes).
   const segments: EtatPuceProgression[] = calculerSegmentsProgressionProprietesLogarithme(etat).map((segment, index) =>
-    segment === "correcte" && aideUtiliseeParPhase[SEQUENCE[index]] ? "aide" : segment,
+    segment === "correcte" && aideUtiliseeParPhase[index] ? "aide" : segment,
   );
 
   return (
@@ -151,24 +153,13 @@ export function App6gen13() {
       </header>
       <main className="card">
         <RecapitulatifPanel entrees={calculerRecapitulatifProprietesLogarithme(etat)} />
-        {phase === "ecran1" && (
-          <EtapeProprieteLogarithme
-            key={phase}
-            {...propsCommun}
-            placeholder="ex : m+n"
-            diagnostiquer={(texte) => diagnostiquerEcran1(exercice, texte)}
-            onValider={(texte) => terminerEtape(soumettreReponseEcran1(etat, texte), texte)}
-          />
-        )}
-        {phase === "ecran2" && (
-          <EtapeProprieteLogarithme
-            key={phase}
-            {...propsCommun}
-            placeholder="ex : 3,874"
-            diagnostiquer={(texte) => diagnostiquerEcran2(exercice, texte)}
-            onValider={(texte) => terminerEtape(soumettreReponseEcran2(etat, texte), texte)}
-          />
-        )}
+        <EtapeProprieteLogarithme
+          key={phase}
+          {...propsCommun}
+          placeholder={estEcranNumerique(exercice, phase) ? "ex : 3,874" : "ex : m+n"}
+          diagnostiquer={(texte) => diagnostiquerEcran(exercice, phase, texte)}
+          onValider={(texte) => terminerEtape(soumettreReponse(etat, texte), texte)}
+        />
       </main>
 
       {ficheOuverteIndex !== null && historique[ficheOuverteIndex] && (

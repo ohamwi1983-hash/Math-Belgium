@@ -1,26 +1,27 @@
 /**
- * Couche B (6e) — moteur de session pour `6gen13`. N'importe jamais rien de `src/generateurs6e/`
- * — voir `sessionProprietesLogarithme.test.ts` pour la preuve avec un exercice factice défini
- * localement (même principe que `sessionFonctionsCyclometriques.ts`, 6gen2).
+ * Couche B (6e) — moteur de session pour `6gen13`, REFONTE TOTALE : `phase` est un index numérique
+ * (voir `typesProprietesLogarithme.ts`) et `scoresPartiels` un TABLEAU (un score par écran DÉJÀ clos
+ * de l'exercice courant), jamais un champ unique ni un dict par nom de phase — seule représentation
+ * qui generalise à un nombre d'écrans déterminé à l'exécution (1 à 5 selon la combinaison tirée).
  */
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";
 import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "../moteur/etapeTentatives";
 import type { ReglagesEtape } from "../moteur/etapeTentatives";
 import { phaseApres, phaseInitiale } from "./typesProprietesLogarithme";
-import type { EtatSessionProprietesLogarithme, PhaseProprietesLogarithme, ResultatExerciceProprietesLogarithme } from "./typesProprietesLogarithme";
-import { verifierEcran1, verifierEcran2 } from "./verificationProprietesLogarithme";
+import type { EtatSessionProprietesLogarithme, ResultatExerciceProprietesLogarithme } from "./typesProprietesLogarithme";
+import { verifierEcran } from "./verificationProprietesLogarithme";
 
 const POINTS_DE_BASE = 100;
 const PENALITE_PAR_NIVEAU_AIDE = 20;
 
-/** 2 niveaux d'aide sur les 2 écrans (spec explicite). */
+/** 2 niveaux d'aide sur CHAQUE écran (convention héritée, inchangée par la refonte). */
 export const NIVEAU_AIDE_MAX = 2;
 
 function etatInitial(
   exercice: ExerciceProprieteLogarithme,
-): Pick<EtatSessionProprietesLogarithme, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreEcran1Partiel" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoreEcran1Partiel: null, derniereTransitionRevelee: false };
+): Pick<EtatSessionProprietesLogarithme, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: [], derniereTransitionRevelee: false };
 }
 
 export function demarrerSessionProprietesLogarithme(reglages: ReglagesSession6e, generateur: () => ExerciceProprieteLogarithme): EtatSessionProprietesLogarithme {
@@ -46,39 +47,27 @@ function cloturerExerciceOuSuivant(etat: EtatSessionProprietesLogarithme, result
   return { ...etat, resultats, indexExercice, ...etatInitial(etat.generateur()) };
 }
 
-function avancerPhase(
-  etat: EtatSessionProprietesLogarithme,
-  texte: string,
-  verifier: (exercice: ExerciceProprieteLogarithme, texte: string) => boolean,
-  phaseAttendue: PhaseProprietesLogarithme,
-): EtatSessionProprietesLogarithme {
+export function soumettreReponse(etat: EtatSessionProprietesLogarithme, texte: string): EtatSessionProprietesLogarithme {
   if (etat.terminee) throw new Error("soumettreReponse : la session est déjà terminée");
-  if (etat.phase !== phaseAttendue) throw new Error(`soumettreReponse : attendu à la phase "${phaseAttendue}", trouvé "${etat.phase}"`);
   const exercice = etat.exerciceCourant;
+  const phase = etat.phase;
 
   const etapeCourante = soumettreEtapeTentatives<string>(etat.etapeCourante, texte, {
     ...reglagesEtape(etat),
-    verifier: (r) => verifier(exercice, r),
+    verifier: (r) => verifierEcran(exercice, phase, r),
     revelerReponse: () => {},
   });
   if (!etapeCourante.terminee) return { ...etat, etapeCourante, derniereTransitionRevelee: false };
 
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-  const phaseSuivante = phaseApres(etat.phase);
+  const scoresPartiels = [...etat.scoresPartiels, score];
+  const phaseSuivante = phaseApres(exercice, phase);
 
   if (phaseSuivante === "termine") {
-    const resultat: ResultatExerciceProprietesLogarithme = { exercice, scoreEcran1: etat.scoreEcran1Partiel as number, scoreEcran2: score };
+    const resultat: ResultatExerciceProprietesLogarithme = { exercice, scores: scoresPartiels };
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoreEcran1Partiel: score, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
-}
-
-export function soumettreReponseEcran1(etat: EtatSessionProprietesLogarithme, texte: string): EtatSessionProprietesLogarithme {
-  return avancerPhase(etat, texte, verifierEcran1, "ecran1");
-}
-
-export function soumettreReponseEcran2(etat: EtatSessionProprietesLogarithme, texte: string): EtatSessionProprietesLogarithme {
-  return avancerPhase(etat, texte, verifierEcran2, "ecran2");
+  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

@@ -1,22 +1,30 @@
+import { nombreEcransTotal } from "../moteur6e/typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme } from "../moteur6e/typesProprietesLogarithme";
 import type { EntreeRecapitulatif } from "./recapitulatif";
-import { LIBELLE_PHASE, formatReponseAttenduePhaseLatex } from "./formatProprietesLogarithme";
+import { libellePhase, formatReponseAttenduePhaseLatex } from "./formatProprietesLogarithme";
 
 /**
- * `6gen13` — `LIBELLE_PHASE` ET `formatReponseAttenduePhaseLatex` existent sous ces noms exacts
- * standards (vérifié par lecture directe), MAIS le score de l'écran 1 est tracké via le champ
- * UNIQUE `scoreEcran1Partiel` (`number | null`), jamais un dict `scoresPartiels` — normal, un seul
- * écran à mémoriser avant le final (2 écrans fixes au total). Au plus 1 entrée possible, affichée
- * dès que la phase "ecran2" est atteinte.
+ * `6gen13`, REFONTE TOTALE — `etat.scoresPartiels` est maintenant un TABLEAU (un score par écran
+ * déjà clos, dans l'ordre), jamais un champ unique ni un dict par nom de phase : une entrée de
+ * récapitulatif par écran déjà traversé. Même patron que `recapitulatifExponentiellesProblemes.ts`
+ * (6gen12), adapté d'une séquence par famille FIXE à une séquence par EXERCICE (dépend de la
+ * combinaison tirée, voir `nombreEcransTotal`).
  */
 export function calculerRecapitulatifProprietesLogarithme(etat: EtatSessionProprietesLogarithme): EntreeRecapitulatif[] {
-  if (etat.phase !== "ecran2" || etat.scoreEcran1Partiel === null) return [];
-  const valeurs = formatReponseAttenduePhaseLatex(etat.exerciceCourant, "ecran1");
-  return [{ libelle: LIBELLE_PHASE.ecran1, estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele: etat.scoreEcran1Partiel === 0 }];
+  const exercice = etat.exerciceCourant;
+  return etat.scoresPartiels.map((score, phase) => {
+    const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
+    return { libelle: libellePhase(exercice, phase), estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele: score === 0 };
+  });
 }
 
+/** Une puce par écran RÉELLEMENT prévu pour l'exercice courant (nombre variable, voir
+ * `moteur6e/typesProprietesLogarithme.ts::nombreEcransTotal`), jamais une séquence fixe commune. */
 export function calculerSegmentsProgressionProprietesLogarithme(etat: EtatSessionProprietesLogarithme) {
-  const segmentEcran1 =
-    etat.phase === "ecran1" ? ("courante" as const) : etat.scoreEcran1Partiel === 0 ? ("revele" as const) : ("correcte" as const);
-  return [segmentEcran1, etat.phase === "ecran2" ? ("courante" as const) : ("a-venir" as const)];
+  const total = nombreEcransTotal(etat.exerciceCourant);
+  return Array.from({ length: total }, (_, i) => {
+    if (i === etat.phase) return "courante" as const;
+    if (i > etat.phase) return "a-venir" as const;
+    return etat.scoresPartiels[i] === 0 ? ("revele" as const) : ("correcte" as const);
+  });
 }
