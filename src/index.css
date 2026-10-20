@@ -943,8 +943,15 @@ figcaption {
 .formulaire-corps { padding: 20px 24px 24px; columns: 2; column-gap: 28px; }
 @media (max-width: 640px) { .formulaire-corps { columns: 1; } }
 .formulaire-groupe { break-inside: avoid; margin-bottom: 20px; }
+/* Jamais de `text-transform: uppercase` ici : `groups[].title` est du texte BRUT (voir
+   content-authoring.md) qui embarque parfois une lettre de variable minuscule au milieu du
+   français (ex. "Suite quelconque P(n)/Q(n)", "Nombre de zéros de [famille](ax+b) = K") —
+   `text-transform` n'a aucune notion de "ceci est une variable mathématique, jamais de cette
+   casse-ci" : il majusculise tout le texte sans distinction, changeant "n"/"a"/"b" en "N"/"A"/"B"
+   (repéré sur capture d'écran utilisateur). Les autres jetons (mono, taille, espacement, couleur,
+   bordure) suffisent déjà à donner l'allure "étiquette" voulue sans dépendre de la casse réelle. */
 .formulaire-groupe h3 {
-  font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
   color: var(--accent-ink); font-weight: 600; margin: 0 0 9px; padding-left: 9px; border-left: 2px solid var(--accent);
 }
 .formulaire-formule { padding: 8px 10px 8px 12px; border-left: 2px solid var(--line); margin-bottom: 7px; }
@@ -953,6 +960,35 @@ figcaption {
 .formulaire-pied {
   display: flex; justify-content: space-between; gap: 10px; padding: 10px 24px; background: var(--surface-2);
   border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--ink-faint);
+}
+.formulaire-actions { margin-top: 12px; text-align: center; }
+.formulaire-print-btn {
+  font: inherit; font-size: 0.85rem; padding: 8px 16px; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px; transition: border-color .15s ease, background-color .15s ease;
+}
+.formulaire-print-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+/* Impression "ce formulaire seulement" (bouton `.formulaire-print-btn`, voir Formulaire.tsx) :
+   plutôt qu'énumérer un par un chaque frère du formulaire dans `.page.chapter-main` (en-tête,
+   sections, synthèse, carte générateurs, section export...) — fragile, à mettre à jour à chaque
+   changement de structure de `ChapterPage` — on masque tout élément qui n'est PAS `.formulaire`
+   parmi les enfants DIRECTS de `.page.chapter-main`, plus l'en-tête du SITE (`.site-header`,
+   hors de `.chapter-layout`) et la TOC collante (`.chapter-sidebar`, sibling de `.page.chapter-main`,
+   elle aussi hors de cette portée). `.chapter-layout` lui-même remis en une seule colonne (`display:
+   block`) : sans ça, sa grille à deux colonnes (`240px minmax(0,760px)`, voir plus haut) réserve
+   toujours les 240px de la TOC même une fois celle-ci cachée (`display:none` sur un item retire
+   l'item, jamais sa PISTE de grille) — repéré en prévisualisant le rendu @media print réel
+   (Playwright), pas supposé : le formulaire restait coincé dans une colonne étroite de 760px avec
+   240px de vide à sa gauche. Classe posée/retirée par JS autour de `window.print()` (évènement
+   `afterprint`), jamais une media query seule : impossible de cibler "seulement quand CE bouton
+   précis a été cliqué" en CSS pur. */
+@media print {
+  body.print-formulaire-only .site-header { display: none !important; }
+  body.print-formulaire-only .chapter-layout { display: block !important; }
+  body.print-formulaire-only .chapter-sidebar { display: none !important; }
+  body.print-formulaire-only .page.chapter-main { max-width: none !important; }
+  body.print-formulaire-only .page.chapter-main > :not(.formulaire) { display: none !important; }
+  .formulaire-actions { display: none !important; }
 }
 
 /* ---------- chaîne d'opérations (operationChain) ---------- */
