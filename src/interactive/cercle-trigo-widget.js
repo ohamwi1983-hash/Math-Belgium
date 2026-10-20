@@ -80,12 +80,28 @@
   var G_HAUTEUR = Math.round(G_MARGE_H + G_MARGE_B + ZONE_H);
   var ASYMPTOTES_TAN = [Math.PI / 2, 3 * Math.PI / 2, 5 * Math.PI / 2];
 
-  // Part (%) de chacun des deux panneaux dans la largeur totale disponible — voir le commentaire
-  // CSS `.panneau:nth-child(...)` plus bas : les deux panneaux doivent rétrécir ENSEMBLE, dans
-  // cette même proportion, à n'importe quelle largeur de conteneur, pour garder la même échelle
-  // (donc les mêmes longueurs visuelles) des deux côtés.
-  var PART_CERCLE_PCT = (C_TAILLE / (C_TAILLE + G_LARGEUR)) * 100;
-  var PART_GRAPHE_PCT = 100 - PART_CERCLE_PCT;
+  // Part (%) de chacun des deux panneaux dans la largeur totale disponible.
+  //
+  // BUG CORRIGÉ ICI (trouvé sur capture d'écran utilisateur, pas supposé) : l'ancienne formule
+  // (C_TAILLE/(C_TAILLE+G_LARGEUR)) répartissait la largeur comme si les deux panneaux allaient
+  // réellement se partager UNE SEULE ligne — mais `gap:16px` n'est JAMAIS soustrait de ce calcul,
+  // et les deux pourcentages somment PILE à 100 % : il ne reste donc jamais la place pour ce gap,
+  // et `flex-wrap` les fait passer chacun sur SA PROPRE ligne à TOUTE largeur de conteneur (vérifié
+  // par mesure Playwright de 320px à 1280px, jamais côte à côte une seule fois). Comme chaque
+  // panneau garde `flex-grow:0`, celui qui arrive seul sur sa ligne n'en occupe PAS pour autant
+  // toute la largeur : il reste bloqué à son ancien pourcentage "pensé pour un partage de ligne"
+  // (≈26 % / 74 %), avec une grande marge inutilisée de chaque côté — exactement ce qui se voyait
+  // sur la capture.
+  //
+  // Puisque les deux panneaux sont donc TOUJOURS empilés en pratique (jamais côte à côte — leur
+  // somme native, ≈1059px, dépasse toute largeur de conteneur réaliste du site), la bonne référence
+  // n'est plus "la largeur combinée des deux" mais LE PANNEAU LE PLUS LARGE DES DEUX (G_LARGEUR,
+  // toujours plus grand que C_TAILLE) : chacun vaut maintenant sa propre taille native rapportée à
+  // CETTE référence commune, ce qui GARDE le même facteur d'échelle implicite pour les deux (donc
+  // les mêmes longueurs visuelles) tout en laissant chacun utiliser TOUTE la largeur de SA PROPRE
+  // ligne, au lieu de rester figé sur un partage de ligne qui ne se produit jamais.
+  var PART_CERCLE_PCT = (C_TAILLE / G_LARGEUR) * 100;
+  var PART_GRAPHE_PCT = 100;
 
   var FN = {
     sin: { f: Math.sin, symbole: "sin(x)" },
@@ -159,19 +175,19 @@
     '<style>' +
     ':host{display:block;font-family:var(--sans,system-ui,sans-serif);}' +
     '*{box-sizing:border-box;}' +
-    // Les deux .panneau se partagent TOUJOURS la largeur disponible dans la MÊME proportion que
-    // leurs tailles natives (flex-basis en %, grow:0, shrink:1) — jamais une largeur max-width
-    // indépendante par panneau (l'ancienne approche) : sur un écran plus étroit que leur somme
-    // (260+609≈870px, le cas courant sur mobile), un max-width par panneau laisse chacun rétrécir
-    // à SON PROPRE rythme — le panneau cercle (plus étroit, max-width atteint plus tard) finissait
-    // alors affiché à son échelle native pendant que le panneau graphe (plus large) était déjà
-    // comprimé, cassant l'égalité de longueur demandée (flèche verte, segment balayé) dès que le
-    // conteneur passait sous ~870px. Les pourcentages ci-dessous, calculés depuis C_TAILLE et
-    // G_LARGEUR, garantissent le MÊME facteur d'échelle pour les deux SVG à N'IMPORTE QUELLE
-    // largeur de conteneur (voir les constantes `PART_CERCLE_PCT`/`PART_GRAPHE_PCT` ci-dessus) ;
-    // `max-width` reste présent sur chaque SVG pour plafonner à la taille NATIVE (1:1) une fois
-    // l'espace disponible, sans jamais les faire grandir au-delà (plafonnage simultané pour les
-    // deux, par construction des mêmes pourcentages).
+    // Les deux .panneau sont TOUJOURS empilés l'un sous l'autre en pratique (jamais côte à côte —
+    // leur somme native dépasse toute largeur de conteneur réaliste du site, voir le commentaire de
+    // `PART_CERCLE_PCT`/`PART_GRAPHE_PCT` ci-dessus pour l'historique du bug corrigé) : jamais une
+    // largeur `max-width` INDÉPENDANTE par panneau pour autant (l'ancienne approche, avant même le
+    // partage en %) — avec un max-width propre à chacun, le panneau cercle (plus étroit, son propre
+    // plafond natif atteint bien plus tôt) finirait affiché à son échelle native pendant que le
+    // panneau graphe (plus large) resterait comprimé sur un écran étroit, cassant l'égalité de
+    // longueur demandée (flèche verte, segment balayé) entre les deux. Les pourcentages ci-dessous,
+    // calculés depuis le MÊME rapport C_TAILLE/G_LARGEUR pour les deux, garantissent au contraire le
+    // MÊME facteur d'échelle implicite pour les deux SVG à N'IMPORTE QUELLE largeur de conteneur
+    // (voir les constantes `PART_CERCLE_PCT`/`PART_GRAPHE_PCT` ci-dessus) ; `max-width` reste
+    // présent sur chaque SVG pour plafonner à la taille NATIVE (1:1) une fois l'espace disponible,
+    // sans jamais les faire grandir au-delà (plafonnage simultané pour les deux, par construction).
     '.panneaux{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:16px;}' +
     // Jamais de padding ici (contrairement à une carte ordinaire) : un padding FIXE (px) appliqué
     // identiquement aux deux panneaux casse la proportion flex-basis ci-dessus — une soustraction
@@ -180,8 +196,14 @@
     // mesure Playwright (rapport largeur/C_TAILLE ≠ rapport largeur/G_LARGEUR, ~4% d'écart) après
     // avoir mis en place le partage proportionnel ci-dessus.
     '.panneau{background:var(--surface-2,#faf6f0);border-radius:var(--radius,3px);min-width:0;}' +
-    '.panneau:nth-child(1){flex:0 1 ' + PART_CERCLE_PCT.toFixed(3) + '%;}' +
-    '.panneau:nth-child(2){flex:0 1 ' + PART_GRAPHE_PCT.toFixed(3) + '%;}' +
+    // `max-width` AUSSI sur le panneau lui-même (pas seulement sur le <svg> qu'il contient) :
+    // chacun étant maintenant TOUJOURS seul sur sa ligne (voir plus haut), son flex-basis en %
+    // dépasse sa propre taille native dès que le conteneur devient assez large — sans ce plafond,
+    // l'encadré gris continuerait alors à s'étirer au-delà du <svg> déjà plafonné à l'intérieur
+    // (bug trouvé par mesure Playwright : encadré du graphe à 974px pour un <svg> plafonné à
+    // 773px, laissant une marge grise vide à droite).
+    '.panneau:nth-child(1){flex:0 1 ' + PART_CERCLE_PCT.toFixed(3) + '%;max-width:' + C_TAILLE + 'px;}' +
+    '.panneau:nth-child(2){flex:0 1 ' + PART_GRAPHE_PCT.toFixed(3) + '%;max-width:' + G_LARGEUR + 'px;}' +
     '#svg-cercle{width:100%;max-width:' + C_TAILLE + 'px;height:auto;display:block;}' +
     '#svg-graphe{width:100%;max-width:' + G_LARGEUR + 'px;height:auto;display:block;}' +
     '.axe{stroke:var(--ink-soft,#6b6055);stroke-width:' + tx(1.3) + ';}' +
