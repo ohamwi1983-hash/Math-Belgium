@@ -127,6 +127,16 @@
      ce !important n'y était pas. Même raison pour `font-size` ci-dessous (17px sur `body` hors
      media query, même sélecteur, même ordre des sources). */
   body { background: #ffffff !important; font-size: 13px !important; }
+  /* `.no-export` marque déjà toute la chrome d'interface (TOC collante, barre de progression,
+     en-tête de section collant, boutons flottants "Sections"/"remonter en haut", tiroir de
+     navigation, nav "Dans ce chapitre", section "Télécharger ce chapitre"...) pour le pipeline
+     d'export HTML (`buildHtml.ts`, qui la retire du document téléchargé) — mais RIEN ne la
+     masquait encore à l'impression navigateur elle-même (Ctrl+P sur la page en ligne, pas
+     seulement le fichier exporté) : repéré sur capture d'écran utilisateur montrant le bouton
+     "Sections" et la flèche "remonter en haut" dans un formulaire pourtant censé s'imprimer seul.
+     Même classe, même intention ("n'a aucun sens hors de l'écran interactif") : une seule règle
+     ici couvre tout le site, pas seulement le formulaire — aucun fichier de contenu à toucher. */
+  .no-export { display: none !important; }
 }
 
 * { box-sizing: border-box; }
@@ -972,9 +982,10 @@ figcaption {
    plutôt qu'énumérer un par un chaque frère du formulaire dans `.page.chapter-main` (en-tête,
    sections, synthèse, carte générateurs, section export...) — fragile, à mettre à jour à chaque
    changement de structure de `ChapterPage` — on masque tout élément qui n'est PAS `.formulaire`
-   parmi les enfants DIRECTS de `.page.chapter-main`, plus l'en-tête du SITE (`.site-header`,
-   hors de `.chapter-layout`) et la TOC collante (`.chapter-sidebar`, sibling de `.page.chapter-main`,
-   elle aussi hors de cette portée). `.chapter-layout` lui-même remis en une seule colonne (`display:
+   parmi les enfants DIRECTS de `.page.chapter-main`, plus l'en-tête du SITE (`.site-header`, hors
+   de `.chapter-layout`). La TOC collante et le reste de la chrome d'interface (`.chapter-sidebar`,
+   boutons flottants...) sont déjà couverts par la règle `.no-export` générale ci-dessus — jamais
+   besoin de les redire ici. `.chapter-layout` lui-même remis en une seule colonne (`display:
    block`) : sans ça, sa grille à deux colonnes (`240px minmax(0,760px)`, voir plus haut) réserve
    toujours les 240px de la TOC même une fois celle-ci cachée (`display:none` sur un item retire
    l'item, jamais sa PISTE de grille) — repéré en prévisualisant le rendu @media print réel
@@ -985,10 +996,8 @@ figcaption {
 @media print {
   body.print-formulaire-only .site-header { display: none !important; }
   body.print-formulaire-only .chapter-layout { display: block !important; }
-  body.print-formulaire-only .chapter-sidebar { display: none !important; }
   body.print-formulaire-only .page.chapter-main { max-width: none !important; }
   body.print-formulaire-only .page.chapter-main > :not(.formulaire) { display: none !important; }
-  .formulaire-actions { display: none !important; }
 }
 
 /* ---------- chaîne d'opérations (operationChain) ---------- */
