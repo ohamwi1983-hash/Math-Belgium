@@ -71,13 +71,19 @@ export function blocDonnees(exercice: ExerciceProprieteLogarithme): string[] {
   return lignes;
 }
 
-/** Bloc de données pour l'ÉCRAN INTERACTIF — vide tant qu'on est sur une étape algébrique : tant que
- * l'élève manipule l'expression symboliquement (m, n, q, r), la valeur décimale de m/n/q/c ne lui sert
- * à rien (la réponse attendue reste littérale, ex. "m+n", jamais une valeur substituée). Ces valeurs ne
- * deviennent utiles qu'au tout dernier écran (substitution numérique), où elles apparaissent enfin —
- * identiques à `blocDonnees(exercice)`. */
+/** Bloc de données pour l'ÉCRAN INTERACTIF — les lettres m/n/q/c RESTENT affichées sur les étapes
+ * algébriques (elles font partie des données de l'exercice, pas de raison de les cacher), mais SANS
+ * valeur numérique tant que l'élève manipule l'expression symboliquement (la réponse attendue reste
+ * littérale, ex. "m+n", jamais une valeur substituée) — seul le symbole apparaît, ex. "m" plutôt que
+ * "m = 1,877". La valeur décimale n'apparaît qu'au tout dernier écran (substitution numérique), seul
+ * endroit où elle sert réellement — identique à `blocDonnees(exercice)`. */
 export function blocDonneesEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): string[] {
-  return estEcranNumerique(exercice, phase) ? blocDonnees(exercice) : [];
+  if (estEcranNumerique(exercice, phase)) return blocDonnees(exercice);
+  const symboles = ["m"];
+  if (exercice.n !== null) symboles.push("n");
+  if (exercice.q !== null) symboles.push("q");
+  if (exercice.avecChangementBase) symboles.push("c");
+  return symboles;
 }
 
 /** Expression logarithmique DEMANDÉE — l'arbre ENTIER, en notation M/N/P, INCHANGÉE sur tous les
@@ -117,8 +123,11 @@ export function etatActuel(exercice: ExerciceProprieteLogarithme, phase: PhasePr
   const dejaRien = etatAccumule.termes.length === 0 && !etatAccumule.reste;
   if (dejaRien) return null;
   if (estEcranNumerique(exercice, phase) && exercice.avecChangementBase) {
-    // Juste après l'étape de changement de base : le "reste" (null) + le facteur c déjà appliqué.
-    return [`\\text{Expression correcte : } ${etatVersLatex(etatAccumule)}\\cdot c`];
+    // Juste après l'étape de changement de base : le "reste" (null) + le facteur c déjà appliqué —
+    // PARENTHÈSES OBLIGATOIRES autour de la somme accumulée (ex. "q-n+m"), sans quoi "q-n+m\cdot c"
+    // se lit (priorité des opérateurs) "q-n+(m\cdot c)" au lieu de "(q-n+m)\cdot c" (même piège que le
+    // bug corrigé dans `formatReponseAttenduePhaseLatex`, mais ici côté AFFICHAGE du rappel).
+    return [`\\text{Expression correcte : } \\left(${etatVersLatex(etatAccumule)}\\right)\\cdot c`];
   }
   return [`\\text{Expression correcte : } ${etatVersLatexAvecLogPendant(etatAccumule)}`];
 }
