@@ -1,7 +1,9 @@
 /**
  * Couche core (6e) — moteur de décomposition PARTAGÉ pour `6gen13` ("Propriétés du logarithme",
  * refonte totale : 5 caractéristiques — produit, quotient, puissance, racine, changement de base —
- * combinées de 1 à 4 à la fois, décomposées couche par couche, un écran par caractéristique).
+ * combinées de 3 ou 4 à la fois (catalogue de 15 variantes, voir
+ * `generateurs6e/proprietesLogarithme/index.ts`), décomposées couche par couche, un écran par
+ * caractéristique).
  *
  * PARTAGÉ entre `moteur6e/verificationProprietesLogarithme.ts` (fonctions de référence numériques
  * par étape) et `ui6e/formatProprietesLogarithme.ts` (rendu LaTeX par étape) — contrairement à la

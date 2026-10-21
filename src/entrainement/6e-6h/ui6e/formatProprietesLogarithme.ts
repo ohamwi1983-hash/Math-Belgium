@@ -8,8 +8,9 @@ import type { PhaseProprietesLogarithme, ResultatExerciceProprietesLogarithme } 
  * dispatche maintenant sur `phase` (index numérique, voir `moteur6e/typesProprietesLogarithme.ts`)
  * ET sur la caractéristique RÉELLEMENT testée à cette phase (déduite de l'arbre de l'exercice, voir
  * `caracteristiqueDeLaPhase` ci-dessous) — jamais sur un `exercice.type` statique comme la version
- * précédente (il n'existe plus : un même exercice teste maintenant 1 à 4 caractéristiques
- * successives). Exercice PUREMENT SYMBOLIQUE : AUCUNE valeur numérique nulle part (ni dans les
+ * précédente (il n'existe plus : un même exercice teste maintenant 3 ou 4 caractéristiques
+ * successives, catalogue restreint — voir `generateurs6e/proprietesLogarithme/index.ts`). Exercice
+ * PUREMENT SYMBOLIQUE : AUCUNE valeur numérique nulle part (ni dans les
  * données affichées, ni dans les réponses attendues, voir `core6e/proprietesLogarithme.types.ts`).
  *
  * **Convention de notation** (inchangée) : tant qu'une partie de l'expression n'est pas encore
@@ -136,7 +137,7 @@ export function formatReponseAttenduePhaseLatex(exercice: ExerciceProprieteLogar
 }
 
 /** Total points du récapitulatif final — COMPLÉMENT de `LigneRecap`/`statutRecap`, jamais un
- * remplacement (CLAUDE.md). Maximum VARIABLE selon le nombre d'écrans de l'exercice (1 à 5
+ * remplacement (CLAUDE.md). Maximum VARIABLE selon le nombre d'écrans de l'exercice (3 ou 4
  * caractéristiques), contrairement à l'ancienne version (toujours 200). */
 export function calculerTotalPointsProprietesLogarithme(resultat: ResultatExerciceProprietesLogarithme): { total: number; maximum: number } {
   const total = resultat.scores.reduce((s, v) => s + v, 0);

@@ -5,12 +5,14 @@ import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarit
 /**
  * Couche A (6e) — génération pour `6gen13` ("Propriétés du logarithme", chapitre 3), REFONTE
  * TOTALE : 5 caractéristiques (produit, quotient, puissance, racine, changement de base) — le
- * catalogue de variantes est maintenant TOUTE combinaison de 1 à 4 d'entre elles (générée par
- * combinatoire, jamais une liste à la main — demande explicite) : 5 isolées + C(5,2)=10 paires +
- * C(5,3)=10 triplets + C(5,4)=5 quadruplets = 30 variantes. Voir `core6e/decompositionLogarithme.ts`
- * pour la construction de l'arbre/l'ordre aléatoire et `moteur6e/typesProprietesLogarithme.ts` pour
- * le nombre d'écrans (= nombre de caractéristiques). Exercice PUREMENT SYMBOLIQUE (aucune valeur
- * numérique générée, voir `core6e/proprietesLogarithme.types.ts`).
+ * catalogue de variantes est TOUTE combinaison de 3 ou 4 d'entre elles (générée par combinatoire,
+ * jamais une liste à la main — demande explicite) : C(5,3)=10 triplets + C(5,4)=5 quadruplets = 15
+ * variantes (les 5 isolées et les C(5,2)=10 paires — les 15 premières combinaisons les plus
+ * simples du catalogue d'origine à 30 variantes — ont été retirées sur demande explicite : trop
+ * peu de caractéristiques à la fois). Voir `core6e/decompositionLogarithme.ts` pour la construction
+ * de l'arbre/l'ordre aléatoire et `moteur6e/typesProprietesLogarithme.ts` pour le nombre d'écrans
+ * (= nombre de caractéristiques). Exercice PUREMENT SYMBOLIQUE (aucune valeur numérique générée,
+ * voir `core6e/proprietesLogarithme.types.ts`).
  */
 
 function tirerParmi<T>(candidats: readonly T[]): T {
@@ -62,8 +64,9 @@ function labelDeCombo(caracteristiques: readonly Caracteristique[]): string {
 }
 
 /** Catalogue `{id,label}` — 1 entrée par combinaison (jamais par exercice individuel, les valeurs
- * numériques/l'ordre de construction restent tirés à CHAQUE génération, voir `construireAvecVarianteId`). */
-export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [1, 2, 3, 4].flatMap((taille) =>
+ * numériques/l'ordre de construction restent tirés à CHAQUE génération, voir `construireAvecVarianteId`).
+ * Tailles 3 et 4 uniquement (voir en-tête de fichier). */
+export const CATALOGUE_VARIANTES: { id: string; label: string }[] = [3, 4].flatMap((taille) =>
   combinaisons(TOUTES_CARACTERISTIQUES, taille).map((combo) => ({ id: idDeCombo(combo), label: labelDeCombo(combo) })),
 );
 
@@ -111,7 +114,7 @@ export function construireAvecVarianteId(id: string): ExerciceProprieteLogarithm
   return construireAvecCombo(comboDepuisId(id));
 }
 
-/** Tirage ÉQUIPROBABLE parmi les 30 combinaisons du catalogue. */
+/** Tirage ÉQUIPROBABLE parmi les 15 combinaisons du catalogue. */
 export function genererExerciceProprietesLogarithme(): ExerciceProprieteLogarithme {
   return construireAvecVarianteId(tirerParmi(CATALOGUE_VARIANTES).id);
 }

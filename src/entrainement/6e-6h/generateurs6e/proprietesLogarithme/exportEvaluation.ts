@@ -8,7 +8,7 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePropriete
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceProprieteLogarithme>` pour `6gen13` (Propriétés du
  * logarithme) — feuille d'évaluation, REFONTE TOTALE : le nombre de questions par instance n'est
- * plus FIXE (2) mais dépend de la combinaison de caractéristiques tirée (1 à 4 étapes algébriques,
+ * plus FIXE (2) mais dépend de la combinaison de caractéristiques tirée (3 ou 4 étapes algébriques,
  * voir `moteur6e/typesProprietesLogarithme.ts::nombreEtapesAlgebriques`) — boucle sur tous les écrans
  * plutôt que 2 appels écrits en dur, réutilise directement les textes/formats déjà écrits côté écran
  * interactif (`consigneEcran`, `aideNiveau2`, `formatReponseAttenduePhaseLatex`), jamais recalculés
@@ -55,7 +55,7 @@ export const adaptateurEvaluationProprietesLogarithme: AdaptateurFeuilleExercice
   genererInstanceAvecVariante: (id) => construireAvecVarianteId(id),
   construireEnonce: construireEnonceProprietesLogarithme,
   construireCorrection: construireCorrectionProprietesLogarithme,
-  // Nombre de questions VARIABLE par instance (1 à 5, selon la combinaison tirée) et consigne de
+  // Nombre de questions VARIABLE par instance (3 ou 4, selon la combinaison tirée) et consigne de
   // chaque écran dépendante de la caractéristique réellement testée — ni "1 seule question", ni
   // "consigne générique" : `regroupable` reste absent (voir `AdaptateurFeuilleExercices.regroupable`).
 };

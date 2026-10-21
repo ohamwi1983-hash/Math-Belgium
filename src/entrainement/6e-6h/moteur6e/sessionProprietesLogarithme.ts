@@ -2,7 +2,7 @@
  * Couche B (6e) — moteur de session pour `6gen13`, REFONTE TOTALE : `phase` est un index numérique
  * (voir `typesProprietesLogarithme.ts`) et `scoresPartiels` un TABLEAU (un score par écran DÉJÀ clos
  * de l'exercice courant), jamais un champ unique ni un dict par nom de phase — seule représentation
- * qui generalise à un nombre d'écrans déterminé à l'exécution (1 à 5 selon la combinaison tirée).
+ * qui generalise à un nombre d'écrans déterminé à l'exécution (3 ou 4 selon la combinaison tirée).
  */
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
 import type { ReglagesSession6e } from "../core6e/session6e.types";

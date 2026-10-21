@@ -3,7 +3,8 @@ import type { Noeud } from "./decompositionLogarithme";
 /**
  * Couche core (6e) — contrat pour `6gen13` ("Propriétés du logarithme", chapitre 3 — "Fonctions
  * logarithmes"), REFONTE TOTALE : 5 caractéristiques (produit, quotient, puissance, racine,
- * changement de base) combinées de 1 à 4 à la fois — voir `core6e/decompositionLogarithme.ts` pour
+ * changement de base) combinées de 3 ou 4 à la fois (catalogue de 15 variantes, voir
+ * `generateurs6e/proprietesLogarithme/index.ts`) — voir `core6e/decompositionLogarithme.ts` pour
  * le moteur de construction/décomposition (arbre `Noeud`, variables libres m/n/q/r/c).
  *
  * AUCUNE VALEUR NUMÉRIQUE n'est générée ni stockée ici : l'exercice reste PUREMENT SYMBOLIQUE du

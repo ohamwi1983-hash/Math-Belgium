@@ -4,7 +4,8 @@
  * voir `core6e/decompositionLogarithme.ts`) — ET CE NOMBRE VARIE même à l'intérieur d'une même
  * "variante" du catalogue, puisque l'ordre de construction (donc la profondeur de chaque
  * caractéristique) n'affecte PAS le compte d'écrans, mais le nombre de caractéristiques, lui, change
- * d'une variante à l'autre (1 à 5). Exercice PUREMENT SYMBOLIQUE : AUCUN écran numérique final (voir
+ * d'une variante à l'autre (3 ou 4, catalogue restreint — voir
+ * `generateurs6e/proprietesLogarithme/index.ts`). Exercice PUREMENT SYMBOLIQUE : AUCUN écran numérique final (voir
  * `core6e/proprietesLogarithme.types.ts`) — le dernier écran reste une décomposition algébrique comme
  * les autres. Ni un dispatch par famille à séquence FIXE (6gen12/`typesExponentiellesProblemes.ts`,
  * phases énumérées en chaîne), ni une séquence commune unique (ancienne version de ce fichier, 2
