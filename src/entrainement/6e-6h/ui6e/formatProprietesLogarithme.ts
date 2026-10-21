@@ -59,11 +59,12 @@ export function consigneGenerale(exercice: ExerciceProprieteLogarithme): string 
 }
 
 /** Bloc de données — REDONDANT sur chaque écran (convention héritée), une ligne par quantité
- * RÉELLEMENT utilisée par cet exercice. */
+ * RÉELLEMENT utilisée par cet exercice. Ne contient QUE m/n/q/c (jamais M/N/P : ce sont de purs noms
+ * symboliques dans l'expression, une valeur numérique associée ne servirait à rien pour résoudre). */
 export function blocDonnees(exercice: ExerciceProprieteLogarithme): string[] {
-  const lignes = [`m = ${formatDecimalKatex(exercice.m)}`, `M = ${exercice.M}`];
-  if (exercice.n !== null) lignes.push(`n = ${formatDecimalKatex(exercice.n)}`, `N = ${exercice.N}`);
-  if (exercice.q !== null) lignes.push(`q = ${formatDecimalKatex(exercice.q)}`, `P = ${exercice.P}`);
+  const lignes = [`m = ${formatDecimalKatex(exercice.m)}`];
+  if (exercice.n !== null) lignes.push(`n = ${formatDecimalKatex(exercice.n)}`);
+  if (exercice.q !== null) lignes.push(`q = ${formatDecimalKatex(exercice.q)}`);
   if (exercice.avecChangementBase) lignes.push(`c = ${formatDecimalKatex(exercice.c as number)}`);
   return lignes;
 }

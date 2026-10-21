@@ -9,10 +9,12 @@ import type { Noeud } from "./decompositionLogarithme";
  * `m = log_a(M)` (toujours présent), `n = log_a(N)` (présent si produit ou quotient fait partie de
  * la combinaison), `q = log_a(P)` (présent seulement si produit ET quotient sont TOUS LES DEUX dans
  * la combinaison — la 2e opération binaire a besoin d'une 3e variable, voir `decompositionLogarithme.ts`)
- * — décimaux arrondis à 3 décimales, tirés dans [1,000 ; 9,999]. `M`/`N`/`P` sont des entiers
- * d'AFFICHAGE (2 à 999) — leur valeur réelle est SANS AUCUNE incidence sur la correction, seule leur
- * présence symbolique dans l'expression affichée compte. `b`/`c` (nom de la nouvelle base / valeur
- * connue de log_b(a)) sont présents UNIQUEMENT si "changementBase" fait partie de la combinaison.
+ * — décimaux arrondis à 3 décimales, tirés dans [1,000 ; 9,999]. `M`/`N`/`P` n'apparaissent QUE comme
+ * noms symboliques dans l'arbre/l'expression affichée (voir `Noeud`/`NomVariable`) — aucune valeur
+ * numérique ne leur est associée : elle ne serait d'aucune utilité pour résoudre l'exercice (seules
+ * m/n/q/c comptent) et ne doit donc jamais être générée ni affichée comme donnée. `b`/`c` (nom de la
+ * nouvelle base / valeur connue de log_b(a)) sont présents UNIQUEMENT si "changementBase" fait partie
+ * de la combinaison.
  */
 
 export interface ExerciceProprieteLogarithme {
@@ -21,9 +23,6 @@ export interface ExerciceProprieteLogarithme {
   m: number;
   n: number | null;
   q: number | null;
-  M: number;
-  N: number | null;
-  P: number | null;
   /** Nom symbolique de la nouvelle base (toujours "b" en pratique, jamais numériquement résolue —
    * même convention que la base "a" elle-même) — `null` si "changementBase" absent de la combinaison. */
   b: string | null;

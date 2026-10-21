@@ -16,10 +16,6 @@ function tirerDecimal(min: number, max: number): number {
   return Math.round((Math.random() * (max - min) + min) * 1000) / 1000;
 }
 
-function tirerEntier(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 function tirerParmi<T>(candidats: readonly T[]): T {
   return candidats[Math.floor(Math.random() * candidats.length)];
 }
@@ -113,13 +109,10 @@ export function construireAvecCombo(caracteristiques: readonly Caracteristique[]
   const m = tirerDecimal(1, 9.999);
   const n = aN ? tirerDecimal(1, 9.999) : null;
   const q = aP ? tirerDecimal(1, 9.999) : null;
-  const M = tirerEntier(2, 999);
-  const N = aN ? tirerEntier(2, 999) : null;
-  const P = aP ? tirerEntier(2, 999) : null;
   const b = avecChangementBase ? "b" : null;
   const c = avecChangementBase ? tirerDecimal(1, 9.999) : null;
 
-  return { arbre, avecChangementBase, m, n, q, M, N, P, b, c };
+  return { arbre, avecChangementBase, m, n, q, b, c };
 }
 
 export function construireAvecVarianteId(id: string): ExerciceProprieteLogarithme {
