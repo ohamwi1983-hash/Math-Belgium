@@ -9,7 +9,7 @@ import { diagnostiquerEcran } from "./moteur6e/verificationProprietesLogarithme"
 import { Katex } from "./components/Katex";
 import { EtapeProprieteLogarithme } from "./components6e/EtapeProprieteLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { consigneGenerale, etatActuel, expressionDemandeeLatex, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
+import { consigneGenerale, etatActuel, expressionDemandeeLatex, blocDonneesEcran, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
 import { calculerRecapitulatifProprietesLogarithme, calculerSegmentsProgressionProprietesLogarithme } from "./ui6e/recapitulatifProprietesLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -122,7 +122,7 @@ export function App6gen13() {
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     expressionLatex: expressionDemandeeLatex(exercice),
-    blocDonnees: blocDonnees(exercice),
+    blocDonnees: blocDonneesEcran(exercice, phase),
     etatActuel: etatActuel(exercice, phase),
     consigneEcran: consigneEcran(exercice, phase),
     aideNiveau1: aideNiveau1(exercice, phase),

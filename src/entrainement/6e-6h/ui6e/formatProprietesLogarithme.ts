@@ -58,15 +58,26 @@ export function consigneGenerale(exercice: ExerciceProprieteLogarithme): string 
   return `On donne (base a jamais précisée, jamais calculée) : ${donnees.join(", ")}.`;
 }
 
-/** Bloc de données — REDONDANT sur chaque écran (convention héritée), une ligne par quantité
- * RÉELLEMENT utilisée par cet exercice. Ne contient QUE m/n/q/c (jamais M/N/P : ce sont de purs noms
- * symboliques dans l'expression, une valeur numérique associée ne servirait à rien pour résoudre). */
+/** Bloc de données COMPLET — une ligne par quantité RÉELLEMENT utilisée par cet exercice (m/n/q/c,
+ * jamais M/N/P : ce sont de purs noms symboliques dans l'expression, une valeur numérique associée ne
+ * servirait à rien pour résoudre). Réservé à la feuille imprimable (`exportEvaluation.ts`), où tout
+ * doit être visible d'un coup faute d'écrans successifs — voir `blocDonneesEcran` pour l'écran
+ * interactif. */
 export function blocDonnees(exercice: ExerciceProprieteLogarithme): string[] {
   const lignes = [`m = ${formatDecimalKatex(exercice.m)}`];
   if (exercice.n !== null) lignes.push(`n = ${formatDecimalKatex(exercice.n)}`);
   if (exercice.q !== null) lignes.push(`q = ${formatDecimalKatex(exercice.q)}`);
   if (exercice.avecChangementBase) lignes.push(`c = ${formatDecimalKatex(exercice.c as number)}`);
   return lignes;
+}
+
+/** Bloc de données pour l'ÉCRAN INTERACTIF — vide tant qu'on est sur une étape algébrique : tant que
+ * l'élève manipule l'expression symboliquement (m, n, q, r), la valeur décimale de m/n/q/c ne lui sert
+ * à rien (la réponse attendue reste littérale, ex. "m+n", jamais une valeur substituée). Ces valeurs ne
+ * deviennent utiles qu'au tout dernier écran (substitution numérique), où elles apparaissent enfin —
+ * identiques à `blocDonnees(exercice)`. */
+export function blocDonneesEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): string[] {
+  return estEcranNumerique(exercice, phase) ? blocDonnees(exercice) : [];
 }
 
 /** Expression logarithmique DEMANDÉE — l'arbre ENTIER, en notation M/N/P, INCHANGÉE sur tous les
