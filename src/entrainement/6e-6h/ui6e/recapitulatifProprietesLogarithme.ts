@@ -1,4 +1,4 @@
-import { nombreEcransTotal } from "../moteur6e/typesProprietesLogarithme";
+import { nombreEtapesAlgebriques } from "../moteur6e/typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme } from "../moteur6e/typesProprietesLogarithme";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import { libellePhase, formatReponseAttenduePhaseLatex } from "./formatProprietesLogarithme";
@@ -8,7 +8,7 @@ import { libellePhase, formatReponseAttenduePhaseLatex } from "./formatPropriete
  * déjà clos, dans l'ordre), jamais un champ unique ni un dict par nom de phase : une entrée de
  * récapitulatif par écran déjà traversé. Même patron que `recapitulatifExponentiellesProblemes.ts`
  * (6gen12), adapté d'une séquence par famille FIXE à une séquence par EXERCICE (dépend de la
- * combinaison tirée, voir `nombreEcransTotal`).
+ * combinaison tirée, voir `nombreEtapesAlgebriques`).
  */
 export function calculerRecapitulatifProprietesLogarithme(etat: EtatSessionProprietesLogarithme): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -19,9 +19,9 @@ export function calculerRecapitulatifProprietesLogarithme(etat: EtatSessionPropr
 }
 
 /** Une puce par écran RÉELLEMENT prévu pour l'exercice courant (nombre variable, voir
- * `moteur6e/typesProprietesLogarithme.ts::nombreEcransTotal`), jamais une séquence fixe commune. */
+ * `moteur6e/typesProprietesLogarithme.ts::nombreEtapesAlgebriques`), jamais une séquence fixe commune. */
 export function calculerSegmentsProgressionProprietesLogarithme(etat: EtatSessionProprietesLogarithme) {
-  const total = nombreEcransTotal(etat.exerciceCourant);
+  const total = nombreEtapesAlgebriques(etat.exerciceCourant);
   return Array.from({ length: total }, (_, i) => {
     if (i === etat.phase) return "courante" as const;
     if (i > etat.phase) return "a-venir" as const;

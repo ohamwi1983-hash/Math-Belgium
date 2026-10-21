@@ -9,12 +9,9 @@ import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarit
  * combinatoire, jamais une liste à la main — demande explicite) : 5 isolées + C(5,2)=10 paires +
  * C(5,3)=10 triplets + C(5,4)=5 quadruplets = 30 variantes. Voir `core6e/decompositionLogarithme.ts`
  * pour la construction de l'arbre/l'ordre aléatoire et `moteur6e/typesProprietesLogarithme.ts` pour
- * le nombre d'écrans (= nombre de caractéristiques + 1 écran numérique final).
+ * le nombre d'écrans (= nombre de caractéristiques). Exercice PUREMENT SYMBOLIQUE (aucune valeur
+ * numérique générée, voir `core6e/proprietesLogarithme.types.ts`).
  */
-
-function tirerDecimal(min: number, max: number): number {
-  return Math.round((Math.random() * (max - min) + min) * 1000) / 1000;
-}
 
 function tirerParmi<T>(candidats: readonly T[]): T {
   return candidats[Math.floor(Math.random() * candidats.length)];
@@ -105,14 +102,9 @@ export function construireAvecCombo(caracteristiques: readonly Caracteristique[]
   const avecChangementBase = caracteristiques.includes("changementBase");
   const argument = melanger(caracteristiques.filter((c): c is "produit" | "quotient" | "puissance" | "racine" => c !== "changementBase"));
   const { arbre, aN, aP } = construireArbre(argument);
-
-  const m = tirerDecimal(1, 9.999);
-  const n = aN ? tirerDecimal(1, 9.999) : null;
-  const q = aP ? tirerDecimal(1, 9.999) : null;
   const b = avecChangementBase ? "b" : null;
-  const c = avecChangementBase ? tirerDecimal(1, 9.999) : null;
 
-  return { arbre, avecChangementBase, m, n, q, b, c };
+  return { arbre, avecChangementBase, avecN: aN, avecP: aP, b };
 }
 
 export function construireAvecVarianteId(id: string): ExerciceProprieteLogarithme {

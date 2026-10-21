@@ -1,22 +1,23 @@
 import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarithme.types";
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
-import { nombreEcransTotal } from "../../moteur6e/typesProprietesLogarithme";
+import { nombreEtapesAlgebriques } from "../../moteur6e/typesProprietesLogarithme";
 import { aideNiveau2, blocDonnees, consigneGenerale, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProprietesLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./index";
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceProprieteLogarithme>` pour `6gen13` (Propriétés du
  * logarithme) — feuille d'évaluation, REFONTE TOTALE : le nombre de questions par instance n'est
- * plus FIXE (2) mais dépend de la combinaison de caractéristiques tirée (1 à 4 étapes algébriques +
- * 1 question numérique finale, voir `moteur6e/typesProprietesLogarithme.ts::nombreEcransTotal`) —
- * boucle sur tous les écrans plutôt que 2 appels écrits en dur, réutilise directement les textes/
- * formats déjà écrits côté écran interactif (`consigneEcran`, `aideNiveau2`,
- * `formatReponseAttenduePhaseLatex`), jamais recalculés indépendamment.
+ * plus FIXE (2) mais dépend de la combinaison de caractéristiques tirée (1 à 4 étapes algébriques,
+ * voir `moteur6e/typesProprietesLogarithme.ts::nombreEtapesAlgebriques`) — boucle sur tous les écrans
+ * plutôt que 2 appels écrits en dur, réutilise directement les textes/formats déjà écrits côté écran
+ * interactif (`consigneEcran`, `aideNiveau2`, `formatReponseAttenduePhaseLatex`), jamais recalculés
+ * indépendamment. Exercice PUREMENT SYMBOLIQUE : AUCUNE question numérique finale, toutes les
+ * questions ont la même forme "étape intermédiaire".
  */
 
 function construireEnonceProprietesLogarithme(exercice: ExerciceProprieteLogarithme): SectionExercice {
-  const total = nombreEcransTotal(exercice);
+  const total = nombreEtapesAlgebriques(exercice);
   return {
     enteteFragments: [
       texte(consigneGenerale(exercice) + " Données : "),
@@ -30,16 +31,9 @@ function construireEnonceProprietesLogarithme(exercice: ExerciceProprieteLogarit
 }
 
 function construireCorrectionProprietesLogarithme(exercice: ExerciceProprieteLogarithme): BlocCorrection[] {
-  const total = nombreEcransTotal(exercice);
+  const total = nombreEtapesAlgebriques(exercice);
   return Array.from({ length: total }, (_, phase) => {
     const lettre = String.fromCharCode(97 + phase); // a), b), c)...
-    const derniere = phase === total - 1;
-    if (derniere) {
-      return {
-        type: "paragraphe" as const,
-        fragments: [texte(`${lettre}) Valeur numérique : `), latex(formatReponseAttenduePhaseLatex(exercice, phase)[0]), texte(".")],
-      };
-    }
     return {
       type: "paragraphe" as const,
       fragments: [

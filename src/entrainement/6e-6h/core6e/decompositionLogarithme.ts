@@ -276,9 +276,10 @@ export interface VariablesLibres {
   c?: number;
 }
 
-/** Évalue un état de décomposition à des valeurs données des variables libres pertinentes — jamais
- * une substitution des VRAIES valeurs connues ici (voir `valeurReelleEtat` pour ça) : sert à
- * construire la fonction de référence `(vars) => number` comparée au texte élève. */
+/** Évalue un état de décomposition à des valeurs données des variables libres — sert à construire la
+ * fonction de référence `(vars) => number` comparée au texte élève (voir
+ * `moteur6e/verificationProprietesLogarithme.ts`) : l'exercice étant purement symbolique, `m`/`n`/`q`/
+ * `r`/`c` n'ont JAMAIS de "vraie" valeur connue, seulement des points d'échantillonnage fixes. */
 export function etatVersValeur(etat: EtatDecomposition, vars: VariablesLibres): number {
   let total = 0;
   for (const t of etat.termes) {
@@ -289,11 +290,4 @@ export function etatVersValeur(etat: EtatDecomposition, vars: VariablesLibres): 
     total += valeurFraction(etat.coefficientReste) * (vars.r as number);
   }
   return total;
-}
-
-/** Valeur RÉELLE (connue) d'un état FINAL (reste = null) — jamais appelée sur un état intermédiaire
- * (reste encore non résolu, pas de "vraie" valeur de r). */
-export function valeurReelleEtatFinal(etat: EtatDecomposition, valeurs: { m: number; n: number | null; q: number | null }): number {
-  if (etat.reste) throw new Error("valeurReelleEtatFinal : état encore intermédiaire (reste non résolu)");
-  return etatVersValeur(etat, { m: valeurs.m, n: valeurs.n ?? undefined, q: valeurs.q ?? undefined });
 }

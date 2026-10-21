@@ -43,11 +43,11 @@ interface Props {
 }
 
 /**
- * Écran GÉNÉRIQUE à un seul champ texte libre pour `6gen13` — tous les écrans (étapes algébriques /
- * calcul numérique final) partagent strictement la même structure. Ordre imposé par CLAUDE.md :
- * consigne générale (+ expression logarithmique demandée) → bloc données (m/n/q/c, SANS valeur
- * numérique tant que l'écran est algébrique, voir `blocDonneesEcran`) → bloc de travail. `App6gen13.tsx`
- * doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
+ * Écran GÉNÉRIQUE à un seul champ texte libre pour `6gen13` — tous les écrans (une étape algébrique
+ * par caractéristique, aucun calcul numérique, exercice PUREMENT SYMBOLIQUE) partagent strictement la
+ * même structure. Ordre imposé par CLAUDE.md : consigne générale (+ expression logarithmique
+ * demandée) → bloc données (m/n/q/c, SANS valeur numérique — voir `blocDonnees`) → bloc de travail.
+ * `App6gen13.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
  */
 export function EtapeProprieteLogarithme({
   consigneGenerale,
@@ -85,15 +85,13 @@ export function EtapeProprieteLogarithme({
             <div className="equation-box">
               <Katex expression={expressionLatex} />
             </div>
-            {blocDonnees.length > 0 && (
-              <div className="equation-box">
-                <div className="equation-box-donnees">
-                  {blocDonnees.map((frag, i) => (
-                    <Katex key={i} expression={frag} />
-                  ))}
-                </div>
+            <div className="equation-box">
+              <div className="equation-box-donnees">
+                {blocDonnees.map((frag, i) => (
+                  <Katex key={i} expression={frag} />
+                ))}
               </div>
-            )}
+            </div>
           </>
         }
       />

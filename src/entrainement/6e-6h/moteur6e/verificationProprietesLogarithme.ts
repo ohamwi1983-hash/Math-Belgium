@@ -1,10 +1,8 @@
-import { calculerEtatsArgument, etatVersValeur, valeurReelleEtatFinal } from "../core6e/decompositionLogarithme";
+import { calculerEtatsArgument, etatVersValeur } from "../core6e/decompositionLogarithme";
 import type { VariablesLibres } from "../core6e/decompositionLogarithme";
 import type { ExerciceProprieteLogarithme } from "../core6e/proprietesLogarithme.types";
 import type { StatutVerification } from "../moteur/statutVerification";
-import { diagnostiquerValeur } from "./equivalenceExponentielle";
 import { evaluerExpressionExponentielle } from "./expressionExponentielle";
-import { estEcranNumerique } from "./typesProprietesLogarithme";
 import type { PhaseProprietesLogarithme } from "./typesProprietesLogarithme";
 
 /**
@@ -17,21 +15,12 @@ import type { PhaseProprietesLogarithme } from "./typesProprietesLogarithme";
  * dans le texte élève sont simplement ignorées par l'évaluateur — jamais besoin de calculer au
  * préalable lesquelles sont "pertinentes" pour cet exercice précis).
  *
- * **Écrans algébriques** (tous sauf le dernier) — référence = l'état de décomposition CIBLE de
- * cette étape (voir `core6e/decompositionLogarithme.ts::calculerEtatsArgument`), ou, pour l'étape de
- * changement de base (toujours la dernière étape algébrique quand elle existe), l'état final
- * multiplié par `c`.
- * **Écran numérique final** — valeur CIBLE unique (pas une fonction), recalculée PUREMENT depuis les
- * vraies valeurs connues de l'exercice (`m`/`n`/`q`/`c`), jamais une saisie élève d'un écran
- * précédent.
- *
- * **Tolérances** — mêmes valeurs et même raisonnement que la version précédente :
- * - `TOLERANCE_EXPRESSION` (0,01) pour les écrans algébriques (variables libres échantillonnées).
- * - `TOLERANCE_VALEUR` (0,005) pour l'écran numérique final (m/n/q/c donnés à 3 décimales EXACTES,
- *   seule source d'écart possible : un arrondi intermédiaire raisonnable du calcul élève).
+ * TOUS les écrans sont algébriques (exercice PUREMENT SYMBOLIQUE, voir
+ * `core6e/proprietesLogarithme.types.ts`) : référence = l'état de décomposition CIBLE de cette étape
+ * (voir `core6e/decompositionLogarithme.ts::calculerEtatsArgument`), ou, pour l'étape de changement de
+ * base (toujours la dernière étape algébrique quand elle existe), l'état final multiplié par `c`.
  */
 const TOLERANCE_EXPRESSION = 0.01;
-const TOLERANCE_VALEUR = 0.005;
 
 /** 7 valeurs FIXES et variées (positives/négatives, décimales) par variable libre — jamais liées
  * aux plages de génération réelles (1 à 9,999) : ici ce sont de simples variables libres, leur
@@ -71,8 +60,7 @@ export function diagnostiquerEquivalenceLogarithme(
   return "correct";
 }
 
-/** Référence (fonction de variables libres) de l'écran algébrique `phase` — jamais appelée sur
- * l'écran numérique final (voir `referenceEcranNumerique`). */
+/** Référence (fonction de variables libres) de l'écran algébrique `phase`. */
 export function referenceEcranAlgebrique(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): (vars: VariablesLibres) => number {
   const etats = calculerEtatsArgument(exercice.arbre);
   const etapesArgument = etats.length - 1;
@@ -86,19 +74,7 @@ export function referenceEcranAlgebrique(exercice: ExerciceProprieteLogarithme, 
   return (vars) => etatVersValeur(etatFinal, vars) * (vars.c as number);
 }
 
-/** Valeur CIBLE unique de l'écran numérique final — recalculée depuis les vraies valeurs connues de
- * l'exercice, jamais une saisie élève. */
-export function referenceEcranNumerique(exercice: ExerciceProprieteLogarithme): number {
-  const etats = calculerEtatsArgument(exercice.arbre);
-  const etatFinal = etats[etats.length - 1];
-  const valeurArgument = valeurReelleEtatFinal(etatFinal, { m: exercice.m, n: exercice.n, q: exercice.q });
-  return exercice.avecChangementBase ? valeurArgument * (exercice.c as number) : valeurArgument;
-}
-
 export function diagnostiquerEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme, texte: string): StatutVerification {
-  if (estEcranNumerique(exercice, phase)) {
-    return diagnostiquerValeur(texte, referenceEcranNumerique(exercice), TOLERANCE_VALEUR);
-  }
   return diagnostiquerEquivalenceLogarithme(texte, referenceEcranAlgebrique(exercice, phase));
 }
 

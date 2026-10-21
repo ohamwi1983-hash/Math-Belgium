@@ -3,13 +3,12 @@ import type { ReactNode } from "react";
 import type { ReglagesSession6e } from "./core6e/session6e.types";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./generateurs6e/proprietesLogarithme";
 import { NIVEAU_AIDE_MAX, activerAideSuivante, demarrerSessionProprietesLogarithme, soumettreReponse } from "./moteur6e/sessionProprietesLogarithme";
-import { estEcranNumerique } from "./moteur6e/typesProprietesLogarithme";
 import type { EtatSessionProprietesLogarithme, PhaseProprietesLogarithme } from "./moteur6e/typesProprietesLogarithme";
 import { diagnostiquerEcran } from "./moteur6e/verificationProprietesLogarithme";
 import { Katex } from "./components/Katex";
 import { EtapeProprieteLogarithme } from "./components6e/EtapeProprieteLogarithme";
 import { SelecteurVarianteDev } from "./components6e/SelecteurVarianteDev";
-import { consigneGenerale, etatActuel, expressionDemandeeLatex, blocDonneesEcran, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
+import { consigneGenerale, etatActuel, expressionDemandeeLatex, blocDonnees, consigneEcran, aideNiveau1, aideNiveau2, formatReponseAttenduePhaseLatex, libellePhase } from "./ui6e/formatProprietesLogarithme";
 import { calculerRecapitulatifProprietesLogarithme, calculerSegmentsProgressionProprietesLogarithme } from "./ui6e/recapitulatifProprietesLogarithme";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
 import type { EtatPuceProgression } from "../components/ProgressionPuces";
@@ -122,10 +121,10 @@ export function App6gen13() {
   const propsCommun = {
     consigneGenerale: consigneGenerale(exercice),
     expressionLatex: expressionDemandeeLatex(exercice),
-    blocDonnees: blocDonneesEcran(exercice, phase),
+    blocDonnees: blocDonnees(exercice),
     etatActuel: etatActuel(exercice, phase),
     consigneEcran: consigneEcran(exercice, phase),
-    aideNiveau1: aideNiveau1(exercice, phase),
+    aideNiveau1: aideNiveau1(),
     aideNiveau2: aideNiveau2(exercice, phase),
     tentativesUtilisees,
     tentativesMax,
@@ -156,7 +155,7 @@ export function App6gen13() {
         <EtapeProprieteLogarithme
           key={phase}
           {...propsCommun}
-          placeholder={estEcranNumerique(exercice, phase) ? "ex : 3,874" : "ex : m+n"}
+          placeholder="ex : m+n"
           diagnostiquer={(texte) => diagnostiquerEcran(exercice, phase, texte)}
           onValider={(texte) => terminerEtape(soumettreReponse(etat, texte), texte)}
         />

@@ -787,8 +787,7 @@ export const fonctionsLogarithmes: ChapterContent = {
           generatorId: '6gen13',
           description: [
             'Applique les propriétés algébriques du logarithme (produit, quotient, puissance, ' +
-              'changement de base) pour simplifier des expressions et résoudre des exemples ' +
-              'numériques.',
+              'changement de base) pour décomposer une expression logarithmique, étape par étape.',
           ],
           chantier: '6e-6h',
           whereLabel: '6e (6h) → « 13. Propriétés du logarithme »',
