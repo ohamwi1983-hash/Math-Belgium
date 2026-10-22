@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
+import type { FragmentConsigne } from "../ui6e/formatProprietesLogarithme";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -14,16 +16,14 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   /** Expression logarithmique DEMANDÉE (KaTeX) — rattachée visuellement à la consigne générale
-   * (même patron que `expressionLatex` de `EtapeChampCycloSimple.tsx`, 6gen2), affichée AVANT le
-   * bloc de données m/n/M/N. */
+   * (même patron que `expressionLatex` de `EtapeChampCycloSimple.tsx`, 6gen2). */
   expressionLatex: string;
-  blocDonnees: string[];
   /** `null` — jamais rendu — quand cet écran ne dépend d'aucun écran précédent (toute première
    * étape d'un exercice) — même convention que `EtapeChampHyperboliques.tsx`. */
   etatActuel: string[] | null;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   placeholder: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -46,13 +46,14 @@ interface Props {
  * Écran GÉNÉRIQUE à un seul champ texte libre pour `6gen13` — tous les écrans (une étape algébrique
  * par caractéristique, aucun calcul numérique, exercice PUREMENT SYMBOLIQUE) partagent strictement la
  * même structure. Ordre imposé par CLAUDE.md : consigne générale (+ expression logarithmique
- * demandée) → bloc données (m/n/q/c, SANS valeur numérique — voir `blocDonnees`) → bloc de travail.
+ * demandée) → bloc de travail. Plus de bloc "données" séparé listant m/n/q/c : ces lettres sont
+ * introduites DANS la phrase de `consigneGenerale` elle-même (voir
+ * `ui6e/formatProprietesLogarithme.ts`), jamais répétées à part sans valeur à montrer.
  * `App6gen13.tsx` doit le rendre avec `key={phase}` (remet le champ à vide à chaque écran).
  */
 export function EtapeProprieteLogarithme({
   consigneGenerale,
   expressionLatex,
-  blocDonnees,
   etatActuel,
   consigneEcran,
   placeholder,
@@ -79,20 +80,11 @@ export function EtapeProprieteLogarithme({
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
-          <>
-            <div className="equation-box">
-              <Katex expression={expressionLatex} />
-            </div>
-            <div className="equation-box">
-              <div className="equation-box-donnees">
-                {blocDonnees.map((frag, i) => (
-                  <Katex key={i} expression={frag} />
-                ))}
-              </div>
-            </div>
-          </>
+          <div className="equation-box">
+            <Katex expression={expressionLatex} />
+          </div>
         }
       />
       {etatActuel && (
@@ -102,7 +94,9 @@ export function EtapeProprieteLogarithme({
           ))}
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
         <input

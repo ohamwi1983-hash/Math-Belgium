@@ -10,8 +10,18 @@ import type { PhaseProprietesLogarithme, ResultatExerciceProprietesLogarithme } 
  * `caracteristiqueDeLaPhase` ci-dessous) — jamais sur un `exercice.type` statique comme la version
  * précédente (il n'existe plus : un même exercice teste maintenant 3 ou 4 caractéristiques
  * successives, catalogue restreint — voir `generateurs6e/proprietesLogarithme/index.ts`). Exercice
- * PUREMENT SYMBOLIQUE : AUCUNE valeur numérique nulle part (ni dans les
- * données affichées, ni dans les réponses attendues, voir `core6e/proprietesLogarithme.types.ts`).
+ * PUREMENT SYMBOLIQUE : AUCUNE valeur numérique nulle part (ni dans les données affichées, ni dans
+ * les réponses attendues, voir `core6e/proprietesLogarithme.types.ts`) — les lettres m/n/q/c ne sont
+ * JAMAIS affichées seules (un bloc "données" qui ne ferait que les lister serait pure redondance
+ * sans valeur à montrer) : elles n'apparaissent que DANS la phrase de consigne elle-même
+ * (`consigneGenerale`), qui les introduit (`log_a(M)=m`, etc.) avant de demander l'expression en
+ * fonction d'elles.
+ *
+ * **`log_a`/`log_b` en LaTeX, jamais en texte brut** : `consigneGenerale` et `consigneEcran`
+ * renvoient un `FragmentConsigne[]` (texte brut mêlé à du LaTeX inline court, même contrat que
+ * `ui/formatEquationDroite.ts` et son rendu `components/RenduFragments.tsx`) plutôt qu'une simple
+ * `string` — tout `log_a(...)`/`log_b(...)` qui y apparaît est un fragment `latex`, jamais une
+ * sous-chaîne littérale "log_a(...)" affichée telle quelle.
  *
  * **Convention de notation** (inchangée) : tant qu'une partie de l'expression n'est pas encore
  * substituée en m/n/q, le fragment LaTeX garde la notation `\log_a(...)` en toutes lettres
@@ -23,6 +33,18 @@ import type { PhaseProprietesLogarithme, ResultatExerciceProprietesLogarithme } 
 export interface AideAvecLatex {
   texte: string;
   latex: string | null;
+}
+
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué ici à dessein, convention CLAUDE.md : un type aussi petit ne justifie pas un module
+ * partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
 }
 
 const NOM_CARACTERISTIQUE: Record<"produit" | "quotient" | "puissance" | "racine" | "changementBase", string> = {
@@ -42,24 +64,29 @@ function caracteristiqueDeLaPhase(exercice: ExerciceProprieteLogarithme, phase: 
   return "changementBase";
 }
 
-/** Consigne générale — DYNAMIQUE : ne mentionne n/q/c que si l'exercice les utilise réellement. */
-export function consigneGenerale(exercice: ExerciceProprieteLogarithme): string {
-  const donnees = ["log_a(M) ≈ m"];
-  if (exercice.avecN) donnees.push("log_a(N) ≈ n");
-  if (exercice.avecP) donnees.push("log_a(P) ≈ q");
-  if (exercice.avecChangementBase) donnees.push(`log_${exercice.b}(a) ≈ c`);
-  return `On donne (base a jamais précisée, jamais calculée) : ${donnees.join(", ")}.`;
-}
-
-/** Bloc de données — les lettres RÉELLEMENT utilisées par cet exercice (m/n/q/c), SANS valeur
- * numérique : aucune n'existe (exercice purement symbolique), seul le symbole compte. Partagé par
- * l'écran interactif ET la feuille imprimable (`exportEvaluation.ts`). */
-export function blocDonnees(exercice: ExerciceProprieteLogarithme): string[] {
-  const symboles = ["m"];
-  if (exercice.avecN) symboles.push("n");
-  if (exercice.avecP) symboles.push("q");
-  if (exercice.avecChangementBase) symboles.push("c");
-  return symboles;
+/** Consigne générale — DYNAMIQUE : ne mentionne n/q/c que si l'exercice les utilise réellement.
+ * Introduit CHAQUE lettre via l'égalité `log_a(...)=...` qui la définit (jamais une lettre non
+ * introduite), puis demande l'expression en fonction de ces mêmes lettres — remplace l'ancien
+ * couple "On donne : ... / Calcule : ..." par une seule phrase ("Sachant que ..., détermine en
+ * fonction de ... l'expression suivante :"), le `blocDonnees` qui listait les lettres SEULES (sans
+ * valeur à montrer) étant devenu une pure redondance avec cette phrase. */
+export function consigneGenerale(exercice: ExerciceProprieteLogarithme): FragmentConsigne[] {
+  const lettres = ["m"];
+  const fragments: FragmentConsigne[] = [texte("Sachant que "), latex("\\log_a(M)=m")];
+  if (exercice.avecN) {
+    fragments.push(texte(", "), latex("\\log_a(N)=n"));
+    lettres.push("n");
+  }
+  if (exercice.avecP) {
+    fragments.push(texte(", "), latex("\\log_a(P)=q"));
+    lettres.push("q");
+  }
+  if (exercice.avecChangementBase) {
+    fragments.push(texte(", "), latex(`\\log_${exercice.b}(a)=c`));
+    lettres.push("c");
+  }
+  fragments.push(texte(`, détermine en fonction de ${lettres.join(", ")} l'expression suivante :`));
+  return fragments;
 }
 
 /** Expression logarithmique DEMANDÉE — l'arbre ENTIER, en notation M/N/P, INCHANGÉE sur tous les
@@ -73,15 +100,29 @@ export function libellePhase(exercice: ExerciceProprieteLogarithme, phase: Phase
   return `Étape ${phase + 1} (${NOM_CARACTERISTIQUE[caracteristique]})`;
 }
 
-export function consigneEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): string {
+export function consigneEcran(exercice: ExerciceProprieteLogarithme, phase: PhaseProprietesLogarithme): FragmentConsigne[] {
   const caracteristique = caracteristiqueDeLaPhase(exercice, phase);
   if (caracteristique === "changementBase") {
-    return `Applique la formule de changement de base à l'expression obtenue à l'étape précédente (nouvelle base ${exercice.b}). Utilise m, n, q (selon le cas) pour les termes déjà extraits, et c pour log_${exercice.b}(a) — jamais "log_a(...)"/"log_${exercice.b}(...)" tels quels.`;
+    return [
+      texte(`Applique la formule de changement de base à l'expression obtenue à l'étape précédente (nouvelle base ${exercice.b}). Utilise m, n, q (selon le cas) pour les termes déjà extraits, et c pour `),
+      latex(`\\log_${exercice.b}(a)`),
+      texte(` — jamais "`),
+      latex("\\log_a(...)"),
+      texte(`"/"`),
+      latex(`\\log_${exercice.b}(...)`),
+      texte(`" tels quels.`),
+    ];
   }
   const etats = calculerEtatsArgument(exercice.arbre);
   const dejaExtraits = etats[phase].termes.length > 0;
   const rappelAnterieur = dejaExtraits ? " Garde les termes déjà extraits aux étapes précédentes (en m/n/q) et ajoute le résultat de cette nouvelle propriété." : "";
-  return `Applique UNIQUEMENT la propriété du ${NOM_CARACTERISTIQUE[caracteristique]} du logarithme à l'expression ci-dessous (celle encore sous forme log_a(...), pas le reste déjà traité). Utilise m, n, q pour toute partie DÉJÀ extraite, et r pour toute partie ENCORE à décomposer (tu la décomposeras à une étape suivante) — jamais "log_a(...)" tel quel.${rappelAnterieur}`;
+  return [
+    texte(`Applique UNIQUEMENT la propriété du ${NOM_CARACTERISTIQUE[caracteristique]} du logarithme à l'expression ci-dessous (celle encore sous forme `),
+    latex("\\log_a(...)"),
+    texte(`, pas le reste déjà traité). Utilise m, n, q pour toute partie DÉJÀ extraite, et r pour toute partie ENCORE à décomposer (tu la décomposeras à une étape suivante) — jamais "`),
+    latex("\\log_a(...)"),
+    texte(`" tel quel.${rappelAnterieur}`),
+  ];
 }
 
 /** Rappel "où en est-on" — `null` sur la toute première étape (rien à rappeler), sinon l'expression

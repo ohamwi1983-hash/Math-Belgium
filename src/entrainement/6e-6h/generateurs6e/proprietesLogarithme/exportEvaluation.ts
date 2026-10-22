@@ -2,7 +2,7 @@ import type { ExerciceProprieteLogarithme } from "../../core6e/proprietesLogarit
 import type { AdaptateurFeuilleExercices, BlocCorrection, SectionExercice } from "../../../export/genererFeuilleExercices";
 import { latex, texte } from "../../../export/fragmentsDocx";
 import { nombreEtapesAlgebriques } from "../../moteur6e/typesProprietesLogarithme";
-import { aideNiveau2, blocDonnees, consigneGenerale, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProprietesLogarithme";
+import { aideNiveau2, consigneGenerale, consigneEcran, expressionDemandeeLatex, formatReponseAttenduePhaseLatex } from "../../ui6e/formatProprietesLogarithme";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProprietesLogarithme } from "./index";
 
 /**
@@ -19,14 +19,8 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePropriete
 function construireEnonceProprietesLogarithme(exercice: ExerciceProprieteLogarithme): SectionExercice {
   const total = nombreEtapesAlgebriques(exercice);
   return {
-    enteteFragments: [
-      texte(consigneGenerale(exercice) + " Données : "),
-      latex(blocDonnees(exercice).join(",\\quad ")),
-      texte(". Calcule : "),
-      latex(expressionDemandeeLatex(exercice)),
-      texte("."),
-    ],
-    questions: Array.from({ length: total }, (_, phase) => ({ consigne: [texte(consigneEcran(exercice, phase))], reponse: { type: "lignes" as const, nombre: 2 } })),
+    enteteFragments: [...consigneGenerale(exercice), texte(" "), latex(expressionDemandeeLatex(exercice)), texte(".")],
+    questions: Array.from({ length: total }, (_, phase) => ({ consigne: consigneEcran(exercice, phase), reponse: { type: "lignes" as const, nombre: 2 } })),
   };
 }
 
