@@ -59,14 +59,22 @@ export function formatFLatexAffichage(exercice: ExerciceInjectiviteFonctions): s
  * `formatAffineLatex` déjà écrit côté générateur pour poser une équation/inéquation SANS la
  * résoudre (voir chaque fonction d'aide écran 1 ci-dessous).
  */
-export const CONSIGNE_GENERALE = "Étudie la fonction f suivante : domaine, injectivité, réciproque, image et bijection.";
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
 
-export const CONSIGNE_ECRAN_DOMAINE = "Détermine le domaine de définition de f.";
-export const CONSIGNE_ECRAN_INJECTIVE = "f est-elle injective sur son domaine de définition ?";
-export const CONSIGNE_SOUS_QUESTION_INTERVALLE = "Quel est le plus grand intervalle sur lequel f est injective ?";
-export const CONSIGNE_ECRAN_RECIPROQUE = "Détermine l'expression de la fonction réciproque f⁻¹(x).";
-export const CONSIGNE_ECRAN_IMAGE = "Détermine le plus grand intervalle dans lequel f est surjective.";
-export const CONSIGNE_ECRAN_BIJECTION = "Complète la phrase suivante :";
+export const CONSIGNE_GENERALE: FragmentConsigne[] = [texte("Étudie la fonction f suivante : domaine, injectivité, réciproque, image et bijection.")];
+
+export const CONSIGNE_ECRAN_DOMAINE: FragmentConsigne[] = [texte("Détermine le domaine de définition de f.")];
+export const CONSIGNE_ECRAN_INJECTIVE: FragmentConsigne[] = [texte("f est-elle injective sur son domaine de définition ?")];
+export const CONSIGNE_SOUS_QUESTION_INTERVALLE: FragmentConsigne[] = [texte("Quel est le plus grand intervalle sur lequel f est injective ?")];
+export const CONSIGNE_ECRAN_RECIPROQUE: FragmentConsigne[] = [texte("Détermine l'expression de la fonction réciproque "), latex("f^{-1}(x)"), texte(".")];
+export const CONSIGNE_ECRAN_IMAGE: FragmentConsigne[] = [texte("Détermine le plus grand intervalle dans lequel f est surjective.")];
+export const CONSIGNE_ECRAN_BIJECTION: FragmentConsigne[] = [texte("Complète la phrase suivante :")];
 
 export interface AideAvecLatex {
   texte: string;

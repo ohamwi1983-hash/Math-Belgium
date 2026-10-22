@@ -8,6 +8,7 @@ import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
@@ -44,14 +45,16 @@ export function EtapeDomaineInjectiviteFonctions({ exercice, tentativesUtilisees
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE}
+        consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatFLatexAffichage(exercice)} />
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_ECRAN_DOMAINE}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={CONSIGNE_ECRAN_DOMAINE} />
+      </p>
 
       <EnsembleReelGuideBuilder onChange={setDomaine} label="domf =" erronee={montrerErreurs && !correct} />
 

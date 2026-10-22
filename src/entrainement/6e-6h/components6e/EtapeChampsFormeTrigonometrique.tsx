@@ -3,9 +3,10 @@ import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, ChampDef } from "../ui6e/formatFormeTrigonometrique";
+import type { AideAvecLatex, ChampDef, FragmentConsigne } from "../ui6e/formatFormeTrigonometrique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { RenduFragments } from "../components/RenduFragments";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -22,9 +23,9 @@ function champEstCompose(champ: ChampDef): boolean {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -67,7 +68,7 @@ export function EtapeChampsFormeTrigonometrique({ consigneGenerale, blocDonnees,
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -78,7 +79,9 @@ export function EtapeChampsFormeTrigonometrique({ consigneGenerale, blocDonnees,
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {champs.map((champ, i) => champEstCompose(champ) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
       {/* `field-row-wrap` dès 2 champs INDÉPENDANTS côte à côte (jusqu'à 4 pour la famille B, écran
        * 1, produit/quotient) — même piège/fix déjà documenté CLAUDE.md ("Débordement horizontal"),

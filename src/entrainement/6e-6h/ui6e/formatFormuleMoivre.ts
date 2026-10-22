@@ -31,6 +31,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts`, rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -129,22 +140,50 @@ function cosNxLatex(exercice: ExerciceFormuleMoivre): string {
 // Consignes / données / état actuel.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceFormuleMoivre): string {
-  return `Formule de Moivre : exprime cos(${exercice.n}x) et sin(${exercice.n}x) en fonction de cos(x) et sin(x), en développant (cos(x)+i·sin(x))^${exercice.n} par le binôme de Newton.`;
+export function consigneGenerale(exercice: ExerciceFormuleMoivre): FragmentConsigne[] {
+  return [
+    texte("Formule de Moivre : exprime "),
+    latex(`\\cos(${exercice.n}x)`),
+    texte(" et "),
+    latex(`\\sin(${exercice.n}x)`),
+    texte(" en fonction de "),
+    latex("\\cos(x)"),
+    texte(" et "),
+    latex("\\sin(x)"),
+    texte(", en développant "),
+    latex(`(\\cos(x)+i\\cdot\\sin(x))^{${exercice.n}}`),
+    texte(" par le binôme de Newton."),
+  ];
 }
 
 export function blocDonnees(exercice: ExerciceFormuleMoivre): string[] {
   return [`(\\cos(x)+i\\sin(x))^{${exercice.n}}=\\cos(${exercice.n}x)+i\\sin(${exercice.n}x)`];
 }
 
-export function consigneEcran(exercice: ExerciceFormuleMoivre, phase: PhaseFormuleMoivre): string {
+export function consigneEcran(exercice: ExerciceFormuleMoivre, phase: PhaseFormuleMoivre): FragmentConsigne[] {
   switch (phase) {
     case "ecran1":
-      return `Développe (cos(x)+i·sin(x))^${exercice.n} via le binôme de Newton : liste chaque terme C(n,k)·cos^(n−k)(x)·(i·sin(x))^k pour k=0,...,${exercice.n}, SANS simplifier les puissances de i.`;
+      return [
+        texte("Développe "),
+        latex(`(\\cos(x)+i\\cdot\\sin(x))^{${exercice.n}}`),
+        texte(" via le binôme de Newton : liste chaque terme "),
+        latex("C(n,k)\\cdot\\cos^{n-k}(x)\\cdot(i\\cdot\\sin(x))^k"),
+        texte(` pour k=0,...,${exercice.n}, SANS simplifier les puissances de i.`),
+      ];
     case "ecran2":
-      return "Simplifie chaque puissance de i présente dans les termes du développement CONFIRMÉ à l'étape précédente (cycle i⁰=1, i¹=i, i²=−1, i³=−i, périodique de période 4), puis sépare les termes d'indice k PAIR (réels) des termes d'indice k IMPAIR (imaginaires).";
+      return [
+        texte("Simplifie chaque puissance de i présente dans les termes du développement CONFIRMÉ à l'étape précédente (cycle "),
+        latex("i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i"),
+        texte(", périodique de période 4), puis sépare les termes d'indice k PAIR (réels) des termes d'indice k IMPAIR (imaginaires)."),
+      ];
     case "ecran3":
-      return `Écris cos(${exercice.n}x) (somme des termes réels CONFIRMÉS) et sin(${exercice.n}x) (somme des termes imaginaires CONFIRMÉS, facteur i mis en évidence puis retiré).`;
+      return [
+        texte("Écris "),
+        latex(`\\cos(${exercice.n}x)`),
+        texte(" (somme des termes réels CONFIRMÉS) et "),
+        latex(`\\sin(${exercice.n}x)`),
+        texte(" (somme des termes imaginaires CONFIRMÉS, facteur i mis en évidence puis retiré)."),
+      ];
   }
 }
 

@@ -4,6 +4,7 @@ import type { ExerciceInjectiviteFonctions } from "../core6e/injectiviteFonction
 import { verifierImage } from "../moteur6e/verificationInjectiviteFonctions";
 import { CONSIGNE_ECRAN_IMAGE, CONSIGNE_GENERALE, TEXTE_AIDE_IMAGE_NIVEAU1, aideImageNiveau2, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -43,14 +44,16 @@ export function EtapeImageInjectiviteFonctions({ exercice, tentativesUtilisees, 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE}
+        consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatFLatexAffichage(exercice)} />
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_ECRAN_IMAGE}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={CONSIGNE_ECRAN_IMAGE} />
+      </p>
 
       <EnsembleReelGuideBuilder onChange={setImage} label="\text{Im}(f)=" erronee={montrerErreurs && !correct} />
 

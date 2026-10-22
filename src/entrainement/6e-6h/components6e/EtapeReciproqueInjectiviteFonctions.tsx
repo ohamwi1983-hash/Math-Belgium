@@ -6,6 +6,7 @@ import { diagnostiquerReciproque } from "../moteur6e/verificationInjectiviteFonc
 import { CONSIGNE_ECRAN_RECIPROQUE, CONSIGNE_GENERALE, TEXTE_AIDE_RECIPROQUE_NIVEAU1, aideReciproqueNiveau2, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -45,14 +46,16 @@ export function EtapeReciproqueInjectiviteFonctions({ exercice, coteChoisi, tent
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE}
+        consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatFLatexAffichage(exercice)} />
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_ECRAN_RECIPROQUE}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={CONSIGNE_ECRAN_RECIPROQUE} />
+      </p>
 
       <ApercuExpressionLatex texte={texte} label="f⁻¹(x) =" />
       <div className="field champ-reponse-latex">

@@ -14,6 +14,7 @@ import {
   texteAideOuiNonNiveau1,
 } from "../ui6e/formatInjectiviteFonctions";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -64,14 +65,16 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilise
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE}
+        consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatFLatexAffichage(exercice)} />
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_ECRAN_INJECTIVE}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={CONSIGNE_ECRAN_INJECTIVE} />
+      </p>
 
       <div className="options-grid-compact">
         <button
@@ -92,7 +95,9 @@ export function EtapeInjectiveInjectiviteFonctions({ exercice, tentativesUtilise
 
       {ouiNon === false && (
         <div className="contenu-conditionnel">
-          <p className="prompt-text">{CONSIGNE_SOUS_QUESTION_INTERVALLE}</p>
+          <p className="prompt-text">
+            <RenduFragments fragments={CONSIGNE_SOUS_QUESTION_INTERVALLE} />
+          </p>
           <EnsembleReelGuideBuilder onChange={setIntervalle} label="x\in" erronee={statut !== null && statut.intervalleCorrect === false} />
         </div>
       )}

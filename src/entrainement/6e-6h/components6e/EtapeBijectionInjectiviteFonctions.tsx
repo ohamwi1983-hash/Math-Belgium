@@ -5,6 +5,7 @@ import type { ReponseBijection } from "../moteur6e/verificationInjectiviteFoncti
 import { diagnostiquerBijection } from "../moteur6e/verificationInjectiviteFonctions";
 import { CONSIGNE_ECRAN_BIJECTION, CONSIGNE_GENERALE, TEXTE_AIDE_BIJECTION_NIVEAU1, formatFLatexAffichage } from "../ui6e/formatInjectiviteFonctions";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -53,14 +54,16 @@ export function EtapeBijectionInjectiviteFonctions({ exercice, tentativesUtilise
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={CONSIGNE_GENERALE}
+        consigneGenerale={<RenduFragments fragments={CONSIGNE_GENERALE} />}
         blocDonnees={
           <div className="equation-box">
             <Katex expression={formatFLatexAffichage(exercice)} />
           </div>
         }
       />
-      <p className="prompt-text">{CONSIGNE_ECRAN_BIJECTION}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={CONSIGNE_ECRAN_BIJECTION} />
+      </p>
       <p className="prompt-text">La fonction f est bijective</p>
 
       <DoubleComboboxIntervalle

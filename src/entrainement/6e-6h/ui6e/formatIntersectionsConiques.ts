@@ -32,6 +32,14 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
@@ -98,14 +106,14 @@ function coniqueLatexA(e: ExerciceIntersectionsConiquesA): string {
   return afficherConiqueLatex(e.conique.p, e.conique.q, e.conique.n);
 }
 
-function consigneSousType(sousType: ExerciceIntersectionsConiquesA["sousTypeDroite"]): string {
-  if (sousType === "deuxPoints") return "établis l'équation de la droite passant par A et B";
-  if (sousType === "mediatrice") return "établis l'équation de la médiatrice du segment [A;B]";
-  return "établis l'équation de la hauteur du triangle ABC issue de C, perpendiculaire au côté [A;B]";
+function consigneSousType(sousType: ExerciceIntersectionsConiquesA["sousTypeDroite"]): FragmentConsigne[] {
+  if (sousType === "deuxPoints") return [texte("établis l'équation de la droite passant par A et B")];
+  if (sousType === "mediatrice") return [texte("établis l'équation de la médiatrice du segment "), latex("[A;B]")];
+  return [texte("établis l'équation de la hauteur du triangle ABC issue de C, perpendiculaire au côté "), latex("[A;B]")];
 }
 
-export function consigneGeneraleA(e: ExerciceIntersectionsConiquesA): string {
-  return `On étudie l'intersection d'une droite et d'une conique (${LIBELLE_NATURE[e.natureConique]}). Détermine leurs équations, résous l'équation du second degré obtenue par substitution, puis donne les points d'intersection.`;
+export function consigneGeneraleA(e: ExerciceIntersectionsConiquesA): FragmentConsigne[] {
+  return [texte(`On étudie l'intersection d'une droite et d'une conique (${LIBELLE_NATURE[e.natureConique]}). Détermine leurs équations, résous l'équation du second degré obtenue par substitution, puis donne les points d'intersection.`)];
 }
 
 export function blocDonneesA(e: ExerciceIntersectionsConiquesA): string[] {
@@ -129,11 +137,11 @@ export function blocDonneesA(e: ExerciceIntersectionsConiquesA): string[] {
   return lignes;
 }
 
-export function consigneEcranA(e: ExerciceIntersectionsConiquesA, phase: PhaseIntersectionsConiques): string {
-  if (phase === "aEcran1") return "Établis l'équation de la conique depuis ses caractéristiques (sommet S, foyer F).";
-  if (phase === "aEcran2") return `À partir des données ci-dessus, ${consigneSousType(e.sousTypeDroite)}.`;
-  if (phase === "aEcran3") return "Substitue l'équation de la droite CONFIRMÉE dans celle de la conique CONFIRMÉE, développe, et résous l'équation du second degré obtenue en x. Donne le discriminant et le nombre de solutions (0, 1, ou 2).";
-  return "À partir de la résolution CONFIRMÉE, donne les coordonnées du (ou des) point(s) d'intersection — aucune ligne si le discriminant est négatif.";
+export function consigneEcranA(e: ExerciceIntersectionsConiquesA, phase: PhaseIntersectionsConiques): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Établis l'équation de la conique depuis ses caractéristiques (sommet S, foyer F).")];
+  if (phase === "aEcran2") return [texte("À partir des données ci-dessus, "), ...consigneSousType(e.sousTypeDroite), texte(".")];
+  if (phase === "aEcran3") return [texte("Substitue l'équation de la droite CONFIRMÉE dans celle de la conique CONFIRMÉE, développe, et résous l'équation du second degré obtenue en x. Donne le discriminant et le nombre de solutions (0, 1, ou 2).")];
+  return [texte("À partir de la résolution CONFIRMÉE, donne les coordonnées du (ou des) point(s) d'intersection — aucune ligne si le discriminant est négatif.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
@@ -204,18 +212,52 @@ function c2Latex(e: ExerciceIntersectionsConiquesB): string {
   return `${termeSigne(e.A2, "x^2", true)}${termeSigne(e.B2, "y^2", false)}${termeSigne(e.D2, "x", false)}${termeSigne(e.E2, "y", false)}${formatConstante(e.F2)}=0`;
 }
 
-export function consigneGeneraleB(): string {
-  return "On donne 2 coniques C1 et C2. Montre que leurs points d'intersection se trouvent sur un CERCLE, sans jamais résoudre le système {C1,C2} directement — cherche une combinaison λC1+μC2=0 qui SOIT un cercle.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [
+    texte("On donne 2 coniques "),
+    latex("C_1"),
+    texte(" et "),
+    latex("C_2"),
+    texte(". Montre que leurs points d'intersection se trouvent sur un CERCLE, sans jamais résoudre le système "),
+    latex("\\{C_1,C_2\\}"),
+    texte(" directement — cherche une combinaison "),
+    latex("\\lambda C_1+\\mu C_2=0"),
+    texte(" qui SOIT un cercle."),
+  ];
 }
 
 export function blocDonneesB(e: ExerciceIntersectionsConiquesB): string[] {
   return [`C_1 : ${c1Latex(e)}`, `C_2 : ${c2Latex(e)}`];
 }
 
-export function consigneEcranB(_e: ExerciceIntersectionsConiquesB, phase: PhaseIntersectionsConiques): string {
-  if (phase === "bEcran1") return "Forme la combinaison λC1+μC2=0. Pose les conditions sur λ,μ pour que les coefficients de x² et de y² soient ÉGAUX (aucun terme croisé xy n'apparaît jamais ici) — donne une paire (λ,μ) qui convient.";
-  if (phase === "bEcran2") return "Avec le couple (λ,μ) CONFIRMÉ, substitue dans λC1+μC2 et donne l'équation BRUTE du cercle obtenu (pas encore sous forme standard).";
-  return "Complète le carré sur x et sur y à partir de l'équation CONFIRMÉE de l'étape précédente, pour identifier le centre et le rayon du cercle.";
+export function consigneEcranB(_e: ExerciceIntersectionsConiquesB, phase: PhaseIntersectionsConiques): FragmentConsigne[] {
+  if (phase === "bEcran1") {
+    return [
+      texte("Forme la combinaison "),
+      latex("\\lambda C_1+\\mu C_2=0"),
+      texte(". Pose les conditions sur "),
+      latex("\\lambda,\\mu"),
+      texte(" pour que les coefficients de "),
+      latex("x^2"),
+      texte(" et de "),
+      latex("y^2"),
+      texte(" soient ÉGAUX (aucun terme croisé "),
+      latex("xy"),
+      texte(" n'apparaît jamais ici) — donne une paire "),
+      latex("(\\lambda,\\mu)"),
+      texte(" qui convient."),
+    ];
+  }
+  if (phase === "bEcran2") {
+    return [
+      texte("Avec le couple "),
+      latex("(\\lambda,\\mu)"),
+      texte(" CONFIRMÉ, substitue dans "),
+      latex("\\lambda C_1+\\mu C_2"),
+      texte(" et donne l'équation BRUTE du cercle obtenu (pas encore sous forme standard)."),
+    ];
+  }
+  return [texte("Complète le carré sur x et sur y à partir de l'équation CONFIRMÉE de l'étape précédente, pour identifier le centre et le rayon du cercle.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelA` (voir sa doc-string). */
@@ -253,7 +295,7 @@ export function aideNiveau2B(e: ExerciceIntersectionsConiquesB): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceIntersectionsConiques): string {
+export function consigneGenerale(exercice: ExerciceIntersectionsConiques): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneGeneraleA(exercice) : consigneGeneraleB();
 }
 
@@ -261,7 +303,7 @@ export function blocDonnees(exercice: ExerciceIntersectionsConiques): string[] {
   return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): string {
+export function consigneEcran(exercice: ExerciceIntersectionsConiques, phase: PhaseIntersectionsConiques): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(exercice, phase);
 }
 

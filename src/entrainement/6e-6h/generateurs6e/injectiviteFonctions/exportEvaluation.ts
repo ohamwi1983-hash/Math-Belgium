@@ -31,7 +31,7 @@ function construireEnonceInjectiviteFonctions(exercice: ExerciceInjectiviteFonct
   const nombreParagraphes = construireParagraphesResolution(exercice).length;
   return {
     enteteFragments: [texte("On considère la fonction "), latex(formatFLatexAffichage(exercice))],
-    questions: [{ consigne: [texte(CONSIGNE_GENERALE)], reponse: { type: "lignes", nombre: nombreLignesReponse(nombreParagraphes) } }],
+    questions: [{ consigne: CONSIGNE_GENERALE, reponse: { type: "lignes", nombre: nombreLignesReponse(nombreParagraphes) } }],
   };
 }
 

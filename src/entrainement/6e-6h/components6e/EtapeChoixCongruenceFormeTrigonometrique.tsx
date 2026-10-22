@@ -2,17 +2,18 @@ import { useState } from "react";
 import { Katex } from "../components/Katex";
 import type { ConditionD } from "../core6e/formeTrigonometrique.types";
 import { OPTIONS_CONDITION_D } from "../moteur6e/verificationFormeTrigonometrique";
-import type { AideAvecLatex } from "../ui6e/formatFormeTrigonometrique";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatFormeTrigonometrique";
 import { LIBELLE_CONDITION } from "../ui6e/formatFormeTrigonometrique";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import { RenduFragments } from "../components/RenduFragments";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -47,7 +48,7 @@ export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blo
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -58,7 +59,9 @@ export function EtapeChoixCongruenceFormeTrigonometrique({ consigneGenerale, blo
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-grid-compact">
         {OPTIONS_CONDITION_D.map((option) => (
           <button key={option} type="button" className={`btn ${choix === option ? "toggle-active" : ""} ${montrerErreurs && choix === option ? "is-erronee" : ""}`} onClick={() => setChoix(option)}>

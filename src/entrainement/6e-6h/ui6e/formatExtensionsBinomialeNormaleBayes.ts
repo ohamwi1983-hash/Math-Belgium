@@ -48,6 +48,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts`, rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string): ChampDef {
@@ -101,19 +112,23 @@ function decouperEnFragmentsTexte(texte: string): string[] {
 // Famille A — Indépendance composée + trouver n via logarithme.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "Une expérience aléatoire, de probabilité de succès p à une seule répétition, est répétée de façon indépendante. Détermine le nombre minimal de répétitions pour que P(au moins 1 succès) dépasse un seuil donné.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("Une expérience aléatoire, de probabilité de succès p à une seule répétition, est répétée de façon indépendante. Détermine le nombre minimal de répétitions pour que "),
+    latex("P(\\text{au moins 1 succès})"),
+    texte(" dépasse un seuil donné."),
+  ];
 }
 
 export function blocDonneesA(e: ExerciceExtA): string[] {
   return [...decouperEnFragmentsTexte(e.contexteTexte), `\\text{Seuil : }${formatDecimalVirgule(e.seuil)}`];
 }
 
-export function consigneEcranA(phase: PhaseExtensionsBinomialeNormaleBayes): string {
-  if (phase === "aComposeEcran1P") return "Calcule p, la probabilité du succès composé (réussite des DEUX épreuves indépendantes).";
-  if (phase === "aEcranAucunAuMoins") return "Pour UNE SEULE répétition : calcule P(aucun succès) puis P(au moins 1 succès).";
-  if (phase === "aEcranTrouverN1") return "Pose l'inéquation correspondant à « P(au moins 1 succès) > seuil » en fonction de n, PUIS isole (1−p)ⁿ.";
-  return "Résous l'inéquation CONFIRMÉE pour trouver n (utilise le logarithme), puis arrondis au nombre entier supérieur.";
+export function consigneEcranA(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
+  if (phase === "aComposeEcran1P") return [texte("Calcule p, la probabilité du succès composé (réussite des DEUX épreuves indépendantes).")];
+  if (phase === "aEcranAucunAuMoins") return [texte("Pour UNE SEULE répétition : calcule "), latex("P(\\text{aucun succès})"), texte(" puis "), latex("P(\\text{au moins 1 succès})"), texte(".")];
+  if (phase === "aEcranTrouverN1") return [texte("Pose l'inéquation correspondant à « "), latex("P(\\text{au moins 1 succès})>\\text{seuil}"), texte(" » en fonction de n, PUIS isole "), latex("(1-p)^n"), texte(".")];
+  return [texte("Résous l'inéquation CONFIRMÉE pour trouver n (utilise le logarithme), puis arrondis au nombre entier supérieur.")];
 }
 
 /** Lignes confirmées à l'écran "p composé" — présent UNIQUEMENT pour `sousType==="compose"` (1er
@@ -198,8 +213,8 @@ function libelleTypeQuestionB(e: ExerciceExtB): string {
   }
 }
 
-export function consigneGeneraleB(): string {
-  return "On étudie n épreuves identiques et indépendantes, chacune avec la même probabilité p de succès. Identifie d'abord la stratégie de calcul adaptée (terme unique, somme de plusieurs termes, ou complément), puis calcule.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On étudie n épreuves identiques et indépendantes, chacune avec la même probabilité p de succès. Identifie d'abord la stratégie de calcul adaptée (terme unique, somme de plusieurs termes, ou complément), puis calcule.")];
 }
 
 export function blocDonneesB(e: ExerciceExtB): string[] {
@@ -213,10 +228,10 @@ function estEcran2B(phase: PhaseExtensionsBinomialeNormaleBayes): boolean {
   return phase === "bTermeUniqueEcran2" || phase === "bSommeEcran2" || phase === "bComplementEcran2";
 }
 
-export function consigneEcranB(phase: PhaseExtensionsBinomialeNormaleBayes): string {
-  if (estEcran1B(phase)) return "Identifie la stratégie de calcul adaptée, puis liste le ou les termes k à calculer (séparés par des virgules).";
-  if (estEcran2B(phase)) return "Calcule chaque valeur P(X=k) listée à l'étape précédente (CONFIRMÉE), dans le même ordre.";
-  return "Combine les valeurs CONFIRMÉES de l'étape précédente pour obtenir le résultat final (somme, ou complément 1−...).";
+export function consigneEcranB(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
+  if (estEcran1B(phase)) return [texte("Identifie la stratégie de calcul adaptée, puis liste le ou les termes k à calculer (séparés par des virgules).")];
+  if (estEcran2B(phase)) return [texte("Calcule chaque valeur "), latex("P(X=k)"), texte(" listée à l'étape précédente (CONFIRMÉE), dans le même ordre.")];
+  return [texte("Combine les valeurs CONFIRMÉES de l'étape précédente pour obtenir le résultat final (somme, ou complément "), latex("1-\\ldots"), texte(").")];
 }
 
 /** Ligne confirmée à l'écran 1 (stratégie + termes) — réutilisée par tout écran ultérieur (correctif
@@ -273,18 +288,23 @@ function equationCibleDepartC(e: ExerciceExtC): string {
   return `P(a\\le X\\le ${formatDecimalVirgule(b.b)})=${formatDecimalVirgule(b.p)}`;
 }
 
-export function consigneGeneraleC(): string {
-  return "X suit une loi normale N(μ,σ). À partir d'un seuil de classement donné, détermine la valeur seuil a correspondante : reformule pour la table, lis-la à l'envers, puis dé-standardise.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    latex("X"),
+    texte(" suit une loi normale "),
+    latex("N(\\mu,\\sigma)"),
+    texte(". À partir d'un seuil de classement donné, détermine la valeur seuil a correspondante : reformule pour la table, lis-la à l'envers, puis dé-standardise."),
+  ];
 }
 
 export function blocDonneesC(e: ExerciceExtC): string[] {
   return [...decouperEnFragmentsTexte(e.contexteTexte), `X\\sim\\mathcal{N}(${formatDecimalVirgule(e.base.mu)}\\text{ ; }${formatDecimalVirgule(e.base.sigma)})`, equationCibleDepartC(e)];
 }
 
-export function consigneEcranC(phase: PhaseExtensionsBinomialeNormaleBayes): string {
-  if (phase === "cEcran1") return "Identifie la transformation nécessaire pour adapter la probabilité donnée à une lecture directe de la table, et calcule la valeur cible.";
-  if (phase === "cEcran2") return "Lis la table À L'ENVERS : trouve z tel que Φ(z) égale la valeur cible CONFIRMÉE.";
-  return "Dé-standardise à partir du z CONFIRMÉ : a=μ+z·σ.";
+export function consigneEcranC(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Identifie la transformation nécessaire pour adapter la probabilité donnée à une lecture directe de la table, et calcule la valeur cible.")];
+  if (phase === "cEcran2") return [texte("Lis la table À L'ENVERS : trouve z tel que "), latex("\\Phi(z)"), texte(" égale la valeur cible CONFIRMÉE.")];
+  return [texte("Dé-standardise à partir du z CONFIRMÉ : "), latex("a=\\mu+z\\cdot\\sigma"), texte(".")];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
@@ -336,8 +356,8 @@ export const calculerReferenceExtensionsBinomialeNormaleBayes: CalculerReference
 // Famille D — Théorème de Bayes à 3 catégories.
 // ============================================================================
 
-export function consigneGeneraleD(): string {
-  return "3 catégories se partagent une population. Pour 2 d'entre elles, on connaît la probabilité conditionnelle d'un critère ; la probabilité totale du critère (toutes catégories confondues) permet de déduire par différence la conditionnelle manquante pour la 3e catégorie.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("3 catégories se partagent une population. Pour 2 d'entre elles, on connaît la probabilité conditionnelle d'un critère ; la probabilité totale du critère (toutes catégories confondues) permet de déduire par différence la conditionnelle manquante pour la 3e catégorie.")];
 }
 
 export function blocDonneesD(e: ExerciceExtD): string[] {
@@ -352,11 +372,11 @@ export function blocDonneesD(e: ExerciceExtD): string[] {
   ];
 }
 
-export function consigneEcranD(phase: PhaseExtensionsBinomialeNormaleBayes): string {
-  if (phase === "dEcran1") return "Identifie les 3 catégories et leurs probabilités d'appartenance (converties en décimal), en déduisant celle de la 3e catégorie.";
-  if (phase === "dEcran2") return "Calcule la probabilité conjointe (catégorie ∩ critère) pour les 2 catégories dont la conditionnelle est connue.";
-  if (phase === "dEcran3") return "Utilise la probabilité totale du critère (donnée) pour déduire, PAR DIFFÉRENCE, la probabilité conjointe manquante de la 3e catégorie.";
-  return "Calcule la conditionnelle demandée P(critère | 3e catégorie), à partir de la valeur CONFIRMÉE de l'étape précédente et de q₃ CONFIRMÉ de l'étape 1.";
+export function consigneEcranD(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Identifie les 3 catégories et leurs probabilités d'appartenance (converties en décimal), en déduisant celle de la 3e catégorie.")];
+  if (phase === "dEcran2") return [texte("Calcule la probabilité conjointe (catégorie ∩ critère) pour les 2 catégories dont la conditionnelle est connue.")];
+  if (phase === "dEcran3") return [texte("Utilise la probabilité totale du critère (donnée) pour déduire, PAR DIFFÉRENCE, la probabilité conjointe manquante de la 3e catégorie.")];
+  return [texte("Calcule la conditionnelle demandée "), latex("P(\\text{critère}\\mid\\text{3e catégorie})"), texte(", à partir de la valeur CONFIRMÉE de l'étape précédente et de "), latex("q_3"), texte(" CONFIRMÉ de l'étape 1.")];
 }
 
 /** Lignes confirmées à l'écran 1 (probabilités d'appartenance) — réutilisées par tout écran
@@ -406,17 +426,28 @@ export function aideNiveau2D(e: ExerciceExtD, phase: PhaseExtensionsBinomialeNor
 // Famille E — Loi uniforme continue.
 // ============================================================================
 
-export function consigneGeneraleE(): string {
-  return "X suit une loi uniforme sur [a;b] : la densité de probabilité est constante sur tout l'intervalle. Calcule P(c≤X≤d) en comparant les longueurs des intervalles [c;d] et [a;b] (aucune table, aucune intégrale nécessaire).";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [
+    latex("X"),
+    texte(" suit une loi uniforme sur "),
+    latex("[a;b]"),
+    texte(" : la densité de probabilité est constante sur tout l'intervalle. Calcule "),
+    latex("P(c\\le X\\le d)"),
+    texte(" en comparant les longueurs des intervalles "),
+    latex("[c;d]"),
+    texte(" et "),
+    latex("[a;b]"),
+    texte(" (aucune table, aucune intégrale nécessaire)."),
+  ];
 }
 
 export function blocDonneesE(e: ExerciceExtE): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texte), `X\\sim\\mathcal{U}([${e.a}\\text{ ; }${e.b}])`, `\\text{Calculer : }P(${e.c}\\le X\\le ${e.d})`];
 }
 
-export function consigneEcranE(phase: PhaseExtensionsBinomialeNormaleBayes): string {
-  if (phase === "eEcran1") return "Détermine la longueur de l'intervalle [c;d] (numérateur) et celle de [a;b] (dénominateur) — le rapport n'est pas encore demandé.";
-  return "Calcule la probabilité finale : rapport des 2 longueurs CONFIRMÉES.";
+export function consigneEcranE(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Détermine la longueur de l'intervalle "), latex("[c;d]"), texte(" (numérateur) et celle de "), latex("[a;b]"), texte(" (dénominateur) — le rapport n'est pas encore demandé.")];
+  return [texte("Calcule la probabilité finale : rapport des 2 longueurs CONFIRMÉES.")];
 }
 
 export function etatActuelE(e: ExerciceExtE, phase: PhaseExtensionsBinomialeNormaleBayes): string[] | null {
@@ -447,8 +478,8 @@ export function aideNiveau2E(e: ExerciceExtE, phase: PhaseExtensionsBinomialeNor
 // Famille F — Reconstruire une loi depuis des % croisés + espérance appliquée.
 // ============================================================================
 
-export function consigneGeneraleF(): string {
-  return "Plusieurs options se partagent une population. Reconstruis la loi de probabilité complète de X (le montant associé à chaque option), calcule son espérance, puis applique-la à une population donnée.";
+export function consigneGeneraleF(): FragmentConsigne[] {
+  return [texte("Plusieurs options se partagent une population. Reconstruis la loi de probabilité complète de "), latex("X"), texte(" (le montant associé à chaque option), calcule son espérance, puis applique-la à une population donnée.")];
 }
 
 export function blocDonneesF(e: ExerciceExtF): string[] {
@@ -464,11 +495,11 @@ export function blocDonneesF(e: ExerciceExtF): string[] {
   ];
 }
 
-export function consigneEcranF(phase: PhaseExtensionsBinomialeNormaleBayes): string {
-  if (phase === "fEcran1") return "Traduis les pourcentages donnés en probabilités décimales, et déduis par différence la probabilité manquante (celle qui correspond à « le reste »).";
-  if (phase === "fEcran2") return "Construis la loi complète de X : pour chaque option, reporte sa valeur (déjà connue) et sa probabilité CONFIRMÉE.";
-  if (phase === "fEcran3") return "Calcule l'espérance E(X)=Σxᵢ·pᵢ à partir de la loi CONFIRMÉE de l'étape précédente.";
-  return "Multiplie E(X) CONFIRMÉE par la taille de la population pour estimer le total attendu.";
+export function consigneEcranF(phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Traduis les pourcentages donnés en probabilités décimales, et déduis par différence la probabilité manquante (celle qui correspond à « le reste »).")];
+  if (phase === "fEcran2") return [texte("Construis la loi complète de "), latex("X"), texte(" : pour chaque option, reporte sa valeur (déjà connue) et sa probabilité CONFIRMÉE.")];
+  if (phase === "fEcran3") return [texte("Calcule l'espérance "), latex("E(X)=\\sum x_i\\cdot p_i"), texte(" à partir de la loi CONFIRMÉE de l'étape précédente.")];
+  return [texte("Multiplie "), latex("E(X)"), texte(" CONFIRMÉE par la taille de la population pour estimer le total attendu.")];
 }
 
 /** Table confirmée à l'écran 2 (loi complète, valeurs ET probabilités CONFIRMÉES de l'écran 1
@@ -516,7 +547,7 @@ export function aideNiveau2F(): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceExtensionsBinomialeNormaleBayes): string {
+export function consigneGenerale(exercice: ExerciceExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -550,7 +581,7 @@ export function blocDonnees(exercice: ExerciceExtensionsBinomialeNormaleBayes): 
   }
 }
 
-export function consigneEcran(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): string {
+export function consigneEcran(exercice: ExerciceExtensionsBinomialeNormaleBayes, phase: PhaseExtensionsBinomialeNormaleBayes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);
