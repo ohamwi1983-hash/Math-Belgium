@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex } from "../ui6e/formatDeterminerParametresLogarithme";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatDeterminerParametresLogarithme";
 import type { ReponseDeuxChamps } from "../moteur6e/verificationDeterminerParametresLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -11,9 +12,9 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   labelA: string;
   labelB: string;
   placeholderA: string;
@@ -71,7 +72,7 @@ export function EtapeDeuxChampsDeterminerParametres({
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -82,7 +83,9 @@ export function EtapeDeuxChampsDeterminerParametres({
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={a} label={labelA} />
       <ApercuExpressionLatex texte={b} label={labelB} />
       <div className="field-row">

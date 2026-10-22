@@ -74,6 +74,8 @@ import {
   texteAideGDeriveeFinaleNiveau2,
   texteAideGDeriveeInterneNiveau1,
   texteAideGDeriveeInterneNiveau2,
+  texte,
+  latex as latexFrag,
 } from "./ui6e/formatDeriveesCyclometriques";
 import { calculerRecapitulatifDeriveesCyclometriques, calculerSegmentsProgressionDeriveesCyclometriques } from "./ui6e/recapitulatifDeriveesCyclometriques";
 import { RecapitulatifPanel } from "./components6e/RecapitulatifPanel";
@@ -266,7 +268,7 @@ export function App6gen4() {
           {etat.phase === "aDeriveeU" && exercice.famille === "A" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive u(x) seul."
+                  consigneEcran={[texte("Dérive "), latexFrag("u(x)"), texte(" seul.")]}
                   fonctionLatex={formatFonctionALatex(exercice)}
                   aideNiveau1={{ texte: texteAideADeriveeUNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideADeriveeUNiveau2(exercice)}
@@ -283,7 +285,7 @@ export function App6gen4() {
               {etat.phase === "aDeriveeFinale" && exercice.famille === "A" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Assemble f'(x) — utilise le u(x) et le u'(x) corrects, simplifie si possible."
+                  consigneEcran={[texte("Assemble "), latexFrag("f'(x)"), texte(" — utilise le "), latexFrag("u(x)"), texte(" et le "), latexFrag("u'(x)"), texte(" corrects, simplifie si possible.")]}
                   fonctionLatex={formatFonctionALatex(exercice)}
                   aideNiveau1={texteAideADeriveeFinaleNiveau1(exercice)}
                   aideNiveau2={texteAideADeriveeFinaleNiveau2(exercice)}
@@ -301,7 +303,7 @@ export function App6gen4() {
               {etat.phase === "bDeriveeU" && exercice.famille === "B" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive u(x)."
+                  consigneEcran={[texte("Dérive "), latexFrag("u(x)"), texte(".")]}
                   fonctionLatex={formatFonctionBLatex(exercice)}
                   aideNiveau1={{ texte: texteAideBDeriveeUNiveau1(), latex: null }}
                   aideNiveau2={texteAideBDeriveeUNiveau2(exercice)}
@@ -318,9 +320,9 @@ export function App6gen4() {
               {etat.phase === "bDeriveeArc" && exercice.famille === "B" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive arcfonction(v(x)) séparément."
+                  consigneEcran={[texte("Dérive "), latexFrag("\\text{arcfonction}(v(x))"), texte(" séparément.")]}
                   fonctionLatex={formatFonctionBLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideBDeriveeArcNiveau1(exercice), latex: null }}
+                  aideNiveau1={texteAideBDeriveeArcNiveau1(exercice)}
                   aideNiveau2={texteAideBDeriveeArcNiveau2(exercice)}
                   placeholder={placeholderGenerique}
                   tentativesUtilisees={tentativesUtilisees}
@@ -335,7 +337,7 @@ export function App6gen4() {
               {etat.phase === "bDeriveeFinale" && exercice.famille === "B" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Assemble f'(x) via la règle du produit."
+                  consigneEcran={[texte("Assemble "), latexFrag("f'(x)"), texte(" via la règle du produit.")]}
                   fonctionLatex={formatFonctionBLatex(exercice)}
                   aideNiveau1={{ texte: texteAideBDeriveeFinaleNiveau1(), latex: null }}
                   aideNiveau2={texteAideBDeriveeFinaleNiveau2(exercice)}
@@ -353,7 +355,7 @@ export function App6gen4() {
               {etat.phase === "cNumerateur" && exercice.famille === "C" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive le numérateur."
+                  consigneEcran={[texte("Dérive le numérateur.")]}
                   fonctionLatex={formatFonctionCLatex(exercice)}
                   aideNiveau1={{ texte: texteAideCNumerateurNiveau1(), latex: null }}
                   aideNiveau2={texteAideCNumerateurNiveau2(exercice)}
@@ -370,9 +372,9 @@ export function App6gen4() {
               {etat.phase === "cDenominateur" && exercice.famille === "C" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive le dénominateur."
+                  consigneEcran={[texte("Dérive le dénominateur.")]}
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideCDenominateurNiveau1(), latex: null }}
+                  aideNiveau1={texteAideCDenominateurNiveau1()}
                   aideNiveau2={texteAideCDenominateurNiveau2(exercice)}
                   placeholder={placeholderGenerique}
                   tentativesUtilisees={tentativesUtilisees}
@@ -387,9 +389,9 @@ export function App6gen4() {
               {etat.phase === "cDeriveeFinale" && exercice.famille === "C" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Assemble f'(x) via la formule du quotient."
+                  consigneEcran={[texte("Assemble "), latexFrag("f'(x)"), texte(" via la formule du quotient.")]}
                   fonctionLatex={formatFonctionCLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideCDeriveeFinaleNiveau1(), latex: null }}
+                  aideNiveau1={texteAideCDeriveeFinaleNiveau1()}
                   aideNiveau2={texteAideCDeriveeFinaleNiveau2(exercice)}
                   placeholder={placeholderGenerique}
                   tentativesUtilisees={tentativesUtilisees}
@@ -405,7 +407,7 @@ export function App6gen4() {
               {etat.phase === "dNumerateur" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive le numérateur."
+                  consigneEcran={[texte("Dérive le numérateur.")]}
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   aideNiveau1={{ texte: texteAideDNumerateurNiveau1(), latex: null }}
                   aideNiveau2={texteAideDNumerateurNiveau2(exercice)}
@@ -422,7 +424,7 @@ export function App6gen4() {
               {etat.phase === "dDenominateur" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive le dénominateur."
+                  consigneEcran={[texte("Dérive le dénominateur.")]}
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   aideNiveau1={{ texte: texteAideDDenominateurNiveau1(), latex: null }}
                   aideNiveau2={texteAideDDenominateurNiveau2(exercice)}
@@ -439,9 +441,9 @@ export function App6gen4() {
               {etat.phase === "dBrut" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Assemble f'(x) via la formule du quotient — résultat BRUT, ne simplifie pas encore."
+                  consigneEcran={[texte("Assemble "), latexFrag("f'(x)"), texte(" via la formule du quotient — résultat BRUT, ne simplifie pas encore.")]}
                   fonctionLatex={formatFonctionDLatex(exercice)}
-                  aideNiveau1={{ texte: texteAideDBrutNiveau1(), latex: null }}
+                  aideNiveau1={texteAideDBrutNiveau1()}
                   aideNiveau2={texteAideDBrutNiveau2(exercice)}
                   placeholder={placeholderGenerique}
                   tentativesUtilisees={tentativesUtilisees}
@@ -456,7 +458,7 @@ export function App6gen4() {
               {etat.phase === "dSimplifiee" && exercice.famille === "D" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Simplifie le résultat précédent grâce à l'identité arcsin(u)+arccos(u)=π/2."
+                  consigneEcran={[texte("Simplifie le résultat précédent grâce à l'identité "), latexFrag("\\arcsin(u)+\\arccos(u)=\\dfrac{\\pi}{2}"), texte(".")]}
                   fonctionLatex={formatFonctionDLatex(exercice)}
                   aideNiveau1={texteAideDSimplifieeNiveau1()}
                   aideNiveau2={texteAideDSimplifieeNiveau2(exercice)}
@@ -474,7 +476,7 @@ export function App6gen4() {
               {etat.phase === "eDeriveeInterne" && exercice.famille === "E" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive l'arcfonction interne complète."
+                  consigneEcran={[texte("Dérive l'arcfonction interne complète.")]}
                   fonctionLatex={formatFonctionELatex(exercice)}
                   aideNiveau1={{ texte: texteAideEDeriveeInterneNiveau1(), latex: null }}
                   aideNiveau2={texteAideEDeriveeInterneNiveau2(exercice)}
@@ -491,7 +493,7 @@ export function App6gen4() {
               {etat.phase === "eDeriveeFinale" && exercice.famille === "E" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Assemble f'(x) via la chaîne extérieure."
+                  consigneEcran={[texte("Assemble "), latexFrag("f'(x)"), texte(" via la chaîne extérieure.")]}
                   fonctionLatex={formatFonctionELatex(exercice)}
                   aideNiveau1={{ texte: texteAideEDeriveeFinaleNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideEDeriveeFinaleNiveau2(exercice)}
@@ -509,7 +511,7 @@ export function App6gen4() {
               {etat.phase === "fBrute" && exercice.famille === "F" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Dérive f(x) via la chaîne standard — résultat brut accepté."
+                  consigneEcran={[texte("Dérive "), latexFrag("f(x)"), texte(" via la chaîne standard — résultat brut accepté.")]}
                   fonctionLatex={formatFonctionFLatex(exercice)}
                   aideNiveau1={{ texte: texteAideFBruteNiveau1(), latex: null }}
                   aideNiveau2={texteAideFBruteNiveau2(exercice)}
@@ -526,7 +528,7 @@ export function App6gen4() {
               {etat.phase === "fSimplifiee" && exercice.famille === "F" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Donne la forme finale simplifiée via l'identité trigonométrique adéquate."
+                  consigneEcran={[texte("Donne la forme finale simplifiée via l'identité trigonométrique adéquate.")]}
                   fonctionLatex={formatFonctionFLatex(exercice)}
                   aideNiveau1={texteAideFSimplifieeNiveau1()}
                   aideNiveau2={{ texte: texteAideFSimplifieeNiveau2(exercice), latex: null }}
@@ -544,7 +546,11 @@ export function App6gen4() {
               {etat.phase === "gDeriveeInterne" && exercice.famille === "G" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran={exercice.sousCas === "h" ? "Dérive v(x)." : "Dérive la fraction interne u(x)."}
+                  consigneEcran={
+                    exercice.sousCas === "h"
+                      ? [texte("Dérive "), latexFrag("v(x)"), texte(".")]
+                      : [texte("Dérive la fraction interne "), latexFrag("u(x)"), texte(".")]
+                  }
                   fonctionLatex={formatFonctionGLatex(exercice)}
                   aideNiveau1={{ texte: texteAideGDeriveeInterneNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideGDeriveeInterneNiveau2(exercice)}
@@ -561,7 +567,7 @@ export function App6gen4() {
               {etat.phase === "gDeriveeFinale" && exercice.famille === "G" && (
                 <EtapeChampDeriveeCyclo
                   key={etat.phase}
-                  consigneEcran="Assemble f'(x)."
+                  consigneEcran={[texte("Assemble "), latexFrag("f'(x)"), texte(".")]}
                   fonctionLatex={formatFonctionGLatex(exercice)}
                   aideNiveau1={{ texte: texteAideGDeriveeFinaleNiveau1(exercice), latex: null }}
                   aideNiveau2={texteAideGDeriveeFinaleNiveau2(exercice)}

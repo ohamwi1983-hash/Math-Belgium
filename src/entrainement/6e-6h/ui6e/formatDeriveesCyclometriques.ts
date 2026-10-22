@@ -23,6 +23,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
+ * via `components/RenduFragments.tsx`. Utilisé par les 18 `consigneEcran` de `App6gen4.tsx` (chaque
+ * écran y définit sa propre consigne, jamais stockée ici — voir le composant pour le détail). */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+export function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+export function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const NOM_LATEX: Record<Arcfonction, string> = { arcsin: "\\arcsin", arccos: "\\arccos", arctan: "\\arctan" };
 
 interface TermeAffiche {
@@ -150,10 +162,10 @@ export function texteAideBDeriveeUNiveau2(e: ExerciceDeriveeB): AideAvecLatex {
   return { texte: "u(x) = m·x, donc :", latex: `u'(x) = ${e.m}` };
 }
 
-export function texteAideBDeriveeArcNiveau1(e: ExerciceDeriveeB): string {
+export function texteAideBDeriveeArcNiveau1(e: ExerciceDeriveeB): AideAvecLatex {
   return e.vType === "simple"
-    ? "Ici v(x)=x, la règle de chaîne se réduit à la dérivée directe de arcfonction."
-    : "N'oublie pas la règle de la chaîne : dérivée de arcfonction(v) fois v'(x), avec v(x)=ax²+b ici non triviale.";
+    ? { texte: "Ici v(x)=x, la règle de chaîne se réduit à la dérivée directe de arcfonction.", latex: null }
+    : { texte: "N'oublie pas la règle de la chaîne : dérivée de arcfonction(v) fois v'(x), avec v(x) ici non triviale :", latex: "v(x) = ax^2+b" };
 }
 export function texteAideBDeriveeArcNiveau2(e: ExerciceDeriveeB): AideAvecLatex {
   const deriveeBase = formatDeriveeArcfonctionLatex(e.arcfonction, formatVLatexB(e));
@@ -191,15 +203,18 @@ export function texteAideCNumerateurNiveau2(e: ExerciceDeriveeC): AideAvecLatex 
   return { texte: "k et a déjà substitués :", latex: `N'(x) = ${e.k}\\cdot\\left[${deriveeBase}\\right]\\cdot ${e.a}` };
 }
 
-export function texteAideCDenominateurNiveau1(): string {
-  return "Dénominateur : D(x)=√(1-(ax)²) — écris-le sous forme (1-(ax)²)^(1/2) puis applique la chaîne.";
+export function texteAideCDenominateurNiveau1(): AideAvecLatex {
+  return { texte: "Dénominateur — écris-le sous forme d'une puissance 1/2 puis applique la chaîne :", latex: "D(x) = \\sqrt{1-(ax)^2} = \\left(1-(ax)^2\\right)^{1/2}" };
 }
 export function texteAideCDenominateurNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   return { texte: "Substitue a :", latex: `D'(x) = \\dfrac{-${e.a}^{2}x}{\\sqrt{1-(${e.a}x)^{2}}}` };
 }
 
-export function texteAideCDeriveeFinaleNiveau1(): string {
-  return "Formule du quotient f'=(N'D-ND')/D² avec les N', D' CORRECTS des étapes précédentes — attention, aucune simplification supplémentaire n'est garantie ici, ne force pas une forme plus courte qui n'existe pas.";
+export function texteAideCDeriveeFinaleNiveau1(): AideAvecLatex {
+  return {
+    texte: "Formule du quotient, avec les N', D' CORRECTS des étapes précédentes — attention, aucune simplification supplémentaire n'est garantie ici, ne force pas une forme plus courte qui n'existe pas :",
+    latex: "f' = \\dfrac{N'D-ND'}{D^2}",
+  };
 }
 export function texteAideCDeriveeFinaleNiveau2(e: ExerciceDeriveeC): AideAvecLatex {
   const arcTexteLatex = NOM_LATEX[e.arcfonction];
@@ -244,8 +259,8 @@ export function texteAideDDenominateurNiveau2(e: ExerciceDeriveeD): AideAvecLate
   return { texte: "u déjà substitué :", latex: `D'(x) = \\left[${deriveeBase}\\right]\\cdot ${e.a}` };
 }
 
-export function texteAideDBrutNiveau1(): string {
-  return "Assemble via la formule du quotient (N'D-ND')/D² avec les N,N',D,D' corrects — résultat BRUT, ne cherche pas encore à simplifier.";
+export function texteAideDBrutNiveau1(): AideAvecLatex {
+  return { texte: "Assemble via la formule du quotient avec les N,N',D,D' corrects — résultat BRUT, ne cherche pas encore à simplifier :", latex: "f' = \\dfrac{N'D-ND'}{D^2}" };
 }
 export function texteAideDBrutNiveau2(e: ExerciceDeriveeD): AideAvecLatex {
   const uLatex = formatAffineLatex(e.a, e.b);

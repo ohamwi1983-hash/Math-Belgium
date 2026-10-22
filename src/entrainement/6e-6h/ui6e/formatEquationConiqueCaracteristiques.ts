@@ -43,6 +43,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
+ * via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
@@ -131,8 +142,8 @@ function pointSommetFoyerMemeAxe(e: ExoMemeAxe): { s: { x: number; y: number }; 
   return { s: { x: 0, y: e.signeS * e.a }, f: { x: 0, y: e.signeF * e.c } };
 }
 
-export function consigneGeneraleAMemeAxe(): string {
-  return "On donne un sommet S et un foyer F d'une conique centrée à l'origine, tous les deux sur le MÊME axe. Détermine s'il s'agit d'une ellipse ou d'une hyperbole, puis construis son équation.";
+export function consigneGeneraleAMemeAxe(): FragmentConsigne[] {
+  return [texte("On donne un sommet S et un foyer F d'une conique centrée à l'origine, tous les deux sur le MÊME axe. Détermine s'il s'agit d'une ellipse ou d'une hyperbole, puis construis son équation.")];
 }
 
 export function blocDonneesAMemeAxe(e: ExoMemeAxe): string[] {
@@ -140,10 +151,20 @@ export function blocDonneesAMemeAxe(e: ExoMemeAxe): string[] {
   return [`\\text{Sommet : }S(${s.x};${s.y})`, `\\text{Foyer : }F(${f.x};${f.y})`];
 }
 
-export function consigneEcranAMemeAxe(_e: ExoMemeAxe, phase: PhaseEquationConiqueCaracteristiques): string {
-  if (phase === "aMemeAxeEcran1") return "Extrais les distances a=|S| et c=|F| (par rapport au centre, à l'origine).";
-  if (phase === "aMemeAxeEcran2") return "Compare a et c pour déterminer la nature exacte, puis calcule b² avec la formule appropriée (b²=a²-c² pour une ellipse, b²=c²-a² pour une hyperbole).";
-  return "À partir de la nature et de b² CONFIRMÉS, donne l'équation finale de la conique.";
+export function consigneEcranAMemeAxe(_e: ExoMemeAxe, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
+  if (phase === "aMemeAxeEcran1") return [texte("Extrais les distances "), latex("a=|S|"), texte(" et "), latex("c=|F|"), texte(" (par rapport au centre, à l'origine).")];
+  if (phase === "aMemeAxeEcran2") {
+    return [
+      texte("Compare a et c pour déterminer la nature exacte, puis calcule "),
+      latex("b^2"),
+      texte(" avec la formule appropriée ("),
+      latex("b^2=a^2-c^2"),
+      texte(" pour une ellipse, "),
+      latex("b^2=c^2-a^2"),
+      texte(" pour une hyperbole)."),
+    ];
+  }
+  return [texte("À partir de la nature et de "), latex("b^2"), texte(" CONFIRMÉS, donne l'équation finale de la conique.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
@@ -175,8 +196,8 @@ function pointSommetFoyerAxesPerp(e: ExoAxesPerp): { s: { x: number; y: number }
   return { s: { x: e.signeS * e.b, y: 0 }, f: { x: 0, y: e.signeF * e.c } };
 }
 
-export function consigneGeneraleAAxesPerp(): string {
-  return "On donne un sommet S d'une ellipse centrée à l'origine, sur un axe, ET un foyer F sur l'axe PERPENDICULAIRE. Attention : c'est la position du foyer, jamais celle de S, qui détermine l'axe principal.";
+export function consigneGeneraleAAxesPerp(): FragmentConsigne[] {
+  return [texte("On donne un sommet S d'une ellipse centrée à l'origine, sur un axe, ET un foyer F sur l'axe PERPENDICULAIRE. Attention : c'est la position du foyer, jamais celle de S, qui détermine l'axe principal.")];
 }
 
 export function blocDonneesAAxesPerp(e: ExoAxesPerp): string[] {
@@ -184,10 +205,10 @@ export function blocDonneesAAxesPerp(e: ExoAxesPerp): string[] {
   return [`\\text{Sommet : }S(${s.x};${s.y})`, `\\text{Foyer : }F(${f.x};${f.y})`];
 }
 
-export function consigneEcranAAxesPerp(_e: ExoAxesPerp, phase: PhaseEquationConiqueCaracteristiques): string {
-  if (phase === "aAxesPerpEcran1") return "Quel axe est l'axe PRINCIPAL (celui qui portera a) ? Et que vaut b (le sommet donné S, sur l'axe secondaire) ?";
-  if (phase === "aAxesPerpEcran2") return "À partir de b CONFIRMÉ, calcule c=|F| puis a²=b²+c².";
-  return "À partir de c et a² CONFIRMÉS, donne l'équation finale.";
+export function consigneEcranAAxesPerp(_e: ExoAxesPerp, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
+  if (phase === "aAxesPerpEcran1") return [texte("Quel axe est l'axe PRINCIPAL (celui qui portera a) ? Et que vaut b (le sommet donné S, sur l'axe secondaire) ?")];
+  if (phase === "aAxesPerpEcran2") return [texte("À partir de b CONFIRMÉ, calcule "), latex("c=|F|"), texte(" puis "), latex("a^2=b^2+c^2"), texte(".")];
+  return [texte("À partir de c et "), latex("a^2"), texte(" CONFIRMÉS, donne l'équation finale.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string). */
@@ -232,17 +253,17 @@ export function aideNiveau2AAxesPerp(e: ExoAxesPerp): AideAvecLatex {
 // Famille A, sous-type "2 sommets".
 // ============================================================================
 
-export function consigneGeneraleADeuxSommets(): string {
-  return "On donne 2 sommets d'une ellipse centrée à l'origine, sur 2 axes perpendiculaires. Identifie quel sommet correspond à quel axe, puis donne l'équation.";
+export function consigneGeneraleADeuxSommets(): FragmentConsigne[] {
+  return [texte("On donne 2 sommets d'une ellipse centrée à l'origine, sur 2 axes perpendiculaires. Identifie quel sommet correspond à quel axe, puis donne l'équation.")];
 }
 
 export function blocDonneesADeuxSommets(e: ExoDeuxSommets): string[] {
   return [`\\text{Sommet : }S(${e.signeSommetX * e.sommetX};0)`, `\\text{Sommet : }S'(0;${e.signeSommetY * e.sommetY})`];
 }
 
-export function consigneEcranADeuxSommets(_e: ExoDeuxSommets, phase: PhaseEquationConiqueCaracteristiques): string {
-  if (phase === "aDeuxSommetsEcran1") return "Identifie a (sommet sur l'axe des x) et b (sommet sur l'axe des y).";
-  return "À partir de a et b CONFIRMÉS, donne l'équation finale.";
+export function consigneEcranADeuxSommets(_e: ExoDeuxSommets, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
+  if (phase === "aDeuxSommetsEcran1") return [texte("Identifie a (sommet sur l'axe des x) et b (sommet sur l'axe des y).")];
+  return [texte("À partir de a et b CONFIRMÉS, donne l'équation finale.")];
 }
 
 export function etatActuelADeuxSommets(e: ExoDeuxSommets, phase: PhaseEquationConiqueCaracteristiques): string[] | null {
@@ -264,8 +285,8 @@ const OPTIONS_FORME_GENERALE = (e: ExerciceFamilleB): OptionChoix[] => [
   { valeur: "vertical", label: `Axe vertical : (${afficherDifference("x", e.h)})² = 4p(${afficherDifference("y", e.k)})` },
 ];
 
-export function consigneGeneraleB(): string {
-  return "On donne le sommet d'une parabole et, selon le cas, son foyer ou un point de passage. Détermine la forme générale adaptée, la valeur signée de p, puis l'équation finale.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On donne le sommet d'une parabole et, selon le cas, son foyer ou un point de passage. Détermine la forme générale adaptée, la valeur signée de p, puis l'équation finale.")];
 }
 
 export function blocDonneesB(e: ExerciceFamilleB): string[] {
@@ -275,14 +296,14 @@ export function blocDonneesB(e: ExerciceFamilleB): string[] {
   return lignes;
 }
 
-export function consigneEcranB(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): string {
-  if (phase === "bEcran1") return "Identifie l'axe de symétrie (donc la forme générale adaptée) depuis les données.";
+export function consigneEcranB(e: ExerciceFamilleB, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Identifie l'axe de symétrie (donc la forme générale adaptée) depuis les données.")];
   if (phase === "bEcran2") {
     return e.donneeType === "foyer"
-      ? "Calcule p = distance signée du sommet au foyer, dans la direction de l'axe (attention au signe : au-delà ou en-deçà du sommet)."
-      : "Substitue les coordonnées du point de passage dans la forme générale CONFIRMÉE à l'étape précédente, et résous pour p — attention au signe.";
+      ? [texte("Calcule p = distance signée du sommet au foyer, dans la direction de l'axe (attention au signe : au-delà ou en-deçà du sommet).")]
+      : [texte("Substitue les coordonnées du point de passage dans la forme générale CONFIRMÉE à l'étape précédente, et résous pour p — attention au signe.")];
   }
-  return "Assemble l'équation finale, en vérifiant que l'orientation est cohérente avec le signe de p CONFIRMÉ.";
+  return [texte("Assemble l'équation finale, en vérifiant que l'orientation est cohérente avec le signe de p CONFIRMÉ.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string). */
@@ -337,8 +358,16 @@ const OPTIONS_RELATION_C: OptionChoix[] = [
   { valeur: "deuxA", label: "2a = distance entre les sommets" },
 ];
 
-export function consigneGeneraleC(): string {
-  return "On donne 2 caractéristiques parmi {2c, e, distance entre les directrices, 2a} d'une conique centrée à l'origine (l'axe des foyers est précisé). Identifie les relations, combine-les pour trouver a et c, détermine le type, puis donne l'équation.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    texte("On donne 2 caractéristiques parmi {"),
+    latex("2c"),
+    texte(", "),
+    latex("e"),
+    texte(", distance entre les directrices, "),
+    latex("2a"),
+    texte("} d'une conique centrée à l'origine (l'axe des foyers est précisé). Identifie les relations, combine-les pour trouver a et c, détermine le type, puis donne l'équation."),
+  ];
 }
 
 export function blocDonneesC(e: ExerciceFamilleC): string[] {
@@ -351,11 +380,21 @@ export function blocDonneesC(e: ExerciceFamilleC): string[] {
   return [`\\text{Foyers sur l'axe ${axeTexte}.}`, `${LIBELLE_DONNEE_C[e.donnee1].split(" ")[0]}=${afficherFractionExacte(e.valeurDonnee1)}`, `${LIBELLE_DONNEE_C[e.donnee2].split(" ")[0]}=${afficherFractionExacte(e.valeurDonnee2)}`];
 }
 
-export function consigneEcranC(_e: ExerciceFamilleC, phase: PhaseEquationConiqueCaracteristiques): string {
-  if (phase === "cEcran1") return "Pour chacune des 2 données ci-dessus, identifie la relation qui la relie à a, b, c ou e — SANS la résoudre encore.";
-  if (phase === "cEcran2") return "Combine les 2 relations CONFIRMÉES pour isoler a (et c).";
-  if (phase === "cEcran3") return "Détermine le type de conique (e<1 : ellipse ; e>1 : hyperbole — ne le suppose JAMAIS par défaut), puis calcule b² avec la formule appropriée à ce type.";
-  return "À partir du type et de b² CONFIRMÉS, donne l'équation finale.";
+export function consigneEcranC(_e: ExerciceFamilleC, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Pour chacune des 2 données ci-dessus, identifie la relation qui la relie à a, b, c ou e — SANS la résoudre encore.")];
+  if (phase === "cEcran2") return [texte("Combine les 2 relations CONFIRMÉES pour isoler a (et c).")];
+  if (phase === "cEcran3") {
+    return [
+      texte("Détermine le type de conique ("),
+      latex("e<1"),
+      texte(" : ellipse ; "),
+      latex("e>1"),
+      texte(" : hyperbole — ne le suppose JAMAIS par défaut), puis calcule "),
+      latex("b^2"),
+      texte(" avec la formule appropriée à ce type."),
+    ];
+  }
+  return [texte("À partir du type et de "), latex("b^2"), texte(" CONFIRMÉS, donne l'équation finale.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string) ;
@@ -405,8 +444,8 @@ function libelleDonneeD(e: ExerciceFamilleD): string {
   return `2c=${e.distanceFocale}`;
 }
 
-export function consigneGeneraleD(): string {
-  return "On donne une asymptote d'une hyperbole centrée à l'origine et un autre élément (sommet, foyer, ou distance focale). Identifie l'axe transverse et le rapport donné par la pente, reconstruis a et b, puis l'équation.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("On donne une asymptote d'une hyperbole centrée à l'origine et un autre élément (sommet, foyer, ou distance focale). Identifie l'axe transverse et le rapport donné par la pente, reconstruis a et b, puis l'équation.")];
 }
 
 export function blocDonneesD(e: ExerciceFamilleD): string[] {
@@ -420,10 +459,22 @@ export function blocDonneesD(e: ExerciceFamilleD): string[] {
   return lignes;
 }
 
-export function consigneEcranD(e: ExerciceFamilleD, phase: PhaseEquationConiqueCaracteristiques): string {
-  if (phase === "dEcran1") return "Identifie l'axe transverse et le rapport (b/a si horizontal, a/b si vertical — jamais l'inverse) donné par la pente de l'asymptote.";
-  if (phase === "dEcran2") return e.sousType === "sommet" ? "a est déjà connu directement : déduis b à partir du rapport CONFIRMÉ." : "Résous le système {rapport CONFIRMÉ, c²=a²+b²} pour trouver a et b séparément.";
-  return "À partir de a et b CONFIRMÉS, donne l'équation finale.";
+export function consigneEcranD(e: ExerciceFamilleD, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
+  if (phase === "dEcran1") {
+    return [
+      texte("Identifie l'axe transverse et le rapport ("),
+      latex("b/a"),
+      texte(" si horizontal, "),
+      latex("a/b"),
+      texte(" si vertical — jamais l'inverse) donné par la pente de l'asymptote."),
+    ];
+  }
+  if (phase === "dEcran2") {
+    return e.sousType === "sommet"
+      ? [texte("a est déjà connu directement : déduis b à partir du rapport CONFIRMÉ.")]
+      : [texte("Résous le système {rapport CONFIRMÉ, "), latex("c^2=a^2+b^2"), texte("} pour trouver a et b séparément.")];
+  }
+  return [texte("À partir de a et b CONFIRMÉS, donne l'équation finale.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelAMemeAxe` (voir sa doc-string). */
@@ -461,7 +512,7 @@ export function aideNiveau2D(e: ExerciceFamilleD): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceEquationConiqueCaracteristiques): string {
+export function consigneGenerale(exercice: ExerciceEquationConiqueCaracteristiques): FragmentConsigne[] {
   if (exercice.famille === "A") {
     if (exercice.sousType === "memeAxe") return consigneGeneraleAMemeAxe();
     if (exercice.sousType === "axesPerpendiculaires") return consigneGeneraleAAxesPerp();
@@ -483,7 +534,7 @@ export function blocDonnees(exercice: ExerciceEquationConiqueCaracteristiques): 
   return blocDonneesD(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): string {
+export function consigneEcran(exercice: ExerciceEquationConiqueCaracteristiques, phase: PhaseEquationConiqueCaracteristiques): FragmentConsigne[] {
   if (exercice.famille === "A") {
     if (exercice.sousType === "memeAxe") return consigneEcranAMemeAxe(exercice, phase);
     if (exercice.sousType === "axesPerpendiculaires") return consigneEcranAAxesPerp(exercice, phase);

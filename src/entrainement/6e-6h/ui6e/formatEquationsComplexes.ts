@@ -33,6 +33,14 @@ export interface ChampDef {
   placeholder?: string;
 }
 
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 export interface AideAvecLatex {
   texte: string;
   latex: string | null;
@@ -115,14 +123,14 @@ function equationSansBarreLatex(e: ExerciceFamilleASansBarre): string {
   return `${gauche}=${droite}`;
 }
 
-export function consigneGeneraleASans(): string {
-  return "Résous dans ℂ l'équation ci-dessous. Donne la solution sous la forme a+bi.";
+export function consigneGeneraleASans(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation ci-dessous. Donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesASans(e: ExerciceFamilleASansBarre): string[] {
   return [equationSansBarreLatex(e)];
 }
-export function consigneEcranASans(): string {
-  return "Isole z (regroupe les termes en z d'un côté, les constantes de l'autre), puis donne la solution sous la forme a+bi.";
+export function consigneEcranASans(): FragmentConsigne[] {
+  return [texte("Isole "), latex("z"), texte(" (regroupe les termes en "), latex("z"), texte(" d'un côté, les constantes de l'autre), puis donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function champsASans(): ChampDef[] {
   return [{ label: "z =", placeholder: "ex : 2+3i" }];
@@ -160,15 +168,16 @@ function equationAvecBarreLatex(e: ExerciceFamilleAAvecBarre): string {
   return `${gauche}=${droite}`;
 }
 
-export function consigneGeneraleAAvec(): string {
-  return "Résous dans ℂ l'équation ci-dessous (z̄ désigne le conjugué de z). Donne la solution sous la forme a+bi.";
+export function consigneGeneraleAAvec(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation ci-dessous ("), latex("\\bar z"), texte(" désigne le conjugué de "), latex("z"), texte("). Donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesAAvec(e: ExerciceFamilleAAvecBarre): string[] {
   return [equationAvecBarreLatex(e)];
 }
-export function consigneEcranAAvec(phase: PhaseEquationsComplexes): string {
-  if (phase === "aAvecEcran1") return "Substitue z=x+yi et z̄=x−yi, développe, puis choisis le système de 2 équations réelles obtenu (identification des parties réelle et imaginaire).";
-  return "Résous le système CONFIRMÉ à l'étape précédente pour x et y, puis donne z=x+yi.";
+export function consigneEcranAAvec(phase: PhaseEquationsComplexes): FragmentConsigne[] {
+  if (phase === "aAvecEcran1")
+    return [texte("Substitue "), latex("z=x+yi"), texte(" et "), latex("\\bar z=x-yi"), texte(", développe, puis choisis le système de 2 équations réelles obtenu (identification des parties réelle et imaginaire).")];
+  return [texte("Résous le système CONFIRMÉ à l'étape précédente pour "), latex("x"), texte(" et "), latex("y"), texte(", puis donne "), latex("z=x+yi"), texte(".")];
 }
 export function etatActuelAAvec(e: ExerciceFamilleAAvecBarre, phase: PhaseEquationsComplexes): string[] | null {
   if (phase === "aAvecEcran2") return [`\\text{Système confirmé : }${equationSystemeALatex(e.a + e.b, "x", e.c)}\\text{, }${equationSystemeALatex(e.a - e.b, "y", e.d)}`];
@@ -228,15 +237,15 @@ export function OPTIONS_EQUATION_B(e: ExerciceFamilleB): { id: IdEquationDevelop
   ];
 }
 
-export function consigneGeneraleB(): string {
-  return "Résous dans ℂ l'équation rationnelle ci-dessous. Donne la solution sous la forme a+bi.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation rationnelle ci-dessous. Donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesB(e: ExerciceFamilleB): string[] {
   return [`${fractionBLatex(e.a, e.b, e.c, e.d)}=${entierComplexeLatex(e.k.re, e.k.im)}`];
 }
-export function consigneEcranB(phase: PhaseEquationsComplexes): string {
-  if (phase === "bEcran1") return "Multiplie les 2 membres par le dénominateur pour éliminer la fraction, développe, puis choisis l'équation développée correcte.";
-  return "Isole z à partir de l'équation CONFIRMÉE à l'étape précédente, puis donne la solution sous la forme a+bi.";
+export function consigneEcranB(phase: PhaseEquationsComplexes): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Multiplie les 2 membres par le dénominateur pour éliminer la fraction, développe, puis choisis l'équation développée correcte.")];
+  return [texte("Isole "), latex("z"), texte(" à partir de l'équation CONFIRMÉE à l'étape précédente, puis donne la solution sous la forme "), latex("a+bi"), texte(".")];
 }
 export function etatActuelB(e: ExerciceFamilleB, phase: PhaseEquationsComplexes): string[] | null {
   if (phase === "bEcran2") return [`\\text{Équation confirmée : }${coteLatex([termeVarReel(e.a, "z"), termeConstanteReelle(e.b)])}=${coteLatex([termeVarComplexe(e.kc, "z"), termeConstanteComplexe(e.kd)])}`];
@@ -268,15 +277,15 @@ function equationCLatex(e: ExerciceFamilleC): string {
   return `${coteLatex([termeVarReel(e.a, "z^2"), termeVarReel(e.b, "z"), termeConstanteReelle(e.c)])}=0`;
 }
 
-export function consigneGeneraleC(): string {
-  return "Résous dans ℂ l'équation du second degré ci-dessous. Donne les 2 solutions sous la forme a+bi.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation du second degré ci-dessous. Donne les 2 solutions sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesC(e: ExerciceFamilleC): string[] {
   return [equationCLatex(e)];
 }
-export function consigneEcranC(phase: PhaseEquationsComplexes): string {
-  if (phase === "cEcran1") return "Calcule le discriminant Δ=b²-4ac, et constate qu'il est négatif.";
-  return "Δ étant négatif, applique la formule quadratique avec √Δ=i√|Δ| (Δ CONFIRMÉ à l'étape précédente), et donne les 2 solutions.";
+export function consigneEcranC(phase: PhaseEquationsComplexes): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Calcule le discriminant "), latex("\\Delta=b^2-4ac"), texte(", et constate qu'il est négatif.")];
+  return [texte("Δ étant négatif, applique la formule quadratique avec "), latex("\\sqrt{\\Delta}=i\\sqrt{|\\Delta|}"), texte(" (Δ CONFIRMÉ à l'étape précédente), et donne les 2 solutions.")];
 }
 export function etatActuelC(e: ExerciceFamilleC, phase: PhaseEquationsComplexes): string[] | null {
   if (phase === "cEcran2") return [`\\text{Δ confirmé : }\\Delta=${e.delta}`];
@@ -306,16 +315,16 @@ function equationDLatex(e: ExerciceFamilleD): string {
   return `${coteLatex([termeVarReel(e.a, "z^2"), termeVarComplexe(e.b, "z"), termeConstanteComplexe(e.c)])}=0`;
 }
 
-export function consigneGeneraleD(): string {
-  return "Résous dans ℂ l'équation du second degré ci-dessous (le discriminant est complexe). Donne les 2 solutions sous la forme a+bi.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation du second degré ci-dessous (le discriminant est complexe). Donne les 2 solutions sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesD(e: ExerciceFamilleD): string[] {
   return [equationDLatex(e)];
 }
-export function consigneEcranD(phase: PhaseEquationsComplexes): string {
-  if (phase === "dEcran1") return "Calcule le discriminant Δ=b²-4ac (un nombre complexe).";
-  if (phase === "dEcran2") return "Calcule les 2 racines carrées complexes de Δ CONFIRMÉ à l'étape précédente (même technique qu'une racine carrée de complexe).";
-  return "Applique la formule quadratique z=(-b±√Δ)/(2a) à partir de √Δ CONFIRMÉ à l'étape précédente, et donne les 2 solutions.";
+export function consigneEcranD(phase: PhaseEquationsComplexes): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Calcule le discriminant "), latex("\\Delta=b^2-4ac"), texte(" (un nombre complexe).")];
+  if (phase === "dEcran2") return [texte("Calcule les 2 racines carrées complexes de Δ CONFIRMÉ à l'étape précédente (même technique qu'une racine carrée de complexe).")];
+  return [texte("Applique la formule quadratique "), latex("z=\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}"), texte(" à partir de √Δ CONFIRMÉ à l'étape précédente, et donne les 2 solutions.")];
 }
 export function etatActuelD(e: ExerciceFamilleD, phase: PhaseEquationsComplexes): string[] | null {
   const deltaConfirme = `\\text{Δ confirmé : }\\Delta=${entierComplexeLatex(e.delta.re, e.delta.im)}`;
@@ -359,16 +368,16 @@ export function OPTIONS_EQUATION_E(e: ExerciceFamilleE): { id: IdEquationEnU; la
   ];
 }
 
-export function consigneGeneraleE(): string {
-  return "Résous dans ℂ l'équation du quatrième degré ci-dessous, en posant u=z². Donne les 4 solutions sous la forme a+bi.";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation du quatrième degré ci-dessous, en posant "), latex("u=z^2"), texte(". Donne les 4 solutions sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesE(e: ExerciceFamilleE): string[] {
   return [equationELatex(e)];
 }
-export function consigneEcranE(phase: PhaseEquationsComplexes): string {
-  if (phase === "eEcran1") return "Pose u=z², réécris l'équation en une équation du second degré en u, et choisis-la ci-dessous.";
-  if (phase === "eEcran2") return "Résous l'équation en u CONFIRMÉE à l'étape précédente (2 valeurs de u, potentiellement complexes).";
-  return "Pour chacune des 2 valeurs de u CONFIRMÉES à l'étape précédente, calcule les racines carrées correspondantes z=±√u, et donne les 4 solutions.";
+export function consigneEcranE(phase: PhaseEquationsComplexes): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Pose "), latex("u=z^2"), texte(", réécris l'équation en une équation du second degré en "), latex("u"), texte(", et choisis-la ci-dessous.")];
+  if (phase === "eEcran2") return [texte("Résous l'équation en "), latex("u"), texte(" CONFIRMÉE à l'étape précédente (2 valeurs de "), latex("u"), texte(", potentiellement complexes).")];
+  return [texte("Pour chacune des 2 valeurs de "), latex("u"), texte(" CONFIRMÉES à l'étape précédente, calcule les racines carrées correspondantes "), latex("z=\\pm\\sqrt{u}"), texte(", et donne les 4 solutions.")];
 }
 export function etatActuelE(e: ExerciceFamilleE, phase: PhaseEquationsComplexes): string[] | null {
   const equationEnUConfirmee = `\\text{Équation en u confirmée : }${coteLatex([termeVarComplexe(e.a, "U^2"), termeVarComplexe(e.b, "U"), termeConstanteComplexe(e.c)])}=0`;
@@ -410,18 +419,18 @@ function polynomeLatex(coefs: number[], puissanceDepart: number): string {
   return coteLatex(termes);
 }
 
-export function consigneGeneraleF(): string {
-  return "Résous dans ℂ l'équation du quatrième degré ci-dessous (2 racines rationnelles évidentes, puis un facteur du second degré). Donne les 4 solutions sous la forme a+bi.";
+export function consigneGeneraleF(): FragmentConsigne[] {
+  return [texte("Résous dans ℂ l'équation du quatrième degré ci-dessous (2 racines rationnelles évidentes, puis un facteur du second degré). Donne les 4 solutions sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesF(e: ExerciceFamilleF): string[] {
   return [equationFLatex(e)];
 }
-export function consigneEcranF(phase: PhaseEquationsComplexes): string {
-  if (phase === "fEcran1") return "Teste des valeurs candidates simples (diviseurs du terme constant sur diviseurs du coefficient dominant) pour trouver une première racine rationnelle r₁.";
-  if (phase === "fEcran2") return "Divise le polynôme par (z-r₁) CONFIRMÉ à l'étape précédente — donne le quotient (polynôme du 3e degré).";
-  if (phase === "fEcran3") return "Trouve une racine rationnelle r₂ du quotient CONFIRMÉ à l'étape précédente, puis divise à nouveau — donne r₂ et le quotient (polynôme du 2e degré).";
-  if (phase === "fEcran4") return "Résous le facteur du second degré CONFIRMÉ à l'étape précédente (discriminant négatif) — donne les 2 racines complexes conjuguées.";
-  return "Donne l'ensemble complet des 4 solutions de l'équation (r₁, r₂, et les 2 racines complexes CONFIRMÉES à l'étape précédente).";
+export function consigneEcranF(phase: PhaseEquationsComplexes): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Teste des valeurs candidates simples (diviseurs du terme constant sur diviseurs du coefficient dominant) pour trouver une première racine rationnelle "), latex("r_1"), texte(".")];
+  if (phase === "fEcran2") return [texte("Divise le polynôme par "), latex("(z-r_1)"), texte(" CONFIRMÉ à l'étape précédente — donne le quotient (polynôme du 3e degré).")];
+  if (phase === "fEcran3") return [texte("Trouve une racine rationnelle "), latex("r_2"), texte(" du quotient CONFIRMÉ à l'étape précédente, puis divise à nouveau — donne "), latex("r_2"), texte(" et le quotient (polynôme du 2e degré).")];
+  if (phase === "fEcran4") return [texte("Résous le facteur du second degré CONFIRMÉ à l'étape précédente (discriminant négatif) — donne les 2 racines complexes conjuguées.")];
+  return [texte("Donne l'ensemble complet des 4 solutions de l'équation ("), latex("r_1"), texte(", "), latex("r_2"), texte(", et les 2 racines complexes CONFIRMÉES à l'étape précédente).")];
 }
 export function etatActuelF(e: ExerciceFamilleF, phase: PhaseEquationsComplexes): string[] | null {
   // 5 écrans — chaque ligne ci-dessous est la réponse VALIDÉE d'UN écran ; chaque phase >=2 cumule
@@ -474,7 +483,7 @@ function diviseurs(n: number): number[] {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceEquationsComplexes): string {
+export function consigneGenerale(exercice: ExerciceEquationsComplexes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return exercice.sousType === "sansBarre" ? consigneGeneraleASans() : consigneGeneraleAAvec();
@@ -508,7 +517,7 @@ export function blocDonnees(exercice: ExerciceEquationsComplexes): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceEquationsComplexes, phase: PhaseEquationsComplexes): string {
+export function consigneEcran(exercice: ExerciceEquationsComplexes, phase: PhaseEquationsComplexes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return exercice.sousType === "sansBarre" ? consigneEcranASans() : consigneEcranAAvec(phase);

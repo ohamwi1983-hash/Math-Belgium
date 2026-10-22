@@ -29,6 +29,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
+ * via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function pgcd(a: number, b: number): number {
   a = Math.abs(a);
   b = Math.abs(b);
@@ -93,8 +104,8 @@ function libelleDeuxiemeConditionA(exercice: ExerciceDetermParamA): string {
   return exercice.sousType === "ordonnee" ? "ordonnée à l'origine" : "point de passage";
 }
 
-export function consigneGeneraleA(): string {
-  return "On cherche f(x)=ln(mx+n) vérifiant les 2 conditions ci-dessous.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("On cherche "), latex("f(x)=\\ln(mx+n)"), texte(" vérifiant les 2 conditions ci-dessous.")];
 }
 
 export function blocDonneesA(exercice: ExerciceDetermParamA): string[] {
@@ -107,11 +118,23 @@ export function etatActuelA(exercice: ExerciceDetermParamA, phase: PhaseDetermin
   return [`m\\cdot ${exercice.x0}+n=0`, equation2LatexA(exercice)];
 }
 
-export function consigneEcranA(phase: PhaseDeterminerParametresLogarithme): string {
+export function consigneEcranA(phase: PhaseDeterminerParametresLogarithme): FragmentConsigne[] {
   if (phase === "aEcran1") {
-    return `Traduis chacune des 2 conditions en une équation portant sur m et n — utilise directement les valeurs numériques données (jamais "x0"/"x1"/"k1" comme symboles).`;
+    return [
+      texte("Traduis chacune des 2 conditions en une équation portant sur "),
+      latex("m"),
+      texte(" et "),
+      latex("n"),
+      texte(' — utilise directement les valeurs numériques données (jamais "'),
+      latex("x_0"),
+      texte('"/"'),
+      latex("x_1"),
+      texte('"/"'),
+      latex("k_1"),
+      texte('" comme symboles).'),
+    ];
   }
-  return "Résous ce système à 2 équations et donne les valeurs de m et n (fraction ou décimal).";
+  return [texte("Résous ce système à 2 équations et donne les valeurs de "), latex("m"), texte(" et "), latex("n"), texte(" (fraction ou décimal).")];
 }
 
 export function labelsEcranA(exercice: ExerciceDetermParamA, phase: PhaseDeterminerParametresLogarithme): { a: string; b: string } {
@@ -164,8 +187,8 @@ export function formatRLatexB(exercice: ExerciceDetermParamB): string {
   return formatCoefLnFractionLatex(exercice.r1 * exercice.r2, exercice.k1, denomB(exercice));
 }
 
-export function consigneGeneraleB(): string {
-  return "On cherche f(x)=ln(px²+qx+r) vérifiant les conditions ci-dessous.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On cherche "), latex("f(x)=\\ln(px^2+qx+r)"), texte(" vérifiant les conditions ci-dessous.")];
 }
 
 export function blocDonneesB(exercice: ExerciceDetermParamB): string[] {
@@ -182,12 +205,28 @@ export function etatActuelB(exercice: ExerciceDetermParamB, phase: PhaseDetermin
   return null;
 }
 
-export function consigneEcranB(phase: PhaseDeterminerParametresLogarithme): string {
+export function consigneEcranB(phase: PhaseDeterminerParametresLogarithme): FragmentConsigne[] {
   if (phase === "bEcran1") {
-    return "Écris p(x-r1)(x-r2) sous la forme px²+qx+r (utilise directement les valeurs numériques de r1 et r2), puis exprime q et r en fonction de p.";
+    return [
+      texte("Écris "),
+      latex("p(x-r_1)(x-r_2)"),
+      texte(" sous la forme "),
+      latex("px^2+qx+r"),
+      texte(" (utilise directement les valeurs numériques de "),
+      latex("r_1"),
+      texte(" et "),
+      latex("r_2"),
+      texte("), puis exprime "),
+      latex("q"),
+      texte(" et "),
+      latex("r"),
+      texte(" en fonction de "),
+      latex("p"),
+      texte("."),
+    ];
   }
-  if (phase === "bEcran2") return "Utilise la condition du point de passage pour trouver la valeur de p.";
-  return "Donne les valeurs de q et r, à partir de la valeur de p trouvée à l'étape précédente.";
+  if (phase === "bEcran2") return [texte("Utilise la condition du point de passage pour trouver la valeur de "), latex("p"), texte(".")];
+  return [texte("Donne les valeurs de "), latex("q"), texte(" et "), latex("r"), texte(", à partir de la valeur de "), latex("p"), texte(" trouvée à l'étape précédente.")];
 }
 
 export function labelsEcranB(phase: PhaseDeterminerParametresLogarithme): { a: string; b: string } {
@@ -232,8 +271,16 @@ function symboleC(exercice: ExerciceDetermParamC): "<" | ">" {
   return exercice.typeExtremum === "maximum" ? "<" : ">";
 }
 
-export function consigneGeneraleC(exercice: ExerciceDetermParamC): string {
-  return `On cherche à quelles conditions sur p,q,r la fonction f(x)=ln(px²+qx+r) admet un ${exercice.typeExtremum} local en x=${exercice.x0}.`;
+export function consigneGeneraleC(exercice: ExerciceDetermParamC): FragmentConsigne[] {
+  return [
+    texte("On cherche à quelles conditions sur "),
+    latex("p,q,r"),
+    texte(" la fonction "),
+    latex("f(x)=\\ln(px^2+qx+r)"),
+    texte(` admet un ${exercice.typeExtremum} local en `),
+    latex(`x=${exercice.x0}`),
+    texte("."),
+  ];
 }
 
 export function blocDonneesC(exercice: ExerciceDetermParamC): string[] {
@@ -246,14 +293,46 @@ export function etatActuelC(exercice: ExerciceDetermParamC, phase: PhaseDetermin
   return null;
 }
 
-export function consigneEcranC(phase: PhaseDeterminerParametresLogarithme): string {
+export function consigneEcranC(phase: PhaseDeterminerParametresLogarithme): FragmentConsigne[] {
   if (phase === "cEcran1") {
-    return "ln est une fonction croissante : un extremum de f coïncide avec un extremum de u(x)=px²+qx+r. Quelle condition cela impose-t-il sur le signe de p ?";
+    return [
+      texte("ln est une fonction croissante : un extremum de "),
+      latex("f"),
+      texte(" coïncide avec un extremum de "),
+      latex("u(x)=px^2+qx+r"),
+      texte(". Quelle condition cela impose-t-il sur le signe de "),
+      latex("p"),
+      texte(" ?"),
+    ];
   }
   if (phase === "cEcran2") {
-    return "Le sommet de la parabole u doit se trouver exactement en x=x0 — utilise directement la valeur numérique de x0. Écris la relation entre q et p.";
+    return [
+      texte("Le sommet de la parabole "),
+      latex("u"),
+      texte(" doit se trouver exactement en "),
+      latex("x=x_0"),
+      texte(" — utilise directement la valeur numérique de "),
+      latex("x_0"),
+      texte(". Écris la relation entre "),
+      latex("q"),
+      texte(" et "),
+      latex("p"),
+      texte("."),
+    ];
   }
-  return "Pour que l'extremum de f existe réellement, il faut que u(x0) soit strictement positif (domaine de ln). Écris cette condition comme une inéquation sur r (en fonction de p, utilise la valeur numérique de x0).";
+  return [
+    texte("Pour que l'extremum de "),
+    latex("f"),
+    texte(" existe réellement, il faut que "),
+    latex("u(x_0)"),
+    texte(" soit strictement positif (domaine de ln). Écris cette condition comme une inéquation sur "),
+    latex("r"),
+    texte(" (en fonction de "),
+    latex("p"),
+    texte(", utilise la valeur numérique de "),
+    latex("x_0"),
+    texte(")."),
+  ];
 }
 
 export function placeholderEcranC(exercice: ExerciceDetermParamC, phase: PhaseDeterminerParametresLogarithme): string {

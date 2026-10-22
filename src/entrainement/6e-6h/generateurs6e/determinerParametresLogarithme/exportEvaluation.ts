@@ -54,7 +54,7 @@ function blocDonnees(exercice: ExerciceDeterminerParametresLogarithme): string[]
   }
 }
 
-function consigneGenerale(exercice: ExerciceDeterminerParametresLogarithme): string {
+function consigneGenerale(exercice: ExerciceDeterminerParametresLogarithme) {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -65,7 +65,7 @@ function consigneGenerale(exercice: ExerciceDeterminerParametresLogarithme): str
   }
 }
 
-function consigneEcran(exercice: ExerciceDeterminerParametresLogarithme, phase: PhaseDeterminerParametresLogarithme): string {
+function consigneEcran(exercice: ExerciceDeterminerParametresLogarithme, phase: PhaseDeterminerParametresLogarithme) {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);
@@ -80,9 +80,9 @@ function construireEnonceDeterminerParametresLogarithme(exercice: ExerciceDeterm
   const phases = PHASES_PAR_FAMILLE[exercice.famille];
   const donnees = blocDonnees(exercice);
   return {
-    enteteFragments: [texte(consigneGenerale(exercice)), ...(donnees.length > 0 ? [latex(donnees.join(",\\quad "))] : [])],
+    enteteFragments: [...consigneGenerale(exercice), ...(donnees.length > 0 ? [latex(donnees.join(",\\quad "))] : [])],
     questions: phases.map((phase) => ({
-      consigne: [texte(`${LIBELLE_PHASE[phase]} — `), texte(consigneEcran(exercice, phase))],
+      consigne: [texte(`${LIBELLE_PHASE[phase]} — `), ...consigneEcran(exercice, phase)],
       reponse: { type: "lignes" as const, nombre: 3 },
     })),
   };

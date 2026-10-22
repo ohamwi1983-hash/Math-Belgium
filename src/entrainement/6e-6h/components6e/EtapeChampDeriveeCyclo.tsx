@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatDeriveesCyclometriques";
-import type { AideAvecLatex } from "../ui6e/formatDeriveesCyclometriques";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatDeriveesCyclometriques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   fonctionLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -61,7 +62,9 @@ export function EtapeChampDeriveeCyclo({
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
         <input type="text" className={`text-input${montrerErreurs ? " is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />
