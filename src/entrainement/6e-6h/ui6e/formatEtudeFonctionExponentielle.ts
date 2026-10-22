@@ -38,6 +38,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué ici à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 // ============================================================================
 // Petits helpers de formatage LOCAUX, dupliqués depuis le patron déjà établi ailleurs sur la
 // plateforme (`formatSommeTermes`/`formatCoefFois`, ex. `ui6e/formatLimitesExponentielles.ts`,
@@ -330,35 +341,35 @@ export function directionLabels(exercice: ExerciceEtudeFonctionExponentielle): D
 // point exclu déjà affichés portent l'information propre à la famille).
 // ============================================================================
 
-export function consigneDomaine(): string {
-  return "Détermine le domaine de définition de f.";
+export function consigneDomaine(): FragmentConsigne[] {
+  return [texte("Détermine le domaine de définition de f.")];
 }
 
-export function consigneLimites(exercice: ExerciceEtudeFonctionExponentielle): string {
+export function consigneLimites(exercice: ExerciceEtudeFonctionExponentielle): FragmentConsigne[] {
   return exercice.famille === "B"
-    ? "Détermine les 4 limites suivantes (attention : les deux côtés du point exclu ne sont pas forcément identiques)."
-    : "Détermine les limites de f aux deux bornes de son domaine.";
+    ? [texte("Détermine les 4 limites suivantes (attention : les deux côtés du point exclu ne sont pas forcément identiques).")]
+    : [texte("Détermine les limites de f aux deux bornes de son domaine.")];
 }
 
-export function consigneAsymptotes(exercice: ExerciceEtudeFonctionExponentielle): string {
-  if (exercice.famille === "C") return "À partir des limites CORRECTES précédentes, détermine l'asymptote de f (horizontale, verticale ou oblique) dans chaque direction — ou l'absence d'asymptote.";
-  return "À partir des limites CORRECTES précédentes, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.";
+export function consigneAsymptotes(exercice: ExerciceEtudeFonctionExponentielle): FragmentConsigne[] {
+  if (exercice.famille === "C") return [texte("À partir des limites CORRECTES précédentes, détermine l'asymptote de f (horizontale, verticale ou oblique) dans chaque direction — ou l'absence d'asymptote.")];
+  return [texte("À partir des limites CORRECTES précédentes, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.")];
 }
 
-export function consigneAsymptotesB(): string {
-  return "L'asymptote verticale x=p n'est valable que d'UN SEUL côté — lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?";
+export function consigneAsymptotesB(): FragmentConsigne[] {
+  return [texte("L'asymptote verticale "), latex("x=p"), texte(" n'est valable que d'UN SEUL côté — lequel ? Et quelle est l'équation de l'asymptote horizontale (commune aux deux infinis) ?")];
 }
 
-export function consigneCroissance(): string {
-  return "Étudie le signe de f' et conclus sur la croissance de f (monotonie constante, ou extremum et sa position).";
+export function consigneCroissance(): FragmentConsigne[] {
+  return [texte("Étudie le signe de "), latex("f'"), texte(" et conclus sur la croissance de f (monotonie constante, ou extremum et sa position).")];
 }
 
-export function consigneConcavite(): string {
-  return "Étudie le signe de f'' et conclus sur la concavité de f (convexe, concave, ou point d'inflexion et sa position).";
+export function consigneConcavite(): FragmentConsigne[] {
+  return [texte("Étudie le signe de "), latex("f''"), texte(" et conclus sur la concavité de f (convexe, concave, ou point d'inflexion et sa position).")];
 }
 
-export function consigneGraphique(): string {
-  return "Sélectionne le graphique qui représente f.";
+export function consigneGraphique(): FragmentConsigne[] {
+  return [texte("Sélectionne le graphique qui représente f.")];
 }
 
 // ============================================================================
@@ -366,7 +377,7 @@ export function consigneGraphique(): string {
 // ============================================================================
 
 function texteFamilleAsymptoteC(): string {
-  return "Nouvelle méthode — une asymptote OBLIQUE y=ax+b existe si f(x)-(ax+b) tend vers 0. Ici, cherche quelle partie de f(x) tend vers 0.";
+  return "Nouvelle méthode — une asymptote OBLIQUE existe si la différence entre f(x) et cette droite tend vers 0. Ici, cherche quelle partie de f(x) tend vers 0.";
 }
 
 export function aideDomaineNiveau1(exercice: ExerciceEtudeFonctionExponentielle): AideAvecLatex {

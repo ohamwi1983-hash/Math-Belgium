@@ -1,4 +1,5 @@
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ExerciceEtudeFonctionExponentielle } from "../core6e/etudeFonctionExponentielle.types";
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, formatFonctionLatex } from "../ui6e/formatEtudeFonctionExponentielle";
@@ -38,7 +39,9 @@ export function EtapeSelectionGraphiqueEtudeFonction({ exercice, aideNiveau1, ai
           </div>
         }
       />
-      <p className="prompt-text">{consigneGraphique()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneGraphique()} />
+      </p>
 
       <EtapeSelectionGraphiqueQCM
         nombreOptions={exercice.candidats.length}

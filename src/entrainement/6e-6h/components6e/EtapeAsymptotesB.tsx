@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseAsymptotes } from "../moteur6e/verificationEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE, consigneAsymptotesB } from "../ui6e/formatEtudeFonctionExponentielle";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -58,7 +59,9 @@ export function EtapeAsymptotesB({ enonceLatex, p, aideNiveau1, aideNiveau2, ten
           </div>
         }
       />
-      <p className="prompt-text">{consigneAsymptotesB()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneAsymptotesB()} />
+      </p>
 
       <div className="field">
         <p className="field-label field-label-minuscule">

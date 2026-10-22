@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseValeurOuVide } from "../moteur6e/verificationEquationsExponentielles";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEquationsExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatEquationsExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -14,7 +16,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -55,7 +57,9 @@ export function EtapeValeurOuVideEquExpo({ consigneEcran, enonceLatex, placehold
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
 
       <div className="options-grid-compact">
         <button type="button" className={`btn ${existe === true ? "toggle-active" : ""} ${montrerErreurs && existe === true ? "is-erronee" : ""}`} onClick={() => setExiste(true)}>

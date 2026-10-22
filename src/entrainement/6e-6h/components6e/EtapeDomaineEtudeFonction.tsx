@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE, consigneDomaine } from "../ui6e/formatEtudeFonctionExponentielle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -49,7 +50,9 @@ export function EtapeDomaineEtudeFonction({ enonceLatex, aideNiveau1, aideNiveau
           </div>
         }
       />
-      <p className="prompt-text">{consigneDomaine()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneDomaine()} />
+      </p>
       <EnsembleReelGuideBuilder onChange={setReponse} label="domf =" />
       {niveauAide >= 1 && (
         <div className="aide-5e">

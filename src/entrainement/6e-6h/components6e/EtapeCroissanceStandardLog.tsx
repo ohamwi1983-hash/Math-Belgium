@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseCroissanceStandard } from "../moteur6e/verificationEtudeFonctionLogarithme";
+import type { FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -22,7 +24,7 @@ const OPTIONS: { id: ReponseCroissanceStandard["type"]; label: string; requiertP
 
 interface Props {
   enonceLatex: string;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Rappel de domaine + limites + asymptotes déjà confirmés — voir
    * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
   etatActuel: string[];
@@ -73,7 +75,9 @@ export function EtapeCroissanceStandardLog({ enonceLatex, consigneEcran, etatAct
           ))}
         </div>
       </div>
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (
           <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${montrerErreurs && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>

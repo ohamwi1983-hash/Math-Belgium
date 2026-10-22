@@ -44,7 +44,7 @@ function fragmentsContenuRecap(exercice: ExerciceEtudeFonctionExponentielle, pha
   return [texte(texteReponse ?? "")];
 }
 
-function consigneEcrite(exercice: ExerciceEtudeFonctionExponentielle, phase: PhaseEtudeFonctionExponentielle): string {
+function consigneEcrite(exercice: ExerciceEtudeFonctionExponentielle, phase: PhaseEtudeFonctionExponentielle): FragmentConsigne[] {
   switch (phase) {
     case "domaine":
       return consigneDomaine();
@@ -64,13 +64,13 @@ function consigneEcrite(exercice: ExerciceEtudeFonctionExponentielle, phase: Pha
 function construireEnonceEtudeFonctionExponentielle(exercice: ExerciceEtudeFonctionExponentielle): SectionExercice {
   const viewBox = calculerViewBox(exercice);
   const questionsEcrites = PHASES_ECRITES.map((phase) => ({
-    consigne: [texte(consigneEcrite(exercice, phase))],
+    consigne: consigneEcrite(exercice, phase),
     reponse: { type: "lignes" as const, nombre: 3 },
   }));
   return {
     enteteFragments: [texte("On considère la fonction suivante :"), latex(formatFonctionLatex(exercice))],
     enteteHtml: construireGrilleSvgCandidatsEtudeExpo(exercice, viewBox),
-    questions: [...questionsEcrites, { consigne: [texte(consigneGraphique())], reponse: { type: "lignes", nombre: 1 } }],
+    questions: [...questionsEcrites, { consigne: consigneGraphique(), reponse: { type: "lignes", nombre: 1 } }],
   };
 }
 

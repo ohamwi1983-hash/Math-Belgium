@@ -21,7 +21,23 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué ici à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const RAPPEL_LN = "Rappel : un logarithme de base numérique s'écrit ln(argument)/ln(base) — jamais log(...) littéral.";
+
+/** Même rappel que `RAPPEL_LN`, en fragments (texte/LaTeX mêlés) pour `consigneEcranC` cEcran3 — la
+ * version string reste utilisée telle quelle dans les textes d'aide (`AideAvecLatex.texte`, jamais
+ * convertis ici, convention distincte). */
+const RAPPEL_LN_FRAGMENTS: FragmentConsigne[] = [texte("Rappel : un logarithme de base numérique s'écrit "), latex("\\dfrac{\\ln(\\text{argument})}{\\ln(\\text{base})}"), texte(" — jamais "), latex("\\log(\\ldots)"), texte(" littéral.")];
 
 function formatBaseLatex(base: number): string {
   return Math.abs(base - Math.E) < 1e-9 ? "e" : String(base);
@@ -78,9 +94,9 @@ function etatActuelA(ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): string[]
   return [`\\text{exposant} = ${formatValeurLatex(ex.exposantCible)}`];
 }
 
-function consigneEcranA(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): string {
-  if (phase === "aEcran1") return "Isole l'exposant : s'il correspond à une puissance entière reconnaissable de la base, donne-le directement (sans logarithme) ; sinon, exprime-le à l'aide d'un logarithme.";
-  return "À partir de la valeur CORRECTE de l'étape précédente, résous l'équation affine et donne x (forme exacte, éventuellement sous forme logarithmique).";
+function consigneEcranA(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Isole l'exposant : s'il correspond à une puissance entière reconnaissable de la base, donne-le directement (sans logarithme) ; sinon, exprime-le à l'aide d'un logarithme.")];
+  return [texte("À partir de la valeur CORRECTE de l'étape précédente, résous l'équation affine et donne x (forme exacte, éventuellement sous forme logarithmique).")];
 }
 
 function aideA1(_ex: ExerciceEqLogA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
@@ -110,9 +126,9 @@ function etatActuelB(ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): string[]
   return [`(${formatAffineLatex(ex.m1, ex.n1)})\\ln(${ex.base1}) = (${formatAffineLatex(ex.m2, ex.n2)})\\ln(${ex.base2})`];
 }
 
-function consigneEcranB(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): string {
-  if (phase === "bEcran1") return "Prends le logarithme népérien des deux membres et développe (ln(a^u)=u·ln(a)).";
-  return "À partir de la forme développée CORRECTE de l'étape précédente, regroupe les termes en x d'un côté, les constantes de l'autre, puis isole x.";
+function consigneEcranB(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Prends le logarithme népérien des deux membres et développe ("), latex("\\ln(a^u)=u\\cdot\\ln(a)"), texte(").")];
+  return [texte("À partir de la forme développée CORRECTE de l'étape précédente, regroupe les termes en x d'un côté, les constantes de l'autre, puis isole x.")];
 }
 
 function aideB1(_ex: ExerciceEqLogB, phase: "bEcran1" | "bEcran2"): AideAvecLatex {
@@ -167,10 +183,10 @@ function etatActuelC(ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3
   return [equationT, `t \\in \\{${ex.tValides.map((t) => formatValeurLatex(t)).join(";\\ ")}\\}`];
 }
 
-function consigneEcranC(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): string {
-  if (phase === "cEcran1") return "Pose t=base^x et réécris l'équation ci-dessus en fonction de t seul.";
-  if (phase === "cEcran2") return "Résous l'équation du second degré en t, et ne garde que les valeurs strictement positives (base^x>0 toujours).";
-  return `Pour chaque valeur de t CORRECTE de l'étape précédente, détermine x — directement si t est une puissance reconnaissable de la base, sinon à l'aide d'un logarithme. ${RAPPEL_LN}`;
+function consigneEcranC(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Pose "), latex("t=\\text{base}^x"), texte(" et réécris l'équation ci-dessus en fonction de t seul.")];
+  if (phase === "cEcran2") return [texte("Résous l'équation du second degré en t, et ne garde que les valeurs strictement positives ("), latex("\\text{base}^x>0"), texte(" toujours).")];
+  return [texte("Pour chaque valeur de t CORRECTE de l'étape précédente, détermine x — directement si t est une puissance reconnaissable de la base, sinon à l'aide d'un logarithme. "), ...RAPPEL_LN_FRAGMENTS];
 }
 
 function aideC1(_ex: ExerciceEqLogC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -223,9 +239,11 @@ function etatActuelD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): string[]
   return ex.sousType === "D1" ? ["\\text{CE} : ]0;1[\\ \\cup\\ ]1;+\\infty["] : ["\\text{CE} : ]0;+\\infty["];
 }
 
-function consigneEcranD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): string {
-  if (phase === "dEcran1") return "Pose la condition d'existence (CE) — rappelle-toi ce que doit vérifier x selon qu'il est la base ou l'argument du logarithme.";
-  return ex.sousType === "D1" ? "Résous log_x(N)=k pour x (élève l'équation à la puissance 1/k)." : "Résous log_a(x)=k pour x directement.";
+function consigneEcranD(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Pose la condition d'existence (CE) — rappelle-toi ce que doit vérifier x selon qu'il est la base ou l'argument du logarithme.")];
+  return ex.sousType === "D1"
+    ? [texte("Résous "), latex("\\log_x(N)=k"), texte(" pour x (élève l'équation à la puissance 1/k).")]
+    : [texte("Résous "), latex("\\log_a(x)=k"), texte(" pour x directement.")];
 }
 
 function aideD1(ex: ExerciceEqLogD, phase: "dEcran1" | "dEcran2"): AideAvecLatex {
@@ -266,10 +284,10 @@ function etatActuelE(ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3
   return [`\\text{CE} : ${ceELatex(ex)}`, `(x-${ex.p})(x-${ex.q}) = ${formatAffineLatex(ex.e, ex.d)}`];
 }
 
-function consigneEcranE(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): string {
-  if (phase === "eEcran1") return "Pose la CE : chaque argument de chaque logarithme doit être strictement positif.";
-  if (phase === "eEcran2") return "Combine les 2 logarithmes du membre de gauche (somme ⟹ produit) pour obtenir une équation polynomiale sans logarithme.";
-  return "Résous l'équation polynomiale CORRECTE de l'étape précédente, puis filtre les racines trouvées à l'aide de la CE CORRECTE de l'étape 1.";
+function consigneEcranE(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Pose la CE : chaque argument de chaque logarithme doit être strictement positif.")];
+  if (phase === "eEcran2") return [texte("Combine les 2 logarithmes du membre de gauche (somme ⟹ produit) pour obtenir une équation polynomiale sans logarithme.")];
+  return [texte("Résous l'équation polynomiale CORRECTE de l'étape précédente, puis filtre les racines trouvées à l'aide de la CE CORRECTE de l'étape 1.")];
 }
 
 function aideE1(_ex: ExerciceEqLogE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
@@ -307,10 +325,10 @@ function etatActuelF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3
   return ["]0;1[\\ \\cup\\ ]1;+\\infty[", `y+\\dfrac{1}{y} = ${ex.k}`];
 }
 
-function consigneEcranF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): string {
-  if (phase === "fEcran1") return "Pose la CE (x est à la fois une base de logarithme et un argument).";
-  if (phase === "fEcran2") return `Change de base pour log_x(${ex.a}), pose y=log_${ex.a}(x), et réécris l'équation en y.`;
-  return `Résous l'équation en y obtenue, puis reconvertis chaque solution valide en x = ${ex.a}^y (tolérance numérique acceptée — réponses non nécessairement exactes).`;
+function consigneEcranF(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Pose la CE (x est à la fois une base de logarithme et un argument).")];
+  if (phase === "fEcran2") return [texte("Change de base pour "), latex(`\\log_x(${ex.a})`), texte(", pose "), latex(`y=\\log_{${ex.a}}(x)`), texte(", et réécris l'équation en y.")];
+  return [texte("Résous l'équation en y obtenue, puis reconvertis chaque solution valide en "), latex(`x = ${ex.a}^y`), texte(" (tolérance numérique acceptée — réponses non nécessairement exactes).")];
 }
 
 function aideF1(ex: ExerciceEqLogF, phase: "fEcran1" | "fEcran2" | "fEcran3"): AideAvecLatex {
@@ -347,9 +365,9 @@ function etatActuelG(ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): string[]
   return formatReponseG(ex, "gEcran1");
 }
 
-function consigneEcranG(_ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): string {
-  if (phase === "gEcran1") return "Pose la CE, puis combine/simplifie les deux membres de l'équation (fais disparaître les logarithmes).";
-  return "À partir de la simplification CORRECTE de l'étape précédente, choisis le verdict qui s'applique.";
+function consigneEcranG(_ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): FragmentConsigne[] {
+  if (phase === "gEcran1") return [texte("Pose la CE, puis combine/simplifie les deux membres de l'équation (fais disparaître les logarithmes).")];
+  return [texte("À partir de la simplification CORRECTE de l'étape précédente, choisis le verdict qui s'applique.")];
 }
 
 function aideG1(_ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): AideAvecLatex {
@@ -383,8 +401,8 @@ function formatReponseG(ex: ExerciceEqLogG, phase: "gEcran1" | "gEcran2"): strin
 // Dispatch général.
 // ============================================================================
 
-export function consigneGenerale(_exercice: ExerciceEquationsExpLog): string {
-  return CONSIGNE_GENERALE;
+export function consigneGenerale(_exercice: ExerciceEquationsExpLog): FragmentConsigne[] {
+  return [texte(CONSIGNE_GENERALE)];
 }
 
 export function blocDonnees(exercice: ExerciceEquationsExpLog): string[] {
@@ -425,7 +443,7 @@ export function etatActuel(exercice: ExerciceEquationsExpLog, phase: PhaseEquati
   }
 }
 
-export function consigneEcran(exercice: ExerciceEquationsExpLog, phase: PhaseEquationsExpLog): string {
+export function consigneEcran(exercice: ExerciceEquationsExpLog, phase: PhaseEquationsExpLog): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(exercice, phase as "aEcran1" | "aEcran2");

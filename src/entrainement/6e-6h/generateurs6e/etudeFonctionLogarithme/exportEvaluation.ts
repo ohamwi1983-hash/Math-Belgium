@@ -92,21 +92,21 @@ function construireEnonceEtudeFonctionLogarithme(exercice: ExerciceEtudeFonction
     return {
       enteteFragments,
       questions: [
-        { consigne: [texte(consigneDomaine(exercice))], reponse: { type: "lignes", nombre: 1 } },
-        { consigne: [texte(consigneComportementInfiniE())], reponse: { type: "lignes", nombre: 2 } },
+        { consigne: consigneDomaine(exercice), reponse: { type: "lignes", nombre: 1 } },
+        { consigne: consigneComportementInfiniE(), reponse: { type: "lignes", nombre: 2 } },
       ],
     };
   }
 
   const questions: QuestionExercice[] = [
-    { consigne: [texte(consigneDomaine(exercice))], reponse: { type: "lignes", nombre: 2 } },
-    { consigne: [texte(consigneLimites(exercice))], reponse: { type: "lignes", nombre: exercice.famille === "C" ? 6 : 2 } },
-    { consigne: [texte(consigneAsymptotes(exercice))], reponse: { type: "lignes", nombre: exercice.famille === "B" ? 1 : 2 } },
+    { consigne: consigneDomaine(exercice), reponse: { type: "lignes", nombre: 2 } },
+    { consigne: consigneLimites(exercice), reponse: { type: "lignes", nombre: exercice.famille === "C" ? 6 : 2 } },
+    { consigne: consigneAsymptotes(exercice), reponse: { type: "lignes", nombre: exercice.famille === "B" ? 1 : 2 } },
     exercice.famille === "C"
-      ? { consigne: [texte(consigneCroissance(exercice))], reponse: { type: "tableau", libellesLignes: ["Intervalle", "Variation de f"], nombreColonnes: 4 } }
-      : { consigne: [texte(consigneCroissance(exercice))], reponse: { type: "lignes", nombre: 2 } },
-    { consigne: [texte(consigneConcavite())], reponse: { type: "lignes", nombre: 2 } },
-    { consigne: [texte(consigneGraphique())], reponse: { type: "lignes", nombre: 1 } },
+      ? { consigne: consigneCroissance(exercice), reponse: { type: "tableau", libellesLignes: ["Intervalle", "Variation de f"], nombreColonnes: 4 } }
+      : { consigne: consigneCroissance(exercice), reponse: { type: "lignes", nombre: 2 } },
+    { consigne: consigneConcavite(), reponse: { type: "lignes", nombre: 2 } },
+    { consigne: consigneGraphique(), reponse: { type: "lignes", nombre: 1 } },
   ];
 
   return {

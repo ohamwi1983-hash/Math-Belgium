@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseLimites } from "../moteur6e/verificationEtudeFonctionExponentielle";
-import type { DirectionLabel } from "../ui6e/formatEtudeFonctionExponentielle";
+import type { DirectionLabel, FragmentConsigne } from "../ui6e/formatEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionExponentielle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -50,7 +51,7 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
 
 interface Props {
   enonceLatex: string;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   labels: DirectionLabel[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -95,7 +96,9 @@ export function EtapeLimitesDeux({ enonceLatex, consigneEcran, labels, aideNivea
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <GroupeLimite label={labels[0].latex} etat={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       <GroupeLimite label={labels[1].latex} etat={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
       {niveauAide >= 1 && (

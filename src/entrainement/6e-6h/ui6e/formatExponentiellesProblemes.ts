@@ -22,6 +22,16 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 /** Décimal FRANÇAIS (virgule) arrondi à `decimales` décimales — pour l'AFFICHAGE seulement (aides,
  * bloc "état actuel", récapitulatif) : jamais la valeur de comparaison utilisée par
  * `moteur6e/verificationExponentiellesProblemes.ts`, qui reste toujours la valeur EXACTE. */
@@ -29,15 +39,6 @@ function formatDecimal(v: number, decimales = 2): string {
   const f = Math.pow(10, decimales);
   const r = Math.round(v * f) / f;
   return String(r).replace(".", "{,}").replace("-{,}", "-0{,}");
-}
-
-/** Même arrondi que `formatDecimal`, mais pour une chaîne rendue en PROSE PURE (`consigneEcran`,
- * jamais passée à KaTeX) — une virgule simple, jamais les accolades LaTeX `{,}` qui s'afficheraient
- * littéralement à l'écran. */
-function formatDecimalTexte(v: number, decimales = 2): string {
-  const f = Math.pow(10, decimales);
-  const r = Math.round(v * f) / f;
-  return String(r).replace(".", ",");
 }
 
 /** `base^{exposant}` LaTeX, sauf si `exposant===1` (retourne `base` seul) — même primitive que
@@ -106,8 +107,9 @@ function formatModeleG(c: number, k: number, aTexte: string): string {
 // Famille A.
 // ============================================================================
 
-function consigneGeneraleA(exercice: ExerciceExpoProbA): string {
-  return exercice.sousType === "evaluer" ? contexteA(exercice).phrase(exercice.Q0, exercice.p) : (contexteA(exercice) as (typeof CONTEXTES_A_DOUBLEMENT)[number]).phrase(exercice.T);
+function consigneGeneraleA(exercice: ExerciceExpoProbA): FragmentConsigne[] {
+  const brut = exercice.sousType === "evaluer" ? contexteA(exercice).phrase(exercice.Q0, exercice.p) : (contexteA(exercice) as (typeof CONTEXTES_A_DOUBLEMENT)[number]).phrase(exercice.T);
+  return [texte(brut)];
 }
 
 function blocDonneesA(exercice: ExerciceExpoProbA): string[] {
@@ -120,11 +122,15 @@ function etatActuelA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"):
   return exercice.sousType === "evaluer" ? [`Q(t) = ${exercice.Q0}\\cdot ${formatDecimal(exercice.r, 3)}^{\\,t}`] : [`${exercice.T}-t`];
 }
 
-function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): string {
+function consigneEcranA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): FragmentConsigne[] {
   if (phase === "aEcran1") {
-    return exercice.sousType === "evaluer" ? "Pose le modèle Q(t), en fonction de t, qui décrit cette évolution." : "Reculer d'une période divise la quantité par 2. Exprime, en fonction de t, le nombre de reculs qui séparent l'instant t de l'instant de référence T.";
+    return exercice.sousType === "evaluer"
+      ? [texte("Pose le modèle "), latex("Q(t)"), texte(", en fonction de t, qui décrit cette évolution.")]
+      : [texte("Reculer d'une période divise la quantité par 2. Exprime, en fonction de t, le nombre de reculs qui séparent l'instant t de l'instant de référence T.")];
   }
-  return exercice.sousType === "evaluer" ? "À partir du modèle CORRECT de l'étape précédente, calcule la valeur au temps demandé (arrondie)." : `Déduis l'instant t où la quantité valait 1/2^${exercice.k} de sa valeur en T.`;
+  return exercice.sousType === "evaluer"
+    ? [texte("À partir du modèle CORRECT de l'étape précédente, calcule la valeur au temps demandé (arrondie).")]
+    : [texte("Déduis l'instant t où la quantité valait "), latex(`\\dfrac{1}{2^{${exercice.k}}}`), texte(" de sa valeur en T.")];
 }
 
 function aideA1(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2"): AideAvecLatex {
@@ -152,8 +158,8 @@ function formatReponseA(exercice: ExerciceExpoProbA, phase: "aEcran1" | "aEcran2
 // Famille B.
 // ============================================================================
 
-function consigneGeneraleB(exercice: ExerciceExpoProbB): string {
-  return contexteB(exercice).phrase(exercice.Q0, exercice.p);
+function consigneGeneraleB(exercice: ExerciceExpoProbB): FragmentConsigne[] {
+  return [texte(contexteB(exercice).phrase(exercice.Q0, exercice.p))];
 }
 
 function blocDonneesB(exercice: ExerciceExpoProbB): string[] {
@@ -176,17 +182,17 @@ function etatActuelB(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" |
   return [reste, complement, complementN];
 }
 
-function consigneEcranB(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4"): string {
+function consigneEcranB(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2" | "bEcran3" | "bEcran4"): FragmentConsigne[] {
   const ctx = contexteB(exercice);
   switch (phase) {
     case "bEcran1":
-      return `Pose l'expression de reste(t) — ${ctx.nomReste}, en fonction de t.`;
+      return [texte("Pose l'expression de "), latex("\\text{reste}(t)"), texte(` — ${ctx.nomReste}, en fonction de t.`)];
     case "bEcran2":
-      return `À partir du reste(t) CORRECT de l'étape précédente, écris l'expression de complément(t) = Q0 − reste(t) — ${ctx.nomComplement}.`;
+      return [texte("À partir du "), latex("\\text{reste}(t)"), texte(" CORRECT de l'étape précédente, écris l'expression de "), latex("\\text{complément}(t) = Q_0 - \\text{reste}(t)"), texte(` — ${ctx.nomComplement}.`)];
     case "bEcran3":
-      return `Calcule complément(${exercice.n}) (arrondi).`;
+      return [texte("Calcule "), latex(`\\text{complément}(${exercice.n})`), texte(" (arrondi).")];
     case "bEcran4":
-      return `À partir de l'expression CORRECTE de l'étape 2, détermine à partir de quel temps t le complément atteint Q0 − ${formatDecimalTexte(exercice.toleranceSeuil, 1)} (arrondi).`;
+      return [texte("À partir de l'expression CORRECTE de l'étape 2, détermine à partir de quel temps t le complément atteint "), latex(`Q_0 - ${formatDecimal(exercice.toleranceSeuil, 1)}`), texte(" (arrondi).")];
   }
 }
 
@@ -233,8 +239,8 @@ function formatReponseB(exercice: ExerciceExpoProbB, phase: "bEcran1" | "bEcran2
 // Famille C.
 // ============================================================================
 
-function consigneGeneraleC(exercice: ExerciceExpoProbC): string {
-  return contexteC(exercice).phrase(exercice.t1, exercice.v1, exercice.t2, exercice.v2Affiche);
+function consigneGeneraleC(exercice: ExerciceExpoProbC): FragmentConsigne[] {
+  return [texte(contexteC(exercice).phrase(exercice.t1, exercice.v1, exercice.t2, exercice.v2Affiche))];
 }
 
 function blocDonneesC(exercice: ExerciceExpoProbC): string[] {
@@ -250,10 +256,10 @@ function etatActuelC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" |
   return lignes;
 }
 
-function consigneEcranC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): string {
-  if (phase === "cEcran1") return "Déduis le taux multiplicateur r entre les deux instants connus.";
-  if (phase === "cEcran2") return "À partir du taux r CORRECT de l'étape précédente, détermine Q0 (la valeur qui correspondrait à t=0).";
-  return `À partir du modèle CORRECT de l'étape précédente, calcule la valeur à chacun des temps suivants : ${exercice.tempsDemandes.map((t) => `t=${t}`).join(", ")}.`;
+function consigneEcranC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Déduis le taux multiplicateur r entre les deux instants connus.")];
+  if (phase === "cEcran2") return [texte("À partir du taux r CORRECT de l'étape précédente, détermine Q0 (la valeur qui correspondrait à "), latex("t=0"), texte(").")];
+  return [texte("À partir du modèle CORRECT de l'étape précédente, calcule la valeur à chacun des temps suivants : "), latex(exercice.tempsDemandes.map((t) => `t=${t}`).join(",\\ ")), texte(".")];
 }
 
 function aideC1(_exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2" | "cEcran3"): AideAvecLatex {
@@ -278,8 +284,8 @@ function formatReponseC(exercice: ExerciceExpoProbC, phase: "cEcran1" | "cEcran2
 // Famille D.
 // ============================================================================
 
-function consigneGeneraleD(exercice: ExerciceExpoProbD): string {
-  return contexteD(exercice).phrase(exercice.aAffiche, exercice.bAffiche, exercice.cAffiche, exercice.d);
+function consigneGeneraleD(exercice: ExerciceExpoProbD): FragmentConsigne[] {
+  return [texte(contexteD(exercice).phrase(exercice.aAffiche, exercice.bAffiche, exercice.cAffiche, exercice.d))];
 }
 
 function blocDonneesD(exercice: ExerciceExpoProbD): string[] {
@@ -299,16 +305,16 @@ function etatActuelD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" |
   return lignes;
 }
 
-function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): string {
+function consigneEcranD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2" | "dEcran3" | "dEcran4"): FragmentConsigne[] {
   switch (phase) {
     case "dEcran1":
-      return "Calcule les deux différences consécutives (a−b) et (b−c), puis leur rapport.";
+      return [texte("Calcule les deux différences consécutives "), latex("(a-b)"), texte(" et "), latex("(b-c)"), texte(", puis leur rapport.")];
     case "dEcran2":
-      return "À partir du rapport CORRECT de l'étape précédente, détermine la valeur de stabilisation L.";
+      return [texte("À partir du rapport CORRECT de l'étape précédente, détermine la valeur de stabilisation L.")];
     case "dEcran3":
-      return "Complète le modèle : donne l'expression complète T(t), en fonction de t, à partir du L CORRECT de l'étape précédente.";
+      return [texte("Complète le modèle : donne l'expression complète "), latex("T(t)"), texte(", en fonction de t, à partir du L CORRECT de l'étape précédente.")];
     case "dEcran4":
-      return `Évalue le modèle CORRECT à t=${exercice.tSuppl}.`;
+      return [texte("Évalue le modèle CORRECT à "), latex(`t=${exercice.tSuppl}`), texte(".")];
   }
 }
 
@@ -355,8 +361,8 @@ function formatReponseD(exercice: ExerciceExpoProbD, phase: "dEcran1" | "dEcran2
 // Famille E.
 // ============================================================================
 
-function consigneGeneraleE(exercice: ExerciceExpoProbE): string {
-  return contexteE(exercice).phrase();
+function consigneGeneraleE(exercice: ExerciceExpoProbE): FragmentConsigne[] {
+  return [texte(contexteE(exercice).phrase())];
 }
 
 function blocDonneesE(exercice: ExerciceExpoProbE): string[] {
@@ -375,10 +381,10 @@ function etatActuelE(exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" |
   return [derivee, tMax];
 }
 
-function consigneEcranE(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): string {
-  if (phase === "eEcran1") return "Calcule f'(t) et factorise-la complètement.";
-  if (phase === "eEcran2") return "À partir de la forme factorisée CORRECTE de l'étape précédente, détermine le temps t du maximum.";
-  return "Évalue f au temps t du maximum trouvé à l'étape précédente.";
+function consigneEcranE(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Calcule "), latex("f'(t)"), texte(" et factorise-la complètement.")];
+  if (phase === "eEcran2") return [texte("À partir de la forme factorisée CORRECTE de l'étape précédente, détermine le temps t du maximum.")];
+  return [texte("Évalue f au temps t du maximum trouvé à l'étape précédente.")];
 }
 
 function aideE1(_exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2" | "eEcran3"): AideAvecLatex {
@@ -405,8 +411,15 @@ function formatReponseE(exercice: ExerciceExpoProbE, phase: "eEcran1" | "eEcran2
 // Famille F.
 // ============================================================================
 
-function consigneGeneraleF(exercice: ExerciceExpoProbF): string {
-  return contexteF(exercice).phrase(exercice.N, exercice.g, exercice.F, exercice.V);
+/** La phrase contextualisée de la famille F embarque littéralement la formule `p(t)=1-e^(-kt)` —
+ * on la découpe au niveau de ce marqueur connu pour l'extraire en fragment `latex()` plutôt que de
+ * la laisser s'afficher comme texte brut (même piège que documenté en tête de fichier). */
+function consigneGeneraleF(exercice: ExerciceExpoProbF): FragmentConsigne[] {
+  const brut = contexteF(exercice).phrase(exercice.N, exercice.g, exercice.F, exercice.V);
+  const marqueur = "p(t)=1-e^(-kt)";
+  const index = brut.indexOf(marqueur);
+  if (index === -1) return [texte(brut)];
+  return [texte(brut.slice(0, index)), latex("p(t)=1-e^{-kt}"), texte(brut.slice(index + marqueur.length))];
 }
 
 function blocDonneesF(exercice: ExerciceExpoProbF): string[] {
@@ -428,16 +441,16 @@ function etatActuelF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2" |
   return [limite, pN1, personnes];
 }
 
-function consigneEcranF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2" | "fEcran3" | "fEcran4"): string {
+function consigneEcranF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2" | "fEcran3" | "fEcran4"): FragmentConsigne[] {
   switch (phase) {
     case "fEcran1":
-      return "Quelle est la limite de p(t) quand t devient très grand ?";
+      return [texte("Quelle est la limite de "), latex("p(t)"), texte(" quand t devient très grand ?")];
     case "fEcran2":
-      return `Calcule p(${exercice.n1}).`;
+      return [texte("Calcule "), latex(`p(${exercice.n1})`), texte(".")];
     case "fEcran3":
-      return `Calcule le nombre de personnes touchées après t=${exercice.n2} — recalcule p(${exercice.n2}), n'utilise PAS p(${exercice.n1}).`;
+      return [texte("Calcule le nombre de personnes touchées après "), latex(`t=${exercice.n2}`), texte(" — recalcule "), latex(`p(${exercice.n2})`), texte(", n'utilise PAS "), latex(`p(${exercice.n1})`), texte(".")];
     case "fEcran4":
-      return `Calcule le bénéfice net après t=${exercice.n2} : bénéfice = revenu − (coûts fixes + coûts variables).`;
+      return [texte("Calcule le bénéfice net après "), latex(`t=${exercice.n2}`), texte(" : "), latex("\\text{bénéfice} = \\text{revenu} - (\\text{coûts fixes} + \\text{coûts variables})")];
   }
 }
 
@@ -484,8 +497,8 @@ function formatReponseF(exercice: ExerciceExpoProbF, phase: "fEcran1" | "fEcran2
 // Famille G.
 // ============================================================================
 
-function consigneGeneraleG(exercice: ExerciceExpoProbG): string {
-  return contexteG(exercice).phrase(exercice.sAffiche);
+function consigneGeneraleG(exercice: ExerciceExpoProbG): FragmentConsigne[] {
+  return [texte(contexteG(exercice).phrase(exercice.sAffiche))];
 }
 
 function blocDonneesG(exercice: ExerciceExpoProbG): string[] {
@@ -506,14 +519,14 @@ function etatActuelG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" |
   return [evaluations, tSeuil];
 }
 
-function consigneEcranG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEcran3"): string {
+function consigneEcranG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2" | "gEcran3"): FragmentConsigne[] {
   switch (phase) {
     case "gEcran1":
-      return `Évalue f(${exercice.tEval1}) et f(${exercice.tEval2}).`;
+      return [texte("Évalue "), latex(`f(${exercice.tEval1})`), texte(" et "), latex(`f(${exercice.tEval2})`), texte(".")];
     case "gEcran2":
-      return `Résous f(t)=${formatDecimalTexte(exercice.sAffiche, 1)} (isole l'exponentielle puis passe au logarithme).`;
+      return [texte("Résous "), latex(`f(t)=${formatDecimal(exercice.sAffiche, 1)}`), texte(" (isole l'exponentielle puis passe au logarithme).")];
     case "gEcran3":
-      return `Compare le temps seuil CORRECT de l'étape précédente à D=${exercice.duree} : l'objectif est-il atteignable ?`;
+      return [texte("Compare le temps seuil CORRECT de l'étape précédente à "), latex(`D=${exercice.duree}`), texte(" : l'objectif est-il atteignable ?")];
   }
 }
 
@@ -549,7 +562,7 @@ function formatReponseG(exercice: ExerciceExpoProbG, phase: "gEcran1" | "gEcran2
 // Dispatch public.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceExponentiellesProblemes): string {
+export function consigneGenerale(exercice: ExerciceExponentiellesProblemes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA(exercice);
@@ -609,7 +622,7 @@ export function etatActuel(exercice: ExerciceExponentiellesProblemes, phase: Pha
   }
 }
 
-export function consigneEcran(exercice: ExerciceExponentiellesProblemes, phase: PhaseExponentiellesProblemes): string {
+export function consigneEcran(exercice: ExerciceExponentiellesProblemes, phase: PhaseExponentiellesProblemes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(exercice, phase as "aEcran1" | "aEcran2");

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { SigneCroissance } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseCroissanceGrilleC } from "../moteur6e/verificationEtudeFonctionLogarithme";
+import type { FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -15,7 +17,7 @@ interface AideAvecLatex {
 
 interface Props {
   enonceLatex: string;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Rappel de domaine + limites + asymptotes déjà confirmés — voir
    * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
   etatActuel: string[];
@@ -73,7 +75,9 @@ export function EtapeCroissanceGrilleCLog({ enonceLatex, consigneEcran, etatActu
           ))}
         </div>
       </div>
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {labels.map((label, i) => (
         <div className="field" key={label}>
           <p className="field-label field-label-minuscule">

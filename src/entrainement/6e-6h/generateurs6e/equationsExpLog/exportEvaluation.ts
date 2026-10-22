@@ -48,7 +48,7 @@ function construireEnonceEquationsExpLog(exercice: ExerciceEquationsExpLog): Sec
   return {
     enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(blocDonnees(exercice)[0])],
     questions: phases.map((phase) => ({
-      consigne: [texte(consigneEcran(exercice, phase))],
+      consigne: consigneEcran(exercice, phase),
       reponse: { type: "lignes", nombre: TAILLE_REPONSE[phase] },
     })),
   };

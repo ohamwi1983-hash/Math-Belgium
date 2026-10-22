@@ -24,6 +24,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué ici à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 interface TermeSigne {
   valeur: number;
   suffixe: string;
@@ -130,13 +141,15 @@ function formatEnonceA(exercice: ExerciceEqExpoA): string {
   return `${bl}^{${expo}} = ${formatValeurExacteLatex(exercice.valeurNumerique)}`;
 }
 
-function consigneA(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): string {
+function consigneA(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): FragmentConsigne[] {
   if (phase === "aEcran1") {
     return exercice.sousType === "A2"
-      ? "Un radical est nul SI ET SEULEMENT SI son radicande est nul. Écris l'équation \"radicande = 0\" (pas encore résolue en x)."
-      : "Réécris le second membre comme une puissance de la MÊME base que le premier membre — donne l'exposant cible.";
+      ? [texte("Un radical est nul SI ET SEULEMENT SI son radicande est nul. Écris l'équation \"radicande = 0\" (pas encore résolue en x).")]
+      : [texte("Réécris le second membre comme une puissance de la MÊME base que le premier membre — donne l'exposant cible.")];
   }
-  return exercice.sousType === "A3" ? "À partir de l'exposant CORRECT de l'étape précédente, résous l'équation du second degré en x (0, 1 ou 2 solutions selon le cas)." : "À partir de l'exposant/de l'équation CORRECT(E) de l'étape précédente, résous pour x.";
+  return exercice.sousType === "A3"
+    ? [texte("À partir de l'exposant CORRECT de l'étape précédente, résous l'équation du second degré en x (0, 1 ou 2 solutions selon le cas).")]
+    : [texte("À partir de l'exposant/de l'équation CORRECT(E) de l'étape précédente, résous pour x.")];
 }
 
 function aideA1(phase: "aEcran1" | "aEcran2", exercice: ExerciceEqExpoA): AideAvecLatex {
@@ -169,12 +182,15 @@ function formatEnonceB(exercice: ExerciceEqExpoB): string {
   return `\\sqrt{${bl}^{${formatExposantLineaireLatex(exercice.m1, exercice.n1)}}} = ${bl}^{${formatExposantLineaireLatex(exercice.m2, exercice.n2)}}`;
 }
 
-// Consigne en PROSE PURE, jamais de syntaxe LaTeX embarquée (`consigneEcran` est rendu en `<p>`
-// brut par les composants d'écran, jamais via KaTeX — bug trouvé par vérification Playwright :
-// "\sqrt{base^u}=base^{u/2}" s'affichait littéralement à l'écran ; la formule elle-même reste
-// disponible, correctement rendue, dans l'aide niveau 1).
-function consigneB(phase: "bEcran1" | "bEcran2"): string {
-  return phase === "bEcran1" ? "Simplifie le radical de gauche : réécris son exposant après division par 2." : "À partir de l'exposant simplifié CORRECT de l'étape précédente, résous l'équation — ou indique qu'il n'y a AUCUNE solution si les deux membres se réduisent à une égalité fausse indépendante de x.";
+// Reste en PROSE PURE (aucun fragment `latex()` ici) : cette consigne n'a jamais eu besoin
+// d'embarquer de formule — la formule elle-même reste disponible, correctement rendue, dans l'aide
+// niveau 1 (`aideB1`). Le bug historique ("\sqrt{base^u}=base^{u/2}" affiché littéralement) venait
+// du rendu en `<p>` brut, désormais corrigé via `FragmentConsigne[]`/`RenduFragments` — voir
+// `consigneC` ci-dessous pour un cas qui, lui, en a réellement besoin.
+function consigneB(phase: "bEcran1" | "bEcran2"): FragmentConsigne[] {
+  return phase === "bEcran1"
+    ? [texte("Simplifie le radical de gauche : réécris son exposant après division par 2.")]
+    : [texte("À partir de l'exposant simplifié CORRECT de l'étape précédente, résous l'équation — ou indique qu'il n'y a AUCUNE solution si les deux membres se réduisent à une égalité fausse indépendante de x.")];
 }
 
 function aideB1(phase: "bEcran1" | "bEcran2"): AideAvecLatex {
@@ -205,10 +221,10 @@ function formatEnonceC(exercice: ExerciceEqExpoC): string {
   return `${membreGauche} = 0`;
 }
 
-function consigneC(phase: "cEcran1" | "cEcran2" | "cEcran3"): string {
-  if (phase === "cEcran1") return "Pose t=baseˣ et réécris l'équation en t (reconnais la structure éventuellement déguisée).";
-  if (phase === "cEcran2") return "Résous l'équation du second degré en t — donne TOUTES les valeurs de t, y compris négatives (elles seront filtrées à l'étape suivante).";
-  return "Parmi les valeurs de t CORRECTES de l'étape précédente, REJETTE celles qui sont ≤ 0 (baseˣ ne peut jamais l'être), puis convertis les valeurs positives restantes en x.";
+function consigneC(phase: "cEcran1" | "cEcran2" | "cEcran3"): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Pose "), latex("t=\\text{base}^x"), texte(" et réécris l'équation en t (reconnais la structure éventuellement déguisée).")];
+  if (phase === "cEcran2") return [texte("Résous l'équation du second degré en t — donne TOUTES les valeurs de t, y compris négatives (elles seront filtrées à l'étape suivante).")];
+  return [texte("Parmi les valeurs de t CORRECTES de l'étape précédente, REJETTE celles qui sont ≤ 0 ("), latex("\\text{base}^x"), texte(" ne peut jamais l'être), puis convertis les valeurs positives restantes en x.")];
 }
 
 function aideC1(phase: "cEcran1" | "cEcran2" | "cEcran3", exercice: ExerciceEqExpoC): AideAvecLatex {
@@ -253,8 +269,8 @@ function formatEnonceD(exercice: ExerciceEqExpoD): string {
   return `${formatSommeTermes([{ valeur: 1, suffixe: t1 }, { valeur: 1, suffixe: t2 }, { valeur: exercice.k, suffixe: "" }])} = 0`;
 }
 
-function consigneD(): string {
-  return "Sans AUCUN calcul : cette équation a-t-elle au moins une solution réelle ?";
+function consigneD(): FragmentConsigne[] {
+  return [texte("Sans AUCUN calcul : cette équation a-t-elle au moins une solution réelle ?")];
 }
 
 /** Même message pour D1 et D2 (le fait fondamental invoqué est identique) — `exercice` non utilisé,
@@ -443,7 +459,7 @@ export function formatEnonceLatex(exercice: ExerciceEquationExponentielle): stri
   }
 }
 
-export function consigneEcran(phase: PhaseEquationExponentielle, exercice: ExerciceEquationExponentielle): string {
+export function consigneEcran(phase: PhaseEquationExponentielle, exercice: ExerciceEquationExponentielle): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aEcran1" | "aEcran2", exercice);

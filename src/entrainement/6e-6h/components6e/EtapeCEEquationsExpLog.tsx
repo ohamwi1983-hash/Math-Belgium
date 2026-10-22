@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
+import type { FragmentConsigne } from "../ui6e/formatEquationsExpLog";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -13,9 +15,9 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -49,7 +51,7 @@ export function EtapeCEEquationsExpLog({ consigneGenerale, blocDonnees, consigne
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -60,7 +62,9 @@ export function EtapeCEEquationsExpLog({ consigneGenerale, blocDonnees, consigne
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <EnsembleReelGuideBuilder onChange={setReponse} label="x\in" />
       {niveauAide >= 1 && (
         <div className="aide-5e">

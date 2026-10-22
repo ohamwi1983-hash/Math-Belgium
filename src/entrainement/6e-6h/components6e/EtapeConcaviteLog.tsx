@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { TypeConcaviteLog } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseConcaviteLog } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, consigneConcavite } from "../ui6e/formatEtudeFonctionLogarithme";
@@ -74,7 +75,9 @@ export function EtapeConcaviteLog({ enonceLatex, etatActuel, aideNiveau1, aideNi
           ))}
         </div>
       </div>
-      <p className="prompt-text">{consigneConcavite()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneConcavite()} />
+      </p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (
           <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${montrerErreurs && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>

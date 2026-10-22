@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEquationsExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatEquationsExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -12,7 +14,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -64,7 +66,9 @@ export function EtapeListeEquExpo({ consigneEcran, enonceLatex, aideNiveau1, aid
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <button type="button" className={`btn ${aucune ? "toggle-active" : ""} ${montrerErreurs && aucune ? "is-erronee" : ""}`} onClick={() => setAucune((v) => !v)}>
         {labelAucune}
       </button>

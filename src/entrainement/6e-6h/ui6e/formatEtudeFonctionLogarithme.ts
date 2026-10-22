@@ -27,6 +27,16 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 // ============================================================================
 // f(x) — un helper par famille.
 // ============================================================================
@@ -282,37 +292,37 @@ export function directionLabelsAsymptotes(exercice: ExerciceEtudeLogNonE): Direc
 // Consignes — un texte par écran.
 // ============================================================================
 
-export function consigneDomaine(exercice: ExerciceEtudeFonctionLogarithme): string {
-  if (exercice.famille === "C") return "Détermine le domaine de définition de f — attention à la valeur absolue.";
-  return "Détermine le domaine de définition de f.";
+export function consigneDomaine(exercice: ExerciceEtudeFonctionLogarithme): FragmentConsigne[] {
+  if (exercice.famille === "C") return [texte("Détermine le domaine de définition de f — attention à la valeur absolue.")];
+  return [texte("Détermine le domaine de définition de f.")];
 }
 
-export function consigneLimites(exercice: ExerciceEtudeLogNonE): string {
-  if (exercice.famille === "C") return "Détermine les 6 limites suivantes (aux deux infinis, puis aux 4 approches des valeurs exclues).";
-  return "Détermine les limites de f aux bornes de son domaine.";
+export function consigneLimites(exercice: ExerciceEtudeLogNonE): FragmentConsigne[] {
+  if (exercice.famille === "C") return [texte("Détermine les 6 limites suivantes (aux deux infinis, puis aux 4 approches des valeurs exclues).")];
+  return [texte("Détermine les limites de f aux bornes de son domaine.")];
 }
 
-export function consigneAsymptotes(exercice: ExerciceEtudeLogNonE): string {
-  if (exercice.famille === "B") return "À partir des limites CORRECTES précédentes, détermine l'équation de l'asymptote horizontale de f.";
-  if (exercice.famille === "C") return "À partir des limites CORRECTES précédentes, détermine les 2 asymptotes verticales de f.";
-  return "À partir des limites CORRECTES précédentes, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.";
+export function consigneAsymptotes(exercice: ExerciceEtudeLogNonE): FragmentConsigne[] {
+  if (exercice.famille === "B") return [texte("À partir des limites CORRECTES précédentes, détermine l'équation de l'asymptote horizontale de f.")];
+  if (exercice.famille === "C") return [texte("À partir des limites CORRECTES précédentes, détermine les 2 asymptotes verticales de f.")];
+  return [texte("À partir des limites CORRECTES précédentes, détermine l'asymptote de f dans chaque direction — ou l'absence d'asymptote.")];
 }
 
-export function consigneCroissance(exercice: ExerciceEtudeLogNonE): string {
-  if (exercice.famille === "C") return "Étudie le signe de f' sur chacun des 4 intervalles délimités par -k, 0 et k, et conclus sur le maximum local.";
-  return "Étudie le signe de f' et conclus sur la croissance de f (monotonie constante, ou extremum et sa position).";
+export function consigneCroissance(exercice: ExerciceEtudeLogNonE): FragmentConsigne[] {
+  if (exercice.famille === "C") return [texte("Étudie le signe de "), latex("f'"), texte(" sur chacun des 4 intervalles délimités par -k, 0 et k, et conclus sur le maximum local.")];
+  return [texte("Étudie le signe de "), latex("f'"), texte(" et conclus sur la croissance de f (monotonie constante, ou extremum et sa position).")];
 }
 
-export function consigneConcavite(): string {
-  return "Étudie le signe de f'' et conclus sur la concavité de f (convexe, concave, ou point(s) d'inflexion et leur(s) position(s)).";
+export function consigneConcavite(): FragmentConsigne[] {
+  return [texte("Étudie le signe de "), latex("f''"), texte(" et conclus sur la concavité de f (convexe, concave, ou point(s) d'inflexion et leur(s) position(s)).")];
 }
 
-export function consigneGraphique(): string {
-  return "Sélectionne le graphique qui représente f.";
+export function consigneGraphique(): FragmentConsigne[] {
+  return [texte("Sélectionne le graphique qui représente f.")];
 }
 
-export function consigneComportementInfiniE(): string {
-  return "Détermine le comportement de f dans chaque direction — une limite existe-t-elle (et vaut 0), ou n'existe-t-elle pas ?";
+export function consigneComportementInfiniE(): FragmentConsigne[] {
+  return [texte("Détermine le comportement de f dans chaque direction — une limite existe-t-elle (et vaut 0), ou n'existe-t-elle pas ?")];
 }
 
 // ============================================================================

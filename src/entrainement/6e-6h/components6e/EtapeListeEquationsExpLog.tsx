@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
+import type { FragmentConsigne } from "../ui6e/formatEquationsExpLog";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -12,9 +14,9 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   placeholder: string;
   labelAjout: string;
   labelAucune: string;
@@ -67,7 +69,7 @@ export function EtapeListeEquationsExpLog({ consigneGenerale, blocDonnees, consi
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -78,7 +80,9 @@ export function EtapeListeEquationsExpLog({ consigneGenerale, blocDonnees, consi
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <button type="button" className={`btn ${aucune ? "toggle-active" : ""}`} onClick={basculerAucune}>
         {labelAucune}
       </button>

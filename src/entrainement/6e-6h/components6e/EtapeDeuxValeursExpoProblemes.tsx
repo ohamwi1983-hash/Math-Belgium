@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
+import type { FragmentConsigne } from "../ui6e/formatExponentiellesProblemes";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
@@ -12,9 +14,9 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Libellés LaTeX des 2 champs (ex. "f(1)=", "f(3)=") — ORDONNÉS, jamais interchangeables
    * (contrairement à la famille C écran 3, add-as-needed) : chaque champ est étiqueté par son
    * propre temps. */
@@ -51,7 +53,7 @@ export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, c
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -62,7 +64,9 @@ export function EtapeDeuxValeursExpoProblemes({ consigneGenerale, blocDonnees, c
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={texte1} label={labelChamp1} />
       <div className="field-row">
         <p className="field-label field-label-minuscule">

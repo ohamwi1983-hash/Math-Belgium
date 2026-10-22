@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseAsymptoteDirection } from "../moteur6e/verificationEtudeFonctionLogarithme";
-import type { DirectionLabel } from "../ui6e/formatEtudeFonctionLogarithme";
+import type { DirectionLabel, FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -60,7 +61,7 @@ function GroupeAsymptote({
 
 interface Props {
   enonceLatex: string;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Rappel des limites confirmées à l'écran précédent (consigne explicite : "à partir des limites
    * CORRECTES précédentes") — voir `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
   etatActuel: string[];
@@ -127,7 +128,9 @@ export function EtapeAsymptotesMultiLog({ enonceLatex, consigneEcran, etatActuel
           ))}
         </div>
       </div>
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {labels.map((l, i) => (
         <GroupeAsymptote key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} forcerPresence={forcerPresence[i]} onChange={(e) => majEtat(i, e)} />
       ))}

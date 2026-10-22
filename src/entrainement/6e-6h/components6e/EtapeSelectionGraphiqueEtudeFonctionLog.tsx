@@ -1,4 +1,5 @@
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ExerciceEtudeLogNonE } from "../core6e/etudeFonctionLogarithme.types";
 import type { AideAvecLatex } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, calculerViewBox, consigneGraphique, formatFonctionLatex } from "../ui6e/formatEtudeFonctionLogarithme";
@@ -37,7 +38,9 @@ export function EtapeSelectionGraphiqueEtudeFonctionLog({ exercice, aideNiveau1,
           </div>
         }
       />
-      <p className="prompt-text">{consigneGraphique()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneGraphique()} />
+      </p>
 
       <EtapeSelectionGraphiqueQCM
         nombreOptions={exercice.candidats.length}

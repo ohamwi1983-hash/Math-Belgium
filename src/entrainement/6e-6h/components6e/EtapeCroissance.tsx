@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseCroissance } from "../moteur6e/verificationEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE, consigneCroissance } from "../ui6e/formatEtudeFonctionExponentielle";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -64,7 +65,9 @@ export function EtapeCroissance({ enonceLatex, aideNiveau1, aideNiveau2, tentati
           </div>
         }
       />
-      <p className="prompt-text">{consigneCroissance()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneCroissance()} />
+      </p>
       <div className="options-liste-longue">
         {OPTIONS.map((o) => (
           <button key={o.id} type="button" className={`btn ${type === o.id ? "toggle-active" : ""} ${montrerErreurs && type === o.id ? "is-erronee" : ""}`} onClick={() => setType(o.id)}>

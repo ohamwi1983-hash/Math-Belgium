@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseAsymptoteDirection, ReponseAsymptotes } from "../moteur6e/verificationEtudeFonctionExponentielle";
-import type { DirectionLabel } from "../ui6e/formatEtudeFonctionExponentielle";
+import type { DirectionLabel, FragmentConsigne } from "../ui6e/formatEtudeFonctionExponentielle";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionExponentielle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -40,7 +41,7 @@ function GroupeAsymptote({ label, etat, erreur, onChange }: { label: string; eta
 
 interface Props {
   enonceLatex: string;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   labels: DirectionLabel[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -90,7 +91,9 @@ export function EtapeAsymptotesDeux({ enonceLatex, consigneEcran, labels, aideNi
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <GroupeAsymptote
         label={labels[0].latex}
         etat={plusInfini}

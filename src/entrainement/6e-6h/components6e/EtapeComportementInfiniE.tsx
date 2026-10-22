@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutLimiteQualitatif } from "../core6e/etudeFonctionLogarithme.types";
 import type { ReponseComportementInfiniE } from "../moteur6e/verificationEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE, consigneComportementInfiniE } from "../ui6e/formatEtudeFonctionLogarithme";
@@ -87,7 +88,9 @@ export function EtapeComportementInfiniE({ enonceLatex, etatActuel, aideNiveau1,
           ))}
         </div>
       </div>
-      <p className="prompt-text">{consigneComportementInfiniE()}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneComportementInfiniE()} />
+      </p>
       <GroupeDirection label="x \to -\infty" valeur={moinsInfini} erreur={montrerErreurs} onChange={setMoinsInfini} />
       <GroupeDirection label="x \to +\infty" valeur={plusInfini} erreur={montrerErreurs} onChange={setPlusInfini} />
       {niveauAide >= 1 && (

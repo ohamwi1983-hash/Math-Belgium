@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseLimite } from "../moteur6e/verificationLimitesExponentielles";
-import type { DirectionLabel } from "../ui6e/formatEtudeFonctionLogarithme";
+import type { DirectionLabel, FragmentConsigne } from "../ui6e/formatEtudeFonctionLogarithme";
 import { CONSIGNE_GENERALE } from "../ui6e/formatEtudeFonctionLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -50,7 +51,7 @@ function GroupeLimite({ label, etat, erreur, onChange }: { label: string; etat: 
 
 interface Props {
   enonceLatex: string;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Rappel du domaine confirmé à l'écran précédent (consigne : "aux bornes de SON DOMAINE") — voir
    * `ui6e/formatEtudeFonctionLogarithme.ts::etatActuel`. */
   etatActuel: string[];
@@ -109,7 +110,9 @@ export function EtapeLimitesMultiLog({ enonceLatex, consigneEcran, etatActuel, l
           ))}
         </div>
       </div>
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {labels.map((l, i) => (
         <GroupeLimite key={l.id} label={l.latex} etat={etats[i]} erreur={montrerErreurs} onChange={(e) => majEtat(i, e)} />
       ))}
