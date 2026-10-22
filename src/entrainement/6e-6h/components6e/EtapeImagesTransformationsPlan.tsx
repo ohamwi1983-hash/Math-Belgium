@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex } from "../ui6e/formatTransformationsPlan";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatTransformationsPlan";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   nombreMaxPoints: number;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -63,7 +64,7 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -74,7 +75,9 @@ export function EtapeImagesTransformationsPlan({ consigneGenerale, blocDonnees, 
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {lignes.map((ligne, i) => (
         <div key={i}>
           <ApercuExpressionLatex texte={ligne} />

@@ -40,6 +40,17 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 // ============================================================================
 // Assemblage "a+bi" (a,b entiers) — voir en-tête de fichier.
 // ============================================================================
@@ -103,8 +114,8 @@ const LIBELLE_SOUS_TYPE_A: Record<SousTypeTransfoA, string> = {
   rotationTranslation: "une rotation de centre O, SUIVIE d'une translation",
 };
 
-export function consigneGeneraleA(e: ExerciceTransfoA): string {
-  return `P est un point d'affixe z_P. Identifie la formule complexe correspondant à ${LIBELLE_SOUS_TYPE_A[e.parametres.sousType]}, puis calcule l'image de P.`;
+export function consigneGeneraleA(e: ExerciceTransfoA): FragmentConsigne[] {
+  return [texte("P est un point d'affixe "), latexFrag("z_P"), texte(`. Identifie la formule complexe correspondant à ${LIBELLE_SOUS_TYPE_A[e.parametres.sousType]}, puis calcule l'image de P.`)];
 }
 
 export function blocDonneesA(e: ExerciceTransfoA): string[] {
@@ -138,9 +149,9 @@ function formuleSubstitueeA(e: ExerciceTransfoA): string {
   }
 }
 
-export function consigneEcranA(phase: PhaseTransformationsPlan): string {
-  if (phase === "aEcran1") return "Parmi les formules proposées, choisis celle qui correspond EXACTEMENT à cette transformation.";
-  return "Calcule l'image de P à partir de la formule CONFIRMÉE à l'étape précédente.";
+export function consigneEcranA(phase: PhaseTransformationsPlan): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Parmi les formules proposées, choisis celle qui correspond EXACTEMENT à cette transformation.")];
+  return [texte("Calcule l'image de P à partir de la formule CONFIRMÉE à l'étape précédente.")];
 }
 
 export function etatActuelA(e: ExerciceTransfoA, phase: PhaseTransformationsPlan): string[] | null {
@@ -223,8 +234,8 @@ export function optionsFormuleA(sousType: SousTypeTransfoA): { id: string; latex
 // Famille B — Construire un point depuis somme/produit, identifier la transformation.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "A et B sont 2 points d'affixes z_A et z_B. Construis le point demandé, puis identifie la transformation géométrique qu'il représente.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("A et B sont 2 points d'affixes "), latexFrag("z_A"), texte(" et "), latexFrag("z_B"), texte(". Construis le point demandé, puis identifie la transformation géométrique qu'il représente.")];
 }
 
 export function blocDonneesB(e: ExerciceTransfoB): string[] {
@@ -233,9 +244,11 @@ export function blocDonneesB(e: ExerciceTransfoB): string[] {
   return [`z_A=${affixeLatex(e.zA)}\\quad z_B=${affixeLatex(e.zB)}`, `z_{${nomPoint}}=z_A${symbole}z_B=\\,?`];
 }
 
-export function consigneEcranB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): string {
-  if (phase === "bEcran1") return e.sousType === "somme" ? "Calcule z_M=z_A+z_B." : "Calcule z_P=z_A·z_B.";
-  return "À partir du point CONFIRMÉ ci-dessus, identifie la transformation géométrique qu'il représente : choisis le type, puis donne le(s) paramètre(s).";
+export function consigneEcranB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): FragmentConsigne[] {
+  if (phase === "bEcran1") {
+    return e.sousType === "somme" ? [texte("Calcule "), latexFrag("z_M=z_A+z_B"), texte(".")] : [texte("Calcule "), latexFrag("z_P=z_A\\cdot\\, z_B"), texte(".")];
+  }
+  return [texte("À partir du point CONFIRMÉ ci-dessus, identifie la transformation géométrique qu'il représente : choisis le type, puis donne le(s) paramètre(s).")];
 }
 
 export function etatActuelB(e: ExerciceTransfoB, phase: PhaseTransformationsPlan): string[] | null {
@@ -272,8 +285,8 @@ export function nomPoint(index: number): string {
   return NOMS_AUTRES_POINTS[index] ?? `P_{${index}}`;
 }
 
-export function consigneGeneraleC(): string {
-  return "A et B sont 2 points tels que |z_A|=|z_B|. Vérifie cette égalité, détermine la rotation de centre O qui transforme A en B, puis applique-la aux autres points donnés.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("A et B sont 2 points tels que "), latexFrag("|z_A|=|z_B|"), texte(". Vérifie cette égalité, détermine la rotation de centre O qui transforme A en B, puis applique-la aux autres points donnés.")];
 }
 
 export function blocDonneesC(e: ExerciceTransfoC): string[] {
@@ -282,10 +295,10 @@ export function blocDonneesC(e: ExerciceTransfoC): string[] {
   return lignes;
 }
 
-export function consigneEcranC(phase: PhaseTransformationsPlan): string {
-  if (phase === "cEcran1") return "Calcule |z_A| et |z_B| (elles doivent être égales).";
-  if (phase === "cEcran2") return "À partir de l'égalité CONFIRMÉE, détermine l'angle de la rotation de centre O qui transforme A en B (rapport 1, rotation pure).";
-  return "Applique la rotation CONFIRMÉE à chacun des autres points donnés pour trouver leurs images.";
+export function consigneEcranC(phase: PhaseTransformationsPlan): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Calcule "), latexFrag("|z_A|"), texte(" et "), latexFrag("|z_B|"), texte(" (elles doivent être égales).")];
+  if (phase === "cEcran2") return [texte("À partir de l'égalité CONFIRMÉE, détermine l'angle de la rotation de centre O qui transforme A en B (rapport 1, rotation pure).")];
+  return [texte("Applique la rotation CONFIRMÉE à chacun des autres points donnés pour trouver leurs images.")];
 }
 
 export function etatActuelC(e: ExerciceTransfoC, phase: PhaseTransformationsPlan): string[] | null {
@@ -324,7 +337,7 @@ export function aideNiveau2C(e: ExerciceTransfoC, phase: PhaseTransformationsPla
 // Dispatch commun (mirroir 6gen37).
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceTransformationsPlan): string {
+export function consigneGenerale(exercice: ExerciceTransformationsPlan): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA(exercice);
@@ -346,7 +359,7 @@ export function blocDonnees(exercice: ExerciceTransformationsPlan): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): string {
+export function consigneEcran(exercice: ExerciceTransformationsPlan, phase: PhaseTransformationsPlan): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

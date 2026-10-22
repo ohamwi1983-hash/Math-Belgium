@@ -36,6 +36,17 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function champTexte(label: string, placeholder: string): ChampDef {
   return { type: "texte", label, placeholder };
 }
@@ -135,18 +146,18 @@ function plageLatexA(indices: number[], xs: number[]): string {
   return `${xs[indices[0]]}\\leq X\\leq ${xs[indices[indices.length - 1]]}`;
 }
 
-export function consigneGeneraleA(): string {
-  return "Voici la loi de probabilité d'une variable aléatoire discrète X. Calcule les 2 probabilités demandées, puis détermine si les 2 événements considérés sont contraires.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("Voici la loi de probabilité d'une variable aléatoire discrète X. Calcule les 2 probabilités demandées, puis détermine si les 2 événements considérés sont contraires.")];
 }
 
 export function blocDonneesA(e: ExerciceEsperanceA): string[] {
   return [tableLoiLatexA(e), `\\text{Événement 1 : }${libelleEvenementLatexA(e.evenement1, e.xs)}`, `\\text{Événement 2 : }${libelleEvenementLatexA(e.evenement2, e.xs)}`];
 }
 
-export function consigneEcranA(phase: PhaseVariablesDiscretesEsperance): string {
-  if (phase === "aEcran1") return "Identifie les valeurs de xᵢ incluses dans l'événement 1, puis additionne les pᵢ correspondants.";
-  if (phase === "aEcran2") return "Fais de même pour l'événement 2.";
-  return "Les 2 événements ci-dessus sont-ils contraires ?";
+export function consigneEcranA(phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Identifie les valeurs de xᵢ incluses dans l'événement 1, puis additionne les pᵢ correspondants.")];
+  if (phase === "aEcran2") return [texte("Fais de même pour l'événement 2.")];
+  return [texte("Les 2 événements ci-dessus sont-ils contraires ?")];
 }
 
 export function etatActuelA(e: ExerciceEsperanceA, phase: PhaseVariablesDiscretesEsperance): string[] | null {
@@ -193,8 +204,8 @@ export function aideNiveau2A(e: ExerciceEsperanceA): AideAvecLatex {
 // Famille B — Construire une loi de probabilité et calculer l'espérance.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "Construis la loi de probabilité complète de X, puis calcule son espérance E(X) = Σ xᵢ·pᵢ.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Construis la loi de probabilité complète de X, puis calcule son espérance "), latexFrag("E(X)=\\sum x_i\\cdot\\, p_i"), texte(".")];
 }
 
 export function blocDonneesB(e: ExerciceEsperanceB): string[] {
@@ -205,13 +216,13 @@ export function blocDonneesB(e: ExerciceEsperanceB): string[] {
   return [`N=${e.N}\\text{ (population totale)}`, `K=${e.K}\\text{ (favorables)}`, `n=${e.n}\\text{ (tirages sans remise)}`, "X=\\text{nombre de succès parmi les tirages}"];
 }
 
-export function consigneEcranB(e: ExerciceEsperanceB, phase: PhaseVariablesDiscretesEsperance): string {
+export function consigneEcranB(e: ExerciceEsperanceB, phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
   if (phase === "bEcran1") {
     return e.sousType === "contexteDirect"
-      ? "Pour chaque résultat possible, reporte sa valeur (déjà connue du contexte) et calcule sa probabilité à partir des effectifs."
-      : "Pour chaque valeur possible de k, reporte k et calcule P(X=k) avec la formule hypergéométrique.";
+      ? [texte("Pour chaque résultat possible, reporte sa valeur (déjà connue du contexte) et calcule sa probabilité à partir des effectifs.")]
+      : [texte("Pour chaque valeur possible de k, reporte k et calcule P(X=k) avec la formule hypergéométrique.")];
   }
-  return "Calcule l'espérance E(X) = Σ xᵢ·pᵢ à partir de la loi CONFIRMÉE de l'étape précédente.";
+  return [texte("Calcule l'espérance "), latexFrag("E(X)=\\sum x_i\\cdot\\, p_i"), texte(" à partir de la loi CONFIRMÉE de l'étape précédente.")];
 }
 
 function tableLoiConfirmeeLatexB(e: ExerciceEsperanceB): string {
@@ -254,9 +265,9 @@ export function aideNiveau2B(e: ExerciceEsperanceB): AideAvecLatex {
 // Famille C — Jeu équitable, espérance nulle.
 // ============================================================================
 
-export function consigneGeneraleC(sousType: ExerciceEsperanceC["sousType"]): string {
-  if (sousType === "verifier") return "Calcule l'espérance de gain net E, puis conclus si le jeu est favorable au joueur, défavorable, ou équitable.";
-  return "Un joueur doit payer une mise m pour jouer (à soustraire de chaque gain). Détermine la valeur de m qui rend le jeu équitable (E=0).";
+export function consigneGeneraleC(sousType: ExerciceEsperanceC["sousType"]): FragmentConsigne[] {
+  if (sousType === "verifier") return [texte("Calcule l'espérance de gain net E, puis conclus si le jeu est favorable au joueur, défavorable, ou équitable.")];
+  return [texte("Un joueur doit payer une mise m pour jouer (à soustraire de chaque gain). Détermine la valeur de m qui rend le jeu équitable ("), latexFrag("E=0"), texte(").")];
 }
 
 export function blocDonneesC(e: ExerciceEsperanceC): string[] {
@@ -266,18 +277,18 @@ export function blocDonneesC(e: ExerciceEsperanceC): string[] {
   return base;
 }
 
-export function consigneEcranC(phase: PhaseVariablesDiscretesEsperance): string {
+export function consigneEcranC(phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
   switch (phase) {
     case "cVerifierEcran1":
-      return "Établis la loi du gain net (ici, gain net = gain brut) : reporte, pour chaque issue, son gain net et sa probabilité.";
+      return [texte("Établis la loi du gain net (ici, gain net = gain brut) : reporte, pour chaque issue, son gain net et sa probabilité.")];
     case "cVerifierEcran2":
-      return "Calcule l'espérance E = Σ pᵢ·gainᵢ à partir de la loi CONFIRMÉE de l'étape précédente.";
+      return [texte("Calcule l'espérance "), latexFrag("E=\\sum p_i\\cdot\\, \\text{gain}_i"), texte(" à partir de la loi CONFIRMÉE de l'étape précédente.")];
     case "cImposerEcran1":
-      return "Établis la loi du gain net EN FONCTION DE m (gain net = gain brut − m) : reporte, pour chaque issue, l'expression du gain net et sa probabilité.";
+      return [texte("Établis la loi du gain net EN FONCTION DE m (gain net = gain brut − m) : reporte, pour chaque issue, l'expression du gain net et sa probabilité.")];
     case "cImposerEcran2":
-      return "Calcule l'expression de E(m) = Σ pᵢ·(gain net)ᵢ, en fonction de m, à partir de la loi CONFIRMÉE de l'étape précédente.";
+      return [texte("Calcule l'expression de "), latexFrag("E(m)=\\sum p_i\\cdot\\, (\\text{gain net})_i"), texte(", en fonction de m, à partir de la loi CONFIRMÉE de l'étape précédente.")];
     default:
-      return "Résous E(m)=0 pour trouver la valeur de m qui rend le jeu équitable, à partir de l'expression CONFIRMÉE de l'étape précédente.";
+      return [texte("Résous "), latexFrag("E(m)=0"), texte(" pour trouver la valeur de m qui rend le jeu équitable, à partir de l'expression CONFIRMÉE de l'étape précédente.")];
   }
 }
 
@@ -329,7 +340,7 @@ export function aideNiveau2C(e: ExerciceEsperanceC): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceVariablesDiscretesEsperance): string {
+export function consigneGenerale(exercice: ExerciceVariablesDiscretesEsperance): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -351,7 +362,7 @@ export function blocDonnees(exercice: ExerciceVariablesDiscretesEsperance): stri
   }
 }
 
-export function consigneEcran(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): string {
+export function consigneEcran(exercice: ExerciceVariablesDiscretesEsperance, phase: PhaseVariablesDiscretesEsperance): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

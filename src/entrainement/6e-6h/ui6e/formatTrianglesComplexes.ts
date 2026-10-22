@@ -36,6 +36,17 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 // ============================================================================
 // Libellés de statut partagés (famille A : sommets A/B/C ; famille B : sommet fixe O/A/B).
 // ============================================================================
@@ -82,16 +93,16 @@ const OPTIONS_COHERENCE: ChoixDef[] = [
 // Famille A — Démontrer isocèle et/ou rectangle.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "Étudie les propriétés du triangle ABC défini par les affixes de ses sommets : calcule ses côtés, puis démontre s'il est isocèle et/ou rectangle.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("Étudie les propriétés du triangle ABC défini par les affixes de ses sommets : calcule ses côtés, puis démontre s'il est isocèle et/ou rectangle.")];
 }
 export function blocDonneesA(e: ExerciceTrianglesA): string[] {
   return [`z_A=${e.A.latex}`, `z_B=${e.B.latex}`, `z_C=${e.C.latex}`];
 }
-export function consigneEcranA(phase: PhaseTrianglesComplexes): string {
-  if (phase === "aEcran1") return "Calcule les 3 longueurs de côtés du triangle, via le module d'une différence d'affixes (ex. AB=|z_B-z_A|).";
-  if (phase === "aEcran2") return "À partir des longueurs CONFIRMÉES, indique en quel sommet le triangle est isocèle (ou choisis \"pas isocèle\").";
-  return "Vérifie la relation de Pythagore entre les 3 longueurs CONFIRMÉES pour conclure si le triangle est rectangle (ou choisis \"pas rectangle\").";
+export function consigneEcranA(phase: PhaseTrianglesComplexes): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Calcule les 3 longueurs de côtés du triangle, via le module d'une différence d'affixes (ex. "), latexFrag("AB=|z_B-z_A|"), texte(").")];
+  if (phase === "aEcran2") return [texte("À partir des longueurs CONFIRMÉES, indique en quel sommet le triangle est isocèle (ou choisis \"pas isocèle\").")];
+  return [texte("Vérifie la relation de Pythagore entre les 3 longueurs CONFIRMÉES pour conclure si le triangle est rectangle (ou choisis \"pas rectangle\").")];
 }
 export function etatActuelA(e: ExerciceTrianglesA, phase: PhaseTrianglesComplexes): string[] | null {
   const longueursConfirmees = `AB=${e.longueurAB}\\text{, }AC=${e.longueurAC}\\text{, }BC=${e.longueurBC}\\text{ (confirmées)}`;
@@ -127,17 +138,17 @@ export function aideNiveau2A(e: ExerciceTrianglesA, phase: PhaseTrianglesComplex
 // Famille B — Triangle isocèle non rectangle, loi des cosinus.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "Étudie le triangle isocèle OAB : calcule ses côtés, démontre qu'il n'est pas rectangle, puis détermine ses 3 angles grâce à la loi des cosinus.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Étudie le triangle isocèle OAB : calcule ses côtés, démontre qu'il n'est pas rectangle, puis détermine ses 3 angles grâce à la loi des cosinus.")];
 }
 export function blocDonneesB(e: ExerciceTrianglesB): string[] {
   return [`z_O=${e.O.latex}`, `z_A=${e.A.latex}`, `z_B=${e.B.latex}`];
 }
-export function consigneEcranB(phase: PhaseTrianglesComplexes): string {
-  if (phase === "bEcran1") return "Calcule les 3 longueurs de côtés OA, OB, AB.";
-  if (phase === "bEcran2") return "À partir des longueurs CONFIRMÉES, indique en quel sommet le triangle est isocèle.";
-  if (phase === "bEcran3") return "Vérifie que la relation de Pythagore ne se vérifie pour AUCUNE paire de côtés : conclus que le triangle n'est pas rectangle.";
-  return "Applique la loi des cosinus pour trouver l'angle à l'apex, puis déduis les 2 angles de base (égaux entre eux, somme des 3 angles=180°). Réponses en DEGRÉS.";
+export function consigneEcranB(phase: PhaseTrianglesComplexes): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Calcule les 3 longueurs de côtés OA, OB, AB.")];
+  if (phase === "bEcran2") return [texte("À partir des longueurs CONFIRMÉES, indique en quel sommet le triangle est isocèle.")];
+  if (phase === "bEcran3") return [texte("Vérifie que la relation de Pythagore ne se vérifie pour AUCUNE paire de côtés : conclus que le triangle n'est pas rectangle.")];
+  return [texte("Applique la loi des cosinus pour trouver l'angle à l'apex, puis déduis les 2 angles de base (égaux entre eux, somme des 3 angles=180°). Réponses en DEGRÉS.")];
 }
 export function etatActuelB(e: ExerciceTrianglesB, phase: PhaseTrianglesComplexes): string[] | null {
   // 4 écrans — chaque phase >=2 cumule TOUTES les conclusions précédentes, du plus ancien au plus
@@ -178,15 +189,15 @@ export function aideNiveau2B(e: ExerciceTrianglesB, phase: PhaseTrianglesComplex
 // Famille C — Triangle équilatéral et point remarquable.
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "Vérifie que OBF est équilatéral, puis démontre que A est équidistant des 3 sommets (donc le centre du triangle).";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Vérifie que OBF est équilatéral, puis démontre que A est équidistant des 3 sommets (donc le centre du triangle).")];
 }
 export function blocDonneesC(e: ExerciceTrianglesC): string[] {
   return [`z_O=${e.O.latex}`, `z_B=${e.B.latex}`, `z_F=${e.F.latex}`, `z_A=${e.A.latex}`];
 }
-export function consigneEcranC(phase: PhaseTrianglesComplexes): string {
-  if (phase === "cEcran1") return "Calcule les 3 longueurs OB, BF, OF, et vérifie qu'elles sont toutes égales (triangle équilatéral).";
-  return "Calcule les 3 distances AO, AB, AF, vérifie l'équidistance, puis conclus.";
+export function consigneEcranC(phase: PhaseTrianglesComplexes): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Calcule les 3 longueurs OB, BF, OF, et vérifie qu'elles sont toutes égales (triangle équilatéral).")];
+  return [texte("Calcule les 3 distances AO, AB, AF, vérifie l'équidistance, puis conclus.")];
 }
 export function etatActuelC(e: ExerciceTrianglesC, phase: PhaseTrianglesComplexes): string[] | null {
   if (phase === "cEcran2") return [`OB=BF=OF=${e.cote}\\text{ (confirmé — triangle équilatéral)}`];
@@ -215,16 +226,16 @@ export function aideNiveau2C(e: ExerciceTrianglesC, phase: PhaseTrianglesComplex
 // Famille D — Similitude entre deux triangles.
 // ============================================================================
 
-export function consigneGeneraleD(): string {
-  return "Le triangle OCD est l'image du triangle OAB par une similitude de centre O. Détermine cette similitude.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("Le triangle OCD est l'image du triangle OAB par une similitude de centre O. Détermine cette similitude.")];
 }
 export function blocDonneesD(e: ExerciceTrianglesD): string[] {
   return [`z_O=0\\quad z_A=${e.A.latex}\\quad z_B=${e.B.latex}`, `z_C=${e.C.latex}\\quad z_D=${e.D.latex}`];
 }
-export function consigneEcranD(phase: PhaseTrianglesComplexes): string {
-  if (phase === "dEcran1") return "Calcule le rapport (|z_C|/|z_A|) et l'angle (arg(z_C)-arg(z_A)) de la similitude.";
-  if (phase === "dEcran2") return "Vérifie la cohérence en retrouvant le même rapport et le même angle via la seconde paire de points (B,D).";
-  return "Écris le nombre complexe qui caractérise cette similitude (multiplicateur=k·e^{iθ}) sous forme a+bi, à partir du rapport et de l'angle CONFIRMÉS.";
+export function consigneEcranD(phase: PhaseTrianglesComplexes): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Calcule le rapport "), latexFrag("|z_C|/|z_A|"), texte(" et l'angle "), latexFrag("\\arg(z_C)-\\arg(z_A)"), texte(" de la similitude.")];
+  if (phase === "dEcran2") return [texte("Vérifie la cohérence en retrouvant le même rapport et le même angle via la seconde paire de points (B,D).")];
+  return [texte("Écris le nombre complexe qui caractérise cette similitude (multiplicateur="), latexFrag("k\\cdot\\, e^{i\\theta}"), texte(") sous forme a+bi, à partir du rapport et de l'angle CONFIRMÉS.")];
 }
 export function etatActuelD(e: ExerciceTrianglesD, phase: PhaseTrianglesComplexes): string[] | null {
   const rapportAngleConfirmes = `k=${e.rapport}\\text{, }\\theta=${e.angleLatex}\\text{ (confirmés)}`;
@@ -259,7 +270,7 @@ export function aideNiveau2D(e: ExerciceTrianglesD, phase: PhaseTrianglesComplex
 // Dispatch commun (mirroir 6gen37).
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceTrianglesComplexes): string {
+export function consigneGenerale(exercice: ExerciceTrianglesComplexes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -285,7 +296,7 @@ export function blocDonnees(exercice: ExerciceTrianglesComplexes): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): string {
+export function consigneEcran(exercice: ExerciceTrianglesComplexes, phase: PhaseTrianglesComplexes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

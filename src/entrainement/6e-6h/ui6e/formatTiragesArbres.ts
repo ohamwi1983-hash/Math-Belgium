@@ -26,6 +26,17 @@ export interface ChampDef {
   placeholder: string;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 export interface AideAvecLatex {
   texte: string;
   latex: string | null;
@@ -105,18 +116,18 @@ function modeTirageTexte(avecRemise: boolean): string {
   return avecRemise ? "avec remise" : "sans remise";
 }
 
-function consigneGeneraleA(ex: ExerciceFamilleA): string {
-  return `Une urne contient ${ex.n1} boules ${ex.labelCouleur1} et ${ex.n2} boules ${ex.labelCouleur2}. On tire successivement ${ex.k} boules au hasard, ${modeTirageTexte(ex.avecRemise)}.`;
+function consigneGeneraleA(ex: ExerciceFamilleA): FragmentConsigne[] {
+  return [texte(`Une urne contient ${ex.n1} boules ${ex.labelCouleur1} et ${ex.n2} boules ${ex.labelCouleur2}. On tire successivement ${ex.k} boules au hasard, ${modeTirageTexte(ex.avecRemise)}.`)];
 }
 
 function blocDonneesA(ex: ExerciceFamilleA): string[] {
   return [`n_1=${ex.n1}\\ (${ex.labelCouleur1})`, `n_2=${ex.n2}\\ (${ex.labelCouleur2})`, `k=${ex.k}`];
 }
 
-function consigneEcranA(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): string {
-  if (phase === "aEcran1") return `Calcule la probabilité d'obtenir ${ex.k} fois la même couleur, pour CHAQUE couleur séparément.`;
-  if (phase === "aEcran2") return `Calcule P("les ${ex.k} boules tirées sont de la même couleur"), à partir des 2 valeurs CORRECTES de l'étape précédente.`;
-  return `Calcule P("exactement ${ex.m} boule(s) ${ex.labelCouleur1}"), sachant que le tirage est ${modeTirageTexte(ex.avecRemise)}.`;
+function consigneEcranA(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte(`Calcule la probabilité d'obtenir ${ex.k} fois la même couleur, pour CHAQUE couleur séparément.`)];
+  if (phase === "aEcran2") return [texte(`Calcule P("les ${ex.k} boules tirées sont de la même couleur"), à partir des 2 valeurs CORRECTES de l'étape précédente.`)];
+  return [texte(`Calcule P("exactement ${ex.m} boule(s) ${ex.labelCouleur1}"), sachant que le tirage est ${modeTirageTexte(ex.avecRemise)}.`)];
 }
 
 function etatActuelA(ex: ExerciceFamilleA, phase: PhaseTiragesArbres): string[] | null {
@@ -176,24 +187,24 @@ function coefficientBinomialB(n: number, k: number): number {
 const DERANGEMENTS_B: readonly number[] = [1, 0, 1, 2, 9, 44];
 const RAPPEL_DERANGEMENTS = "D(0)=1,\\ D(1)=0,\\ D(2)=1,\\ D(3)=2,\\ D(4)=9,\\ D(5)=44";
 
-function consigneGeneraleB(ex: ExerciceFamilleB): string {
+function consigneGeneraleB(ex: ExerciceFamilleB): FragmentConsigne[] {
   if (ex.contexte === "lettres") {
-    return `${ex.n} lettres numérotées de 1 à ${ex.n} sont placées aléatoirement dans ${ex.n} enveloppes numérotées de 1 à ${ex.n} (une lettre par enveloppe). Une lettre est "bien placée" si son numéro correspond à celui de l'enveloppe.`;
+    return [texte(`${ex.n} lettres numérotées de 1 à ${ex.n} sont placées aléatoirement dans ${ex.n} enveloppes numérotées de 1 à ${ex.n} (une lettre par enveloppe). Une lettre est "bien placée" si son numéro correspond à celui de l'enveloppe.`)];
   }
-  return `Une playlist de ${ex.n} chansons numérotées de 1 à ${ex.n} est lue dans un ordre entièrement aléatoire. Une chanson est "bien placée" si sa position de lecture correspond à son numéro d'origine.`;
+  return [texte(`Une playlist de ${ex.n} chansons numérotées de 1 à ${ex.n} est lue dans un ordre entièrement aléatoire. Une chanson est "bien placée" si sa position de lecture correspond à son numéro d'origine.`)];
 }
 
 function blocDonneesB(ex: ExerciceFamilleB): string[] {
   return [`n=${ex.n}`];
 }
 
-function consigneEcranB(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): string {
+function consigneEcranB(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): FragmentConsigne[] {
   if (phase === "bEcran1") {
-    return ex.demandeEcran1 === "une" ? `Calcule la probabilité que l'élément n°${ex.positionsEcran1[0]} soit bien placé.` : `Calcule la probabilité que les éléments n°${ex.positionsEcran1[0]} ET n°${ex.positionsEcran1[1]} soient bien placés SIMULTANÉMENT.`;
+    return [texte(ex.demandeEcran1 === "une" ? `Calcule la probabilité que l'élément n°${ex.positionsEcran1[0]} soit bien placé.` : `Calcule la probabilité que les éléments n°${ex.positionsEcran1[0]} ET n°${ex.positionsEcran1[1]} soient bien placés SIMULTANÉMENT.`)];
   }
-  if (phase === "bEcran2") return "Calcule la probabilité que TOUS les éléments soient bien placés (arrangement entièrement correct).";
-  if (phase === "bEcran3") return `Calcule la probabilité qu'EXACTEMENT ${ex.k} élément(s) soi(en)t bien placé(s) — ni plus, ni moins.`;
-  return "Calcule la probabilité qu'AUCUN élément ne soit bien placé.";
+  if (phase === "bEcran2") return [texte("Calcule la probabilité que TOUS les éléments soient bien placés (arrangement entièrement correct).")];
+  if (phase === "bEcran3") return [texte(`Calcule la probabilité qu'EXACTEMENT ${ex.k} élément(s) soi(en)t bien placé(s) — ni plus, ni moins.`)];
+  return [texte("Calcule la probabilité qu'AUCUN élément ne soit bien placé.")];
 }
 
 function etatActuelB(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): string[] | null {
@@ -242,16 +253,24 @@ function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseTiragesArbres): AideAvec
 // Famille C — Distributions non uniformes, dé truqué.
 // ============================================================================
 
-// Note : `consigneGenerale*` est rendu en PROSE PURE (<p className="prompt-text">, jamais passé à
-// KaTeX — voir `EtapeChampsTiragesArbres.tsx`) : ne JAMAIS y insérer de commande LaTeX
-// (`\dfrac{...}` etc, piège trouvé par vérification Playwright visuelle, voir consigne de la
-// tâche) — toute valeur numérique EXACTE (fraction) vit exclusivement dans `blocDonnees` (rendu,
-// lui, sous KaTeX). Un entier simple ("k=2", "r=2") reste un texte parfaitement lisible tel quel.
-function consigneGeneraleC(ex: ExerciceFamilleC): string {
+// Note : `consigneGenerale*`/`consigneEcran*` passent maintenant par `FragmentConsigne[]`/
+// `RenduFragments.tsx` (texte brut mêlé à du LaTeX inline court, même contrat que
+// `ui/formatEquationDroite.ts`) — ancien piège trouvé par vérification Playwright visuelle (une
+// commande LaTeX brute type `\dfrac{...}` affichée littéralement quand tout le bloc était rendu
+// en `<p className="prompt-text">` sans passer par KaTeX) : l'invariant à préserver n'est PAS
+// "jamais de LaTeX ici", mais "jamais une phrase française de plusieurs mots à l'intérieur d'un
+// fragment `latex()`" — la prose va TOUJOURS dans `texte()`, seule une notation symbolique courte
+// (ex. `p=3q`) va dans `latex()`, ce que `FragmentConsigne` impose par construction (impossible de
+// coller un mot français dans un fragment `latex()` sans que ça saute aux yeux à la relecture).
+function consigneGeneraleC(ex: ExerciceFamilleC): FragmentConsigne[] {
   if (ex.sousType === "special") {
-    return `On lance un dé à 6 faces truqué. La face ${ex.faceSpeciale} a une probabilité fixée a (donnée ci-dessous). Les 5 autres faces sont équiprobables entre elles (probabilité p chacune, INCONNUE).`;
+    return [texte(`On lance un dé à 6 faces truqué. La face ${ex.faceSpeciale} a une probabilité fixée a (donnée ci-dessous). Les 5 autres faces sont équiprobables entre elles (probabilité p chacune, INCONNUE).`)];
   }
-  return `On lance un dé à 6 faces truqué. Les faces paires sont équiprobables entre elles (probabilité p chacune), les faces impaires équiprobables entre elles (probabilité q chacune), avec la relation p=${ex.r}·q (r=${ex.r} donné).`;
+  return [
+    texte("On lance un dé à 6 faces truqué. Les faces paires sont équiprobables entre elles (probabilité p chacune), les faces impaires équiprobables entre elles (probabilité q chacune), avec la relation "),
+    latexFrag(`p=${ex.r}q`),
+    texte(` (r=${ex.r} donné).`),
+  ];
 }
 
 function blocDonneesC(ex: ExerciceFamilleC): string[] {
@@ -265,14 +284,14 @@ function cible3Texte(ex: Extract<ExerciceFamilleC, { sousType: "parite" }>): str
   return `Calcule P(obtenir une face parmi {${(ex.sousEnsemble ?? []).join(", ")}}).`;
 }
 
-function consigneEcranC(ex: ExerciceFamilleC, phase: PhaseTiragesArbres): string {
+function consigneEcranC(ex: ExerciceFamilleC, phase: PhaseTiragesArbres): FragmentConsigne[] {
   if (phase === "cEcran1") {
-    if (ex.sousType === "special") return "Pose l'équation traduisant \"la somme de toutes les probabilités élémentaires vaut 1\", en utilisant a (déjà connu) et p (l'inconnue).";
-    return "Pose les 2 équations du système : la relation p=r·q donnée par l'énoncé, PUIS la somme totale des probabilités = 1.";
+    if (ex.sousType === "special") return [texte("Pose l'équation traduisant \"la somme de toutes les probabilités élémentaires vaut 1\", en utilisant a (déjà connu) et p (l'inconnue).")];
+    return [texte("Pose les 2 équations du système : la relation "), latexFrag("p=r\\,q"), texte(" donnée par l'énoncé, PUIS la somme totale des probabilités = 1.")];
   }
-  if (phase === "cEcran2") return "Résous le système CORRECT de l'étape précédente pour obtenir la ou les probabilités inconnues.";
-  if (ex.sousType === "special") return `Calcule P(face ${ex.faceSpeciale} OU face ${ex.autreFace}), à partir des valeurs CORRECTES de l'étape précédente.`;
-  return cible3Texte(ex);
+  if (phase === "cEcran2") return [texte("Résous le système CORRECT de l'étape précédente pour obtenir la ou les probabilités inconnues.")];
+  if (ex.sousType === "special") return [texte(`Calcule P(face ${ex.faceSpeciale} OU face ${ex.autreFace}), à partir des valeurs CORRECTES de l'étape précédente.`)];
+  return [texte(cible3Texte(ex))];
 }
 
 function equationsCorrectesC(ex: ExerciceFamilleC): string[] {
@@ -333,7 +352,7 @@ function aideNiveau2C(ex: ExerciceFamilleC, phase: PhaseTiragesArbres): AideAvec
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceTiragesArbres): string {
+export function consigneGenerale(exercice: ExerciceTiragesArbres): FragmentConsigne[] {
   if (exercice.famille === "A") return consigneGeneraleA(exercice);
   if (exercice.famille === "B") return consigneGeneraleB(exercice);
   return consigneGeneraleC(exercice);
@@ -345,7 +364,7 @@ export function blocDonnees(exercice: ExerciceTiragesArbres): string[] {
   return blocDonneesC(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceTiragesArbres, phase: PhaseTiragesArbres): string {
+export function consigneEcran(exercice: ExerciceTiragesArbres, phase: PhaseTiragesArbres): FragmentConsigne[] {
   if (exercice.famille === "A") return consigneEcranA(exercice, phase);
   if (exercice.famille === "B") return consigneEcranB(exercice, phase);
   return consigneEcranC(exercice, phase);

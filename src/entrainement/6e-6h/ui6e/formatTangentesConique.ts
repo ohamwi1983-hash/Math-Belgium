@@ -50,6 +50,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
@@ -184,18 +195,18 @@ function afficherDroiteYmxk(m: number, k: number): string {
 // Famille A — tangente en un point donné (dédoublement).
 // ============================================================================
 
-function consigneGeneraleA(): string {
-  return "On donne une conique et un point P situé SUR cette conique. Détermine l'équation de la tangente à la conique en P, en appliquant la formule de dédoublement adaptée au type de conique.";
+function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("On donne une conique et un point P situé SUR cette conique. Détermine l'équation de la tangente à la conique en P, en appliquant la formule de dédoublement adaptée au type de conique.")];
 }
 
 function blocDonneesA(e: ExerciceTangenteA): string[] {
   return [afficherConique(e), `\\text{Point } P${afficherPoint(e.P)}`];
 }
 
-function consigneEcranA(phase: PhaseTangentesConique): string {
-  if (phase === "aEcran1") return "Vérifie que P appartient bien à la conique : substitue ses coordonnées dans l'équation. Quelle valeur obtiens-tu pour le membre substitué (elle doit égaler la constante de l'équation) ?";
-  if (phase === "aEcran2") return "P étant confirmé sur la conique, applique la formule de dédoublement pour poser l'équation de la tangente en P.";
-  return "Simplifie l'équation de la tangente obtenue à l'étape précédente.";
+function consigneEcranA(phase: PhaseTangentesConique): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Vérifie que P appartient bien à la conique : substitue ses coordonnées dans l'équation. Quelle valeur obtiens-tu pour le membre substitué (elle doit égaler la constante de l'équation) ?")];
+  if (phase === "aEcran2") return [texte("P étant confirmé sur la conique, applique la formule de dédoublement pour poser l'équation de la tangente en P.")];
+  return [texte("Simplifie l'équation de la tangente obtenue à l'étape précédente.")];
 }
 
 function champsEcranA(phase: PhaseTangentesConique): ChampDef[] {
@@ -221,8 +232,8 @@ function aideA(e: ExerciceTangenteA, phase: PhaseTangentesConique, niveau: 1 | 2
 // Famille B — tangentes parallèles à une droite donnée (hyperbole).
 // ============================================================================
 
-function consigneGeneraleB(): string {
-  return "On donne une hyperbole et une direction (la pente m d'une droite d). Détermine s'il existe des tangentes à l'hyperbole de cette pente — et si oui, lesquelles.";
+function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On donne une hyperbole et une direction (la pente m d'une droite d). Détermine s'il existe des tangentes à l'hyperbole de cette pente — et si oui, lesquelles.")];
 }
 
 function blocDonneesB(e: ExerciceTangenteB): string[] {
@@ -267,11 +278,11 @@ function formatEquationKConfirmeeB(e: ExerciceTangenteB): string {
   return `${corps}=0`;
 }
 
-function consigneEcranB(phase: PhaseTangentesConique): string {
-  if (phase === "bEcran1") return "Pose y=mx+k (k inconnu, m étant la pente donnée) et substitue dans l'équation de l'hyperbole. Donne l'équation du second degré en x obtenue (ses coefficients dépendent de k).";
-  if (phase === "bEcran2") return "Pose la condition de tangence (discriminant nul) à partir de l'équation précédente. Donne l'équation résultante en k.";
-  if (phase === "bEcran3") return "Résous l'équation en k. ATTENTION : si elle n'a pas de solution réelle, ce n'est pas une erreur de calcul — conclus explicitement qu'aucune tangente de cette pente n'existe.";
-  return "Donne les équations complètes des tangentes trouvées et leurs points de tangence.";
+function consigneEcranB(phase: PhaseTangentesConique): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Pose "), latexFrag("y=mx+k"), texte(" (k inconnu, m étant la pente donnée) et substitue dans l'équation de l'hyperbole. Donne l'équation du second degré en x obtenue (ses coefficients dépendent de k).")];
+  if (phase === "bEcran2") return [texte("Pose la condition de tangence (discriminant nul) à partir de l'équation précédente. Donne l'équation résultante en k.")];
+  if (phase === "bEcran3") return [texte("Résous l'équation en k. ATTENTION : si elle n'a pas de solution réelle, ce n'est pas une erreur de calcul — conclus explicitement qu'aucune tangente de cette pente n'existe.")];
+  return [texte("Donne les équations complètes des tangentes trouvées et leurs points de tangence.")];
 }
 
 function champsEcranB(e: ExerciceTangenteB, phase: PhaseTangentesConique): ChampDef[] {
@@ -301,8 +312,8 @@ function aideB(e: ExerciceTangenteB, phase: PhaseTangentesConique, niveau: 1 | 2
 // Famille C — tangentes depuis un point donné (ellipse).
 // ============================================================================
 
-function consigneGeneraleC(): string {
-  return "On donne une ellipse et un point P (pas nécessairement sur l'ellipse). Détermine s'il existe des tangentes à l'ellipse passant par P — et si oui, lesquelles.";
+function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("On donne une ellipse et un point P (pas nécessairement sur l'ellipse). Détermine s'il existe des tangentes à l'ellipse passant par P — et si oui, lesquelles.")];
 }
 
 function blocDonneesC(e: ExerciceTangenteC): string[] {
@@ -341,11 +352,11 @@ function formatEquationMConfirmeeC(e: ExerciceTangenteC): string {
   return `${corps}=0`;
 }
 
-function consigneEcranC(phase: PhaseTangentesConique): string {
-  if (phase === "cEcran1") return "Pose y-y₀=m(x-x₀) (m inconnu) et substitue dans l'équation de l'ellipse. Donne l'équation du second degré en x obtenue (ses coefficients dépendent de m).";
-  if (phase === "cEcran2") return "Pose la condition de tangence (discriminant nul) à partir de l'équation précédente. Donne l'équation résultante en m.";
-  if (phase === "cEcran3") return "Résous l'équation en m. ATTENTION : si elle n'a pas de solution réelle, ce n'est pas une erreur de calcul — conclus explicitement que P est situé à l'INTÉRIEUR de l'ellipse.";
-  return "Donne les équations complètes des 2 tangentes et leurs points de tangence.";
+function consigneEcranC(phase: PhaseTangentesConique): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Pose "), latexFrag("y-y_0=m(x-x_0)"), texte(" (m inconnu) et substitue dans l'équation de l'ellipse. Donne l'équation du second degré en x obtenue (ses coefficients dépendent de m).")];
+  if (phase === "cEcran2") return [texte("Pose la condition de tangence (discriminant nul) à partir de l'équation précédente. Donne l'équation résultante en m.")];
+  if (phase === "cEcran3") return [texte("Résous l'équation en m. ATTENTION : si elle n'a pas de solution réelle, ce n'est pas une erreur de calcul — conclus explicitement que P est situé à l'INTÉRIEUR de l'ellipse.")];
+  return [texte("Donne les équations complètes des 2 tangentes et leurs points de tangence.")];
 }
 
 function champsEcranC(e: ExerciceTangenteC, phase: PhaseTangentesConique): ChampDef[] {
@@ -376,8 +387,8 @@ function aideC(e: ExerciceTangenteC, phase: PhaseTangentesConique, niveau: 1 | 2
 // Famille D — construire une conique depuis un point de passage et une tangente.
 // ============================================================================
 
-function consigneGeneraleD(): string {
-  return "On cherche une conique (ellipse ou hyperbole) à axes de symétrie = axes de coordonnées, passant par un point P donné et tangente à une droite d donnée. Détermine son équation.";
+function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("On cherche une conique (ellipse ou hyperbole) à axes de symétrie = axes de coordonnées, passant par un point P donné et tangente à une droite d donnée. Détermine son équation.")];
 }
 
 /** Fragments DÉLIBÉRÉMENT courts (jamais une phrase complète en français dans un `\text{}` — un
@@ -409,11 +420,11 @@ function formatEquationTangenceConfirmeeD(e: ExerciceTangenteD): string {
   return `a^2\\cdot ${mCarre}${signe}b^2=${kCarre}`;
 }
 
-function consigneEcranD(phase: PhaseTangentesConique): string {
-  if (phase === "dEcran1") return "Pose la condition « la conique passe par P » (équation en a² et b², encore inconnus).";
-  if (phase === "dEcran2") return "Pose la condition de tangence à la droite d (équation en a² et b²).";
-  if (phase === "dEcran3") return "Résous le système des 2 équations précédentes pour trouver a² et b².";
-  return "Donne l'équation finale de la conique.";
+function consigneEcranD(phase: PhaseTangentesConique): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Pose la condition « la conique passe par P » (équation en "), latexFrag("a^2"), texte(" et "), latexFrag("b^2"), texte(", encore inconnus).")];
+  if (phase === "dEcran2") return [texte("Pose la condition de tangence à la droite d (équation en "), latexFrag("a^2"), texte(" et "), latexFrag("b^2"), texte(").")];
+  if (phase === "dEcran3") return [texte("Résous le système des 2 équations précédentes pour trouver "), latexFrag("a^2"), texte(" et "), latexFrag("b^2"), texte(".")];
+  return [texte("Donne l'équation finale de la conique.")];
 }
 
 function champsEcranD(phase: PhaseTangentesConique): ChampDef[] {
@@ -441,18 +452,18 @@ function aideD(e: ExerciceTangenteD, phase: PhaseTangentesConique, niveau: 1 | 2
 // Famille E — point d'une conique le plus proche d'une droite (réutilise famille B).
 // ============================================================================
 
-function consigneGeneraleE(): string {
-  return "On donne une hyperbole et une droite d. Détermine, parmi les points de l'hyperbole où la tangente est parallèle à d, celui qui est le plus proche de d.";
+function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("On donne une hyperbole et une droite d. Détermine, parmi les points de l'hyperbole où la tangente est parallèle à d, celui qui est le plus proche de d.")];
 }
 
 function blocDonneesE(e: ExerciceTangenteE): string[] {
   return [afficherConiqueCentree(e.base.conique), `\\text{Droite } d : ${afficherDroiteYmxk(e.base.m, e.c0)}`];
 }
 
-function consigneEcranE(phase: PhaseTangentesConique): string {
-  if (phase === "eEcran1") return "Trouve les tangentes à l'hyperbole parallèles à d et leurs points de tangence (comme à la famille B). Donne les 2 points de tangence, celui de plus petite abscisse d'abord.";
-  if (phase === "eEcran2") return "Calcule la distance de chacun des 2 points précédents à la droite d.";
-  return "Identifie lequel des 2 points est le plus proche de d (distance minimale).";
+function consigneEcranE(phase: PhaseTangentesConique): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Trouve les tangentes à l'hyperbole parallèles à d et leurs points de tangence (comme à la famille B). Donne les 2 points de tangence, celui de plus petite abscisse d'abord.")];
+  if (phase === "eEcran2") return [texte("Calcule la distance de chacun des 2 points précédents à la droite d.")];
+  return [texte("Identifie lequel des 2 points est le plus proche de d (distance minimale).")];
 }
 
 function champsEcranE(phase: PhaseTangentesConique): ChampDef[] {
@@ -477,7 +488,7 @@ function aideE(e: ExerciceTangenteE, phase: PhaseTangentesConique, niveau: 1 | 2
 // Dispatcher générique.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceTangentesConique): string {
+export function consigneGenerale(exercice: ExerciceTangentesConique): FragmentConsigne[] {
   if (exercice.famille === "A") return consigneGeneraleA();
   if (exercice.famille === "B") return consigneGeneraleB();
   if (exercice.famille === "C") return consigneGeneraleC();
@@ -545,7 +556,7 @@ export function etatActuel(exercice: ExerciceTangentesConique, phase: PhaseTange
   return lignes.length > 0 ? lignes : null;
 }
 
-export function consigneEcran(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): string {
+export function consigneEcran(exercice: ExerciceTangentesConique, phase: PhaseTangentesConique): FragmentConsigne[] {
   if (exercice.famille === "A") return consigneEcranA(phase);
   if (exercice.famille === "B") return consigneEcranB(phase);
   if (exercice.famille === "C") return consigneEcranC(phase);

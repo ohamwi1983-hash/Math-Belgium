@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, ChampDef, ChoixDef } from "../ui6e/formatTrianglesComplexes";
+import type { AideAvecLatex, ChampDef, ChoixDef, FragmentConsigne } from "../ui6e/formatTrianglesComplexes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -20,9 +21,9 @@ function champEstCompose(placeholder?: string): boolean {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   choix: ChoixDef[];
   aideNiveau1: AideAvecLatex;
@@ -81,7 +82,7 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consign
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -92,7 +93,9 @@ export function EtapeTrianglesComplexes({ consigneGenerale, blocDonnees, consign
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {champs.map((champ, i) => champEstCompose(champ.placeholder) && <ApercuExpressionLatex key={i} texte={valeursTexte[i]} label={champ.label} />)}
       {champs.length > 0 && (
         <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>
