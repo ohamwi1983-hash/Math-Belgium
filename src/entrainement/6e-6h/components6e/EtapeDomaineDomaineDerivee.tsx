@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatDomaineDeriveeExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatDomaineDeriveeExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -14,7 +16,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   etatActuel: string[] | null;
   aideNiveau1: AideAvecLatex;
@@ -64,7 +66,9 @@ export function EtapeDomaineDomaineDerivee({ consigneEcran, enonceLatex, etatAct
           </div>
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <EnsembleReelGuideBuilder onChange={setReponse} label="domf =" />
       {niveauAide >= 1 && (
         <div className="aide-5e">

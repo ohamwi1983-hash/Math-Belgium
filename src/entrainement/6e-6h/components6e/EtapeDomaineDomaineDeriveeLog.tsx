@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex } from "../ui6e/formatDomaineDeriveeLogarithme";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatDomaineDeriveeLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -9,9 +10,9 @@ import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -45,7 +46,7 @@ export function EtapeDomaineDomaineDeriveeLog({ consigneGenerale, blocDonnees, c
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             {blocDonnees.map((frag, i) => (
@@ -54,7 +55,9 @@ export function EtapeDomaineDomaineDeriveeLog({ consigneGenerale, blocDonnees, c
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <EnsembleReelGuideBuilder onChange={setReponse} label="domf =" />
       {niveauAide >= 1 && (
         <div className="aide-5e">

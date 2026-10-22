@@ -28,6 +28,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 interface TermeSigne {
   valeur: number;
   suffixe: string;
@@ -78,8 +90,8 @@ function formatFonctionA(exercice: ExerciceDomaineDeriveeA): string {
   return `\\left(${b}^{${puissance}} - ${exercice.c}\\right)^2`;
 }
 
-function consigneA(phase: "aDomaine" | "aDerivee"): string {
-  return phase === "aDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction.";
+function consigneA(phase: "aDomaine" | "aDerivee"): FragmentConsigne[] {
+  return [texte(phase === "aDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction.")];
 }
 
 function aideANiveau1(phase: "aDomaine" | "aDerivee"): AideAvecLatex {
@@ -110,8 +122,8 @@ function formatFonctionB(exercice: ExerciceDomaineDeriveeB): string {
   return `${b}^{\\frac{${num}}{${den}}}`;
 }
 
-function consigneB(phase: "bDomaine" | "bDerivee"): string {
-  return phase === "bDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction (n'oublie pas la dérivée de l'exposant lui-même).";
+function consigneB(phase: "bDomaine" | "bDerivee"): FragmentConsigne[] {
+  return [texte(phase === "bDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction (n'oublie pas la dérivée de l'exposant lui-même).")];
 }
 
 function aideBNiveau1(phase: "bDomaine" | "bDerivee", exercice: ExerciceDomaineDeriveeB): AideAvecLatex {
@@ -189,10 +201,10 @@ function formatFonctionC(exercice: ExerciceDomaineDeriveeC): string {
   return `\\left(${u}\\right)\\cdot ${v}`;
 }
 
-function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): string {
-  if (phase === "cDomaine") return CONSIGNE_DOMAINE;
-  if (phase === "cFacteurs") return "Dérive chaque facteur SÉPARÉMENT (u'(x) et v'(x)).";
-  return "Assemble via u'v+uv', à partir des dérivées CORRECTES de l'étape précédente.";
+function consigneC(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): FragmentConsigne[] {
+  if (phase === "cDomaine") return [texte(CONSIGNE_DOMAINE)];
+  if (phase === "cFacteurs") return [texte("Dérive chaque facteur SÉPARÉMENT ("), latex("u'(x)"), texte(" et "), latex("v'(x)"), texte(").")];
+  return [texte("Assemble via "), latex("u'v+uv'"), texte(", à partir des dérivées CORRECTES de l'étape précédente.")];
 }
 
 function aideCNiveau1(phase: "cDomaine" | "cFacteurs" | "cAssemblage"): AideAvecLatex {
@@ -236,10 +248,10 @@ function deriveesND(exercice: ExerciceDomaineDeriveeD): { nPrime: string; dPrime
   return { nPrime: `-\\ln(${base})\\cdot(${base}^{-x}+${base}^x)`, dPrime: `2\\ln(${base})\\cdot ${base}^{2x}` };
 }
 
-function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): string {
-  if (phase === "dDomaine") return CONSIGNE_DOMAINE;
-  if (phase === "dND") return "Dérive le numérateur N ET le dénominateur D SÉPARÉMENT (N'(x) et D'(x)).";
-  return "Assemble via (N'D−ND')/D², à partir des valeurs N'/D' CORRECTES de l'étape précédente.";
+function consigneD(phase: "dDomaine" | "dND" | "dAssemblage"): FragmentConsigne[] {
+  if (phase === "dDomaine") return [texte(CONSIGNE_DOMAINE)];
+  if (phase === "dND") return [texte("Dérive le numérateur N ET le dénominateur D SÉPARÉMENT ("), latex("N'(x)"), texte(" et "), latex("D'(x)"), texte(").")];
+  return [texte("Assemble via "), latex("(N'D-ND')/D^2"), texte(", à partir des valeurs "), latex("N'/D'"), texte(" CORRECTES de l'étape précédente.")];
 }
 
 function aideDNiveau1(phase: "dDomaine" | "dND" | "dAssemblage"): AideAvecLatex {
@@ -309,10 +321,10 @@ function formeSimplifieeLatexE(exercice: ExerciceDomaineDeriveeE): string {
   return `\\left(\\dfrac{${base1}}{${base2}}\\right)^x-${termeC}`;
 }
 
-function consigneE(phase: "eDomaine" | "eSimplifier" | "eDerivee"): string {
-  if (phase === "eDomaine") return CONSIGNE_DOMAINE;
-  if (phase === "eSimplifier") return "Simplifie l'écriture de f(x) AVANT toute dérivation (utilise les propriétés des exposants).";
-  return "Dérive la forme SIMPLIFIÉE et CORRECTE de l'étape précédente (dérivée directe, nettement plus simple).";
+function consigneE(phase: "eDomaine" | "eSimplifier" | "eDerivee"): FragmentConsigne[] {
+  if (phase === "eDomaine") return [texte(CONSIGNE_DOMAINE)];
+  if (phase === "eSimplifier") return [texte("Simplifie l'écriture de f(x) AVANT toute dérivation (utilise les propriétés des exposants).")];
+  return [texte("Dérive la forme SIMPLIFIÉE et CORRECTE de l'étape précédente (dérivée directe, nettement plus simple).")];
 }
 
 function texteProprieteE(exercice: ExerciceDomaineDeriveeE): string {
@@ -353,8 +365,8 @@ function formatFonctionF(exercice: ExerciceDomaineDeriveeF): string {
   return `${trigLatex}\\left(e^{x^2-${exercice.k}}\\right)`;
 }
 
-function consigneF(phase: "fDomaine" | "fDerivee"): string {
-  return phase === "fDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction (chaîne à 3 niveaux : fonction extérieure, exponentielle, exposant).";
+function consigneF(phase: "fDomaine" | "fDerivee"): FragmentConsigne[] {
+  return [texte(phase === "fDomaine" ? CONSIGNE_DOMAINE : "Calcule la dérivée de cette fonction (chaîne à 3 niveaux : fonction extérieure, exponentielle, exposant).")];
 }
 
 function aideFNiveau1(phase: "fDomaine" | "fDerivee", exercice: ExerciceDomaineDeriveeF): AideAvecLatex {
@@ -431,7 +443,7 @@ export function etatActuel(exercice: ExerciceDomaineDeriveeExponentielle, phase:
   return null;
 }
 
-export function consigneEcran(phase: PhaseDomaineDeriveeExponentielle, exercice: ExerciceDomaineDeriveeExponentielle): string {
+export function consigneEcran(phase: PhaseDomaineDeriveeExponentielle, exercice: ExerciceDomaineDeriveeExponentielle): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aDomaine" | "aDerivee");

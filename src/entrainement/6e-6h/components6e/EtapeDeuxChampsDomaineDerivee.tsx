@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseDeuxChamps } from "../moteur6e/verificationDomaineDeriveeExponentielles";
 import { CONSIGNE_GENERALE } from "../ui6e/formatDomaineDeriveeExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatDomaineDeriveeExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -14,7 +16,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   etatActuel: string[] | null;
   labelA: string;
@@ -68,7 +70,9 @@ export function EtapeDeuxChampsDomaineDerivee({ consigneEcran, enonceLatex, etat
           </div>
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={a} label={labelA} />
       <ApercuExpressionLatex texte={b} label={labelB} />
       <div className="field-row">

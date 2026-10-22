@@ -70,8 +70,8 @@ function construireEnonceA(exercice: ExerciceDomaineDeriveeLogA): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "aDomaine"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "aDerivee"))], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "aDomaine"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "aDerivee"), reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }
@@ -101,8 +101,8 @@ function construireEnonceB(exercice: ExerciceDomaineDeriveeLogB): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "bDomaine"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "bDerivee"))], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "bDomaine"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "bDerivee"), reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }
@@ -145,9 +145,9 @@ function construireEnonceC(exercice: ExerciceDomaineDeriveeLogC): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "cDomaine"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "cFacteurs"))], reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(consigneEcran(exercice, "cAssemblage"))], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "cDomaine"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "cFacteurs"), reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "cAssemblage"), reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }
@@ -183,9 +183,9 @@ function construireEnonceD(exercice: ExerciceDomaineDeriveeLogD): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "dDomaine"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "dND"))], reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(consigneEcran(exercice, "dAssemblage"))], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "dDomaine"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "dND"), reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "dAssemblage"), reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }
@@ -250,9 +250,9 @@ function construireEnonceE(exercice: ExerciceDomaineDeriveeLogE): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "eDomaine"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "eSimplifier"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "eDerivee"))], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "eDomaine"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "eSimplifier"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "eDerivee"), reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }
@@ -291,8 +291,8 @@ function construireEnonceF(exercice: ExerciceDomaineDeriveeLogF): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "fDomaine"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "fDerivee"))], reponse: { type: "lignes", nombre: 4 } },
+      { consigne: consigneEcran(exercice, "fDomaine"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "fDerivee"), reponse: { type: "lignes", nombre: 4 } },
     ],
   };
 }
@@ -387,9 +387,9 @@ function construireEnonceG(exercice: ExerciceDomaineDeriveeLogG): SectionExercic
   return {
     enteteFragments: entete(exercice),
     questions: [
-      { consigne: [texte(consigneEcran(exercice, "gIdentifier"))], reponse: { type: "lignes", nombre: 2 } },
-      { consigne: [texte(consigneEcran(exercice, "gFPrimeSurF"))], reponse: { type: "lignes", nombre: 3 } },
-      { consigne: [texte(consigneEcran(exercice, "gIsoler"))], reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "gIdentifier"), reponse: { type: "lignes", nombre: 2 } },
+      { consigne: consigneEcran(exercice, "gFPrimeSurF"), reponse: { type: "lignes", nombre: 3 } },
+      { consigne: consigneEcran(exercice, "gIsoler"), reponse: { type: "lignes", nombre: 3 } },
     ],
   };
 }

@@ -3,18 +3,19 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex } from "../ui6e/formatDomaineDeriveeLogarithme";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatDomaineDeriveeLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   /** `null` — jamais rendu — quand cet écran ne dépend d'aucun écran précédent. */
   etatActuel: string[] | null;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   placeholder: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -68,7 +69,7 @@ export function EtapeChampDomaineDeriveeLog({
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             {blocDonnees.map((frag, i) => (
@@ -84,7 +85,9 @@ export function EtapeChampDomaineDeriveeLog({
           ))}
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />

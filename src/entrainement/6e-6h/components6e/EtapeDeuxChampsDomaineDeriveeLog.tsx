@@ -3,7 +3,8 @@ import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex } from "../ui6e/formatDomaineDeriveeLogarithme";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatDomaineDeriveeLogarithme";
 import type { ReponseDeuxChamps } from "../moteur6e/verificationDomaineDeriveeLogarithme";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -11,10 +12,10 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   etatActuel: string[] | null;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   labelA: string;
   labelB: string;
   aideNiveau1: AideAvecLatex;
@@ -69,7 +70,7 @@ export function EtapeDeuxChampsDomaineDeriveeLog({
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             {blocDonnees.map((frag, i) => (
@@ -85,7 +86,9 @@ export function EtapeDeuxChampsDomaineDeriveeLog({
           ))}
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={a} label={labelA} />
       <ApercuExpressionLatex texte={b} label={labelB} />
       <div className="field-row">
