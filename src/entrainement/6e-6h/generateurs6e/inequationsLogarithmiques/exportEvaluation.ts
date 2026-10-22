@@ -60,7 +60,7 @@ function construireEnonceInequationsLogarithmiques(exercice: ExerciceInequationL
   return {
     enteteFragments: [texte(`${CONSIGNE_GENERALE} `), latex(formatEnonceLatex(exercice))],
     questions: phases.map((phase) => ({
-      consigne: [texte(consigneEcran(phase, exercice))],
+      consigne: consigneEcran(phase, exercice),
       reponse: reponsePourPhase(phase),
     })),
   };

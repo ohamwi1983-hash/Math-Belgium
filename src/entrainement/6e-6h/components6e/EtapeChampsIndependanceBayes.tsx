@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, ChampDef, TableauAffichage } from "../ui6e/formatIndependanceBayes";
+import type { AideAvecLatex, ChampDef, FragmentConsigne, TableauAffichage } from "../ui6e/formatIndependanceBayes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   tableauDonnees: TableauAffichage | null;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -86,7 +87,7 @@ export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, ta
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <>
             <div className="equation-box">
@@ -100,7 +101,9 @@ export function EtapeChampsIndependanceBayes({ consigneGenerale, blocDonnees, ta
           </>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className={`field-row ${champs.length > 3 ? "field-row-wrap" : ""}`}>
         {champs.map((champ, i) => (
           <div className={champs.length > 1 ? "field field-inline" : "field"} key={i}>

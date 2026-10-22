@@ -25,6 +25,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const SH = "\\operatorname{sh}";
 const CH = "\\operatorname{ch}";
 
@@ -33,8 +44,23 @@ const CH = "\\operatorname{ch}";
  * fonctions FIXES et NOMMÉES, jamais un paramètre d'exercice, donc leur rappel ne dépend d'aucun
  * champ de l'exercice (contrairement à `6gen16`, où la consigne générale variait selon la
  * famille) — même principe que `CONSIGNE_GENERALE` (`6gen6`, `formatLimitesExponentielles.ts`). */
-export const CONSIGNE_GENERALE =
-  "Rappel : sh(x)=(eˣ−e⁻ˣ)/2 est IMPAIRE, ch(x)=(eˣ+e⁻ˣ)/2 est PAIRE ; ch²(x)−sh²(x)=1 pour tout x ; sh'=ch et ch'=sh (donc sh''=sh et ch''=ch).";
+export const CONSIGNE_GENERALE: FragmentConsigne[] = [
+  texte("Rappel : "),
+  latex(`${SH}(x)=\\dfrac{e^x-e^{-x}}{2}`),
+  texte(" est IMPAIRE, "),
+  latex(`${CH}(x)=\\dfrac{e^x+e^{-x}}{2}`),
+  texte(" est PAIRE ; "),
+  latex(`${CH}^2(x)-${SH}^2(x)=1`),
+  texte(" pour tout x ; "),
+  latex(`${SH}'=${CH}`),
+  texte(" et "),
+  latex(`${CH}'=${SH}`),
+  texte(" (donc "),
+  latex(`${SH}''=${SH}`),
+  texte(" et "),
+  latex(`${CH}''=${CH}`),
+  texte(")."),
+];
 
 // ============================================================================
 // Famille A — Parité de combinaisons.
@@ -107,9 +133,15 @@ function formatExpressionIsoleeB(exercice: ExerciceHyperboliquesB): string {
   return `${SH}(x_0) = ${exercice.signeX0 > 0 ? "" : "-"}\\sqrt{${radicande}}`;
 }
 
-function consigneB(phase: "bIsoler" | "bValeurs"): string {
-  if (phase === "bIsoler") return "À partir de l'identité ch²(x0)−sh²(x0)=1, isole l'inconnue demandée (exprime-la à l'aide d'une racine carrée, avec ou sans ±).";
-  return "Calcule la ou les valeurs numériques, à partir de l'expression CORRECTE de l'étape précédente.";
+function consigneB(phase: "bIsoler" | "bValeurs"): FragmentConsigne[] {
+  if (phase === "bIsoler") {
+    return [
+      texte("À partir de l'identité "),
+      latex(`${CH}^2(x_0)-${SH}^2(x_0)=1`),
+      texte(", isole l'inconnue demandée (exprime-la à l'aide d'une racine carrée, avec ou sans ±)."),
+    ];
+  }
+  return [texte("Calcule la ou les valeurs numériques, à partir de l'expression CORRECTE de l'étape précédente.")];
 }
 
 function aideBNiveau1(phase: "bIsoler" | "bValeurs"): AideAvecLatex {
@@ -169,10 +201,14 @@ function formatDeriveeSecondeC(exercice: ExerciceHyperboliquesC): string {
   return `${exercice.k * exercice.k}\\left[${formatFonctionC(exercice)}\\right]`;
 }
 
-function consigneC(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): string {
-  if (phase === "cDerivee") return "Calcule f'(x), en utilisant sh'=ch et ch'=sh (attention à la chaîne pour l'argument kx).";
-  if (phase === "cDeriveeSeconde") return "Calcule f''(x) à partir de l'expression CORRECTE de f'(x) obtenue à l'étape précédente.";
-  return "Exprime la relation entre f''(x) et f(x) : quelle est la valeur du coefficient tel que f''(x) = coefficient·f(x) ?";
+function consigneC(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): FragmentConsigne[] {
+  if (phase === "cDerivee") {
+    return [texte("Calcule f'(x), en utilisant "), latex(`${SH}'=${CH}`), texte(" et "), latex(`${CH}'=${SH}`), texte(" (attention à la chaîne pour l'argument kx).")];
+  }
+  if (phase === "cDeriveeSeconde") {
+    return [texte("Calcule f''(x) à partir de l'expression CORRECTE de f'(x) obtenue à l'étape précédente.")];
+  }
+  return [texte("Exprime la relation entre f''(x) et f(x) : quelle est la valeur du coefficient tel que "), latex("f''(x) = \\text{coefficient}\\cdot f(x)"), texte(" ?")];
 }
 
 function aideCNiveau1(phase: "cDerivee" | "cDeriveeSeconde" | "cRelation"): AideAvecLatex {
@@ -215,9 +251,11 @@ function formatFormeExponentielleD(exercice: ExerciceHyperboliquesD): string {
   return `\\dfrac{${numerateur}}{2}`;
 }
 
-function consigneD(phase: "dReecriture" | "dLimites"): string {
-  if (phase === "dReecriture") return "Réécris f(x) en termes de eˣ et e⁻ˣ, puis identifie le terme dominant à chaque infini.";
-  return "Conclus le signe de la limite de f à chaque infini, à partir de la forme CORRECTE de l'étape précédente (1 statut par direction).";
+function consigneD(phase: "dReecriture" | "dLimites"): FragmentConsigne[] {
+  if (phase === "dReecriture") {
+    return [texte("Réécris f(x) en termes de "), latex("e^x"), texte(" et "), latex("e^{-x}"), texte(", puis identifie le terme dominant à chaque infini.")];
+  }
+  return [texte("Conclus le signe de la limite de f à chaque infini, à partir de la forme CORRECTE de l'étape précédente (1 statut par direction).")];
 }
 
 function aideDNiveau1(phase: "dReecriture" | "dLimites"): AideAvecLatex {
@@ -272,10 +310,10 @@ export function etatActuel(exercice: ExerciceHyperboliques, phase: PhaseHyperbol
   return null;
 }
 
-export function consigneEcran(exercice: ExerciceHyperboliques, phase: PhaseHyperboliques): string {
+export function consigneEcran(exercice: ExerciceHyperboliques, phase: PhaseHyperboliques): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
-      return "Détermine la parité de cette fonction (paire, impaire, ou aucune des deux).";
+      return [texte("Détermine la parité de cette fonction (paire, impaire, ou aucune des deux).")];
     case "B":
       return consigneB(phase as "bIsoler" | "bValeurs");
     case "C":

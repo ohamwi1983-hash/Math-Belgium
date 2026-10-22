@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatInequationsExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatInequationsExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -17,7 +19,7 @@ interface Option {
 }
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   optionGauche: Option;
   optionDroite: Option;
@@ -62,7 +64,9 @@ export function EtapeChoixDeuxIneqExpo({ consigneEcran, enonceLatex, optionGauch
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
 
       <div className="options-grid-compact">
         <button

@@ -24,6 +24,19 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. Les
+ * fragments "latex" ne contiennent QUE du symbole mathématique court (jamais un libellé français
+ * multi-mots — même piège que documenté ci-dessus pour A₁/A₂/c₁/c₂/E). */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function txt(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function ltx(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 /** Table en lecture seule pour l'affichage (données/état actuel) — TEXTE BRUT partout (jamais du
  * LaTeX : les libellés sont des mots ("Football", "Niveau faible") ou des nombres simples, rendus
  * comme un `<table>` HTML ordinaire, jamais via KaTeX — voir `components6e/
@@ -59,8 +72,14 @@ function formatEntier(v: number): string {
  * espace (ex. "l'ampouleL1grille"), illisible — piège de la même famille que le bug "signe orphelin"
  * documenté CLAUDE.md, guardé par la régression `formatIndependanceBayes.test.ts`. La définition
  * complète de A₁/A₂ (en prose, hors KaTeX) est donnée UNE FOIS dans `consigneGenerale`. */
-function consigneGeneraleAPannes(ex: ExerciceFamilleAPannes): string {
-  return `${ex.contexte.texte} A₁ : ${ex.contexte.labelElement1} ${ex.contexte.labelPanne}. A₂ : ${ex.contexte.labelElement2} ${ex.contexte.labelPanne}.`;
+function consigneGeneraleAPannes(ex: ExerciceFamilleAPannes): FragmentConsigne[] {
+  return [
+    txt(`${ex.contexte.texte} `),
+    ltx("A_1"),
+    txt(` : ${ex.contexte.labelElement1} ${ex.contexte.labelPanne}. `),
+    ltx("A_2"),
+    txt(` : ${ex.contexte.labelElement2} ${ex.contexte.labelPanne}.`),
+  ];
 }
 
 function blocDonneesAPannes(ex: ExerciceFamilleAPannes): string[] {
@@ -74,9 +93,17 @@ const LIBELLE_DEMANDE_PANNES: Record<ExerciceFamilleAPannes["demandeEcran2"], st
   exactementUn: "exactement un des deux se produit",
 };
 
-function consigneEcranAPannes(ex: ExerciceFamilleAPannes, phase: PhaseIndependanceBayes): string {
-  if (phase === "aPannesEcran1") return `Calcule les probabilités complémentaires P(Ā₁) et P(Ā₂) : la probabilité que ${ex.contexte.labelElement1} ${ex.contexte.labelPanneNegatif}, et que ${ex.contexte.labelElement2} ${ex.contexte.labelPanneNegatif}.`;
-  return `Calcule la probabilité que ${LIBELLE_DEMANDE_PANNES[ex.demandeEcran2]}, à partir des valeurs CORRECTES de l'étape précédente.`;
+function consigneEcranAPannes(ex: ExerciceFamilleAPannes, phase: PhaseIndependanceBayes): FragmentConsigne[] {
+  if (phase === "aPannesEcran1") {
+    return [
+      txt("Calcule les probabilités complémentaires "),
+      ltx("P(\\overline{A_1})"),
+      txt(" et "),
+      ltx("P(\\overline{A_2})"),
+      txt(` : la probabilité que ${ex.contexte.labelElement1} ${ex.contexte.labelPanneNegatif}, et que ${ex.contexte.labelElement2} ${ex.contexte.labelPanneNegatif}.`),
+    ];
+  }
+  return [txt(`Calcule la probabilité que ${LIBELLE_DEMANDE_PANNES[ex.demandeEcran2]}, à partir des valeurs CORRECTES de l'étape précédente.`)];
 }
 
 function champsAPannes(phase: PhaseIndependanceBayes): ChampDef[] {
@@ -119,18 +146,30 @@ function latexProduitPannes(ex: ExerciceFamilleAPannes): string {
 // Famille A — sous-type "unionIndependance".
 // ============================================================================
 
-function consigneGeneraleAUnion(ex: ExerciceFamilleAUnion): string {
-  return ex.contexte.texte;
+function consigneGeneraleAUnion(ex: ExerciceFamilleAUnion): FragmentConsigne[] {
+  return [txt(ex.contexte.texte)];
 }
 
 function blocDonneesAUnion(ex: ExerciceFamilleAUnion): string[] {
   return [`P(A)=${formatDecimalVirgule(ex.pA)}`, `P(A\\cup B)=${formatDecimalVirgule(ex.pAouB)}`];
 }
 
-function consigneEcranAUnion(phase: PhaseIndependanceBayes): string {
-  if (phase === "aUnionEcran1") return "Calcule P(Ā) — nécessaire pour résoudre l'équation d'union à l'étape suivante.";
-  if (phase === "aUnionEcran2") return "Résous P(A∪B)=P(A)+P(B)−P(A)·P(B) pour trouver P(B), à partir de P(Ā) CORRECT de l'étape précédente.";
-  return "Calcule P(A|B) et P(B|A), à partir des valeurs CORRECTES des étapes précédentes.";
+function consigneEcranAUnion(phase: PhaseIndependanceBayes): FragmentConsigne[] {
+  if (phase === "aUnionEcran1") {
+    return [txt("Calcule "), ltx("P(\\overline{A})"), txt(" — nécessaire pour résoudre l'équation d'union à l'étape suivante.")];
+  }
+  if (phase === "aUnionEcran2") {
+    return [
+      txt("Résous "),
+      ltx("P(A\\cup B)=P(A)+P(B)-P(A)\\cdot P(B)"),
+      txt(" pour trouver "),
+      ltx("P(B)"),
+      txt(", à partir de "),
+      ltx("P(\\overline{A})"),
+      txt(" CORRECT de l'étape précédente."),
+    ];
+  }
+  return [txt("Calcule "), ltx("P(A|B)"), txt(" et "), ltx("P(B|A)"), txt(", à partir des valeurs CORRECTES des étapes précédentes.")];
 }
 
 function champsAUnion(phase: PhaseIndependanceBayes): ChampDef[] {
@@ -164,8 +203,8 @@ function aideNiveau2AUnion(ex: ExerciceFamilleAUnion, phase: PhaseIndependanceBa
 // Famille B — sous-type "histogramme".
 // ============================================================================
 
-function consigneGeneraleBHisto(ex: ExerciceFamilleBHistogramme): string {
-  return ex.contexte.texte;
+function consigneGeneraleBHisto(ex: ExerciceFamilleBHistogramme): FragmentConsigne[] {
+  return [txt(ex.contexte.texte)];
 }
 
 function tableauHisto(ex: ExerciceFamilleBHistogramme): TableauAffichage {
@@ -183,9 +222,9 @@ function blocDonneesBHisto(ex: ExerciceFamilleBHistogramme): string[] {
 
 const LIBELLE_DEMANDE_HISTO: Record<ExerciceFamilleBHistogramme["demande"], string> = { inferieur: "inférieure à", auMoins: "au moins égale à" };
 
-function consigneEcranBHisto(ex: ExerciceFamilleBHistogramme, phase: PhaseIndependanceBayes): string {
-  if (phase === "bHistoEcran1") return `Identifie la classe dans laquelle tombe la valeur cible, puis calcule la proportion de cette classe à prendre en compte (interpolation linéaire).`;
-  return `Calcule la probabilité que ${ex.contexte.variable} soit ${LIBELLE_DEMANDE_HISTO[ex.demande]} ${ex.cible} ${ex.contexte.unite}, à partir de la proportion CORRECTE de l'étape précédente.`;
+function consigneEcranBHisto(ex: ExerciceFamilleBHistogramme, phase: PhaseIndependanceBayes): FragmentConsigne[] {
+  if (phase === "bHistoEcran1") return [txt("Identifie la classe dans laquelle tombe la valeur cible, puis calcule la proportion de cette classe à prendre en compte (interpolation linéaire).")];
+  return [txt(`Calcule la probabilité que ${ex.contexte.variable} soit ${LIBELLE_DEMANDE_HISTO[ex.demande]} ${ex.cible} ${ex.contexte.unite}, à partir de la proportion CORRECTE de l'étape précédente.`)];
 }
 
 function champsBHisto(phase: PhaseIndependanceBayes): ChampDef[] {
@@ -215,16 +254,24 @@ function aideNiveau2BHisto(ex: ExerciceFamilleBHistogramme, phase: PhaseIndepend
 // Famille B — sous-type "tableauDonne".
 // ============================================================================
 
-const LIBELLE_TYPE_QUESTION: Record<TypeQuestionTable, string> = {
-  jointe: "P(ligne ∩ colonne)",
-  margLigne: "P(ligne) — marginale",
-  margColonne: "P(colonne) — marginale",
-  condLigneSachantColonne: "P(ligne | colonne) — conditionnelle",
-  condColonneSachantLigne: "P(colonne | ligne) — conditionnelle",
+const LIBELLE_TYPE_QUESTION_LATEX: Record<TypeQuestionTable, string> = {
+  jointe: "P(\\text{ligne}\\cap\\text{colonne})",
+  margLigne: "P(\\text{ligne})",
+  margColonne: "P(\\text{colonne})",
+  condLigneSachantColonne: "P(\\text{ligne}\\mid\\text{colonne})",
+  condColonneSachantLigne: "P(\\text{colonne}\\mid\\text{ligne})",
 };
 
-function consigneGeneraleBTable(ex: ExerciceFamilleBTableauDonne): string {
-  return ex.contexte.texte;
+const LIBELLE_TYPE_QUESTION_NATURE: Record<TypeQuestionTable, string> = {
+  jointe: "jointe",
+  margLigne: "marginale",
+  margColonne: "marginale",
+  condLigneSachantColonne: "conditionnelle",
+  condColonneSachantLigne: "conditionnelle",
+};
+
+function consigneGeneraleBTable(ex: ExerciceFamilleBTableauDonne): FragmentConsigne[] {
+  return [txt(ex.contexte.texte)];
 }
 
 function tableauBTable(ex: ExerciceFamilleBTableauDonne): TableauAffichage {
@@ -236,11 +283,14 @@ function blocDonneesBTable(ex: ExerciceFamilleBTableauDonne): string[] {
   return [`n=${total}`];
 }
 
-function consigneEcranBTable(ex: ExerciceFamilleBTableauDonne): string {
+function consigneEcranBTable(ex: ExerciceFamilleBTableauDonne): FragmentConsigne[] {
   const ligne = ex.table.libelleLignes[ex.ligneCible];
   const colonne = ex.table.libelleColonnes[ex.colonneCible];
-  const type = LIBELLE_TYPE_QUESTION[ex.typeQuestion];
-  return `Calcule ${type} pour la ligne « ${ligne} » et la colonne « ${colonne} ». Attention à ne pas confondre une probabilité MARGINALE (total d'une ligne/colonne divisé par le total général) avec une CONDITIONNELLE (cellule divisée par le total d'une seule ligne/colonne).`;
+  return [
+    txt("Calcule "),
+    ltx(LIBELLE_TYPE_QUESTION_LATEX[ex.typeQuestion]),
+    txt(` (${LIBELLE_TYPE_QUESTION_NATURE[ex.typeQuestion]}) pour la ligne « ${ligne} » et la colonne « ${colonne} ». Attention à ne pas confondre une probabilité MARGINALE (total d'une ligne/colonne divisé par le total général) avec une CONDITIONNELLE (cellule divisée par le total d'une seule ligne/colonne).`),
+  ];
 }
 
 function champsBTable(): ChampDef[] {
@@ -263,8 +313,8 @@ function aideNiveau2BTable(ex: ExerciceFamilleBTableauDonne): AideAvecLatex {
 // Famille B — sous-type "tableauReconstruire".
 // ============================================================================
 
-function consigneGeneraleBRecon(ex: ExerciceFamilleBReconstruire): string {
-  return ex.contexte.texte;
+function consigneGeneraleBRecon(ex: ExerciceFamilleBReconstruire): FragmentConsigne[] {
+  return [txt(ex.contexte.texte)];
 }
 
 function blocDonneesBRecon(ex: ExerciceFamilleBReconstruire): string[] {
@@ -300,10 +350,10 @@ function tableauEtatActuelBRecon(ex: ExerciceFamilleBReconstruire, phase: PhaseI
   return { libelleLignes: ex.contexte.libelleLignes, libelleColonnes: [...ex.contexte.libelleColonnes, "Total"], cellules: table.cellules.map((ligne, i) => [...ligne.map(formatEntier), formatEntier(totauxLigne[i])]) };
 }
 
-function consigneEcranBRecon(phase: PhaseIndependanceBayes): string {
-  if (phase === "bReconEcran1") return "Traduis chaque contrainte donnée en % en effectif : calcule le total de chaque ligne, puis les 2 cellules directement déductibles.";
-  if (phase === "bReconEcran2") return "Complète les cases restantes PAR DIFFÉRENCE (chaque ligne et chaque colonne doit sommer à son total connu), à partir des cases CORRECTES de l'étape précédente.";
-  return "Lis la probabilité demandée dans le tableau CORRECT reconstruit.";
+function consigneEcranBRecon(phase: PhaseIndependanceBayes): FragmentConsigne[] {
+  if (phase === "bReconEcran1") return [txt("Traduis chaque contrainte donnée en % en effectif : calcule le total de chaque ligne, puis les 2 cellules directement déductibles.")];
+  if (phase === "bReconEcran2") return [txt("Complète les cases restantes PAR DIFFÉRENCE (chaque ligne et chaque colonne doit sommer à son total connu), à partir des cases CORRECTES de l'étape précédente.")];
+  return [txt("Lis la probabilité demandée dans le tableau CORRECT reconstruit.")];
 }
 
 function champsBRecon(ex: ExerciceFamilleBReconstruire, phase: PhaseIndependanceBayes): ChampDef[] {
@@ -353,18 +403,26 @@ function aideNiveau2BRecon(ex: ExerciceFamilleBReconstruire, phase: PhaseIndepen
  * `labelCause1`/`labelCause2`/`labelEffet` (des phrases françaises complètes) directement en mode
  * mathématique, même piège que la famille A "pannes" ci-dessus (voir son en-tête). La définition
  * complète de c₁/c₂/E (en prose, hors KaTeX) est donnée UNE FOIS dans `consigneGenerale`. */
-function consigneGeneraleC(ex: ExerciceFamilleC): string {
-  return `${ex.contexte.texte} c₁ : ${ex.contexte.labelCause1}. c₂ : ${ex.contexte.labelCause2}. E : ${ex.contexte.labelEffet}.`;
+function consigneGeneraleC(ex: ExerciceFamilleC): FragmentConsigne[] {
+  return [
+    txt(`${ex.contexte.texte} `),
+    ltx("c_1"),
+    txt(` : ${ex.contexte.labelCause1}. `),
+    ltx("c_2"),
+    txt(` : ${ex.contexte.labelCause2}. `),
+    ltx("E"),
+    txt(` : ${ex.contexte.labelEffet}.`),
+  ];
 }
 
 function blocDonneesC(ex: ExerciceFamilleC): string[] {
   return [`P(c_1)=${formatDecimalVirgule(ex.p)}`, `P(E|c_1)=${formatDecimalVirgule(ex.q1)}`, `P(E|c_2)=${formatDecimalVirgule(ex.q2)}`];
 }
 
-function consigneEcranC(phase: PhaseIndependanceBayes): string {
-  if (phase === "cEcran1") return "Construis l'arbre : calcule les probabilités des 4 branches finales.";
-  if (phase === "cEcran2") return "Calcule P(effet) par la formule des probabilités totales, à partir de l'arbre CORRECT de l'étape précédente.";
-  return "Applique le théorème de Bayes pour calculer la probabilité demandée, à partir de la valeur CORRECTE de l'étape précédente.";
+function consigneEcranC(phase: PhaseIndependanceBayes): FragmentConsigne[] {
+  if (phase === "cEcran1") return [txt("Construis l'arbre : calcule les probabilités des 4 branches finales.")];
+  if (phase === "cEcran2") return [txt("Calcule "), ltx("P(E)"), txt(" par la formule des probabilités totales, à partir de l'arbre CORRECT de l'étape précédente.")];
+  return [txt("Applique le théorème de Bayes pour calculer la probabilité demandée, à partir de la valeur CORRECTE de l'étape précédente.")];
 }
 
 function champsC(ex: ExerciceFamilleC, phase: PhaseIndependanceBayes): ChampDef[] {
@@ -416,7 +474,7 @@ function aideNiveau2C(ex: ExerciceFamilleC, phase: PhaseIndependanceBayes): Aide
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceIndependanceBayes): string {
+export function consigneGenerale(exercice: ExerciceIndependanceBayes): FragmentConsigne[] {
   if (exercice.famille === "A") return exercice.sousType === "pannes" ? consigneGeneraleAPannes(exercice) : consigneGeneraleAUnion(exercice);
   if (exercice.famille === "B") {
     if (exercice.sousType === "histogramme") return consigneGeneraleBHisto(exercice);
@@ -445,7 +503,7 @@ export function tableauDonnees(exercice: ExerciceIndependanceBayes): TableauAffi
   return null;
 }
 
-export function consigneEcran(exercice: ExerciceIndependanceBayes, phase: PhaseIndependanceBayes): string {
+export function consigneEcran(exercice: ExerciceIndependanceBayes, phase: PhaseIndependanceBayes): FragmentConsigne[] {
   if (exercice.famille === "A") return exercice.sousType === "pannes" ? consigneEcranAPannes(exercice, phase) : consigneEcranAUnion(phase);
   if (exercice.famille === "B") {
     if (exercice.sousType === "histogramme") return consigneEcranBHisto(exercice, phase);

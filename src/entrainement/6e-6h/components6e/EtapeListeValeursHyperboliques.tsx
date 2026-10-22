@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex } from "../ui6e/formatHyperboliques";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatHyperboliques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   etatActuel: string[] | null;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   placeholder: string;
   labelAjout: string;
   aideNiveau1: AideAvecLatex;
@@ -59,7 +60,7 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -79,7 +80,9 @@ export function EtapeListeValeursHyperboliques({ consigneGenerale, blocDonnees, 
           </div>
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="contenu-conditionnel">
         {lignes.map((ligne, i) => (
           <div key={i}>

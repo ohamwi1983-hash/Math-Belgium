@@ -39,6 +39,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function txt(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function ltx(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 interface TermeSigne {
   valeur: number;
   suffixe: string;
@@ -140,9 +151,9 @@ function formatEnonceA(exercice: ExerciceIneqA): string {
   return `${bl}^{${formatExposantLineaireLatex(exercice.m, exercice.n)}} ${symboleComparateurLatex(exercice.comparateur)} ${formatValeurExacteLatex(exercice.valeurNumerique)}`;
 }
 
-function consigneA(phase: "aReconnaitre" | "aResoudre"): string {
-  if (phase === "aReconnaitre") return "Réécris le second membre comme une puissance de la MÊME base que le premier membre — donne l'exposant cible.";
-  return "À partir de l'exposant CORRECT de l'étape précédente, résous l'inéquation en x — attention au sens selon que la base est supérieure ou inférieure à 1.";
+function consigneA(phase: "aReconnaitre" | "aResoudre"): FragmentConsigne[] {
+  if (phase === "aReconnaitre") return [txt("Réécris le second membre comme une puissance de la MÊME base que le premier membre — donne l'exposant cible.")];
+  return [txt("À partir de l'exposant CORRECT de l'étape précédente, résous l'inéquation en x — attention au sens selon que la base est supérieure ou inférieure à 1.")];
 }
 
 function aideA1(phase: "aReconnaitre" | "aResoudre"): AideAvecLatex {
@@ -171,8 +182,8 @@ function formatEnonceB(exercice: ExerciceIneqB): string {
   return `${exercice.c}\\cdot ${bl}^{${expo}} ${symboleComparateurLatex(exercice.comparateur)} ${-exercice.k}`;
 }
 
-function consigneB(): string {
-  return "Sans AUCUN calcul : cette inéquation a-t-elle au moins une solution réelle ?";
+function consigneB(): FragmentConsigne[] {
+  return [txt("Sans AUCUN calcul : cette inéquation a-t-elle au moins une solution réelle ?")];
 }
 
 function aideB1(): AideAvecLatex {
@@ -197,8 +208,8 @@ function formatEnonceCf(base: BaseIneq): string {
   return `x\\cdot\\left(${bl}^{x}-1\\right) \\geq 0`;
 }
 
-function consigneCf(): string {
-  return "Sans résoudre d'inéquation classique : cette expression est-elle vraie pour TOUT x réel ?";
+function consigneCf(): FragmentConsigne[] {
+  return [txt("Sans résoudre d'inéquation classique : cette expression est-elle vraie pour TOUT x réel ?")];
 }
 
 function aideCf1(): AideAvecLatex {
@@ -226,9 +237,16 @@ function formatEnonceCk(exercice: ExerciceIneqCk): string {
   return `${b1}^{${formatGCkLatex(exercice, 1)}} ${symboleComparateurLatex(exercice.comparateur)} ${b2}^{${formatGCkLatex(exercice, 2)}}`;
 }
 
-function consigneCk(phase: "ckRegrouper" | "ckConclure"): string {
-  if (phase === "ckRegrouper") return "Regroupe l'inéquation sous la forme (base1/base2²)^{g(x)} [symbole] 1, en divisant les deux membres par base2^{2g(x)}.";
-  return "À partir du regroupement CORRECT de l'étape précédente : cette inéquation est-elle vraie pour TOUT x réel ?";
+function consigneCk(phase: "ckRegrouper" | "ckConclure"): FragmentConsigne[] {
+  if (phase === "ckRegrouper")
+    return [
+      txt("Regroupe l'inéquation sous la forme "),
+      ltx("\\left(\\dfrac{\\text{base}_1}{\\text{base}_2^{2}}\\right)^{g(x)}"),
+      txt(" [symbole] 1, en divisant les deux membres par "),
+      ltx("\\text{base}_2^{2g(x)}"),
+      txt("."),
+    ];
+  return [txt("À partir du regroupement CORRECT de l'étape précédente : cette inéquation est-elle vraie pour TOUT x réel ?")];
 }
 
 function aideCk1(phase: "ckRegrouper" | "ckConclure", _exercice: ExerciceIneqCk): AideAvecLatex {
@@ -247,7 +265,7 @@ function formatEnonceC(exercice: ExerciceIneqC): string {
   return exercice.sousType === "f" ? formatEnonceCf(exercice.base) : formatEnonceCk(exercice);
 }
 
-function consigneC(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure"): string {
+function consigneC(phase: "cfReconnaitre" | "ckRegrouper" | "ckConclure"): FragmentConsigne[] {
   return phase === "cfReconnaitre" ? consigneCf() : consigneCk(phase);
 }
 
@@ -284,9 +302,9 @@ function formatEnonceDConstant(exercice: ExerciceIneqDConstant): string {
   return `\\left(${p1}\\right)\\cdot\\left(${p2}\\right) ${symboleComparateurLatex(exercice.comparateur)} 0`;
 }
 
-function consigneDConstant(phase: "dConstantSigne" | "dConstantResoudre"): string {
-  if (phase === "dConstantSigne") return "Le premier facteur a un signe CONSTANT, quel que soit x — lequel ?";
-  return "À partir du signe CORRECT de l'étape précédente, résous l'inéquation sur le SECOND facteur seul — avec le bon sens (conservé si le 1er facteur est positif, inversé s'il est négatif).";
+function consigneDConstant(phase: "dConstantSigne" | "dConstantResoudre"): FragmentConsigne[] {
+  if (phase === "dConstantSigne") return [txt("Le premier facteur a un signe CONSTANT, quel que soit x — lequel ?")];
+  return [txt("À partir du signe CORRECT de l'étape précédente, résous l'inéquation sur le SECOND facteur seul — avec le bon sens (conservé si le 1er facteur est positif, inversé s'il est négatif).")];
 }
 
 function aideDConstant1(phase: "dConstantSigne" | "dConstantResoudre"): AideAvecLatex {
@@ -317,10 +335,10 @@ function formatEnonceDVariable(exercice: ExerciceIneqDVariable): string {
   return `\\left(${f1}\\right)\\cdot\\left(${f2}\\right) ${symboleComparateurLatex(exercice.comparateur)} 0`;
 }
 
-function consigneDVariable(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): string {
-  if (phase === "dVariableSigne1") return "Étudie le signe du PREMIER facteur : en quel point s'annule-t-il, et quel est le sens du changement de signe ?";
-  if (phase === "dVariableSigne2") return "Étudie le signe du SECOND facteur : en quel point s'annule-t-il, et quel est le sens du changement de signe ?";
-  return "À partir des 2 signes CORRECTS des étapes précédentes, construis le tableau de signes du produit et donne l'ensemble-solution.";
+function consigneDVariable(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): FragmentConsigne[] {
+  if (phase === "dVariableSigne1") return [txt("Étudie le signe du PREMIER facteur : en quel point s'annule-t-il, et quel est le sens du changement de signe ?")];
+  if (phase === "dVariableSigne2") return [txt("Étudie le signe du SECOND facteur : en quel point s'annule-t-il, et quel est le sens du changement de signe ?")];
+  return [txt("À partir des 2 signes CORRECTS des étapes précédentes, construis le tableau de signes du produit et donne l'ensemble-solution.")];
 }
 
 function aideDVariable1(phase: "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau"): AideAvecLatex {
@@ -346,7 +364,7 @@ function formatEnonceD(exercice: ExerciceIneqD): string {
   return exercice.sousType === "constant" ? formatEnonceDConstant(exercice) : formatEnonceDVariable(exercice);
 }
 
-function consigneD(phase: PhaseInequationExponentielle, exercice: ExerciceIneqD): string {
+function consigneD(phase: PhaseInequationExponentielle, exercice: ExerciceIneqD): FragmentConsigne[] {
   if (exercice.sousType === "constant") return consigneDConstant(phase as "dConstantSigne" | "dConstantResoudre");
   return consigneDVariable(phase as "dVariableSigne1" | "dVariableSigne2" | "dVariableTableau");
 }
@@ -372,9 +390,16 @@ function formatEnonceE(exercice: ExerciceIneqE): string {
   return `${b1}^{${expo}} ${symboleComparateurLatex(exercice.comparateur)} ${b2}^{${expo}}`;
 }
 
-function consigneE(phase: "eRegrouper" | "eResoudre"): string {
-  if (phase === "eRegrouper") return "Regroupe l'inéquation sous la forme (base1/base2)^{mx+n} [symbole] 1, en divisant les deux membres par base2^{mx+n}.";
-  return "À partir du regroupement CORRECT de l'étape précédente, résous — attention au sens selon que le rapport base1/base2 est supérieur ou inférieur à 1.";
+function consigneE(phase: "eRegrouper" | "eResoudre"): FragmentConsigne[] {
+  if (phase === "eRegrouper")
+    return [
+      txt("Regroupe l'inéquation sous la forme "),
+      ltx("\\left(\\dfrac{\\text{base}_1}{\\text{base}_2}\\right)^{mx+n}"),
+      txt(" [symbole] 1, en divisant les deux membres par "),
+      ltx("\\text{base}_2^{mx+n}"),
+      txt("."),
+    ];
+  return [txt("À partir du regroupement CORRECT de l'étape précédente, résous — attention au sens selon que le rapport base1/base2 est supérieur ou inférieur à 1.")];
 }
 
 function aideE1(phase: "eRegrouper" | "eResoudre"): AideAvecLatex {
@@ -414,7 +439,7 @@ export function formatEnonceLatex(exercice: ExerciceInequationExponentielle): st
   }
 }
 
-export function consigneEcran(phase: PhaseInequationExponentielle, exercice: ExerciceInequationExponentielle): string {
+export function consigneEcran(phase: PhaseInequationExponentielle, exercice: ExerciceInequationExponentielle): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aReconnaitre" | "aResoudre");

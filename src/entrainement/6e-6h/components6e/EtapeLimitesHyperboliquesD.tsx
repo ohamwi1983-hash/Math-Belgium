@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { SigneLimiteHyperbolique } from "../core6e/hyperboliques.types";
 import type { ReponseLimitesD } from "../moteur6e/verificationHyperboliques";
-import type { AideAvecLatex } from "../ui6e/formatHyperboliques";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatHyperboliques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
   etatActuel: string[] | null;
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -55,7 +56,7 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             {blocDonnees.map((frag, i) => (
@@ -71,7 +72,9 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
           ))}
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
 
       <p className="prompt-text">
         <Katex expression="\lim_{x\to+\infty} f(x) =" />

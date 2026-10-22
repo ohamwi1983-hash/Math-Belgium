@@ -17,6 +17,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function txt(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function ltx(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 interface TermeSigne {
   valeur: number;
   suffixe: string;
@@ -73,9 +84,9 @@ function formatEnonceA(exercice: ExerciceLogA): string {
   return `${logBaseLatex(baseLatex(exercice.base), formatAffineLatex({ m: exercice.m, n: exercice.n }))} ${symboleComparateurLatex(exercice.comparateur)} ${exercice.k}`;
 }
 
-function consigneA(phase: "aCE" | "aResoudre"): string {
-  if (phase === "aCE") return "Pose la condition d'existence : l'argument du logarithme doit être strictement positif.";
-  return "À partir de la CE CORRECTE de l'étape précédente, résous l'inéquation en appliquant le bon sens (direct si la base est >1, inversé si elle est <1), puis intersecte avec la CE.";
+function consigneA(phase: "aCE" | "aResoudre"): FragmentConsigne[] {
+  if (phase === "aCE") return [txt("Pose la condition d'existence : l'argument du logarithme doit être strictement positif.")];
+  return [txt("À partir de la CE CORRECTE de l'étape précédente, résous l'inéquation en appliquant le bon sens (direct si la base est >1, inversé si elle est <1), puis intersecte avec la CE.")];
 }
 
 function aideA1(phase: "aCE" | "aResoudre"): AideAvecLatex {
@@ -104,10 +115,10 @@ function formatEnonceB(exercice: ExerciceLogB): string {
   return `${logBaseLatex(bl, formatArgumentB(exercice))} ${symboleComparateurLatex(exercice.comparateur)} ${logBaseLatex(bl, formatAffineLatex(exercice.g))}`;
 }
 
-function consigneB(phase: "bCE" | "bResoudre", exercice: ExerciceLogB): string {
-  if (phase === "bCE") return "Pose la CE : les DEUX arguments doivent être strictement positifs.";
+function consigneB(phase: "bCE" | "bResoudre", exercice: ExerciceLogB): FragmentConsigne[] {
+  if (phase === "bCE") return [txt("Pose la CE : les DEUX arguments doivent être strictement positifs.")];
   const justification = exercice.sousType === "racine" ? " (la comparaison sur les arguments se justifie ici par élévation au carré, valide car la CE garantit déjà leur positivité)" : "";
-  return `À partir de la CE CORRECTE de l'étape précédente, compare directement les arguments avec le bon sens${justification}, puis ré-intersecte avec la CE.`;
+  return [txt(`À partir de la CE CORRECTE de l'étape précédente, compare directement les arguments avec le bon sens${justification}, puis ré-intersecte avec la CE.`)];
 }
 
 function aideB1(phase: "bCE" | "bResoudre"): AideAvecLatex {
@@ -145,14 +156,14 @@ export function formatCombinaisonC(exercice: ExerciceLogC): string {
     : `\\dfrac{${formatAffineLatex(exercice.f)}}{${formatAffineLatex(exercice.g)}}`;
 }
 
-function consigneC(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): string {
-  if (phase === "cCE") return "Pose la CE : les DEUX arguments doivent être strictement positifs.";
+function consigneC(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): FragmentConsigne[] {
+  if (phase === "cCE") return [txt("Pose la CE : les DEUX arguments doivent être strictement positifs.")];
   if (phase === "cCombiner") {
     return exercice.sousType === "produit"
-      ? "Combine le membre de gauche en un seul logarithme : log(f)+log(g)=log(f·g). Donne l'expression f(x)·g(x)."
-      : "Combine le membre de gauche en un seul logarithme : log(f)-log(g)=log(f/g). Donne l'expression f(x)/g(x).";
+      ? [txt("Combine le membre de gauche en un seul logarithme : "), ltx("\\log(f)+\\log(g)=\\log(f\\cdot g)"), txt(". Donne l'expression "), ltx("f(x)\\cdot g(x)"), txt(".")]
+      : [txt("Combine le membre de gauche en un seul logarithme : "), ltx("\\log(f)-\\log(g)=\\log\\!\\left(\\dfrac{f}{g}\\right)"), txt(". Donne l'expression "), ltx("\\dfrac{f(x)}{g(x)}"), txt(".")];
   }
-  return "À partir de la combinaison CORRECTE de l'étape précédente, compare les arguments avec le bon sens, puis intersecte avec la CE CORRECTE de l'étape 1.";
+  return [txt("À partir de la combinaison CORRECTE de l'étape précédente, compare les arguments avec le bon sens, puis intersecte avec la CE CORRECTE de l'étape 1.")];
 }
 
 function aideC1(phase: "cCE" | "cCombiner" | "cComparer", exercice: ExerciceLogC): AideAvecLatex {
@@ -193,16 +204,16 @@ function formatEnonceD(exercice: ExerciceLogD): string {
   ])} ${symboleComparateurLatex(exercice.comparateur)} 0`;
 }
 
-function consigneD(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX"): string {
+function consigneD(phase: "dCE" | "dReecrire" | "dResoudreY" | "dConvertirX"): FragmentConsigne[] {
   switch (phase) {
     case "dCE":
-      return "Pose la CE : l'argument du logarithme doit être strictement positif.";
+      return [txt("Pose la CE : l'argument du logarithme doit être strictement positif.")];
     case "dReecrire":
-      return "Pose y=log_base(x) et réécris l'inéquation comme une inéquation du second degré en y (même comparateur).";
+      return [txt("Pose "), ltx("y=\\log_{\\text{base}}(x)"), txt(" et réécris l'inéquation comme une inéquation du second degré en y (même comparateur).")];
     case "dResoudreY":
-      return "À partir de la réécriture CORRECTE de l'étape précédente, résous l'inéquation du second degré en y (tableau de signes).";
+      return [txt("À partir de la réécriture CORRECTE de l'étape précédente, résous l'inéquation du second degré en y (tableau de signes).")];
     case "dConvertirX":
-      return "À partir de l'intervalle en y CORRECT de l'étape précédente, convertis-le en x (via x=base^y — attention à l'inversion des bornes si la base est <1), puis intersecte avec la CE.";
+      return [txt("À partir de l'intervalle en y CORRECT de l'étape précédente, convertis-le en x (via "), ltx("x=\\text{base}^{y}"), txt(" — attention à l'inversion des bornes si la base est <1), puis intersecte avec la CE.")];
   }
 }
 
@@ -244,8 +255,8 @@ function formatEnonceE(exercice: ExerciceLogE): string {
   return `${logBaseLatex(bl, formatAffineLatex({ m: 1, n: -exercice.p }))} ${symboleComparateurLatex(exercice.comparateur)} ${logBaseLatex(bl, formatAffineLatex({ m: -1, n: exercice.r }))}`;
 }
 
-function consigneE(): string {
-  return "Sans résoudre l'inégalité principale : pose la CE, et détermine si elle est satisfiable.";
+function consigneE(): FragmentConsigne[] {
+  return [txt("Sans résoudre l'inégalité principale : pose la CE, et détermine si elle est satisfiable.")];
 }
 
 function aideE1(): AideAvecLatex {
@@ -270,14 +281,14 @@ function formatEnonceF(exercice: ExerciceLogF): string {
   return `${logBaseLatex("a", g)} ${symboleComparateurLatex(exercice.comparateur)} ${logBaseLatex("a", f)}`;
 }
 
-function consigneF(phase: "fCE" | "fSimplifier" | "fConclure"): string {
+function consigneF(phase: "fCE" | "fSimplifier" | "fConclure"): FragmentConsigne[] {
   switch (phase) {
     case "fCE":
-      return "Pose la CE. Remarque : f(x)-g(x) est un carré, donc f(x)≥g(x) toujours — la CE se réduit-elle à une seule condition ?";
+      return [txt("Pose la CE. Remarque : "), ltx("f(x)-g(x)"), txt(" est un carré, donc "), ltx("f(x)\\geq g(x)"), txt(" toujours — la CE se réduit-elle à une seule condition ?")];
     case "fSimplifier":
-      return "Simplifie f(x)-g(x) et reconnais un carré parfait.";
+      return [txt("Simplifie "), ltx("f(x)-g(x)"), txt(" et reconnais un carré parfait.")];
     case "fConclure":
-      return "Traite séparément les cas a>1 et 0<a<1 — à partir de la CE CORRECTE de l'étape 1 et du carré parfait CORRECT de l'étape 2, conclus pour chaque cas.";
+      return [txt("Traite séparément les cas "), ltx("a>1"), txt(" et "), ltx("0<a<1"), txt(" — à partir de la CE CORRECTE de l'étape 1 et du carré parfait CORRECT de l'étape 2, conclus pour chaque cas.")];
   }
 }
 
@@ -373,7 +384,7 @@ export function formatEnonceLatex(exercice: ExerciceInequationLogarithmique): st
   }
 }
 
-export function consigneEcran(phase: PhaseInequationLogarithmique, exercice: ExerciceInequationLogarithmique): string {
+export function consigneEcran(phase: PhaseInequationLogarithmique, exercice: ExerciceInequationLogarithmique): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aCE" | "aResoudre");

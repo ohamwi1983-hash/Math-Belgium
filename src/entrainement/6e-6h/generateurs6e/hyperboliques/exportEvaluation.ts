@@ -159,11 +159,11 @@ function construireEnonceHyperboliques(exercice: ExerciceHyperboliques): Section
   const phases = phasesPourExercice(exercice);
   const donnees = blocDonnees(exercice);
   return {
-    enteteFragments: [texte(CONSIGNE_GENERALE), latex(donnees.join(",\\quad "))],
+    enteteFragments: [...CONSIGNE_GENERALE, latex(donnees.join(",\\quad "))],
     questions: phases.map((phase) => {
       const suffixe = phase === "aParite" ? " Justifie en calculant f(−x)." : "";
       return {
-        consigne: [texte(consigneEcran(exercice, phase) + suffixe)],
+        consigne: suffixe ? [...consigneEcran(exercice, phase), texte(suffixe)] : consigneEcran(exercice, phase),
         reponse: { type: "lignes", nombre: NOMBRE_LIGNES_PAR_PHASE[phase] },
       };
     }),

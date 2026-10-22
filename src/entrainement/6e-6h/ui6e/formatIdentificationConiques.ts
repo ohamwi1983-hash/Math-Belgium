@@ -38,6 +38,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`
+ * (dupliqué à dessein, convention CLAUDE.md), rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function txt(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function ltx(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
@@ -155,8 +166,12 @@ function optionsNaturePourCategorie(categorie: "ellipseCercleVidePoint" | "hyper
 // Famille A, sous-type 1 — Ax²+By²+C=0.
 // ============================================================================
 
-export function consigneGeneraleA1(): string {
-  return "On considère une conique d'équation Ax²+By²+C=0 (les deux carrés sont présents, aucun terme linéaire). Identifie sa nature exacte, puis ses éléments caractéristiques si elle n'est pas dégénérée.";
+export function consigneGeneraleA1(): FragmentConsigne[] {
+  return [
+    txt("On considère une conique d'équation "),
+    ltx("Ax^2+By^2+C=0"),
+    txt(" (les deux carrés sont présents, aucun terme linéaire). Identifie sa nature exacte, puis ses éléments caractéristiques si elle n'est pas dégénérée."),
+  ];
 }
 
 export function blocDonneesA1(e: ExerciceConiqueA1): string[] {
@@ -164,10 +179,10 @@ export function blocDonneesA1(e: ExerciceConiqueA1): string[] {
   return [`${eq}=0`];
 }
 
-export function consigneEcranA1(_e: ExerciceConiqueA1, phase: PhaseIdentificationConiques): string {
-  if (phase === "a1Ecran1") return "Observe les signes de A et de B (sans regarder C pour l'instant) : à quelle grande catégorie l'équation appartient-elle probablement ?";
-  if (phase === "a1Ecran2") return "Attention au cas C=0 (ne divise JAMAIS par C sans l'avoir vérifié en premier) : à partir de la catégorie CONFIRMÉE, tranche la nature exacte de la conique.";
-  return "À partir de la nature CONFIRMÉE, donne les éléments caractéristiques de la conique.";
+export function consigneEcranA1(_e: ExerciceConiqueA1, phase: PhaseIdentificationConiques): FragmentConsigne[] {
+  if (phase === "a1Ecran1") return [txt("Observe les signes de A et de B (sans regarder C pour l'instant) : à quelle grande catégorie l'équation appartient-elle probablement ?")];
+  if (phase === "a1Ecran2") return [txt("Attention au cas "), ltx("C=0"), txt(" (ne divise JAMAIS par C sans l'avoir vérifié en premier) : à partir de la catégorie CONFIRMÉE, tranche la nature exacte de la conique.")];
+  return [txt("À partir de la nature CONFIRMÉE, donne les éléments caractéristiques de la conique.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
@@ -214,8 +229,12 @@ export function aideNiveau2A1(e: ExerciceConiqueA1): AideAvecLatex {
 // Famille A, sous-type 2 — un seul carré + un terme linéaire.
 // ============================================================================
 
-export function consigneGeneraleA2(): string {
-  return "On considère une conique d'équation Av²+D·w=0 (un seul carré, un seul terme linéaire). Détermine si le terme linéaire porte sur la même variable que le carré (cas dégénéré) ou sur l'autre (parabole), puis résous en conséquence.";
+export function consigneGeneraleA2(): FragmentConsigne[] {
+  return [
+    txt("On considère une conique d'équation "),
+    ltx("Av^2+Dw=0"),
+    txt(" (un seul carré, un seul terme linéaire). Détermine si le terme linéaire porte sur la même variable que le carré (cas dégénéré) ou sur l'autre (parabole), puis résous en conséquence."),
+  ];
 }
 
 export function blocDonneesA2(e: ExerciceConiqueA2): string[] {
@@ -224,12 +243,13 @@ export function blocDonneesA2(e: ExerciceConiqueA2): string[] {
   return [`${eq}=0`];
 }
 
-export function consigneEcranA2(e: ExerciceConiqueA2, phase: PhaseIdentificationConiques): string {
-  if (phase === "a2Ecran1") return "Le terme linéaire porte-t-il sur la MÊME variable que le carré, ou sur l'AUTRE ?";
+export function consigneEcranA2(e: ExerciceConiqueA2, phase: PhaseIdentificationConiques): FragmentConsigne[] {
+  if (phase === "a2Ecran1") return [txt("Le terme linéaire porte-t-il sur la MÊME variable que le carré, ou sur l'AUTRE ?")];
   if (phase === "a2Ecran2") {
-    return e.memeVariable ? "Factorise (v(Av+D)=0) pour obtenir les 2 droites parallèles CONFIRMÉES par l'étape précédente." : "Mets l'équation sous forme standard v²=4p·w et identifie le coefficient 4p ainsi que l'orientation de la parabole.";
+    if (e.memeVariable) return [txt("Factorise ("), ltx("v(Av+D)=0"), txt(") pour obtenir les 2 droites parallèles CONFIRMÉES par l'étape précédente.")];
+    return [txt("Mets l'équation sous forme standard "), ltx("v^2=4pw"), txt(" et identifie le coefficient 4p ainsi que l'orientation de la parabole.")];
   }
-  return "À partir de l'orientation CONFIRMÉE, donne le foyer et la directrice de la parabole.";
+  return [txt("À partir de l'orientation CONFIRMÉE, donne le foyer et la directrice de la parabole.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelA1` (voir sa doc-string). */
@@ -298,8 +318,12 @@ function champsElements(nature: NatureConique): ChampDef[] {
 // Famille B — Ax²+By²+Dx+Ey+F=0, décentrée.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "On considère une conique décentrée d'équation Ax²+By²+Dx+Ey+F=0. Regroupe les termes par variable, complète le carré pour chacune séparément, puis classe la conique et donne ses éléments caractéristiques.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [
+    txt("On considère une conique décentrée d'équation "),
+    ltx("Ax^2+By^2+Dx+Ey+F=0"),
+    txt(". Regroupe les termes par variable, complète le carré pour chacune séparément, puis classe la conique et donne ses éléments caractéristiques."),
+  ];
 }
 
 export function blocDonneesB(e: ExerciceConiqueB): string[] {
@@ -313,11 +337,17 @@ export function blocDonneesB(e: ExerciceConiqueB): string[] {
   return [`${eq}=0`];
 }
 
-export function consigneEcranB(_e: ExerciceConiqueB, phase: PhaseIdentificationConiques): string {
-  if (phase === "bEcran1") return "Regroupe les termes par variable et complète le carré POUR CHACUNE séparément (forme intermédiaire A(x-h)²+B(y-k)²=constante, avant simplification finale) — une simple recopie de l'équation de départ, même réordonnée, ne sera PAS acceptée.";
-  if (phase === "bEcran2") return "À partir de la forme CONFIRMÉE de l'étape précédente, identifie les signes de A, de B et de la constante finale.";
-  if (phase === "bEcran3") return "À partir des signes CONFIRMÉS, classe la nature exacte de la conique.";
-  return "À partir de la nature CONFIRMÉE, donne les éléments caractéristiques de la conique.";
+export function consigneEcranB(_e: ExerciceConiqueB, phase: PhaseIdentificationConiques): FragmentConsigne[] {
+  if (phase === "bEcran1") {
+    return [
+      txt("Regroupe les termes par variable et complète le carré POUR CHACUNE séparément (forme intermédiaire "),
+      ltx("A(x-h)^2+B(y-k)^2=\\text{constante}"),
+      txt(", avant simplification finale) — une simple recopie de l'équation de départ, même réordonnée, ne sera PAS acceptée."),
+    ];
+  }
+  if (phase === "bEcran2") return [txt("À partir de la forme CONFIRMÉE de l'étape précédente, identifie les signes de A, de B et de la constante finale.")];
+  if (phase === "bEcran3") return [txt("À partir des signes CONFIRMÉS, classe la nature exacte de la conique.")];
+  return [txt("À partir de la nature CONFIRMÉE, donne les éléments caractéristiques de la conique.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelA1` (voir sa doc-string) ;
@@ -372,8 +402,12 @@ export function aideNiveau2B(e: ExerciceConiqueB, phase: PhaseIdentificationConi
 // Famille C — forme "racine isolée".
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "On considère une équation de la forme v_isolée = k ± m·√(expression quadratique). Isole le terme en racine (déjà fait ici), élève au carré, complète le carré sur la variable qui était SOUS LA RACINE, puis classe la conique.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    txt("On considère une équation de la forme "),
+    ltx("v_{\\text{isolée}} = k \\pm m\\sqrt{\\text{expression quadratique}}"),
+    txt(". Isole le terme en racine (déjà fait ici), élève au carré, complète le carré sur la variable qui était SOUS LA RACINE, puis classe la conique."),
+  ];
 }
 
 export function blocDonneesC(e: ExerciceConiqueC): string[] {
@@ -385,11 +419,11 @@ export function blocDonneesC(e: ExerciceConiqueC): string[] {
   return [`${e.variableIsolee}=${expr}`];
 }
 
-export function consigneEcranC(_e: ExerciceConiqueC, phase: PhaseIdentificationConiques): string {
-  if (phase === "cEcran1") return "Isole le terme en ±racine (déjà fait dans l'énoncé) et élève au carré les deux membres.";
-  if (phase === "cEcran2") return "Complète le carré sur la variable qui était SOUS LA RACINE dans l'énoncé d'origine — attention, ce n'est pas forcément celle isolée à gauche.";
-  if (phase === "cEcran3") return "Assemble la forme standard finale (les deux carrés du même côté) et classe la conique : le signe sous la racine d'origine détermine ellipse ou hyperbole.";
-  return "À partir de la nature CONFIRMÉE, donne les éléments caractéristiques de la conique.";
+export function consigneEcranC(_e: ExerciceConiqueC, phase: PhaseIdentificationConiques): FragmentConsigne[] {
+  if (phase === "cEcran1") return [txt("Isole le terme en ±racine (déjà fait dans l'énoncé) et élève au carré les deux membres.")];
+  if (phase === "cEcran2") return [txt("Complète le carré sur la variable qui était SOUS LA RACINE dans l'énoncé d'origine — attention, ce n'est pas forcément celle isolée à gauche.")];
+  if (phase === "cEcran3") return [txt("Assemble la forme standard finale (les deux carrés du même côté) et classe la conique : le signe sous la racine d'origine détermine ellipse ou hyperbole.")];
+  return [txt("À partir de la nature CONFIRMÉE, donne les éléments caractéristiques de la conique.")];
 }
 
 /** ACCUMULE les écrans déjà confirmés — même correctif que `etatActuelA1`/`etatActuelB` (voir leur
@@ -429,7 +463,7 @@ export function aideNiveau2C(e: ExerciceConiqueC): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceIdentificationConiques): string {
+export function consigneGenerale(exercice: ExerciceIdentificationConiques): FragmentConsigne[] {
   if (exercice.famille === "A") return exercice.sousType === "centree2Carres" ? consigneGeneraleA1() : consigneGeneraleA2();
   if (exercice.famille === "B") return consigneGeneraleB();
   return consigneGeneraleC();
@@ -441,7 +475,7 @@ export function blocDonnees(exercice: ExerciceIdentificationConiques): string[] 
   return blocDonneesC(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceIdentificationConiques, phase: PhaseIdentificationConiques): string {
+export function consigneEcran(exercice: ExerciceIdentificationConiques, phase: PhaseIdentificationConiques): FragmentConsigne[] {
   if (exercice.famille === "A") return exercice.sousType === "centree2Carres" ? consigneEcranA1(exercice, phase) : consigneEcranA2(exercice, phase);
   if (exercice.famille === "B") return consigneEcranB(exercice, phase);
   return consigneEcranC(exercice, phase);
