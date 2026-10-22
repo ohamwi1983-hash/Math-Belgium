@@ -11,12 +11,12 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceLongueurA
  */
 
 function entete(exercice: ExerciceLongueurArc) {
-  return [texte(`${consigneGenerale(exercice)} Données : `), latex(blocDonnees(exercice).join(",\\ "))];
+  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
 }
 
 function construireEnonce(exercice: ExerciceLongueurArc): SectionExercice {
   const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: [texte(consigneEcran(exercice, phase))] })) };
+  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
 }
 
 function construireCorrection(exercice: ExerciceLongueurArc): BlocCorrection[] {

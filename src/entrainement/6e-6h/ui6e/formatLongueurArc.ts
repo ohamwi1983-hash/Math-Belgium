@@ -37,8 +37,30 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
-const FORMULE_LONGUEUR_ARC_TEXTE = "L = ∫[a;b] √(1+f'(x)²) dx";
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const FORMULE_LONGUEUR_ARC_LATEX = "L=\\int_{a}^{b}\\sqrt{1+f'(x)^2}\\,dx";
+
+/** Consigne générale — IDENTIQUE pour les 3 familles (seule la fonction f change), donc UNE SEULE
+ * implémentation partagée plutôt que 3 copies littéralement identiques. */
+const CONSIGNE_GENERALE_COMMUNE: FragmentConsigne[] = [
+  texte("On considère la fonction f définie ci-dessous. On veut calculer la longueur de l'arc de sa courbe entre "),
+  latex("x=a"),
+  texte(" et "),
+  latex("x=b"),
+  texte(", donnée par "),
+  latex(FORMULE_LONGUEUR_ARC_LATEX),
+  texte("."),
+];
 
 /** x^exposant, divisé par `denom` SEULEMENT si `denom≠1` (évite une fraction "sur 1" inutile,
  * ex. n=2 dans la famille A où n−1=1). */
@@ -64,16 +86,26 @@ function formuleFPrimeCarreDeveloppeA(n: number): string {
   return `\\frac{1}{4}\\left(x^{${2 * n}}-2+x^{${-2 * n}}\\right)`;
 }
 
-export function consigneGeneraleA(): string {
-  return `On considère la fonction f définie ci-dessous. On veut calculer la longueur de l'arc de sa courbe entre x=a et x=b, donnée par ${FORMULE_LONGUEUR_ARC_TEXTE}.`;
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return CONSIGNE_GENERALE_COMMUNE;
 }
 export function blocDonneesA(exercice: ExerciceLongueurArcA): string[] {
   return [FORMULE_LONGUEUR_ARC_LATEX, `f(x)=${formuleFA(exercice.n)}`, `a=${exercice.a}\\text{, }b=${exercice.b}`];
 }
-export function consigneEcranA(phase: PhaseLongueurArc): string {
-  if (phase === "aEcran1") return "Calcule f'(x).";
-  if (phase === "aEcran2") return "Calcule 1+f'(x)² et simplifie √(1+f'(x)²), à partir de f'(x) confirmé à l'étape précédente.";
-  return "Calcule la longueur de l'arc L, à partir de la forme simplifiée confirmée à l'étape précédente.";
+export function consigneEcranA(phase: PhaseLongueurArc): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Calcule "), latex("f'(x)"), texte(".")];
+  if (phase === "aEcran2") {
+    return [
+      texte("Calcule "),
+      latex("1+f'(x)^2"),
+      texte(" et simplifie "),
+      latex("\\sqrt{1+f'(x)^2}"),
+      texte(", à partir de "),
+      latex("f'(x)"),
+      texte(" confirmé à l'étape précédente."),
+    ];
+  }
+  return [texte("Calcule la longueur de l'arc L, à partir de la forme simplifiée confirmée à l'étape précédente.")];
 }
 export function etatActuelA(exercice: ExerciceLongueurArcA, phase: PhaseLongueurArc): string[] | null {
   const lignes: string[] = [];
@@ -115,17 +147,39 @@ function formulePrimitiveEnTB(k: number): string {
   return `t+\\dfrac{${k}}{2}\\ln\\left|\\dfrac{t-${k}}{t+${k}}\\right|`;
 }
 
-export function consigneGeneraleB(): string {
-  return `On considère la fonction f définie ci-dessous. On veut calculer la longueur de l'arc de sa courbe entre x=a et x=b, donnée par ${FORMULE_LONGUEUR_ARC_TEXTE}.`;
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return CONSIGNE_GENERALE_COMMUNE;
 }
 export function blocDonneesB(exercice: ExerciceLongueurArcB): string[] {
   return [FORMULE_LONGUEUR_ARC_LATEX, `f(x)=${formuleFB(exercice.k)}`, `a=${racineExacte(exercice.t1 * exercice.t1 - exercice.k * exercice.k)}\\text{, }b=${racineExacte(exercice.t2 * exercice.t2 - exercice.k * exercice.k)}`];
 }
-export function consigneEcranB(phase: PhaseLongueurArc): string {
-  if (phase === "bEcran1") return "Pose t=√(x²+k²) et calcule les 2 valeurs de t correspondant aux bornes x=a et x=b données ci-dessus.";
-  if (phase === "bEcran2") return "Exprime x·dx en fonction de t·dt (dérive t²=x²+k²), puis réécris complètement l'intégrale en fonction de t uniquement.";
-  if (phase === "bEcran3") return "Décompose t²/(t²−k²)=1+k²/(t²−k²) et intègre (fractions simples), à partir de la forme confirmée à l'étape précédente.";
-  return "Évalue la primitive entre les bornes en t confirmées à l'étape 1, à partir de la primitive confirmée à l'étape précédente.";
+export function consigneEcranB(phase: PhaseLongueurArc): FragmentConsigne[] {
+  if (phase === "bEcran1") {
+    return [
+      texte("Pose "),
+      latex("t=\\sqrt{x^2+k^2}"),
+      texte(" et calcule les 2 valeurs de t correspondant aux bornes "),
+      latex("x=a"),
+      texte(" et "),
+      latex("x=b"),
+      texte(" données ci-dessus."),
+    ];
+  }
+  if (phase === "bEcran2") {
+    return [
+      texte("Exprime "),
+      latex("x\\cdot dx"),
+      texte(" en fonction de "),
+      latex("t\\cdot dt"),
+      texte(" (dérive "),
+      latex("t^2=x^2+k^2"),
+      texte("), puis réécris complètement l'intégrale en fonction de t uniquement."),
+    ];
+  }
+  if (phase === "bEcran3") {
+    return [texte("Décompose "), latex("\\dfrac{t^2}{t^2-k^2}=1+\\dfrac{k^2}{t^2-k^2}"), texte(" et intègre (fractions simples), à partir de la forme confirmée à l'étape précédente.")];
+  }
+  return [texte("Évalue la primitive entre les bornes en t confirmées à l'étape 1, à partir de la primitive confirmée à l'étape précédente.")];
 }
 export function etatActuelB(exercice: ExerciceLongueurArcB, phase: PhaseLongueurArc): string[] | null {
   const bornesT = `t_1=${exercice.t1}\\text{, }t_2=${exercice.t2}`;
@@ -161,16 +215,24 @@ export function aideNiveau2B(exercice: ExerciceLongueurArcB, phase: PhaseLongueu
 // Famille C — Cas simple, substitution directe.
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return `On considère la fonction f définie ci-dessous. On veut calculer la longueur de l'arc de sa courbe entre x=a et x=b, donnée par ${FORMULE_LONGUEUR_ARC_TEXTE}.`;
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return CONSIGNE_GENERALE_COMMUNE;
 }
 export function blocDonneesC(exercice: ExerciceLongueurArcC): string[] {
   return [FORMULE_LONGUEUR_ARC_LATEX, `f(x)=x^{\\frac{3}{2}}`, `a=${exercice.a}\\text{, }b=${exercice.b}`];
 }
-export function consigneEcranC(phase: PhaseLongueurArc): string {
-  if (phase === "cEcran1") return "Calcule f'(x), puis 1+f'(x)².";
-  if (phase === "cEcran2") return "Pose une substitution simple (u=1+f'(x)²) et intègre √(1+f'(x)²), à partir de la forme confirmée à l'étape précédente.";
-  return "Évalue la primitive entre les bornes [a;b], à partir de la primitive confirmée à l'étape précédente.";
+export function consigneEcranC(phase: PhaseLongueurArc): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Calcule "), latex("f'(x)"), texte(", puis "), latex("1+f'(x)^2"), texte(".")];
+  if (phase === "cEcran2") {
+    return [
+      texte("Pose une substitution simple ("),
+      latex("u=1+f'(x)^2"),
+      texte(") et intègre "),
+      latex("\\sqrt{1+f'(x)^2}"),
+      texte(", à partir de la forme confirmée à l'étape précédente."),
+    ];
+  }
+  return [texte("Évalue la primitive entre les bornes "), latex("[a;b]"), texte(", à partir de la primitive confirmée à l'étape précédente.")];
 }
 export function etatActuelC(phase: PhaseLongueurArc): string[] | null {
   const lignes: string[] = [];
@@ -199,7 +261,7 @@ export function aideNiveau2C(phase: PhaseLongueurArc): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceLongueurArc): string {
+export function consigneGenerale(exercice: ExerciceLongueurArc): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -221,7 +283,7 @@ export function blocDonnees(exercice: ExerciceLongueurArc): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceLongueurArc, phase: PhaseLongueurArc): string {
+export function consigneEcran(exercice: ExerciceLongueurArc, phase: PhaseLongueurArc): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

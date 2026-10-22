@@ -37,6 +37,16 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: [] };
 
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
   return { type: "texte", label, placeholder, minuscule };
 }
@@ -95,8 +105,8 @@ function equationCanoniqueLatex(e: ExerciceProprietesOptiquesConiques): string {
 // Consigne générale + bloc données — redondants sur CHAQUE écran (convention transversale).
 // ============================================================================
 
-export function consigneGenerale(e: ExerciceProprietesOptiquesConiques): string {
-  return `Une ${LIBELLE_NATURE[e.natureConique].toLowerCase()} possède 2 foyers. Un rayon lumineux émis depuis le foyer F (abscisse négative), vers les abscisses croissantes, se réfléchit sur la courbe. Retrouve son trajet en utilisant la PROPRIÉTÉ FOCALE des coniques — jamais un calcul de tangente.`;
+export function consigneGenerale(e: ExerciceProprietesOptiquesConiques): FragmentConsigne[] {
+  return [texte(`Une ${LIBELLE_NATURE[e.natureConique].toLowerCase()} possède 2 foyers. Un rayon lumineux émis depuis le foyer F (abscisse négative), vers les abscisses croissantes, se réfléchit sur la courbe. Retrouve son trajet en utilisant la PROPRIÉTÉ FOCALE des coniques — jamais un calcul de tangente.`)];
 }
 
 export function blocDonnees(e: ExerciceProprietesOptiquesConiques): string[] {
@@ -107,11 +117,11 @@ export function blocDonnees(e: ExerciceProprietesOptiquesConiques): string[] {
 // Par écran.
 // ============================================================================
 
-export function consigneEcran(_e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): string {
-  if (phase === "ecran1") return "Calcule la distance focale c, puis donne les coordonnées des 2 foyers F (abscisse négative) et F'.";
-  if (phase === "ecran2") return "À partir de F CONFIRMÉ, pose l'équation du rayon incident (pente tan α donnée). Substitue-la dans l'équation de la conique et donne les 2 points d'intersection trouvés.";
-  if (phase === "ecran3") return "Parmi les 2 points CONFIRMÉS, lequel correspond au trajet RÉEL du rayon (celui atteint en premier en s'éloignant de F vers les abscisses croissantes) ?";
-  return "Donne l'équation du rayon réfléchi, en utilisant la propriété focale (jamais un calcul de tangente).";
+export function consigneEcran(_e: ExerciceProprietesOptiquesConiques, phase: PhaseProprietesOptiquesConiques): FragmentConsigne[] {
+  if (phase === "ecran1") return [texte("Calcule la distance focale c, puis donne les coordonnées des 2 foyers F (abscisse négative) et F'.")];
+  if (phase === "ecran2") return [texte("À partir de F CONFIRMÉ, pose l'équation du rayon incident (pente "), latex("\\tan\\alpha"), texte(" donnée). Substitue-la dans l'équation de la conique et donne les 2 points d'intersection trouvés.")];
+  if (phase === "ecran3") return [texte("Parmi les 2 points CONFIRMÉS, lequel correspond au trajet RÉEL du rayon (celui atteint en premier en s'éloignant de F vers les abscisses croissantes) ?")];
+  return [texte("Donne l'équation du rayon réfléchi, en utilisant la propriété focale (jamais un calcul de tangente).")];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-

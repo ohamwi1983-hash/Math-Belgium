@@ -35,6 +35,16 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function champTexte(label: string, placeholder: string): ChampDef {
   return { type: "texte", label, placeholder };
 }
@@ -83,8 +93,8 @@ export function versKatex(expr: string): string {
 // Bloc données — propre à chaque famille (contexte géométrique).
 // ============================================================================
 
-export function consigneGenerale(): string {
-  return "Le paramètre α décrit une famille de droites mobiles (les génératrices). Le lieu cherché est l'ensemble des points d'intersection de 2 génératrices correspondantes, quand α varie. Élimine α algébriquement entre les 2 équations — jamais point par point.";
+export function consigneGenerale(): FragmentConsigne[] {
+  return [texte("Le paramètre α décrit une famille de droites mobiles (les génératrices). Le lieu cherché est l'ensemble des points d'intersection de 2 génératrices correspondantes, quand α varie. Élimine α algébriquement entre les 2 équations — jamais point par point.")];
 }
 
 // **Fragments COURTS, un par ligne** (jamais une phrase française et plusieurs points/symboles
@@ -185,23 +195,23 @@ export function labelVariante(exercice: ExerciceMethodeGeneratrices): string {
 // Écrans 1-5 — STRUCTURE UNIQUE, partagée par les 5 familles (voir en-tête).
 // ============================================================================
 
-export function consigneEcran(exercice: ExerciceMethodeGeneratrices, phase: PhaseMethodeGeneratrices): string {
+export function consigneEcran(exercice: ExerciceMethodeGeneratrices, phase: PhaseMethodeGeneratrices): FragmentConsigne[] {
   switch (phase) {
     case "ecran1":
-      return "Pose les équations des 2 génératrices, en fonction de x, y et α (une équation par génératrice).";
+      return [texte("Pose les équations des 2 génératrices, en fonction de x, y et α (une équation par génératrice).")];
     case "ecran2":
-      return "Élimine α entre les 2 équations CONFIRMÉES de l'étape précédente (technique du produit croisé/déterminant, ou toute manipulation équivalente) — donne le résultat BRUT, non simplifié, en x et y uniquement.";
+      return [texte("Élimine α entre les 2 équations CONFIRMÉES de l'étape précédente (technique du produit croisé/déterminant, ou toute manipulation équivalente) — donne le résultat BRUT, non simplifié, en x et y uniquement.")];
     case "ecran3":
-      return "Factorise complètement le résultat CONFIRMÉ de l'étape précédente (typiquement sous la forme (expression)·(expression)=0).";
+      return [texte("Factorise complètement le résultat CONFIRMÉ de l'étape précédente (typiquement sous la forme "), latex("(\\text{expression})\\cdot(\\text{expression})=0"), texte(").")];
     case "ecran4": {
       if (exercice.morceaux.length === 1) {
-        return "Cette famille ne comporte NI lieu singulier NI lieu parasite — indique simplement le statut de l'unique morceau obtenu.";
+        return [texte("Cette famille ne comporte NI lieu singulier NI lieu parasite — indique simplement le statut de l'unique morceau obtenu.")];
       }
       const notePasDeParasite = exercice.morceaux.every((m) => m.statut !== "parasite") ? " Cette famille ne comporte PAS de lieu parasite — ne cherche pas à en trouver un par réflexe." : "";
-      return `Indique le statut de chaque morceau de l'équation factorisée CONFIRMÉE (singulier : α y coïncide pour les 2 génératrices ; parasite : ne correspond à aucune valeur admissible de α ; propre : fait réellement partie du lieu).${notePasDeParasite}`;
+      return [texte(`Indique le statut de chaque morceau de l'équation factorisée CONFIRMÉE (singulier : α y coïncide pour les 2 génératrices ; parasite : ne correspond à aucune valeur admissible de α ; propre : fait réellement partie du lieu).${notePasDeParasite}`)];
     }
     case "ecran5":
-      return "Décris complètement le lieu propre : donne son équation isolée, puis choisis la restriction correcte (le domaine admissible de α borne-t-il le lieu à un segment, exclut-il un point, ou n'y a-t-il aucune restriction ?).";
+      return [texte("Décris complètement le lieu propre : donne son équation isolée, puis choisis la restriction correcte (le domaine admissible de α borne-t-il le lieu à un segment, exclut-il un point, ou n'y a-t-il aucune restriction ?).")];
   }
 }
 

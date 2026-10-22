@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, ChampDef } from "../ui6e/formatMethodeGeneratrices";
+import type { AideAvecLatex, ChampDef, FragmentConsigne } from "../ui6e/formatMethodeGeneratrices";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -71,7 +72,7 @@ export function EtapeChampsMethodeGeneratrices({ consigneGenerale, blocDonnees, 
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -82,7 +83,9 @@ export function EtapeChampsMethodeGeneratrices({ consigneGenerale, blocDonnees, 
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {champs.map((champ, i) => (champComporteCalcul(champ.placeholder) ? <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} /> : null))}
       {champs.map((champ, i) =>
         champ.type === "choix" ? (

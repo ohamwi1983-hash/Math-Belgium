@@ -11,12 +11,12 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMethodeGe
  */
 
 function entete(exercice: ExerciceMethodeGeneratrices) {
-  return [texte(`${consigneGenerale()} Données : `), latex(blocDonnees(exercice).join(",\\ "))];
+  return [...consigneGenerale(), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
 }
 
 function construireEnonce(exercice: ExerciceMethodeGeneratrices): SectionExercice {
   const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: [texte(consigneEcran(exercice, phase))] })) };
+  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
 }
 
 function construireCorrection(exercice: ExerciceMethodeGeneratrices): BlocCorrection[] {

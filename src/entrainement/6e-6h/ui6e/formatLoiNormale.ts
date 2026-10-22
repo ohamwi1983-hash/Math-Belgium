@@ -49,6 +49,17 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 // ============================================================================
 // Formatage décimal français — voir en-tête de fichier.
 // ============================================================================
@@ -122,15 +133,27 @@ function equationCibleA(e: ExerciceLoiNormaleA): string {
   return e.sousType === "inferieur" ? `P(Z\\le ${formatDecimal(e.z, 2)})=\\,?` : `P(Z\\ge ${formatDecimal(e.z, 2)})=\\,?`;
 }
 
-export function consigneGeneraleA(): string {
-  return "Z suit la loi normale centrée réduite N(0,1). Calcule la probabilité demandée à l'aide de la table Φ (fonction de répartition, Φ(t)=P(Z≤t)).";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("Z suit la loi normale centrée réduite "),
+    latex("\\mathcal{N}(0,1)"),
+    texte(". Calcule la probabilité demandée à l'aide de la table Φ (fonction de répartition, "),
+    latex("\\Phi(t)=P(Z\\leq t)"),
+    texte(")."),
+  ];
 }
 export function blocDonneesA(e: ExerciceLoiNormaleA): string[] {
   return ["Z\\sim\\mathcal{N}(0,1)", equationCibleA(e)];
 }
-export function consigneEcranA(phase: PhaseLoiNormale): string {
-  if (phase === "aEcran1") return "La table Φ ne donne QUE des lectures directes pour une entrée positive. Identifie la transformation nécessaire (directe si la valeur est déjà positive, symétrie sinon) et la valeur positive t à chercher.";
-  return "Calcule la probabilité finale demandée, à partir de la ou des lecture(s) CONFIRMÉE(s) de l'étape précédente.";
+export function consigneEcranA(phase: PhaseLoiNormale): FragmentConsigne[] {
+  if (phase === "aEcran1") {
+    return [
+      texte(
+        "La table Φ ne donne QUE des lectures directes pour une entrée positive. Identifie la transformation nécessaire (directe si la valeur est déjà positive, symétrie sinon) et la valeur positive t à chercher.",
+      ),
+    ];
+  }
+  return [texte("Calcule la probabilité finale demandée, à partir de la ou des lecture(s) CONFIRMÉE(s) de l'étape précédente.")];
 }
 export function etatActuelA(e: ExerciceLoiNormaleA, phase: PhaseLoiNormale): string[] | null {
   if (phase !== "aEcran2") return null;
@@ -181,16 +204,16 @@ function equationCibleB(e: ExerciceLoiNormaleB): string {
   return e.sousType === "inferieur" ? `P(X\\le ${formatDecimal(e.x, 2)})=\\,?` : `P(X\\ge ${formatDecimal(e.x, 2)})=\\,?`;
 }
 
-export function consigneGeneraleB(): string {
-  return "X suit la loi normale N(μ,σ). Standardise puis calcule la probabilité demandée à l'aide de la table Φ.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("X suit la loi normale "), latex("\\mathcal{N}(\\mu,\\sigma)"), texte(". Standardise puis calcule la probabilité demandée à l'aide de la table Φ.")];
 }
 export function blocDonneesB(e: ExerciceLoiNormaleB): string[] {
   return [`X\\sim\\mathcal{N}(${formatDecimal(e.mu, 2)}\\text{ ; }${formatDecimal(e.sigma, 2)})`, equationCibleB(e), ...donneesPopulationB(e.population)];
 }
-export function consigneEcranB(phase: PhaseLoiNormale): string {
-  if (phase === "bEcran1") return "Standardise chaque borne : z=(x−μ)/σ.";
-  if (phase === "bEcran2") return "Calcule la probabilité demandée à partir du/des z CONFIRMÉ(s) (même logique que pour Z centrée réduite).";
-  return "Multiplie la probabilité CONFIRMÉE par la taille de la population, puis arrondis à l'entier le plus proche.";
+export function consigneEcranB(phase: PhaseLoiNormale): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Standardise chaque borne : "), latex("z=\\dfrac{x-\\mu}{\\sigma}"), texte(".")];
+  if (phase === "bEcran2") return [texte("Calcule la probabilité demandée à partir du/des z CONFIRMÉ(s) (même logique que pour Z centrée réduite).")];
+  return [texte("Multiplie la probabilité CONFIRMÉE par la taille de la population, puis arrondis à l'entier le plus proche.")];
 }
 /** Ligne(s) confirmée(s) à l'écran 1 (standardisation) — réutilisée(s) par tout écran ultérieur
  * (correctif transversal accumulation, voir CLAUDE.md/`docs/historique-6e.md`). */
@@ -239,17 +262,23 @@ function equationCibleDepartC(sousType: SousTypeLoiNormaleC, p: number, k?: numb
   return `P(t\\le Z\\le ${formatDecimal(k as number, 2)})=${formatDecimal(p, 4)}`;
 }
 
-export function consigneGeneraleC(): string {
-  return "Z suit la loi normale centrée réduite N(0,1). Détermine t à partir de la probabilité donnée, en utilisant la table Φ À L'ENVERS.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Z suit la loi normale centrée réduite "), latex("\\mathcal{N}(0,1)"), texte(". Détermine t à partir de la probabilité donnée, en utilisant la table Φ À L'ENVERS.")];
 }
 export function blocDonneesC(e: ExerciceLoiNormaleC): string[] {
   const donnees = ["Z\\sim\\mathcal{N}(0,1)", equationCibleDepartC(e.sousType, e.p, e.sousType === "encadree" ? e.k : undefined)];
   if (e.sousType === "encadree") donnees.push(`\\Phi(${formatDecimal(e.k, 2)})\\approx ${formatDecimal(Phi(e.k), 4)}\\text{ (donnée)}`);
   return donnees;
 }
-export function consigneEcranC(phase: PhaseLoiNormale): string {
-  if (phase === "cEcran1") return "La table Φ ne donne DIRECTEMENT que Φ(t)=P(Z≤t). Identifie la transformation nécessaire pour adapter la probabilité donnée à cette forme, et calcule la valeur cible.";
-  return "Lis la table À L'ENVERS : trouve t tel que Φ(t) égale la valeur cible CONFIRMÉE à l'étape précédente.";
+export function consigneEcranC(phase: PhaseLoiNormale): FragmentConsigne[] {
+  if (phase === "cEcran1") {
+    return [
+      texte("La table Φ ne donne DIRECTEMENT que "),
+      latex("\\Phi(t)=P(Z\\leq t)"),
+      texte(". Identifie la transformation nécessaire pour adapter la probabilité donnée à cette forme, et calcule la valeur cible."),
+    ];
+  }
+  return [texte("Lis la table À L'ENVERS : trouve t tel que "), latex("\\Phi(t)"), texte(" égale la valeur cible CONFIRMÉE à l'étape précédente.")];
 }
 export function etatActuelC(e: ExerciceLoiNormaleC, phase: PhaseLoiNormale): string[] | null {
   if (phase !== "cEcran2") return null;
@@ -283,8 +312,8 @@ function equationCibleDepartD(e: ExerciceLoiNormaleD): string {
   return `P(a\\le X\\le ${formatDecimal(e.b, 2)})=${formatDecimal(e.p, 4)}`;
 }
 
-export function consigneGeneraleD(): string {
-  return "X suit la loi normale N(μ,σ). Détermine a à partir de la probabilité donnée : reformule pour la table, lis à l'envers, puis dé-standardise.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("X suit la loi normale "), latex("\\mathcal{N}(\\mu,\\sigma)"), texte(". Détermine a à partir de la probabilité donnée : reformule pour la table, lis à l'envers, puis dé-standardise.")];
 }
 export function blocDonneesD(e: ExerciceLoiNormaleD): string[] {
   const donnees = [`X\\sim\\mathcal{N}(${formatDecimal(e.mu, 2)}\\text{ ; }${formatDecimal(e.sigma, 2)})`, equationCibleDepartD(e)];
@@ -297,10 +326,12 @@ export function blocDonneesD(e: ExerciceLoiNormaleD): string[] {
   }
   return donnees;
 }
-export function consigneEcranD(phase: PhaseLoiNormale): string {
-  if (phase === "dEcran1") return "Comme pour Z centrée réduite : identifie la transformation nécessaire pour adapter la probabilité donnée à une lecture directe de la table, et calcule la valeur cible.";
-  if (phase === "dEcran2") return "Lis la table À L'ENVERS : trouve z tel que Φ(z) égale la valeur cible CONFIRMÉE.";
-  return "Dé-standardise à partir du z CONFIRMÉ : a=μ+z·σ.";
+export function consigneEcranD(phase: PhaseLoiNormale): FragmentConsigne[] {
+  if (phase === "dEcran1") {
+    return [texte("Comme pour Z centrée réduite : identifie la transformation nécessaire pour adapter la probabilité donnée à une lecture directe de la table, et calcule la valeur cible.")];
+  }
+  if (phase === "dEcran2") return [texte("Lis la table À L'ENVERS : trouve z tel que "), latex("\\Phi(z)"), texte(" égale la valeur cible CONFIRMÉE.")];
+  return [texte("Dé-standardise à partir du z CONFIRMÉ : "), latex("a=\\mu+z\\cdot\\sigma"), texte(".")];
 }
 /** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
  * 6e.md`) : `dEcran3` omettait Φ(z) confirmé à `dEcran1`, ne montrant que z de `dEcran2`. Plus
@@ -360,9 +391,13 @@ function donneesPopulationE(population: number | undefined): string[] {
  * apparaissait tronqué des deux côtés, `.equation-box` scrollant vers son centre par défaut).
  * `blocDonneesE` ci-dessous reste à des fragments COURTS uniquement (pourcentage, intervalle),
  * jamais une phrase entière dans un seul bloc KaTeX. */
-export function consigneGeneraleE(e: ExerciceLoiNormaleE): string {
+export function consigneGeneraleE(e: ExerciceLoiNormaleE): FragmentConsigne[] {
   const pourcentageTexte = formatDecimal(POURCENTAGE_PAR_K[e.k] * 100, 1).replace("{,}", ",");
-  return `La règle empirique (68-95-99,7) donne le pourcentage de valeurs situées dans un intervalle centré sur μ — environ ${pourcentageTexte}% dans l'intervalle affiché ci-dessous. Retrouve μ et σ, puis calcule la probabilité demandée.`;
+  return [
+    texte(
+      `La règle empirique (68-95-99,7) donne le pourcentage de valeurs situées dans un intervalle centré sur μ — environ ${pourcentageTexte}% dans l'intervalle affiché ci-dessous. Retrouve μ et σ, puis calcule la probabilité demandée.`,
+    ),
+  ];
 }
 export function blocDonneesE(e: ExerciceLoiNormaleE): string[] {
   const { basse, haute } = bornesE(e.mu, e.sigma, e.k);
@@ -373,13 +408,15 @@ export function blocDonneesE(e: ExerciceLoiNormaleE): string[] {
   // `consigneGeneraleE`) : le pourcentage, puis l'intervalle.
   return [`${pourcentageL}\\%`, `[${basseL}\\text{ ; }${hauteL}]`, ...donneesPopulationE(e.population)];
 }
-export function consigneEcranE(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): string {
-  if (phase === "eEcran1") return "Identifie μ (milieu de l'intervalle) et σ (demi-largeur divisée par le nombre d'écarts-types correspondant au pourcentage donné).";
+export function consigneEcranE(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): FragmentConsigne[] {
+  if (phase === "eEcran1") {
+    return [texte("Identifie μ (milieu de l'intervalle) et σ (demi-largeur divisée par le nombre d'écarts-types correspondant au pourcentage donné).")];
+  }
   if (phase === "eEcran2") {
     const { basse, haute } = bornesE(e.mu, e.sigma, e.k);
-    return `Calcule la probabilité COMPLÉMENTAIRE (hors intervalle), en tenant compte du nombre de côtés concernés par la question. ${libelleQuestionE(e.unCote, e.coteDemande, basse, haute)}`;
+    return [texte(`Calcule la probabilité COMPLÉMENTAIRE (hors intervalle), en tenant compte du nombre de côtés concernés par la question. ${libelleQuestionE(e.unCote, e.coteDemande, basse, haute)}`)];
   }
-  return "Multiplie la probabilité CONFIRMÉE par la taille de la population, puis arrondis à l'entier le plus proche.";
+  return [texte("Multiplie la probabilité CONFIRMÉE par la taille de la population, puis arrondis à l'entier le plus proche.")];
 }
 /** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
  * 6e.md`) : `eEcran3` omettait μ/σ confirmés à `eEcran1`, ne montrant que la probabilité de
@@ -410,7 +447,7 @@ export function aideNiveau2E(e: ExerciceLoiNormaleE, phase: PhaseLoiNormale): Ai
 // Dispatch commun (mirroir 6gen37).
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceLoiNormale): string {
+export function consigneGenerale(exercice: ExerciceLoiNormale): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -440,7 +477,7 @@ export function blocDonnees(exercice: ExerciceLoiNormale): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): string {
+export function consigneEcran(exercice: ExerciceLoiNormale, phase: PhaseLoiNormale): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

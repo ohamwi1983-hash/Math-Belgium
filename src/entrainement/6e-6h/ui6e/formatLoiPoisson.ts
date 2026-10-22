@@ -49,6 +49,17 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`,
+ * rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
   return { type: "texte", label, placeholder, minuscule };
 }
@@ -133,18 +144,28 @@ const LIBELLE_STRATEGIE: Record<StrategiePoissonB, string> = {
 
 const CONDITIONS_APPROXIMATION = ["Le nombre d'épreuves n est au moins égal à 30 (n≥30).", "La probabilité de succès p est au plus égale à 0,1 (p≤0,1).", "Le produit n·p est au plus égal à 15 (n·p≤15)."];
 
-export function consigneGeneraleA(): string {
-  return "Un contexte binomial B(n,p) est donné, avec n grand et p petit. Vérifie les conditions d'approximation par une loi de Poisson, calcule λ, puis calcule la probabilité demandée.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("Un contexte binomial "),
+    latex("B(n,p)"),
+    texte(" est donné, avec n grand et p petit. Vérifie les conditions d'approximation par une loi de Poisson, calcule λ, puis calcule la probabilité demandée."),
+  ];
 }
 
 export function blocDonneesA(e: ExerciceLoiPoissonA): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatFractionPA(e.p)}`, `\\text{Demandé : }P(X=${e.k})`];
 }
 
-export function consigneEcranA(phase: PhaseLoiPoisson): string {
-  if (phase === "aEcran1") return "Vérifie si chacune des 3 conditions suivantes est remplie dans ce contexte.";
-  if (phase === "aEcran2") return "Calcule la valeur de λ=n·p, la moyenne théorique du nombre d'occurrences.";
-  return "Calcule P(X=k) à l'aide de la formule de Poisson P(X=k)=e^(-λ)·λ^k/k!, avec la valeur de λ CONFIRMÉE à l'étape précédente.";
+export function consigneEcranA(phase: PhaseLoiPoisson): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Vérifie si chacune des 3 conditions suivantes est remplie dans ce contexte.")];
+  if (phase === "aEcran2") return [texte("Calcule la valeur de "), latex("\\lambda=n\\cdot p"), texte(", la moyenne théorique du nombre d'occurrences.")];
+  return [
+    texte("Calcule "),
+    latex("P(X=k)"),
+    texte(" à l'aide de la formule de Poisson "),
+    latex("P(X=k)=e^{-\\lambda}\\cdot\\dfrac{\\lambda^k}{k!}"),
+    texte(", avec la valeur de λ CONFIRMÉE à l'étape précédente."),
+  ];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal, voir CLAUDE.md/`docs/historique-
@@ -214,20 +235,38 @@ function estEcranFinalSepareB(phase: PhaseLoiPoisson): boolean {
   return phase === "bSommeEcran3" || phase === "bComplementEcran3";
 }
 
-export function consigneGeneraleB(): string {
-  return "Un taux moyen d'occurrence est donné pour une échelle de référence. Détermine λ adapté à la question posée, identifie la stratégie de calcul adaptée, puis calcule la probabilité demandée à l'aide de la loi de Poisson.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [
+    texte(
+      "Un taux moyen d'occurrence est donné pour une échelle de référence. Détermine λ adapté à la question posée, identifie la stratégie de calcul adaptée, puis calcule la probabilité demandée à l'aide de la loi de Poisson.",
+    ),
+  ];
 }
 
 export function blocDonneesB(e: ExerciceLoiPoissonB): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texteTauxBase(e.tauxBase)), ...decouperEnFragmentsTexte(e.contexte.texteCible(e.valeurCible)), `\\text{Demandé : }${formatQuestionMathB(e)}`];
 }
 
-export function consigneEcranB(phase: PhaseLoiPoisson): string {
-  if (estEcranLambdaB(phase)) return "Détermine la valeur de λ adaptée à la question posée : ajuste le taux de base donné à la bonne échelle (durée ou effectif demandé), ne le recopie jamais tel quel.";
-  if (phase === "bTermeUniqueEcranFinal") return "Identifie la stratégie de calcul, indique le nombre d'occurrences k concerné, puis calcule directement la probabilité demandée à l'aide de la formule de Poisson P(X=k)=e^(-λ)·λ^k/k!.";
-  if (estEcranIdentificationB(phase)) return "Identifie la stratégie de calcul adaptée à la question posée, puis indique le(s) nombre(s) d'occurrences pour lesquels il faut calculer P(X=i).";
-  if (phase === "bSommeEcran3") return "Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.";
-  return "Calcule 1 moins la somme des termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.";
+export function consigneEcranB(phase: PhaseLoiPoisson): FragmentConsigne[] {
+  if (estEcranLambdaB(phase)) {
+    return [texte("Détermine la valeur de λ adaptée à la question posée : ajuste le taux de base donné à la bonne échelle (durée ou effectif demandé), ne le recopie jamais tel quel.")];
+  }
+  if (phase === "bTermeUniqueEcranFinal") {
+    return [
+      texte("Identifie la stratégie de calcul, indique le nombre d'occurrences k concerné, puis calcule directement la probabilité demandée à l'aide de la formule de Poisson "),
+      latex("P(X=k)=e^{-\\lambda}\\cdot\\dfrac{\\lambda^k}{k!}"),
+      texte("."),
+    ];
+  }
+  if (estEcranIdentificationB(phase)) {
+    return [
+      texte("Identifie la stratégie de calcul adaptée à la question posée, puis indique le(s) nombre(s) d'occurrences pour lesquels il faut calculer "),
+      latex("P(X=i)"),
+      texte("."),
+    ];
+  }
+  if (phase === "bSommeEcran3") return [texte("Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.")];
+  return [texte("Calcule 1 moins la somme des termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.")];
 }
 
 export function etatActuelB(e: ExerciceLoiPoissonB, phase: PhaseLoiPoisson): string[] | null {
@@ -298,7 +337,7 @@ export function aideNiveau2B(e: ExerciceLoiPoissonB, phase: PhaseLoiPoisson): Ai
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceLoiPoisson): string {
+export function consigneGenerale(exercice: ExerciceLoiPoisson): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneGeneraleA() : consigneGeneraleB();
 }
 
@@ -306,7 +345,7 @@ export function blocDonnees(exercice: ExerciceLoiPoisson): string[] {
   return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): string {
+export function consigneEcran(exercice: ExerciceLoiPoisson, phase: PhaseLoiPoisson): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneEcranA(phase) : consigneEcranB(phase);
 }
 

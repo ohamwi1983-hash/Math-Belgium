@@ -13,13 +13,13 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExercicePropriete
  */
 
 function entete(exercice: ExerciceProprietesOptiquesConiques) {
-  return [texte(`${consigneGenerale(exercice)} Données : `), latex(blocDonnees(exercice).join(",\\ "))];
+  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
 }
 
 function construireEnonce(exercice: ExerciceProprietesOptiquesConiques): SectionExercice {
   return {
     enteteFragments: entete(exercice),
-    questions: TOUTES_LES_PHASES.map((phase) => ({ consigne: [texte(consigneEcran(exercice, phase))] })),
+    questions: TOUTES_LES_PHASES.map((phase) => ({ consigne: consigneEcran(exercice, phase) })),
   };
 }
 
