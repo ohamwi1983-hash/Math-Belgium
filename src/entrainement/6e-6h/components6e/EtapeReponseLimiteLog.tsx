@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseLimiteLog } from "../moteur6e/verificationLimitesLogarithmiques";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesLogarithmiques";
+import type { FragmentConsigne } from "../ui6e/formatLimitesLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -18,7 +20,7 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   /** `null` sur le tout premier écran de chaque famille (rien à rappeler) — voir
    * `ui6e/formatLimitesLogarithmiques.ts::etatActuel`. Toujours non-`null` ici (cet écran n'est
@@ -80,7 +82,9 @@ export function EtapeReponseLimiteLog({ consigneEcran, enonceLatex, etatActuel, 
           </div>
         </div>
       )}
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-grid-compact">
         {optionsCategorielles.map((option) => (
           <button key={option} type="button" className={`btn ${statut === option ? "toggle-active" : ""} ${montrerErreurs && statut === option ? "is-erronee" : ""}`} onClick={() => setStatut(option)}>

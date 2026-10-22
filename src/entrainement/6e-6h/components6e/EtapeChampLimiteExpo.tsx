@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatLimitesExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -13,7 +15,7 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   placeholder: string;
   aideNiveau1: AideAvecLatex;
@@ -52,7 +54,9 @@ export function EtapeChampLimiteExpo({ consigneEcran, enonceLatex, placeholder, 
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={texte} />
       <div className="field">
         <input type="text" className={`text-input ${montrerErreurs ? "is-erronee" : ""}`} value={texte} placeholder={placeholder} onChange={(e) => setTexte(e.target.value)} />

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
+import type { FragmentConsigne } from "../ui6e/formatLogarithmesProblemes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -12,9 +14,9 @@ interface AideAvecLatex {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Libellés LaTeX des 2 champs (ex. "a=", "b=") — ORDONNÉS, jamais interchangeables. */
   labelChamp1: string;
   labelChamp2: string;
@@ -50,7 +52,7 @@ export function EtapeDeuxValeursLogProblemes({ consigneGenerale, blocDonnees, co
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -61,7 +63,9 @@ export function EtapeDeuxValeursLogProblemes({ consigneGenerale, blocDonnees, co
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <ApercuExpressionLatex texte={texte1} label={labelChamp1} />
       <div className="field-row">
         <p className="field-label field-label-minuscule">

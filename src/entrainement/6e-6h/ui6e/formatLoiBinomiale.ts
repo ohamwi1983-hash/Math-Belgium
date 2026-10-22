@@ -47,6 +47,19 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Fragment de consigne mixant prose française et LaTeX inline — jamais de phrase française
+ * entière passée à KaTeX (piège documenté, "libellé français brut en mode maths"). Rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
@@ -147,17 +160,17 @@ const CONDITIONS_BERNOULLI = (labelSucces: string): string[] => [
   "La probabilité de succès reste constante d'une épreuve à l'autre.",
 ];
 
-export function consigneGeneraleA(): string {
-  return "Un contexte décrit une répétition d'épreuves. Identifie le nombre d'épreuves n et la probabilité de succès p, puis vérifie que les conditions du schéma de Bernoulli répété sont réunies.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("Un contexte décrit une répétition d'épreuves. Identifie le nombre d'épreuves n et la probabilité de succès p, puis vérifie que les conditions du schéma de Bernoulli répété sont réunies.")];
 }
 
 export function blocDonneesA(e: ExerciceLoiBinomialeA): string[] {
   return decouperEnFragmentsTexte(e.contexte.texteTemplate(e.n, e.p));
 }
 
-export function consigneEcranA(phase: PhaseLoiBinomiale): string {
-  if (phase === "aEcran1") return "Identifie le nombre d'épreuves n et la probabilité de succès p décrits dans l'énoncé.";
-  return "Vérifie si chacune des 4 conditions suivantes est remplie dans ce contexte.";
+export function consigneEcranA(phase: PhaseLoiBinomiale): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Identifie le nombre d'épreuves n et la probabilité de succès p décrits dans l'énoncé.")];
+  return [texte("Vérifie si chacune des 4 conditions suivantes est remplie dans ce contexte.")];
 }
 
 export function etatActuelA(e: ExerciceLoiBinomialeA, phase: PhaseLoiBinomiale): string[] | null {
@@ -243,19 +256,41 @@ function estEsperanceB(phase: PhaseLoiBinomiale): boolean {
   return phase === "bTermeUniqueEsperance" || phase === "bSommeEsperance" || phase === "bComplementEsperance";
 }
 
-export function consigneGeneraleB(): string {
-  return "n épreuves indépendantes sont répétées, chacune avec la même probabilité de succès p. Identifie la stratégie de calcul adaptée à la question, calcule la probabilité demandée, puis calcule le nombre moyen de succès attendu.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("n épreuves indépendantes sont répétées, chacune avec la même probabilité de succès p. Identifie la stratégie de calcul adaptée à la question, calcule la probabilité demandée, puis calcule le nombre moyen de succès attendu.")];
 }
 
 export function blocDonneesB(e: ExerciceLoiBinomialeB): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatFraction(e.p)}`, `\\text{Demandé : }${formatQuestionMathB(e)}`, ...decouperEnFragmentsTexte(formatQuestionQualificatifB(e))];
 }
 
-export function consigneEcranB(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale): string {
-  if (estEcran1B(phase)) return "Identifie la stratégie de calcul (un seul terme, une somme de plusieurs termes, ou un complément), puis indique le(s) nombre(s) de succès k pour lesquels il faut calculer P(X=k).";
-  if (estEcran2B(phase)) return "Calcule la valeur de chaque terme P(X=k) identifié à l'étape précédente, à l'aide de la formule C(n,k)·p^k·(1-p)^(n-k).";
-  if (estEcran3B(phase)) return e.strategie === "somme" ? "Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée." : "Calcule 1 moins le terme CONFIRMÉ de l'étape précédente pour obtenir la probabilité demandée.";
-  return "Calcule l'espérance E(X)=n·p, puis choisis l'interprétation correcte de cette valeur.";
+export function consigneEcranB(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale): FragmentConsigne[] {
+  if (estEcran1B(phase)) {
+    return [
+      texte("Identifie la stratégie de calcul (un seul terme, une somme de plusieurs termes, ou un complément), puis indique le(s) nombre(s) de succès k pour lesquels il faut calculer "),
+      latex("P(X=k)"),
+      texte("."),
+    ];
+  }
+  if (estEcran2B(phase)) {
+    return [
+      texte("Calcule la valeur de chaque terme "),
+      latex("P(X=k)"),
+      texte(" identifié à l'étape précédente, à l'aide de la formule "),
+      latex("C(n,k)\\cdot p^k\\cdot(1-p)^{n-k}"),
+      texte("."),
+    ];
+  }
+  if (estEcran3B(phase)) {
+    return [
+      texte(
+        e.strategie === "somme"
+          ? "Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée."
+          : "Calcule 1 moins le terme CONFIRMÉ de l'étape précédente pour obtenir la probabilité demandée.",
+      ),
+    ];
+  }
+  return [texte("Calcule l'espérance "), latex("E(X)=n\\cdot p"), texte(", puis choisis l'interprétation correcte de cette valeur.")];
 }
 
 /** Lignes confirmées à l'écran 1 (stratégie + termes identifiés) — réutilisées par tout écran
@@ -348,18 +383,22 @@ export function aideNiveau2B(e: ExerciceLoiBinomialeB, phase: PhaseLoiBinomiale)
 // Famille C — Trouver n via logarithme, "au moins 1 succès".
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "Une épreuve est répétée n fois, indépendamment, avec une probabilité p de succès à chaque fois. Détermine le nombre minimal n de répétitions pour que la probabilité d'obtenir au moins un succès dépasse le seuil donné.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    texte(
+      "Une épreuve est répétée n fois, indépendamment, avec une probabilité p de succès à chaque fois. Détermine le nombre minimal n de répétitions pour que la probabilité d'obtenir au moins un succès dépasse le seuil donné.",
+    ),
+  ];
 }
 
 export function blocDonneesC(e: ExerciceLoiBinomialeC): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texte), `p=${formatFraction(e.p)}`, `\\text{Seuil : }${formatFraction(e.seuil)}`];
 }
 
-export function consigneEcranC(phase: PhaseLoiBinomiale): string {
-  if (phase === "cEcran1") return "Pose l'inéquation correspondant à « P(au moins 1 succès) > seuil », en fonction de n.";
-  if (phase === "cEcran2") return "Isole (1−p)ⁿ dans l'inéquation CONFIRMÉE de l'étape précédente.";
-  return "Résous l'inéquation CONFIRMÉE pour trouver n (utilise le logarithme), puis arrondis au nombre entier supérieur pour obtenir le nombre minimal d'épreuves.";
+export function consigneEcranC(phase: PhaseLoiBinomiale): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Pose l'inéquation correspondant à « P(au moins 1 succès) > seuil », en fonction de n.")];
+  if (phase === "cEcran2") return [texte("Isole "), latex("(1-p)^n"), texte(" dans l'inéquation CONFIRMÉE de l'étape précédente.")];
+  return [texte("Résous l'inéquation CONFIRMÉE pour trouver n (utilise le logarithme), puis arrondis au nombre entier supérieur pour obtenir le nombre minimal d'épreuves.")];
 }
 
 function formatInequationPoseeC(e: ExerciceLoiBinomialeC): string {
@@ -420,7 +459,7 @@ export function aideNiveau2C(e: ExerciceLoiBinomialeC, phase: PhaseLoiBinomiale)
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceLoiBinomiale): string {
+export function consigneGenerale(exercice: ExerciceLoiBinomiale): FragmentConsigne[] {
   if (exercice.famille === "A") return consigneGeneraleA();
   if (exercice.famille === "B") return consigneGeneraleB();
   return consigneGeneraleC();
@@ -432,7 +471,7 @@ export function blocDonnees(exercice: ExerciceLoiBinomiale): string[] {
   return blocDonneesC(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): string {
+export function consigneEcran(exercice: ExerciceLoiBinomiale, phase: PhaseLoiBinomiale): FragmentConsigne[] {
   if (exercice.famille === "A") return consigneEcranA(phase);
   if (exercice.famille === "B") return consigneEcranB(exercice, phase);
   return consigneEcranC(phase);

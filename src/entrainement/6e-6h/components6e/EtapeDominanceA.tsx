@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { CategorieCroissance } from "../core6e/limitesLogarithmiques.types";
 import type { ReponseDominanceA } from "../moteur6e/verificationLimitesLogarithmiques";
 import { CONSIGNE_GENERALE, formatCategorieLabel } from "../ui6e/formatLimitesLogarithmiques";
+import type { FragmentConsigne } from "../ui6e/formatLimitesLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -16,7 +18,7 @@ interface AideAvecLatex {
 const OPTIONS: CategorieCroissance[] = ["log", "polynome", "exponentielle"];
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -72,7 +74,9 @@ export function EtapeDominanceA({ consigneEcran, enonceLatex, aideNiveau1, aideN
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <GroupeCategorie label="Numérateur — terme dominant" valeur={numerateur} erreur={montrerErreurs} onChange={setNumerateur} />
       <GroupeCategorie label="Dénominateur — terme dominant" valeur={denominateur} erreur={montrerErreurs} onChange={setDenominateur} />
       {niveauAide >= 1 && (

@@ -35,6 +35,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
+ * via `components/RenduFragments.tsx`. Noms `fragTexte`/`fragLatex` (pas `texte`/`latex`) pour ne
+ * pas entrer en collision avec `texte()` ci-dessous, qui construit un fragment `\text{...}` pour un
+ * contexte KaTeX déjà en mode maths (récapitulatif), un besoin différent. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+function fragTexte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function fragLatex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string): ChampDef {
@@ -80,8 +92,8 @@ function constanteSigne(c: number): string {
 // Famille A — Lieux définis par une équation à valeurs absolues.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "Le lieu des points M(x;y) vérifiant l'équation à valeurs absolues donnée se détermine en distinguant les cas selon le signe du contenu de chaque valeur absolue.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [fragTexte("Le lieu des points M(x;y) vérifiant l'équation à valeurs absolues donnée se détermine en distinguant les cas selon le signe du contenu de chaque valeur absolue.")];
 }
 
 function labelCasAbsolu(a: number, b: number): string {
@@ -94,10 +106,10 @@ export function blocDonneesA(e: ExerciceLieuxA): string[] {
   return [`|x${constanteSigne(-e.p)}|${signe}|y${constanteSigne(-e.q)}| = ${e.k}`];
 }
 
-export function consigneEcranA(phase: PhaseLieuxGeometriquesParametres): string {
-  if (phase.endsWith("Ecran1")) return "Combien de cas faut-il distinguer, selon le(s) signe(s) du contenu de la (ou des) valeur(s) absolue(s) ?";
-  if (phase.endsWith("Ecran2")) return "Résous chaque cas identifié : complète la constante de l'équation obtenue dans chaque cas.";
-  return "En annulant tour à tour chaque valeur absolue (cas CONFIRMÉS de l'étape précédente), donne les 4 sommets du losange.";
+export function consigneEcranA(phase: PhaseLieuxGeometriquesParametres): FragmentConsigne[] {
+  if (phase.endsWith("Ecran1")) return [fragTexte("Combien de cas faut-il distinguer, selon le(s) signe(s) du contenu de la (ou des) valeur(s) absolue(s) ?")];
+  if (phase.endsWith("Ecran2")) return [fragTexte("Résous chaque cas identifié : complète la constante de l'équation obtenue dans chaque cas.")];
+  return [fragTexte("En annulant tour à tour chaque valeur absolue (cas CONFIRMÉS de l'étape précédente), donne les 4 sommets du losange.")];
 }
 
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `aLosangeEcran3` ne montrait
@@ -153,8 +165,8 @@ const LABEL_CONFIG_B: Record<ExerciceLieuxB["sousType"], string[]> = {
   seuilCarre: ["Somme des carrés", "des distances aux 4", "côtés d'un carré = k"],
 };
 
-export function consigneGeneraleB(): string {
-  return "Détermine la nature du lieu des points M vérifiant la condition de distance au carré donnée. Certains sous-types dépendent d'un seuil critique sur k, d'autres jamais — identifie lequel avant de conclure.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [fragTexte("Détermine la nature du lieu des points M vérifiant la condition de distance au carré donnée. Certains sous-types dépendent d'un seuil critique sur k, d'autres jamais — identifie lequel avant de conclure.")];
 }
 
 export function blocDonneesB(e: ExerciceLieuxB): string[] {
@@ -175,15 +187,15 @@ export function blocDonneesB(e: ExerciceLieuxB): string[] {
   }
 }
 
-export function consigneEcranB(e: ExerciceLieuxB, phase: PhaseLieuxGeometriquesParametres): string {
-  if (phase.endsWith("Ecran1")) return "Pose l'expression algébrique de la condition en x, y : identifie la (les) quantité(s) obtenue(s) en développant chaque distance élevée au carré.";
-  if (phase.endsWith("Ecran2")) return "Développe et simplifie la condition (fais apparaître, quand c'est pertinent, la forme X²+Y²=… pour un cercle centré à l'origine).";
+export function consigneEcranB(e: ExerciceLieuxB, phase: PhaseLieuxGeometriquesParametres): FragmentConsigne[] {
+  if (phase.endsWith("Ecran1")) return [fragTexte("Pose l'expression algébrique de la condition en x, y : identifie la (les) quantité(s) obtenue(s) en développant chaque distance élevée au carré.")];
+  if (phase.endsWith("Ecran2")) return [fragTexte("Développe et simplifie la condition (fais apparaître, quand c'est pertinent, la forme "), fragLatex("X^2+Y^2=\\ldots"), fragTexte(" pour un cercle centré à l'origine).")];
   if (phase.endsWith("Ecran3")) {
-    if (e.sousType === "apollonius") return "Le rapport k vaut-il exactement 1, ou non ?";
-    if (e.sousType === "seuil2Points" || e.sousType === "seuilCarre") return "Détermine le seuil critique (à partir de l'étape précédente, confirmé), puis compare k à ce seuil pour identifier le régime.";
-    return "Ce sous-type nécessite-t-il de comparer k à un seuil critique avant de conclure ?";
+    if (e.sousType === "apollonius") return [fragTexte("Le rapport k vaut-il exactement 1, ou non ?")];
+    if (e.sousType === "seuil2Points" || e.sousType === "seuilCarre") return [fragTexte("Détermine le seuil critique (à partir de l'étape précédente, confirmé), puis compare k à ce seuil pour identifier le régime.")];
+    return [fragTexte("Ce sous-type nécessite-t-il de comparer k à un seuil critique avant de conclure ?")];
   }
-  return "Donne la nature finale du lieu (à partir du régime confirmé) et son équation complète (ou son statut ∅/point).";
+  return [fragTexte("Donne la nature finale du lieu (à partir du régime confirmé) et son équation complète (ou son statut ∅/point).")];
 }
 
 // Accumulation (correctif transversal — le bloc "état actuel" doit lister TOUTES les réponses
@@ -362,15 +374,15 @@ export function aideNiveau2B(e: ExerciceLieuxB, phase: PhaseLieuxGeometriquesPar
 // Famille C — Cercle depuis une équation quadratique.
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "Regroupe les termes en x et en y séparément, divise par le coefficient commun de x² et y², puis complète le carré pour identifier le cercle.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [fragTexte("Regroupe les termes en x et en y séparément, divise par le coefficient commun de x² et y², puis complète le carré pour identifier le cercle.")];
 }
 export function blocDonneesC(e: ExerciceLieuxC): string[] {
   return [`${e.m > 1 ? e.m : ""}x^2+${e.m > 1 ? e.m : ""}y^2${termeSigne(false, e.D, "x")}${termeSigne(false, e.E, "y")}${constanteSigne(e.F)}=0`];
 }
-export function consigneEcranC(phase: PhaseLieuxGeometriquesParametres): string {
-  if (phase === "cEcran1") return "Complète le carré : donne h, k' (valeurs ajoutées dans chaque carré) et R (rayon au carré), sous la forme (x+h)²+(y+k')²=R.";
-  return "Identifie le centre et le rayon du cercle (à partir de la forme confirmée).";
+export function consigneEcranC(phase: PhaseLieuxGeometriquesParametres): FragmentConsigne[] {
+  if (phase === "cEcran1") return [fragTexte("Complète le carré : donne h, k' (valeurs ajoutées dans chaque carré) et R (rayon au carré), sous la forme "), fragLatex("(x+h)^2+(y+k')^2=R"), fragTexte(".")];
+  return [fragTexte("Identifie le centre et le rayon du cercle (à partir de la forme confirmée).")];
 }
 export function etatActuelC(e: ExerciceLieuxC, phase: PhaseLieuxGeometriquesParametres): string[] | null {
   if (phase === "cEcran2") return [`(x${constanteSigne(e.h)})^2+(y${constanteSigne(e.kPrime)})^2=${e.R}\\text{ (confirmé)}`];
@@ -400,18 +412,18 @@ const OPTIONS_METHODE_D: OptionChoix[] = [
   { valeur: "ratio", label: "Reconnaître un rapport qui élimine directement t" },
 ];
 
-export function consigneGeneraleD(): string {
-  return "Le point M(x;y) est défini par 2 expressions paramétrées par t. Identifie la méthode d'élimination adaptée, puis élimine t pour obtenir l'équation cartésienne du lieu.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [fragTexte("Le point M(x;y) est défini par 2 expressions paramétrées par t. Identifie la méthode d'élimination adaptée, puis élimine t pour obtenir l'équation cartésienne du lieu.")];
 }
 export function blocDonneesD(e: ExerciceLieuxD): string[] {
   if (e.sousType === "substitution") return [`x=\\sqrt{t}${constanteSigne(e.p)}\\ (t\\geqslant 0)`, `y=${e.q}t${constanteSigne(e.r)}`];
   if (e.sousType === "fractions") return [`x=\\dfrac{1}{t${constanteSigne(e.a)}}`, `y=\\dfrac{t${constanteSigne(e.b)}}{t${constanteSigne(e.a)}}`];
   return [`x=${e.a}t^{${e.exposantY}}`, `y=${e.b}t^{${e.exposantX}}`];
 }
-export function consigneEcranD(phase: PhaseLieuxGeometriquesParametres): string {
-  if (phase.endsWith("Ecran1")) return "Quelle méthode d'élimination est la mieux adaptée ici ?";
-  if (phase.endsWith("Ecran2")) return "Applique la méthode CONFIRMÉE : isole t (ou l'expression clé qui l'élimine).";
-  return "Substitue et simplifie pour obtenir l'équation cartésienne finale.";
+export function consigneEcranD(phase: PhaseLieuxGeometriquesParametres): FragmentConsigne[] {
+  if (phase.endsWith("Ecran1")) return [fragTexte("Quelle méthode d'élimination est la mieux adaptée ici ?")];
+  if (phase.endsWith("Ecran2")) return [fragTexte("Applique la méthode CONFIRMÉE : isole t (ou l'expression clé qui l'élimine).")];
+  return [fragTexte("Substitue et simplifie pour obtenir l'équation cartésienne finale.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `Ecran3` ne montrait
 // auparavant QUE le résultat confirmé à `Ecran2`, sans la méthode confirmée à `Ecran1`. `methodeDTexte`
@@ -474,8 +486,8 @@ const OPTIONS_STRATEGIE_E: OptionChoix[] = [
   { valeur: "direct", label: "Forme directe, aucun seuil" },
 ];
 
-export function consigneGeneraleE(): string {
-  return "La somme des distances de M aux 2 références (droites, ou côtés d'un carré) vaut k. Identifie d'abord si un raisonnement par seuil s'impose ici, avant de déterminer le lieu.";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [fragTexte("La somme des distances de M aux 2 références (droites, ou côtés d'un carré) vaut k. Identifie d'abord si un raisonnement par seuil s'impose ici, avant de déterminer le lieu.")];
 }
 export function blocDonneesE(e: ExerciceLieuxE): string[] {
   // "Configuration : " et le libellé sur 2 fragments SÉPARÉS (jamais concaténés en 1 seule ligne)
@@ -493,11 +505,11 @@ export function blocDonneesE(e: ExerciceLieuxE): string[] {
       return [...config, `\\text{carré de demi-côté }c=${e.c}`, `k=${e.k}`];
   }
 }
-export function consigneEcranE(e: ExerciceLieuxE, phase: PhaseLieuxGeometriquesParametres): string {
-  if (phase.endsWith("Ecran1")) return "Identifie la configuration donnée et choisis la stratégie adaptée.";
-  if (phase.endsWith("Ecran2")) return "Détermine le seuil critique (valeur minimale géométriquement atteignable de la somme), à partir de la configuration confirmée.";
-  if (phase.endsWith("Ecran3")) return e.sousType === "perpendiculaires" || e.sousType === "secantes" ? "Construis directement la forme (aucune comparaison à un seuil n'est nécessaire ici)." : "Compare k au seuil confirmé et détermine le régime.";
-  return "Donne l'équation ou la description complète du lieu, pour le régime confirmé.";
+export function consigneEcranE(e: ExerciceLieuxE, phase: PhaseLieuxGeometriquesParametres): FragmentConsigne[] {
+  if (phase.endsWith("Ecran1")) return [fragTexte("Identifie la configuration donnée et choisis la stratégie adaptée.")];
+  if (phase.endsWith("Ecran2")) return [fragTexte("Détermine le seuil critique (valeur minimale géométriquement atteignable de la somme), à partir de la configuration confirmée.")];
+  if (phase.endsWith("Ecran3")) return [fragTexte(e.sousType === "perpendiculaires" || e.sousType === "secantes" ? "Construis directement la forme (aucune comparaison à un seuil n'est nécessaire ici)." : "Compare k au seuil confirmé et détermine le régime.")];
+  return [fragTexte("Donne l'équation ou la description complète du lieu, pour le régime confirmé.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `Ecran3` ne montrait
 // auparavant QUE le seuil (rien de `Ecran1`) et `Ecran4` ne montrait QUE le régime confirmé à
@@ -547,7 +559,7 @@ export function aideNiveau2E(e: ExerciceLieuxE, phase: PhaseLieuxGeometriquesPar
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceLieuxGeometriquesParametres): string {
+export function consigneGenerale(exercice: ExerciceLieuxGeometriquesParametres): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -577,7 +589,7 @@ export function blocDonnees(exercice: ExerciceLieuxGeometriquesParametres): stri
   }
 }
 
-export function consigneEcran(exercice: ExerciceLieuxGeometriquesParametres, phase: PhaseLieuxGeometriquesParametres): string {
+export function consigneEcran(exercice: ExerciceLieuxGeometriquesParametres, phase: PhaseLieuxGeometriquesParametres): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

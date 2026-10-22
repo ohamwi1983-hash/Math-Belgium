@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
 import type { ReponseFacteursC, ReponseLimite } from "../moteur6e/verificationLimitesExponentielles";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatLimitesExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -17,7 +19,7 @@ const OPTIONS: OptionCategorielle[] = ["plus_infini", "moins_infini", "zero"];
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -73,7 +75,9 @@ export function EtapeFacteursC({ consigneEcran, enonceLatex, aideNiveau1, aideNi
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <GroupeBoutons label="x^r →" valeur={facteur1} erreur={montrerErreurs} onChange={setFacteur1} />
       <GroupeBoutons label="e^(-x^s) →" valeur={facteur2} erreur={montrerErreurs} onChange={setFacteur2} />
       {niveauAide >= 1 && (

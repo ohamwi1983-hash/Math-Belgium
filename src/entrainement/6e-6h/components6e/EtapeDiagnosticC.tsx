@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { ReponseDiagnosticC, ReponseLimiteLog } from "../moteur6e/verificationLimitesLogarithmiques";
-import type { ConfigPartieDiagnostic } from "../ui6e/formatLimitesLogarithmiques";
+import type { ConfigPartieDiagnostic, FragmentConsigne } from "../ui6e/formatLimitesLogarithmiques";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesLogarithmiques";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -18,7 +19,7 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   partie1: ConfigPartieDiagnostic;
   partie2: ConfigPartieDiagnostic;
@@ -113,7 +114,9 @@ export function EtapeDiagnosticC({ consigneEcran, enonceLatex, partie1, partie2,
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <GroupePartie config={partie1} etat={etat1} erreur={montrerErreurs} onChange={setEtat1} />
       <GroupePartie config={partie2} etat={etat2} erreur={montrerErreurs} onChange={setEtat2} />
       {niveauAide >= 1 && (

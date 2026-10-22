@@ -22,6 +22,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`, rendu
+ * via `components/RenduFragments.tsx`. Utilisé uniquement par `consigneEcran` (la consigne
+ * générale reste une simple chaîne, sans math embarquée). */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+function fragTexte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function fragLatex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 interface TermeSigne {
   valeur: number;
   suffixe: string;
@@ -78,8 +89,8 @@ function formatDirectionA(exercice: ExerciceLimiteA): string {
   return exercice.directionZero === "zero_plus" ? "x \\to 0^+" : "x \\to 0^-";
 }
 
-function consigneA(phase: "aExposant" | "aGlobale"): string {
-  return phase === "aExposant" ? "Détermine la limite de l'exposant (ou de la fraction interne)." : "À partir de la limite CORRECTE de l'exposant, conclus la limite globale (règle base>1 / base<1).";
+function consigneA(phase: "aExposant" | "aGlobale"): FragmentConsigne[] {
+  return [fragTexte(phase === "aExposant" ? "Détermine la limite de l'exposant (ou de la fraction interne)." : "À partir de la limite CORRECTE de l'exposant, conclus la limite globale (règle base>1 / base<1).")];
 }
 
 function aideA1(phase: "aExposant" | "aGlobale"): AideAvecLatex {
@@ -120,10 +131,10 @@ function formatDirectionB(exercice: ExerciceLimiteB): string {
   return exercice.direction === "plus_infini" ? "x \\to +\\infty" : "x \\to -\\infty";
 }
 
-function consigneB(phase: "bExponentielle" | "bPolynomiale" | "bGlobale"): string {
-  if (phase === "bExponentielle") return "Détermine la limite du terme exponentiel seul.";
-  if (phase === "bPolynomiale") return "Détermine la limite du terme polynomial seul.";
-  return "À partir des deux limites CORRECTES précédentes, conclus la limite globale.";
+function consigneB(phase: "bExponentielle" | "bPolynomiale" | "bGlobale"): FragmentConsigne[] {
+  if (phase === "bExponentielle") return [fragTexte("Détermine la limite du terme exponentiel seul.")];
+  if (phase === "bPolynomiale") return [fragTexte("Détermine la limite du terme polynomial seul.")];
+  return [fragTexte("À partir des deux limites CORRECTES précédentes, conclus la limite globale.")];
 }
 
 function memeSigneB(exercice: ExerciceLimiteB): boolean {
@@ -166,8 +177,8 @@ function formatFonctionC(exercice: ExerciceLimiteC): string {
   return `${formatPuissance("x", exercice.r)} \\cdot e^{-${formatPuissance("x", exercice.s)}}`;
 }
 
-function consigneC(phase: "cFacteurs" | "cGlobale"): string {
-  return phase === "cFacteurs" ? "Détermine la limite de chacun des deux facteurs séparément." : "Conclus la limite du produit (réécris-le mentalement en quotient pour comparer les vitesses de croissance).";
+function consigneC(phase: "cFacteurs" | "cGlobale"): FragmentConsigne[] {
+  return [fragTexte(phase === "cFacteurs" ? "Détermine la limite de chacun des deux facteurs séparément." : "Conclus la limite du produit (réécris-le mentalement en quotient pour comparer les vitesses de croissance).")];
 }
 
 function aideC1(phase: "cFacteurs" | "cGlobale"): AideAvecLatex {
@@ -196,10 +207,10 @@ function formatFonctionG(): string {
   return "\\frac{1}{\\cos(x)} + \\frac{1}{1 - e^{\\frac{\\pi}{2}-x}}";
 }
 
-function consigneG(phase: "gCombiner" | "gOrdre1" | "gConclure"): string {
-  if (phase === "gCombiner") return "Combine les deux termes en une seule fraction (dénominateur commun).";
-  if (phase === "gOrdre1") return "Un développement à l'ordre 1 (en u=π/2−x) suffit-il à conclure la limite ?";
-  return "Pousse le développement au second ordre, puis conclus la valeur exacte de la limite.";
+function consigneG(phase: "gCombiner" | "gOrdre1" | "gConclure"): FragmentConsigne[] {
+  if (phase === "gCombiner") return [fragTexte("Combine les deux termes en une seule fraction (dénominateur commun).")];
+  if (phase === "gOrdre1") return [fragTexte("Un développement à l'ordre 1 (en "), fragLatex("u=\\pi/2-x"), fragTexte(") suffit-il à conclure la limite ?")];
+  return [fragTexte("Pousse le développement au second ordre, puis conclus la valeur exacte de la limite.")];
 }
 
 function aideG1(phase: "gCombiner" | "gOrdre1" | "gConclure"): AideAvecLatex {
@@ -294,11 +305,11 @@ function formatDeriveePartieExponentielleH(exercice: ExerciceLimiteH): string {
   return `${coef}\\ln(${base})\\cdot ${base}^{${kx}}`;
 }
 
-function consigneH(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice: ExerciceLimiteH): string {
-  if (phase === "hForme") return `Quelle est la forme indéterminée de cette limite en x=${formatPointLimite(exercice.x0)} ?`;
-  if (phase === "hNumerateur") return "Dérive le numérateur f(x) (avant application de la règle de L'Hôpital).";
-  if (phase === "hDenominateur") return "Dérive le dénominateur g(x).";
-  return `Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en x=${formatPointLimite(exercice.x0)}.`;
+function consigneH(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice: ExerciceLimiteH): FragmentConsigne[] {
+  if (phase === "hForme") return [fragTexte("Quelle est la forme indéterminée de cette limite en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" ?")];
+  if (phase === "hNumerateur") return [fragTexte("Dérive le numérateur "), fragLatex("f(x)"), fragTexte(" (avant application de la règle de L'Hôpital).")];
+  if (phase === "hDenominateur") return [fragTexte("Dérive le dénominateur "), fragLatex("g(x)"), fragTexte(".")];
+  return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
 function aideH1(phase: "hForme" | "hNumerateur" | "hDenominateur" | "hConclure", exercice: ExerciceLimiteH): AideAvecLatex {
@@ -379,11 +390,11 @@ function formatDeriveePartieExponentielleI(exercice: ExerciceLimiteI): string {
   return `${coef}\\ln(${base})\\cdot ${base}^{${mx}}`;
 }
 
-function consigneI(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice: ExerciceLimiteI): string {
-  if (phase === "iForme") return `Quelle est la forme indéterminée de cette limite en x=${formatPointLimite(exercice.x0)} ?`;
-  if (phase === "iNumerateur") return "Dérive le numérateur f(x) (avant application de la règle de L'Hôpital).";
-  if (phase === "iDenominateur") return "Dérive le dénominateur g(x).";
-  return `Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en x=${formatPointLimite(exercice.x0)}.`;
+function consigneI(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice: ExerciceLimiteI): FragmentConsigne[] {
+  if (phase === "iForme") return [fragTexte("Quelle est la forme indéterminée de cette limite en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" ?")];
+  if (phase === "iNumerateur") return [fragTexte("Dérive le numérateur "), fragLatex("f(x)"), fragTexte(" (avant application de la règle de L'Hôpital).")];
+  if (phase === "iDenominateur") return [fragTexte("Dérive le dénominateur "), fragLatex("g(x)"), fragTexte(".")];
+  return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
 function aideI1(phase: "iForme" | "iNumerateur" | "iDenominateur" | "iConclure", exercice: ExerciceLimiteI): AideAvecLatex {
@@ -465,11 +476,11 @@ function formatDeriveePartieExponentielleJ(exercice: ExerciceLimiteJ): string {
   return `${coef}\\ln(${base})\\cdot ${base}^{${mx}}`;
 }
 
-function consigneJ(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice: ExerciceLimiteJ): string {
-  if (phase === "jForme") return `Quelle est la forme indéterminée de cette limite en x=${formatPointLimite(exercice.x0)} ?`;
-  if (phase === "jNumerateur") return "Dérive le numérateur f(x) (avant application de la règle de L'Hôpital).";
-  if (phase === "jDenominateur") return "Dérive le dénominateur g(x).";
-  return `Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en x=${formatPointLimite(exercice.x0)}.`;
+function consigneJ(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice: ExerciceLimiteJ): FragmentConsigne[] {
+  if (phase === "jForme") return [fragTexte("Quelle est la forme indéterminée de cette limite en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" ?")];
+  if (phase === "jNumerateur") return [fragTexte("Dérive le numérateur "), fragLatex("f(x)"), fragTexte(" (avant application de la règle de L'Hôpital).")];
+  if (phase === "jDenominateur") return [fragTexte("Dérive le dénominateur "), fragLatex("g(x)"), fragTexte(".")];
+  return [fragTexte("Applique la règle de L'Hôpital : calcule la limite du rapport des dérivées en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
 function aideJ1(phase: "jForme" | "jNumerateur" | "jDenominateur" | "jConclure", exercice: ExerciceLimiteJ): AideAvecLatex {
@@ -564,13 +575,13 @@ function formatDerivee2ExpK(exercice: ExerciceLimiteK): string {
   return `${coef}\\ln(${base})^2\\cdot ${base}^{${kx}}`;
 }
 
-function consigneK(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice: ExerciceLimiteK): string {
-  if (phase === "kForme") return `Quelle est la forme indéterminée de cette limite en x=${formatPointLimite(exercice.x0)} ?`;
-  if (phase === "kNumerateur1") return "Dérive une première fois le numérateur f(x).";
-  if (phase === "kDenominateur1") return "Dérive une première fois le dénominateur g(x).";
-  if (phase === "kNumerateur2") return `Le rapport des dérivées précédentes est ENCORE une forme indéterminée 0/0 en x=${formatPointLimite(exercice.x0)} — dérive le numérateur UNE SECONDE FOIS.`;
-  if (phase === "kDenominateur2") return "Dérive le dénominateur une seconde fois.";
-  return `Applique la règle de L'Hôpital (2 applications) : calcule la limite du rapport des dérivées secondes en x=${formatPointLimite(exercice.x0)}.`;
+function consigneK(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice: ExerciceLimiteK): FragmentConsigne[] {
+  if (phase === "kForme") return [fragTexte("Quelle est la forme indéterminée de cette limite en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" ?")];
+  if (phase === "kNumerateur1") return [fragTexte("Dérive une première fois le numérateur "), fragLatex("f(x)"), fragTexte(".")];
+  if (phase === "kDenominateur1") return [fragTexte("Dérive une première fois le dénominateur "), fragLatex("g(x)"), fragTexte(".")];
+  if (phase === "kNumerateur2") return [fragTexte("Le rapport des dérivées précédentes est ENCORE une forme indéterminée "), fragLatex("0/0"), fragTexte(" en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(" — dérive le numérateur UNE SECONDE FOIS.")];
+  if (phase === "kDenominateur2") return [fragTexte("Dérive le dénominateur une seconde fois.")];
+  return [fragTexte("Applique la règle de L'Hôpital (2 applications) : calcule la limite du rapport des dérivées secondes en "), fragLatex(`x=${formatPointLimite(exercice.x0)}`), fragTexte(".")];
 }
 
 function aideK1(phase: "kForme" | "kNumerateur1" | "kDenominateur1" | "kNumerateur2" | "kDenominateur2" | "kConclure", exercice: ExerciceLimiteK): AideAvecLatex {
@@ -658,13 +669,13 @@ function formatDirectionL(exercice: ExerciceLimiteL): string {
   return exercice.sousType === "L1" ? "x \\to +\\infty" : "x \\to 0";
 }
 
-function consigneL(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): string {
-  if (phase === "lConclure") return "Applique le résultat du pivot (1+1/u)^u → e, puis conclus la valeur exacte de la limite.";
+function consigneL(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): FragmentConsigne[] {
+  if (phase === "lConclure") return [fragTexte("Applique le résultat du pivot "), fragLatex("(1+1/u)^u \\to e"), fragTexte(", puis conclus la valeur exacte de la limite.")];
   if (exercice.sousType === "L1") {
     const kDiv = exercice.k >= 0 ? `${exercice.k}` : `(${exercice.k})`;
-    return `Pose u = x/${kDiv} et réexprime f entièrement en fonction de u.`;
+    return [fragTexte("Pose "), fragLatex(`u = x/${kDiv}`), fragTexte(" et réexprime f entièrement en fonction de u.")];
   }
-  return `Pose t = ${exercice.k}x et réexprime f entièrement en fonction de t.`;
+  return [fragTexte("Pose "), fragLatex(`t = ${exercice.k}x`), fragTexte(" et réexprime f entièrement en fonction de t.")];
 }
 
 function aideL1(phase: "lReformuler" | "lConclure", exercice: ExerciceLimiteL): AideAvecLatex {
@@ -714,9 +725,9 @@ function formatFormeCombineeN(exercice: ExerciceLimiteN): string {
   return `${base}^{${k * m} ${reste}}`;
 }
 
-function consigneN(phase: "nCombiner" | "nConclure"): string {
-  if (phase === "nCombiner") return "Réécris f(x) en une seule puissance, à l'aide de la loi des puissances (aᵖ)^q = a^(pq).";
-  return "Utilise la continuité de l'exponentielle pour conclure la valeur exacte de la limite.";
+function consigneN(phase: "nCombiner" | "nConclure"): FragmentConsigne[] {
+  if (phase === "nCombiner") return [fragTexte("Réécris f(x) en une seule puissance, à l'aide de la loi des puissances "), fragLatex("(a^p)^q = a^{pq}"), fragTexte(".")];
+  return [fragTexte("Utilise la continuité de l'exponentielle pour conclure la valeur exacte de la limite.")];
 }
 
 function aideN1(phase: "nCombiner" | "nConclure"): AideAvecLatex {
@@ -767,7 +778,7 @@ export function formatLimiteEnonceLatex(exercice: ExerciceLimiteExponentielle): 
   }
 }
 
-export function consigneEcran(phase: PhaseLimiteExponentielle, exercice: ExerciceLimiteExponentielle): string {
+export function consigneEcran(phase: PhaseLimiteExponentielle, exercice: ExerciceLimiteExponentielle): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aExposant" | "aGlobale");

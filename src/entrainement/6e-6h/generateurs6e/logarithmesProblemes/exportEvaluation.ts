@@ -27,9 +27,9 @@ function construireEnonceLogarithmesProblemes(exercice: ExerciceLogarithmesProbl
   const phases = phasesPourExercice(exercice);
   const donnees = blocDonnees(exercice);
   return {
-    enteteFragments: [texte(consigneGenerale(exercice)), ...(donnees.length > 0 ? [latex(donnees.join(",\\quad "))] : [])],
+    enteteFragments: [...consigneGenerale(exercice), ...(donnees.length > 0 ? [latex(donnees.join(",\\quad "))] : [])],
     questions: phases.map((phase) => ({
-      consigne: [texte(`${LIBELLE_PHASE[phase]} — `), texte(consigneEcran(exercice, phase))],
+      consigne: [texte(`${LIBELLE_PHASE[phase]} — `), ...consigneEcran(exercice, phase)],
       reponse: { type: "lignes" as const, nombre: 3 },
     })),
   };

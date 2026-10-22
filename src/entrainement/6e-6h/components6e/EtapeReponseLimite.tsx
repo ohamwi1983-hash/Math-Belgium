@@ -2,7 +2,9 @@ import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
 import type { ReponseLimite } from "../moteur6e/verificationLimitesExponentielles";
+import { RenduFragments } from "../components/RenduFragments";
 import { CONSIGNE_GENERALE } from "../ui6e/formatLimitesExponentielles";
+import type { FragmentConsigne } from "../ui6e/formatLimitesExponentielles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -18,7 +20,7 @@ type OptionCategorielle = "plus_infini" | "moins_infini" | "zero";
 const LABELS: Record<OptionCategorielle, string> = { plus_infini: "+\\infty", moins_infini: "-\\infty", zero: "0" };
 
 interface Props {
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   enonceLatex: string;
   /** Sous-ensemble des 3 boutons catégoriels pertinents pour CET écran (voir la note de
    * conception dans `core6e/limitesExponentielles.types.ts` — un seul composant réutilisé pour
@@ -68,7 +70,9 @@ export function EtapeReponseLimite({ consigneEcran, enonceLatex, optionsCategori
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-grid-compact">
         {optionsCategorielles.map((option) => (
           <button key={option} type="button" className={`btn ${statut === option ? "toggle-active" : ""} ${montrerErreurs && statut === option ? "is-erronee" : ""}`} onClick={() => setStatut(option)}>

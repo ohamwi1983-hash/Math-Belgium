@@ -17,6 +17,19 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Fragment de consigne mixant prose française et LaTeX inline — jamais de phrase française
+ * entière passée à KaTeX (piège documenté, "libellé français brut en mode maths"). Rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 interface TermeSigne {
   valeur: number;
   suffixe: string;
@@ -102,11 +115,11 @@ function formatDirectionA(exercice: ExerciceLimiteLogA): string {
   return "x \\to +\\infty";
 }
 
-const CONSIGNE_A_DOMINANCE = "Identifie le terme dominant au numérateur et au dénominateur séparément (hiérarchie log ≪ polynôme ≪ exponentielle(base>1)).";
-const CONSIGNE_A_CONCLURE = "À partir de la dominance CORRECTE de l'étape précédente, conclus la limite globale.";
-
-function consigneA(phase: "aDominance" | "aConclure"): string {
-  return phase === "aDominance" ? CONSIGNE_A_DOMINANCE : CONSIGNE_A_CONCLURE;
+function consigneA(phase: "aDominance" | "aConclure"): FragmentConsigne[] {
+  if (phase === "aDominance") {
+    return [texte("Identifie le terme dominant au numérateur et au dénominateur séparément (hiérarchie "), latex("\\ln(x) \\ll x^n \\ll \\text{base}^x"), texte(" avec base>1).")];
+  }
+  return [texte("À partir de la dominance CORRECTE de l'étape précédente, conclus la limite globale.")];
 }
 
 const RAPPEL_HIERARCHIE_LATEX = "\\ln(x) \\ll x^n \\ll \\text{base}^x \\ (\\text{base}>1)";
@@ -137,13 +150,12 @@ function formatFonctionB(exercice: ExerciceLimiteLogB): string {
   return `(x-${exercice.x0})\\cdot\\log_{\\frac{x}{${exercice.x0}}}(${exercice.k})`;
 }
 
-const CONSIGNE_B_REFORMULER_QUOTIENT = "Pose u=x/x0−1 et réécris l'expression en termes de ln(1+u)/u.";
-const CONSIGNE_B_REFORMULER_PRODUIT = "Pose u=x/x0−1 et réécris l'expression en termes de u/ln(1+u).";
-const CONSIGNE_B_CONCLURE = "Applique la limite de référence à la forme CORRECTE de l'étape précédente, puis conclus.";
-
-function consigneB(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB): string {
-  if (phase === "bConclure") return CONSIGNE_B_CONCLURE;
-  return exercice.sousType === "quotient" ? CONSIGNE_B_REFORMULER_QUOTIENT : CONSIGNE_B_REFORMULER_PRODUIT;
+function consigneB(phase: "bReformuler" | "bConclure", exercice: ExerciceLimiteLogB): FragmentConsigne[] {
+  if (phase === "bConclure") return [texte("Applique la limite de référence à la forme CORRECTE de l'étape précédente, puis conclus.")];
+  if (exercice.sousType === "quotient") {
+    return [texte("Pose "), latex("u=\\dfrac{x}{x_0}-1"), texte(" et réécris l'expression en termes de "), latex("\\dfrac{\\ln(1+u)}{u}"), texte(".")];
+  }
+  return [texte("Pose "), latex("u=\\dfrac{x}{x_0}-1"), texte(" et réécris l'expression en termes de "), latex("\\dfrac{u}{\\ln(1+u)}"), texte(".")];
 }
 
 const FORMULE_REFERENCE_LATEX = "\\lim_{u \\to 0} \\frac{\\ln(1+u)}{u} = 1";
@@ -179,11 +191,9 @@ function formatDirectionC(exercice: ExerciceLimiteLogC): string {
   return "x \\to 0";
 }
 
-const CONSIGNE_C_DIAGNOSTIC = "Évalue séparément le numérateur et le dénominateur (ou chaque facteur) AVANT toute technique de forme indéterminée.";
-const CONSIGNE_C_CONCLURE = "À partir du diagnostic CORRECT de l'étape précédente, conclus la limite (détermine le signe si besoin).";
-
-function consigneC(phase: "cDiagnostic" | "cConclure"): string {
-  return phase === "cDiagnostic" ? CONSIGNE_C_DIAGNOSTIC : CONSIGNE_C_CONCLURE;
+function consigneC(phase: "cDiagnostic" | "cConclure"): FragmentConsigne[] {
+  if (phase === "cDiagnostic") return [texte("Évalue séparément le numérateur et le dénominateur (ou chaque facteur) AVANT toute technique de forme indéterminée.")];
+  return [texte("À partir du diagnostic CORRECT de l'étape précédente, conclus la limite (détermine le signe si besoin).")];
 }
 
 function aideC1(phase: "cDiagnostic" | "cConclure"): AideAvecLatex {
@@ -229,14 +239,12 @@ function formatFonctionD(exercice: ExerciceLimiteLogD): string {
   return `\\left(\\cos(${exercice.k}x)\\right)^{\\frac{${exercice.c}}{x^2}}`;
 }
 
-const CONSIGNE_D_EXPOSANT = "Réécris f^g sous la forme e^(g·ln f), et isole la limite de l'exposant g(x)·ln(f(x)) à calculer.";
-const CONSIGNE_D_LIMITE_EXPOSANT = "Calcule la limite de l'exposant CORRECT de l'étape précédente.";
-const CONSIGNE_D_CONCLURE = "Conclus en exponentiant le résultat CORRECT de l'étape précédente.";
-
-function consigneD(phase: "dExposant" | "dLimiteExposant" | "dConclure"): string {
-  if (phase === "dExposant") return CONSIGNE_D_EXPOSANT;
-  if (phase === "dLimiteExposant") return CONSIGNE_D_LIMITE_EXPOSANT;
-  return CONSIGNE_D_CONCLURE;
+function consigneD(phase: "dExposant" | "dLimiteExposant" | "dConclure"): FragmentConsigne[] {
+  if (phase === "dExposant") {
+    return [texte("Réécris "), latex("f^g"), texte(" sous la forme "), latex("e^{g\\cdot\\ln f}"), texte(", et isole la limite de l'exposant "), latex("g(x)\\cdot\\ln(f(x))"), texte(" à calculer.")];
+  }
+  if (phase === "dLimiteExposant") return [texte("Calcule la limite de l'exposant CORRECT de l'étape précédente.")];
+  return [texte("Conclus en exponentiant le résultat CORRECT de l'étape précédente.")];
 }
 
 function aideD1(phase: "dExposant" | "dLimiteExposant" | "dConclure"): AideAvecLatex {
@@ -259,14 +267,14 @@ function formatFonctionE(): string {
   return "\\frac{3^x\\sin(x) - \\ln(1+x)}{x^4+4x^2}";
 }
 
-const CONSIGNE_E_DEVELOPPER = "Développe 3ˣ·sin(x) et ln(1+x) à l'ordre 2, puis exprime le numérateur développé.";
-const CONSIGNE_E_SIMPLIFIER = "Simplifie le numérateur CORRECT de l'étape précédente (les termes d'ordre 1 s'annulent) et le dénominateur (x⁴+4x² ~ 4x²).";
-const CONSIGNE_E_CONCLURE = "Conclus la valeur numérique à partir de la forme CORRECTE de l'étape précédente.";
-
-function consigneE(phase: "eDevelopper" | "eSimplifier" | "eConclure"): string {
-  if (phase === "eDevelopper") return CONSIGNE_E_DEVELOPPER;
-  if (phase === "eSimplifier") return CONSIGNE_E_SIMPLIFIER;
-  return CONSIGNE_E_CONCLURE;
+function consigneE(phase: "eDevelopper" | "eSimplifier" | "eConclure"): FragmentConsigne[] {
+  if (phase === "eDevelopper") {
+    return [texte("Développe "), latex("3^x\\sin(x)"), texte(" et "), latex("\\ln(1+x)"), texte(" à l'ordre 2, puis exprime le numérateur développé.")];
+  }
+  if (phase === "eSimplifier") {
+    return [texte("Simplifie le numérateur CORRECT de l'étape précédente (les termes d'ordre 1 s'annulent) et le dénominateur ("), latex("x^4+4x^2 \\sim 4x^2"), texte(").")];
+  }
+  return [texte("Conclus la valeur numérique à partir de la forme CORRECTE de l'étape précédente.")];
 }
 
 function aideE1(phase: "eDevelopper" | "eSimplifier" | "eConclure"): AideAvecLatex {
@@ -307,7 +315,7 @@ export function formatLimiteEnonceLatex(exercice: ExerciceLimiteLogarithmique): 
   }
 }
 
-export function consigneEcran(phase: PhaseLimiteLogarithmique, exercice: ExerciceLimiteLogarithmique): string {
+export function consigneEcran(phase: PhaseLimiteLogarithmique, exercice: ExerciceLimiteLogarithmique): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneA(phase as "aDominance" | "aConclure");

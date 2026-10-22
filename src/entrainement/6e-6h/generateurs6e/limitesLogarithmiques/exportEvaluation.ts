@@ -56,42 +56,42 @@ function construireEnonceLimitesLogarithmiques(exercice: ExerciceLimiteLogarithm
       return {
         enteteFragments: entete,
         questions: [
-          { consigne: [texte(consigneEcran("aDominance", exercice))], reponse: { type: "lignes", nombre: 2 } },
-          { consigne: [texte(consigneEcran("aConclure", exercice))], reponse: { type: "lignes", nombre: 1 } },
+          { consigne: consigneEcran("aDominance", exercice), reponse: { type: "lignes", nombre: 2 } },
+          { consigne: consigneEcran("aConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
         ],
       };
     case "B":
       return {
         enteteFragments: entete,
         questions: [
-          { consigne: [texte(consigneEcran("bReformuler", exercice))], reponse: { type: "lignes", nombre: 2 } },
-          { consigne: [texte(consigneEcran("bConclure", exercice))], reponse: { type: "lignes", nombre: 1 } },
+          { consigne: consigneEcran("bReformuler", exercice), reponse: { type: "lignes", nombre: 2 } },
+          { consigne: consigneEcran("bConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
         ],
       };
     case "C":
       return {
         enteteFragments: entete,
         questions: [
-          { consigne: [texte(consigneEcran("cDiagnostic", exercice))], reponse: { type: "lignes", nombre: 2 } },
-          { consigne: [texte(consigneEcran("cConclure", exercice))], reponse: { type: "lignes", nombre: 1 } },
+          { consigne: consigneEcran("cDiagnostic", exercice), reponse: { type: "lignes", nombre: 2 } },
+          { consigne: consigneEcran("cConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
         ],
       };
     case "D":
       return {
         enteteFragments: entete,
         questions: [
-          { consigne: [texte(consigneEcran("dExposant", exercice))], reponse: { type: "lignes", nombre: 2 } },
-          { consigne: [texte(consigneEcran("dLimiteExposant", exercice))], reponse: { type: "lignes", nombre: 1 } },
-          { consigne: [texte(consigneEcran("dConclure", exercice))], reponse: { type: "lignes", nombre: 1 } },
+          { consigne: consigneEcran("dExposant", exercice), reponse: { type: "lignes", nombre: 2 } },
+          { consigne: consigneEcran("dLimiteExposant", exercice), reponse: { type: "lignes", nombre: 1 } },
+          { consigne: consigneEcran("dConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
         ],
       };
     case "E":
       return {
         enteteFragments: entete,
         questions: [
-          { consigne: [texte(consigneEcran("eDevelopper", exercice))], reponse: { type: "lignes", nombre: 3 } },
-          { consigne: [texte(consigneEcran("eSimplifier", exercice))], reponse: { type: "lignes", nombre: 2 } },
-          { consigne: [texte(consigneEcran("eConclure", exercice))], reponse: { type: "lignes", nombre: 1 } },
+          { consigne: consigneEcran("eDevelopper", exercice), reponse: { type: "lignes", nombre: 3 } },
+          { consigne: consigneEcran("eSimplifier", exercice), reponse: { type: "lignes", nombre: 2 } },
+          { consigne: consigneEcran("eConclure", exercice), reponse: { type: "lignes", nombre: 1 } },
         ],
       };
   }
