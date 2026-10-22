@@ -33,6 +33,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string, minuscule = false): ChampDef {
@@ -66,18 +78,41 @@ function afficherFractionExacte(f: FractionExacte): string {
 // Famille A — Aire du triangle foyer-point-foyer.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "On donne une ellipse et un point P de cette ellipse tel que |PF|=k·|PF'| (F,F' les foyers, k≠1 donné). Détermine les 2 rayons focaux, l'angle FPF', puis l'aire du triangle FPF'.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("On donne une ellipse et un point P de cette ellipse tel que "),
+    latex("|PF|=k\\cdot|PF'|"),
+    texte(" (F,F' les foyers, "),
+    latex("k\\neq 1"),
+    texte(" donné). Détermine les 2 rayons focaux, l'angle FPF', puis l'aire du triangle FPF'."),
+  ];
 }
 
 export function blocDonneesA(e: ExerciceFamilleA): string[] {
   return [`\\frac{x^2}{${e.a * e.a}}+\\frac{y^2}{${e.b * e.b}}=1`, `|PF|=${afficherFractionExacte(e.k)}\\cdot|PF'|`];
 }
 
-export function consigneEcranA(_e: ExerciceFamilleA, phase: PhaseAireExcentriciteConique): string {
-  if (phase === "aEcran1") return "Utilise la propriété |PF|+|PF'|=2a de l'ellipse, combinée au rapport k donné, pour trouver |PF| et |PF'| individuellement.";
-  if (phase === "aEcran2") return "Calcule c²=a²-b², puis applique la loi des cosinus dans le triangle FPF' (avec |FF'|=2c) pour trouver cos(angle FPF').";
-  return "Déduis sin(angle FPF') à partir de cos(angle FPF') CONFIRMÉ (l'angle est nécessairement dans ]0°;180°[), puis calcule l'aire du triangle FPF'.";
+export function consigneEcranA(_e: ExerciceFamilleA, phase: PhaseAireExcentriciteConique): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Utilise la propriété "), latex("|PF|+|PF'|=2a"), texte(" de l'ellipse, combinée au rapport k donné, pour trouver |PF| et |PF'| individuellement.")];
+  if (phase === "aEcran2")
+    return [
+      texte("Calcule "),
+      latex("c^2=a^2-b^2"),
+      texte(", puis applique la loi des cosinus dans le triangle FPF' (avec "),
+      latex("|FF'|=2c"),
+      texte(") pour trouver "),
+      latex("\\cos(\\widehat{FPF'})"),
+      texte("."),
+    ];
+  return [
+    texte("Déduis "),
+    latex("\\sin(\\widehat{FPF'})"),
+    texte(" à partir de "),
+    latex("\\cos(\\widehat{FPF'})"),
+    texte(" CONFIRMÉ (l'angle est nécessairement dans "),
+    latex("]0°;180°["),
+    texte("), puis calcule l'aire du triangle FPF'."),
+  ];
 }
 
 /** ACCUMULE les écrans déjà confirmés (correctif transversal — voir CLAUDE.md/`docs/historique-
@@ -119,14 +154,14 @@ export function aideNiveau2A(e: ExerciceFamilleA): AideAvecLatex {
  * condition géométrique complète de chaque sous-type — `blocDonneesB` n'en garde qu'un recap
  * SYMBOLIQUE terse (contrainte de largeur mobile 375px, un `\text{...}` KaTeX ne s'enroulant
  * jamais). Un `<p>` s'enroule normalement quelle que soit sa longueur, donc aucune limite ici. */
-export function consigneGeneraleB(e: ExerciceFamilleB): string {
+export function consigneGeneraleB(e: ExerciceFamilleB): FragmentConsigne[] {
   if (e.sousType === "abscisseFoyerParallele") {
-    return "On donne un point P de l'ellipse ayant la même abscisse qu'un foyer F, tel que la droite (OP) soit parallèle à la droite joignant un sommet principal à un sommet secondaire. Traduis ces 2 conditions en une équation reliant a,b,c (ou directement e), puis résous pour l'excentricité e.";
+    return [texte("On donne un point P de l'ellipse ayant la même abscisse qu'un foyer F, tel que la droite (OP) soit parallèle à la droite joignant un sommet principal à un sommet secondaire. Traduis ces 2 conditions en une équation reliant a,b,c (ou directement e), puis résous pour l'excentricité e.")];
   }
   if (e.sousType === "angleDroitSommetSecondaire") {
-    return "On donne B, un sommet de l'axe secondaire d'une ellipse (foyers F,F'), tel que l'angle FBF' soit droit. Traduis cette condition en une équation reliant a,b,c (ou directement e), puis résous pour l'excentricité e.";
+    return [texte("On donne B, un sommet de l'axe secondaire d'une ellipse (foyers F,F'), tel que l'angle FBF' soit droit. Traduis cette condition en une équation reliant a,b,c (ou directement e), puis résous pour l'excentricité e.")];
   }
-  return "On donne une ellipse dont la distance entre les 2 directrices vaut k fois la distance entre les 2 foyers (k donné). Traduis cette condition en une équation reliant a,b,c (ou directement e), puis résous pour l'excentricité e.";
+  return [texte("On donne une ellipse dont la distance entre les 2 directrices vaut k fois la distance entre les 2 foyers (k donné). Traduis cette condition en une équation reliant a,b,c (ou directement e), puis résous pour l'excentricité e.")];
 }
 
 /** Recap SYMBOLIQUE terse — voir en-tête `consigneGeneraleB` ci-dessus pour la répartition
@@ -141,9 +176,9 @@ export function blocDonneesB(e: ExerciceFamilleB): string[] {
   return [`D(\\text{directrices})=k\\cdot D(\\text{foyers})`, `k=${e.k}`];
 }
 
-export function consigneEcranB(_e: ExerciceFamilleB, phase: PhaseAireExcentriciteConique): string {
-  if (phase === "bEcran1") return "Traduis la condition géométrique donnée en une équation reliant a, b, c (ou directement e).";
-  return "Résous l'équation CONFIRMÉE de l'étape précédente pour l'excentricité e.";
+export function consigneEcranB(_e: ExerciceFamilleB, phase: PhaseAireExcentriciteConique): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Traduis la condition géométrique donnée en une équation reliant a, b, c (ou directement e).")];
+  return [texte("Résous l'équation CONFIRMÉE de l'étape précédente pour l'excentricité e.")];
 }
 
 function formatEquationRelationLatex(e: ExerciceFamilleB): string {
@@ -195,7 +230,7 @@ export function aideNiveau2B(e: ExerciceFamilleB): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceAireExcentriciteConique): string {
+export function consigneGenerale(exercice: ExerciceAireExcentriciteConique): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneGeneraleA() : consigneGeneraleB(exercice);
 }
 
@@ -203,7 +238,7 @@ export function blocDonnees(exercice: ExerciceAireExcentriciteConique): string[]
   return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceAireExcentriciteConique, phase: PhaseAireExcentriciteConique): string {
+export function consigneEcran(exercice: ExerciceAireExcentriciteConique, phase: PhaseAireExcentriciteConique): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(exercice, phase);
 }
 

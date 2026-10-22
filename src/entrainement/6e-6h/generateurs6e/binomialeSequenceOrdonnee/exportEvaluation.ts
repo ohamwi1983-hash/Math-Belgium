@@ -12,12 +12,12 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBinomiale
  */
 
 function entete(exercice: ExerciceBinomialeSequenceOrdonnee) {
-  return [texte(`${consigneGenerale(exercice)} Données : `), latex(blocDonnees(exercice).join(",\\ "))];
+  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
 }
 
 function construireEnonce(exercice: ExerciceBinomialeSequenceOrdonnee): SectionExercice {
   const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: [texte(consigneEcran(exercice, phase))] })) };
+  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
 }
 
 function construireCorrection(exercice: ExerciceBinomialeSequenceOrdonnee): BlocCorrection[] {

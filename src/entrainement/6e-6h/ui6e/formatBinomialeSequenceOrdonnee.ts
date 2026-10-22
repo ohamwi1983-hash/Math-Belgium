@@ -38,6 +38,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 /** Annonce de tolérance pour tout champ de PROBABILITÉ décimale de la famille A (`diagnostiquerValeur`,
@@ -126,8 +138,8 @@ function estEcran2A(phase: PhaseBinomialeSequenceOrdonnee): boolean {
 // Famille A — Probabilité binomiale.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "n épreuves indépendantes sont répétées, chacune avec la même probabilité de succès p. Identifie la stratégie de calcul adaptée à la question, puis calcule la probabilité demandée.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("n épreuves indépendantes sont répétées, chacune avec la même probabilité de succès p. Identifie la stratégie de calcul adaptée à la question, puis calcule la probabilité demandée.")];
 }
 
 /** Notation mathématique de la question — reste COURTE (mode maths pur, jamais de `\text{}`
@@ -168,10 +180,14 @@ export function blocDonneesA(e: ExerciceBinomialeA): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `p=${formatP(e.p)}`, `\\text{Demandé : }${formatQuestionMathA(e)}`, ...decouperEnFragmentsTexte(formatQuestionQualificatifA(e))];
 }
 
-export function consigneEcranA(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): string {
-  if (estEcran1A(phase)) return "Identifie la stratégie de calcul (un seul terme, une somme de plusieurs termes, ou un complément), puis indique le(s) nombre(s) de succès k pour lesquels il faut calculer P(X=k).";
-  if (estEcran2A(phase)) return "Calcule la valeur de chaque terme P(X=k) identifié à l'étape précédente, à l'aide de la formule Cₙᵏ·p^k·(1-p)^(n-k).";
-  return e.strategie === "somme" ? "Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée." : "Calcule 1 moins le terme CONFIRMÉ de l'étape précédente pour obtenir la probabilité demandée.";
+export function consigneEcranA(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): FragmentConsigne[] {
+  if (estEcran1A(phase))
+    return [texte("Identifie la stratégie de calcul (un seul terme, une somme de plusieurs termes, ou un complément), puis indique le(s) nombre(s) de succès k pour lesquels il faut calculer "), latex("P(X=k)"), texte(".")];
+  if (estEcran2A(phase))
+    return [texte("Calcule la valeur de chaque terme "), latex("P(X=k)"), texte(" identifié à l'étape précédente, à l'aide de la formule "), latex("C_n^k\\cdot p^k\\cdot(1-p)^{n-k}"), texte(".")];
+  return e.strategie === "somme"
+    ? [texte("Additionne les termes CONFIRMÉS de l'étape précédente pour obtenir la probabilité demandée.")]
+    : [texte("Calcule 1 moins le terme CONFIRMÉ de l'étape précédente pour obtenir la probabilité demandée.")];
 }
 
 export function etatActuelA(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenceOrdonnee): string[] | null {
@@ -248,17 +264,17 @@ export function aideNiveau2A(e: ExerciceBinomialeA, phase: PhaseBinomialeSequenc
 // Famille B — Probabilité d'une séquence exacte, sans remise.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "On tire k éléments l'un après l'autre, SANS REMISE, parmi n éléments tous distincts. Détermine la probabilité d'obtenir un ordre précis donné, une position à la fois.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On tire k éléments l'un après l'autre, SANS REMISE, parmi n éléments tous distincts. Détermine la probabilité d'obtenir un ordre précis donné, une position à la fois.")];
 }
 
 export function blocDonneesB(e: ExerciceBinomialeB): string[] {
   return [...decouperEnFragmentsTexte(e.contexte.texte), `n=${e.n}`, `k=${e.k}`, ...decouperEnFragmentsTexte("Probabilité d'obtenir l'ordre exact demandé, tirage après tirage")];
 }
 
-export function consigneEcranB(phase: PhaseBinomialeSequenceOrdonnee): string {
-  if (phase === "bEcran1") return "Pose, SANS LE CALCULER, le produit des fractions correspondant à chaque tirage successif : donne le dénominateur de chaque fraction (le numérateur vaut toujours 1).";
-  return "Calcule la valeur finale du produit CONFIRMÉ à l'étape précédente.";
+export function consigneEcranB(phase: PhaseBinomialeSequenceOrdonnee): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Pose, SANS LE CALCULER, le produit des fractions correspondant à chaque tirage successif : donne le dénominateur de chaque fraction (le numérateur vaut toujours 1).")];
+  return [texte("Calcule la valeur finale du produit CONFIRMÉ à l'étape précédente.")];
 }
 
 /** Notation COMPACTE (`1/12` en ligne, jamais `\dfrac{1}{12}` empilée) — un produit de `k`∈{3,4,5}
@@ -301,7 +317,7 @@ export function aideNiveau2B(e: ExerciceBinomialeB, phase: PhaseBinomialeSequenc
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceBinomialeSequenceOrdonnee): string {
+export function consigneGenerale(exercice: ExerciceBinomialeSequenceOrdonnee): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneGeneraleA() : consigneGeneraleB();
 }
 
@@ -309,7 +325,7 @@ export function blocDonnees(exercice: ExerciceBinomialeSequenceOrdonnee): string
   return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): string {
+export function consigneEcran(exercice: ExerciceBinomialeSequenceOrdonnee, phase: PhaseBinomialeSequenceOrdonnee): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(phase);
 }
 

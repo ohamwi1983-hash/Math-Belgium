@@ -27,6 +27,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -96,14 +108,14 @@ function affixeDemiEntiereLatex(re2: number, im2: number): string {
 // Famille A — Propriétés de z+z̄ et z−z̄.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "z est un nombre complexe donné. Calcule z+z̄ et z−z̄, chacun sous la forme a+bi.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("z est un nombre complexe donné. Calcule "), latex("z+\\bar z"), texte(" et "), latex("z-\\bar z"), texte(", chacun sous la forme "), latex("a+bi"), texte(".")];
 }
 export function blocDonneesA(e: Extract<ExerciceAffixesRacines, { famille: "A" }>): string[] {
   return [`z=${entierComplexeLatex(e.a, e.b)}`];
 }
-export function consigneEcranA(): string {
-  return "Calcule z+z̄ et z−z̄, chacun sous la forme a+bi (0 s'il n'y a pas de partie réelle/imaginaire).";
+export function consigneEcranA(): FragmentConsigne[] {
+  return [texte("Calcule "), latex("z+\\bar z"), texte(" et "), latex("z-\\bar z"), texte(", chacun sous la forme "), latex("a+bi"), texte(" (0 s'il n'y a pas de partie réelle/imaginaire).")];
 }
 export function champsA(): ChampDef[] {
   return [
@@ -142,15 +154,15 @@ export const OPTIONS_RELATION_B: { id: IdRelationParallelogramme; latex: string 
   { id: "mauvaiseCombinaison", latex: "D=-A+B+C" },
 ];
 
-export function consigneGeneraleB(): string {
-  return "A, B, C sont 3 points du plan, donnés par leurs affixes. Détermine l'affixe du point D tel que ABCD (dans cet ordre) soit un parallélogramme.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("A, B, C sont 3 points du plan, donnés par leurs affixes. Détermine l'affixe du point D tel que ABCD (dans cet ordre) soit un parallélogramme.")];
 }
 export function blocDonneesB(e: Extract<ExerciceAffixesRacines, { famille: "B" }>): string[] {
   return [`A=${affixeDemiEntiereLatex(e.reA2, e.imA2)}\\text{, }B=${affixeDemiEntiereLatex(e.reB2, e.imB2)}\\text{, }C=${affixeDemiEntiereLatex(e.reC2, e.imC2)}`];
 }
-export function consigneEcranB(phase: PhaseAffixesRacines): string {
-  if (phase === "bEcran1") return "Dans un parallélogramme ABCD (dans cet ordre de sommets), quelle relation vectorielle entre les affixes de A, B, C, D est correcte ?";
-  return "Calcule l'affixe de D à partir de la relation CONFIRMÉE à l'étape précédente, sous la forme a+bi.";
+export function consigneEcranB(phase: PhaseAffixesRacines): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Dans un parallélogramme ABCD (dans cet ordre de sommets), quelle relation vectorielle entre les affixes de A, B, C, D est correcte ?")];
+  return [texte("Calcule l'affixe de D à partir de la relation CONFIRMÉE à l'étape précédente, sous la forme "), latex("a+bi"), texte(".")];
 }
 export function etatActuelB(phase: PhaseAffixesRacines): string[] | null {
   if (phase === "bEcran2") return ["\\text{Relation confirmée : }D=A-B+C"];
@@ -189,16 +201,23 @@ export function OPTIONS_SYSTEME_C(a: number, b: number): { id: IdSystemeRacine; 
   ];
 }
 
-export function consigneGeneraleC(): string {
-  return "Calcule les 2 racines carrées complexes du nombre a+bi ci-dessous.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Calcule les 2 racines carrées complexes du nombre "), latex("a+bi"), texte(" ci-dessous.")];
 }
 export function blocDonneesC(e: Extract<ExerciceAffixesRacines, { famille: "C" }>): string[] {
   return [`a+bi=${entierComplexeLatex(e.a, e.b)}`];
 }
-export function consigneEcranC(phase: PhaseAffixesRacines): string {
-  if (phase === "cEcran1") return "Pose le système qui identifie les parties réelle et imaginaire de (x+yi)²=a+bi.";
-  if (phase === "cEcran2") return "Résous le système CONFIRMÉ à l'étape précédente pour x (substitue y=b/(2x) dans la 1ère équation, filtre la solution réelle valide x²>0).";
-  return "Déduis y à partir du x CONFIRMÉ à l'étape précédente (y=b/(2x)), puis donne les 2 racines carrées ±(x+yi).";
+export function consigneEcranC(phase: PhaseAffixesRacines): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Pose le système qui identifie les parties réelle et imaginaire de "), latex("(x+yi)^2=a+bi"), texte(".")];
+  if (phase === "cEcran2")
+    return [
+      texte("Résous le système CONFIRMÉ à l'étape précédente pour x (substitue "),
+      latex("y=b/(2x)"),
+      texte(" dans la 1ère équation, filtre la solution réelle valide "),
+      latex("x^2>0"),
+      texte(").")
+    ];
+  return [texte("Déduis y à partir du x CONFIRMÉ à l'étape précédente ("), latex("y=b/(2x)"), texte("), puis donne les 2 racines carrées "), latex("\\pm(x+yi)"), texte(".")];
 }
 export function etatActuelC(e: Extract<ExerciceAffixesRacines, { famille: "C" }>, phase: PhaseAffixesRacines): string[] | null {
   if (phase === "cEcran2") return [`\\text{Système confirmé : }x^2-y^2=${e.a}\\text{, }2xy=${e.b}`];
@@ -233,7 +252,7 @@ export function aideNiveau2C(e: Extract<ExerciceAffixesRacines, { famille: "C" }
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceAffixesRacines): string {
+export function consigneGenerale(exercice: ExerciceAffixesRacines): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -255,7 +274,7 @@ export function blocDonnees(exercice: ExerciceAffixesRacines): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceAffixesRacines, phase: PhaseAffixesRacines): string {
+export function consigneEcran(exercice: ExerciceAffixesRacines, phase: PhaseAffixesRacines): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA();

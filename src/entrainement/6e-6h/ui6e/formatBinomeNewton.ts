@@ -8,11 +8,13 @@ import { phasesPourExercice } from "../moteur6e/typesBinomeNewton";
  * importé par un autre générateur (chaque générateur reste indépendant — CLAUDE.md).
  *
  * **Vigilance signe orphelin / groupe LaTeX vide / texte français en mode maths** — toute clause en
- * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths ;
- * `consigneGenerale`/`consigneEcran`/`aide.texte` sont, eux, du texte BRUT (rendus hors KaTeX par
- * `EtapeChampsBinomeNewton.tsx`, `<p className="prompt-text">`), jamais besoin de `\text{}`.
- * Couverture de régression : `formatBinomeNewton.test.ts`, scan sur de nombreux tirages aléatoires
- * à la recherche d'un `++`/`+-`/`--`/groupe `{}` vide.
+ * français mêlée à du LaTeX passe TOUJOURS par `\text{...}`, jamais du texte brut en mode maths.
+ * `consigneGenerale`/`consigneEcran` renvoient un `FragmentConsigne[]` (texte brut mêlé à du LaTeX
+ * inline court, même contrat que `ui/formatEquationDroite.ts` et son rendu
+ * `components/RenduFragments.tsx`) : tout `(ax+b)ⁿ`/`Cₙᵏ`/équation qui y apparaît est un fragment
+ * `latex`, jamais une sous-chaîne Unicode littérale — `aide.texte` (`AideAvecLatex`, pattern
+ * séparé) reste lui du texte BRUT. Couverture de régression : `formatBinomeNewton.test.ts`, scan
+ * sur de nombreux tirages aléatoires à la recherche d'un `++`/`+-`/`--`/groupe `{}` vide.
  */
 
 export type TypeChamp = "texte" | "choix";
@@ -32,6 +34,18 @@ export interface ChampDef {
 export interface AideAvecLatex {
   texte: string;
   latex: string | null;
+}
+
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
 }
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
@@ -147,8 +161,16 @@ function formatPolynomeLatex(termes: { coefficientFinal: number; exposantX: numb
 // Famille A — Développement complet de (ax+b)ⁿ.
 // ============================================================================
 
-function consigneGeneraleA(): string {
-  return "On développe (ax+b)ⁿ à l'aide du binôme de Newton : (ax+b)ⁿ = Σ Cₙᵏ·(ax)^(n-k)·bᵏ pour k=0,...,n. Détermine, étape par étape, les coefficients binomiaux, puis chaque terme du développement, puis le polynôme final.";
+function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("On développe "),
+    latex("(ax+b)^n"),
+    texte(" à l'aide du binôme de Newton : "),
+    latex("(ax+b)^n=\\sum C_n^k\\cdot(ax)^{n-k}\\cdot b^k"),
+    texte(" pour "),
+    latex("k=0,...,n"),
+    texte(". Détermine, étape par étape, les coefficients binomiaux, puis chaque terme du développement, puis le polynôme final."),
+  ];
 }
 
 function blocDonneesA(e: ExerciceBinomeA): string[] {
@@ -161,10 +183,11 @@ function blocDonneesA(e: ExerciceBinomeA): string[] {
   return [formatBinomeBase(e.a, e.b, e.n), `n=${e.n}`];
 }
 
-function consigneEcranA(phase: PhaseBinomeNewton): string {
-  if (phase === "aEcran1") return "Identifie les n+1 coefficients binomiaux Cₙᵏ du développement, pour k=0 jusqu'à n.";
-  if (phase === "aEcran2") return "Calcule chaque terme du développement (coefficient binomial × puissance de a × puissance de b). Attention au signe : b élevé à la puissance k doit être recalculé pour CHAQUE terme, jamais déduit par simple alternance.";
-  return "Assemble le polynôme final en ordonnant les termes par puissances décroissantes de x.";
+function consigneEcranA(phase: PhaseBinomeNewton): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Identifie les n+1 coefficients binomiaux "), latex("C_n^k"), texte(" du développement, pour k=0 jusqu'à n.")];
+  if (phase === "aEcran2")
+    return [texte("Calcule chaque terme du développement (coefficient binomial × puissance de a × puissance de b). Attention au signe : b élevé à la puissance k doit être recalculé pour CHAQUE terme, jamais déduit par simple alternance.")];
+  return [texte("Assemble le polynôme final en ordonnant les termes par puissances décroissantes de x.")];
 }
 
 // Chaque `etatActuel*` renvoie l'étiquette et la liste de valeurs comme 2 fragments SÉPARÉS
@@ -212,8 +235,8 @@ function reponseAttendueA(e: ExerciceBinomeA, phase: PhaseBinomeNewton): string[
 // Famille B — Terme spécifique sans développement complet.
 // ============================================================================
 
-function consigneGeneraleB(): string {
-  return "On cherche UN SEUL terme du développement de (ax+b)ⁿ, sans écrire tout le développement — isole directement ce terme grâce au binôme de Newton.";
+function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On cherche UN SEUL terme du développement de "), latex("(ax+b)^n"), texte(", sans écrire tout le développement — isole directement ce terme grâce au binôme de Newton.")];
 }
 
 function blocDonneesB(e: ExerciceBinomeB): string[] {
@@ -225,10 +248,17 @@ function blocDonneesB(e: ExerciceBinomeB): string[] {
   return [formatBinomeBase(e.a, e.b, e.n), `n=${e.n}`, ...cible];
 }
 
-function consigneEcranB(phase: PhaseBinomeNewton): string {
-  if (phase === "bTrouverKEcran") return "Détermine k tel que l'exposant de x dans le terme général vaille p (résous n-k=p).";
-  if (phase === "bPoserEcran") return "Pose le terme général : donne le coefficient binomial Cₙᵏ et la valeur de b^k, SANS calculer le terme complet (ni la puissance de a, ni le produit final).";
-  return "Calcule la valeur du coefficient final de ce terme (n'oublie pas la puissance de a).";
+function consigneEcranB(phase: PhaseBinomeNewton): FragmentConsigne[] {
+  if (phase === "bTrouverKEcran") return [texte("Détermine k tel que l'exposant de x dans le terme général vaille p (résous "), latex("n-k=p"), texte(").")];
+  if (phase === "bPoserEcran")
+    return [
+      texte("Pose le terme général : donne le coefficient binomial "),
+      latex("C_n^k"),
+      texte(" et la valeur de "),
+      latex("b^k"),
+      texte(", SANS calculer le terme complet (ni la puissance de a, ni le produit final)."),
+    ];
+  return [texte("Calcule la valeur du coefficient final de ce terme (n'oublie pas la puissance de a).")];
 }
 
 // Fragments scindés (étiquette / valeurs), même raison que `etatActuelA` (overflow mobile).
@@ -274,8 +304,8 @@ function reponseAttendueB(e: ExerciceBinomeB, phase: PhaseBinomeNewton): string[
 // Famille C — Approximation décimale via développement binomial.
 // ============================================================================
 
-function consigneGeneraleC(): string {
-  return "On calcule (1+ε)ⁿ EXACTEMENT à l'aide du développement binomial, plutôt que par un calcul direct de puissance.";
+function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("On calcule "), latex("(1+\\varepsilon)^n"), texte(" EXACTEMENT à l'aide du développement binomial, plutôt que par un calcul direct de puissance.")];
 }
 
 function blocDonneesC(e: ExerciceBinomeC): string[] {
@@ -285,10 +315,10 @@ function blocDonneesC(e: ExerciceBinomeC): string[] {
   return [`${formatDecimalFrancaisLatex(e.base)}^{${e.n}}`, `\\text{À écrire } (1+\\varepsilon)^{n}`, `\\varepsilon=${formatDecimalFrancaisLatex(e.epsilon)},\\ n=${e.n}`];
 }
 
-function consigneEcranC(phase: PhaseBinomeNewton): string {
-  if (phase === "cEcran1") return "Identifie les n+1 coefficients binomiaux Cₙᵏ du développement de (1+ε)ⁿ.";
-  if (phase === "cEcran2") return "Calcule chaque terme Cₙᵏ·ε^k du développement.";
-  return "Somme tous les termes pour obtenir la valeur exacte de (1+ε)ⁿ.";
+function consigneEcranC(phase: PhaseBinomeNewton): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Identifie les n+1 coefficients binomiaux "), latex("C_n^k"), texte(" du développement de "), latex("(1+\\varepsilon)^n"), texte(".")];
+  if (phase === "cEcran2") return [texte("Calcule chaque terme "), latex("C_n^k\\cdot\\varepsilon^k"), texte(" du développement.")];
+  return [texte("Somme tous les termes pour obtenir la valeur exacte de "), latex("(1+\\varepsilon)^n"), texte(".")];
 }
 
 // Voir commentaire de `etatActuelA` — mêmes fragments SÉPARÉS (étiquette / liste) pour la même
@@ -336,7 +366,7 @@ function reponseAttendueC(e: ExerciceBinomeC, phase: PhaseBinomeNewton): string[
 // Dispatchers génériques — point d'entrée consommé par `App6gen45.tsx`/`EtapeChampsBinomeNewton.tsx`.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceBinomeNewton): string {
+export function consigneGenerale(exercice: ExerciceBinomeNewton): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -358,7 +388,7 @@ export function blocDonnees(exercice: ExerciceBinomeNewton): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): string {
+export function consigneEcran(exercice: ExerciceBinomeNewton, phase: PhaseBinomeNewton): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

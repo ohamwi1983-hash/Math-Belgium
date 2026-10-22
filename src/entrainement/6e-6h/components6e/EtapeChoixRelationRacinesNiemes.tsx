@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { IdRelationRacineUnite } from "../moteur6e/verificationRacinesNiemes";
 import { OPTIONS_RELATION_C } from "../moteur6e/verificationRacinesNiemes";
-import type { AideAvecLatex } from "../ui6e/formatRacinesNiemes";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatRacinesNiemes";
 import { LIBELLE_RELATION_C } from "../ui6e/formatRacinesNiemes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -10,9 +11,9 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -47,7 +48,7 @@ export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees,
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -58,7 +59,9 @@ export function EtapeChoixRelationRacinesNiemes({ consigneGenerale, blocDonnees,
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-grid-compact">
         {OPTIONS_RELATION_C.map((option) => (
           <button key={option} type="button" className={`btn ${choix === option ? "toggle-active" : ""} ${montrerErreurs && choix === option ? "is-erronee" : ""}`} onClick={() => setChoix(option)}>

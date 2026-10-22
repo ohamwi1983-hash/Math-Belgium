@@ -32,6 +32,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md) ; rendu via
+ * `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -102,16 +114,17 @@ export { LIBELLE_RELATION_C, OPTIONS_RELATION_C };
 // Famille A — Racines n-ièmes, cas propre.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "Calcule les n racines n-ièmes du nombre complexe w, sachant que son module et son argument sont remarquables (le résultat final se convertit toujours en forme a+bi).";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("Calcule les n racines n-ièmes du nombre complexe w, sachant que son module et son argument sont remarquables (le résultat final se convertit toujours en forme "), latex("a+bi"), texte(").")];
 }
 export function blocDonneesA(e: ExerciceRacinesA): string[] {
   return [`w=${formatWTrig(e.r, e.angle.latex)}`, `n=${e.n}`];
 }
-export function consigneEcranA(phase: PhaseRacinesNiemes): string {
-  if (phase === "aEcran1") return "Calcule le module r et l'argument θ de w.";
-  if (phase === "aEcran2") return "Calcule le module commun des n racines (r^{1/n}) et pose la formule générale de leur argument, avec k comme paramètre entier (k=0,...,n-1).";
-  return "Liste les n racines (k=0,...,n-1), converties en forme a+bi : donne la partie réelle et la partie imaginaire de chacune, séparément.";
+export function consigneEcranA(phase: PhaseRacinesNiemes): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Calcule le module r et l'argument θ de w.")];
+  if (phase === "aEcran2")
+    return [texte("Calcule le module commun des n racines "), latex("(r^{1/n})"), texte(" et pose la formule générale de leur argument, avec k comme paramètre entier "), latex("(k=0,...,n-1)"), texte(".")];
+  return [texte("Liste les n racines "), latex("(k=0,...,n-1)"), texte(", converties en forme "), latex("a+bi"), texte(" : donne la partie réelle et la partie imaginaire de chacune, séparément.")];
 }
 export function etatActuelA(e: ExerciceRacinesA, phase: PhaseRacinesNiemes): string[] | null {
   const rThetaConfirmes = `r=${e.r}\\text{, }\\theta=${e.angle.latex}\\text{ (confirmés)}`;
@@ -143,15 +156,22 @@ export function aideNiveau2A(e: ExerciceRacinesA, phase: PhaseRacinesNiemes): Ai
 // Famille B — Racines n-ièmes, cas général.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "Détermine les n racines n-ièmes du nombre complexe w, dont le module et l'argument ne sont pas nécessairement remarquables.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Détermine les n racines n-ièmes du nombre complexe w, dont le module et l'argument ne sont pas nécessairement remarquables.")];
 }
 export function blocDonneesB(e: ExerciceRacinesB): string[] {
   return [`w=${formatABPlain(e.a, e.b)}`, `n=${e.n}`];
 }
-export function consigneEcranB(phase: PhaseRacinesNiemes): string {
-  if (phase === "bEcran1") return "Calcule le module r et l'argument θ de w (une forme symbolique, ex. arctan(...), est acceptée si la valeur n'est pas remarquable).";
-  return "Donne le module commun et l'argument (en fonction du paramètre entier k, k=0,...,n-1) des n racines — la forme trigonométrique/exponentielle générale EST la réponse finale ici, aucune conversion en a+bi n'est exigée ni possible en général.";
+export function consigneEcranB(phase: PhaseRacinesNiemes): FragmentConsigne[] {
+  if (phase === "bEcran1")
+    return [texte("Calcule le module r et l'argument θ de w (une forme symbolique, ex. "), latex("\\arctan(...)"), texte(", est acceptée si la valeur n'est pas remarquable).")];
+  return [
+    texte("Donne le module commun et l'argument (en fonction du paramètre entier k, "),
+    latex("k=0,...,n-1"),
+    texte(") des n racines — la forme trigonométrique/exponentielle générale EST la réponse finale ici, aucune conversion en "),
+    latex("a+bi"),
+    texte(" n'est exigée ni possible en général."),
+  ];
 }
 export function etatActuelB(e: ExerciceRacinesB, phase: PhaseRacinesNiemes): string[] | null {
   if (phase !== "bEcran2") return null;
@@ -177,16 +197,22 @@ export function aideNiveau2B(e: ExerciceRacinesB, phase: PhaseRacinesNiemes): Ai
 // Famille C — zⁿ=wⁿ, astuce racine de l'unité.
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "Résous l'équation zⁿ=wⁿ en reconnaissant que z/w doit être une racine n-ième de l'unité (jamais en calculant directement wⁿ).";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Résous l'équation "), latex("z^n=w^n"), texte(" en reconnaissant que "), latex("z/w"), texte(" doit être une racine n-ième de l'unité (jamais en calculant directement "), latex("w^n"), texte(").")];
 }
 export function blocDonneesC(e: ExerciceRacinesC): string[] {
   return [`w=${formatWTrig(e.r, e.angle.latex)}`, `z^{${e.n}}=w^{${e.n}}`];
 }
-export function consigneEcranC(phase: PhaseRacinesNiemes): string {
-  if (phase === "cEcran1") return "Si zⁿ=wⁿ alors (z/w)ⁿ=1 : reconnais la relation qui en découle entre z, w et une racine n-ième de l'unité ζ_k.";
-  if (phase === "cEcran2") return "Donne les n racines n-ièmes de l'unité ζ_k=\\cos(2kπ/n)+i\\sin(2kπ/n), pour k=0,...,n-1 (partie réelle et partie imaginaire séparées).";
-  return "Multiplie w par chaque racine de l'unité CONFIRMÉE pour obtenir les n solutions z_k=w·ζ_k, converties en forme a+bi.";
+export function consigneEcranC(phase: PhaseRacinesNiemes): FragmentConsigne[] {
+  if (phase === "cEcran1")
+    return [texte("Si "), latex("z^n=w^n"), texte(" alors "), latex("(z/w)^n=1"), texte(" : reconnais la relation qui en découle entre z, w et une racine n-ième de l'unité "), latex("\\zeta_k"), texte(".")];
+  if (phase === "cEcran2")
+    // Bug trouvé par audit : ce fragment contenait auparavant du vrai code source LaTeX
+    // ("\\cos(2kπ/n)+i\\sin(2kπ/n)") affiché comme texte brut — les antislashs s'affichaient
+    // littéralement à l'écran au lieu d'un rendu KaTeX. Même source LaTeX, désormais un fragment
+    // `latex` réellement rendu par `<Katex>` via `RenduFragments`.
+    return [texte("Donne les n racines n-ièmes de l'unité "), latex("\\zeta_k=\\cos(2k\\pi/n)+i\\sin(2k\\pi/n)"), texte(", pour "), latex("k=0,...,n-1"), texte(" (partie réelle et partie imaginaire séparées).")];
+  return [texte("Multiplie w par chaque racine de l'unité CONFIRMÉE pour obtenir les n solutions "), latex("z_k=w\\cdot\\zeta_k"), texte(", converties en forme "), latex("a+bi"), texte(".")];
 }
 export function etatActuelC(e: ExerciceRacinesC, phase: PhaseRacinesNiemes): string[] | null {
   const relationConfirmee = `\\text{Relation confirmée : }${LIBELLE_RELATION_C.correct}`;
@@ -217,7 +243,7 @@ export function aideNiveau2C(phase: PhaseRacinesNiemes): AideAvecLatex {
 // Dispatch commun (mirroir 6gen37).
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceRacinesNiemes): string {
+export function consigneGenerale(exercice: ExerciceRacinesNiemes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -239,7 +265,7 @@ export function blocDonnees(exercice: ExerciceRacinesNiemes): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceRacinesNiemes, phase: PhaseRacinesNiemes): string {
+export function consigneEcran(exercice: ExerciceRacinesNiemes, phase: PhaseRacinesNiemes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex } from "../ui6e/formatRacinesNiemes";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatRacinesNiemes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -15,9 +16,9 @@ interface Ligne {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   /** Nombre de racines attendues (n de l'exercice) — détermine le nombre de lignes de départ. */
   nAttendu: number;
   aideNiveau1: AideAvecLatex;
@@ -73,7 +74,7 @@ export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consign
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -84,7 +85,9 @@ export function EtapeListeRacinesNiemes({ consigneGenerale, blocDonnees, consign
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="contenu-conditionnel">
         {lignes.map((ligne, i) => (
           <div key={i}>
