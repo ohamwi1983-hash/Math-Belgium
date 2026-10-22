@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { labelAjoutCentreB, labelListeCentresB, labelRayonB, placeholderCentreB } from "../ui6e/formatCercles";
-import type { AideAvecLatex } from "../ui6e/formatCercles";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatCercles";
 import { SEPARATEUR_CENTRES_B } from "../moteur6e/verificationCercles";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -12,9 +13,9 @@ import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -64,7 +65,7 @@ export function EtapeListeCentresCercles({ consigneGenerale, blocDonnees, consig
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -75,7 +76,9 @@ export function EtapeListeCentresCercles({ consigneGenerale, blocDonnees, consig
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="contenu-conditionnel">
         <div className="field">
           <label className="field-label field-label-minuscule">{labelListeCentresB()}</label>

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, ChampDef } from "../ui6e/formatComplexesAvances";
+import type { AideAvecLatex, ChampDef, FragmentConsigne } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -21,9 +22,9 @@ function champEstCompose(champ: ChampDef): boolean {
 }
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -66,7 +67,7 @@ export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, con
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -77,7 +78,9 @@ export function EtapeChampsComplexesAvances({ consigneGenerale, blocDonnees, con
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {champs.map((champ, i) => champEstCompose(champ) && <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} />)}
       <div className={`field-row ${champs.length > 1 ? "field-row-wrap" : ""}`}>
         {champs.map((champ, i) => (

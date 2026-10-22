@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { NatureLieu } from "../core6e/complexesAvances.types";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { NATURES_DISPONIBLES } from "../ui6e/formatComplexesAvances";
-import type { AideAvecLatex } from "../ui6e/formatComplexesAvances";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   demandePoleExclu: boolean;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -93,7 +94,7 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -104,7 +105,9 @@ export function EtapeLocusComplexesAvances({ consigneGenerale, blocDonnees, cons
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-grid-compact">
         {NATURES_DISPONIBLES.map((option) => (
           <button type="button" key={option.id} className={`btn ${nature === option.id ? "toggle-active" : ""} ${montrerErreurs && nature === option.id ? "is-erronee" : ""}`} onClick={() => setNature(option.id)}>

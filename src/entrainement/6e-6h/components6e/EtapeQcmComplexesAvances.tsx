@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex, OptionQcm } from "../ui6e/formatComplexesAvances";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne, OptionQcm } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   options: OptionQcm[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -45,7 +46,7 @@ export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, consig
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -56,7 +57,9 @@ export function EtapeQcmComplexesAvances({ consigneGenerale, blocDonnees, consig
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="options-grid-compact">
         {options.map((option) => (
           <button key={option.id} type="button" className={`btn ${choix === option.id ? "toggle-active" : ""} ${montrerErreurs && choix === option.id ? "is-erronee" : ""}`} onClick={() => setChoix(option.id)}>

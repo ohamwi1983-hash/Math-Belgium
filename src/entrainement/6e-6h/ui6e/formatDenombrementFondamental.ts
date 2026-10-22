@@ -46,6 +46,18 @@ export interface AideAvecLatex {
 
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function champTexte(label: string, placeholder: string): ChampDef {
   return { type: "texte", label, placeholder };
 }
@@ -68,8 +80,8 @@ function champsPositions(positions: number[], placeholderDepart = 8): ChampDef[]
 // Famille A — Principe des cases juxtaposées.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "On considère les nombres à n chiffres, tous différents, dont le premier chiffre n'est pas nul. Détermine, en comptant position par position (principe multiplicatif), le nombre de tels nombres vérifiant la contrainte donnée.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("On considère les nombres à n chiffres, tous différents, dont le premier chiffre n'est pas nul. Détermine, en comptant position par position (principe multiplicatif), le nombre de tels nombres vérifiant la contrainte donnée.")];
 }
 
 function blocDonneesA_Total(e: ExerciceDenombA_Total): string[] {
@@ -115,31 +127,31 @@ export function blocDonneesA(e: ExerciceDenombrementFondamental & { famille: "A"
   }
 }
 
-export function consigneEcranA(e: ExerciceDenombrementFondamental & { famille: "A" }, phase: PhaseDenombrementFondamental): string {
+export function consigneEcranA(e: ExerciceDenombrementFondamental & { famille: "A" }, phase: PhaseDenombrementFondamental): FragmentConsigne[] {
   switch (e.sousType) {
     case "total":
-      if (phase === "aTotalEcran1") return "Combien de choix as-tu pour le premier chiffre (non nul) ?";
-      return "Combien de choix restent, position par position, pour les chiffres suivants (les chiffres déjà utilisés ne sont plus disponibles) ? Termine en donnant le nombre TOTAL de tels nombres.";
+      if (phase === "aTotalEcran1") return [texte("Combien de choix as-tu pour le premier chiffre (non nul) ?")];
+      return [texte("Combien de choix restent, position par position, pour les chiffres suivants (les chiffres déjà utilisés ne sont plus disponibles) ? Termine en donnant le nombre TOTAL de tels nombres.")];
     case "positionFixee":
       if (phase === "aPositionFixeeEcran1") {
-        return e.variante === "dernier" ? "Combien de choix as-tu pour le chiffre fixé, puis pour le premier chiffre (non nul, et différent du chiffre déjà fixé) ?" : "Combien de choix as-tu pour chacun des chiffres déjà fixés ?";
+        return [texte(e.variante === "dernier" ? "Combien de choix as-tu pour le chiffre fixé, puis pour le premier chiffre (non nul, et différent du chiffre déjà fixé) ?" : "Combien de choix as-tu pour chacun des chiffres déjà fixés ?")];
       }
-      return "Combien de choix restent pour les positions NON fixées, position par position ? Termine en donnant le nombre TOTAL de tels nombres.";
+      return [texte("Combien de choix restent pour les positions NON fixées, position par position ? Termine en donnant le nombre TOTAL de tels nombres.")];
     case "contientUnChiffre":
-      if (phase === "aContientUnEcran1") return "Pour compter les nombres NE contenant PAS ce chiffre : combien de choix as-tu pour le premier chiffre ?";
-      if (phase === "aContientUnEcran2") return "Combien de choix restent pour les positions suivantes ? Termine en donnant le nombre de nombres ne contenant PAS ce chiffre.";
-      return "En utilisant la technique du complément (total moins le nombre CONFIRMÉ ne contenant pas ce chiffre), donne le résultat final.";
+      if (phase === "aContientUnEcran1") return [texte("Pour compter les nombres NE contenant PAS ce chiffre : combien de choix as-tu pour le premier chiffre ?")];
+      if (phase === "aContientUnEcran2") return [texte("Combien de choix restent pour les positions suivantes ? Termine en donnant le nombre de nombres ne contenant PAS ce chiffre.")];
+      return [texte("En utilisant la technique du complément (total moins le nombre CONFIRMÉ ne contenant pas ce chiffre), donne le résultat final.")];
     case "contientDeuxChiffres":
-      if (phase === "aContientDeuxEcran1") return "Pour compter les nombres NE contenant NI l'un NI l'autre chiffre : combien de choix as-tu pour le premier chiffre ?";
-      if (phase === "aContientDeuxEcran2") return "Combien de choix restent pour les positions suivantes ? Termine en donnant le nombre de nombres ne contenant aucun des deux chiffres.";
-      return "En utilisant l'inclusion-exclusion (T − Ā − B̄ + Ā∩B̄, à partir des valeurs CONFIRMÉES), donne le résultat final.";
+      if (phase === "aContientDeuxEcran1") return [texte("Pour compter les nombres NE contenant NI l'un NI l'autre chiffre : combien de choix as-tu pour le premier chiffre ?")];
+      if (phase === "aContientDeuxEcran2") return [texte("Combien de choix restent pour les positions suivantes ? Termine en donnant le nombre de nombres ne contenant aucun des deux chiffres.")];
+      return [texte("En utilisant l'inclusion-exclusion ("), latex("T-\\bar A-\\bar B+\\bar A\\cap\\bar B"), texte(", à partir des valeurs CONFIRMÉES), donne le résultat final.")];
     case "borneSuperieure":
-      if (phase === "aBorneEcran1") return "Combien de choix as-tu pour le premier chiffre, sachant qu'il doit être non nul et strictement inférieur à la borne donnée ?";
-      return "Combien de choix restent pour les positions suivantes ? Termine en donnant le nombre TOTAL de tels nombres.";
+      if (phase === "aBorneEcran1") return [texte("Combien de choix as-tu pour le premier chiffre, sachant qu'il doit être non nul et strictement inférieur à la borne donnée ?")];
+      return [texte("Combien de choix restent pour les positions suivantes ? Termine en donnant le nombre TOTAL de tels nombres.")];
     case "parite":
-      if (phase === "aPariteEcran1") return "Distingue les 2 cas possibles pour le dernier chiffre : donne le nombre de choix pour le premier chiffre SI le dernier chiffre vaut 0, puis SI le dernier chiffre est non nul.";
-      if (phase === "aPariteEcran2") return "Combien de choix restent pour les positions du milieu (ni la première, ni la dernière) ? Cette séquence est LA MÊME dans les 2 cas.";
-      return "Combine les 2 cas CONFIRMÉS (dernier chiffre = 0, puis dernier chiffre non nul) pour obtenir le résultat final.";
+      if (phase === "aPariteEcran1") return [texte("Distingue les 2 cas possibles pour le dernier chiffre : donne le nombre de choix pour le premier chiffre SI le dernier chiffre vaut 0, puis SI le dernier chiffre est non nul.")];
+      if (phase === "aPariteEcran2") return [texte("Combien de choix restent pour les positions du milieu (ni la première, ni la dernière) ? Cette séquence est LA MÊME dans les 2 cas.")];
+      return [texte("Combine les 2 cas CONFIRMÉS (dernier chiffre = 0, puis dernier chiffre non nul) pour obtenir le résultat final.")];
   }
 }
 
@@ -249,17 +261,17 @@ export function aideNiveau2A(e: ExerciceDenombrementFondamental & { famille: "A"
 // Famille B — Diagonales d'un polygone.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "Un polygone convexe à n côtés possède D(n)=n(n-3)/2 diagonales.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Un polygone convexe à n côtés possède "), latex("D(n)=n(n-3)/2"), texte(" diagonales.")];
 }
 export function blocDonneesB(e: ExerciceDenombrementFondamental & { famille: "B" }): string[] {
   if (e.sousType === "direct") return [`n=${e.n}`, "D(n)=\\,?"];
   return [`D=${e.diagonales}`, "n=\\,?"];
 }
-export function consigneEcranB(e: ExerciceDenombrementFondamental & { famille: "B" }, phase: PhaseDenombrementFondamental): string {
-  if (e.sousType === "direct") return "Calcule D(n)=n(n-3)/2.";
-  if (phase === "bInverseEcran1") return "Pose n(n-3)/2=D, multiplie par 2 puis développe : complète l'équation du second degré n² − 3n − ⬚ = 0.";
-  return "Résous l'équation CONFIRMÉE pour n>0 entier (formule quadratique).";
+export function consigneEcranB(e: ExerciceDenombrementFondamental & { famille: "B" }, phase: PhaseDenombrementFondamental): FragmentConsigne[] {
+  if (e.sousType === "direct") return [texte("Calcule "), latex("D(n)=n(n-3)/2"), texte(".")];
+  if (phase === "bInverseEcran1") return [texte("Pose "), latex("n(n-3)/2=D"), texte(", multiplie par 2 puis développe : complète l'équation du second degré "), latex("n^2-3n-\\square=0"), texte(".")];
+  return [texte("Résous l'équation CONFIRMÉE pour n>0 entier (formule quadratique).")];
 }
 export function etatActuelB(e: ExerciceDenombrementFondamental & { famille: "B" }, phase: PhaseDenombrementFondamental): string[] | null {
   if (e.sousType === "inverse" && phase === "bInverseEcran2") return [`n^2-3n-${e.constanteEquation}=0\\text{ (confirmé)}`];
@@ -290,8 +302,8 @@ const LIBELLE_FORMULE_C: Record<ExerciceDenombrementC["formule"], string> = {
   puissance: "Puissance (n^k)",
 };
 
-export function consigneGeneraleC(): string {
-  return "Identifie la technique de dénombrement appropriée (l'ordre compte-t-il ?), puis calcule le résultat.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Identifie la technique de dénombrement appropriée (l'ordre compte-t-il ?), puis calcule le résultat.")];
 }
 export function blocDonneesC(e: ExerciceDenombrementC): string[] {
   switch (e.sousType) {
@@ -309,9 +321,9 @@ export function blocDonneesC(e: ExerciceDenombrementC): string[] {
     }
   }
 }
-export function consigneEcranC(phase: PhaseDenombrementFondamental): string {
-  if (phase === "cEcran1") return "L'ordre des éléments choisis a-t-il de l'importance dans ce contexte ? Choisis la formule appropriée.";
-  return "Calcule le résultat à partir de la formule CONFIRMÉE.";
+export function consigneEcranC(phase: PhaseDenombrementFondamental): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("L'ordre des éléments choisis a-t-il de l'importance dans ce contexte ? Choisis la formule appropriée.")];
+  return [texte("Calcule le résultat à partir de la formule CONFIRMÉE.")];
 }
 export function etatActuelC(e: ExerciceDenombrementC, phase: PhaseDenombrementFondamental): string[] | null {
   if (phase === "cEcran2") return [`\\text{Formule confirmée : }${LIBELLE_FORMULE_C[e.formule]}`];
@@ -345,8 +357,8 @@ export function aideNiveau2C(e: ExerciceDenombrementC, phase: PhaseDenombrementF
 // Famille D — Arrangements par blocs ou groupes.
 // ============================================================================
 
-export function consigneGeneraleD(): string {
-  return "Certains éléments doivent rester groupés (traités comme un seul bloc) — détermine le nombre total d'arrangements possibles.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("Certains éléments doivent rester groupés (traités comme un seul bloc) — détermine le nombre total d'arrangements possibles.")];
 }
 export function blocDonneesD(e: ExerciceDenombrementD): string[] {
   if (e.sousType === "grouper") {
@@ -356,10 +368,10 @@ export function blocDonneesD(e: ExerciceDenombrementD): string[] {
   const clause = e.sousType === "consecutivesOrdreFixe" ? `\\text{dans CET ORDRE PRÉCIS}` : `\\text{dans un ordre QUELCONQUE entre elles}`;
   return [`\\text{Mot de }${(e.mot ?? "").length}\\text{ lettres : }${e.mot}`, `\\text{Consécutives : }${e.lettresConsecutives}`, clause];
 }
-export function consigneEcranD(phase: PhaseDenombrementFondamental): string {
-  if (phase === "dEcran1") return "Combien d'unités distinctes (blocs + éléments isolés éventuels) doivent être arrangées, en traitant chaque bloc comme une seule unité ?";
-  if (phase === "dEcran2") return "Combien d'arrangements possibles pour ces unités entre elles (nombre d'unités CONFIRMÉ, factorielle) ?";
-  return "Combine avec les arrangements INTERNES à chaque bloc (1 seul si l'ordre interne est imposé, k! si libre) pour obtenir le résultat final.";
+export function consigneEcranD(phase: PhaseDenombrementFondamental): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Combien d'unités distinctes (blocs + éléments isolés éventuels) doivent être arrangées, en traitant chaque bloc comme une seule unité ?")];
+  if (phase === "dEcran2") return [texte("Combien d'arrangements possibles pour ces unités entre elles (nombre d'unités CONFIRMÉ, factorielle) ?")];
+  return [texte("Combine avec les arrangements INTERNES à chaque bloc (1 seul si l'ordre interne est imposé, "), latex("k!"), texte(" si libre) pour obtenir le résultat final.")];
 }
 export function etatActuelD(e: ExerciceDenombrementD, phase: PhaseDenombrementFondamental): string[] | null {
   if (phase === "dEcran2") return [`\\text{Nombre d'unités : }${e.nombreUnites}\\text{ (confirmé)}`];
@@ -397,8 +409,8 @@ const LIBELLE_SOUS_TYPE_E: Record<ExerciceDenombrementE["sousType"], string> = {
   collier: "Collier/bracelet — (n-1)!/2",
 };
 
-export function consigneGeneraleE(): string {
-  return "n objets distincts sont disposés en cercle. Identifie si seules les rotations sont équivalentes, ou aussi les réflexions (retournement), puis calcule le résultat.";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("n objets distincts sont disposés en cercle. Identifie si seules les rotations sont équivalentes, ou aussi les réflexions (retournement), puis calcule le résultat.")];
 }
 export function blocDonneesE(e: ExerciceDenombrementE): string[] {
   if (e.sousType === "table") {
@@ -406,9 +418,9 @@ export function blocDonneesE(e: ExerciceDenombrementE): string[] {
   }
   return [`n=${e.n}`, "\\text{Perles enfilées en bracelet}", "\\text{(le bracelet peut être retourné)}"];
 }
-export function consigneEcranE(phase: PhaseDenombrementFondamental): string {
-  if (phase === "eEcran1") return "Le contexte autorise-t-il aussi le retournement (réflexion) ? Choisis la formule appropriée.";
-  return "Calcule le résultat à partir de la formule CONFIRMÉE.";
+export function consigneEcranE(phase: PhaseDenombrementFondamental): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Le contexte autorise-t-il aussi le retournement (réflexion) ? Choisis la formule appropriée.")];
+  return [texte("Calcule le résultat à partir de la formule CONFIRMÉE.")];
 }
 export function etatActuelE(e: ExerciceDenombrementE, phase: PhaseDenombrementFondamental): string[] | null {
   if (phase === "eEcran2") return [`\\text{Formule confirmée : }${LIBELLE_SOUS_TYPE_E[e.sousType]}`];
@@ -442,7 +454,7 @@ export function aideNiveau2E(phase: PhaseDenombrementFondamental): AideAvecLatex
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceDenombrementFondamental): string {
+export function consigneGenerale(exercice: ExerciceDenombrementFondamental): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -472,7 +484,7 @@ export function blocDonnees(exercice: ExerciceDenombrementFondamental): string[]
   }
 }
 
-export function consigneEcran(exercice: ExerciceDenombrementFondamental, phase: PhaseDenombrementFondamental): string {
+export function consigneEcran(exercice: ExerciceDenombrementFondamental, phase: PhaseDenombrementFondamental): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(exercice, phase);

@@ -22,6 +22,18 @@ import { pgcd } from "../generateurs6e/calculPrimitives/aleatoire";
  * rendu sur de nombreux tirages aléatoires des 5 familles.
  */
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 export type TypeChamp = "texte";
 
 export interface ChampDef {
@@ -94,18 +106,29 @@ export function affixeLatexRationnel(a: number, b: number): string {
 // Famille A.
 // ============================================================================
 
-export function consigneGeneraleA(e: ExerciceComplexesA): string {
-  return `z=a+bi est un nombre complexe quelconque (a et b réels). On étudie zⁿ pour n=${e.n}, et on cherche la condition sur a et b pour que zⁿ soit un réel strictement supérieur à k=${e.k}.`;
+export function consigneGeneraleA(e: ExerciceComplexesA): FragmentConsigne[] {
+  return [
+    latex("z=a+bi"),
+    texte(" est un nombre complexe quelconque (a et b réels). On étudie "),
+    latex("z^n"),
+    texte(` pour `),
+    latex(`n=${e.n}`),
+    texte(", et on cherche la condition sur a et b pour que "),
+    latex("z^n"),
+    texte(" soit un réel strictement supérieur à "),
+    latex(`k=${e.k}`),
+    texte("."),
+  ];
 }
 
 export function blocDonneesA(e: ExerciceComplexesA): string[] {
   return [`z=a+bi\\quad n=${e.n}\\quad k=${e.k}`];
 }
 
-export function consigneEcranA(phase: PhaseComplexesAvances): string {
-  if (phase === "aEcran1") return "Quelle est la condition sur θ (l'argument de z) pour que zⁿ soit un réel STRICTEMENT POSITIF (pas seulement réel) ?";
-  if (phase === "aEcran2") return "En utilisant la condition CONFIRMÉE sur θ, quelle est la condition correspondante sur a et b ?";
-  return "En ajoutant la condition sur le module pour que zⁿ dépasse strictement k, quelle est la condition complète finale ?";
+export function consigneEcranA(phase: PhaseComplexesAvances): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Quelle est la condition sur θ (l'argument de z) pour que "), latex("z^n"), texte(" soit un réel STRICTEMENT POSITIF (pas seulement réel) ?")];
+  if (phase === "aEcran2") return [texte("En utilisant la condition CONFIRMÉE sur θ, quelle est la condition correspondante sur a et b ?")];
+  return [texte("En ajoutant la condition sur le module pour que "), latex("z^n"), texte(" dépasse strictement k, quelle est la condition complète finale ?")];
 }
 
 const LIBELLE_CAB: Record<3 | 4, string> = {
@@ -185,21 +208,33 @@ const LIBELLE_SOUS_TYPE_B: Record<ExerciceComplexesB["sousType"], string> = {
   intersection: "intersection de 2 lieux",
 };
 
-export function consigneGeneraleB(e: ExerciceComplexesB): string {
+export function consigneGeneraleB(e: ExerciceComplexesB): FragmentConsigne[] {
   if (e.sousType === "intersection") {
-    return "M est un point d'affixe z=x+yi. Il vérifie SIMULTANÉMENT 2 conditions : (z-q1)/(z-q2) est un nombre RÉEL (M est sur une droite passant par q1 et q2), ET z·z̄=k (M est sur un cercle centré en O). Détermine chaque lieu, puis les points d'intersection.";
+    return [
+      texte("M est un point d'affixe "),
+      latex("z=x+yi"),
+      texte(". Il vérifie SIMULTANÉMENT 2 conditions : "),
+      latex("\\dfrac{z-q_1}{z-q_2}"),
+      texte(" est un nombre RÉEL (M est sur une droite passant par "),
+      latex("q_1"),
+      texte(" et "),
+      latex("q_2"),
+      texte("), ET "),
+      latex("z\\cdot\\bar z=k"),
+      texte(" (M est sur un cercle centré en O). Détermine chaque lieu, puis les points d'intersection."),
+    ];
   }
   switch (e.sousType) {
     case "droite":
-      return "M est un point d'affixe z=x+yi. On sait que le rapport (z-p1)/(z-p2) est un nombre RÉEL. Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M (le pôle éventuel est exclu du lieu).";
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(". On sait que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un nombre RÉEL. Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M (le pôle éventuel est exclu du lieu).")];
     case "thales":
-      return "M est un point d'affixe z=x+yi. On sait que le rapport (z-p1)/(z-p2) est un nombre IMAGINAIRE PUR. Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M (le pôle éventuel est exclu du lieu).";
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(". On sait que le rapport "), latex("\\dfrac{z-p_1}{z-p_2}"), texte(" est un nombre IMAGINAIRE PUR. Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M (le pôle éventuel est exclu du lieu).")];
     case "apollonius":
-      return "M est un point d'affixe z=x+yi tel que |z-p1| = k·|z-p2| (k≠1, donné). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.";
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("|z-p_1|=k\\cdot|z-p_2|"), texte(" (k≠1, donné). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.")];
     case "demiDroites":
-      return "M est un point d'affixe z=x+yi (z≠0) tel que z+z̄ = c·|z| (c donné). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.";
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" (z≠0) tel que "), latex("z+\\bar z=c\\cdot|z|"), texte(" (c donné). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.")];
     case "cercleO":
-      return "M est un point d'affixe z=x+yi tel que z·z̄ = k (k donné, k>0). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.";
+      return [texte("M est un point d'affixe "), latex("z=x+yi"), texte(" tel que "), latex("z\\cdot\\bar z=k"), texte(" (k donné, k>0). Détermine l'équation vérifiée par x et y, puis identifie la nature du lieu de M.")];
   }
 }
 
@@ -220,14 +255,14 @@ export function blocDonneesB(e: ExerciceComplexesB): string[] {
   }
 }
 
-export function consigneEcranB(e: ExerciceComplexesB, phase: PhaseComplexesAvances): string {
+export function consigneEcranB(e: ExerciceComplexesB, phase: PhaseComplexesAvances): FragmentConsigne[] {
   if (e.sousType === "intersection") {
-    if (phase === "bInterEcran1") return "Pose l'équation en x,y de la droite (q1,q2), PUIS l'équation en x,y du cercle centré en O (2 champs).";
-    if (phase === "bInterEcran2") return "Donne les paramètres de chaque lieu CONFIRMÉ ci-dessus : 2 points pour la droite, centre et rayon pour le cercle.";
-    return "Résous le système des 2 équations CONFIRMÉES pour trouver les points d'intersection.";
+    if (phase === "bInterEcran1") return [texte("Pose l'équation en x,y de la droite ("), latex("q_1,q_2"), texte("), PUIS l'équation en x,y du cercle centré en O (2 champs).")];
+    if (phase === "bInterEcran2") return [texte("Donne les paramètres de chaque lieu CONFIRMÉ ci-dessus : 2 points pour la droite, centre et rayon pour le cercle.")];
+    return [texte("Résous le système des 2 équations CONFIRMÉES pour trouver les points d'intersection.")];
   }
-  if (phase === "bEcran1") return "Pose l'équation en x,y correspondant à la condition donnée.";
-  return "À partir de l'équation CONFIRMÉE, identifie la nature du lieu (droite, cercle, ou demi-droite(s)), puis donne ses paramètres.";
+  if (phase === "bEcran1") return [texte("Pose l'équation en x,y correspondant à la condition donnée.")];
+  return [texte("À partir de l'équation CONFIRMÉE, identifie la nature du lieu (droite, cercle, ou demi-droite(s)), puis donne ses paramètres.")];
 }
 
 export function etatActuelB(e: ExerciceComplexesB, phase: PhaseComplexesAvances): string[] | null {
@@ -278,18 +313,42 @@ function latexParamsLocus(resultat: ParamsLocus): string[] {
 // Famille C.
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return `z est un point du cercle unité (|z|=1, donc z·z̄=1). On considère la transformation z'=(z-p)/(1-p̄z), avec p=a+bi. On note z̄ le conjugué de z (à taper "zb" dans les formules). Démontre que |z'|=1, en développant |z-p|² puis |1-p̄z|² SANS jamais poser z=x+yi — utilise uniquement z·z̄=1 et z-z̄=2i·Im(z).`;
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    texte("z est un point du cercle unité ("),
+    latex("|z|=1"),
+    texte(", donc "),
+    latex("z\\cdot\\bar z=1"),
+    texte("). On considère la transformation "),
+    latex("z'=\\dfrac{z-p}{1-\\bar p z}"),
+    texte(", avec "),
+    latex("p=a+bi"),
+    texte(". On note "),
+    latex("\\bar z"),
+    texte(' le conjugué de z (à taper "zb" dans les formules). Démontre que '),
+    latex("|z'|=1"),
+    texte(", en développant "),
+    latex("|z-p|^2"),
+    texte(" puis "),
+    latex("|1-\\bar p z|^2"),
+    texte(" SANS jamais poser "),
+    latex("z=x+yi"),
+    texte(" — utilise uniquement "),
+    latex("z\\cdot\\bar z=1"),
+    texte(" et "),
+    latex("z-\\bar z=2i\\cdot\\text{Im}(z)"),
+    texte("."),
+  ];
 }
 
 export function blocDonneesC(e: ExerciceComplexesC): string[] {
   return [`p=${e.a}${e.b < 0 ? "" : "+"}${e.b}i`, `z\\cdot\\, \\bar{z}=1`];
 }
 
-export function consigneEcranC(phase: PhaseComplexesAvances): string {
-  if (phase === "cEcran1") return "Développe |z-p|² = (z-p)(z̄-p̄), en utilisant z·z̄=1 (donné). Champ : expression simplifiée (en z et zb).";
-  if (phase === "cEcran2") return "Développe |1-p̄z|² = (1-p̄z)(1-pz̄), en utilisant les mêmes relations. Champ : expression simplifiée (en z et zb).";
-  return "Conclus : les 2 expressions confirmées sont-elles égales (donc |z'|=1) ? Et la réciproque (échanger z et z' redonne une transformation analogue) est-elle vraie ?";
+export function consigneEcranC(phase: PhaseComplexesAvances): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Développe "), latex("|z-p|^2=(z-p)(\\bar z-\\bar p)"), texte(", en utilisant "), latex("z\\cdot\\bar z=1"), texte(" (donné). Champ : expression simplifiée (en z et zb).")];
+  if (phase === "cEcran2") return [texte("Développe "), latex("|1-\\bar p z|^2=(1-\\bar p z)(1-p\\bar z)"), texte(", en utilisant les mêmes relations. Champ : expression simplifiée (en z et zb).")];
+  return [texte("Conclus : les 2 expressions confirmées sont-elles égales (donc "), latex("|z'|=1"), texte(") ? Et la réciproque (échanger z et z' redonne une transformation analogue) est-elle vraie ?")];
 }
 
 export function etatActuelC(phase: PhaseComplexesAvances): string[] | null {
@@ -334,16 +393,28 @@ export function aideNiveau2C(phase: PhaseComplexesAvances): AideAvecLatex {
 // Famille D.
 // ============================================================================
 
-export function consigneGeneraleD(e: ExerciceComplexesD): string {
+export function consigneGeneraleD(e: ExerciceComplexesD): FragmentConsigne[] {
   switch (e.sousType) {
     case "ratio":
-      return `On cherche à résoudre (z+c)ⁿ=k·zⁿ, ce qui équivaut à ((z+c)/z)ⁿ=k (pour z≠0). On pose u=(z+c)/z : trouve d'abord toutes les solutions u de uⁿ=k, PUIS calcule z depuis la solution réelle u=m.`;
+      return [
+        texte("On cherche à résoudre "),
+        latex("(z+c)^n=k\\cdot z^n"),
+        texte(", ce qui équivaut à "),
+        latex("\\left(\\dfrac{z+c}{z}\\right)^n=k"),
+        texte(" (pour z≠0). On pose "),
+        latex("u=\\dfrac{z+c}{z}"),
+        texte(" : trouve d'abord toutes les solutions u de "),
+        latex("u^n=k"),
+        texte(", PUIS calcule z depuis la solution réelle "),
+        latex("u=m"),
+        texte("."),
+      ];
     case "reelles":
-      return `L'équation z²+[-A+(m₀-m)i]z+[P+k(m-m₀)i]=0 dépend d'un paramètre réel m. Trouve la valeur de m pour laquelle cette équation admet 2 solutions réelles.`;
+      return [texte("L'équation "), latex("z^2+[-A+(m_0-m)i]z+[P+k(m-m_0)i]=0"), texte(" dépend d'un paramètre réel m. Trouve la valeur de m pour laquelle cette équation admet 2 solutions réelles.")];
     case "coef":
-      return `L'équation z²+αz+β=0 a des coefficients α,β réels INCONNUS. On sait qu'elle admet la racine donnée z₀. Retrouve α et β.`;
+      return [texte("L'équation "), latex("z^2+\\alpha z+\\beta=0"), texte(" a des coefficients α,β réels INCONNUS. On sait qu'elle admet la racine donnée "), latex("z_0"), texte(". Retrouve α et β.")];
     case "modules":
-      return `Trouve z tel que |z|=|1/z| ET |z|=|z-d| (d donné) soient simultanément vérifiées.`;
+      return [texte("Trouve z tel que "), latex("|z|=|1/z|"), texte(" ET "), latex("|z|=|z-d|"), texte(" (d donné) soient simultanément vérifiées.")];
   }
 }
 
@@ -370,18 +441,24 @@ export function blocDonneesD(e: ExerciceComplexesD): string[] {
   }
 }
 
-export function consigneEcranD(e: ExerciceComplexesD, phase: PhaseComplexesAvances): string {
+export function consigneEcranD(e: ExerciceComplexesD, phase: PhaseComplexesAvances): FragmentConsigne[] {
   switch (e.sousType) {
     case "ratio":
-      return phase === "dRatioEcran1" ? `Trouve les ${e.n} solutions u de uⁿ=k (ajoute une ligne par solution).` : "Utilise la solution RÉELLE u=m (confirmée) pour calculer z=c/(u-1).";
+      return phase === "dRatioEcran1"
+        ? [texte(`Trouve les ${e.n} solutions u de `), latex("u^n=k"), texte(" (ajoute une ligne par solution).")]
+        : [texte("Utilise la solution RÉELLE "), latex("u=m"), texte(" (confirmée) pour calculer "), latex("z=\\dfrac{c}{u-1}"), texte(".")];
     case "reelles":
-      if (phase === "dReellesEcran1") return "Substitue z=x (réel), sépare l'équation en 2 équations réelles (partie réelle=0, partie imaginaire=0).";
-      if (phase === "dReellesEcran2") return "À partir des 2 équations CONFIRMÉES, déduis la valeur de m pour laquelle elles partagent les mêmes racines x.";
-      return "Donne les 2 solutions réelles, pour le m CONFIRMÉ.";
+      if (phase === "dReellesEcran1") return [texte("Substitue "), latex("z=x"), texte(" (réel), sépare l'équation en 2 équations réelles (partie réelle=0, partie imaginaire=0).")];
+      if (phase === "dReellesEcran2") return [texte("À partir des 2 équations CONFIRMÉES, déduis la valeur de m pour laquelle elles partagent les mêmes racines x.")];
+      return [texte("Donne les 2 solutions réelles, pour le m CONFIRMÉ.")];
     case "coef":
-      return phase === "dCoefEcran1" ? "Substitue z₀ dans le polynôme, développe, sépare en 2 équations (partie réelle=0, partie imaginaire=0) en α et β." : "Résous le système CONFIRMÉ pour α et β.";
+      return phase === "dCoefEcran1"
+        ? [texte("Substitue "), latex("z_0"), texte(" dans le polynôme, développe, sépare en 2 équations (partie réelle=0, partie imaginaire=0) en α et β.")]
+        : [texte("Résous le système CONFIRMÉ pour α et β.")];
     case "modules":
-      return phase === "dModulesEcran1" ? "Déduis |z| depuis |z|=|1/z|." : "Utilise |z|=1 CONFIRMÉ et |z|=|z-d| pour trouver les solutions z (ajoute une ligne par solution).";
+      return phase === "dModulesEcran1"
+        ? [texte("Déduis |z| depuis "), latex("|z|=|1/z|"), texte(".")]
+        : [texte("Utilise "), latex("|z|=1"), texte(" CONFIRMÉ et "), latex("|z|=|z-d|"), texte(" pour trouver les solutions z (ajoute une ligne par solution).")];
   }
 }
 
@@ -429,18 +506,18 @@ export function niveauAideMaxD(): number {
 // Famille E.
 // ============================================================================
 
-export function consigneGeneraleE(): string {
-  return "A, B, C, D sont 4 points donnés par leurs affixes. Détermine si les droites (AB) et (CD) sont parallèles, perpendiculaires, ou ni l'un ni l'autre, en étudiant l'argument du rapport (zD-zC)/(zB-zA).";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("A, B, C, D sont 4 points donnés par leurs affixes. Détermine si les droites (AB) et (CD) sont parallèles, perpendiculaires, ou ni l'un ni l'autre, en étudiant l'argument du rapport "), latex("\\dfrac{z_D-z_C}{z_B-z_A}"), texte(".")];
 }
 
 export function blocDonneesE(e: ExerciceComplexesE): string[] {
   return [`z_A=${affixeLatex(e.zA)}\\quad z_B=${affixeLatex(e.zB)}\\quad z_C=${affixeLatex(e.zC)}\\quad z_D=${affixeLatex(e.zD)}`];
 }
 
-export function consigneEcranE(phase: PhaseComplexesAvances): string {
-  if (phase === "eEcran1") return "Calcule le rapport (zD-zC)/(zB-zA), sous forme a+bi.";
-  if (phase === "eEcran2") return "À partir du rapport CONFIRMÉ, détermine son argument.";
-  return "Conclus : les droites (AB) et (CD) sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ?";
+export function consigneEcranE(phase: PhaseComplexesAvances): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Calcule le rapport "), latex("\\dfrac{z_D-z_C}{z_B-z_A}"), texte(", sous forme a+bi.")];
+  if (phase === "eEcran2") return [texte("À partir du rapport CONFIRMÉ, détermine son argument.")];
+  return [texte("Conclus : les droites (AB) et (CD) sont-elles parallèles, perpendiculaires, ou ni l'un ni l'autre ?")];
 }
 
 export function etatActuelE(phase: PhaseComplexesAvances): string[] | null {
@@ -476,7 +553,7 @@ export function aideNiveau2E(phase: PhaseComplexesAvances): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceComplexesAvances): string {
+export function consigneGenerale(exercice: ExerciceComplexesAvances): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA(exercice);
@@ -506,7 +583,7 @@ export function blocDonnees(exercice: ExerciceComplexesAvances): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceComplexesAvances, phase: PhaseComplexesAvances): string {
+export function consigneEcran(exercice: ExerciceComplexesAvances, phase: PhaseComplexesAvances): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

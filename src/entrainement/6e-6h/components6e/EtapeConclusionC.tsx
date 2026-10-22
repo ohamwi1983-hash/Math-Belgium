@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex, OptionQcm } from "../ui6e/formatComplexesAvances";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne, OptionQcm } from "../ui6e/formatComplexesAvances";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   optionsStatut: OptionQcm[];
   optionsReciproque: OptionQcm[];
   aideNiveau1: AideAvecLatex;
@@ -49,7 +50,7 @@ export function EtapeConclusionC({ consigneGenerale, blocDonnees, consigneEcran,
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -60,7 +61,9 @@ export function EtapeConclusionC({ consigneGenerale, blocDonnees, consigneEcran,
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <p className="prompt-text">Les 2 expressions confirmées sont-elles égales ?</p>
       <div className="options-grid-compact">
         {optionsStatut.map((option) => (

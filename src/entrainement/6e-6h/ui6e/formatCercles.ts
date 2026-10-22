@@ -2,6 +2,18 @@ import type { DonneesTriangleInscrit, DroiteAffine, ExerciceCercles, Point } fro
 import type { PhaseCercles, ResultatExerciceCercles } from "../moteur6e/typesCercles";
 import { phasesPourExercice } from "../moteur6e/typesCercles";
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen55`. Dispatch sur
  * `exercice.famille` PUIS `phase` (pas de sous-type ici, contrairement à `6gen43`) — mirroir
@@ -125,16 +137,16 @@ function champ(label: string, placeholder: string): ChampDef {
 // Famille A — Cercle par 3 points.
 // ============================================================================
 
-function consigneGeneraleA(): string {
-  return "On cherche l'équation d'un cercle passant par 3 points A, B et C non alignés, sous la forme générale x²+y²+Dx+Ey+F=0, puis son centre et son rayon.";
+function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("On cherche l'équation d'un cercle passant par 3 points A, B et C non alignés, sous la forme générale "), latex("x^2+y^2+Dx+Ey+F=0"), texte(", puis son centre et son rayon.")];
 }
 function blocDonneesA(e: Extract<ExerciceCercles, { famille: "A" }>): string[] {
   return [labelPoint("A", e.A), labelPoint("B", e.B), labelPoint("C", e.C)];
 }
-function consigneEcranA(phase: PhaseCercles): string {
-  if (phase === "aEcran1") return "Substitue A, B puis C dans x²+y²+Dx+Ey+F=0 : écris les 3 équations en D, E, F ainsi obtenues (une par point).";
-  if (phase === "aEcran2") return "Résous ce système de 3 équations à 3 inconnues (D, E, F).";
-  return "À partir de D, E, F CONFIRMÉS, donne les coordonnées du centre (−D/2;−E/2) et le rayon √(D²/4+E²/4−F).";
+function consigneEcranA(phase: PhaseCercles): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Substitue A, B puis C dans "), latex("x^2+y^2+Dx+Ey+F=0"), texte(" : écris les 3 équations en D, E, F ainsi obtenues (une par point).")];
+  if (phase === "aEcran2") return [texte("Résous ce système de 3 équations à 3 inconnues (D, E, F).")];
+  return [texte("À partir de D, E, F CONFIRMÉS, donne les coordonnées du centre "), latex("\\left(-\\dfrac{D}{2};-\\dfrac{E}{2}\\right)"), texte(" et le rayon "), latex("\\sqrt{\\dfrac{D^2}{4}+\\dfrac{E^2}{4}-F}"), texte(".")];
 }
 // Accumulation (correctif transversal — le bloc "état actuel" doit lister TOUTES les réponses
 // validées des écrans précédents, du plus ancien au plus récent, jamais seulement celle de l'écran
@@ -176,16 +188,16 @@ function blocDonneesAB(A: Point, B: Point): string[] {
 // Famille B — Cercle par 2 points, rayon donné.
 // ============================================================================
 
-function consigneGeneraleB(): string {
-  return "On cherche les cercles de rayon r donné passant par 2 points A et B distincts.";
+function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On cherche les cercles de rayon r donné passant par 2 points A et B distincts.")];
 }
 function blocDonneesB(e: Extract<ExerciceCercles, { famille: "B" }>): string[] {
   return [...blocDonneesAB(e.A, e.B), `r=${formatValeurAffichage(e.r)}`];
 }
-function consigneEcranB(phase: PhaseCercles): string {
-  if (phase === "bEcran1") return "Le centre d'un cercle passant par A et B est nécessairement équidistant des deux points. Écris l'équation de la médiatrice de [AB], le lieu de tous les points équidistants de A et B.";
-  if (phase === "bEcran2") return "Le centre appartient à la médiatrice CONFIRMÉE : en le paramétrant par son abscisse x, écris l'équation traduisant distance(centre,A)=r.";
-  return "Résous l'équation CONFIRMÉE : elle admet en général 2 solutions pour x, donc 2 centres possibles. Donne les 2 centres (ajoute une ligne par centre trouvé) ainsi que le rayon commun.";
+function consigneEcranB(phase: PhaseCercles): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Le centre d'un cercle passant par A et B est nécessairement équidistant des deux points. Écris l'équation de la médiatrice de "), latex("[AB]"), texte(", le lieu de tous les points équidistants de A et B.")];
+  if (phase === "bEcran2") return [texte("Le centre appartient à la médiatrice CONFIRMÉE : en le paramétrant par son abscisse x, écris l'équation traduisant "), latex("\\text{distance}(\\text{centre},A)=r"), texte(".")];
+  return [texte("Résous l'équation CONFIRMÉE : elle admet en général 2 solutions pour x, donc 2 centres possibles. Donne les 2 centres (ajoute une ligne par centre trouvé) ainsi que le rayon commun.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `bEcran3` ne montrait
 // auparavant QUE l'équation en x confirmée à `bEcran2`, sans la médiatrice confirmée à `bEcran1`.
@@ -224,16 +236,16 @@ function aideNiveau2B(e: Extract<ExerciceCercles, { famille: "B" }>): AideAvecLa
 // Famille C — Cercle par 2 points, centre sur une droite donnée.
 // ============================================================================
 
-function consigneGeneraleC(): string {
-  return "On cherche le cercle passant par 2 points A et B, dont le centre appartient de plus à une droite d donnée.";
+function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("On cherche le cercle passant par 2 points A et B, dont le centre appartient de plus à une droite d donnée.")];
 }
 function blocDonneesC(e: Extract<ExerciceCercles, { famille: "C" }>): string[] {
   return [...blocDonneesAB(e.A, e.B), `d:\\;${formatDroiteLatex(e.d)}`];
 }
-function consigneEcranC(phase: PhaseCercles): string {
-  if (phase === "cEcran1") return "Le centre d'un cercle passant par A et B est nécessairement équidistant des deux points. Écris l'équation de la médiatrice de [AB], le lieu de tous les points équidistants de A et B.";
-  if (phase === "cEcran2") return "Le centre doit appartenir À LA FOIS à la médiatrice CONFIRMÉE et à la droite d donnée. Résous le système formé par ces 2 équations pour trouver ses coordonnées.";
-  return "Calcule le rayon, distance du centre CONFIRMÉ au point A.";
+function consigneEcranC(phase: PhaseCercles): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Le centre d'un cercle passant par A et B est nécessairement équidistant des deux points. Écris l'équation de la médiatrice de "), latex("[AB]"), texte(", le lieu de tous les points équidistants de A et B.")];
+  if (phase === "cEcran2") return [texte("Le centre doit appartenir À LA FOIS à la médiatrice CONFIRMÉE et à la droite d donnée. Résous le système formé par ces 2 équations pour trouver ses coordonnées.")];
+  return [texte("Calcule le rayon, distance du centre CONFIRMÉ au point A.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `cEcran3` ne montrait
 // auparavant QUE le centre confirmé à `cEcran2`, sans la médiatrice confirmée à `cEcran1`.
@@ -266,16 +278,16 @@ function aideNiveau2C(e: Extract<ExerciceCercles, { famille: "C" }>): AideAvecLa
 // Famille D — Cercle tangent à un axe en un point donné.
 // ============================================================================
 
-function consigneGeneraleD(): string {
-  return "On cherche le cercle passant par un point A, tangent à l'axe des abscisses au point B donné sur cet axe.";
+function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("On cherche le cercle passant par un point A, tangent à l'axe des abscisses au point B donné sur cet axe.")];
 }
 function blocDonneesD(e: Extract<ExerciceCercles, { famille: "D" }>): string[] {
   return [labelPoint("A", e.A), `\\text{B}(${formatValeurAffichage(e.Bx)};0)\\text{ (point de tangence)}`];
 }
-function consigneEcranD(phase: PhaseCercles): string {
-  if (phase === "dEcran1") return "Le centre est sur la perpendiculaire à l'axe des abscisses passant par B (la droite verticale x=Bx), à une distance r (le rayon) du point de tangence. Pose le centre sous la forme (Bx;r).";
-  if (phase === "dEcran2") return "En partant du centre (Bx;r) CONFIRMÉ, écris l'équation traduisant distance(centre,A)=r.";
-  return "Développe l'équation CONFIRMÉE : le terme r² s'annule des deux côtés, l'équation résultante est LINÉAIRE en r — résous-la, puis donne le centre et l'équation complète du cercle.";
+function consigneEcranD(phase: PhaseCercles): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Le centre est sur la perpendiculaire à l'axe des abscisses passant par B (la droite verticale "), latex("x=B_x"), texte("), à une distance r (le rayon) du point de tangence. Pose le centre sous la forme "), latex("(B_x;r)"), texte(".")];
+  if (phase === "dEcran2") return [texte("En partant du centre "), latex("(B_x;r)"), texte(" CONFIRMÉ, écris l'équation traduisant "), latex("\\text{distance}(\\text{centre},A)=r"), texte(".")];
+  return [texte("Développe l'équation CONFIRMÉE : le terme "), latex("r^2"), texte(" s'annule des deux côtés, l'équation résultante est LINÉAIRE en r — résous-la, puis donne le centre et l'équation complète du cercle.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `dEcran3` ne montrait
 // auparavant QUE l'équation confirmée à `dEcran2`, sans le centre (Bx;r) confirmé à `dEcran1`.
@@ -313,16 +325,21 @@ function aideNiveau2D(e: Extract<ExerciceCercles, { famille: "D" }>): AideAvecLa
 // Famille E — Cercle inscrit à un triangle. RÉUTILISÉE par la famille G (voir plus bas).
 // ============================================================================
 
-function consigneGeneraleE(): string {
-  return "On cherche le cercle inscrit à un triangle ABC (tangent intérieurement aux 3 côtés).";
+function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("On cherche le cercle inscrit à un triangle ABC (tangent intérieurement aux 3 côtés).")];
 }
 function blocDonneesTriangle(t: DonneesTriangleInscrit): string[] {
   return [labelPoint("A", t.A), labelPoint("B", t.B), labelPoint("C", t.C)];
 }
-function consigneEcranTriangle(phase: "cotes" | "incentre" | "rayon"): string {
-  if (phase === "cotes") return "Calcule les longueurs des 3 côtés a=BC, b=CA et c=AB.";
-  if (phase === "incentre") return "Le centre I du cercle inscrit est la moyenne des sommets pondérée par le côté OPPOSÉ à chacun : I=(a·A+b·B+c·C)/(a+b+c). Calcule ses coordonnées à partir de a, b, c CONFIRMÉS.";
-  return "Calcule le rayon du cercle inscrit (distance de I CONFIRMÉ à l'un des côtés, ou via aire/demi-périmètre).";
+function consigneEcranTriangle(phase: "cotes" | "incentre" | "rayon"): FragmentConsigne[] {
+  if (phase === "cotes") return [texte("Calcule les longueurs des 3 côtés "), latex("a=BC"), texte(", "), latex("b=CA"), texte(" et "), latex("c=AB"), texte(".")];
+  if (phase === "incentre")
+    return [
+      texte("Le centre I du cercle inscrit est la moyenne des sommets pondérée par le côté OPPOSÉ à chacun : "),
+      latex("I=\\dfrac{a\\cdot A+b\\cdot B+c\\cdot C}{a+b+c}"),
+      texte(". Calcule ses coordonnées à partir de a, b, c CONFIRMÉS."),
+    ];
+  return [texte("Calcule le rayon du cercle inscrit (distance de I CONFIRMÉ à l'un des côtés, ou via aire/demi-périmètre).")];
 }
 // Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : l'écran "rayon" ne montrait
 // auparavant QUE I confirmé à l'écran "incentre", sans a, b, c confirmés à l'écran "cotes" — ajouté
@@ -354,16 +371,17 @@ function aideNiveau2Incentre(): AideAvecLatex {
 // Famille F — Cercle avec corde de longueur donnée.
 // ============================================================================
 
-function consigneGeneraleF(): string {
-  return "On connaît le centre C d'un cercle et une droite d qui le coupe selon une corde de longueur L donnée — on cherche le rayon puis l'équation du cercle.";
+function consigneGeneraleF(): FragmentConsigne[] {
+  return [texte("On connaît le centre C d'un cercle et une droite d qui le coupe selon une corde de longueur L donnée — on cherche le rayon puis l'équation du cercle.")];
 }
 function blocDonneesF(e: Extract<ExerciceCercles, { famille: "F" }>): string[] {
   return [labelPoint("C", e.centre), `d:\\;${formatDroiteLatex(e.d)}`, `L=${formatValeurAffichage(e.L)}`];
 }
-function consigneEcranF(phase: PhaseCercles): string {
-  if (phase === "fEcran1") return "Calcule la distance du centre C à la droite d.";
-  if (phase === "fEcran2") return "Le rayon, la distance CONFIRMÉE et la demi-longueur de la corde forment un triangle rectangle : applique la relation de Pythagore r²=distance²+(L/2)². Donne r² puis r.";
-  return "Donne le rayon (déjà trouvé) et l'équation complète du cercle, à partir du rayon CONFIRMÉ.";
+function consigneEcranF(phase: PhaseCercles): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Calcule la distance du centre C à la droite d.")];
+  if (phase === "fEcran2")
+    return [texte("Le rayon, la distance CONFIRMÉE et la demi-longueur de la corde forment un triangle rectangle : applique la relation de Pythagore "), latex("r^2=\\text{distance}^2+(L/2)^2"), texte(". Donne "), latex("r^2"), texte(" puis r.")];
+  return [texte("Donne le rayon (déjà trouvé) et l'équation complète du cercle, à partir du rayon CONFIRMÉ.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelA` ci-dessus) : `fEcran3` ne montrait
 // auparavant QUE r² et r confirmés à `fEcran2`, sans la distance confirmée à `fEcran1`.
@@ -396,14 +414,14 @@ function aideNiveau2F(e: Extract<ExerciceCercles, { famille: "F" }>): AideAvecLa
 // Famille G — Cercles tangents à 3 droites. RÉUTILISE la famille E (écrans 2-4).
 // ============================================================================
 
-function consigneGeneraleG(): string {
-  return "3 droites d1, d2 et d3, sécantes deux à deux et non concourantes, forment un triangle. On cherche le cercle tangent aux 3 droites — le cercle INSCRIT à ce triangle.";
+function consigneGeneraleG(): FragmentConsigne[] {
+  return [texte("3 droites "), latex("d_1"), texte(", "), latex("d_2"), texte(" et "), latex("d_3"), texte(", sécantes deux à deux et non concourantes, forment un triangle. On cherche le cercle tangent aux 3 droites — le cercle INSCRIT à ce triangle.")];
 }
 function blocDonneesG(e: Extract<ExerciceCercles, { famille: "G" }>): string[] {
   return [`d_1:\\;${formatDroiteLatex(e.d1)}`, `d_2:\\;${formatDroiteLatex(e.d2)}`, `d_3:\\;${formatDroiteLatex(e.d3)}`];
 }
-function consigneEcranG1(): string {
-  return "Chaque sommet du triangle formé est l'intersection de 2 des 3 droites, prises deux à deux. Trouve les 3 sommets : d1∩d2, d2∩d3 et d3∩d1.";
+function consigneEcranG1(): FragmentConsigne[] {
+  return [texte("Chaque sommet du triangle formé est l'intersection de 2 des 3 droites, prises deux à deux. Trouve les 3 sommets : "), latex("d_1\\cap d_2"), texte(", "), latex("d_2\\cap d_3"), texte(" et "), latex("d_3\\cap d_1"), texte(".")];
 }
 function champsG1(): ChampDef[] {
   return [
@@ -451,7 +469,7 @@ const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceCercles): string {
+export function consigneGenerale(exercice: ExerciceCercles): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -489,7 +507,7 @@ export function blocDonnees(exercice: ExerciceCercles): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceCercles, phase: PhaseCercles): string {
+export function consigneEcran(exercice: ExerciceCercles, phase: PhaseCercles): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

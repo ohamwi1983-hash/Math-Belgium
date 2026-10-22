@@ -18,14 +18,14 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceDenombrem
  */
 
 function enteteDenombrementFondamental(exercice: ExerciceDenombrementFondamental) {
-  return [texte(`${consigneGenerale(exercice)} Données : `), latex(blocDonnees(exercice).join(",\\ "))];
+  return [...consigneGenerale(exercice), texte(" Données : "), latex(blocDonnees(exercice).join(",\\ "))];
 }
 
 function construireEnonceDenombrementFondamental(exercice: ExerciceDenombrementFondamental): SectionExercice {
   const phases = phasesPourExercice(exercice);
   return {
     enteteFragments: enteteDenombrementFondamental(exercice),
-    questions: phases.map((phase) => ({ consigne: [texte(consigneEcran(exercice, phase))] })),
+    questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })),
   };
 }
 
