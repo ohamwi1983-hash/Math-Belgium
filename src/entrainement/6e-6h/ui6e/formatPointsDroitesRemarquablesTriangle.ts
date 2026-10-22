@@ -41,6 +41,20 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts` /
+ * `ui6e/formatProprietesLogarithme.ts`, rendu via `components/RenduFragments.tsx`. Les noms de
+ * points/droites/segments isolés (A, B, I, [BC], (AB)...) utilisés comme NOMS PROPRES dans une
+ * phrase en français restent `texte()` — seules les VRAIES formules (I=(BC·A+AB·C)/(AB+BC),
+ * Aire(t)=½|K+M·t|...) deviennent `latex()`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 function champTexte(label: string, placeholder: string): ChampDef {
@@ -119,15 +133,15 @@ const OPTIONS_RELATION_A: OptionChoix[] = [
   { valeur: "subC", label: "A'+B'−C'" },
 ];
 
-function consigneGeneraleA(): string {
-  return "A', B' et C' sont respectivement les milieux de [BC], [CA] et [AB]. Retrouve les sommets A, B et C du triangle.";
+function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("A', B' et C' sont respectivement les milieux de [BC], [CA] et [AB]. Retrouve les sommets A, B et C du triangle.")];
 }
 function blocDonneesA(e: ExercicePDRT_A): string[] {
   return [`A'=${fmtPoint(e.Ap)}`, `B'=${fmtPoint(e.Bp)}`, `C'=${fmtPoint(e.Cp)}`];
 }
-function consigneEcranA(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "aEcran1") return "Pour chacun des sommets A, B et C, identifie la relation vectorielle qui permet de le retrouver à partir des 3 milieux.";
-  return "Calcule les coordonnées de A, B et C à partir des 3 relations CONFIRMÉES.";
+function consigneEcranA(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Pour chacun des sommets A, B et C, identifie la relation vectorielle qui permet de le retrouver à partir des 3 milieux.")];
+  return [texte("Calcule les coordonnées de A, B et C à partir des 3 relations CONFIRMÉES.")];
 }
 function etatActuelA(phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
   if (phase === "aEcran2") return ["\\text{Relations confirmées : }A=B'+C'-A'\\text{, }B=A'+C'-B'\\text{, }C=A'+B'-C'"];
@@ -160,16 +174,16 @@ function aideNiveau2A(): AideAvecLatex {
 // Famille B — Point d'une bissectrice sur le côté opposé.
 // ============================================================================
 
-function consigneGeneraleB(): string {
-  return "Le triangle ABC est donné. La bissectrice issue de B coupe [AC] en un point I. Retrouve les coordonnées de I.";
+function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Le triangle ABC est donné. La bissectrice issue de B coupe [AC] en un point I. Retrouve les coordonnées de I.")];
 }
 function blocDonneesB(e: ExercicePDRT_B): string[] {
   return [`A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`, `C=${fmtPoint(e.C)}`];
 }
-function consigneEcranB(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "bEcran1") return "Calcule les longueurs AB et BC.";
-  if (phase === "bEcran2") return "D'après le théorème de la bissectrice, quel est le rapport AI:IC, à partir des longueurs CONFIRMÉES ?";
-  return "Calcule les coordonnées de I via I=(BC·A+AB·C)/(AB+BC), à partir du rapport CONFIRMÉ.";
+function consigneEcranB(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Calcule les longueurs AB et BC.")];
+  if (phase === "bEcran2") return [texte("D'après le théorème de la bissectrice, quel est le rapport AI:IC, à partir des longueurs CONFIRMÉES ?")];
+  return [texte("Calcule les coordonnées de I via "), latexFrag("I=\\dfrac{BC\\cdot A+AB\\cdot C}{AB+BC}"), texte(", à partir du rapport CONFIRMÉ.")];
 }
 // Accumulation (correctif transversal — le bloc "état actuel" doit lister TOUTES les réponses
 // validées des écrans précédents, du plus ancien au plus récent, jamais seulement celle de l'écran
@@ -200,16 +214,16 @@ function aideNiveau2B(e: ExercicePDRT_B): AideAvecLatex {
 // Famille C — Point à aire imposée sur une droite.
 // ============================================================================
 
-function consigneGeneraleC(): string {
-  return "A, B et une droite d sont donnés, ainsi qu'une aire cible k. Trouve le(s) point(s) C sur d tel(s) que l'aire du triangle ABC vaille k.";
+function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("A, B et une droite d sont donnés, ainsi qu'une aire cible k. Trouve le(s) point(s) C sur d tel(s) que l'aire du triangle ABC vaille k.")];
 }
 function blocDonneesC(e: ExercicePDRT_C): string[] {
   return [`A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`, `(d):${fmtEquationDroite(e.d)}`, `k=${e.k}`];
 }
-function consigneEcranC(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "cEcran1") return "Un point C(t) parcourt d. Exprime l'aire du triangle ABC en fonction du paramètre t, sous la forme Aire(t)=½|K+M·t| : donne K et M.";
-  if (phase === "cEcran2") return "Résous |K+M·t|=2k pour le paramètre t, à partir de K et M CONFIRMÉS — attention, cette équation admet en général 2 solutions.";
-  return "Donne les coordonnées de C pour CHAQUE solution CONFIRMÉE de l'étape précédente.";
+function consigneEcranC(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Un point C(t) parcourt d. Exprime l'aire du triangle ABC en fonction du paramètre t, sous la forme "), latexFrag("\\text{Aire}(t)=\\tfrac12|K+M\\cdot t|"), texte(" : donne K et M.")];
+  if (phase === "cEcran2") return [texte("Résous "), latexFrag("|K+M\\cdot t|=2k"), texte(" pour le paramètre t, à partir de K et M CONFIRMÉS — attention, cette équation admet en général 2 solutions.")];
+  return [texte("Donne les coordonnées de C pour CHAQUE solution CONFIRMÉE de l'étape précédente.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `cEcran3` ne montrait
 // auparavant QUE les solutions confirmées à `cEcran2`, sans l'expression Aire(t) confirmée à
@@ -229,7 +243,7 @@ function niveauAideMaxC(phase: PhasePointsDroitesRemarquablesTriangle): number {
   return phase === "cEcran2" ? 2 : 0;
 }
 function aideNiveau1C(): AideAvecLatex {
-  return { texte: "Une équation de la forme |expression|=k (k>0) a 2 solutions : expression=k OU expression=−k.", latex: "|\\text{expression}|=k\\ \\Rightarrow\\ \\text{expression}=k\\ \\text{ou}\\ \\text{expression}=-k" };
+  return { texte: "Une équation de la forme |expression|=k (k>0) a 2 solutions :", latex: "|\\text{expression}|=k\\ \\Rightarrow\\ \\text{expression}=k\\ \\text{ou}\\ \\text{expression}=-k" };
 }
 function aideNiveau2C(e: ExercicePDRT_C): AideAvecLatex {
   return { texte: "Une des 2 équations, l'autre reste à poser :", latex: `${fmtExpressionAffine(e.K, e.M)}=${2 * e.k}` };
@@ -239,17 +253,17 @@ function aideNiveau2C(e: ExercicePDRT_C): AideAvecLatex {
 // Famille D — Côtés depuis un sommet et 2 médianes.
 // ============================================================================
 
-function consigneGeneraleD(): string {
-  return "A est donné, ainsi que les 2 droites (BB') et (CC'), médianes issues respectivement de B et de C. Retrouve les équations des 3 côtés du triangle.";
+function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("A est donné, ainsi que les 2 droites (BB') et (CC'), médianes issues respectivement de B et de C. Retrouve les équations des 3 côtés du triangle.")];
 }
 function blocDonneesD(e: ExercicePDRT_D): string[] {
   return [`A=${fmtPoint(e.A)}`, `(BB'):${fmtEquationDroite(e.droiteBBp)}`, `(CC'):${fmtEquationDroite(e.droiteCCp)}`];
 }
-function consigneEcranD(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "dEcran1") return "Pose les 2 équations qui déterminent B : B appartient à sa propre médiane (BB') ; le milieu de [A,B] appartient à (CC').";
-  if (phase === "dEcran2") return "Résous le système CONFIRMÉ pour trouver les coordonnées de B.";
-  if (phase === "dEcran3") return "De façon analogue (C appartient à (CC') ; le milieu de [A,C] appartient à (BB')), donne directement les coordonnées de C.";
-  return "Donne les équations des 3 côtés (AB), (AC) et (BC), à partir de A (donné), B et C CONFIRMÉS.";
+function consigneEcranD(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Pose les 2 équations qui déterminent B : B appartient à sa propre médiane (BB') ; le milieu de [A,B] appartient à (CC').")];
+  if (phase === "dEcran2") return [texte("Résous le système CONFIRMÉ pour trouver les coordonnées de B.")];
+  if (phase === "dEcran3") return [texte("De façon analogue (C appartient à (CC') ; le milieu de [A,C] appartient à (BB')), donne directement les coordonnées de C.")];
+  return [texte("Donne les équations des 3 côtés (AB), (AC) et (BC), à partir de A (donné), B et C CONFIRMÉS.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `dEcran3` et `dEcran4` ne
 // montraient auparavant QUE la (les) coordonnée(s) confirmée(s) à l'écran immédiatement précédent,
@@ -303,15 +317,15 @@ const OPTIONS_CONSTRUCTION_E: OptionChoix[] = [
   { valeur: "passeParAB", label: "La droite (AB) elle-même" },
 ];
 
-function consigneGeneraleE(): string {
-  return "P, A et B sont donnés. Trouve la ou les droite(s) passant par P et équidistantes de A et de B.";
+function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("P, A et B sont donnés. Trouve la ou les droite(s) passant par P et équidistantes de A et de B.")];
 }
 function blocDonneesE(e: ExercicePDRT_E): string[] {
   return [`P=${fmtPoint(e.P)}`, `A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`];
 }
-function consigneEcranE(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "eEcran1") return "Identifie LA (ou LES) construction(s) possible(s) parmi les propositions suivantes — il peut y en avoir plusieurs.";
-  return "Calcule les équations des droites correspondant aux constructions CONFIRMÉES.";
+function consigneEcranE(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Identifie LA (ou LES) construction(s) possible(s) parmi les propositions suivantes — il peut y en avoir plusieurs.")];
+  return [texte("Calcule les équations des droites correspondant aux constructions CONFIRMÉES.")];
 }
 function etatActuelE(phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
   if (phase === "eEcran2") return ["\\text{Constructions confirmées : parallèle à (AB) ; passant par le milieu de [A,B]}"];
@@ -335,16 +349,16 @@ function aideNiveau2E(): AideAvecLatex {
 // Famille F — Symétrique d'un point par rapport à une droite.
 // ============================================================================
 
-function consigneGeneraleF(): string {
-  return "P est donné, ainsi qu'une droite définie par 2 points A et B. Trouve Q, symétrique de P par rapport à (AB).";
+function consigneGeneraleF(): FragmentConsigne[] {
+  return [texte("P est donné, ainsi qu'une droite définie par 2 points A et B. Trouve Q, symétrique de P par rapport à (AB).")];
 }
 function blocDonneesF(e: ExercicePDRT_F): string[] {
   return [`P=${fmtPoint(e.P)}`, `A=${fmtPoint(e.A)}`, `B=${fmtPoint(e.B)}`];
 }
-function consigneEcranF(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "fEcran1") return "Trouve l'équation de (AB), puis l'équation de la perpendiculaire à (AB) passant par P.";
-  if (phase === "fEcran2") return "Trouve le pied de la perpendiculaire H, intersection des 2 droites CONFIRMÉES.";
-  return "Calcule Q, symétrique de P par rapport à H, à partir de H CONFIRMÉ.";
+function consigneEcranF(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Trouve l'équation de (AB), puis l'équation de la perpendiculaire à (AB) passant par P.")];
+  if (phase === "fEcran2") return [texte("Trouve le pied de la perpendiculaire H, intersection des 2 droites CONFIRMÉES.")];
+  return [texte("Calcule Q, symétrique de P par rapport à H, à partir de H CONFIRMÉ.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `fEcran3` ne montrait
 // auparavant QUE H confirmé à `fEcran2`, sans (AB) et la perpendiculaire confirmées à `fEcran1`.
@@ -363,7 +377,7 @@ function niveauAideMaxF(phase: PhasePointsDroitesRemarquablesTriangle): number {
   return phase === "fEcran3" ? 2 : 0;
 }
 function aideNiveau1F(): AideAvecLatex {
-  return { texte: "H est le milieu de [P,Q], donc Q=2H−P.", latex: "Q=2H-P" };
+  return { texte: "H est le milieu de [P,Q], donc :", latex: "Q=2H-P" };
 }
 function aideNiveau2F(e: ExercicePDRT_F): AideAvecLatex {
   return { texte: "Relation posée (calcul non fait) :", latex: `Q=2\\times ${fmtPointFrac(e.HFrac.x, e.HFrac.y)}-${fmtPoint(e.P)}` };
@@ -386,25 +400,25 @@ function labelSecondSommetG(e: ExercicePDRT_G): string {
   return e.sousType === "sommetDiagonale" ? "C" : "A";
 }
 
-function consigneGeneraleG(e: ExercicePDRT_G): string {
-  if (e.sousType === "sommetDiagonale") return "ABCD est un carré. Le sommet A et la droite (BD) [l'autre diagonale] sont donnés. Retrouve B, C et D.";
-  return "ABCD est un carré de centre P. Le centre P et la droite (AB) [un côté] sont donnés. Retrouve les 4 sommets.";
+function consigneGeneraleG(e: ExercicePDRT_G): FragmentConsigne[] {
+  if (e.sousType === "sommetDiagonale") return [texte("ABCD est un carré. Le sommet A et la droite (BD) [l'autre diagonale] sont donnés. Retrouve B, C et D.")];
+  return [texte("ABCD est un carré de centre P. Le centre P et la droite (AB) [un côté] sont donnés. Retrouve les 4 sommets.")];
 }
 function blocDonneesG(e: ExercicePDRT_G): string[] {
   if (e.sousType === "sommetDiagonale") return [`A=${fmtPoint(e.A)}`, `(BD):${fmtEquationDroite(e.droiteBD)}`];
   return [`P=${fmtPoint(e.P)}`, `(AB):${fmtEquationDroite(e.droiteAB)}`];
 }
-function consigneEcranG(e: ExercicePDRT_G, phase: PhasePointsDroitesRemarquablesTriangle): string {
+function consigneEcranG(e: ExercicePDRT_G, phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
   if (phase === "gEcran1") {
-    if (e.sousType === "sommetDiagonale") return "Trouve l'équation de la perpendiculaire à (BD) passant par A, puis le pied de cette perpendiculaire — c'est le centre O du carré.";
-    return "Trouve l'équation de la perpendiculaire à (AB) passant par P, puis le pied de cette perpendiculaire — c'est le milieu M du côté [A,B].";
+    if (e.sousType === "sommetDiagonale") return [texte("Trouve l'équation de la perpendiculaire à (BD) passant par A, puis le pied de cette perpendiculaire — c'est le centre O du carré.")];
+    return [texte("Trouve l'équation de la perpendiculaire à (AB) passant par P, puis le pied de cette perpendiculaire — c'est le milieu M du côté [A,B].")];
   }
   if (phase === "gEcran2") {
-    if (e.sousType === "sommetDiagonale") return "En utilisant les propriétés du carré (diagonales de même longueur, se coupant en leur milieu), trouve les coordonnées de C, sommet opposé à A.";
-    return "En utilisant les propriétés du carré (côtés opposés parallèles et équidistants du centre), trouve les coordonnées de A, l'un des 2 sommets du côté donné.";
+    if (e.sousType === "sommetDiagonale") return [texte("En utilisant les propriétés du carré (diagonales de même longueur, se coupant en leur milieu), trouve les coordonnées de C, sommet opposé à A.")];
+    return [texte("En utilisant les propriétés du carré (côtés opposés parallèles et équidistants du centre), trouve les coordonnées de A, l'un des 2 sommets du côté donné.")];
   }
-  if (e.sousType === "sommetDiagonale") return "Assemble les coordonnées complètes de B, C et D.";
-  return "Assemble les coordonnées complètes de A, B, C et D.";
+  if (e.sousType === "sommetDiagonale") return [texte("Assemble les coordonnées complètes de B, C et D.")];
+  return [texte("Assemble les coordonnées complètes de A, B, C et D.")];
 }
 // Accumulation (correctif transversal, voir `etatActuelB` ci-dessus) : `gEcran3` ne montrait
 // auparavant QUE le second sommet confirmé à `gEcran2`, sans le point intermédiaire (O ou M)
@@ -444,15 +458,15 @@ function aideNiveau2G(e: ExercicePDRT_G): AideAvecLatex {
 // Famille H — Rayon réfléchi (réutilise F).
 // ============================================================================
 
-function consigneGeneraleH(): string {
-  return "Un miroir d (défini par 2 points Ad et Bd), une source P et un point d'incidence M (sur d) sont donnés. Trouve l'équation du rayon réfléchi.";
+function consigneGeneraleH(): FragmentConsigne[] {
+  return [texte("Un miroir d (défini par 2 points Ad et Bd), une source P et un point d'incidence M (sur d) sont donnés. Trouve l'équation du rayon réfléchi.")];
 }
 function blocDonneesH(e: ExercicePDRT_H): string[] {
   return [`(d):${fmtEquationDroite(e.droiteD)}`, `P=${fmtPoint(e.P)}`, `M=${fmtPoint(e.M)}`];
 }
-function consigneEcranH(phase: PhasePointsDroitesRemarquablesTriangle): string {
-  if (phase === "hEcran1") return "Trouve le symétrique P' de la source P par rapport au miroir d.";
-  return "Le rayon réfléchi passe par P' et par M. Calcule son équation à partir de P' CONFIRMÉ.";
+function consigneEcranH(phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
+  if (phase === "hEcran1") return [texte("Trouve le symétrique P' de la source P par rapport au miroir d.")];
+  return [texte("Le rayon réfléchi passe par P' et par M. Calcule son équation à partir de P' CONFIRMÉ.")];
 }
 function etatActuelH(e: ExercicePDRT_H, phase: PhasePointsDroitesRemarquablesTriangle): string[] | null {
   if (phase === "hEcran2") return [`\\text{P' confirmé : }P'=${fmtPointFrac(e.PpFrac.x, e.PpFrac.y)}`];
@@ -480,7 +494,7 @@ function aideNiveau2H(e: ExercicePDRT_H): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExercicePointsDroitesRemarquablesTriangle): string {
+export function consigneGenerale(exercice: ExercicePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -522,7 +536,7 @@ export function blocDonnees(exercice: ExercicePointsDroitesRemarquablesTriangle)
   }
 }
 
-export function consigneEcran(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): string {
+export function consigneEcran(exercice: ExercicePointsDroitesRemarquablesTriangle, phase: PhasePointsDroitesRemarquablesTriangle): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, DefinitionEcran } from "../ui6e/formatPointsDroitesRemarquablesTriangle";
+import type { AideAvecLatex, DefinitionEcran, FragmentConsigne } from "../ui6e/formatPointsDroitesRemarquablesTriangle";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   definition: DefinitionEcran;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -50,7 +51,7 @@ export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale,
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -61,7 +62,9 @@ export function EtapeChampsPointsDroitesRemarquablesTriangle({ consigneGenerale,
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {definition.kind === "champs" ? (
         <BlocChamps
           champs={definition.champs}

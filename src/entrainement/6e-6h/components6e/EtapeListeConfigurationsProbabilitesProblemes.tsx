@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex } from "../ui6e/formatProbabilitesProblemes";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatProbabilitesProblemes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   placeholder: string;
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -53,7 +54,7 @@ export function EtapeListeConfigurationsProbabilitesProblemes({ consigneGenerale
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           blocDonnees.length > 0 ? (
             <div className="equation-box">
@@ -66,7 +67,9 @@ export function EtapeListeConfigurationsProbabilitesProblemes({ consigneGenerale
           ) : null
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       <div className="liste-morceaux contenu-conditionnel">
         {valeurs.map((v, i) => (
           <div key={i} className="liste-morceaux-ligne">

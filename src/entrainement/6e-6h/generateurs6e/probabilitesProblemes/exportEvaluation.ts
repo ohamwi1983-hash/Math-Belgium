@@ -11,12 +11,13 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceProbabili
  */
 
 function entete(exercice: ExerciceProbabilitesProblemes) {
-  return [texte(`${consigneGenerale(exercice)} Données : `), latex(blocDonnees(exercice).join(",\\ "))];
+  const donnees = blocDonnees(exercice);
+  return donnees.length > 0 ? [...consigneGenerale(exercice), texte(" Données : "), latex(donnees.join(",\\ "))] : consigneGenerale(exercice);
 }
 
 function construireEnonce(exercice: ExerciceProbabilitesProblemes): SectionExercice {
   const phases = phasesPourExercice(exercice);
-  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: [texte(consigneEcran(exercice, phase))] })) };
+  return { enteteFragments: entete(exercice), questions: phases.map((phase) => ({ consigne: consigneEcran(exercice, phase) })) };
 }
 
 function construireCorrection(exercice: ExerciceProbabilitesProblemes): BlocCorrection[] {

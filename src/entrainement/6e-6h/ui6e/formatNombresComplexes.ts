@@ -37,6 +37,17 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts` /
+ * `ui6e/formatProprietesLogarithme.ts`, rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -113,14 +124,14 @@ function operationLatex(op: "+" | "-"): string {
   return op === "+" ? "+" : "-";
 }
 
-export function consigneGeneraleA(): string {
-  return "Calcule le résultat de l'opération suivante et donne-le sous la forme a+bi.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("Calcule le résultat de l'opération suivante et donne-le sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function blocDonneesA(e: Extract<ExerciceNombresComplexes, { famille: "A" }>): string[] {
   return [`(${entierComplexeLatex(e.a, e.b)})${operationLatex(e.operation)}(${entierComplexeLatex(e.c, e.d)})`];
 }
-export function consigneEcranA(): string {
-  return "Calcule la somme ou différence ci-dessus, sous la forme a+bi.";
+export function consigneEcranA(): FragmentConsigne[] {
+  return [texte("Calcule la somme ou différence ci-dessus, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function champsA(): ChampDef[] {
   return [{ type: "texte", label: "Résultat =", placeholder: "ex : 3-2i" }];
@@ -130,19 +141,19 @@ export function champsA(): ChampDef[] {
 // Famille B — Multiplication et puissances.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "Calcule le résultat de l'opération suivante et donne-le sous la forme a+bi.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Calcule le résultat de l'opération suivante et donne-le sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function blocDonneesB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>): string[] {
   if (e.sousType === "produit") return [`(${entierComplexeLatex(e.a, e.b)})\\cdot(${entierComplexeLatex(e.c, e.d)})`];
   if (e.sousType === "carre") return [`(${entierComplexeLatex(e.a, e.b)})^2`];
   return [`(${entierComplexeLatex(e.a, e.b)})^3`];
 }
-export function consigneEcranB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): string {
-  if (phase === "bProduitEcran1") return "Développe le produit ci-dessus, sous la forme a+bi.";
-  if (phase === "bCarreEcran1") return "Développe le carré ci-dessus (i²=-1), sous la forme a+bi.";
-  if (phase === "bCubeEcran1") return "Calcule d'abord le carré (a+bi)², sous la forme a+bi.";
-  return `Multiplie le carré CONFIRMÉ à l'étape précédente par (${entierComplexeLatex(e.a, e.b)}) pour obtenir le cube, sous la forme a+bi.`;
+export function consigneEcranB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): FragmentConsigne[] {
+  if (phase === "bProduitEcran1") return [texte("Développe le produit ci-dessus, sous la forme "), latexFrag("a+bi"), texte(".")];
+  if (phase === "bCarreEcran1") return [texte("Développe le carré ci-dessus ("), latexFrag("i^2=-1"), texte("), sous la forme "), latexFrag("a+bi"), texte(".")];
+  if (phase === "bCubeEcran1") return [texte("Calcule d'abord le carré "), latexFrag("(a+bi)^2"), texte(", sous la forme "), latexFrag("a+bi"), texte(".")];
+  return [texte("Multiplie le carré CONFIRMÉ à l'étape précédente par "), latexFrag(`(${entierComplexeLatex(e.a, e.b)})`), texte(" pour obtenir le cube, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelB(e: Extract<ExerciceNombresComplexes, { famille: "B" }>, phase: PhaseNombresComplexes): string[] | null {
   if (e.sousType === "cube" && phase === "bCubeEcran2") return [`(${entierComplexeLatex(e.a, e.b)})^2=${valeurComplexeLatex(e.carre)}\\text{ (confirmé)}`];
@@ -167,15 +178,15 @@ export function aideNiveau2B(e: Extract<ExerciceNombresComplexes, { famille: "B"
 // Famille C — Division par conjugué.
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "Calcule le résultat de la division suivante et donne-le sous la forme a+bi.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Calcule le résultat de la division suivante et donne-le sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function blocDonneesC(e: Extract<ExerciceNombresComplexes, { famille: "C" }>): string[] {
   return [`\\dfrac{${entierComplexeLatex(e.a, e.b)}}{${entierComplexeLatex(e.c, e.d)}}`];
 }
-export function consigneEcranC(phase: PhaseNombresComplexes): string {
-  if (phase === "cEcran1") return "Multiplie le numérateur ET le dénominateur par le conjugué du dénominateur, et développe les deux.";
-  return "Simplifie sous la forme a+bi, à partir du numérateur/dénominateur CONFIRMÉS à l'étape précédente.";
+export function consigneEcranC(phase: PhaseNombresComplexes): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Multiplie le numérateur ET le dénominateur par le conjugué du dénominateur, et développe les deux.")];
+  return [texte("Simplifie sous la forme "), latexFrag("a+bi"), texte(", à partir du numérateur/dénominateur CONFIRMÉS à l'étape précédente.")];
 }
 export function etatActuelC(e: Extract<ExerciceNombresComplexes, { famille: "C" }>, phase: PhaseNombresComplexes): string[] | null {
   if (phase === "cEcran2") return [`\\text{Numérateur confirmé : }${valeurComplexeLatex(e.numerateurDeveloppe)}\\text{, dénominateur confirmé : }${e.denominateurDeveloppe}`];
@@ -211,14 +222,14 @@ export function aideNiveau2C(e: Extract<ExerciceNombresComplexes, { famille: "C"
 // Famille D — Division par ki.
 // ============================================================================
 
-export function consigneGeneraleD(): string {
-  return "Calcule le résultat de la division suivante et donne-le sous la forme a+bi.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("Calcule le résultat de la division suivante et donne-le sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function blocDonneesD(e: Extract<ExerciceNombresComplexes, { famille: "D" }>): string[] {
   return [`\\dfrac{${entierComplexeLatex(e.a, e.b)}}{${kiLatex(e.k)}}`];
 }
-export function consigneEcranD(): string {
-  return "Diviser par i (ou ki) équivaut à multiplier par -i (ou -i/k) — calcule directement, sous la forme a+bi.";
+export function consigneEcranD(): FragmentConsigne[] {
+  return [texte("Diviser par "), latexFrag("i"), texte(" (ou "), latexFrag("ki"), texte(") équivaut à multiplier par "), latexFrag("-i"), texte(" (ou "), latexFrag("-i/k"), texte(") — calcule directement, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function champsD(): ChampDef[] {
   return [{ type: "texte", label: "Résultat =", placeholder: "ex : 2-i" }];
@@ -237,15 +248,15 @@ export function aideNiveau2D(e: Extract<ExerciceNombresComplexes, { famille: "D"
 // Famille E — Combiner 2 fractions.
 // ============================================================================
 
-export function consigneGeneraleE(): string {
-  return "Calcule le résultat de la somme suivante et donne-le sous la forme a+bi.";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("Calcule le résultat de la somme suivante et donne-le sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function blocDonneesE(e: Extract<ExerciceNombresComplexes, { famille: "E" }>): string[] {
   return [`\\dfrac{${entierComplexeLatex(e.a1, e.b1)}}{${entierComplexeLatex(e.c1, e.d1)}}+\\dfrac{${entierComplexeLatex(e.a2, e.b2)}}{${entierComplexeLatex(e.c2, e.d2)}}`];
 }
-export function consigneEcranE(phase: PhaseNombresComplexes): string {
-  if (phase === "eEcran1") return "Mets chaque fraction séparément sous forme a+bi (conjugué de chaque dénominateur).";
-  return "Additionne les 2 résultats CONFIRMÉS à l'étape précédente, sous la forme a+bi.";
+export function consigneEcranE(phase: PhaseNombresComplexes): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Mets chaque fraction séparément sous forme "), latexFrag("a+bi"), texte(" (conjugué de chaque dénominateur).")];
+  return [texte("Additionne les 2 résultats CONFIRMÉS à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelE(e: Extract<ExerciceNombresComplexes, { famille: "E" }>, phase: PhaseNombresComplexes): string[] | null {
   // Reconstruit depuis les entiers bruts (`divisionLatex`), JAMAIS depuis `e.fraction1`/`e.fraction2`
@@ -277,15 +288,15 @@ export function aideNiveau2E(e: Extract<ExerciceNombresComplexes, { famille: "E"
 // Famille F — Simplifier le quotient avant de mettre au carré.
 // ============================================================================
 
-export function consigneGeneraleF(): string {
-  return "Calcule le résultat de l'expression suivante et donne-le sous la forme a+bi.";
+export function consigneGeneraleF(): FragmentConsigne[] {
+  return [texte("Calcule le résultat de l'expression suivante et donne-le sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function blocDonneesF(e: Extract<ExerciceNombresComplexes, { famille: "F" }>): string[] {
   return [`\\left(\\dfrac{${entierComplexeLatex(e.numRe, e.numIm)}}{${entierComplexeLatex(e.c, e.d)}}\\right)^2`];
 }
-export function consigneEcranF(phase: PhaseNombresComplexes): string {
-  if (phase === "fEcran1") return "Simplifie le quotient interne via le conjugué, AVANT toute mise au carré.";
-  return "Élève au carré le résultat CONFIRMÉ à l'étape précédente, sous la forme a+bi.";
+export function consigneEcranF(phase: PhaseNombresComplexes): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Simplifie le quotient interne via le conjugué, AVANT toute mise au carré.")];
+  return [texte("Élève au carré le résultat CONFIRMÉ à l'étape précédente, sous la forme "), latexFrag("a+bi"), texte(".")];
 }
 export function etatActuelF(e: Extract<ExerciceNombresComplexes, { famille: "F" }>, phase: PhaseNombresComplexes): string[] | null {
   if (phase === "fEcran2") return [`\\text{Quotient simplifié confirmé : }${valeurComplexeLatex(e.quotientSimplifie)}`];
@@ -311,19 +322,19 @@ export function aideNiveau2F(e: Extract<ExerciceNombresComplexes, { famille: "F"
 // Famille G — Puissances de i.
 // ============================================================================
 
-export function consigneGeneraleG(): string {
-  return "Détermine la valeur de la puissance de i suivante.";
+export function consigneGeneraleG(): FragmentConsigne[] {
+  return [texte("Détermine la valeur de la puissance de i suivante.")];
 }
 export function blocDonneesG(e: Extract<ExerciceNombresComplexes, { famille: "G" }>): string[] {
   return [`i^{${e.n}}`];
 }
-export function consigneEcranG(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): string {
+export function consigneEcranG(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): FragmentConsigne[] {
   if (phase === "gEcran1") {
     return e.n >= 0
-      ? "Détermine le reste de la division de l'exposant par 4."
-      : "Convertis l'exposant négatif en une forme équivalente positive, puis réduis modulo 4 (donne le reste, dans {0,1,2,3}).";
+      ? [texte("Détermine le reste de la division de l'exposant par 4.")]
+      : [texte("Convertis l'exposant négatif en une forme équivalente positive, puis réduis modulo 4 (donne le reste, dans "), latexFrag("\\{0,1,2,3\\}"), texte(").")];
   }
-  return "Donne la valeur du cycle {i⁰=1, i¹=i, i²=-1, i³=-i} correspondant au reste CONFIRMÉ à l'étape précédente.";
+  return [texte("Donne la valeur du cycle "), latexFrag("\\{i^0=1,\\ i^1=i,\\ i^2=-1,\\ i^3=-i\\}"), texte(" correspondant au reste CONFIRMÉ à l'étape précédente.")];
 }
 export function etatActuelG(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): string[] | null {
   if (phase === "gEcran2") return [`\\text{Reste confirmé : }${e.reste}`];
@@ -338,8 +349,8 @@ export function niveauAideMaxG(phase: PhaseNombresComplexes): number {
 }
 export function aideNiveau1G(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): AideAvecLatex {
   if (phase !== "gEcran1") return AUCUNE_AIDE;
-  if (e.n < 0) return { texte: "i^(-n)=1/i^n — le cycle des puissances négatives suit le même schéma, décalé : i⁻¹=-i, i⁻²=-1, i⁻³=i, i⁻⁴=1.", latex: "i^{-n}=\\dfrac{1}{i^{n}}\\qquad i^{-1}=-i,\\ i^{-2}=-1,\\ i^{-3}=i,\\ i^{-4}=1" };
-  return { texte: "i a une période de 4 (i⁰=1, i¹=i, i²=-1, i³=-i, puis ça recommence) — réduis l'exposant modulo 4.", latex: "i^{0}=1,\\ i^{1}=i,\\ i^{2}=-1,\\ i^{3}=-i" };
+  if (e.n < 0) return { texte: "Le cycle des puissances négatives suit le même schéma que les positives, décalé :", latex: "i^{-n}=\\dfrac{1}{i^{n}}\\qquad i^{-1}=-i,\\ i^{-2}=-1,\\ i^{-3}=i,\\ i^{-4}=1" };
+  return { texte: "i a une période de 4 — réduis l'exposant modulo 4 :", latex: "i^{0}=1,\\ i^{1}=i,\\ i^{2}=-1,\\ i^{3}=-i" };
 }
 export function aideNiveau2G(e: Extract<ExerciceNombresComplexes, { famille: "G" }>, phase: PhaseNombresComplexes): AideAvecLatex {
   if (phase !== "gEcran1") return AUCUNE_AIDE;
@@ -352,7 +363,7 @@ export function aideNiveau2G(e: Extract<ExerciceNombresComplexes, { famille: "G"
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceNombresComplexes): string {
+export function consigneGenerale(exercice: ExerciceNombresComplexes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -390,7 +401,7 @@ export function blocDonnees(exercice: ExerciceNombresComplexes): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceNombresComplexes, phase: PhaseNombresComplexes): string {
+export function consigneEcran(exercice: ExerciceNombresComplexes, phase: PhaseNombresComplexes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA();

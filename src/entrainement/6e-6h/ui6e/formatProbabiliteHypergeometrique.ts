@@ -32,6 +32,19 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Fragment de consigne mêlant texte français et LaTeX court (CLAUDE.md, convention établie sur
+ * `formatProprietesLogarithme.ts`/6gen13, dupliquée ici localement — chaque générateur garde la
+ * sienne). */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 const ANNONCE_TOLERANCE = "(forme exacte ou décimale arrondie au centième)";
 
@@ -61,8 +74,8 @@ export function formatFractionLatex(num: number, den: number): string {
 // Famille A — Hypergéométrique de base.
 // ============================================================================
 
-export function consigneGeneraleA(): string {
-  return "On tire au hasard, sans remise, un échantillon dans une population divisée en 2 catégories (succès/échecs). Calcule la probabilité d'obtenir exactement le nombre de succès demandé, à l'aide de la formule hypergéométrique.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("On tire au hasard, sans remise, un échantillon dans une population divisée en 2 catégories (succès/échecs). Calcule la probabilité d'obtenir exactement le nombre de succès demandé, à l'aide de la formule hypergéométrique.")];
 }
 
 function descriptionK(e: ExerciceHypergeoA): string[] {
@@ -89,15 +102,13 @@ export function blocDonneesA(e: ExerciceHypergeoA): string[] {
   ];
 }
 
-export function consigneEcranA(phase: PhaseProbabiliteHypergeometrique): string {
-  // Notation C(K,k)/C(N−K,n−k)/C(N,n) NON convertie en Unicode indice/exposant : K et N sont des
-  // paramètres MAJUSCULES (convention hypergéométrique), or l'ensemble Unicode indice/exposant
-  // disponible (voir CLAUDE.md/piège notation combinatoire) ne couvre QUE des lettres minuscules —
-  // aucun équivalent Unicode n'existe pour un K ou un N en indice/exposant, contrairement à
-  // `etatActuelA`/`aideNiveau2A` ci-dessous qui affichent la même formule en vrai KaTeX (sans cette
-  // limite, `_{K}`/`^{k}` fonctionnent avec n'importe quelle casse).
-  if (phase === "aEcran1") return "Pose la formule hypergéométrique P(k succès) = C(K,k)·C(N−K,n−k)/C(N,n) — calcule chaque coefficient binomial toi-même et utilise ses valeurs numériques dans l'expression (une fraction non réduite est acceptée, inutile de la simplifier).";
-  return "Calcule la valeur de cette probabilité, à partir de la formule CORRECTE de l'étape précédente.";
+export function consigneEcranA(phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
+  // Formule reprise en vrai LaTeX (même expression que `etatActuelA`/`aideNiveau1A`) : `_{K}`/`^{k}`
+  // fonctionnent avec n'importe quelle casse en KaTeX, contrairement à l'ancien habillage Unicode
+  // indice/exposant (limité aux lettres minuscules) qui justifiait l'ancienne notation C(K,k) en
+  // texte brut.
+  if (phase === "aEcran1") return [texte("Pose la formule hypergéométrique "), latexFrag("P(k\\text{ succès})=\\dfrac{C_{K}^{k}\\cdot C_{N-K}^{n-k}}{C_{N}^{n}}"), texte(" — calcule chaque coefficient binomial toi-même et utilise ses valeurs numériques dans l'expression (une fraction non réduite est acceptée, inutile de la simplifier).")];
+  return [texte("Calcule la valeur de cette probabilité, à partir de la formule CORRECTE de l'étape précédente.")];
 }
 
 export function etatActuelA(e: ExerciceHypergeoA, phase: PhaseProbabiliteHypergeometrique): string[] | null {
@@ -135,8 +146,8 @@ function libelleCouleur(c: "c1" | "c2"): string {
 
 const ORDINAL_TIRAGE = ["1ᵉʳ", "2ᵉ", "3ᵉ"];
 
-export function consigneGeneraleB(): string {
-  return "On tire successivement, sans remise, 3 boules d'une urne à 2 couleurs. Compare la probabilité d'une séquence précise (dans un ordre donné) à la probabilité de la même composition (mêmes couleurs), sans tenir compte de l'ordre.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On tire successivement, sans remise, 3 boules d'une urne à 2 couleurs. Compare la probabilité d'une séquence précise (dans un ordre donné) à la probabilité de la même composition (mêmes couleurs), sans tenir compte de l'ordre.")];
 }
 
 /** Une DONNÉE (variable=valeur) par ligne, jamais accolée à sa description française — même
@@ -158,10 +169,10 @@ export function blocDonneesB(e: ExerciceHypergeoB): string[] {
   ];
 }
 
-export function consigneEcranB(phase: PhaseProbabiliteHypergeometrique): string {
-  if (phase === "bEcran1") return "Calcule la probabilité d'obtenir EXACTEMENT cette séquence, dans cet ordre précis (produit de fractions qui diminuent à chaque tirage, tirage après tirage).";
-  if (phase === "bEcran2") return "Calcule la probabilité d'obtenir cette même composition (mêmes couleurs, dans n'importe quel ordre) — formule hypergéométrique.";
-  return "Le rapport entre les 2 valeurs CONFIRMÉES des étapes précédentes est exactement égal au nombre d'arrangements distincts de cette séquence. Calcule ce rapport, puis ce nombre d'arrangements (indépendamment, par le calcul combinatoire).";
+export function consigneEcranB(phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Calcule la probabilité d'obtenir EXACTEMENT cette séquence, dans cet ordre précis (produit de fractions qui diminuent à chaque tirage, tirage après tirage).")];
+  if (phase === "bEcran2") return [texte("Calcule la probabilité d'obtenir cette même composition (mêmes couleurs, dans n'importe quel ordre) — formule hypergéométrique.")];
+  return [texte("Le rapport entre les 2 valeurs CONFIRMÉES des étapes précédentes est exactement égal au nombre d'arrangements distincts de cette séquence. Calcule ce rapport, puis ce nombre d'arrangements (indépendamment, par le calcul combinatoire).")];
 }
 
 export function etatActuelB(e: ExerciceHypergeoB, phase: PhaseProbabiliteHypergeometrique): string[] | null {
@@ -196,8 +207,8 @@ export function aideNiveau2B(e: ExerciceHypergeoB): AideAvecLatex {
 // Famille C — Hypergéométrique à 2 catégories croisées (loto + bonus).
 // ============================================================================
 
-export function consigneGeneraleC(): string {
-  return "Un tirage de loto sélectionne des numéros principaux ET, indépendamment, des numéros bonus. Calcule la probabilité d'avoir exactement le nombre demandé de bons numéros dans CHAQUE catégorie, puis combine les 2 résultats.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Un tirage de loto sélectionne des numéros principaux ET, indépendamment, des numéros bonus. Calcule la probabilité d'avoir exactement le nombre demandé de bons numéros dans CHAQUE catégorie, puis combine les 2 résultats.")];
 }
 
 /** Une DONNÉE (variable=valeur) par ligne — même convention que `blocDonneesA` (voir son
@@ -220,10 +231,10 @@ export function blocDonneesC(e: ExerciceHypergeoC): string[] {
   ];
 }
 
-export function consigneEcranC(phase: PhaseProbabiliteHypergeometrique): string {
-  if (phase === "cEcran1") return "Calcule l'hypergéométrique de la catégorie PRINCIPALE : P(k₁ bons numéros parmi les n₁ tirés).";
-  if (phase === "cEcran2") return "Calcule l'hypergéométrique de la catégorie BONUS, INDÉPENDAMMENT de la première : P(k₂ bons numéros bonus parmi les n₂ tirés).";
-  return "Multiplie les 2 résultats CONFIRMÉS des étapes précédentes pour obtenir la probabilité combinée (les 2 tirages sont indépendants).";
+export function consigneEcranC(phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Calcule l'hypergéométrique de la catégorie PRINCIPALE : P(k₁ bons numéros parmi les n₁ tirés).")];
+  if (phase === "cEcran2") return [texte("Calcule l'hypergéométrique de la catégorie BONUS, INDÉPENDAMMENT de la première : P(k₂ bons numéros bonus parmi les n₂ tirés).")];
+  return [texte("Multiplie les 2 résultats CONFIRMÉS des étapes précédentes pour obtenir la probabilité combinée (les 2 tirages sont indépendants).")];
 }
 
 export function etatActuelC(e: ExerciceHypergeoC, phase: PhaseProbabiliteHypergeometrique): string[] | null {
@@ -258,7 +269,7 @@ export function aideNiveau2C(e: ExerciceHypergeoC): AideAvecLatex {
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceProbabiliteHypergeometrique): string {
+export function consigneGenerale(exercice: ExerciceProbabiliteHypergeometrique): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -280,7 +291,7 @@ export function blocDonnees(exercice: ExerciceProbabiliteHypergeometrique): stri
   }
 }
 
-export function consigneEcran(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): string {
+export function consigneEcran(exercice: ExerciceProbabiliteHypergeometrique, phase: PhaseProbabiliteHypergeometrique): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

@@ -31,6 +31,19 @@ export interface OptionChoix {
   label: string;
 }
 
+/** Fragment de consigne mêlant texte français et LaTeX court (CLAUDE.md, convention établie sur
+ * `formatProprietesLogarithme.ts`/6gen13, dupliquée ici localement — chaque générateur garde la
+ * sienne). */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texteFrag(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+
+function latexFrag(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const ANNONCE_TOLERANCE = "(forme exacte ou décimale arrondie au centième)";
 
 function pgcd(a: number, b: number): number {
@@ -69,8 +82,8 @@ function nAouBA(ex: ExerciceFamilleA): number {
   return ex.nA + ex.nB - ex.nAetB;
 }
 
-function consigneGeneraleA(ex: ExerciceFamilleA): string {
-  return ex.contexte.texte;
+function consigneGeneraleA(ex: ExerciceFamilleA): FragmentConsigne[] {
+  return [texteFrag(ex.contexte.texte)];
 }
 
 function troisiemeDonneeLatexA(ex: ExerciceFamilleA): string {
@@ -108,11 +121,11 @@ function infoDemandeEcran2A(ex: ExerciceFamilleA): { libelle: string; latexGauch
   }
 }
 
-function consigneEcranA(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): string {
-  if (phase === "aEcran1") return "Déduis la quantité manquante grâce à la relation d'inclusion-exclusion P(A∪B) = P(A) + P(B) − P(A∩B), puis complète les 4 cases du tableau à double entrée.";
-  if (phase === "aEcran2") return `Calcule ${infoDemandeEcran2A(ex).libelle}, à partir du tableau CORRECT de l'étape précédente.`;
-  if (ex.sousTypeEcran3 === "incompatibilite") return "Les événements A∩B̄ et Ā∩B sont-ils incompatibles ?";
-  return "Compare P(A|B̄) et P(A|B) : lequel est le plus grand, ou sont-ils égaux ?";
+function consigneEcranA(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texteFrag("Déduis la quantité manquante grâce à la relation d'inclusion-exclusion "), latexFrag("P(A\\cup B)=P(A)+P(B)-P(A\\cap B)"), texteFrag(", puis complète les 4 cases du tableau à double entrée.")];
+  if (phase === "aEcran2") return [texteFrag(`Calcule ${infoDemandeEcran2A(ex).libelle}, à partir du tableau CORRECT de l'étape précédente.`)];
+  if (ex.sousTypeEcran3 === "incompatibilite") return [texteFrag("Les événements A∩B̄ et Ā∩B sont-ils incompatibles ?")];
+  return [texteFrag("Compare P(A|B̄) et P(A|B) : lequel est le plus grand, ou sont-ils égaux ?")];
 }
 
 function etatActuelA(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): string[] | null {
@@ -179,9 +192,9 @@ function aideNiveau2A(ex: ExerciceFamilleA, phase: PhaseProbabilitesEnsembles): 
 // Famille B.
 // ============================================================================
 
-function consigneGeneraleB(ex: ExerciceFamilleB): string {
+function consigneGeneraleB(ex: ExerciceFamilleB): FragmentConsigne[] {
   const situation = ex.sousType === "cartes" ? "On tire une carte au hasard dans un jeu de 52 cartes bien mélangé." : `On lance deux dés équilibrés à ${ex.facesParDe} faces.`;
-  return `${situation} A : ${ex.eventA.label}. B : ${ex.eventB.label}.`;
+  return [texteFrag(`${situation} A : ${ex.eventA.label}. B : ${ex.eventB.label}.`)];
 }
 
 function blocDonneesB(ex: ExerciceFamilleB): string[] {
@@ -192,11 +205,11 @@ function infoDemandeEcran2B(ex: ExerciceFamilleB): { libelle: string; symbole: s
   return ex.demandeEcran2 === "intersection" ? { libelle: "P(A∩B)", symbole: "P(A\\cap B)" } : { libelle: "P(A∪B)", symbole: "P(A\\cup B)" };
 }
 
-function consigneEcranB(ex: ExerciceFamilleB, phase: PhaseProbabilitesEnsembles): string {
-  if (phase === "bEcran1") return "Calcule la probabilité de chacun des deux événements A et B.";
-  if (phase === "bEcran2") return ex.demandeEcran2 === "intersection" ? "Calcule P(A∩B) (dénombrement direct)." : "Calcule P(A∪B) — par inclusion-exclusion, ou par dénombrement direct.";
-  if (phase === "bEcran3") return "Calcule la probabilité conditionnelle P(A|B), à partir des valeurs CORRECTES des étapes précédentes.";
-  return "A et B sont-ils indépendants ? Vérifie NUMÉRIQUEMENT — ne te fie jamais à une impression.";
+function consigneEcranB(ex: ExerciceFamilleB, phase: PhaseProbabilitesEnsembles): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texteFrag("Calcule la probabilité de chacun des deux événements A et B.")];
+  if (phase === "bEcran2") return [texteFrag(ex.demandeEcran2 === "intersection" ? "Calcule P(A∩B) (dénombrement direct)." : "Calcule P(A∪B) — par inclusion-exclusion, ou par dénombrement direct.")];
+  if (phase === "bEcran3") return [texteFrag("Calcule la probabilité conditionnelle P(A|B), à partir des valeurs CORRECTES des étapes précédentes.")];
+  return [texteFrag("A et B sont-ils indépendants ? Vérifie NUMÉRIQUEMENT — ne te fie jamais à une impression.")];
 }
 
 function etatActuelB(ex: ExerciceFamilleB, phase: PhaseProbabilitesEnsembles): string[] | null {
@@ -241,7 +254,7 @@ function aideNiveau2B(ex: ExerciceFamilleB, phase: PhaseProbabilitesEnsembles): 
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceProbabilitesEnsembles): string {
+export function consigneGenerale(exercice: ExerciceProbabilitesEnsembles): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneGeneraleA(exercice) : consigneGeneraleB(exercice);
 }
 
@@ -249,7 +262,7 @@ export function blocDonnees(exercice: ExerciceProbabilitesEnsembles): string[] {
   return exercice.famille === "A" ? blocDonneesA(exercice) : blocDonneesB(exercice);
 }
 
-export function consigneEcran(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): string {
+export function consigneEcran(exercice: ExerciceProbabilitesEnsembles, phase: PhaseProbabilitesEnsembles): FragmentConsigne[] {
   return exercice.famille === "A" ? consigneEcranA(exercice, phase) : consigneEcranB(exercice, phase);
 }
 

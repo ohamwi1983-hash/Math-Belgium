@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { EnsembleReelGuide } from "../core6e/ensembleReel.types";
 import { Katex } from "../components/Katex";
-import type { AideAvecLatex } from "../ui6e/formatProbabilitesProblemes";
+import { RenduFragments } from "../components/RenduFragments";
+import type { AideAvecLatex, FragmentConsigne } from "../ui6e/formatProbabilitesProblemes";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
@@ -9,9 +10,9 @@ import { EnsembleReelGuideBuilder } from "./EnsembleReelGuideBuilder";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
   tentativesUtilisees: number;
@@ -45,7 +46,7 @@ export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, blocDon
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           blocDonnees.length > 0 ? (
             <div className="equation-box">
@@ -58,7 +59,9 @@ export function EtapeIntervalleProbabilitesProblemes({ consigneGenerale, blocDon
           ) : null
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
 
       <EnsembleReelGuideBuilder onChange={setReponse} label="S =" />
 
