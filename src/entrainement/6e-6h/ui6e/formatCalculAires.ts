@@ -35,6 +35,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -107,15 +119,19 @@ function fLatexA(exercice: ExerciceAireA): string {
   return polynomeLatex([exercice.terme]);
 }
 
-export function consigneGeneraleA(): string {
-  return "On considère la fonction f définie ci-dessous sur l'intervalle [a;b]. On veut calculer l'aire du domaine délimité par la courbe de f et l'axe des abscisses sur cet intervalle.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("On considère la fonction f définie ci-dessous sur l'intervalle "),
+    latex("[a;b]"),
+    texte(". On veut calculer l'aire du domaine délimité par la courbe de f et l'axe des abscisses sur cet intervalle."),
+  ];
 }
 export function blocDonneesA(exercice: ExerciceAireA): string[] {
   return [`f(x)=${fLatexA(exercice)}`, `a=${exercice.a}\\text{, }b=${exercice.b}`];
 }
-export function consigneEcranA(phase: PhaseCalculAires): string {
-  if (phase === "aEcran1") return "Détermine le signe de f(x) sur l'intervalle [a;b].";
-  return "Calcule l'aire du domaine délimité par la courbe de f et l'axe des abscisses sur [a;b], à partir du signe confirmé à l'étape précédente.";
+export function consigneEcranA(phase: PhaseCalculAires): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Détermine le signe de "), latex("f(x)"), texte(" sur l'intervalle "), latex("[a;b]"), texte(".")];
+  return [texte("Calcule l'aire du domaine délimité par la courbe de f et l'axe des abscisses sur "), latex("[a;b]"), texte(", à partir du signe confirmé à l'étape précédente.")];
 }
 export function etatActuelA(exercice: ExerciceAireA, phase: PhaseCalculAires): string[] | null {
   if (phase !== "aEcran2") return null;
@@ -139,16 +155,16 @@ export function aideNiveau2A(): AideAvecLatex {
 // Famille B — Aire courbe/axe, bornes à trouver, signe constant.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "On considère la fonction f définie ci-dessous. On veut calculer l'aire du domaine délimité par sa courbe et l'axe des abscisses.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("On considère la fonction f définie ci-dessous. On veut calculer l'aire du domaine délimité par sa courbe et l'axe des abscisses.")];
 }
 export function blocDonneesB(exercice: ExerciceAireB): string[] {
   return [`f(x)=${polynomeLatex(exercice.termes)}`];
 }
-export function consigneEcranB(phase: PhaseCalculAires): string {
-  if (phase === "bEcran1") return "Trouve les racines de f — ce sont les bornes de la région d'aire (aucune borne n'est donnée dans l'énoncé).";
-  if (phase === "bEcran2") return "Confirme le signe de f entre les racines trouvées à l'étape précédente.";
-  return "Calcule l'aire délimitée par la courbe de f et l'axe des abscisses entre ces racines, à partir du signe confirmé.";
+export function consigneEcranB(phase: PhaseCalculAires): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Trouve les racines de f — ce sont les bornes de la région d'aire (aucune borne n'est donnée dans l'énoncé).")];
+  if (phase === "bEcran2") return [texte("Confirme le signe de f entre les racines trouvées à l'étape précédente.")];
+  return [texte("Calcule l'aire délimitée par la courbe de f et l'axe des abscisses entre ces racines, à partir du signe confirmé.")];
 }
 export function etatActuelB(exercice: ExerciceAireB, phase: PhaseCalculAires): string[] | null {
   if (phase === "bEcran2") return [`r_1=${exercice.r1}\\text{, }r_2=${exercice.r2}`];
@@ -183,17 +199,17 @@ function integralesSousIntervallesC(exercice: ExerciceAireC): { iGauche: number;
   };
 }
 
-export function consigneGeneraleC(): string {
-  return "On considère la fonction f définie ci-dessous, dont le signe change sur l'intervalle étudié. On veut calculer l'aire TOTALE du domaine délimité par sa courbe et l'axe des abscisses.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("On considère la fonction f définie ci-dessous, dont le signe change sur l'intervalle étudié. On veut calculer l'aire TOTALE du domaine délimité par sa courbe et l'axe des abscisses.")];
 }
 export function blocDonneesC(exercice: ExerciceAireC): string[] {
   return [`f(x)=${polynomeLatex(exercice.termes)}`];
 }
-export function consigneEcranC(phase: PhaseCalculAires): string {
-  if (phase === "cEcran1") return "Trouve TOUTES les racines de f dans l'intervalle étudié (il y en a 3).";
-  if (phase === "cEcran2") return "Détermine le signe de f sur chacun des deux sous-intervalles délimités par ces racines.";
-  if (phase === "cEcran3") return "Calcule l'intégrale de f sur CHAQUE sous-intervalle séparément (une valeur positive, une négative).";
-  return "Calcule l'aire TOTALE du domaine — attention, une aire est toujours positive.";
+export function consigneEcranC(phase: PhaseCalculAires): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Trouve TOUTES les racines de f dans l'intervalle étudié (il y en a 3).")];
+  if (phase === "cEcran2") return [texte("Détermine le signe de f sur chacun des deux sous-intervalles délimités par ces racines.")];
+  if (phase === "cEcran3") return [texte("Calcule l'intégrale de f sur CHAQUE sous-intervalle séparément (une valeur positive, une négative).")];
+  return [texte("Calcule l'aire TOTALE du domaine — attention, une aire est toujours positive.")];
 }
 export function etatActuelC(exercice: ExerciceAireC, phase: PhaseCalculAires): string[] | null {
   const bornes = `r_1=${exercice.r1}\\text{, }r_2=${exercice.r2}\\text{, }r_3=${exercice.r3}`;
@@ -252,9 +268,14 @@ function gLatexD(exercice: ExerciceAireD): string {
   return polynomeLatex(exercice.termesG);
 }
 
-export function consigneGeneraleD(exercice: ExerciceAireD): string {
-  if (exercice.sousType === "parametre") return "On considère les 2 courbes ci-dessous, dépendant d'un paramètre m>0. On veut déterminer m pour que l'aire du domaine compris entre elles soit égale à la valeur visée.";
-  return "On considère les 2 courbes f et g ci-dessous. On veut calculer l'aire du domaine compris entre elles.";
+export function consigneGeneraleD(exercice: ExerciceAireD): FragmentConsigne[] {
+  if (exercice.sousType === "parametre")
+    return [
+      texte("On considère les 2 courbes ci-dessous, dépendant d'un paramètre "),
+      latex("m>0"),
+      texte(". On veut déterminer m pour que l'aire du domaine compris entre elles soit égale à la valeur visée."),
+    ];
+  return [texte("On considère les 2 courbes f et g ci-dessous. On veut calculer l'aire du domaine compris entre elles.")];
 }
 
 export function blocDonneesD(exercice: ExerciceAireD): string[] {
@@ -267,14 +288,14 @@ export function blocDonneesD(exercice: ExerciceAireD): string[] {
   return donnees;
 }
 
-export function consigneEcranD(exercice: ExerciceAireD, phase: PhaseCalculAires): string {
-  if (phase === "dEcran1") return "Trouve les points d'intersection de f et g — ce sont les bornes du domaine d'aire.";
-  if (phase === "dEcran2") return "Détermine laquelle des 2 courbes est au-dessus de l'autre sur l'intervalle.";
+export function consigneEcranD(exercice: ExerciceAireD, phase: PhaseCalculAires): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Trouve les points d'intersection de f et g — ce sont les bornes du domaine d'aire.")];
+  if (phase === "dEcran2") return [texte("Détermine laquelle des 2 courbes est au-dessus de l'autre sur l'intervalle.")];
   if (phase === "dEcran3") {
-    if (exercice.sousType === "parametre") return "Calcule l'aire du domaine compris entre les 2 courbes, EN FONCTION de m, à partir de l'ordre confirmé.";
-    return "Calcule l'aire du domaine compris entre les 2 courbes sur l'intervalle, à partir de l'ordre confirmé.";
+    if (exercice.sousType === "parametre") return [texte("Calcule l'aire du domaine compris entre les 2 courbes, EN FONCTION de m, à partir de l'ordre confirmé.")];
+    return [texte("Calcule l'aire du domaine compris entre les 2 courbes sur l'intervalle, à partir de l'ordre confirmé.")];
   }
-  return "Pose aire(m) = aire visée, à partir de l'expression trouvée à l'étape précédente, et résous pour m (m>0).";
+  return [texte("Pose aire(m) = aire visée, à partir de l'expression trouvée à l'étape précédente, et résous pour "), latex("m>0"), texte(".")];
 }
 
 /** Expression de aire(m) (famille D, sous-type "parametre") — factorisée pour être réutilisée à la
@@ -335,7 +356,7 @@ export function aideNiveau2D(exercice: ExerciceAireD, phase: PhaseCalculAires): 
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceCalculAires): string {
+export function consigneGenerale(exercice: ExerciceCalculAires): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -361,7 +382,7 @@ export function blocDonnees(exercice: ExerciceCalculAires): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceCalculAires, phase: PhaseCalculAires): string {
+export function consigneEcran(exercice: ExerciceCalculAires, phase: PhaseCalculAires): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

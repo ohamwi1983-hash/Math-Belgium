@@ -38,6 +38,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -190,16 +202,23 @@ function fLatexA(exercice: ExerciceVolumeA): string {
   return sommeVolumeLatex(exercice.termes);
 }
 
-export function consigneGeneraleA(): string {
-  return "On effectue une rotation de la courbe de f, sur l'intervalle [a;b] donné, autour de l'axe des abscisses. Le volume du solide obtenu vaut V = π∫[a;b] f(x)² dx. On calcule ce volume étape par étape.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [
+    texte("On effectue une rotation de la courbe de f, sur l'intervalle "),
+    latex("[a;b]"),
+    texte(" donné, autour de l'axe des abscisses. Le volume du solide obtenu vaut "),
+    latex("V=\\pi\\displaystyle\\int_a^b f(x)^2\\,dx"),
+    texte(". On calcule ce volume étape par étape."),
+  ];
 }
 export function blocDonneesA(exercice: ExerciceVolumeA): string[] {
   return [`f(x)=${fLatexA(exercice)}`, `a=${exercice.a}\\text{, }b=${exercice.b}`];
 }
-export function consigneEcranA(phase: PhaseVolumesRevolution): string {
-  if (phase === "aEcran1") return "Développe et simplifie f(x)² (utilise l'identité cos²x=(1+cos2x)/2 si f est trigonométrique).";
-  if (phase === "aEcran2") return "Calcule la primitive de l'expression développée de f(x)², confirmée à l'étape précédente.";
-  return "Évalue cette primitive entre a et b, puis multiplie par π, pour obtenir le volume V.";
+export function consigneEcranA(phase: PhaseVolumesRevolution): FragmentConsigne[] {
+  if (phase === "aEcran1")
+    return [texte("Développe et simplifie "), latex("f(x)^2"), texte(" (utilise l'identité "), latex("\\cos^2(x)=\\dfrac{1+\\cos(2x)}{2}"), texte(" si f est trigonométrique).")];
+  if (phase === "aEcran2") return [texte("Calcule la primitive de l'expression développée de "), latex("f(x)^2"), texte(", confirmée à l'étape précédente.")];
+  return [texte("Évalue cette primitive entre a et b, puis multiplie par π, pour obtenir le volume V.")];
 }
 export function etatActuelA(exercice: ExerciceVolumeA, phase: PhaseVolumesRevolution): string[] | null {
   if (phase === "aEcran2") return [`f(x)^2=${sommeVolumeLatex(exercice.developpe)}`];
@@ -227,17 +246,21 @@ export function aideNiveau2A(exercice: ExerciceVolumeA, phase: PhaseVolumesRevol
 // Famille B — Volume par rotation, bornes à trouver.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "On effectue une rotation de la courbe de f, sur l'intervalle délimité par ses racines (aucune borne n'est donnée dans l'énoncé), autour de l'axe des abscisses. Le volume du solide obtenu vaut V = π∫ f(x)² dx.";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [
+    texte("On effectue une rotation de la courbe de f, sur l'intervalle délimité par ses racines (aucune borne n'est donnée dans l'énoncé), autour de l'axe des abscisses. Le volume du solide obtenu vaut "),
+    latex("V=\\pi\\displaystyle\\int f(x)^2\\,dx"),
+    texte("."),
+  ];
 }
 export function blocDonneesB(exercice: ExerciceVolumeB): string[] {
   return [`f(x)=${sommeVolumeLatex(exercice.termes)}`];
 }
-export function consigneEcranB(phase: PhaseVolumesRevolution): string {
-  if (phase === "bEcran1") return "Trouve les racines de f — ce sont les bornes du volume (aucune borne n'est donnée dans l'énoncé).";
-  if (phase === "bEcran2") return "Développe et simplifie f(x)², à partir des racines confirmées à l'étape précédente.";
-  if (phase === "bEcran3") return "Calcule la primitive de l'expression développée de f(x)², confirmée à l'étape précédente.";
-  return "Évalue cette primitive entre les racines, puis multiplie par π, pour obtenir le volume V.";
+export function consigneEcranB(phase: PhaseVolumesRevolution): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Trouve les racines de f — ce sont les bornes du volume (aucune borne n'est donnée dans l'énoncé).")];
+  if (phase === "bEcran2") return [texte("Développe et simplifie "), latex("f(x)^2"), texte(", à partir des racines confirmées à l'étape précédente.")];
+  if (phase === "bEcran3") return [texte("Calcule la primitive de l'expression développée de "), latex("f(x)^2"), texte(", confirmée à l'étape précédente.")];
+  return [texte("Évalue cette primitive entre les racines, puis multiplie par π, pour obtenir le volume V.")];
 }
 export function etatActuelB(exercice: ExerciceVolumeB, phase: PhaseVolumesRevolution): string[] | null {
   const racines = `r_1=${exercice.r1}\\text{, }r_2=${exercice.r2}`;
@@ -274,17 +297,26 @@ function termesSupInf(exercice: ExerciceVolumeC): { sup: ExerciceVolumeC["termes
   return exercice.ordre === "fSurG" ? { sup: exercice.termesF, inf: exercice.termesG } : { sup: exercice.termesG, inf: exercice.termesF };
 }
 
-export function consigneGeneraleC(): string {
-  return "On effectue une rotation, autour de l'axe des abscisses, du domaine compris entre la courbe de f et la droite g. Le volume du solide obtenu vaut V = π∫[a;b] (sup(x)²−inf(x)²) dx, où sup désigne la fonction au-dessus de l'autre sur l'intervalle.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    texte("On effectue une rotation, autour de l'axe des abscisses, du domaine compris entre la courbe de f et la droite g. Le volume du solide obtenu vaut "),
+    latex("V=\\pi\\displaystyle\\int_a^b \\left(\\text{sup}(x)^2-\\text{inf}(x)^2\\right)dx"),
+    texte(", où sup désigne la fonction au-dessus de l'autre sur l'intervalle."),
+  ];
 }
 export function blocDonneesC(exercice: ExerciceVolumeC): string[] {
   return [`f(x)=${sommeVolumeLatex(exercice.termesF)}`, `g(x)=${sommeVolumeLatex(exercice.termesG)}`];
 }
-export function consigneEcranC(phase: PhaseVolumesRevolution): string {
-  if (phase === "cEcran1") return "Trouve les points d'intersection de f et g — ce sont les bornes du volume.";
-  if (phase === "cEcran2") return "Détermine laquelle des 2 courbes est au-dessus de l'autre sur l'intervalle.";
-  if (phase === "cEcran3") return "Pose V=π∫[a;b](sup(x)²−inf(x)²)dx et développe, à partir de l'ordre confirmé à l'étape précédente.";
-  return "Calcule la primitive puis évalue-la entre les bornes, en multipliant par π, à partir de la forme développée confirmée.";
+export function consigneEcranC(phase: PhaseVolumesRevolution): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Trouve les points d'intersection de f et g — ce sont les bornes du volume.")];
+  if (phase === "cEcran2") return [texte("Détermine laquelle des 2 courbes est au-dessus de l'autre sur l'intervalle.")];
+  if (phase === "cEcran3")
+    return [
+      texte("Pose "),
+      latex("V=\\pi\\displaystyle\\int_a^b\\left(\\text{sup}(x)^2-\\text{inf}(x)^2\\right)dx"),
+      texte(" et développe, à partir de l'ordre confirmé à l'étape précédente."),
+    ];
+  return [texte("Calcule la primitive puis évalue-la entre les bornes, en multipliant par π, à partir de la forme développée confirmée.")];
 }
 export function etatActuelC(exercice: ExerciceVolumeC, phase: PhaseVolumesRevolution): string[] | null {
   const bornes = `r_1=${exercice.r1}\\text{, }r_2=${exercice.r2}`;
@@ -331,16 +363,24 @@ function kLatexD(exercice: ExerciceVolumeD): string {
   return magnitude === "1" ? "" : magnitude;
 }
 
-export function consigneGeneraleD(): string {
-  return "On effectue une rotation, autour de l'axe des abscisses, de la courbe de f(x)=k√x sur [0;L] (un paraboloïde). On compare son volume à celui du cylindre englobant, de rayon f(L) et de hauteur L.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [
+    texte("On effectue une rotation, autour de l'axe des abscisses, de la courbe de "),
+    latex("f(x)=k\\sqrt{x}"),
+    texte(" sur "),
+    latex("[0;L]"),
+    texte(" (un paraboloïde). On compare son volume à celui du cylindre englobant, de rayon "),
+    latex("f(L)"),
+    texte(" et de hauteur L."),
+  ];
 }
 export function blocDonneesD(exercice: ExerciceVolumeD): string[] {
   return [`f(x)=${kLatexD(exercice)}\\sqrt{x}`, `\\text{Intervalle : }[0\\text{ ; }${exercice.L}]`];
 }
-export function consigneEcranD(phase: PhaseVolumesRevolution): string {
-  if (phase === "dEcran1") return "Calcule le volume du paraboloïde : V = π∫[0;L] k²x dx.";
-  if (phase === "dEcran2") return "Calcule le volume du cylindre englobant (rayon = f(L) = k√L, hauteur = L).";
-  return "Calcule le rapport des deux volumes confirmés aux étapes précédentes — que remarques-tu ?";
+export function consigneEcranD(phase: PhaseVolumesRevolution): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Calcule le volume du paraboloïde : "), latex("V=\\pi\\displaystyle\\int_0^L k^2x\\,dx"), texte(".")];
+  if (phase === "dEcran2") return [texte("Calcule le volume du cylindre englobant (rayon = "), latex("f(L)=k\\sqrt{L}"), texte(", hauteur = L).")];
+  return [texte("Calcule le rapport des deux volumes confirmés aux étapes précédentes — que remarques-tu ?")];
 }
 export function etatActuelD(exercice: ExerciceVolumeD, phase: PhaseVolumesRevolution): string[] | null {
   if (phase === "dEcran2") return [`V_{parabo}${nombreLatex(exercice.volumeParaboloide)}`];
@@ -368,7 +408,7 @@ export function aideNiveau2D(exercice: ExerciceVolumeD, phase: PhaseVolumesRevol
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceVolumesRevolution): string {
+export function consigneGenerale(exercice: ExerciceVolumesRevolution): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -394,7 +434,7 @@ export function blocDonnees(exercice: ExerciceVolumesRevolution): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceVolumesRevolution, phase: PhaseVolumesRevolution): string {
+export function consigneEcran(exercice: ExerciceVolumesRevolution, phase: PhaseVolumesRevolution): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(phase);

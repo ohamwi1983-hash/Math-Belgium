@@ -4,7 +4,7 @@ import { phasesPourExercice as phasesPourExerciceBase } from "../moteur6e/typesC
 import type { PhaseQuellePrimitive } from "../moteur6e/typesQuellePrimitive";
 import { phasesPourExercice } from "../moteur6e/typesQuellePrimitive";
 import type { ResultatExerciceQuellePrimitive } from "../moteur6e/typesQuellePrimitive";
-import type { AideAvecLatex, ChampDef } from "./formatCalculPrimitives";
+import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
 import {
   LIBELLE_FAMILLE,
   LIBELLE_PHASE as LIBELLE_PHASE_BASE,
@@ -21,6 +21,16 @@ import {
   primitiveLatexC,
   primitiveLatexG,
 } from "./formatCalculPrimitives";
+
+/** Texte brut mêlé à du LaTeX inline court — mêmes fragments que `formatCalculPrimitives.ts`
+ * (importés en tant que type seulement ; `texte`/`latex` restent dupliqués ici à dessein,
+ * convention CLAUDE.md). */
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
 
 /**
  * Couche ui (6e) — textes de consigne/aide + formatage LaTeX pour `6gen24`. Pour les écrans
@@ -85,17 +95,23 @@ function aLatex(exercice: ExerciceQuellePrimitive): string {
 // Dispatch — écrans empruntés délégués tels quels, écran final géré ici.
 // ============================================================================
 
-export function consigneGeneraleQuellePrimitive(): string {
-  return "Détermine la primitive F de f qui vérifie la condition initiale ci-dessous. Garde la constante C dans tous tes calculs jusqu'à l'étape finale — c'est elle qui te permettra de répondre à la toute dernière question.";
+export function consigneGeneraleQuellePrimitive(): FragmentConsigne[] {
+  return [texte("Détermine la primitive F de f qui vérifie la condition initiale ci-dessous. Garde la constante C dans tous tes calculs jusqu'à l'étape finale — c'est elle qui te permettra de répondre à la toute dernière question.")];
 }
 
 export function blocDonneesQuellePrimitive(exercice: ExerciceQuellePrimitive): string[] {
   return [...blocDonneesBase(exercice.exerciceBase), `F(${aLatex(exercice)})=${exercice.b}`];
 }
 
-export function consigneEcranQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): string {
+export function consigneEcranQuellePrimitive(exercice: ExerciceQuellePrimitive, phase: PhaseQuellePrimitive): FragmentConsigne[] {
   if (!estPhaseBase(phase)) {
-    return "Substitue x=a dans la primitive générale trouvée (C compris), pose l'équation résultante égale à b, puis isole C. Donne la valeur de C, puis l'expression finale de F(x) avec C substituée.";
+    return [
+      texte("Substitue "),
+      latex("x=a"),
+      texte(" dans la primitive générale trouvée (C compris), pose l'équation résultante égale à b, puis isole C. Donne la valeur de C, puis l'expression finale de "),
+      latex("F(x)"),
+      texte(" avec C substituée."),
+    ];
   }
   return consigneEcranBase(exercice.exerciceBase, phase);
 }

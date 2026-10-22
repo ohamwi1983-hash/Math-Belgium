@@ -34,6 +34,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 function pgcd(a: number, b: number): number {
   a = Math.abs(a);
   b = Math.abs(b);
@@ -172,18 +184,19 @@ function integrandeLatexA(exercice: ExerciceFamilleA): string {
   return `${c === -1 ? "-" : c === 1 ? "" : c}x^{${k}}\\sqrt{x}`;
 }
 
-export function consigneGeneraleA(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous.";
+export function consigneGeneraleA(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous.")];
 }
 export function blocDonneesA(exercice: ExerciceFamilleA): string[] {
   return [`f(x)=${integrandeLatexA(exercice)}`];
 }
-export function consigneEcranA(exercice: ExerciceFamilleA, phase: PhaseCalculPrimitives): string {
-  if (phase === "aEcranDirect") return "Primitive chaque terme de la somme, puis assemble le résultat.";
+export function consigneEcranA(exercice: ExerciceFamilleA, phase: PhaseCalculPrimitives): FragmentConsigne[] {
+  if (phase === "aEcranDirect") return [texte("Primitive chaque terme de la somme, puis assemble le résultat.")];
   if (phase === "aEcran1") {
-    return exercice.sousType === "diviserFraction" ? "Divise chaque terme du numérateur par le dénominateur pour réécrire f en somme de puissances de x." : "Combine x et √x en un seul exposant pour réécrire f(x) sous la forme cx^k.";
+    if (exercice.sousType === "diviserFraction") return [texte("Divise chaque terme du numérateur par le dénominateur pour réécrire f en somme de puissances de x.")];
+    return [texte("Combine x et "), latex("\\sqrt{x}"), texte(" en un seul exposant pour réécrire "), latex("f(x)"), texte(" sous la forme "), latex("cx^k"), texte(".")];
   }
-  return "Primitive la forme réécrite trouvée à l'étape précédente.";
+  return [texte("Primitive la forme réécrite trouvée à l'étape précédente.")];
 }
 export function etatActuelA(exercice: ExerciceFamilleA, phase: PhaseCalculPrimitives): string[] | null {
   if (phase !== "aEcran2" || exercice.sousType === "direct") return null;
@@ -269,16 +282,23 @@ function integrandeLatexB(exercice: ExerciceFamilleB): string {
   return `${kPart}${sep}${xPart}${gLatexB(exercice.typeG, uLatexB(exercice), exercice.nG)}`;
 }
 
-export function consigneGeneraleB(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous (fonction composée).";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous (fonction composée).")];
 }
 export function blocDonneesB(exercice: ExerciceFamilleB): string[] {
   return [`f(x)=${integrandeLatexB(exercice)}`];
 }
-export function consigneEcranB(phase: PhaseCalculPrimitives): string {
-  if (phase === "bEcran1") return "Identifie la fonction intérieure u(x) et calcule u'(x).";
-  if (phase === "bEcran2") return "Compare le coefficient affiché dans f(x) à u'(x) — quel facteur multiplicatif faut-il sortir de l'intégrale pour que la formule composée s'applique exactement ?";
-  return "Applique la formule de primitive composée, ajustée par le facteur trouvé.";
+export function consigneEcranB(phase: PhaseCalculPrimitives): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Identifie la fonction intérieure "), latex("u(x)"), texte(" et calcule "), latex("u'(x)"), texte(".")];
+  if (phase === "bEcran2")
+    return [
+      texte("Compare le coefficient affiché dans "),
+      latex("f(x)"),
+      texte(" à "),
+      latex("u'(x)"),
+      texte(" — quel facteur multiplicatif faut-il sortir de l'intégrale pour que la formule composée s'applique exactement ?"),
+    ];
+  return [texte("Applique la formule de primitive composée, ajustée par le facteur trouvé.")];
 }
 export function etatActuelB(exercice: ExerciceFamilleB, phase: PhaseCalculPrimitives): string[] | null {
   const lignes: string[] = [];
@@ -331,20 +351,20 @@ function integrandeLatexC(exercice: ExerciceFamilleC): string {
   return `\\dfrac{${exercice.k}e^x}{\\sqrt{e^x+1}}`;
 }
 
-export function consigneGeneraleC(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous, par changement de variable.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous, par changement de variable.")];
 }
 export function blocDonneesC(exercice: ExerciceFamilleC): string[] {
   return [`f(x)=${integrandeLatexC(exercice)}`];
 }
-export function consigneEcranC(exercice: ExerciceFamilleC, phase: PhaseCalculPrimitives): string {
+export function consigneEcranC(exercice: ExerciceFamilleC, phase: PhaseCalculPrimitives): FragmentConsigne[] {
   if (phase === "cEcran1") {
     const besoinX = exercice.sousType === "1" || exercice.sousType === "3";
-    return besoinX ? "Pose u égal à l'expression interne pertinente, isole x en fonction de u, puis exprime dx en fonction de du." : "Pose u égal à l'expression interne pertinente et exprime dx en fonction de du.";
+    return [texte(besoinX ? "Pose u égal à l'expression interne pertinente, isole x en fonction de u, puis exprime dx en fonction de du." : "Pose u égal à l'expression interne pertinente et exprime dx en fonction de du.")];
   }
-  if (phase === "cEcran2") return "Réécris complètement l'intégrale en fonction de u uniquement.";
-  if (phase === "cEcran3") return "Calcule la primitive en u.";
-  return "Reviens à la variable x en substituant u par son expression.";
+  if (phase === "cEcran2") return [texte("Réécris complètement l'intégrale en fonction de u uniquement.")];
+  if (phase === "cEcran3") return [texte("Calcule la primitive en u.")];
+  return [texte("Reviens à la variable x en substituant u par son expression.")];
 }
 export function etatActuelC(_exercice: ExerciceFamilleC, phase: PhaseCalculPrimitives): string[] | null {
   if (phase === "cEcran1") return null;
@@ -418,18 +438,18 @@ function integrandeLatexD(exercice: ExerciceFamilleD): string {
   return `e^{${exercice.kExp === 1 ? "" : exercice.kExp}x}${trig}`;
 }
 
-export function consigneGeneraleD(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous.")];
 }
 export function blocDonneesD(exercice: ExerciceFamilleD): string[] {
   return [`f(x)=${integrandeLatexD(exercice)}`];
 }
-export function consigneEcranD(_exercice: ExerciceFamilleD, phase: PhaseCalculPrimitives): string {
-  if (phase === "dEcranDirect") return "Avant de te lancer dans une intégration par parties, regarde si l'expression peut se simplifier — est-ce vraiment nécessaire ici ?";
-  if (phase === "dEcran1") return "Choisis u et dv pour l'intégration par parties (priorité pour u : logarithme > cyclométrique > polynôme > trig/exp).";
-  if (phase === "dEcran2") return "Calcule du (dérivée de u) et v (primitive de dv), à partir du choix de l'étape précédente.";
-  if (phase === "dEcran3") return "Applique la formule ∫u dv = uv − ∫v du.";
-  return "Calcule la primitive finale, à partir de la nouvelle intégrale de l'étape précédente (une 2e IBP ou une résolution algébrique en I peuvent être nécessaires — voir l'aide si besoin).";
+export function consigneEcranD(_exercice: ExerciceFamilleD, phase: PhaseCalculPrimitives): FragmentConsigne[] {
+  if (phase === "dEcranDirect") return [texte("Avant de te lancer dans une intégration par parties, regarde si l'expression peut se simplifier — est-ce vraiment nécessaire ici ?")];
+  if (phase === "dEcran1") return [texte("Choisis u et dv pour l'intégration par parties (priorité pour u : logarithme > cyclométrique > polynôme > trig/exp).")];
+  if (phase === "dEcran2") return [texte("Calcule du (dérivée de u) et v (primitive de dv), à partir du choix de l'étape précédente.")];
+  if (phase === "dEcran3") return [texte("Applique la formule "), latex("\\int u\\,dv = uv - \\int v\\,du"), texte(".")];
+  return [texte("Calcule la primitive finale, à partir de la nouvelle intégrale de l'étape précédente (une 2e IBP ou une résolution algébrique en I peuvent être nécessaires — voir l'aide si besoin).")];
 }
 export function etatActuelD(_exercice: ExerciceFamilleD, phase: PhaseCalculPrimitives): string[] | null {
   const lignes: string[] = [];
@@ -474,17 +494,17 @@ function integrandeLatexE(exercice: ExerciceFamilleE): string {
   return `\\dfrac{1}{x^2\\sqrt{${exercice.a}^2+x^2}}\\quad(x>0)`;
 }
 
-export function consigneGeneraleE(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous, par substitution trigonométrique.";
+export function consigneGeneraleE(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous, par substitution trigonométrique.")];
 }
 export function blocDonneesE(exercice: ExerciceFamilleE): string[] {
   return [`f(x)=${integrandeLatexE(exercice)}`];
 }
-export function consigneEcranE(phase: PhaseCalculPrimitives): string {
-  if (phase === "eEcran1") return "Pose la substitution trigonométrique appropriée et exprime dx en fonction de dθ.";
-  if (phase === "eEcran2") return "Simplifie l'expression sous la racine via l'identité pythagoricienne.";
-  if (phase === "eEcran3") return "Intègre la forme trouvée à l'étape précédente (en θ).";
-  return "Reviens à la variable x (utilise un triangle de référence pour exprimer les fonctions de θ en fonction de x si besoin).";
+export function consigneEcranE(phase: PhaseCalculPrimitives): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Pose la substitution trigonométrique appropriée et exprime dx en fonction de dθ.")];
+  if (phase === "eEcran2") return [texte("Simplifie l'expression sous la racine via l'identité pythagoricienne.")];
+  if (phase === "eEcran3") return [texte("Intègre la forme trouvée à l'étape précédente (en θ).")];
+  return [texte("Reviens à la variable x (utilise un triangle de référence pour exprimer les fonctions de θ en fonction de x si besoin).")];
 }
 export function etatActuelE(exercice: ExerciceFamilleE, phase: PhaseCalculPrimitives): string[] | null {
   if (phase === "eEcran1") return null;
@@ -559,15 +579,15 @@ const NOM_IDENTITE: Record<ExerciceFamilleF["sousType"], string> = {
   oddPowerCos: "séparation d'un facteur cos(x) et identité pythagoricienne",
 };
 
-export function consigneGeneraleF(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous, via une identité trigonométrique.";
+export function consigneGeneraleF(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous, via une identité trigonométrique.")];
 }
 export function blocDonneesF(exercice: ExerciceFamilleF): string[] {
   return [`f(x)=${integrandeLatexF(exercice)}`];
 }
-export function consigneEcranF(exercice: ExerciceFamilleF, phase: PhaseCalculPrimitives): string {
-  if (phase === "fEcran1") return `Réécris f(x) sous une forme intégrable, en utilisant ${NOM_IDENTITE[exercice.sousType]}.`;
-  return "Intègre la forme réécrite trouvée à l'étape précédente.";
+export function consigneEcranF(exercice: ExerciceFamilleF, phase: PhaseCalculPrimitives): FragmentConsigne[] {
+  if (phase === "fEcran1") return [texte("Réécris "), latex("f(x)"), texte(` sous une forme intégrable, en utilisant ${NOM_IDENTITE[exercice.sousType]}.`)];
+  return [texte("Intègre la forme réécrite trouvée à l'étape précédente.")];
 }
 export function etatActuelF(_exercice: ExerciceFamilleF, phase: PhaseCalculPrimitives): string[] | null {
   return phase === "fEcran2" ? [`f(x)=\\ldots\\text{(forme réécrite)}`] : null;
@@ -627,20 +647,21 @@ function integrandeLatexG(exercice: ExerciceFamilleG): string {
   return `\\dfrac{${exercice.gamma}}{x^2${termeAdditif(exercice.p)}x${termeAdditif(exercice.q)}}`;
 }
 
-export function consigneGeneraleG(): string {
-  return "Calcule une primitive F de la fonction f définie ci-dessous, par décomposition en éléments simples.";
+export function consigneGeneraleG(): FragmentConsigne[] {
+  return [texte("Calcule une primitive F de la fonction f définie ci-dessous, par décomposition en éléments simples.")];
 }
 export function blocDonneesG(exercice: ExerciceFamilleG): string[] {
   return [`f(x)=${integrandeLatexG(exercice)}`];
 }
-export function consigneEcranG(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives): string {
-  if (phase === "gEcran1") return "Cette fraction est impropre (degré du numérateur ≥ degré du dénominateur) : effectue la division polynomiale et isole le reste sous forme de fraction propre.";
+export function consigneEcranG(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives): FragmentConsigne[] {
+  if (phase === "gEcran1") return [texte("Cette fraction est impropre (degré du numérateur ≥ degré du dénominateur) : effectue la division polynomiale et isole le reste sous forme de fraction propre.")];
   if (phase === "gEcran2") {
-    if (exercice.sousType === "4") return "Complète le carré au dénominateur, puis pose la décomposition sous la forme γ/((x+h)²+m²) (h, m indéterminés).";
-    return "Factorise le dénominateur et pose la décomposition en éléments simples avec coefficients indéterminés.";
+    if (exercice.sousType === "4")
+      return [texte("Complète le carré au dénominateur, puis pose la décomposition sous la forme "), latex("\\dfrac{\\gamma}{(x+h)^2+m^2}"), texte(" (h, m indéterminés).")];
+    return [texte("Factorise le dénominateur et pose la décomposition en éléments simples avec coefficients indéterminés.")];
   }
-  if (phase === "gEcran3") return "Détermine la valeur de chaque coefficient indéterminé.";
-  return "Intègre chaque terme de la décomposition trouvée à l'étape précédente.";
+  if (phase === "gEcran3") return [texte("Détermine la valeur de chaque coefficient indéterminé.")];
+  return [texte("Intègre chaque terme de la décomposition trouvée à l'étape précédente.")];
 }
 export function etatActuelG(exercice: ExerciceFamilleG, phase: PhaseCalculPrimitives): string[] | null {
   const lignes: string[] = [];
@@ -682,7 +703,7 @@ export function aideNiveau2G(exercice: ExerciceFamilleG, phase: PhaseCalculPrimi
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceCalculPrimitives): string {
+export function consigneGenerale(exercice: ExerciceCalculPrimitives): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA();
@@ -720,7 +741,7 @@ export function blocDonnees(exercice: ExerciceCalculPrimitives): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceCalculPrimitives, phase: PhaseCalculPrimitives): string {
+export function consigneEcran(exercice: ExerciceCalculPrimitives, phase: PhaseCalculPrimitives): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(exercice, phase);

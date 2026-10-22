@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { ApercuExpressionLatex } from "../components/ApercuExpressionLatex";
 import { Katex } from "../components/Katex";
+import { RenduFragments } from "../components/RenduFragments";
 import type { StatutVerification } from "../moteur/statutVerification";
 import { formatMessageErreur } from "../ui/messageErreur";
-import type { AideAvecLatex, ChampDef } from "../ui6e/formatCalculAires";
+import type { AideAvecLatex, ChampDef, FragmentConsigne } from "../ui6e/formatCalculAires";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
 import { BoutonAide } from "./BoutonAide";
 import { EnTeteExercice } from "./EnTeteExercice";
 
 interface Props {
-  consigneGenerale: string;
+  consigneGenerale: FragmentConsigne[];
   blocDonnees: string[];
-  consigneEcran: string;
+  consigneEcran: FragmentConsigne[];
   champs: ChampDef[];
   aideNiveau1: AideAvecLatex;
   aideNiveau2: AideAvecLatex;
@@ -56,7 +57,7 @@ export function EtapeChampsCalculAires({ consigneGenerale, blocDonnees, consigne
   return (
     <div>
       <EnTeteExercice
-        consigneGenerale={consigneGenerale}
+        consigneGenerale={<RenduFragments fragments={consigneGenerale} />}
         blocDonnees={
           <div className="equation-box">
             <div className="equation-box-donnees">
@@ -67,7 +68,9 @@ export function EtapeChampsCalculAires({ consigneGenerale, blocDonnees, consigne
           </div>
         }
       />
-      <p className="prompt-text">{consigneEcran}</p>
+      <p className="prompt-text">
+        <RenduFragments fragments={consigneEcran} />
+      </p>
       {champs.map((champ, i) => (champ.type === "texte" ? <ApercuExpressionLatex key={i} texte={valeurs[i]} label={champ.label} /> : null))}
       <div className="field-row">
         {champs.map((champ, i) =>

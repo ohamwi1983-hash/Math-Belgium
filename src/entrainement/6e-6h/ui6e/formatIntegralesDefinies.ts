@@ -4,7 +4,7 @@ import type { PhaseIntegralesDefinies, ResultatExerciceIntegralesDefinies } from
 import { phasesPourExercice } from "../moteur6e/typesIntegralesDefinies";
 import type { PhaseCalculPrimitives } from "../moteur6e/typesCalculPrimitives";
 import { phasesPourExercice as phasesPourExercicePrimitive } from "../moteur6e/typesCalculPrimitives";
-import type { AideAvecLatex, ChampDef } from "./formatCalculPrimitives";
+import type { AideAvecLatex, ChampDef, FragmentConsigne } from "./formatCalculPrimitives";
 import {
   aideNiveau1 as aideNiveau1Primitive,
   aideNiveau2 as aideNiveau2Primitive,
@@ -78,31 +78,41 @@ function estPhaseEmpruntee(exercice: ExerciceIntegralesDefinies, phase: PhaseInt
   return phasesPourExercicePrimitive(exercice.primitive).includes(phase as PhaseCalculPrimitives);
 }
 
+/** Texte brut mêlé à du LaTeX inline court — mêmes fragments que `formatCalculPrimitives.ts`
+ * (importés en tant que type seulement ; `texte`/`latex` restent dupliqués ici à dessein,
+ * convention CLAUDE.md). */
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 // ============================================================================
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceIntegralesDefinies): string {
-  if (exercice.scenario === "simple") return "Calcule une primitive F de f, puis évalue l'intégrale définie ci-dessous.";
-  if (exercice.scenario === "moyenne") return "Calcule une primitive F de f, évalue l'intégrale définie, puis la valeur moyenne de f sur cet intervalle.";
-  return "Calcule une primitive F de f, puis détermine la ou les valeurs du paramètre m pour lesquelles l'intégrale définie ci-dessous vaut la valeur indiquée.";
+export function consigneGenerale(exercice: ExerciceIntegralesDefinies): FragmentConsigne[] {
+  if (exercice.scenario === "simple") return [texte("Calcule une primitive F de f, puis évalue l'intégrale définie ci-dessous.")];
+  if (exercice.scenario === "moyenne") return [texte("Calcule une primitive F de f, évalue l'intégrale définie, puis la valeur moyenne de f sur cet intervalle.")];
+  return [texte("Calcule une primitive F de f, puis détermine la ou les valeurs du paramètre m pour lesquelles l'intégrale définie ci-dessous vaut la valeur indiquée.")];
 }
 
 export function blocDonnees(exercice: ExerciceIntegralesDefinies): string[] {
   return [...blocDonneesPrimitive(exercice.primitive), ligneIntegraleLatex(exercice)];
 }
 
-export function consigneEcran(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): string {
+export function consigneEcran(exercice: ExerciceIntegralesDefinies, phase: PhaseIntegralesDefinies): FragmentConsigne[] {
   if (estPhaseEmpruntee(exercice, phase)) return consigneEcranPrimitive(exercice.primitive, phase);
-  if (phase === "finalIntegrale") return "Évalue l'intégrale définie F(b)−F(a), à partir de la primitive trouvée à l'étape précédente.";
-  if (phase === "valeurMoyenne") return "Divise l'intégrale définie trouvée par (b−a) pour obtenir la valeur moyenne de f sur cet intervalle.";
+  if (phase === "finalIntegrale") return [texte("Évalue l'intégrale définie "), latex("F(b)-F(a)"), texte(", à partir de la primitive trouvée à l'étape précédente.")];
+  if (phase === "valeurMoyenne") return [texte("Divise l'intégrale définie trouvée par "), latex("(b-a)"), texte(" pour obtenir la valeur moyenne de f sur cet intervalle.")];
   if (phase === "poserEquationM") {
-    return "Exprime l'intégrale définie ci-dessus en fonction de m à l'aide de la primitive trouvée, puis pose l'équation égale à la valeur cible indiquée dans les données.";
+    return [texte("Exprime l'intégrale définie ci-dessus en fonction de m à l'aide de la primitive trouvée, puis pose l'équation égale à la valeur cible indiquée dans les données.")];
   }
   // "resoudreM"
   const exerciceP = exercice as ExerciceIntegraleParametre;
   const restriction = exerciceP.domaineMTexte ? ` (${exerciceP.domaineMTexte})` : "";
-  return `Résous l'équation posée à l'étape précédente pour m${restriction}.`;
+  return [texte(`Résous l'équation posée à l'étape précédente pour m${restriction}.`)];
 }
 
 /** Toutes les lignes "état actuel" confirmées par la chaîne EMPRUNTÉE (calcul de primitive),
@@ -220,4 +230,4 @@ export const LIBELLE_SCENARIO: Record<ExerciceIntegralesDefinies["scenario"], st
   moyenne: "Valeur moyenne",
 };
 
-export type { ChampDef, AideAvecLatex };
+export type { ChampDef, AideAvecLatex, FragmentConsigne };

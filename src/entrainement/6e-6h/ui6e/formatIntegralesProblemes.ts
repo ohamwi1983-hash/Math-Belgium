@@ -33,6 +33,18 @@ export interface AideAvecLatex {
   latex: string | null;
 }
 
+/** Texte brut mêlé à du LaTeX inline court — même contrat que `ui/formatEquationDroite.ts`/
+ * `ui6e/formatProprietesLogarithme.ts` (dupliqué ici à dessein, convention CLAUDE.md : un type aussi
+ * petit ne justifie pas un module partagé) ; rendu via `components/RenduFragments.tsx`. */
+export type FragmentConsigne = { type: "texte"; valeur: string } | { type: "latex"; valeur: string };
+
+function texte(valeur: string): FragmentConsigne {
+  return { type: "texte", valeur };
+}
+function latex(valeur: string): FragmentConsigne {
+  return { type: "latex", valeur };
+}
+
 const AUCUNE_AIDE: AideAvecLatex = { texte: "", latex: null };
 
 // ============================================================================
@@ -140,9 +152,15 @@ function libelleContexteA(exercice: ExerciceFamilleA_Problemes): { intro: string
   return { intro: "Un mur présente un profil irrégulier, sondé par des mesures de hauteur (en mètres) à intervalles réguliers de Δx=1 m.", grandeur: "le volume total de matière (après avoir multiplié l'aire de la coupe par la profondeur donnée)", unite: "m³" };
 }
 
-export function consigneGeneraleA(exercice: ExerciceFamilleA_Problemes): string {
+export function consigneGeneraleA(exercice: ExerciceFamilleA_Problemes): FragmentConsigne[] {
   const { intro, grandeur } = libelleContexteA(exercice);
-  return `${intro} Aucune expression f(x) n'est disponible : on approxime ${grandeur} par la méthode des trapèzes, Aire ≈ Δx·[(y_0+y_n)/2 + y_1+y_2+...+y_(n-1)].`;
+  return [
+    texte(`${intro} Aucune expression `),
+    latex("f(x)"),
+    texte(` n'est disponible : on approxime ${grandeur} par la méthode des trapèzes, `),
+    latex("\\text{Aire}\\approx\\Delta x\\cdot\\left[\\dfrac{y_0+y_n}{2}+y_1+y_2+\\cdots+y_{n-1}\\right]"),
+    texte("."),
+  ];
 }
 export function blocDonneesA(exercice: ExerciceFamilleA_Problemes): string[] {
   const yTexte = exercice.y.map((v, i) => `y_{${i}}=${v}`).join("\\text{, }");
@@ -150,10 +168,10 @@ export function blocDonneesA(exercice: ExerciceFamilleA_Problemes): string[] {
   if (exercice.dimensionSupplementaire !== null) lignes.push(`\\text{profondeur}=${exercice.dimensionSupplementaire}\\text{ m}`);
   return lignes;
 }
-export function consigneEcranA(exercice: ExerciceFamilleA_Problemes, phase: PhaseIntegralesProblemes): string {
-  if (phase === "aEcran1") return "Pose la somme entre crochets de la formule des trapèzes (ne calcule pas encore le résultat final).";
+export function consigneEcranA(exercice: ExerciceFamilleA_Problemes, phase: PhaseIntegralesProblemes): FragmentConsigne[] {
+  if (phase === "aEcran1") return [texte("Pose la somme entre crochets de la formule des trapèzes (ne calcule pas encore le résultat final).")];
   const { grandeur } = libelleContexteA(exercice);
-  return `Calcule ${grandeur}, à partir de la somme confirmée ci-dessus.`;
+  return [texte(`Calcule ${grandeur}, à partir de la somme confirmée ci-dessus.`)];
 }
 export function etatActuelA(exercice: ExerciceFamilleA_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
   if (phase === "aEcran2") return [`\\text{Somme confirmée}=${demiEntierLatex(exercice.sommeAttendue)}`];
@@ -181,8 +199,20 @@ export function aideNiveau2A(exercice: ExerciceFamilleA_Problemes, phase: PhaseI
 // Famille B — Cinématique.
 // ============================================================================
 
-export function consigneGeneraleB(): string {
-  return "Un mobile a pour accélération a(t)=k·t+p. On connaît sa vitesse initiale v(0) et sa position initiale x(0). Détermine v(t) puis x(t), en utilisant CHAQUE condition initiale SÉPARÉMENT (2 constantes distinctes à déterminer).";
+export function consigneGeneraleB(): FragmentConsigne[] {
+  return [
+    texte("Un mobile a pour accélération "),
+    latex("a(t)=k\\cdot t+p"),
+    texte(". On connaît sa vitesse initiale "),
+    latex("v(0)"),
+    texte(" et sa position initiale "),
+    latex("x(0)"),
+    texte(". Détermine "),
+    latex("v(t)"),
+    texte(" puis "),
+    latex("x(t)"),
+    texte(", en utilisant CHAQUE condition initiale SÉPARÉMENT (2 constantes distinctes à déterminer)."),
+  ];
 }
 export function blocDonneesB(exercice: ExerciceFamilleB_Problemes): string[] {
   const lignes = [`a(t)=${afficheAffine(exercice.k, exercice.p, "t")}`, `v(0)=${exercice.v0}`, `x(0)=${exercice.x0}`];
@@ -190,10 +220,22 @@ export function blocDonneesB(exercice: ExerciceFamilleB_Problemes): string[] {
   else lignes.push(`\\text{distance cible}=${Math.round((exercice.cible as number) * 1000) / 1000}`);
   return lignes;
 }
-export function consigneEcranB(exercice: ExerciceFamilleB_Problemes, phase: PhaseIntegralesProblemes): string {
-  if (phase === "bEcran1") return "Intègre a(t) pour obtenir v(t), puis utilise v(0) pour déterminer la constante.";
-  if (phase === "bEcran2") return "Intègre v(t) confirmé ci-dessus pour obtenir x(t), puis utilise x(0) pour déterminer SA PROPRE constante (distincte de celle de v(t)).";
-  return exercice.sousType === "evaluer" ? "Évalue x(t) au temps t1 donné, à partir de x(t) confirmé ci-dessus." : "Résous x(t)=distance cible (donnée ci-dessus) pour t, à partir de x(t) confirmé ci-dessus.";
+export function consigneEcranB(exercice: ExerciceFamilleB_Problemes, phase: PhaseIntegralesProblemes): FragmentConsigne[] {
+  if (phase === "bEcran1") return [texte("Intègre "), latex("a(t)"), texte(" pour obtenir "), latex("v(t)"), texte(", puis utilise "), latex("v(0)"), texte(" pour déterminer la constante.")];
+  if (phase === "bEcran2")
+    return [
+      texte("Intègre "),
+      latex("v(t)"),
+      texte(" confirmé ci-dessus pour obtenir "),
+      latex("x(t)"),
+      texte(", puis utilise "),
+      latex("x(0)"),
+      texte(" pour déterminer SA PROPRE constante (distincte de celle de "),
+      latex("v(t)"),
+      texte(")."),
+    ];
+  if (exercice.sousType === "evaluer") return [texte("Évalue "), latex("x(t)"), texte(" au temps t1 donné, à partir de "), latex("x(t)"), texte(" confirmé ci-dessus.")];
+  return [texte("Résous "), latex("x(t)=\\text{distance cible}"), texte(" (donnée ci-dessus) pour t, à partir de "), latex("x(t)"), texte(" confirmé ci-dessus.")];
 }
 function vLatexB(exercice: ExerciceFamilleB_Problemes): string {
   return sommeAffineExacteLatex([
@@ -239,19 +281,32 @@ const OPTIONS_COMPARAISON: OptionChoix[] = [
   { valeur: "different", label: "Non, les travaux sont différents (F(x)=kx n'est pas constante)" },
 ];
 
-export function consigneGeneraleC(): string {
-  return "La force nécessaire pour étirer un ressort suit la loi de Hooke : F(x)=k·x. Une paire (allongement, force) connue permet de trouver k. Le travail pour étirer le ressort de a à b vaut W=∫[a;b] k·x dx.";
+export function consigneGeneraleC(): FragmentConsigne[] {
+  return [
+    texte("La force nécessaire pour étirer un ressort suit la loi de Hooke : "),
+    latex("F(x)=k\\cdot x"),
+    texte(". Une paire (allongement, force) connue permet de trouver k. Le travail pour étirer le ressort de a à b vaut "),
+    latex("W=\\displaystyle\\int_a^b k\\cdot x\\,dx"),
+    texte("."),
+  ];
 }
 export function blocDonneesC(exercice: ExerciceFamilleC_Problemes): string[] {
   const lignes = [`F_0=${exercice.F0}\\text{ N pour }x_0=${exercice.x0}\\text{ m}`, `a=${exercice.a}\\text{, }b=${exercice.b}`];
   if (exercice.a2 !== null) lignes.push(`a_2=${exercice.a2}\\text{, }b_2=${exercice.b2}`);
   return lignes;
 }
-export function consigneEcranC(phase: PhaseIntegralesProblemes): string {
-  if (phase === "cEcran1") return "Détermine k à partir de la paire connue (F_0=k·x_0).";
-  if (phase === "cEcran2") return "Calcule le travail W=∫[a;b] k·x dx, à partir du k confirmé ci-dessus.";
-  if (phase === "cEcran3") return "Calcule le second travail W_2=∫[a_2;b_2] k·x dx (même longueur d'intervalle que [a;b], position différente).";
-  return "Les deux travaux (même longueur d'intervalle) sont-ils égaux ?";
+export function consigneEcranC(phase: PhaseIntegralesProblemes): FragmentConsigne[] {
+  if (phase === "cEcran1") return [texte("Détermine k à partir de la paire connue ("), latex("F_0=k\\cdot x_0"), texte(").")];
+  if (phase === "cEcran2") return [texte("Calcule le travail "), latex("W=\\displaystyle\\int_a^b k\\cdot x\\,dx"), texte(", à partir du k confirmé ci-dessus.")];
+  if (phase === "cEcran3")
+    return [
+      texte("Calcule le second travail "),
+      latex("W_2=\\displaystyle\\int_{a_2}^{b_2} k\\cdot x\\,dx"),
+      texte(" (même longueur d'intervalle que "),
+      latex("[a;b]"),
+      texte(", position différente)."),
+    ];
+  return [texte("Les deux travaux (même longueur d'intervalle) sont-ils égaux ?")];
 }
 export function etatActuelC(exercice: ExerciceFamilleC_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
   const lignes: string[] = [];
@@ -286,17 +341,42 @@ export function aideNiveau2C(): AideAvecLatex {
 // Famille D — Coût marginal, total et moyen.
 // ============================================================================
 
-export function consigneGeneraleD(): string {
-  return "Le coût marginal de production est f(q)=a−b·q (affine décroissant). Le coût fixe C(0) est donné. Détermine le coût total C(q), puis étudie son évolution entre q_1 et q_2, et son coût moyen.";
+export function consigneGeneraleD(): FragmentConsigne[] {
+  return [
+    texte("Le coût marginal de production est "),
+    latex("f(q)=a-b\\cdot q"),
+    texte(" (affine décroissant). Le coût fixe "),
+    latex("C(0)"),
+    texte(" est donné. Détermine le coût total "),
+    latex("C(q)"),
+    texte(", puis étudie son évolution entre "),
+    latex("q_1"),
+    texte(" et "),
+    latex("q_2"),
+    texte(", et son coût moyen."),
+  ];
 }
 export function blocDonneesD(exercice: ExerciceFamilleD_Problemes): string[] {
   return [`f(q)=${exercice.a}-${fractionLatex(exercice.bNum, exercice.bDen)}q`, `C(0)=${exercice.F0}`, `q_1=${exercice.q1}\\text{, }q_2=${exercice.q2}`];
 }
-export function consigneEcranD(phase: PhaseIntegralesProblemes): string {
-  if (phase === "dEcran1") return "Intègre f(q) pour obtenir C(q), en utilisant C(0) pour déterminer la constante.";
-  if (phase === "dEcran2") return "Évalue C(q_1), à partir de C(q) confirmé ci-dessus.";
-  if (phase === "dEcran3") return "Calcule l'augmentation de coût entre q_1 et q_2 (C(q_2)−C(q_1), OU l'intégrale définie de f entre q_1 et q_2 — les deux méthodes donnent le même résultat).";
-  return "Donne l'expression du coût moyen, C_{moy}(q)=C(q)/q.";
+export function consigneEcranD(phase: PhaseIntegralesProblemes): FragmentConsigne[] {
+  if (phase === "dEcran1") return [texte("Intègre "), latex("f(q)"), texte(" pour obtenir "), latex("C(q)"), texte(", en utilisant "), latex("C(0)"), texte(" pour déterminer la constante.")];
+  if (phase === "dEcran2") return [texte("Évalue "), latex("C(q_1)"), texte(", à partir de "), latex("C(q)"), texte(" confirmé ci-dessus.")];
+  if (phase === "dEcran3")
+    return [
+      texte("Calcule l'augmentation de coût entre "),
+      latex("q_1"),
+      texte(" et "),
+      latex("q_2"),
+      texte(" ("),
+      latex("C(q_2)-C(q_1)"),
+      texte(", OU l'intégrale définie de f entre "),
+      latex("q_1"),
+      texte(" et "),
+      latex("q_2"),
+      texte(" — les deux méthodes donnent le même résultat)."),
+    ];
+  return [texte("Donne l'expression du coût moyen, "), latex("C_{moy}(q)=C(q)/q"), texte(".")];
 }
 function cLatexD(exercice: ExerciceFamilleD_Problemes): string {
   return `${exercice.a}q-${fractionLatex(exercice.bNum, 2 * exercice.bDen)}q^2+${exercice.F0}`;
@@ -353,18 +433,18 @@ function libelleContexteE(contexte: ExerciceFamilleE_Problemes["contexte"]): { i
   return { intro: "Le cours d'une action varie selon un taux f(t) (€/jour).", grandeur: "le cours" };
 }
 
-export function consigneGeneraleE(exercice: ExerciceFamilleE_Problemes): string {
+export function consigneGeneraleE(exercice: ExerciceFamilleE_Problemes): FragmentConsigne[] {
   const { intro } = libelleContexteE(exercice.contexte);
-  return `${intro} Calcule la variation totale sur [a;b], puis la valeur moyenne de f sur cette période, et interprète le résultat.`;
+  return [texte(`${intro} Calcule la variation totale sur `), latex("[a;b]"), texte(", puis la valeur moyenne de f sur cette période, et interprète le résultat.")];
 }
 export function blocDonneesE(exercice: ExerciceFamilleE_Problemes): string[] {
   const { a, b } = exercice.exerciceMoyenne;
   return [`f(t)=${fLatexE(exercice)}`, `[a\\text{ ; }b]=[${a}\\text{ ; }${b}]`];
 }
-export function consigneEcranE(phase: PhaseIntegralesProblemes): string {
-  if (phase === "eEcran1") return "Calcule ∫[a;b] f(t) dt.";
-  if (phase === "eEcran2") return "Calcule la valeur moyenne de f sur [a;b], à partir de l'intégrale confirmée ci-dessus.";
-  return "Interprète ce résultat dans le contexte donné.";
+export function consigneEcranE(phase: PhaseIntegralesProblemes): FragmentConsigne[] {
+  if (phase === "eEcran1") return [texte("Calcule "), latex("\\displaystyle\\int_a^b f(t)\\,dt"), texte(".")];
+  if (phase === "eEcran2") return [texte("Calcule la valeur moyenne de f sur "), latex("[a;b]"), texte(", à partir de l'intégrale confirmée ci-dessus.")];
+  return [texte("Interprète ce résultat dans le contexte donné.")];
 }
 export function etatActuelE(exercice: ExerciceFamilleE_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
   const F = exercice.exerciceMoyenne.primitive.primitiveReference;
@@ -394,15 +474,28 @@ export function aideNiveau2E(): AideAvecLatex {
 // Famille F — Surplus consommateur.
 // ============================================================================
 
-export function consigneGeneraleF(): string {
-  return "La fonction de demande est f(x)=A·e^(−k·x) (décroissante), l'offre g(x)=m·x+p (affine croissante, donnée explicitement). Résous f(x)=g(x) pour trouver le point d'équilibre (Q,P), puis calcule le surplus consommateur = ∫[0;Q] (f(x)−P) dx.";
+export function consigneGeneraleF(): FragmentConsigne[] {
+  return [
+    texte("La fonction de demande est "),
+    latex("f(x)=A\\cdot e^{-k\\cdot x}"),
+    texte(" (décroissante), l'offre "),
+    latex("g(x)=m\\cdot x+p"),
+    texte(" (affine croissante, donnée explicitement). Résous "),
+    latex("f(x)=g(x)"),
+    texte(" pour trouver le point d'équilibre "),
+    latex("(Q,P)"),
+    texte(", puis calcule le "),
+    latex("\\text{surplus consommateur}=\\displaystyle\\int_0^Q (f(x)-P)\\,dx"),
+    texte("."),
+  ];
 }
 export function blocDonneesF(exercice: ExerciceFamilleF_Problemes): string[] {
   return [`f(x)=${exercice.A}e^{-${fractionLatex(exercice.kNum, exercice.kDen)}x}`, `g(x)=${afficheAffine(exercice.m, exercice.p, "x")}`];
 }
-export function consigneEcranF(phase: PhaseIntegralesProblemes): string {
-  if (phase === "fEcran1") return "Résous f(x)=g(x) pour trouver le point d'équilibre (Q,P) — numériquement (calculatrice graphique).";
-  return "Calcule le surplus consommateur = ∫[0;Q] (f(x)−P) dx, à partir de Q,P confirmés ci-dessus.";
+export function consigneEcranF(phase: PhaseIntegralesProblemes): FragmentConsigne[] {
+  if (phase === "fEcran1")
+    return [texte("Résous "), latex("f(x)=g(x)"), texte(" pour trouver le point d'équilibre "), latex("(Q,P)"), texte(" — numériquement (calculatrice graphique).")];
+  return [texte("Calcule le "), latex("\\text{surplus consommateur}=\\displaystyle\\int_0^Q (f(x)-P)\\,dx"), texte(", à partir de Q,P confirmés ci-dessus.")];
 }
 export function etatActuelF(exercice: ExerciceFamilleF_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
   if (phase === "fEcran2") return [`Q${approxLatex(exercice.Q)}\\text{, }P${approxLatex(exercice.P)}`];
@@ -428,10 +521,26 @@ export function aideNiveau2F(exercice: ExerciceFamilleF_Problemes, phase: PhaseI
 // Famille G — Volume de révolution appliqué (3 sous-types).
 // ============================================================================
 
-export function consigneGeneraleG(exercice: ExerciceFamilleG_Problemes): string {
-  if (exercice.sousType === "soustraction") return "On connaît le volume total d'un solide de révolution (rotation de f autour de l'axe des abscisses). Un volume intérieur creux (cylindrique) en est retiré. Calcule le volume de matière restant.";
-  if (exercice.sousType === "archimede") return "Un verre en forme de paraboloïde (rotation de f(x)=k√x sur [0;L]) contient de l'eau. Une bille de rayon r y est introduite, TOTALEMENT immergée. Détermine le volume du verre, le volume d'eau déplacé, puis la fraction du volume initial expulsée.";
-  return "Une sphère de rayon r contient de l'eau jusqu'à une hauteur h (0≤h≤2r). En utilisant l'équation du cercle décalé x²+(y−r)²=r², détermine le volume d'eau V(h)=π∫[0;h](r²−(y−r)²)dy.";
+export function consigneGeneraleG(exercice: ExerciceFamilleG_Problemes): FragmentConsigne[] {
+  if (exercice.sousType === "soustraction")
+    return [texte("On connaît le volume total d'un solide de révolution (rotation de f autour de l'axe des abscisses). Un volume intérieur creux (cylindrique) en est retiré. Calcule le volume de matière restant.")];
+  if (exercice.sousType === "archimede")
+    return [
+      texte("Un verre en forme de paraboloïde (rotation de "),
+      latex("f(x)=k\\sqrt{x}"),
+      texte(" sur "),
+      latex("[0;L]"),
+      texte(") contient de l'eau. Une bille de rayon r y est introduite, TOTALEMENT immergée. Détermine le volume du verre, le volume d'eau déplacé, puis la fraction du volume initial expulsée."),
+    ];
+  return [
+    texte("Une sphère de rayon r contient de l'eau jusqu'à une hauteur h ("),
+    latex("0\\leq h\\leq 2r"),
+    texte("). En utilisant l'équation du cercle décalé "),
+    latex("x^2+(y-r)^2=r^2"),
+    texte(", détermine le volume d'eau "),
+    latex("V(h)=\\pi\\displaystyle\\int_0^h\\left(r^2-(y-r)^2\\right)dy"),
+    texte("."),
+  ];
 }
 
 export function blocDonneesG(exercice: ExerciceFamilleG_Problemes): string[] {
@@ -446,18 +555,26 @@ export function blocDonneesG(exercice: ExerciceFamilleG_Problemes): string[] {
   return [`r=${exercice.r}`, `h=${exercice.hDemande}`];
 }
 
-export function consigneEcranG(exercice: ExerciceFamilleG_Problemes, phase: PhaseIntegralesProblemes): string {
+export function consigneEcranG(exercice: ExerciceFamilleG_Problemes, phase: PhaseIntegralesProblemes): FragmentConsigne[] {
   if (exercice.sousType === "soustraction") {
-    return phase === "gSoustractionEcran1" ? "Calcule le volume total obtenu par rotation de f sur [a;b] autour de l'axe des abscisses (V=π∫[a;b] f(x)² dx)." : "Soustrais le volume intérieur creux donné pour obtenir le volume de matière.";
+    if (phase === "gSoustractionEcran1")
+      return [
+        texte("Calcule le volume total obtenu par rotation de f sur "),
+        latex("[a;b]"),
+        texte(" autour de l'axe des abscisses ("),
+        latex("V=\\pi\\displaystyle\\int_a^b f(x)^2\\,dx"),
+        texte(")."),
+      ];
+    return [texte("Soustrais le volume intérieur creux donné pour obtenir le volume de matière.")];
   }
   if (exercice.sousType === "archimede") {
-    if (phase === "gArchimedeEcran1") return "Calcule le volume du paraboloïde (le contenant).";
-    if (phase === "gArchimedeEcran2") return "Calcule le volume d'eau déplacé par la bille totalement immergée.";
-    return "Calcule la fraction du volume initial qui a été expulsée (volume déplacé / volume du paraboloïde).";
+    if (phase === "gArchimedeEcran1") return [texte("Calcule le volume du paraboloïde (le contenant).")];
+    if (phase === "gArchimedeEcran2") return [texte("Calcule le volume d'eau déplacé par la bille totalement immergée.")];
+    return [texte("Calcule la fraction du volume initial qui a été expulsée (volume déplacé / volume du paraboloïde).")];
   }
-  if (phase === "gCalotteEcran1") return "Pose l'intégrande r²−(y−r)² (remplace r par sa valeur numérique).";
-  if (phase === "gCalotteEcran2") return "Développe puis calcule la primitive de cet intégrande (en y, constante nulle).";
-  return "Évalue V(h) pour la hauteur d'eau donnée.";
+  if (phase === "gCalotteEcran1") return [texte("Pose l'intégrande "), latex("r^2-(y-r)^2"), texte(" (remplace r par sa valeur numérique).")];
+  if (phase === "gCalotteEcran2") return [texte("Développe puis calcule la primitive de cet intégrande (en y, constante nulle).")];
+  return [texte("Évalue "), latex("V(h)"), texte(" pour la hauteur d'eau donnée.")];
 }
 
 export function etatActuelG(exercice: ExerciceFamilleG_Problemes, phase: PhaseIntegralesProblemes): string[] | null {
@@ -513,7 +630,7 @@ export function aideNiveau2G(exercice: ExerciceFamilleG_Problemes, phase: PhaseI
 // Dispatch commun.
 // ============================================================================
 
-export function consigneGenerale(exercice: ExerciceIntegralesProblemes): string {
+export function consigneGenerale(exercice: ExerciceIntegralesProblemes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneGeneraleA(exercice);
@@ -551,7 +668,7 @@ export function blocDonnees(exercice: ExerciceIntegralesProblemes): string[] {
   }
 }
 
-export function consigneEcran(exercice: ExerciceIntegralesProblemes, phase: PhaseIntegralesProblemes): string {
+export function consigneEcran(exercice: ExerciceIntegralesProblemes, phase: PhaseIntegralesProblemes): FragmentConsigne[] {
   switch (exercice.famille) {
     case "A":
       return consigneEcranA(exercice, phase);

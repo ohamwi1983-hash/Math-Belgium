@@ -17,14 +17,14 @@ import { CATALOGUE_VARIANTES, construireAvecVarianteId, construireQuellePrimitiv
  */
 
 function entete(exercice: ExerciceQuellePrimitive) {
-  return [texte(`${consigneGeneraleQuellePrimitive()} Données : `), latex(blocDonneesQuellePrimitive(exercice).join(",\\ "))];
+  return [...consigneGeneraleQuellePrimitive(), texte(" Données : "), latex(blocDonneesQuellePrimitive(exercice).join(",\\ "))];
 }
 
 function construireEnonce(exercice: ExerciceQuellePrimitive): SectionExercice {
   const phases = phasesPourExercice(exercice);
   return {
     enteteFragments: entete(exercice),
-    questions: phases.map((phase) => ({ consigne: [texte(consigneEcranQuellePrimitive(exercice, phase))] })),
+    questions: phases.map((phase) => ({ consigne: consigneEcranQuellePrimitive(exercice, phase) })),
   };
 }
 
