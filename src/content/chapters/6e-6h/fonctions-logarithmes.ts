@@ -504,6 +504,11 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Mesurer l\'information en bits avec le logarithme en base 2',
+          image: {
+            src: '/images/application/punchcard.png',
+            alt: 'Carte perforée, chaque trou codant un bit d\'information',
+            caption: 'Une carte perforée : chaque position codait un bit (trou ou pas de trou), l\'unité même que log₂(N) permet de compter. Domaine public.',
+          },
           text:
             "En informatique, la quantité d'information nécessaire pour distinguer N " +
             'possibilités égales se mesure en bits par $\\log_2(N)$ — le changement de base ' +
@@ -1836,6 +1841,11 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Pourquoi un algorithme « en log n » est redoutablement rapide',
+          image: {
+            src: '/images/application/dictionary.jpg',
+            alt: 'Dictionnaire ouvert',
+            caption: 'Un dictionnaire — chercher un mot en l\'ouvrant d\'abord au milieu, puis en répétant, est exactement la recherche dichotomique du texte. Photo : Dr. Marcus Gossler, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
           text:
             'En informatique, la recherche dichotomique (chercher un mot dans un ' +
             'dictionnaire trié en divisant à chaque étape les possibilités restantes par 2) ' +
