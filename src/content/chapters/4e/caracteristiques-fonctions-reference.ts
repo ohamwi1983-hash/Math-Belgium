@@ -49,6 +49,25 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         ],
       },
       {
+        kind: 'historique',
+        titre: 'Le repère (x;y) n\'a pas toujours existé',
+        text:
+          'Avant 1637, personne n\'associait une courbe à des coordonnées (x;y) comme tu le ' +
+          'fais naturellement ici. C\'est le philosophe et mathématicien français ' +
+          '**René Descartes** qui, dans un appendice de son Discours de la méthode intitulé ' +
+          'La Géométrie, invente l\'idée de repérer un point par deux nombres mesurés le long ' +
+          'de deux axes perpendiculaires. Cette invention — le **repère cartésien**, qui ' +
+          'porte encore son nom — fusionne pour la première fois l\'algèbre et la ' +
+          'géométrie : une équation comme $y=x^2$ devient une courbe qu\'on peut dessiner, et ' +
+          'une courbe devient une équation qu\'on peut calculer. Sans cette idée, impossible ' +
+          'de lire les 6 fonctions de référence de ce chapitre sur un graphique.',
+        image: {
+          src: '/images/historique/descartes.jpg',
+          alt: 'Portrait de René Descartes',
+          caption: 'René Descartes (1596–1650), portrait attribué à Frans Hals, v. 1649.',
+        },
+      },
+      {
         kind: 'featureTable',
         caption: 'Les 6 familles',
         headers: ['Famille', 'Formule', 'Domaine', 'Allure'],
@@ -216,6 +235,27 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           '— miroir vertical (paire) ou symétrie centrale par l\'origine (impaire). Pour la ' +
           'racine carrée, aucun symétrique n\'apparaît : le domaine à sens unique ne contient ' +
           'tout simplement pas −t.',
+      },
+      {
+        kind: 'historique',
+        titre: 'Représenter une grandeur qui varie, 300 ans avant Descartes',
+        text:
+          'Au 14e siècle, bien avant l\'invention du repère cartésien, le philosophe et ' +
+          'évêque français **Nicole Oresme** a déjà l\'idée de représenter une grandeur qui ' +
+          'varie (comme une vitesse) par une figure géométrique — sa théorie dite de la ' +
+          '« latitude des formes » utilise des segments verticaux de hauteur variable pour ' +
+          'visualiser comment une quantité évolue, l\'ancêtre lointain du graphique d\'une ' +
+          'fonction. Oresme n\'a ni axes, ni coordonnées numériques au sens moderne, mais ' +
+          'l\'intuition est déjà là : une figure peut représenter un changement, pas ' +
+          'seulement une valeur fixe. Il faudra attendre Descartes, presque 300 ans plus ' +
+          'tard, pour que cette intuition devienne un véritable outil de calcul.',
+        image: {
+          src: '/images/historique/oresme.jpg',
+          alt: 'Miniature représentant Nicole Oresme, Traité de la sphère',
+          caption:
+            'Nicole Oresme (v. 1320–1382), miniature du Traité de la sphère, Bibliothèque ' +
+            'nationale de France, fonds français 565 (v. 1400–1420).',
+        },
       },
       {
         kind: 'astuce',
@@ -389,6 +429,23 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'justement sur une valeur exclue du domaine.',
         },
         {
+          kind: 'application',
+          titre: 'Lire un graphique de population ou d\'épidémie',
+          text:
+            'Un graphique de biologie ou d\'écologie se lit EXACTEMENT de la même façon ' +
+            'qu\'ici — un écologue qui étudie l\'évolution d\'une population animale applique ' +
+            'la même méthode étape par étape : le domaine, c\'est la période étudiée (on ne ' +
+            'connaît pas la population avant le début du suivi) ; les intervalles de ' +
+            'croissance et de décroissance montrent les phases d\'expansion et de déclin ' +
+            '(une maladie, une famine, une réintroduction d\'espèce) ; une asymptote ' +
+            'horizontale représente souvent la **capacité de charge** du milieu — le nombre ' +
+            'maximal d\'individus que l\'environnement peut durablement soutenir, que la ' +
+            'population s\'approche sans jamais vraiment dépasser. Les mêmes six questions ' +
+            'que tu viens d\'apprendre à poser sur un graphique abstrait sont les questions ' +
+            'qu\'un biologiste pose sur de vraies données de terrain.',
+          domaines: ['Biologie', 'Écologie'],
+        },
+        {
           kind: 'entrainement',
           title: 'Caractéristiques d\'une fonction (lecture graphique)',
           generatorId: 'gen12',
@@ -466,6 +523,27 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'ou $|P(x)| = K$ (K > 0). Dans les deux cas, il faut séparer en **deux** équations ' +
             'linéaires distinctes — jamais une seule ! Pour le carré : $P(x) = \\sqrt{K}$ et ' +
             '$P(x) = -\\sqrt{K}$. Pour la valeur absolue : $P(x) = K$ et $P(x) = -K$.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Le père de l\'algèbre écrivait sans le signe =',
+          text:
+            'Étudier une fonction « algébriquement », comme tu le fais dans cette section, ' +
+            'suppose une notation symbolique pour manipuler des inconnues — un outil qu\'on a ' +
+            'longtemps dû inventer. Le mathématicien grec **Diophante d\'Alexandrie** (3e ' +
+            'siècle apr. J.-C.), dans son traité Arithmetica, est l\'un des premiers à ' +
+            'utiliser des abréviations pour une inconnue et ses puissances, au lieu d\'écrire ' +
+            'chaque équation en toutes lettres comme ses prédécesseurs. Cette notation ' +
+            '« syncopée » — à mi-chemin entre le texte et le symbole — lui vaut le titre de ' +
+            '« père de l\'algèbre », même si la notation que tu utilises aujourd\'hui (le ' +
+            'signe =, les lettres x, y) viendra bien plus tard, à la Renaissance.',
+          image: {
+            src: '/images/historique/diophantus-arithmetica.jpg',
+            alt: 'Page de titre de l\'édition 1670 de l\'Arithmetica de Diophante',
+            caption:
+              'Page de titre de l\'édition 1670 de l\'Arithmetica de Diophante — l\'exemplaire ' +
+              'où Pierre de Fermat écrira sa célèbre note marginale sur son « dernier théorème ».',
+          },
         },
         {
           kind: 'entrainement',
@@ -569,6 +647,21 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             'domaine s\'étend.',
         },
         {
+          kind: 'application',
+          titre: 'Décaler un signal physique dans le temps ou en intensité',
+          text:
+            'En physique et en ingénierie du son, un signal (une onde sonore, un signal ' +
+            'électrique, les vibrations d\'un tremblement de terre) se modélise souvent par ' +
+            'une fonction du temps. Retarder ce signal d\'un délai $d$ — par exemple un écho ' +
+            'qui arrive après le son direct — revient exactement à une translation ' +
+            'horizontale TH = $d$ sur son graphique. Amplifier son intensité, c\'est un ' +
+            'étirement vertical EV ; l\'inverser en phase (un haut-parleur câblé à l\'envers), ' +
+            'c\'est une symétrie SOX. Les ingénieurs du son manipulent ces mêmes 8 paramètres ' +
+            'en permanence, sous les noms de « délai », « gain » et « inversion de polarité » ' +
+            '— la même formule unifiée que celle de cette section, avec un autre vocabulaire.',
+          domaines: ['Physique', 'Ingénierie du son'],
+        },
+        {
           kind: 'atelier',
           tag: 'transformation-8-parametres-widget',
           label: 'Manipule toi-même — les 8 paramètres en direct',
@@ -629,6 +722,21 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
             { tag: '2 — sortir le facteur constant de la valeur absolue', text: '$|2(x+3)| = 2 \\cdot |x+3| = 2|x-(-3)|$' },
           ],
           result: { tag: 'forme canonique', text: '$f(x) = 2|x-(-3)|$ — TH = −3, EV = 2, TV = 0' },
+        },
+        {
+          kind: 'application',
+          titre: 'Modéliser l\'effet d\'une taxe sur une courbe d\'offre',
+          text:
+            'En économie, une courbe d\'offre donne, pour chaque prix, la quantité qu\'un ' +
+            'vendeur est prêt à produire. Quand l\'État impose une taxe fixe $t$ par unité ' +
+            'vendue, chaque vendeur doit désormais recevoir $t$ de plus pour accepter de ' +
+            'produire la même quantité qu\'avant : la courbe d\'offre entière se déplace ' +
+            'verticalement de $t$ — exactement une translation verticale TV = $t$, la même ' +
+            'transformation que tu viens d\'apprendre à repérer sur une fonction de ' +
+            'référence. Une subvention produit l\'effet inverse (TV négatif) : elle fait ' +
+            'glisser la courbe vers le bas, rendant la production plus attractive à chaque ' +
+            'niveau de prix.',
+          domaines: ['Économie'],
         },
         {
           kind: 'entrainement',
