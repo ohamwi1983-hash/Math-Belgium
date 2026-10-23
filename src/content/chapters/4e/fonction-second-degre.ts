@@ -143,6 +143,27 @@ export const fonctionSecondDegre: ChapterContent = {
             'le haut, toujours un minimum.',
         },
         {
+          kind: 'historique',
+          titre: "Galilée et la première preuve que les projectiles dessinent une parabole",
+          text:
+            "Pendant des siècles, on pensait qu'un projectile (une flèche, un boulet de canon) " +
+            'montait en ligne droite, puis retombait brusquement — deux mouvements bien ' +
+            'distincts. C\'est le physicien italien **Galilée** qui, dans son ouvrage Discours ' +
+            "concernant deux sciences nouvelles (1638), démontre pour la première fois que la " +
+            'trajectoire réelle est en fait une seule courbe continue : une **parabole**. Son ' +
+            "idée clé est de décomposer le mouvement en deux directions indépendantes — un " +
+            'déplacement horizontal à vitesse constante, et une chute verticale accélérée par ' +
+            'la gravité — et de montrer que leur combinaison dessine exactement la courbe que ' +
+            'tu étudies dans ce chapitre. C\'est l\'un des tout premiers exemples de l\'histoire ' +
+            'où une expérience physique (lâcher une bille, observer un jet d\'eau) est ' +
+            'expliquée par une seule équation mathématique.',
+          image: {
+            src: '/images/historique/galilee.jpg',
+            alt: 'Portrait de Galilée',
+            caption: 'Galilée (1564–1642), portrait par Justus Sustermans, 1636.',
+          },
+        },
+        {
           kind: 'para',
           text:
             'Le signe et la valeur de a donnent la forme générale de la parabole. Tu le sais ' +
@@ -480,6 +501,30 @@ export const fonctionSecondDegre: ChapterContent = {
             '$f(x) = (x-1)(x-4)$ : axe de symétrie $= \\dfrac{1+4}{2} = 2{,}5$ — sans aucun ' +
             'autre calcul.',
         },
+        {
+          kind: 'historique',
+          titre: "Trouver les racines... 3500 ans avant la factorisation",
+          text:
+            "Factoriser pour trouver les zéros d'une fonction peut sembler une technique " +
+            "moderne — elle est pourtant bien plus ancienne que l'algèbre elle-même ! Des " +
+            'tablettes d\'argile babyloniennes, datées d\'environ 1800 avant J.-C., montrent ' +
+            'déjà des scribes résoudre des problèmes concrets (partager un champ, calculer une ' +
+            'aire) qui reviennent, en langage actuel, à des équations du second degré. Ils ne ' +
+            'connaissaient ni le signe =, ni les lettres x, a, b, c : chaque problème était ' +
+            'résolu par une méthode géométrique, étape par étape, en manipulant des longueurs ' +
+            'et des aires réelles plutôt que des symboles abstraits. La photo ci-contre montre ' +
+            'une tablette babylonienne du même corpus mathématique — gravée en écriture ' +
+            'cunéiforme, avec des nombres écrits en base 60 (celle qui nous a donné les 60 ' +
+            'minutes d\'une heure).',
+          image: {
+            src: '/images/historique/tablette-babylonienne.jpg',
+            alt: 'Tablette d\'argile babylonienne couverte d\'écriture cunéiforme',
+            caption:
+              'Tablette babylonienne YBC 7289 (c. 1800–1600 av. J.-C.), un exemple de corpus ' +
+              'mathématique cunéiforme de la même époque. Photo : Bill Casselman, CC BY-SA ' +
+              '3.0, via Wikimedia Commons.',
+          },
+        },
         { kind: 'subheading', text: 'Tableau de signes et tableau de variation' },
         {
           kind: 'para',
@@ -714,6 +759,29 @@ export const fonctionSecondDegre: ChapterContent = {
           label: 'Forme canonique',
           items: ['$f(x) = a(x-x_S)^2+y_S$, de sommet $S(x_S\\,;\\,y_S)$.'],
         },
+        {
+          kind: 'application',
+          titre: 'Reconnaître une parabole dans un pont suspendu',
+          text:
+            'Les câbles (ou chaînes) principaux d\'un pont suspendu, tirés par le poids ' +
+            'uniformément réparti du tablier qu\'ils portent, prennent naturellement la forme ' +
+            'd\'une parabole. Les ingénieurs utilisent directement la forme canonique pour la ' +
+            'modéliser : le sommet $S(x_S\\,;\\,y_S)$ correspond au point le plus bas du câble ' +
+            '(souvent au centre du pont), et le coefficient a détermine à quel point le câble ' +
+            'est « tendu » ou « relâché » entre les deux pylônes. Cette équation leur permet de ' +
+            'calculer la longueur exacte de câble nécessaire à chaque point, et la tension ' +
+            'qu\'il doit supporter — sans elle, impossible de dimensionner correctement la ' +
+            'structure.',
+          domaines: ['Ingénierie', 'Architecture'],
+          image: {
+            src: '/images/application/pont-suspendu.jpg',
+            alt: 'Chaînes du pont suspendu de Clifton dessinant une courbe parabolique',
+            caption:
+              'Les chaînes du pont suspendu de Clifton (Bristol, Royaume-Uni) dessinent une ' +
+              'courbe proche d\'une parabole. Photo : Tom Jolliffe, CC BY-SA 2.0, via ' +
+              'Geograph/Wikimedia Commons.',
+          },
+        },
         { kind: 'para', text: 'Pour passer de la forme développée à la forme canonique, on **complète le carré** :' },
         {
           kind: 'exemple',
@@ -747,6 +815,28 @@ export const fonctionSecondDegre: ChapterContent = {
             'À l\'étape 3 : le $-4$ sorti de la parenthèse doit être **multiplié par a** ! Avant ' +
             'd\'être ajouté au c d\'origine. L\'erreur la plus fréquente : le ressortir tel quel, ' +
             'sans multiplier par a.',
+        },
+        {
+          kind: 'historique',
+          titre: "Le mathématicien qui a donné son nom à l'algèbre",
+          text:
+            'La technique que tu viens d\'utiliser — compléter le carré — porte la marque ' +
+            "d'un seul homme : **Muhammad ibn Musa al-Khwarizmi**, qui travaille à Bagdad vers " +
+            '820. Son livre, intitulé Al-Jabr (« la réunion », en parlant des termes d\'une ' +
+            'équation), est le premier à présenter cette méthode de façon systématique, ' +
+            "expliquée en mots plutôt qu'en symboles. Le mot « al-jabr » a donné le mot " +
+            'français **algèbre** ; son propre nom, latinisé en « algorismi », a donné le mot ' +
+            '**algorithme**. Ironie de l\'histoire : la version que tu utilises — compléter le ' +
+            'carré pour révéler directement le sommet — n\'est pas différente, dans son ' +
+            'principe géométrique, de celle qu\'il décrivait déjà il y a plus de 1200 ans.',
+          image: {
+            src: '/images/historique/al-khwarizmi.jpg',
+            alt: "Page d'un manuscrit de l'Al-Jabr d'al-Khwarizmi",
+            caption:
+              "Page d'un manuscrit de l'Al-Jabr d'al-Khwarizmi (copie de 1342), montrant une " +
+              'résolution géométrique d\'équations du second degré. Bibliothèque bodléienne, ' +
+              'domaine public.',
+          },
         },
         {
           kind: 'entrainement',
@@ -861,6 +951,21 @@ export const fonctionSecondDegre: ChapterContent = {
             'moins, jamais plus : on s\'est éloigné du sommet théorique.',
         },
         {
+          kind: 'application',
+          titre: 'Fixer un prix de vente qui maximise un revenu',
+          text:
+            'Une entreprise qui baisse son prix de vente attire plus de clients, mais gagne ' +
+            'moins par vente — et inversement si elle l\'augmente. Si le nombre d\'acheteurs ' +
+            'varie de façon linéaire avec le prix, le revenu total (prix × quantité vendue) ' +
+            'est une fonction du second degré du prix, exactement comme l\'aire de l\'enclos ' +
+            'ci-dessus était une fonction de sa largeur. Trouver le prix qui maximise ce ' +
+            'revenu revient donc à trouver le sommet de cette parabole — la même démarche que ' +
+            'tu viens d\'utiliser, appliquée cette fois à une décision commerciale plutôt ' +
+            'qu\'à un aménagement de terrain. Au-delà de ce sommet, chaque euro de prix ' +
+            'supplémentaire fait perdre plus de clients qu\'il n\'en rapporte.',
+          domaines: ['Économie', 'Gestion'],
+        },
+        {
           kind: 'entrainement',
           title: "Problèmes d'optimisation",
           generatorId: 'gen55',
@@ -922,6 +1027,20 @@ export const fonctionSecondDegre: ChapterContent = {
             tag: 'le produit est négatif entre les zéros 0 et 4',
             text: 'le ballon reste au-dessus de 25 m pendant **0 < t < 4 secondes**, avant de redescendre',
           },
+        },
+        {
+          kind: 'application',
+          titre: "Calculer où retombe un ballon, un boulet ou une fusée de feu d'artifice",
+          text:
+            'L\'exemple du ballon ci-dessus n\'est pas qu\'un exercice : c\'est exactement ' +
+            'ainsi qu\'on calcule, en sport ou en pyrotechnie, où et quand un projectile ' +
+            'retombe. Un entraîneur de basket qui étudie la trajectoire idéale d\'un tir, un ' +
+            "ingénieur qui règle la hauteur d'explosion d'une fusée de feu d'artifice, ou un " +
+            'artilleur qui calcule la portée d\'un tir : tous posent la même équation ' +
+            '$h(t) = -\\dfrac{1}{2}gt^2+v_0t+h_0$ (où $g$ est l\'accélération de la pesanteur, ' +
+            '$v_0$ la vitesse initiale et $h_0$ la hauteur de départ), puis cherchent ses ' +
+            'zéros ou son sommet exactement comme tu viens de le faire pour le ballon.',
+          domaines: ['Physique', 'Sport'],
         },
         {
           kind: 'entrainement',
