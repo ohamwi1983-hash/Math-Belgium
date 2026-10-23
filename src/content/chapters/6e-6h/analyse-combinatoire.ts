@@ -453,6 +453,11 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'application',
           titre: 'Compter le nombre de mots de passe possibles',
+          image: {
+            src: '/images/application/padlock.png',
+            alt: 'Illustration d\'un cadenas, symbole de sécurité informatique',
+            caption: 'AJ Ashton, domaine public (CC0), via Wikimedia Commons.',
+          },
           text:
             'Le principe multiplicatif que tu viens de voir est exactement ce qu\'un ' +
             "informaticien utilise pour évaluer la solidité d'un mot de passe. Un mot de " +
@@ -598,6 +603,11 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'application',
           titre: 'Compter les séquences possibles d\'ADN',
+          image: {
+            src: '/images/application/dna-sequence.png',
+            alt: 'Schéma de la structure en double hélice de l\'ADN',
+            caption: 'Zephyris, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
           text:
             'L\'ADN s\'écrit avec seulement 4 « lettres » — A, T, C et G, les quatre bases ' +
             'azotées. Compter le nombre de séquences DISTINCTES d\'une longueur donnée, ' +
@@ -1232,6 +1242,11 @@ export const analyseCombinatoire: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer ses (vraies) chances de gagner au loto',
+          image: {
+            src: '/images/application/lottery-balls.jpg',
+            alt: 'Boules numérotées dans un tambour de loterie',
+            caption: 'elizaIO, CC BY-SA 2.0, via Wikimedia Commons.',
+          },
           text:
             'Comme pour les mains de poker ci-dessus, gagner à un loto où tu coches 6 numéros ' +
             'parmi 45 revient à choisir une COMBINAISON précise parmi toutes celles possibles ' +
