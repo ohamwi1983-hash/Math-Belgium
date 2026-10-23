@@ -72,6 +72,22 @@ export const geometrieDansEspace: ChapterContent = {
             '(appartenance, parallélisme, intersection) — jamais sur une distance lue à l\'œil.',
         },
         {
+          kind: 'application',
+          titre: 'Comment un jeu vidéo 3D dessine un monde sur ton écran plat',
+          text:
+            "Un écran d'ordinateur ou de téléphone est plat, mais les jeux vidéo en 3D " +
+            'affichent des mondes qui ont une vraie profondeur — exactement le même problème ' +
+            'que cette section. Le moteur du jeu résout ce problème avec une **caméra ' +
+            'virtuelle** : il calcule, pour chaque sommet d\'un objet 3D, où cette caméra ' +
+            '« voit » ce sommet sur un plan de projection, selon des règles de perspective ' +
+            'fixées une fois pour toutes dans le moteur (position de la caméra, angle de vue, ' +
+            'distance de projection). C\'est exactement le principe d\'une convention de ' +
+            'dessin comme la perspective cavalière : une règle fixe et systématique, appliquée ' +
+            'des millions de fois par seconde à chaque sommet de chaque objet 3D du jeu, pour ' +
+            'transformer un monde en trois dimensions en une image plate sur ton écran.',
+          domaines: ['Informatique', 'Jeux vidéo'],
+        },
+        {
           kind: 'para',
           text:
             'Trois familles de solides reviennent dans ce chapitre. Le **parallélépipède** et le ' +
@@ -104,6 +120,28 @@ export const geometrieDansEspace: ChapterContent = {
             'perspective cavalière. Elle est plus simple à tracer, et elle conserve le ' +
             'parallélisme des droites : deux arêtes parallèles du solide le restent sur le ' +
             'dessin. La perspective centrale, elle, ne le fait jamais.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Un seul homme a donné son nom à toute cette discipline',
+          text:
+            'Représenter un solide à trois dimensions sur une feuille plane — exactement ce ' +
+            'que fait la perspective cavalière de cette section — est le sujet d\'une ' +
+            'discipline mathématique à part entière : la **géométrie descriptive**, fondée en ' +
+            '1795 par le Français **Gaspard Monge**. Avant lui, les techniques de ' +
+            'représentation (plans d\'architecte, dessins d\'ingénieur, perspectives de ' +
+            'peintre) restaient des savoir-faire empiriques, transmis d\'atelier en atelier, ' +
+            'sans théorie commune. Monge les unifie en un système rigoureux — reposant sur ' +
+            'deux projections perpendiculaires d\'un même objet — si stratégiquement utile ' +
+            '(fortifications, artillerie) que Napoléon le classe secret militaire pendant ' +
+            'plusieurs années avant d\'en autoriser l\'enseignement public. Monge devient ' +
+            'l\'un des fondateurs de l\'École polytechnique, où la géométrie descriptive ' +
+            'reste enseignée pendant près de deux siècles.',
+          image: {
+            src: '/images/historique/monge.jpg',
+            alt: 'Portrait de Gaspard Monge',
+            caption: 'Gaspard Monge (1746–1818), fondateur de la géométrie descriptive.',
+          },
         },
       ],
     },
@@ -751,6 +789,20 @@ export const geometrieDansEspace: ChapterContent = {
           ],
         },
         {
+          kind: 'application',
+          titre: 'Comment une imprimante 3D construit un objet, tranche par tranche',
+          text:
+            "Une imprimante 3D ne dépose jamais un objet entier d'un coup : elle le construit " +
+            'couche par couche, en empilant des tranches horizontales très fines les unes sur ' +
+            'les autres. Avant d\'imprimer, un logiciel (le « slicer », littéralement ' +
+            '« trancheur ») calcule la forme de CHAQUE tranche en coupant le modèle 3D par un ' +
+            'plan horizontal, à intervalles réguliers — exactement l\'opération que tu viens ' +
+            'd\'apprendre dans cette section, répétée parfois plusieurs centaines de fois pour ' +
+            'un seul objet. Plus les tranches sont fines, plus l\'objet final est lisse ; plus ' +
+            'elles sont épaisses, plus l\'impression est rapide mais visiblement « striée ».',
+          domaines: ['Ingénierie', 'Fabrication'],
+        },
+        {
           kind: 'entrainement',
           title: "Section plane d'un solide",
           generatorId: 'gen40',
@@ -837,6 +889,29 @@ export const geometrieDansEspace: ChapterContent = {
             'quand même : le globe oculaire est sphérique, pas plan. Les règles de la perspective ' +
             'centrale s\'observent donc directement sur une photographie.',
         },
+        {
+          kind: 'historique',
+          titre: 'Avant Dürer, une expérience avec un miroir',
+          text:
+            "Près d'un siècle avant que Dürer ne popularise son dispositif à vitre quadrillée, " +
+            'l\'architecte florentin **Filippo Brunelleschi** réalise, vers 1415, la toute ' +
+            'première démonstration que la perspective centrale peut se construire avec une ' +
+            'précision mathématique exacte. Il peint le baptistère de Florence sur un petit ' +
+            'panneau de bois percé d\'un trou en son centre, puis fait regarder le spectateur ' +
+            'à travers ce trou, par l\'arrière du panneau, en tenant un miroir devant lui : le ' +
+            'reflet de sa peinture se superpose exactement au vrai baptistère, visible ' +
+            'par-dessus le miroir. L\'illusion est si parfaite que les témoins n\'arrivent plus ' +
+            'à distinguer la peinture de la réalité. Cette expérience, plus qu\'un simple tour ' +
+            'de magie, prouve que l\'espace peut être projeté sur un plan selon des règles ' +
+            'géométriques fixes et vérifiables.',
+          image: {
+            src: '/images/historique/brunelleschi.jpg',
+            alt: 'Portrait de Filippo Brunelleschi',
+            caption:
+              'Filippo Brunelleschi (1377–1446), gravure sur cuivre de Nicolas de Larmessin, ' +
+              'publiée en 1682 (Académie des Sciences et des Arts d\'Isaac Bullart).',
+          },
+        },
       ],
     },
 
@@ -920,6 +995,27 @@ export const geometrieDansEspace: ChapterContent = {
             'des arêtes : deux arêtes parallèles le restent sur le papier. La perspective à point ' +
             'de fuite, elle, ne le fait jamais — ses arêtes parallèles convergent vers leur point ' +
             'de fuite commun.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Le premier manuel écrit de la perspective',
+          text:
+            "L'expérience de Brunelleschi restait une démonstration, pas une méthode " +
+            'transmissible. C\'est l\'architecte et théoricien **Leon Battista Alberti** qui, ' +
+            'dans son traité Della Pittura (1435), couche enfin par écrit les règles précises ' +
+            'de construction de la perspective centrale — y compris le principe du point de ' +
+            'fuite que tu viens d\'étudier. Son texte permet à toute une génération de ' +
+            'peintres de la Renaissance d\'appliquer ces règles sans avoir à les redécouvrir ' +
+            'eux-mêmes par tâtonnement, comme Brunelleschi avait dû le faire. C\'est en grande ' +
+            'partie grâce à Alberti que la perspective centrale devient, en quelques ' +
+            'décennies, la norme incontournable de la peinture occidentale.',
+          image: {
+            src: '/images/historique/alberti.jpg',
+            alt: 'Statue de Leon Battista Alberti',
+            caption:
+              'Statue de Leon Battista Alberti par Giovanni Lusini, Florence. Photo : Frieda, ' +
+              'CC BY-SA 3.0, via Wikimedia Commons.',
+          },
         },
       ],
     },
@@ -1056,6 +1152,26 @@ export const geometrieDansEspace: ChapterContent = {
               'd\'un sommet réel du solide et de son ombre déjà connue. Ensuite seulement, tu ' +
               'projettes les autres sommets.',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Calculer l\'ombre portée d\'un panneau solaire avant de l\'installer',
+          text:
+            'Avant d\'installer des panneaux solaires sur un toit ou au sol, les ingénieurs ' +
+            'doivent vérifier qu\'aucun panneau ne projette d\'ombre sur son voisin aux heures ' +
+            'où le soleil est bas — sinon ce voisin perd une partie de sa production ' +
+            'd\'électricité. Ce calcul est EXACTEMENT celui de cette section : connaissant la ' +
+            'direction du soleil à un instant donné (son azimut et sa hauteur, qui varient ' +
+            'selon l\'heure, la date et la latitude) et la hauteur de chaque panneau, on ' +
+            'projette son sommet au sol pour connaître la longueur et la position de son ' +
+            'ombre. C\'est ce calcul qui fixe l\'espacement minimal entre deux rangées de ' +
+            'panneaux sur une grande installation solaire.',
+          domaines: ['Énergie', 'Ingénierie'],
+          image: {
+            src: '/images/application/panneaux-solaires.jpg',
+            alt: 'Panneaux solaires installés sur un toit',
+            caption: 'Panneaux solaires sur un toit. Photo : Pujanak, domaine public, via Wikimedia Commons.',
+          },
         },
         {
           kind: 'entrainement',
