@@ -96,6 +96,25 @@ export const limitesAsymptotes: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Rendre rigoureuse une idée qui semblait couler de source',
+          text:
+            "La définition que tu viens de lire — « f(x) se rapproche d'autant plus de L que x " +
+            "se rapproche de a » — ressemble à du bon sens, mais elle est restée VAGUE pendant " +
+            "plus d'un siècle après l'invention du calcul différentiel par Newton et Leibniz. " +
+            'Mathématiciens et physiciens parlaient d\'« infiniment petit » sans jamais le ' +
+            "définir précisément, ce qui provoquait de vrais désaccords. C'est le mathématicien " +
+            'français **Augustin-Louis Cauchy** qui, dans son Cours d\'Analyse (1821), pose les ' +
+            "premières bases vraiment rigoureuses de la notion de limite — en insistant pour la " +
+            'première fois sur l\'idée de « se rapprocher d\'aussi près qu\'on veut », exactement ' +
+            "la formulation intuitive que tu utilises aujourd'hui.",
+          image: {
+            src: '/images/historique/cauchy.jpg',
+            alt: 'Portrait d\'Augustin-Louis Cauchy',
+            caption: 'Augustin-Louis Cauchy (1789–1857), portrait du 19e siècle.',
+          },
+        },
+        {
           kind: 'rappel',
           label: 'Rappel — limite à gauche, limite à droite',
           items: [
@@ -121,6 +140,25 @@ export const limitesAsymptotes: ChapterContent = {
               'degrés. deg(N)<deg(D) ⟹ 0. deg(N)=deg(D) ⟹ rapport des coefficients dominants. ' +
               'deg(N)>deg(D) ⟹ limite infinie.',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Pourquoi un parachutiste cesse d\'accélérer',
+          text:
+            "Quand un parachutiste saute, la gravité l'accélère... mais pas indéfiniment : " +
+            "l'air exerce une résistance qui augmente avec la vitesse. Sa vitesse $v(t)$ suit " +
+            'une courbe qui ressemble exactement à celles que tu étudies ici — elle grimpe vite ' +
+            'au début, puis se rapproche de plus en plus lentement d\'une valeur limite, sans ' +
+            'jamais vraiment l\'atteindre : $\\displaystyle\\lim_{t \\to +\\infty} v(t) = ' +
+            'v_{max}$, la **vitesse terminale** (environ 200 km/h en chute libre). Cette ' +
+            'asymptote horizontale n\'est pas qu\'une curiosité mathématique : c\'est elle qui ' +
+            "garantit qu'un parachutiste n'accélère pas indéfiniment jusqu'au sol.",
+          domaines: ['Physique', 'Aérodynamique'],
+          image: {
+            src: '/images/application/parachutiste.jpg',
+            alt: 'Parachutiste en chute libre',
+            caption: 'Un parachutiste en chute libre, proche de sa vitesse terminale. Photo : Rstpch, CC BY-SA 4.0, via Wikimedia Commons.',
+          },
         },
         {
           kind: 'intuition',
@@ -423,6 +461,26 @@ export const limitesAsymptotes: ChapterContent = {
             'Sauter ce diagnostic fait perdre du temps sur des formes qui n\'en avaient pas besoin.',
         },
         {
+          kind: 'historique',
+          titre: 'Chasser le flou avec des epsilon et des delta',
+          text:
+            'Même la définition de Cauchy restait encore un peu floue : que veut vraiment dire ' +
+            '« aussi proche qu\'on veut » ? C\'est le mathématicien allemand **Karl ' +
+            'Weierstrass**, dans les années 1850-1860, qui transforme cette idée intuitive en ' +
+            'une définition totalement rigoureuse, purement basée sur des nombres : pour TOUT ' +
+            '$\\varepsilon>0$ (une marge d\'erreur aussi petite que tu veux), il existe un ' +
+            '$\\delta>0$ tel que $|x-a|<\\delta$ entraîne $|f(x)-L|<\\varepsilon$. Cette ' +
+            'définition, dite « epsilon-delta », met fin à deux siècles de débats sur ce ' +
+            "qu'est réellement une limite — et c'est encore exactement elle qui est enseignée " +
+            'partout aujourd\'hui, même si ce chapitre reste volontairement à la version ' +
+            'intuitive que tu viens d\'apprendre.',
+          image: {
+            src: '/images/historique/weierstrass.jpg',
+            alt: 'Portrait de Karl Weierstrass',
+            caption: 'Karl Weierstrass (1815–1897), photographie d\'époque.',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Limites, reconnaissance et calcul',
           generatorId: '5gen20',
@@ -474,6 +532,19 @@ export const limitesAsymptotes: ChapterContent = {
               '$\\displaystyle\\lim_{x \\to +\\infty} [f(x)-(mx+p)] = 0$ ou ' +
               '$\\displaystyle\\lim_{x \\to -\\infty} [f(x)-(mx+p)] = 0$.',
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Un mot grec pour « qui ne tombe jamais ensemble »',
+          text:
+            'Le mot « asymptote » vient du grec ancien asymptōtos, littéralement « qui ne ' +
+            'tombe pas ensemble » — a- (sans), syn- (ensemble), ptotos (qui tombe). Il est ' +
+            'utilisé pour la première fois par le mathématicien grec **Apollonios de Perge**, ' +
+            'vers 200 avant J.-C., dans son grand traité sur les coniques, pour décrire les ' +
+            'droites dont s\'approche indéfiniment une hyperbole sans jamais les toucher — ' +
+            'exactement l\'idée que tu étudies dans cette section, plus de deux mille ans plus ' +
+            'tard. Le mot a ensuite été repris tel quel pour n\'importe quelle courbe, pas ' +
+            'seulement l\'hyperbole d\'Apollonios.',
         },
         {
           kind: 'illustrationGroup',
@@ -640,6 +711,20 @@ export const limitesAsymptotes: ChapterContent = {
               'extrémités = asymptote oblique. La courbe continue de monter ou de descendre, ' +
               'mais épouse de plus en plus la pente de la droite.',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Lire sur un graphique combien de temps un médicament reste actif',
+          text:
+            "Après une injection, la concentration d'un médicament dans le sang suit une " +
+            'courbe décroissante qui se rapproche d\'autant plus de 0 que le temps passe, sans ' +
+            'jamais littéralement l\'atteindre — exactement la lecture graphique que tu ' +
+            'pratiques dans cette section. Les médecins lisent directement sur ce type de ' +
+            'graphique la **demi-vie** du médicament (le temps nécessaire pour que la ' +
+            'concentration soit divisée par deux), information essentielle pour décider de la ' +
+            'fréquence des prises : un médicament à demi-vie courte doit être repris plus ' +
+            'souvent qu\'un médicament qui reste actif longtemps.',
+          domaines: ['Médecine', 'Pharmacologie'],
         },
         {
           kind: 'exemple',
@@ -886,6 +971,20 @@ export const limitesAsymptotes: ChapterContent = {
               'deux côtés, et en ±∞.',
             '**Synthétiser** : domaine, équations de toutes les asymptotes, tableau des limites.',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Prévoir la concentration finale d\'une réaction chimique',
+          text:
+            "Dans de nombreuses réactions chimiques, la concentration d'un réactif ou d'un " +
+            'produit évolue selon une fonction du temps qui admet une asymptote horizontale : ' +
+            'la réaction ralentit progressivement et la concentration se stabilise vers une ' +
+            'valeur d\'équilibre, sans jamais la dépasser ni l\'atteindre exactement en temps ' +
+            'fini. Faire l\'étude complète d\'une telle fonction — domaine (le temps ne peut ' +
+            'pas être négatif), limites, asymptotes — donne directement aux chimistes la ' +
+            "concentration théorique à l'équilibre, sans devoir attendre un temps infini pour " +
+            "l'observer expérimentalement.",
+          domaines: ['Chimie', 'Cinétique chimique'],
         },
         {
           kind: 'exemple',
