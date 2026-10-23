@@ -296,6 +296,20 @@ export const trigonometrie: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: "Le premier catalogue d'étoiles... et les premières tables trigonométriques",
+          text:
+            'Le mathématicien et astronome grec **Hipparque de Nicée** (2e siècle av. J.-C.) ' +
+            'est considéré comme le père de la trigonométrie : pour étudier les positions des ' +
+            'étoiles et prévoir les éclipses, il construit la toute première table connue ' +
+            "reliant un angle à la longueur d'une corde dans un cercle — l'ancêtre direct de " +
+            'ton tableau sin/cos/tan ci-dessus. Son catalogue recensait plus de 850 étoiles, ' +
+            'chacune localisée par ses coordonnées célestes, calculées grâce à cette toute ' +
+            'nouvelle trigonométrie. Aucun de ses écrits originaux n\'a survécu : tout ce ' +
+            "qu'on sait de son travail vient des résumés qu'en a faits Ptolémée, trois " +
+            "siècles plus tard, dans son propre traité d'astronomie.",
+        },
+        {
           kind: 'entrainement',
           title: 'Arcs et secteurs',
           generatorId: '5gen6',
@@ -392,6 +406,27 @@ export const trigonometrie: ChapterContent = {
             '41{,}57 \\approx 8{,}70$ cm² — ça correspond !',
         },
         {
+          kind: 'application',
+          titre: "Pourquoi les abeilles choisissent l'hexagone",
+          image: {
+            src: '/images/application/honeycomb.jpg',
+            alt: 'Gros plan sur des cellules hexagonales de cire dans une ruche',
+            caption: 'Photo : Ruth Hartnup, CC BY 2.0, via Wikimedia Commons.',
+          },
+          text:
+            'Les abeilles construisent leurs rayons de cire avec des cellules hexagonales — ' +
+            "et ce n'est pas un hasard. Parmi tous les polygones réguliers qui peuvent paver " +
+            'un plan sans aucun espace vide (seuls le triangle équilatéral, le carré et ' +
+            "l'hexagone le peuvent), l'hexagone est celui qui, à périmètre de cire égal, " +
+            'enferme la plus grande surface : il minimise la quantité de matière utilisée ' +
+            "pour une capacité de stockage donnée. C'est exactement le calcul d'aire de " +
+            "secteurs/triangles que tu viens de faire, appliqué à l'échelle d'une ruche " +
+            "entière. Les ingénieurs réutilisent le même principe dans les structures en nid " +
+            "d'abeilles (panneaux d'avion, cartons d'emballage) : un maximum de résistance " +
+            'pour un minimum de poids.',
+          domaines: ['Biologie', 'Ingénierie'],
+        },
+        {
           kind: 'entrainement',
           title: 'Polygones, arcs et secteurs',
           generatorId: '5gen7',
@@ -466,6 +501,48 @@ export const trigonometrie: ChapterContent = {
             'surface se calcule directement par $\\frac{1}{2}r^2\\sin(\\theta)$ — l\'aire ' +
             'd\'un triangle à partir de deux côtés et de l\'angle inclus — sans jamais avoir ' +
             'besoin de connaître la hauteur ni la base.',
+        },
+        {
+          kind: 'application',
+          titre: "Mesurer une distance qu'on ne peut pas atteindre directement",
+          image: {
+            src: '/images/application/theodolite-triangulation.jpg',
+            alt: 'Un étudiant utilise un théodolite sur le terrain',
+            caption: 'Photo : Kskhh, CC BY-SA 4.0, via Wikimedia Commons.',
+          },
+          text:
+            "Un géomètre qui doit connaître la largeur d'une rivière, ou la hauteur d'un " +
+            "bâtiment, ne peut évidemment pas y planter un mètre ruban. Il utilise un " +
+            "théodolite — l'instrument sur la photo — pour mesurer UNIQUEMENT des angles, " +
+            "depuis deux points accessibles dont il connaît la distance. En reliant ces " +
+            "deux points et le point inaccessible, il obtient un triangle quelconque où il " +
+            "connaît un côté et deux angles : exactement la configuration que tu résous " +
+            "avec la loi des cosinus dans cette section. C'est la technique de " +
+            "triangulation, utilisée depuis des siècles pour cartographier des territoires " +
+            "entiers sans jamais devoir parcourir chaque distance à pied.",
+          domaines: ['Géomètre', 'Construction'],
+        },
+        {
+          kind: 'historique',
+          titre: 'L\'astronome qui a remplacé les cordes par le sinus',
+          image: {
+            src: '/images/historique/albattani.jpg',
+            alt: "Page de titre d'une édition latine du traité d'astronomie d'Al-Battani",
+            caption:
+              "Page de titre de l'édition latine (1645) du traité d'Al-Battani, De scientia " +
+              'stellarum. Domaine public.',
+          },
+          text:
+            "L'astronome et mathématicien arabe **Al-Battani** (858-929), originaire de " +
+            'Harran (actuelle Turquie), reprend les tables de cordes héritées de Ptolémée et ' +
+            'les reformule entièrement avec la fonction **sinus** — la même que tu utilises ' +
+            'aujourd\'hui. Son traité, le Kitab az-Zij, calcule avec une précision ' +
+            "remarquable la durée de l'année solaire et l'inclinaison de l'axe terrestre, " +
+            'des résultats encore cités par les astronomes européens des siècles plus tard. ' +
+            'Traduit en latin au 12e siècle sous le nom De scientia stellarum (« De la ' +
+            'science des étoiles », page de titre ci-contre), son travail introduit la ' +
+            'trigonométrie moderne — celle fondée sur le sinus plutôt que sur la corde — ' +
+            "dans les universités d'Europe occidentale.",
         },
         {
           kind: 'atelier',
@@ -732,6 +809,23 @@ export const trigonometrie: ChapterContent = {
             yAxisLabel: 'y',
             caption: 'les 5 points construits en divisant une période en 4 parties égales à partir de Φ',
           },
+        },
+        {
+          kind: 'application',
+          titre: "Modéliser la durée du jour au fil de l'année",
+          text:
+            "La durée du jour (le temps entre le lever et le coucher du soleil) varie de " +
+            "façon périodique au fil de l'année — minimale au solstice d'hiver, maximale au " +
+            "solstice d'été, avec une période d'exactement 365,25 jours. C'est un exemple " +
+            'parfait de fonction sinusoïdale en contexte, construite exactement selon la ' +
+            "méthode de cette section : l'amplitude dépend de la latitude du lieu (plus on " +
+            'est proche des pôles, plus l\'écart entre jour le plus long et le plus court ' +
+            'est grand), le décalage vertical correspond à la durée moyenne du jour (12 ' +
+            "heures à l'équateur), et la phase se cale sur la date du solstice d'hiver, où " +
+            'la durée du jour est minimale. Les météorologues et les agriculteurs ' +
+            "utilisent ce type de modèle pour prévoir les heures d'ensoleillement plusieurs " +
+            'mois à l\'avance.',
+          domaines: ['Astronomie', 'Climat'],
         },
         {
           kind: 'entrainement',
@@ -1065,6 +1159,29 @@ export const trigonometrie: ChapterContent = {
             'la méthode ci-dessus. φ n\'est jamais réglé directement : il est toujours DÉDUIT ' +
             'de la position choisie, comme dans la méthode. La vérification affichée reprend ' +
             'l\'astuce du demi-tour plus tard.',
+        },
+        {
+          kind: 'historique',
+          titre: "Le mathématicien qui a prouvé qu'on peut tout décomposer en sinusoïdes",
+          image: {
+            src: '/images/historique/fourier.jpg',
+            alt: 'Portrait de Joseph Fourier',
+            caption:
+              'Joseph Fourier (1768–1830), gravure d\'après un portrait de Julien-Léopold ' +
+              'Boilly, début du 19e siècle. Domaine public.',
+          },
+          text:
+            'Pourquoi une sinusoïde, et pas une autre forme, pour modéliser un phénomène ' +
+            'périodique ? Le mathématicien français **Joseph Fourier** répond à cette ' +
+            'question en 1822, dans un mémoire sur la propagation de la chaleur : il ' +
+            'démontre qu\'en combinant suffisamment de sinusoïdes de fréquences ' +
+            "différentes, on peut reconstruire quasiment n'importe quel signal périodique, " +
+            'même un signal qui ne ressemble pas du tout à une sinusoïde (un signal carré, ' +
+            'un battement cardiaque, un son complexe). Ce résultat, aujourd\'hui appelé ' +
+            'analyse de Fourier, explique pourquoi la sinusoïde est LE bloc de construction ' +
+            'fondamental de tous les phénomènes périodiques — la grande roue de cette ' +
+            "section n'en est qu'un cas particulier, le plus simple possible : une seule " +
+            'sinusoïde, sans combinaison.',
         },
         {
           kind: 'entrainement',
