@@ -1263,6 +1263,13 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Faire tourner un objet dans un jeu vidéo ou un bras robotisé',
+          image: {
+            src: '/images/application/canadarm2.jpg',
+            alt: 'Un astronaute sur le bras robotisé Canadarm2 lors d\'une sortie dans l\'espace',
+            caption:
+              'L\'astronaute Steve Robinson sur le bras robotisé Canadarm2, mission STS-114 ' +
+              '(2005). Photo : NASA, domaine public.',
+          },
           text:
             "Dans un moteur de jeu vidéo en 2D ou pour commander un bras robotisé, faire " +
             'pivoter un objet revient exactement à la rotation que tu viens de voir : on ' +
