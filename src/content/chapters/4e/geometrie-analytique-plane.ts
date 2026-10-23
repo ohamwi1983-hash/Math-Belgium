@@ -227,6 +227,26 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'le construire !',
         },
         {
+          kind: 'historique',
+          titre: "Et si Descartes n'était pas seul ?",
+          text:
+            'Au même moment où René Descartes publie sa fameuse méthode des coordonnées en ' +
+            '1637, un autre Français développe, de son côté, une idée presque identique : ' +
+            '**Pierre de Fermat**, magistrat toulousain et mathématicien amateur. Dans un ' +
+            'texte resté inédit de son vivant, Ad Locos Planos et Solidos Isagoge ' +
+            '(« Introduction aux lieux plans et solides »), rédigé vers 1636 — avant même la ' +
+            "publication de Descartes — Fermat part d'une équation entre deux inconnues et " +
+            'en déduit directement la courbe qu\'elle représente : exactement l\'idée que tu ' +
+            "utilises dans ce chapitre, dans l'autre sens, en partant d'un point et d'un " +
+            'vecteur directeur pour écrire une équation. Les deux hommes sont arrivés à la ' +
+            'même méthode, presque au même moment, sans se concerter.',
+          image: {
+            src: '/images/historique/fermat.jpg',
+            alt: 'Portrait de Pierre de Fermat',
+            caption: 'Pierre de Fermat (1601–1665), portrait anonyme du 17e siècle.',
+          },
+        },
+        {
           kind: 'entrainement',
           title: "Équation d'une droite",
           generatorId: 'gen42',
@@ -316,6 +336,20 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             ],
             caption: 'les deux intersections avec les axes suffisent pour tracer la droite en entier',
           },
+        },
+        {
+          kind: 'application',
+          titre: 'Positionner un objet à l\'écran, pixel par pixel',
+          text:
+            "Un écran d'ordinateur, de téléphone ou de console est, au fond, un immense " +
+            'quadrillage de points — les pixels — repérés exactement comme dans ce chapitre : ' +
+            'une abscisse (colonne) et une ordonnée (ligne), souvent avec l\'origine (0 ; 0) ' +
+            'dans le coin supérieur gauche plutôt qu\'au centre. Déplacer un personnage dans ' +
+            'un jeu vidéo, dessiner une fenêtre, ou afficher du texte au bon endroit revient ' +
+            'toujours à calculer une position (x ; y), parfois en résolvant une équation de ' +
+            'droite pour tracer un trait net entre deux points — exactement l\'algorithme que ' +
+            'les logiciels de dessin utilisent pour relier deux pixels par une ligne droite.',
+          domaines: ['Informatique', 'Jeux vidéo'],
         },
         {
           kind: 'entrainement',
@@ -751,6 +785,27 @@ export const geometrieAnalytiquePlane: ChapterContent = {
           ],
         },
         {
+          kind: 'application',
+          titre: 'Mesurer une distance sur un vrai terrain',
+          image: {
+            src: '/images/application/theodolite.jpg',
+            alt: 'Un théodolite, instrument de mesure d\'angles utilisé en géométrie de terrain',
+            caption: 'Théodolite utilisé en arpentage. Photo : Djat, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
+          text:
+            'Un géomètre-arpenteur qui doit fixer la limite exacte d\'un terrain, ou vérifier ' +
+            'qu\'une construction respecte bien le recul minimal imposé par rapport à la ' +
+            'voirie ou à la parcelle voisine, applique très exactement la méthode de cette ' +
+            'section : il matérialise une droite de référence (souvent la limite de ' +
+            'propriété), puis mesure la distance **perpendiculaire** entre cette droite et le ' +
+            'point à contrôler (un mur, une clôture) — jamais une distance mesurée « à vue » ' +
+            'ou en diagonale, qui surestimerait toujours l\'écart réel. Des instruments comme ' +
+            'le théodolite, qui mesurent des angles avec une très grande précision, servent ' +
+            'justement à construire cette perpendiculaire sur le terrain, exactement comme tu ' +
+            'la construis ici sur le papier.',
+          domaines: ['Géomètre', 'Urbanisme'],
+        },
+        {
           kind: 'entrainement',
           title: 'Distance point-droite et droite-droite',
           generatorId: 'gen47',
@@ -861,6 +916,21 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             '**Cas particulier** — cercle centré à l\'origine : $x^2+y^2=r^2$.',
           ],
         },
+        {
+          kind: 'historique',
+          titre: 'Le théorème que tu croyais réservé aux triangles',
+          text:
+            "L'équation du cercle que tu viens d'obtenir, $(x-x_0)^2+(y-y_0)^2=r^2$, n'est " +
+            'rien d\'autre que le théorème de **Pythagore** (6e siècle avant J.-C.) écrit ' +
+            'avec des coordonnées : la distance entre deux points, ' +
+            '$\\sqrt{(x-x_0)^2+(y-y_0)^2}$, est l\'hypoténuse d\'un triangle rectangle dont ' +
+            'les deux côtés mesurent $|x-x_0|$ et $|y-y_0|$. Pythagore et son école ' +
+            'pythagoricienne, dans la Grèce antique, démontrent ce résultat pour des ' +
+            'triangles concrets, dessinés — ils n\'ont ni coordonnées, ni algèbre, ni même de ' +
+            'notation symbolique pour les nombres inconnus. Il faudra attendre près de 2000 ' +
+            'ans, et l\'invention du repère par Fermat et Descartes, pour que ce théorème ' +
+            'devienne aussi l\'équation d\'un cercle.',
+        },
         { kind: 'subheading', text: 'Équation depuis un graphe' },
         {
           kind: 'illustration',
@@ -948,6 +1018,28 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'rester sous forme de racine (par exemple $r = \\sqrt{18} = 3\\sqrt{2}$) — exactement comme une norme de vecteur.',
         },
         {
+          kind: 'application',
+          titre: 'Trouver sa position grâce à trois cercles',
+          image: {
+            src: '/images/application/gps-satellite.jpg',
+            alt: 'Illustration d\'un satellite GPS en orbite',
+            caption: 'Satellite GPS en orbite. Photo : NASA, domaine public.',
+          },
+          text:
+            'Un récepteur GPS ne « voit » jamais directement sa position : il la calcule. ' +
+            'Chaque satellite envoie un signal horodaté, et le récepteur mesure le temps que ' +
+            'ce signal a mis à arriver pour en déduire sa distance exacte à ce satellite. ' +
+            'Connaître sa distance à UN satellite, c\'est savoir qu\'on se trouve quelque ' +
+            'part sur un cercle (en réalité une sphère, en 3D) centré sur ce satellite — ' +
+            'exactement l\'équation $(x-x_0)^2+(y-y_0)^2=r^2$ de cette section, avec r la ' +
+            'distance mesurée. Avec un seul satellite, une infinité de positions sont ' +
+            'possibles ; avec un deuxième, l\'intersection des deux cercles réduit à 2 ' +
+            'points ; un troisième satellite élimine la dernière ambiguïté. C\'est cette ' +
+            'méthode, appelée **trilatération**, qui permet à ton téléphone d\'afficher ta ' +
+            'position à quelques mètres près.',
+          domaines: ['Navigation', 'Technologie'],
+        },
+        {
           kind: 'entrainement',
           title: 'Équation depuis un graphe',
           generatorId: 'gen49',
@@ -1017,6 +1109,21 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             'placée exactement au foyer ressort en rayons parfaitement parallèles. Cette ' +
             'propriété n\'est vraie QUE pour cette forme précise, celle définie par ' +
             'l\'équidistance foyer/directrice.',
+        },
+        {
+          kind: 'historique',
+          titre: 'La parabole, trouvée en cherchant tout autre chose',
+          text:
+            'La parabole est découverte vers 350 avant J.-C. par le mathématicien grec ' +
+            '**Ménechme**, élève d\'Eudoxe et parfois présenté comme le précepteur ' +
+            "d'Alexandre le Grand — mais pas du tout en cherchant une courbe ! Il tente de " +
+            "résoudre un problème célèbre de l'Antiquité, la « duplication du cube » " +
+            '(construire un cube de volume double d\'un cube donné), impossible à la règle ' +
+            'et au compas. En coupant un cône par un plan de différentes façons, il obtient ' +
+            'plusieurs courbes nouvelles — dont la parabole — et montre qu\'elles permettent ' +
+            'de résoudre son problème. La définition par foyer et directrice que tu utilises ' +
+            'aujourd\'hui viendra bien plus tard, avec Apollonius de Perga ; Ménechme, lui, ' +
+            'ne connaissait la parabole que comme une tranche de cône.',
         },
         { kind: 'subheading', text: "L'équation" },
         {
