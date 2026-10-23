@@ -122,6 +122,27 @@ export const fonctionsExponentielles: ChapterContent = {
           },
         },
         {
+          kind: 'historique',
+          titre: 'Quand la croissance exponentielle a changé la vision du monde',
+          text:
+            "En 1798, l'économiste anglais **Thomas Malthus** publie un essai qui va marquer " +
+            'durablement la pensée économique et scientifique : il affirme que la population ' +
+            "humaine croît de façon **exponentielle** (elle double régulièrement), alors que " +
+            'les ressources alimentaires ne peuvent croître que de façon **linéaire** (un ' +
+            "champ supplémentaire cultivé ajoute toujours la même quantité de nourriture, il " +
+            'ne la multiplie pas). Sa conclusion, pessimiste, est que la population finira ' +
+            'toujours par dépasser ce que la terre peut nourrir — exactement le phénomène que ' +
+            'tu viens d\'observer sur le graphique ci-dessus, où le modèle exponentiel finit ' +
+            'toujours par dépasser le modèle linéaire, même s\'il part plus bas. Son essai ' +
+            "influencera profondément Charles Darwin dans sa théorie de l'évolution par " +
+            'sélection naturelle.',
+          image: {
+            src: '/images/historique/malthus.jpg',
+            alt: 'Portrait de Thomas Robert Malthus',
+            caption: 'Thomas Robert Malthus (1766–1834), portrait du 19e siècle.',
+          },
+        },
+        {
           kind: 'definition',
           label: 'Définition — fonction exponentielle de base a',
           items: [
@@ -133,6 +154,21 @@ export const fonctionsExponentielles: ChapterContent = {
             "Pour $a = 1$, la fonction est constante — toujours égale à 1. Ce n'est donc pas " +
               "vraiment une exponentielle, d'où la condition $a \\neq 1$.",
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Pourquoi chaque note de musique est une puissance de 2',
+          text:
+            'Le piano moderne (et presque tous les instruments occidentaux) utilise la ' +
+            '**gamme tempérée** : l\'octave est divisée en 12 demi-tons ÉGAUX, où chaque ' +
+            'demi-ton multiplie la fréquence par le même facteur. Comme 12 demi-tons doivent ' +
+            'exactement doubler la fréquence (une octave plus haut), ce facteur vaut ' +
+            '$2^{1/12}$ — un exposant IRRATIONNEL, exactement le genre de nombre que la ' +
+            'définition ci-dessus vient de rendre possible. La fréquence de la note $n$ ' +
+            "demi-tons au-dessus d'une fréquence de référence $f_0$ (souvent le la à 440 Hz) " +
+            'vaut donc $f(n) = f_0 \\cdot 2^{n/12}$ : une vraie fonction exponentielle, dont ' +
+            "l'exposant $n$ parcourt les touches du clavier.",
+          domaines: ['Musique', 'Acoustique'],
         },
         {
           kind: 'methode',
@@ -259,6 +295,21 @@ export const fonctionsExponentielles: ChapterContent = {
             "exponentielle continue de s'amplifier indéfiniment, alors que celui d'un " +
             "polynôme ralentit relativement. Tôt ou tard, l'exponentielle rattrape et dépasse " +
             'n\'importe quel polynôme, aussi impressionnant soit-il au départ.',
+        },
+        {
+          kind: 'historique',
+          titre: "La légende qui a fait comprendre la puissance de l'exponentielle",
+          text:
+            'Une vieille légende, probablement apocryphe, raconte qu\'un roi indien voulut ' +
+            "récompenser l'inventeur du jeu d'échecs et lui demanda ce qu'il souhaitait. Le " +
+            'sage demanda une récompense modeste en apparence : un grain de riz sur la ' +
+            'première case de l\'échiquier, deux sur la deuxième, quatre sur la troisième, et ' +
+            'ainsi de suite en doublant à chaque case — 64 cases en tout. Le roi, amusé par ' +
+            'une demande qui lui semblait dérisoire, accepta aussitôt... avant de découvrir ' +
+            'que la dernière case à elle seule exigerait $2^{63}$ grains de riz, soit bien ' +
+            'plus de riz que l\'humanité n\'en a jamais produit. Cette histoire illustre ' +
+            'exactement ce que tu es en train d\'apprendre : une croissance exponentielle ' +
+            'part lentement, presque invisible, puis explose bien au-delà de toute intuition.',
         },
         {
           kind: 'methode',
@@ -642,6 +693,26 @@ export const fonctionsExponentielles: ChapterContent = {
             "Moyen mnémotechnique : « Je renonce à calculer la suivante » — le nombre de " +
             'lettres de chaque mot donne 2, 7, 1, 8, 2, 8. Et ce n\'est qu\'une valeur ' +
             "approchée de $e$ (à moins de $2 \\cdot 10^{-6}$ près), pas la valeur exacte !",
+        },
+        {
+          kind: 'historique',
+          titre: "Le nombre e, découvert en voulant s'enrichir",
+          text:
+            "C'est le mathématicien suisse **Jacob Bernoulli** qui, en 1683, tombe sur ce " +
+            "nombre pour la première fois — sans le chercher. Il étudie les intérêts " +
+            'composés : si une banque capitalise les intérêts non pas une fois par an, mais ' +
+            'de plus en plus souvent (par mois, par jour, par seconde...), que devient le ' +
+            'capital final ? Bernoulli calcule que ce capital ne grandit pas indéfiniment : ' +
+            'il se rapproche d\'une limite précise, exactement ' +
+            '$\\left(1+\\dfrac{1}{x}\\right)^x$ quand $x$ tend vers l\'infini — la limite que ' +
+            'tu viens de voir ci-dessus. Bernoulli avait donc déjà repéré ce nombre près ' +
+            "d'un demi-siècle avant que **Leonhard Euler** ne lui donne son nom symbolique, " +
+            'la lettre $e$, en 1731, et n\'en démontre les propriétés fondamentales.',
+          image: {
+            src: '/images/historique/bernoulli-jacob.jpg',
+            alt: 'Portrait de Jacob Bernoulli',
+            caption: 'Jacob Bernoulli (1655–1705), portrait d\'époque.',
+          },
         },
         {
           kind: 'para',
@@ -1525,6 +1596,23 @@ export const fonctionsExponentielles: ChapterContent = {
               'une décroissance.',
           ],
         },
+        {
+          kind: 'application',
+          titre: 'Pourquoi les ordinateurs doublent de puissance tous les deux ans',
+          text:
+            "En 1965, l'ingénieur américain **Gordon Moore** (cofondateur d'Intel) observe " +
+            "que le nombre de transistors que l'on peut placer sur une puce électronique " +
+            'DOUBLE environ tous les deux ans, pour un coût à peu près constant — une ' +
+            'prédiction connue depuis sous le nom de **loi de Moore**. C\'est un modèle ' +
+            'exponentiel pur, $N(t) = N_0 \\cdot 2^{t/2}$ ($t$ en années), qui s\'est vérifié ' +
+            'avec une précision frappante pendant plus de 50 ans : un processeur de ' +
+            'smartphone actuel contient des milliards de transistors, là où les premiers ' +
+            'microprocesseurs des années 1970 en comptaient à peine quelques milliers. ' +
+            "C'est cette même croissance exponentielle qui explique pourquoi l'informatique " +
+            'a progressé aussi vite — et pourquoi elle finit, comme toute exponentielle, par ' +
+            'ralentir : la loi de Moore touche aujourd\'hui à ses limites physiques.',
+          domaines: ['Informatique', 'Technologie'],
+        },
         { kind: 'subheading', text: 'Reconnaître un accroissement de type exponentiel' },
         {
           kind: 'exempleLibre',
@@ -1705,6 +1793,24 @@ export const fonctionsExponentielles: ChapterContent = {
             'seuil donné ? », isole le terme exponentiel, puis utilise le logarithme népérien ' +
             'à la calculatrice — la seule situation du chapitre où ln intervient vraiment en ' +
             'pratique.',
+        },
+        {
+          kind: 'application',
+          titre: "L'interrupteur « doux » qui fait fonctionner l'intelligence artificielle",
+          text:
+            'Les réseaux de neurones artificiels, au cœur de l\'intelligence artificielle ' +
+            'moderne, ont besoin d\'une fonction qui transforme n\'importe quel nombre réel ' +
+            'en une valeur comprise entre 0 et 1 — un peu comme le modèle de saturation que ' +
+            'tu viens de voir. Cette fonction, appelée **sigmoïde**, s\'écrit ' +
+            '$\\sigma(x) = \\dfrac{1}{1+e^{-x}}$ : exactement le même ingrédient, $e^{-x}$, ' +
+            'que dans ton modèle de saturation $p(t)=1-e^{-0{,}1t}$. Quand $x$ est très ' +
+            'négatif, $\\sigma(x)$ vaut presque 0 ; quand $x$ est très positif, elle vaut ' +
+            'presque 1 ; autour de 0, elle bascule progressivement de l\'un à l\'autre. ' +
+            'Chaque « neurone » d\'un réseau utilise cette bascule pour décider, de façon ' +
+            'graduelle plutôt que brutale, à quel point il doit « s\'activer » — une des ' +
+            'briques mathématiques de base derrière des outils comme la reconnaissance ' +
+            'd\'image ou les assistants conversationnels.',
+          domaines: ['Intelligence artificielle', 'Informatique'],
         },
         {
           kind: 'entrainement',
