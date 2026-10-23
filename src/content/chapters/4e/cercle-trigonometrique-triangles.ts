@@ -96,6 +96,27 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
           },
         },
         {
+          kind: 'historique',
+          titre: 'L\'invention du sinus — un demi-accord, pas un angle',
+          text:
+            'Les astronomes grecs calculaient déjà avec des **cordes** (la longueur d\'un ' +
+            'segment reliant deux points d\'un cercle) plutôt qu\'avec des sinus. C\'est ' +
+            'l\'astronome et mathématicien indien **Âryabhata**, vers 500, qui introduit dans ' +
+            'son traité Âryabhatiya la notion de jyā (littéralement « corde d\'arc », à ' +
+            'l\'origine du mot « sinus » après plusieurs traductions successives, en arabe ' +
+            'puis en latin) — essentiellement la **moitié** d\'une corde, c\'est-à-dire ' +
+            'exactement le sin θ que tu lis aujourd\'hui comme une coordonnée sur le cercle ' +
+            'trigonométrique. Il calcule aussi des tables de sinus avec une précision ' +
+            'remarquable pour l\'époque, sans aucun instrument de calcul.',
+          image: {
+            src: '/images/historique/aryabhata.jpg',
+            alt: 'Statue d\'Âryabhata',
+            caption:
+              'Statue d\'Âryabhata, Institut inter-universitaire d\'astronomie et ' +
+              'd\'astrophysique (IUCAA), Pune, Inde. Domaine public.',
+          },
+        },
+        {
           kind: 'featureTable',
           caption: 'Le signe de sin θ, cos θ et tan θ selon le quadrant',
           headers: ['Quadrant', 'sin θ', 'cos θ', 'tan θ'],
@@ -633,6 +654,23 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             caption: 'convention constante : le côté minuscule (a, b, c) est toujours le côté opposé au sommet de même lettre majuscule (A, B, C)',
           },
         },
+        {
+          kind: 'historique',
+          titre: 'Le mathématicien qui a libéré la trigonométrie de l\'astronomie',
+          text:
+            'Jusqu\'au 13e siècle, la trigonométrie n\'existe que comme un outil au service ' +
+            'de l\'astronomie — personne ne l\'étudie pour elle-même. C\'est le savant perse ' +
+            '**Nasir al-Din al-Tusi**, directeur du grand observatoire de Maragha (actuel ' +
+            'Iran), qui change cela : dans son Traité du quadrilatère, il traite la ' +
+            'trigonométrie comme une branche des mathématiques à part entière, et y établit ' +
+            'la loi des sinus pour un triangle quelconque, exactement sous la forme que tu ' +
+            'utilises dans cette section.',
+          image: {
+            src: '/images/historique/al-tusi.jpg',
+            alt: 'Portrait de Nasir al-Din al-Tusi',
+            caption: 'Nasir al-Din al-Tusi (1201–1274), timbre iranien. Domaine public (PD-Iran).',
+          },
+        },
         { kind: 'subheading', text: 'La loi des sinus' },
         {
           kind: 'para',
@@ -661,7 +699,43 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             '$\\sin \\hat{A}/a = \\sin \\hat{B}/b = \\sin \\hat{C}/c$. C\'est strictement ' +
             'équivalent — les deux écritures répondent exactement aux mêmes questions.',
         },
+        {
+          kind: 'application',
+          titre: 'Trouver sa position en mer avec un sextant',
+          text:
+            'Avant le GPS, les marins déterminaient leur position en mer grâce à la ' +
+            'trigonométrie. Un sextant mesure précisément l\'angle entre l\'horizon et un ' +
+            'astre (le Soleil, une étoile) — exactement comme tu mesures un angle sur le ' +
+            'cercle trigonométrique. En combinant cet angle avec l\'heure exacte et des ' +
+            'tables astronomiques, le navigateur reconstruit un triangle reliant sa ' +
+            'position, le pôle et l\'astre visé, puis résout ce triangle avec la loi des ' +
+            'sinus pour en déduire sa latitude et sa longitude. Cette méthode, utilisée ' +
+            'pendant des siècles, a permis de traverser les océans bien avant les satellites.',
+          domaines: ['Navigation', 'Astronomie'],
+          image: {
+            src: '/images/application/sextant.jpg',
+            alt: 'Sextant marin Plath',
+            caption: 'Sextant Plath, utilisé pour mesurer l\'angle entre l\'horizon et un astre. NOAA, domaine public.',
+          },
+        },
         { kind: 'subheading', text: 'La loi des cosinus (Al-Kashi)' },
+        {
+          kind: 'historique',
+          titre: 'Pourquoi la loi des cosinus porte le nom d\'Al-Kashi',
+          text:
+            'Ghiyath al-Din Jamshid Al-Kashi, astronome et mathématicien du 15e siècle à ' +
+            'l\'observatoire de Samarcande (actuel Ouzbékistan), est le premier à énoncer et ' +
+            'démontrer clairement cette relation entre les trois côtés d\'un triangle et le ' +
+            'cosinus d\'un angle — d\'où son nom, encore utilisé aujourd\'hui dans les pays ' +
+            'francophones. Al-Kashi est aussi réputé pour avoir calculé π avec 16 décimales ' +
+            'exactes, un record resté inégalé pendant plus de 150 ans, en travaillant ' +
+            'uniquement avec des polygones à des millions de côtés.',
+          image: {
+            src: '/images/historique/al-kashi.jpg',
+            alt: 'Page manuscrite du Miftah al-Hisab d\'Al-Kashi',
+            caption: 'Page du Miftah al-Hisab (« Clé de l\'arithmétique ») d\'Al-Kashi, copie manuscrite de 1656. Domaine public.',
+          },
+        },
         { kind: 'para', text: '$a^2 = b^2 + c^2 - 2bc\\cos \\hat{A}$' },
         {
           kind: 'para',
@@ -669,6 +743,24 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             'Elle est utile dès que tu connais **2 côtés et l\'angle compris** entre eux (SAS). ' +
             'Ou les **3 côtés** (SSS, en isolant le cosinus). Pythagore n\'en est qu\'un cas ' +
             'particulier : si Â = 90°, alors cos Â = 0, et la formule redevient $a^2=b^2+c^2$.',
+        },
+        {
+          kind: 'application',
+          titre: 'Calculer les longueurs d\'une charpente de toit',
+          text:
+            'Une charpente de toit est un assemblage de triangles — les charpentiers ' +
+            'choisissent cette forme précisément parce qu\'un triangle est rigide ' +
+            '(contrairement à un rectangle, qui peut se déformer). Pour fabriquer chaque ' +
+            'pièce de bois à la bonne longueur AVANT de monter la charpente, il faut ' +
+            'résoudre ces triangles : connaissant la pente du toit (un angle) et la largeur ' +
+            'du bâtiment (un côté), la loi des cosinus donne directement la longueur de ' +
+            'chaque arbalétrier ou entrait, sans avoir à mesurer sur place.',
+          domaines: ['Architecture', 'Construction'],
+          image: {
+            src: '/images/application/charpente.jpg',
+            alt: 'Charpente de toit en bois',
+            caption: 'Charpente de la cathédrale de Greifswald (Allemagne). Photo : WildO, CC BY-SA 4.0, via Wikimedia Commons.',
+          },
         },
         { kind: 'subheading', text: 'L\'aire' },
         {
@@ -817,6 +909,20 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
             { tag: 'aire', text: 'Aire = ½×8×6×sin 60° ≈ 20,78' },
           ],
           result: { tag: 'résultat', text: 'a ≈ 7,21 — B̂ ≈ 73,9° — Ĉ ≈ 46,1° — Aire ≈ 20,78' },
+        },
+        {
+          kind: 'application',
+          titre: 'Reconstruire un objet en 3D à partir de simples photos',
+          text:
+            'La photogrammétrie reconstruit un modèle 3D d\'un objet ou d\'un bâtiment à ' +
+            'partir de plusieurs photos prises sous des angles différents — la même ' +
+            'technique qui numérise aujourd\'hui des sites archéologiques ou des décors de ' +
+            'jeux vidéo. Le principe : chaque point visible sur au moins deux photos ' +
+            'appartient à un triangle dont on connaît la position des deux appareils photo ' +
+            '(les sommets) et les angles de visée. En résolvant ce triangle avec les lois ' +
+            'vues dans cette section, le logiciel calcule la position exacte du point en 3D ' +
+            '— répété des millions de fois, cela reconstruit la forme entière de l\'objet.',
+          domaines: ['Informatique', 'Imagerie 3D'],
         },
         {
           kind: 'entrainement',
