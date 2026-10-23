@@ -89,6 +89,30 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Le mathématicien qui a osé comparer des infinis',
+          text:
+            'Les mots « injective », « surjective » et « bijective » que tu viens de voir ' +
+            'trouvent leur origine dans les travaux du mathématicien allemand **Georg ' +
+            'Cantor**, dans les années 1870. Cantor cherche alors à répondre à une question ' +
+            'qui semblait presque absurde : peut-on comparer la « taille » de deux ensembles ' +
+            'infinis ? Son idée, révolutionnaire pour l\'époque, est exactement celle de ' +
+            'cette section — s\'il existe une bijection entre deux ensembles (chaque élément ' +
+            'de l\'un associé à exactement un élément de l\'autre, sans rien oublier ni ' +
+            'répéter), alors ces deux ensembles ont, par définition, « autant » d\'éléments, ' +
+            'même s\'ils sont tous les deux infinis. Cantor démontre ainsi l\'un des résultats ' +
+            'les plus déroutants des mathématiques : il existe une bijection entre ' +
+            '$\\mathbb{N}$ et $\\mathbb{Q}$ (ces deux infinis ont « la même taille »), mais ' +
+            'aucune bijection n\'existe entre $\\mathbb{N}$ et $\\mathbb{R}$ — il y a donc ' +
+            'plusieurs sortes d\'infini. Ses idées ont été violemment contestées par certains ' +
+            'de ses contemporains avant de devenir un pilier des mathématiques modernes.',
+          image: {
+            src: '/images/historique/cantor.jpg',
+            alt: 'Portrait de Georg Cantor',
+            caption: 'Georg Cantor (1845–1918), photographie d\'époque.',
+          },
+        },
+        {
           kind: 'astuce',
           label: "💡 Lire l'injectivité sur un graphique",
           text:
@@ -240,6 +264,28 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
               'En orange : $y = x^2$ (domaine ℝ, non injective). En vert : sa relation ' +
               'réciproque $y = \\pm\\sqrt{x}$, qui n\'est pas une fonction — en $x = 1$, elle ' +
               'donne deux images (points marqués).',
+          },
+        },
+        {
+          kind: 'historique',
+          titre: 'Qu\'est-ce qu\'une fonction, au juste ?',
+          text:
+            'Ce que tu viens de démontrer — qu\'une relation réciproque n\'est une fonction ' +
+            'que si elle associe UNE SEULE valeur à chaque $x$ — repose sur une définition ' +
+            'qui n\'a rien d\'évident historiquement. Pendant longtemps, une « fonction » ' +
+            'désignait seulement une expression algébrique explicite, comme $x^2$ ou ' +
+            '$\\sin(x)$. C\'est le mathématicien allemand **Peter Gustav Lejeune Dirichlet** ' +
+            'qui, en 1837, propose la définition moderne que ce chapitre utilise sans le ' +
+            'dire : une fonction est simplement une correspondance qui associe, à chaque ' +
+            'élément d\'un ensemble de départ, UN SEUL élément d\'un ensemble d\'arrivée — ' +
+            'peu importe que cette correspondance s\'exprime par une formule, un graphique ' +
+            'ou même un tableau de valeurs. Cette définition, bien plus large que ' +
+            'l\'ancienne, est exactement ce qui permet de parler proprement d\'injectivité, ' +
+            'de surjectivité et de réciproque, quelle que soit la fonction considérée.',
+          image: {
+            src: '/images/historique/dirichlet.jpg',
+            alt: 'Portrait de Peter Gustav Lejeune Dirichlet',
+            caption: 'Peter Gustav Lejeune Dirichlet (1805–1859), lithographie d\'époque.',
           },
         },
         {
@@ -671,6 +717,23 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             'x^5$ est parfaitement dérivable en 0, avec $(f^{-1})\'(0) = 5 \\cdot 0^4 = 0$.',
         },
         {
+          kind: 'application',
+          titre: 'Calculer l\'angle d\'un bras robotisé à partir de sa position',
+          text:
+            'En robotique, un bras articulé doit souvent atteindre une position précise dans ' +
+            "l'espace — attraper un objet, souder un point donné. Calculer la position de la " +
+            'pince à partir des angles des articulations est facile (c\'est une fonction ' +
+            'directe, de la trigonométrie classique). Mais le problème INVERSE — retrouver ' +
+            "les angles qu'il faut donner à chaque articulation pour atteindre une position " +
+            'voulue — est exactement le problème de la fonction réciproque : on connaît la ' +
+            'sortie, on cherche l\'entrée. Ce calcul, appelé **cinématique inverse**, utilise ' +
+            'directement les fonctions réciproques (souvent cyclométriques, comme tu les ' +
+            'verras à la section suivante) pour transformer une position 3D cible en angles ' +
+            "d'articulation — un calcul refait des dizaines de fois par seconde par le " +
+            "logiciel de contrôle d'un robot industriel.",
+          domaines: ['Robotique', 'Informatique'],
+        },
+        {
           kind: 'entrainement',
           title: 'Fonctions injectives / surjectives / bijectives',
           generatorId: '6gen1',
@@ -778,6 +841,28 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             ['cos', '[0 ; π]', 'arccos', '[−1 ; 1]', '[0 ; π]'],
             ['tan', ']−π/2 ; π/2[', 'arctan', 'ℝ', ']−π/2 ; π/2['],
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Pourquoi « arcsin » et pas seulement « sin⁻¹ » ?',
+          text:
+            'Tu as déjà vu, en section 1, à quel point la notation $f^{-1}$ peut prêter à ' +
+            'confusion avec $1/f$. C\'est l\'astronome et mathématicien britannique **John ' +
+            'Herschel** qui introduit, en 1813, la notation $\\sin^{-1}(x)$ pour désigner la ' +
+            'réciproque de sin — en l\'alignant sur la notation générale $f^{-1}$ des ' +
+            'fonctions réciproques. Problème : $\\sin^{-1}(x)$ ressemble furieusement à ' +
+            '$1/\\sin(x)$, qui est une fonction complètement différente (la cosécante) ! ' +
+            'C\'est pour éviter cette ambiguïté que la notation $\\arcsin$, $\\arccos$, ' +
+            '$\\arctan$ s\'est peu à peu imposée en parallèle — « arc » rappelle que le ' +
+            'résultat est un ANGLE (un arc de cercle), pas l\'inverse d\'un nombre. Les deux ' +
+            'notations cohabitent encore aujourd\'hui : ta calculatrice affiche sans doute ' +
+            '$\\sin^{-1}$, mais $\\arcsin$ reste la notation la plus sûre dès que la ' +
+            'confusion est possible.',
+          image: {
+            src: '/images/historique/herschel.jpg',
+            alt: 'Portrait de John Herschel',
+            caption: 'John Herschel (1792–1871), photographie par Julia Margaret Cameron, 1867.',
+          },
         },
         {
           kind: 'para',
@@ -1045,6 +1130,22 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             '$\\arcsin(0) = 0 \\quad \\arcsin(\\frac{\\sqrt{2}}{2}) = \\pi/4 \\quad ' +
             '\\arcsin(-\\frac{\\sqrt{3}}{2}) = -\\pi/3 \\quad \\arcsin(-1) = -\\pi/2$',
           items: ['$\\arcsin(2)$ n\'existe pas : $2 \\notin [-1;1]$ (hors du domaine).'],
+        },
+        {
+          kind: 'application',
+          titre: "Calculer l'angle de réfraction de la lumière",
+          text:
+            "Quand un rayon de lumière passe d'un milieu à un autre — de l'air à l'eau, par " +
+            "exemple — il change de direction : c'est la **réfraction**. La loi de " +
+            'Snell-Descartes relie les deux angles (par rapport à la normale) et les indices ' +
+            'de réfraction des deux milieux : $n_1\\sin(\\theta_1) = n_2\\sin(\\theta_2)$. ' +
+            'Pour calculer directement l\'angle de réfraction $\\theta_2$ à partir de ' +
+            "l'angle d'incidence $\\theta_1$, il faut ISOLER $\\theta_2$ — et donc appliquer " +
+            'arcsin aux deux membres : $\\theta_2 = \\arcsin\\left(\\dfrac{n_1\\sin(\\theta_1)}' +
+            '{n_2}\\right)$. C\'est exactement arcsin qui permet aux opticiens et aux ' +
+            'fabricants de lentilles de calculer la trajectoire précise d\'un rayon lumineux ' +
+            'à travers un système optique.',
+          domaines: ['Physique', 'Optique'],
         },
         {
           kind: 'entrainement',
@@ -1547,6 +1648,21 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
                 '$(\\arcsin(2x-1))\' = \\dfrac{2}{\\sqrt{1-(2x-1)^2}} = \\dfrac{2}{\\sqrt{-4x^2+4x}} = \\dfrac{1}{\\sqrt{-x^2+x}}$',
             },
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Trouver la meilleure place pour regarder un écran',
+          text:
+            "Au cinéma ou devant un grand panneau publicitaire, l'angle sous lequel tu vois " +
+            "l'écran — et donc ton confort visuel — dépend de ta distance au mur. Trop près, " +
+            "l'angle est grand mais déformé ; trop loin, l'angle devient minuscule. Ce " +
+            "problème classique d'optimisation se modélise avec arctan : si l'écran est " +
+            'accroché entre les hauteurs $a$ et $b$ au-dessus de tes yeux, l\'angle sous ' +
+            'lequel tu le vois depuis une distance $x$ vaut $\\theta(x) = \\arctan(b/x) - ' +
+            '\\arctan(a/x)$. Trouver la distance qui MAXIMISE cet angle — la meilleure place ' +
+            'dans la salle — demande exactement ce que tu viens d\'apprendre : dériver une ' +
+            'expression contenant arctan, puis chercher où cette dérivée s\'annule.',
+          domaines: ['Physique', 'Optimisation'],
         },
         {
           kind: 'entrainement',
