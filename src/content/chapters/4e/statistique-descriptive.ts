@@ -128,6 +128,23 @@ export const statistiqueDescriptive: ChapterContent = {
             'Sinon, tu as oublié une valeur — ou compté une valeur en trop !',
         },
         {
+          kind: 'historique',
+          titre: 'Compter les morts pour inventer la statistique',
+          text:
+            "En 1662, le marchand londonien **John Graunt** publie ses « Observations " +
+            'naturelles et politiques... faites sur les registres de mortalité » — le tout ' +
+            "premier ouvrage à transformer des données brutes en véritable connaissance. " +
+            "Chaque semaine depuis 1592, les paroisses de Londres enregistraient les décès et " +
+            'leurs causes, sans que personne ne les exploite vraiment. Graunt a l\'idée de les ' +
+            'rassembler dans des tableaux organisés — exactement la démarche de cette section ' +
+            '— et y découvre des régularités insoupçonnées : la proportion de garçons et de ' +
+            "filles à la naissance reste étonnamment stable d'une année à l'autre, et il en " +
+            "tire la toute première « table de mortalité » de l'histoire, un outil encore " +
+            "utilisé aujourd'hui par les compagnies d'assurance. Aucun portrait authentifié de " +
+            "Graunt n'a survécu — l'image parfois présentée comme la sienne est aujourd'hui " +
+            'considérée comme un faux tardif.',
+        },
+        {
           kind: 'entrainement',
           title: 'Tableau de fréquences',
           generatorId: 'gen30',
@@ -218,6 +235,27 @@ export const statistiqueDescriptive: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Un diagramme qui a sauvé des vies',
+          text:
+            "En 1858, l'infirmière britannique **Florence Nightingale** publie un rapport sur " +
+            "les pertes de l'armée britannique pendant la guerre de Crimée, accompagné d'un " +
+            "graphique de son invention : le « diagramme en rose » (coxcomb), une forme " +
+            "d'histogramme circulaire où chaque secteur, groupé par mois, montre les décès " +
+            "dus aux blessures de combat, aux maladies évitables et à d'autres causes. Le " +
+            "résultat est saisissant : la quasi-totalité des morts viennent de maladies " +
+            "évitables (typhus, choléra, mauvaise hygiène) et non des combats eux-mêmes. " +
+            "Nightingale sait que des tableaux de chiffres n'auraient jamais convaincu le " +
+            "Parlement britannique aussi vite — son graphique, lui, le fait : les hôpitaux " +
+            "militaires sont réformés dans la foulée. C'est l'un des tout premiers exemples " +
+            "où un graphique statistique change concrètement une décision politique.",
+          image: {
+            src: '/images/historique/nightingale.jpg',
+            alt: 'Portrait de Florence Nightingale',
+            caption: 'Florence Nightingale (1820–1910), photographie par Henry Hering, vers 1860.',
+          },
+        },
+        {
           kind: 'atelier',
           tag: 'frontiere-classe-widget',
           label: 'Manipule toi-même — sur quelle classe tombe x ?',
@@ -297,6 +335,28 @@ export const statistiqueDescriptive: ChapterContent = {
             'Ne fais **jamais** la moyenne des valeurs distinctes seules ! Ici, ça donnerait ' +
             '$(2+6+9+12)/4 = 7{,}25$. Cette erreur ignore complètement les effectifs. Elle ' +
             'donne un résultat faux dès que les effectifs ne sont pas tous égaux.',
+        },
+        {
+          kind: 'historique',
+          titre: 'L\'astronome belge qui a inventé « l\'homme moyen »',
+          text:
+            "Dans les années 1830, l'astronome et statisticien belge **Adolphe Quetelet** a " +
+            "une idée audacieuse : appliquer la moyenne pondérée — jusque-là réservée aux " +
+            "mesures physiques en astronomie — aux mesures humaines. En compilant des " +
+            "milliers de mesures de taille, de poids et même de comportements, il construit " +
+            'le concept de « l\'homme moyen » (l\'homme moyen), un individu théorique qui ' +
+            "résumerait toute une population par ses valeurs moyennes. L'idée fait scandale " +
+            "autant qu'elle fascine : peut-on vraiment réduire une société entière à quelques " +
+            'nombres ? Quetelet invente au passage l\'**indice de masse corporelle** (encore ' +
+            'appelé « indice de Quetelet »), le poids divisé par le carré de la taille, ' +
+            "toujours utilisé en médecine aujourd'hui. Fondateur de l'Observatoire royal de " +
+            "Belgique, il reste l'un des scientifiques belges les plus influents du 19e " +
+            "siècle.",
+          image: {
+            src: '/images/historique/quetelet.jpg',
+            alt: 'Portrait d\'Adolphe Quetelet',
+            caption: 'Lambert Adolphe Jacques Quetelet (1796–1874), photographie d\'époque.',
+          },
         },
         {
           kind: 'entrainement',
@@ -428,6 +488,23 @@ export const statistiqueDescriptive: ChapterContent = {
               'est peu représentatif si les effectifs sont trop dispersés, ou s\'il y a ' +
               'plusieurs modes.',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Choisir la bonne statistique pour juger un athlète',
+          text:
+            "En sport, le choix entre moyenne, médiane et mode change complètement l'histoire " +
+            "qu'on raconte. La moyenne de points par match d'un basketteur peut être tirée " +
+            "vers le haut par une seule performance exceptionnelle à 50 points — la médiane, " +
+            "elle, reste insensible à ce match exceptionnel et reflète mieux son niveau « " +
+            "typique ». Un entraîneur qui compare deux joueurs de même moyenne regarde " +
+            "ensuite leur dispersion : celui dont les scores varient peu (constant match " +
+            "après match) est souvent préféré à celui qui alterne les matchs exceptionnels et " +
+            "les matchs catastrophiques, même à moyenne égale. Le mode, lui, sert à repérer " +
+            "le score le plus fréquent d'un joueur — utile pour prédire ce qu'il est le plus " +
+            "probable de réaliser lors du prochain match, plutôt que ce qu'il réalise « en " +
+            "moyenne ».",
+          domaines: ['Sport', 'Analyse de données'],
         },
         {
           kind: 'entrainement',
@@ -620,6 +697,27 @@ export const statistiqueDescriptive: ChapterContent = {
             'direct. À d=8, tu retrouves exactement l\'exemple du texte (moitié à 4, moitié à 20).',
         },
         {
+          kind: 'application',
+          titre: 'Surveiller une chaîne de production avec l\'écart-type',
+          image: {
+            src: '/images/application/quality-control-steel.jpg',
+            alt: 'Ouvrier effectuant un contrôle qualité dans une aciérie',
+            caption: 'Contrôle qualité dans une usine sidérurgique, Tarente, 1963. Touring Club Italiano, CC BY-SA 4.0, via Wikimedia Commons.',
+          },
+          text:
+            "Dans une usine, une machine qui fabrique des pièces vise toujours une valeur " +
+            "cible (un diamètre, une masse, une épaisseur) — mais aucune pièce n'est jamais " +
+            "parfaitement identique à une autre. Le contrôle qualité mesure régulièrement un " +
+            "échantillon de pièces et calcule leur **moyenne** (reste-t-on bien sur la cible ?) " +
+            "et leur **écart-type** (les pièces sont-elles toutes proches les unes des autres, " +
+            "ou très dispersées ?). Un écart-type qui grimpe, même si la moyenne reste bonne, " +
+            "est un signal d'alerte : la machine se dérègle, et de plus en plus de pièces " +
+            "risquent de sortir des tolérances acceptables. C'est exactement l'idée de " +
+            "l'atelier ci-dessus : deux séries de même moyenne peuvent raconter une histoire " +
+            "complètement différente selon leur dispersion.",
+          domaines: ['Industrie', 'Contrôle qualité'],
+        },
+        {
           kind: 'entrainement',
           title: 'Paramètres de dispersion',
           generatorId: 'gen34',
@@ -762,6 +860,28 @@ export const statistiqueDescriptive: ChapterContent = {
             'Pour répondre à « quel pourcentage se situe entre a et b ? », ne lis jamais ' +
             'l\'intervalle directement sur la courbe ! Lis séparément le cumulé en b et le ' +
             'cumulé en a. Puis **soustrais** les deux : cumulé(b) − cumulé(a).',
+        },
+        {
+          kind: 'application',
+          titre: 'Comparer deux groupes de patients dans un essai clinique',
+          image: {
+            src: '/images/application/clinical-trial.jpg',
+            alt: 'Essai clinique en laboratoire médical',
+            caption: 'Analyse de données dans le cadre d\'un essai clinique.',
+          },
+          text:
+            "Pour tester un nouveau médicament, les chercheurs forment deux groupes de " +
+            "patients comparables : l'un reçoit le médicament, l'autre un placebo (sans " +
+            "principe actif). Ils mesurent ensuite un indicateur (temps de guérison, baisse " +
+            "de tension, etc.) sur chaque groupe et comparent les deux séries EXACTEMENT comme " +
+            "dans cette section : quelle série a la médiane la plus favorable (centrage) ? " +
+            "Laquelle est la plus homogène, c'est-à-dire a le médicament un effet constant ou " +
+            "très variable d'un patient à l'autre (dispersion) ? Quelle proportion de patients " +
+            "dépasse un seuil donné (lecture de seuil) ? Une différence de médianes, à elle " +
+            "seule, ne suffit jamais à conclure qu'un médicament fonctionne — il faut aussi " +
+            "regarder si les deux séries se chevauchent beaucoup ou peu, exactement la question " +
+            "de dispersion que pose cette section.",
+          domaines: ['Médecine', 'Recherche clinique'],
         },
         {
           kind: 'entrainement',
