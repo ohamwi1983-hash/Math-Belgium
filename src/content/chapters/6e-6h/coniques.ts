@@ -38,6 +38,30 @@ export const coniques: ChapterContent = {
           text:
             "Pointe une lampe de poche bien droit vers un mur : tu obtiens un **cercle** de lumière. Incline-la un peu : le cercle s'étire en **ellipse**. Incline-la encore, jusqu'à ce que le bord du faisceau devienne parallèle au mur : tu obtiens une **parabole**. Incline-la plus loin : c'est une **hyperbole**. Le faisceau de la lampe, c'est un cône de lumière — et chaque forme est juste une **coupe** de ce cône, selon l'angle du mur. D'où le nom : sections **coniques**.",
         },
+        {
+          kind: 'historique',
+          titre: 'Le mathématicien qui a nommé ces trois courbes il y a 2200 ans',
+          text:
+            'Le savant grec **Apollonius de Perga** (3e-2e siècle avant J.-C.) écrit un traité ' +
+            'en huit livres, intitulé **Coniques**, qui reste pendant près de 2000 ans LA ' +
+            "référence sur ces courbes — c'est lui qui invente les noms « ellipse », " +
+            '« parabole » et « hyperbole » que tu utilises aujourd\'hui, choisis d\'après des ' +
+            'mots grecs signifiant respectivement « défaut », « égalité » et « excès ». ' +
+            "Contrairement à ce que tu viens de voir avec la lampe de poche, Apollonius ne " +
+            'dispose d\'aucune des notions modernes (repère, équation, fonction) : il obtient ' +
+            'tous ses résultats par des raisonnements purement géométriques, en coupant un ' +
+            "seul cône sous des angles différents — exactement l'idée que tu viens d'utiliser. " +
+            'Sur les huit livres de son traité, quatre seulement nous sont parvenus en grec ; ' +
+            "les trois suivants n'ont survécu que grâce à une traduction arabe du 9e siècle, " +
+            'et le dernier est définitivement perdu.',
+          image: {
+            src: '/images/historique/apollonius.jpg',
+            alt: "Gravure imaginaire représentant Apollonius de Perga, édition de 1537",
+            caption:
+              "Apollonius de Perga, représentation imaginaire tirée d'une édition de 1537 de " +
+              "son œuvre — aucun portrait contemporain d'Apollonius n'existe.",
+          },
+        },
         { kind: 'subheading', text: 'A. La parabole' },
         {
           kind: 'definition',
@@ -255,6 +279,28 @@ export const coniques: ChapterContent = {
           items: [
             "L'ellipse de foyers $F(c;0)$ et $F'(-c;0)$ dont les points se trouvent à des distances de $F$ et $F'$ dont la somme vaut $2a$, avec $a > c$, a pour équation : $\\dfrac{x^2}{a^2} + \\dfrac{y^2}{b^2} = 1 \\quad \\text{avec} \\quad b^2 = a^2-c^2 \\;\\, (b>0)$",
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Comment Kepler a découvert que les planètes ne tournent pas en cercle',
+          text:
+            'Pendant des siècles, les astronomes supposent que les planètes tournent autour ' +
+            'du Soleil selon des cercles parfaits — la forme jugée la plus « parfaite ». En ' +
+            "1609, l'astronome allemand **Johannes Kepler**, en analysant des décennies " +
+            "d'observations extrêmement précises de la planète Mars réalisées par Tycho " +
+            "Brahe, découvre que ça ne colle tout simplement pas : les écarts entre les " +
+            'positions observées et les positions prédites par un cercle sont trop grands ' +
+            'pour être une erreur de mesure. Après des années de calculs manuels acharnés, ' +
+            "Kepler comprend que l'orbite de Mars est en réalité une **ellipse**, avec le " +
+            "Soleil placé en l'un de ses deux foyers — jamais au centre. Cette découverte, " +
+            "aujourd'hui appelée la première loi de Kepler, s'applique à toutes les planètes " +
+            'du Système solaire, y compris la Terre, et bouleverse près de 2000 ans ' +
+            "d'astronomie.",
+          image: {
+            src: '/images/historique/kepler.jpg',
+            alt: 'Portrait de Johannes Kepler',
+            caption: "Johannes Kepler (1571–1630), portrait d'après un original de 1620.",
+          },
         },
         { kind: 'subheading', text: "Caractéristiques de l'ellipse" },
         {
@@ -651,6 +697,30 @@ export const coniques: ChapterContent = {
             ],
             caption:
               "Vue en coupe du cône : les 2 sphères inscrites touchent le plan de section en F et F′, et la génératrice en M et M′. |PF|+|PF′| = |PM|+|PM′| = |MM′|, constante.",
+          },
+        },
+        {
+          kind: 'historique',
+          titre: 'Un ingénieur militaire et un astronome, auteurs du « théorème belge »',
+          text:
+            "Germinal Dandelin n'est pas un mathématicien de carrière à l'origine : né en " +
+            "France en 1794, il s'engage comme officier du génie dans l'armée de Napoléon, " +
+            'combat à Waterloo, puis devient professeur de mécanique et de minéralogie dans ' +
+            "ce qui est aujourd'hui la Belgique, où il obtient la nationalité belge. C'est " +
+            "dans ce contexte qu'il publie, en 1822, la démonstration par les sphères " +
+            'inscrites que tu viens d\'étudier. Son collègue Adolphe Quételet, de son côté, ' +
+            "fonde l'Observatoire royal de Belgique et devient un pionnier de la statistique " +
+            "appliquée aux populations humaines — c'est lui qui invente l'indice de masse " +
+            "corporelle (IMC), encore utilisé aujourd'hui en médecine. Deux parcours très " +
+            'différents, réunis dans un seul théorème que les manuels francophones ' +
+            'surnomment encore « le théorème belge ».',
+          image: {
+            src: '/images/historique/quetelet-coniques.jpg',
+            alt: 'Portrait d\'Adolphe Quételet',
+            caption:
+              'Adolphe Quételet (1796–1874), gravure de Joseph-Arnold Demannez — co-auteur du ' +
+              'théorème avec Germinal Dandelin, dont aucun portrait librement réutilisable ' +
+              "n'a pu être trouvé.",
           },
         },
         { kind: 'subheading', text: "Réduire l'équation d'une conique" },
@@ -1252,6 +1322,31 @@ export const coniques: ChapterContent = {
           text:
             "Une antenne parabolique reçoit des ondes venues d'un satellite très éloigné, donc pratiquement **parallèles** : elles se concentrent toutes au foyer, où l'on place le capteur. Un phare de voiture, lui, fonctionne à l'envers : la source est placée au foyer, et le miroir renvoie un faisceau parallèle. Un four solaire exploite la première propriété, un télescope à réflexion aussi.",
         },
+        {
+          kind: 'application',
+          titre: "Capter un signal venu de l'espace avec une parabole",
+          text:
+            "Tu viens de voir que tout rayon parallèle à l'axe d'une parabole se réfléchit " +
+            "vers le foyer : c'est exactement le principe d'une antenne satellite ou d'un " +
+            "radiotélescope. Un satellite de télécommunication est si loin (36 000 km pour " +
+            'un satellite géostationnaire) que les ondes radio qu\'il émet arrivent quasiment ' +
+            'parallèles entre elles au moment où elles atteignent la Terre. Une antenne ' +
+            'parabolique capte ces ondes sur toute sa surface — parfois plusieurs mètres de ' +
+            "diamètre — et les concentre TOUTES en un seul point, le foyer, où se trouve le " +
+            "récepteur (le « LNB »). Plus le diamètre de la parabole est grand, plus elle " +
+            'capte d\'ondes et plus le signal reçu au foyer est puissant — c\'est pour ça que ' +
+            'les plus grands radiotélescopes du monde, comme celui de 500 mètres de diamètre ' +
+            "en Chine (FAST), peuvent détecter des signaux radio émis à des milliards " +
+            "d'années-lumière.",
+          domaines: ['Télécommunications', 'Astronomie'],
+          image: {
+            src: '/images/application/satellite-dish.jpg',
+            alt: 'Antenne parabolique de communication par satellite',
+            caption:
+              'Antenne parabolique de 28,5 m de la station terrienne de Raisting, Allemagne. ' +
+              'Photo : Richard Bartz, CC BY-SA 2.5, via Wikimedia Commons.',
+          },
+        },
         { kind: 'subheading', text: "B. L'ellipse et l'hyperbole" },
         {
           kind: 'definition',
@@ -1332,6 +1427,48 @@ export const coniques: ChapterContent = {
           label: 'Applications concrètes des trois miroirs',
           text:
             "**Parabolique** : antenne satellite, phare, four solaire, télescope de Newton. **Elliptique** : lithotripsie (les ondes de choc émises depuis un foyer se concentrent sur le calcul rénal placé à l'autre foyer) et « galeries à écho ». **Hyperbolique** : le petit miroir secondaire d'un télescope de type Cassegrain, qui renvoie le faisceau vers l'oculaire sans déplacer le foyer effectif.",
+        },
+        {
+          kind: 'application',
+          titre: "Détruire un calcul rénal sans opération grâce à l'ellipse",
+          text:
+            "La propriété optique de l'ellipse — tout ce qui part d'un foyer repasse par " +
+            "l'autre — a une application médicale directe : la **lithotritie " +
+            'extracorporelle**. Le patient est positionné de façon à ce que son calcul rénal ' +
+            "(un « calcul » ici au sens médical, pas mathématique) se trouve exactement au " +
+            "second foyer d'un réflecteur en forme d'ellipse. Un générateur placé au premier " +
+            'foyer émet de courtes ondes de choc ; comme elles partent toutes d\'un foyer, ' +
+            "l'ellipse les renvoie TOUTES vers le second foyer, où elles se concentrent avec " +
+            'assez d\'énergie pour fragmenter le calcul en petits morceaux — qui seront ' +
+            'ensuite éliminés naturellement. Le reste du corps du patient, traversé par des ' +
+            "ondes individuellement peu puissantes, n'est pas endommagé : toute l'énergie ne " +
+            'se concentre qu\'au second foyer, nulle part ailleurs.',
+          domaines: ['Médecine'],
+          image: {
+            src: '/images/application/lithotripsy.jpg',
+            alt: 'Appareil de lithotritie extracorporelle par ondes de choc',
+            caption:
+              "Appareil de thérapie par ondes de choc extracorporelles (ESWT), utilisé entre " +
+              'autres pour la lithotritie. Photo : Mattes, CC BY-SA 3.0, via Wikimedia ' +
+              'Commons.',
+          },
+        },
+        {
+          kind: 'application',
+          titre: 'Trouver sa position en mer grâce à des hyperboles',
+          text:
+            "Avant le GPS, les navires et les avions se repéraient avec un système appelé " +
+            'LORAN : deux émetteurs radio au sol, à des positions connues et fixes, envoient ' +
+            'un signal EXACTEMENT au même instant. Un récepteur à bord mesure la différence ' +
+            "de temps d'arrivée des deux signaux. Or l'ensemble des points où cette " +
+            'différence de temps (donc cette différence de distance aux deux émetteurs) ' +
+            "reste constante est précisément une **hyperbole**, dont les deux émetteurs sont " +
+            "les foyers ! Une seule paire d'émetteurs place donc le navire sur UNE " +
+            "hyperbole ; une seconde paire en place une deuxième, et l'intersection des deux " +
+            'donne une position précise. Le GPS moderne, qui mesure aussi des différences de ' +
+            'temps de signal (cette fois depuis des satellites), repose sur exactement le ' +
+            'même principe mathématique.',
+          domaines: ['Navigation', 'Géolocalisation'],
         },
         {
           kind: 'entrainement',
