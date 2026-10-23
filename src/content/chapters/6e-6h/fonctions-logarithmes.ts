@@ -57,6 +57,24 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Vingt ans de calculs pour en épargner aux autres',
+          text:
+            "En 1614, l'Écossais **John Napier** (ou Neper) publie Mirifici Logarithmorum " +
+            'Canonis Descriptio, un ouvrage où il introduit pour la première fois le concept ' +
+            "de logarithme. Son objectif est concret : à une époque où astronomes et " +
+            'navigateurs passent des heures à multiplier de grands nombres à la main, Napier ' +
+            'cherche un moyen de remplacer ces multiplications par de simples additions. Il ' +
+            "aurait passé plus de vingt ans à calculer, à la main, les tables de logarithmes " +
+            "nécessaires — un travail titanesque, achevé juste avant sa mort en 1617. Le mot " +
+            '« logarithme » lui-même vient du grec logos (rapport) et arithmos (nombre).',
+          image: {
+            src: '/images/historique/napier.jpg',
+            alt: 'Portrait de John Napier',
+            caption: "John Napier (1550–1617), portrait d'époque, auteur du logarithme.",
+          },
+        },
+        {
           kind: 'definition',
           label: 'Propriétés immédiates',
           items: [
@@ -484,6 +502,23 @@ export const fonctionsLogarithmes: ChapterContent = {
           },
         },
         {
+          kind: 'application',
+          titre: 'Mesurer l\'information en bits avec le logarithme en base 2',
+          text:
+            "En informatique, la quantité d'information nécessaire pour distinguer N " +
+            'possibilités égales se mesure en bits par $\\log_2(N)$ — le changement de base ' +
+            'que tu viens de voir est donc utilisé en permanence : ' +
+            '$\\log_2(N) = \\dfrac{\\ln(N)}{\\ln(2)}$. Par exemple, pour coder un chiffre ' +
+            'parmi 8 possibilités (0 à 7), il faut $\\log_2(8)=3$ bits — exactement le ' +
+            'nombre de questions « oui/non » nécessaires pour deviner le bon chiffre en ' +
+            'cherchant par dichotomie (en divisant à chaque fois les possibilités restantes ' +
+            'par 2). Cette idée, formalisée par l\'ingénieur **Claude Shannon** en 1948 dans ' +
+            'sa théorie de l\'information, est au fondement de toute l\'informatique ' +
+            'moderne : compression de fichiers, codes correcteurs d\'erreurs, et taille des ' +
+            'mots mémoire des ordinateurs.',
+          domaines: ['Informatique', 'Théorie de l\'information'],
+        },
+        {
           kind: 'definition',
           label: 'Changement de base — pour les logarithmes',
           items: [
@@ -588,6 +623,27 @@ export const fonctionsLogarithmes: ChapterContent = {
               'ordonnées sont, en chaque x, proportionnelles entre elles. Un coefficient négatif ' +
               '(cas de log₀,₅, dont le coefficient vaut 1/ln(0,5) < 0) retourne simplement la ' +
               'courbe autour de l\'axe des abscisses.',
+          },
+        },
+        {
+          kind: 'historique',
+          titre: 'Un simple choix de base, devenu la norme mondiale',
+          text:
+            "En 1615, l'Anglais **Henry Briggs** voyage jusqu'en Écosse pour rencontrer " +
+            'Napier en personne. Les deux hommes s\'accordent sur une amélioration ' +
+            "décisive : les tables originales de Napier n'utilisaient pas la base 10, ce qui " +
+            'compliquait les calculs pratiques. Briggs propose de tout recalculer avec ' +
+            '$\\log_{10}$ comme base de référence — le **logarithme décimal** (ou ' +
+            '« logarithme vulgaire »), visible dans le graphique ci-dessus. Il publiera ' +
+            'lui-même, en 1624, une table de logarithmes décimaux de 30 000 nombres ' +
+            "calculés à 14 décimales près, entièrement à la main. C'est cette base 10, " +
+            'choisie pour sa commodité pratique plutôt que pour une raison mathématique ' +
+            'profonde, qui reste la plus utilisée aujourd\'hui en dehors des sciences (où ' +
+            '$e$ domine) et de l\'informatique (où 2 domine).',
+          image: {
+            src: '/images/historique/briggs.jpg',
+            alt: 'Portrait de Henry Briggs',
+            caption: "Henry Briggs (1561–1630), portrait d'époque, inventeur du logarithme décimal.",
           },
         },
         {
@@ -780,6 +836,26 @@ export const fonctionsLogarithmes: ChapterContent = {
             'situe donc en 1, car $\\log_{10}(1)=0$. Ce type de repère représente un ' +
             'phénomène exponentiel par une droite, et permet de comparer des taux de croissance ' +
             'très différents sur un même graphique.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Une règle à calcul... construite entièrement sur cette propriété',
+          text:
+            "Dès 1622, l'Anglais **William Oughtred** exploite directement la propriété " +
+            '$\\log(ab) = \\log(a) + \\log(b)$ pour inventer la règle à calcul : deux ' +
+            "réglettes graduées selon une échelle logarithmique, qu'on fait glisser l'une " +
+            'contre l\'autre pour transformer physiquement une multiplication en une simple ' +
+            "addition de longueurs. L'outil reste indispensable aux ingénieurs, architectes " +
+            "et même aux équipes de la mission Apollo pendant plus de trois siècles, jusqu'à " +
+            'ce que les calculatrices électroniques de poche, dans les années 1970, le ' +
+            'rendent obsolète presque du jour au lendemain.',
+          image: {
+            src: '/images/historique/oughtred.jpg',
+            alt: 'Portrait de William Oughtred',
+            caption:
+              'William Oughtred (1574–1660), gravure de Wenceslaus Hollar, inventeur de la ' +
+              'règle à calcul.',
+          },
         },
         {
           kind: 'entrainement',
@@ -1476,6 +1552,23 @@ export const fonctionsLogarithmes: ChapterContent = {
           ],
         },
         {
+          kind: 'application',
+          titre: 'Lire un taux de croissance directement sur un graphique économique',
+          text:
+            'En économie, le rapport $\\dfrac{f\'(x)}{f(x)}$ que tu viens de calculer — la ' +
+            'dérivée logarithmique — a un sens concret très utilisé : c\'est le **taux de ' +
+            'croissance relatif** (ou instantané) de la grandeur f, souvent exprimé en ' +
+            'pourcentage. Si $f(t)$ représente un chiffre d\'affaires, un PIB ou une ' +
+            'population au temps t, alors $f\'(t)/f(t)$ donne directement sa vitesse de ' +
+            'croissance RELATIVE à sa taille actuelle — pas sa variation en valeur absolue, ' +
+            'mais en proportion. C\'est exactement pour cette raison que les économistes ' +
+            'tracent souvent $\\ln(f(t))$ plutôt que $f(t)$ lui-même : sur un tel graphique, ' +
+            'une croissance à taux constant (exponentielle) devient une simple droite, dont ' +
+            'la pente EST directement ce taux de croissance — le même principe que le repère ' +
+            'semi-logarithmique de la section 1.',
+          domaines: ['Économie', 'Finance'],
+        },
+        {
           kind: 'methode',
           label: 'Pour aller plus loin — exposant lui-même variable',
           items: [
@@ -1739,6 +1832,24 @@ export const fonctionsLogarithmes: ChapterContent = {
               'redescend plus jamais : ln croît plus lentement que √x, que ∛x, et plus ' +
               'généralement que toute puissance x^k avec k>0, aussi petit soit k.',
           },
+        },
+        {
+          kind: 'application',
+          titre: 'Pourquoi un algorithme « en log n » est redoutablement rapide',
+          text:
+            'En informatique, la recherche dichotomique (chercher un mot dans un ' +
+            'dictionnaire trié en divisant à chaque étape les possibilités restantes par 2) ' +
+            'ne nécessite jamais plus d\'environ $\\log_2(n)$ étapes pour trouver un élément ' +
+            'parmi n — exactement la croissance extrêmement lente que tu viens d\'observer ' +
+            'sur le graphique ci-dessus. Concrètement, chercher un élément parmi un MILLIARD ' +
+            '($10^9$) de données triées ne prend jamais plus de 30 comparaisons environ ' +
+            '($\\log_2(10^9)\\approx 29{,}9$), alors qu\'une recherche naïve, élément par ' +
+            'élément, pourrait en demander jusqu\'à un milliard. C\'est cette lenteur de ' +
+            'croissance du logarithme — vue ici comme un avantage plutôt qu\'un ' +
+            'inconvénient — qui rend des algorithmes comme la recherche dichotomique, les ' +
+            'arbres binaires ou certaines bases de données capables de traiter des ' +
+            'quantités de données gigantesques en un temps quasi instantané.',
+          domaines: ['Informatique', 'Algorithmique'],
         },
         {
           kind: 'methode',
