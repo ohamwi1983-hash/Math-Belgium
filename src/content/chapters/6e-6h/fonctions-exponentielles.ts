@@ -158,6 +158,13 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'application',
           titre: 'Pourquoi chaque note de musique est une puissance de 2',
+          image: {
+            src: '/images/application/piano-keys.jpg',
+            alt: 'Clavier de piano vu de dessus',
+            caption:
+              'Les touches du piano sont accordées sur la gamme tempérée, répartie selon des ' +
+              "puissances de 2. Photo : Scott Detwiler, CC BY-SA 3.0, via Wikimedia Commons.",
+          },
           text:
             'Le piano moderne (et presque tous les instruments occidentaux) utilise la ' +
             '**gamme tempérée** : l\'octave est divisée en 12 demi-tons ÉGAUX, où chaque ' +
@@ -1599,6 +1606,13 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'application',
           titre: 'Pourquoi les ordinateurs doublent de puissance tous les deux ans',
+          image: {
+            src: '/images/application/microprocessor.jpg',
+            alt: "Gros plan sur la puce d'un microprocesseur",
+            caption:
+              "Le nombre de transistors gravés sur une puce a suivi la loi de Moore pendant " +
+              'des décennies. Photo : Krzysztof Gojowy, CC BY 4.0, via Wikimedia Commons.',
+          },
           text:
             "En 1965, l'ingénieur américain **Gordon Moore** (cofondateur d'Intel) observe " +
             "que le nombre de transistors que l'on peut placer sur une puce électronique " +
@@ -1797,6 +1811,13 @@ export const fonctionsExponentielles: ChapterContent = {
         {
           kind: 'application',
           titre: "L'interrupteur « doux » qui fait fonctionner l'intelligence artificielle",
+          image: {
+            src: '/images/application/neural-network.png',
+            alt: 'Schéma d\'un réseau de neurones artificiels à 3 couches',
+            caption:
+              'Chaque neurone applique une fonction sigmoïde à la somme pondérée de ses ' +
+              'entrées. Diagramme : Cburnett, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
           text:
             'Les réseaux de neurones artificiels, au cœur de l\'intelligence artificielle ' +
             'moderne, ont besoin d\'une fonction qui transforme n\'importe quel nombre réel ' +
