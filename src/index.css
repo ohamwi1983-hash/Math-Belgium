@@ -41,6 +41,10 @@
      --histoire-soft/--plan-soft (jamais utilisé comme fond avant ce callout, --sky lui-même reste
      calibré pour un trait de diagramme). */
   --sky-soft: #dde9f5;
+  /* Lignes de la grille "carnet d'ingénieur" du callout "À quoi ça sert ?" — --sky dilué en trait
+     très fin sur --sky-soft, jamais une couleur opaque à part (évite d'ajouter un token de plus
+     juste pour une valeur dérivée). */
+  --sky-grid: rgba(47, 111, 176, 0.12);
   /* Rose dédié au même usage que --sky (groupe de couleurs multiples sur un diagramme, ex. cercle
      trigonométrique à 16 angles codé par 7 familles) — nécessaire dès qu'un diagramme a besoin d'une
      7e couleur distincte des 6 tons existants (accent/good/bad/plan/sky/ink), qui sont déjà tous pris
@@ -51,6 +55,14 @@
      d'œil comme une catégorie à part, pas une variante d'un callout existant. */
   --histoire: #7a4a2a;
   --histoire-soft: #f3e6d4;
+  /* Dégradé du "rouleau" de "Le sais-tu ?" — --parch-1/2 pour le fond du parchemin lui-même
+     (linear-gradient vertical), --dowel-light/--dowel-dark pour les 2 "tiges" latérales (dérivées
+     de --histoire, jamais une couleur fixe hors thème : s'adaptent au clair/sombre comme le reste
+     de la palette). */
+  --parch-1: #f9f0dc;
+  --parch-2: #f0dfb8;
+  --dowel-light: #c8995f;
+  --dowel-dark: #5c3016;
   --on-accent: #fff8f0;
   --radius: 3px;
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
@@ -87,9 +99,14 @@
     --sky: #6ea8e8;
     --sky-ink: #a8cdf2;
     --sky-soft: #17222c;
+    --sky-grid: rgba(110, 168, 232, 0.14);
     --rose: #e07fb8;
     --histoire: #d6a86b;
     --histoire-soft: #2e2113;
+    --parch-1: #2a2013;
+    --parch-2: #332815;
+    --dowel-light: #f0c892;
+    --dowel-dark: #8a5a2e;
     --on-accent: #201404;
     color-scheme: dark;
   }
@@ -729,8 +746,23 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .callout-exemple .callout-label { color: var(--accent-ink); }
 .callout-intuition { border-left-color: var(--plan); background: var(--plan-soft); }
 .callout-intuition .callout-label { color: var(--plan-ink); }
-.callout-historique { border-left-color: var(--histoire); background: var(--histoire-soft); }
-.callout-historique .callout-label { color: var(--histoire); }
+/* "Le sais-tu ?" — forme "rouleau" : 2 tiges latérales encadrant une feuille de parchemin,
+   remplace le format carte à bordure gauche des autres callouts (choix validé explicitement,
+   seul callout du site à sortir de ce gabarit commun). */
+.historique-scroll {
+  display: flex; margin: 22px 0; border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.35);
+}
+.historique-scroll .dowel {
+  flex: 0 0 12px;
+  background: linear-gradient(90deg, var(--histoire) 0%, var(--dowel-light) 35%, var(--histoire) 65%, var(--dowel-dark) 100%);
+}
+.historique-scroll .sheet {
+  flex: 1; min-width: 0; padding: 16px 18px;
+  background: linear-gradient(180deg, var(--parch-1) 0%, var(--parch-2) 100%);
+  box-shadow: inset 6px 0 10px -8px rgba(0, 0, 0, 0.25), inset -6px 0 10px -8px rgba(0, 0, 0, 0.25);
+}
+.historique-scroll .callout-label { color: var(--histoire); }
 .historique-body { display: flex; gap: 18px; align-items: flex-start; margin-top: 8px; }
 .historique-figure { flex: 0 0 140px; margin: 0; }
 .historique-figure img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--line); }
@@ -742,7 +774,18 @@ ul.plain li, ol.plain li { margin: 6px 0; }
   .historique-body { flex-direction: column; }
   .historique-figure { flex: none; max-width: 160px; margin: 0 auto; }
 }
-.callout-application { border-left-color: var(--sky); background: var(--sky-soft); }
+
+/* "À quoi ça sert ?" — carte à bordure gauche standard + grille "carnet d'ingénieur" en fond
+   (repeating-linear-gradient, même technique que .diagram-frame--grid) et puces de discipline en
+   petites étiquettes monospace à angles droits plutôt que des pastilles, pour un rendu "technique"
+   distinct du reste des callouts. */
+.callout-application {
+  border-left-color: var(--sky);
+  background-color: var(--sky-soft);
+  background-image:
+    repeating-linear-gradient(0deg, var(--sky-grid) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(90deg, var(--sky-grid) 0 1px, transparent 1px 20px);
+}
 .callout-application .callout-label { color: var(--sky-ink); }
 .application-body { display: flex; gap: 18px; align-items: flex-start; margin-top: 8px; }
 .application-figure { flex: 0 0 140px; margin: 0; }
@@ -752,7 +795,10 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .application-titre { font-family: var(--serif); font-weight: 700; font-size: 17px; margin: 0 0 6px; color: var(--sky-ink); }
 .application-text p:last-of-type { margin-bottom: 0; }
 .application-domaines { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; }
-.application-domaines li { font: 600 11px/1 var(--sans); color: var(--sky-ink); background: var(--surface); border: 1px solid var(--sky); border-radius: 999px; padding: 4px 10px; }
+.application-domaines li {
+  font: 600 10.5px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.03em;
+  color: var(--sky-ink); background: var(--surface); border: 1px solid var(--sky); border-radius: 2px; padding: 4px 8px;
+}
 @media (max-width: 560px) {
   .application-body { flex-direction: column; }
   .application-figure { flex: none; max-width: 160px; margin: 0 auto; }

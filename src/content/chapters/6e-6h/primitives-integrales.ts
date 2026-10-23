@@ -106,6 +106,30 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'La querelle la plus célèbre de l\'histoire des maths',
+          text:
+            "À la fin du 17e siècle, deux savants inventent indépendamment le même outil : " +
+            "l'Anglais **Isaac Newton**, vers 1666, qui l'appelle le calcul des « fluxions » ; " +
+            "et l'Allemand **Gottfried Wilhelm Leibniz**, vers 1675, qui invente la notation " +
+            'que tu utilises aujourd\'hui — le symbole $\\int$ (un S allongé, pour « somme ») ' +
+            'et le $dx$. Les deux hommes ne communiquent presque jamais leurs travaux, et ' +
+            'quand chacun publie les siens, une querelle de priorité éclate : qui a vraiment ' +
+            "inventé le calcul intégral en premier ? Le débat déchire les mathématiciens " +
+            'européens pendant des décennies — les Anglais défendant Newton, les continentaux ' +
+            'Leibniz — et retarde même les progrès britanniques en analyse, par fierté ' +
+            "nationale, pendant près d'un siècle. Aujourd'hui, les historiens s'accordent : " +
+            'les deux l\'ont bien découvert indépendamment, et c\'est la notation de Leibniz, ' +
+            'plus pratique, qui a fini par s\'imposer partout.',
+          image: {
+            src: '/images/historique/leibniz.jpg',
+            alt: 'Portrait de Gottfried Wilhelm Leibniz',
+            caption:
+              'Gottfried Wilhelm Leibniz (1646–1716), portrait attribué à Bernhard Christoph ' +
+              'Francke, vers 1700.',
+          },
+        },
+        {
           kind: 'featureTable',
           caption: 'Primitives usuelles',
           headers: ['f(x)', 'Primitive F(x)', 'Condition'],
@@ -359,6 +383,21 @@ export const primitivesIntegrales: ChapterContent = {
             'l\'expression finale de F — ces deux mots ne sont jamais interchangeables.',
         },
         {
+          kind: 'application',
+          titre: 'Retrouver une position à partir d\'une vitesse',
+          text:
+            "En physique, la vitesse $v(t)$ d'un mobile est la DÉRIVÉE de sa position $x(t)$ : " +
+            "$x'(t)=v(t)$. Autrement dit, retrouver $x(t)$ à partir de $v(t)$ est EXACTEMENT " +
+            'le problème de cette section — trouver une primitive, puis fixer la constante C ' +
+            'grâce à une position connue à un instant donné (la condition initiale). Par ' +
+            'exemple, si une voiture roule à $v(t)=6t$ (en m/s, t en secondes) et se trouve à ' +
+            '$x(0)=10$ m au départ, sa primitive générale est $x(t)=3t^2+C$ ; la condition ' +
+            '$x(0)=10$ donne $C=10$, donc $x(t)=3t^2+10$ : tu connais désormais sa position à ' +
+            "CHAQUE instant, juste à partir de sa vitesse et d'un seul point de départ. La " +
+            "même idée relie l'accélération à la vitesse : $v'(t)=a(t)$.",
+          domaines: ['Physique', 'Cinématique'],
+        },
+        {
           kind: 'entrainement',
           title: 'Quelle primitive ? (condition initiale)',
           generatorId: '6gen24',
@@ -462,6 +501,27 @@ export const primitivesIntegrales: ChapterContent = {
               '$\\int_a^b f(x)dx$, l\'**intégrale définie** de f entre a et b. La démarche se ' +
               'généralise à toute fonction f continue, même non positive.',
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Donner un sens rigoureux à l\'aire sous une courbe',
+          text:
+            'La définition que tu viens de voir — encadrer l\'aire par des rectangles de plus ' +
+            'en plus fins — porte le nom du mathématicien allemand **Bernhard Riemann**, qui ' +
+            'la formalise en 1854, dans un texte d\'habilitation (une sorte d\'examen pour ' +
+            'devenir professeur) resté célèbre. Avant lui, Newton et Leibniz savaient déjà ' +
+            'calculer des intégrales grâce au théorème fondamental — mais personne n\'avait ' +
+            "donné de définition PRÉCISE de ce qu'est réellement une intégrale, " +
+            'indépendamment du calcul d\'une primitive. Riemann comble ce manque : son ' +
+            'découpage en rectangles minorants et majorants, et le passage à la limite quand ' +
+            'leur nombre $n$ tend vers l\'infini, est exactement ce que tu viens d\'étudier — ' +
+            'c\'est pour cette raison qu\'on parle encore aujourd\'hui de **somme de Riemann** ' +
+            'et d\'**intégrale de Riemann**.',
+          image: {
+            src: '/images/historique/riemann.jpg',
+            alt: 'Portrait de Bernhard Riemann',
+            caption: 'Bernhard Riemann (1826–1866), photographie d\'époque.',
+          },
         },
         {
           kind: 'definition',
@@ -710,6 +770,22 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'application',
+          titre: 'Calculer un coût total à partir d\'un coût marginal',
+          text:
+            'En économie, le **coût marginal** $C_m(x)$ est le coût de production d\'une ' +
+            'unité supplémentaire quand $x$ unités sont déjà produites — c\'est la dérivée du ' +
+            'coût total $C(x)$. Inverser cette relation, exactement comme tu viens de le ' +
+            'faire pour une aire, permet de retrouver le coût total à partir du coût ' +
+            'marginal : $C(x) = C(0) + \\int_0^x C_m(t)dt$, où $C(0)$ est le coût fixe (les ' +
+            'frais même à production nulle). Graphiquement, le coût variable entre deux ' +
+            'niveaux de production $a$ et $b$ est exactement l\'AIRE sous la courbe du coût ' +
+            'marginal entre $a$ et $b$ — la même idée sert aussi à calculer le **surplus du ' +
+            'consommateur** (l\'aire entre la courbe de demande et le prix réellement payé), ' +
+            "une mesure centrale de l'avantage que les acheteurs retirent d'un marché.",
+          domaines: ['Économie', 'Gestion'],
+        },
+        {
           kind: 'methode',
           label: 'Aire entre deux courbes',
           items: [
@@ -867,6 +943,30 @@ export const primitivesIntegrales: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Calculer une aire... 2000 ans avant l\'intégrale',
+          text:
+            "Bien avant l'invention du calcul intégral, le savant grec **Archimède** (3e " +
+            'siècle avant J.-C.) calcule déjà des aires et des volumes avec une précision ' +
+            'redoutable — dont celle du disque que tu viens de retrouver ci-dessus. Sa ' +
+            'méthode, dite « d\'exhaustion », consiste à encadrer une figure courbe entre des ' +
+            'polygones inscrits et circonscrits dont il augmente peu à peu le nombre de côtés ' +
+            '— une idée étonnamment proche du découpage en rectangles que tu utilises ' +
+            "aujourd'hui, mais sans les outils de l'analyse moderne (ni limite, ni notation " +
+            'symbolique) : chaque calcul demandait des pages entières de raisonnement ' +
+            'géométrique pur. Un traité où il applique cette méthode, La Méthode, a été ' +
+            'considéré perdu pendant des siècles avant d\'être redécouvert en 1906, effacé ' +
+            'sous un texte religieux du 13e siècle (un palimpseste) — une véritable archive ' +
+            'du raisonnement mathématique antique, retrouvée presque par hasard.',
+          image: {
+            src: '/images/historique/archimedes.jpg',
+            alt: 'Archimède pensif, peinture de Domenico Fetti',
+            caption:
+              'Archimède pensif, par Domenico Fetti, 1620 (représentation posthume : aucun ' +
+              "portrait contemporain d'Archimède n'existe).",
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Calcul d\'aires par intégrale',
           generatorId: '6gen26',
@@ -929,6 +1029,21 @@ export const primitivesIntegrales: ChapterContent = {
             { kind: 'para', text: 'Rotation de f(x) = x sur [0;3] autour de l\'axe des abscisses :' },
             { kind: 'para', text: '$V = \\pi \\int_0^3 x^2 dx = \\pi [\\dfrac{x^3}{3}]_0^3 = 9\\pi$' },
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Calculer le volume d\'une pièce tournée sur un tour',
+          text:
+            'Un tour (la machine, pas l\'unité de rotation) fabrique des pièces en faisant ' +
+            'tourner un bloc de matière autour d\'un axe pendant qu\'un outil en retire la ' +
+            'matière selon un profil précis — un pied de table, une pièce de moteur, un vase ' +
+            'en bois. Ce profil, c\'est exactement une courbe $f(x)$ : la pièce finale est ' +
+            'donc littéralement un solide de révolution, et son volume (pour calculer la ' +
+            'quantité de matière utilisée, ou son poids) se calcule avec la méthode des ' +
+            'disques que tu viens de voir, $V=\\pi\\int_a^b[f(x)]^2dx$. Quand le profil creuse ' +
+            'la pièce (un tube, un pot évidé), c\'est la méthode des rondelles — avec un ' +
+            'profil extérieur ET un profil intérieur — qui s\'applique directement.',
+          domaines: ['Ingénierie', 'Fabrication'],
         },
         {
           kind: 'definition',

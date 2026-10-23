@@ -110,27 +110,31 @@ export function Intuition({ block }: { block: Extract<Block, { kind: 'intuition'
  * seule l'image est omise plutôt que de casser le fichier HTML autonome une fois ouvert hors ligne. */
 export function Historique({ block }: { block: Extract<Block, { kind: 'historique' }> }) {
   return (
-    <div className="callout callout-historique">
-      <p className="callout-label">
-        <span className="icon" aria-hidden="true">
-          📜
-        </span>{' '}
-        Le sais-tu ?
-      </p>
-      <div className="historique-body">
-        {block.image && (
-          <figure className="historique-figure no-export">
-            <img src={block.image.src} alt={block.image.alt} loading="lazy" />
-            <figcaption>{block.image.caption}</figcaption>
-          </figure>
-        )}
-        <div className="historique-text">
-          <p className="historique-titre">{block.titre}</p>
-          <p>
-            <RichText text={block.text} />
-          </p>
+    <div className="historique-scroll">
+      <div className="dowel" aria-hidden="true" />
+      <div className="sheet">
+        <p className="callout-label">
+          <span className="icon" aria-hidden="true">
+            📜
+          </span>{' '}
+          Le sais-tu ?
+        </p>
+        <div className="historique-body">
+          {block.image && (
+            <figure className="historique-figure no-export">
+              <img src={block.image.src} alt={block.image.alt} loading="lazy" />
+              <figcaption>{block.image.caption}</figcaption>
+            </figure>
+          )}
+          <div className="historique-text">
+            <p className="historique-titre">{block.titre}</p>
+            <p>
+              <RichText text={block.text} />
+            </p>
+          </div>
         </div>
       </div>
+      <div className="dowel" aria-hidden="true" />
     </div>
   )
 }
