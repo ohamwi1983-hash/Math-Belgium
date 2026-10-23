@@ -35,6 +35,21 @@ export const analyseCombinatoire: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: "Qui a inventé le point d'exclamation des maths ?",
+          text:
+            "Le symbole $n!$ ne vient pas de Newton ni de Pascal, mais du mathématicien " +
+            "français **Christian Kramp**, qui l'introduit en 1808 dans un traité sur les " +
+            '« facultés analytiques » — le nom qu\'il donnait alors à ce que tu appelles ' +
+            "aujourd'hui une factorielle. Avant lui, plusieurs notations concurrentes " +
+            'existaient, aucune vraiment pratique à écrire à la main. Kramp choisit le point ' +
+            "d'exclamation précisément parce que cette quantité grandit très vite : $5!=120$, " +
+            '$10!=3\\,628\\,800$, $20!$ dépasse déjà $2\\times10^{18}$ — une croissance si ' +
+            'spectaculaire qu\'elle méritait, selon lui, un symbole qui donne l\'impression de ' +
+            '« crier » le résultat. La notation s\'impose rapidement dans toute l\'Europe et ' +
+            "n'a plus bougé depuis plus de deux siècles.",
+        },
+        {
           kind: 'definition',
           label: 'Arrangement A(n,k) — choisir ET ordonner',
           items: [
@@ -436,6 +451,22 @@ export const analyseCombinatoire: ChapterContent = {
             "répétition d'un même élément dans le groupe choisi.",
         },
         {
+          kind: 'application',
+          titre: 'Compter le nombre de mots de passe possibles',
+          text:
+            'Le principe multiplicatif que tu viens de voir est exactement ce qu\'un ' +
+            "informaticien utilise pour évaluer la solidité d'un mot de passe. Un mot de " +
+            'passe de 8 caractères choisis parmi 26 lettres minuscules, 26 majuscules, 10 ' +
+            'chiffres et environ 10 symboles courants (72 caractères possibles à chaque ' +
+            'position) compte $72^8$ possibilités — plus de 722 mille milliards. C\'est ce ' +
+            "nombre, appelé l'**espace des clés**, qu'un pirate devrait explorer pour deviner " +
+            'le mot de passe par force brute : plus il est grand, plus l\'attaque prend de ' +
+            'temps. Ajouter un seul caractère au mot de passe ne l\'allonge pas de façon ' +
+            'linéaire : il le MULTIPLIE par 72 — exactement le principe multiplicatif de ' +
+            'cette section, appliqué à la cybersécurité.',
+          domaines: ['Informatique', 'Cybersécurité'],
+        },
+        {
           kind: 'entrainement',
           title: 'Dénombrement fondamental et arrangements',
           generatorId: '6gen43',
@@ -563,6 +594,22 @@ export const analyseCombinatoire: ChapterContent = {
             'exactement une permutation simple. Diviser par les factorielles des effectifs ' +
             'répétés (4! pour les I, 4! pour les S) retire précisément les réordonnancements ' +
             'internes des lettres identiques, qui ne produisent aucun mot nouveau.',
+        },
+        {
+          kind: 'application',
+          titre: 'Compter les séquences possibles d\'ADN',
+          text:
+            'L\'ADN s\'écrit avec seulement 4 « lettres » — A, T, C et G, les quatre bases ' +
+            'azotées. Compter le nombre de séquences DISTINCTES d\'une longueur donnée, ' +
+            'sachant que chaque lettre peut apparaître plusieurs fois, est exactement le même ' +
+            'calcul que pour les anagrammes de MISSISSIPI : une permutation avec répétitions. ' +
+            'Par exemple, une courte séquence de 10 bases contenant 4 A, 3 T, 2 C et 1 G ' +
+            'admet $\\dfrac{10!}{4! \\times 3! \\times 2! \\times 1!} = 12\\,600$ arrangements ' +
+            'distincts — chacun une séquence génétique potentiellement différente. À ' +
+            'l\'échelle d\'un vrai gène, long de milliers de bases, ce même calcul explique ' +
+            'pourquoi le nombre de séquences possibles est si vertigineusement grand qu\'il ' +
+            'dépasse largement le nombre d\'atomes dans l\'univers observable.',
+          domaines: ['Biologie', 'Génétique'],
         },
         {
           kind: 'illustration',
@@ -768,6 +815,26 @@ export const analyseCombinatoire: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Le binôme qui ne porte pas le nom de son premier auteur',
+          text:
+            'La formule que tu viens de voir — avec un exposant $n$ ENTIER — était déjà ' +
+            'connue, sous une forme ou une autre, bien avant **Isaac Newton** : elle apparaît ' +
+            'dans les travaux de mathématiciens arabes, chinois et européens des siècles ' +
+            "précédents. L'apport propre de Newton, publié vers 1665, est d'une tout autre " +
+            'ampleur : il généralise la formule à des exposants NON entiers — fractionnaires ' +
+            'ou même négatifs — en remplaçant la somme finie $C_n^k$ par une série infinie. ' +
+            "C'est cette extension audacieuse, bien plus que la formule classique enseignée " +
+            'dans ce chapitre, qui porte vraiment la marque de Newton en mathématiques — un ' +
+            "exemple de nom attaché par convention à un résultat qu'il n'a pas découvert en " +
+            'premier, mais considérablement approfondi.',
+          image: {
+            src: '/images/historique/newton.jpg',
+            alt: 'Portrait d\'Isaac Newton',
+            caption: 'Isaac Newton (1642–1727), portrait par Godfrey Kneller, 1689.',
+          },
+        },
+        {
           kind: 'piege',
           text:
             "$(a-b)^n \\neq a^n-b^n$ ! Tu ne peux **jamais** séparer une puissance d'une somme " +
@@ -922,6 +989,29 @@ export const analyseCombinatoire: ChapterContent = {
             ['4', '1', '4', '6', '4', '1', '', '16'],
             ['5', '1', '5', '10', '10', '5', '1', '32'],
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Un triangle vieux de plusieurs siècles avant Pascal',
+          text:
+            "Malgré son nom, le triangle que tu viens de voir n'a pas été découvert par " +
+            '**Blaise Pascal**, qui ne fait que le populariser en Europe en 1654. Il ' +
+            'apparaît déjà, avec exactement la même relation d\'addition, dans un texte du ' +
+            'mathématicien chinois **Yang Hui** en 1261 — qui l\'attribue lui-même à un ' +
+            'mathématicien encore plus ancien, Jia Xian, vers 1050. En Perse, le savant ' +
+            '**Omar Khayyam** décrit une construction équivalente vers 1100, pour développer ' +
+            'les puissances d\'un binôme. Des traces similaires existent aussi en Inde et ' +
+            'dans le monde islamique médiéval. Le triangle que Pascal étudie n\'est donc pas ' +
+            'une découverte nouvelle, mais un objet mathématique redécouvert, encore et ' +
+            'encore, par des civilisations qui n\'avaient souvent aucun contact entre elles ' +
+            '— un signe que cette structure est, d\'une certaine façon, inévitable.',
+          image: {
+            src: '/images/historique/yanghui-triangle.gif',
+            alt: 'Représentation du triangle de Yang Hui avec des chiffres chinois traditionnels',
+            caption:
+              'Le triangle de Yang Hui (1261), tel que publié dans ses travaux — la même ' +
+              'relation d\'addition que le « triangle de Pascal », quatre siècles plus tôt.',
+          },
         },
         {
           kind: 'exemple',
@@ -1138,6 +1228,22 @@ export const analyseCombinatoire: ChapterContent = {
               'ordres de grandeur) : 224, 10 752, 24 192, 107 520, comparées au total de 201 376 ' +
               'mains possibles.',
           },
+        },
+        {
+          kind: 'application',
+          titre: 'Calculer ses (vraies) chances de gagner au loto',
+          text:
+            'Comme pour les mains de poker ci-dessus, gagner à un loto où tu coches 6 numéros ' +
+            'parmi 45 revient à choisir une COMBINAISON précise parmi toutes celles possibles ' +
+            "— l'ordre dans lequel les numéros sortent ne compte pas. Le nombre total de " +
+            'grilles possibles est $C_{45}^6$, soit plus de 8 millions ; une seule d\'entre ' +
+            'elles rapporte le gros lot. Ta probabilité de gagner avec une seule grille est ' +
+            'donc $1/C_{45}^6$ — un nombre si petit qu\'il est souvent plus parlant de ' +
+            'l\'exprimer en comparaison (par exemple, la probabilité d\'être frappé par la ' +
+            'foudre un jour donné). C\'est exactement ce calcul de dénombrement, et pas une ' +
+            '« intuition » sur la chance, qui permet aux organismes de loterie de fixer un ' +
+            'gain cohérent avec les mises totales.',
+          domaines: ['Jeux', 'Statistiques'],
         },
         { kind: 'subheading', text: 'Le paradoxe du Chevalier de Méré' },
         {
