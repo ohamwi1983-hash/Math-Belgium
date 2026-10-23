@@ -113,6 +113,26 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           steps: [{ tag: 'carré parfait', text: '$2(x^2-6x+9) = 2(x-3)^2 = 0$' }],
           result: { tag: 'solution (racine double)', text: '$x = 3$' },
         },
+        {
+          kind: 'historique',
+          titre: 'D\'où vient la notation x², a, b, c que tu utilises partout ?',
+          text:
+            'La notation de ce chapitre — $x^2$, les coefficients a, b, c, le signe = — n\'a ' +
+            'pas toujours existé. Pendant des siècles, les mathématiciens écrivaient leurs ' +
+            'équations en phrases entières (« le carré de la chose, plus cinq fois la chose, ' +
+            'moins six, égale zéro »), ce qui rendait les calculs longs et les erreurs ' +
+            'fréquentes. C\'est le Français **René Descartes**, dans son traité La Géométrie, ' +
+            'publié en 1637, qui généralise l\'usage de lettres : a, b, c pour des quantités ' +
+            'connues, x, y, z pour des inconnues, et l\'exposant $x^2$ pour « x au carré » — ' +
+            'une notation si pratique qu\'elle s\'est imposée presque telle quelle jusqu\'à ' +
+            'aujourd\'hui. Sans elle, résoudre une équation du second degré demanderait encore ' +
+            'des paragraphes entiers de texte.',
+          image: {
+            src: '/images/historique/descartes.jpg',
+            alt: 'Portrait de René Descartes',
+            caption: 'René Descartes (1596–1650), portrait d\'après Frans Hals, 1649.',
+          },
+        },
         { kind: 'subheading', text: 'Le cas général — la formule du discriminant' },
         {
           kind: 'intuition',
@@ -237,6 +257,20 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'selon son signe. Observe combien de fois elle coupe l\'axe des x selon que Δ est ' +
             'positif, nul ou négatif.',
         },
+        {
+          kind: 'historique',
+          titre: 'Un mathématicien indien résolvait déjà ce cas il y a 900 ans',
+          text:
+            'La formule générale que tu viens de démontrer — avec les deux solutions ' +
+            'possibles $\\dfrac{-b\\pm\\sqrt{\\Delta}}{2a}$ — apparaît déjà, sous une forme ' +
+            'équivalente, dans le traité Bijaganita du mathématicien indien **Bhāskara II**, ' +
+            'écrit vers 1150. Il est l\'un des premiers à accepter et manipuler ' +
+            'systématiquement les solutions négatives et irrationnelles d\'une équation, là où ' +
+            'beaucoup de mathématiciens de son époque — et bien après lui — rejetaient encore ' +
+            'les nombres négatifs comme « absurdes » ou refusaient de les compter comme de ' +
+            'vraies solutions. Il faudra encore plusieurs siècles avant que l\'Europe n\'accepte ' +
+            'pleinement ce genre de solutions.',
+        },
         { kind: 'subheading', text: 'Le cas caché — mettre une expression entière en évidence' },
         {
           kind: 'para',
@@ -315,6 +349,26 @@ export const equationsInequationsSecondDegre: ChapterContent = {
                 'Donc $x_1 \\cdot x_2 = \\dfrac{4ac}{4a^2} = \\dfrac{c}{a}$. $\\qquad \\blacksquare$',
             },
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Pourquoi ces relations portent le nom de Viète',
+          text:
+            'Les relations entre la somme/produit des racines et les coefficients a, b, c que ' +
+            'tu viens de démontrer portent le nom du mathématicien français **François ' +
+            'Viète** (1540–1603), qui les établit à la fin du 16e siècle. Mais sa contribution ' +
+            'va bien au-delà de ces deux formules : Viète est le premier à utiliser ' +
+            'systématiquement des LETTRES pour représenter à la fois les quantités connues et ' +
+            'les quantités inconnues d\'un problème — jusque-là, les mathématiciens résolvaient ' +
+            'chaque équation au cas par cas, avec des nombres concrets, sans méthode générale ' +
+            'écrite une fois pour toutes. En introduisant ce langage symbolique, Viète invente ' +
+            'ce qu\'on appelle aujourd\'hui l\'algèbre « littérale » — l\'algèbre que tu ' +
+            'pratiques dans tout ce chapitre.',
+          image: {
+            src: '/images/historique/viete.jpg',
+            alt: 'Portrait de François Viète',
+            caption: 'François Viète (1540–1603), portrait d\'époque.',
+          },
         },
         { kind: 'subheading', text: 'Factoriser un trinôme grâce à ses racines' },
         {
@@ -413,6 +467,22 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             { tag: 'somme et produit', text: '$S = x_1+x_2 = 7$, $P = x_1 \\cdot x_2 = 10$' },
           ],
           result: { tag: 'équation', text: '$x^2 - 7x + 10 = 0$' },
+        },
+        {
+          kind: 'application',
+          titre: 'Trouver le seuil de rentabilité d\'une entreprise',
+          text:
+            'En gestion d\'entreprise, le bénéfice réalisé pour $x$ unités vendues s\'exprime ' +
+            'souvent par une fonction du second degré $B(x) = ax^2+bx+c$ (le prix de vente ' +
+            'baisse quand on produit plus, ce qui donne cette forme). Le **seuil de ' +
+            'rentabilité** — la quantité à partir de laquelle l\'entreprise commence à gagner ' +
+            'de l\'argent — correspond exactement aux racines de cette équation : $B(x)=0$. ' +
+            'Résoudre $ax^2+bx+c=0$, exactement la technique de cette section, donne ' +
+            'directement les deux quantités où le bénéfice s\'annule ; entre ces deux valeurs ' +
+            '(ou en dehors, selon le signe de a), l\'entreprise est rentable. Un gestionnaire ' +
+            'qui ignorerait la formule du discriminant devrait tester les quantités une par ' +
+            'une pour trouver ce seuil — avec elle, un seul calcul suffit.',
+          domaines: ['Économie', 'Gestion'],
         },
         {
           kind: 'entrainement',
@@ -527,6 +597,21 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'Règle a, b et c, choisis le symbole ◇, et regarde le tableau de signes se ' +
             'construire tout seul sous la parabole colorée — puis l\'ensemble-solution S calculé ' +
             'avec la bonne notation à crochets.',
+        },
+        {
+          kind: 'application',
+          titre: 'Garantir une aire minimale avec une clôture limitée',
+          text:
+            'Un agriculteur dispose de 40 mètres de clôture pour un enclos rectangulaire et ' +
+            'veut que sa surface atteigne AU MOINS 75 m². Si x est la longueur d\'un côté, ' +
+            'l\'autre côté vaut $20-x$ (le périmètre total divisé par 2, moins x), donc l\'aire ' +
+            'vaut $A(x)=x(20-x)$ — une fonction du second degré. La question « pour quelles ' +
+            'valeurs de x l\'aire est-elle d\'au moins 75 m² ? » est exactement une INÉQUATION ' +
+            'du second degré : $x(20-x) \\geq 75$, soit $-x^2+20x-75 \\geq 0$. Le tableau de ' +
+            'signes que tu viens d\'apprendre à construire donne directement l\'intervalle des ' +
+            'largeurs possibles — sans lui, il faudrait tester des dizaines de valeurs de x ' +
+            'une par une.',
+          domaines: ['Architecture', 'Agriculture'],
         },
         {
           kind: 'entrainement',
@@ -678,6 +763,22 @@ export const equationsInequationsSecondDegre: ChapterContent = {
             'Règle la racine de chaque facteur (active le 3e si besoin) : la grille se construit ' +
             'ligne par ligne, la courbe du produit se colore en direct, et S se calcule pour le ' +
             'symbole choisi — reprend par défaut l\'exemple (x−1)·x·(x−3) résolu ci-dessus.',
+        },
+        {
+          kind: 'application',
+          titre: 'Vérifier qu\'un système reste sûr sous plusieurs contraintes à la fois',
+          text:
+            'Un ingénieur qui conçoit un système (électrique, mécanique, chimique...) doit ' +
+            'souvent garantir que PLUSIEURS grandeurs restent dans une plage sûre EN MÊME ' +
+            'TEMPS — une pression, une température, une tension. Si chaque contrainte s\'écrit ' +
+            'comme un facteur du premier ou du second degré, la condition « le système reste ' +
+            'sûr » devient un produit de plusieurs facteurs qui doit garder un signe donné — ' +
+            'exactement la situation de cette section. La grille de signes que tu viens de ' +
+            'construire, qui compte le nombre de facteurs négatifs colonne par colonne, est ' +
+            'précisément la méthode qu\'un ingénieur utilise pour repérer en un coup d\'œil les ' +
+            'plages de fonctionnement sûres, sans devoir vérifier chaque contrainte séparément ' +
+            'à chaque valeur testée.',
+          domaines: ['Ingénierie', 'Sécurité'],
         },
         {
           kind: 'entrainement',
