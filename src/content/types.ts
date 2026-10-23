@@ -1064,10 +1064,21 @@ export type Block =
       text: string
       /** 1 à 3 disciplines, texte brut, courtes (ex. "Électricité", "Physique"). */
       domaines: string[]
+      /** Photo du phénomène/objet réel décrit par `text` (jamais une illustration SVG générée —
+       * ça, c'est le rôle du kind `illustration` ailleurs). Optionnel : beaucoup de sujets
+       * abstraits (un coût marginal, un cycle économique) n'ont tout simplement rien de
+       * photographiable qui ajoute du sens — mieux vaut l'omettre qu'en forcer une hors-sujet. */
       image?: {
+        /** Chemin public (`/images/application/...`) ou URL externe stable. Contrairement aux
+         * portraits de `historique` (presque toujours dans le domaine public faute d'âge), une
+         * photo de sujet moderne (oscilloscope, tour à bois, échographie...) est très souvent
+         * encore sous droit — vérifier une licence explicitement libre (CC BY/CC BY-SA/domaine
+         * public réel, ex. travaux d'agences fédérales américaines) avant usage, jamais supposée. */
         src: string
         alt: string
-        /** Qui, quoi, quand — texte brut (jamais RichText), sous l'image. */
+        /** Qui/quoi/source — texte brut (jamais RichText), sous l'image. Pour une image sous
+         * CC BY/CC BY-SA, inclut l'attribution (auteur si connu, licence, source) : contrairement
+         * au domaine public, cette licence l'exige. */
         caption: string
       }
     }

@@ -754,6 +754,11 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Décrire un courant électrique alternatif',
+          image: {
+            src: '/images/application/oscilloscope.jpg',
+            alt: 'Oscilloscope affichant une onde sinusoïdale de courant alternatif',
+            caption: 'Un oscilloscope affichant une tension alternative sinusoïdale. Photo : Wikimedia Commons, CC BY-SA 3.0.',
+          },
           text:
             "En électricité, un courant alternatif ne se décrit pas par un seul nombre : il a " +
             'une amplitude ET une phase (son décalage dans le temps par rapport à la tension). ' +
