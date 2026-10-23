@@ -385,6 +385,11 @@ export const primitivesIntegrales: ChapterContent = {
         {
           kind: 'application',
           titre: 'Retrouver une position à partir d\'une vitesse',
+          image: {
+            src: '/images/application/speedometre.jpg',
+            alt: 'Compteur de vitesse sur le tableau de bord d\'une voiture',
+            caption: 'Photo : Michael Sheehan, CC BY 2.0, via Wikimedia Commons.',
+          },
           text:
             "En physique, la vitesse $v(t)$ d'un mobile est la DÉRIVÉE de sa position $x(t)$ : " +
             "$x'(t)=v(t)$. Autrement dit, retrouver $x(t)$ à partir de $v(t)$ est EXACTEMENT " +
@@ -1033,6 +1038,11 @@ export const primitivesIntegrales: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer le volume d\'une pièce tournée sur un tour',
+          image: {
+            src: '/images/application/tour-bois.jpg',
+            alt: 'Artisan tournant une pièce de bois sur un tour, Gujarat',
+            caption: 'Tournage sur bois, Gujarat (Inde), vers 1870. Domaine public (CC0), via Wikimedia Commons / Getty Museum.',
+          },
           text:
             'Un tour (la machine, pas l\'unité de rotation) fabrique des pièces en faisant ' +
             'tourner un bloc de matière autour d\'un axe pendant qu\'un outil en retire la ' +
