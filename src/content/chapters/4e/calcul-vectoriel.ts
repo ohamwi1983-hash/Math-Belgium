@@ -108,6 +108,26 @@ export const calculVectoriel: ChapterContent = {
             'ont la même direction, le même sens et la même longueur. Peu importe où tu choisis ' +
             'de les dessiner !',
         },
+        {
+          kind: 'historique',
+          titre: 'La formule gravée sur un pont, un jour d\'octobre 1843',
+          text:
+            'Le 16 octobre 1843, le mathématicien irlandais **William Rowan Hamilton** se ' +
+            'promène le long du canal Royal à Dublin avec sa femme quand une idée lui vient ' +
+            'd\'un coup : une nouvelle façon de calculer avec des grandeurs ayant à la fois ' +
+            'une direction et une longueur, en trois dimensions. Pris d\'enthousiasme, il ' +
+            'grave sur-le-champ la formule centrale de sa découverte — ' +
+            '$i^2=j^2=k^2=ijk=-1$ — dans la pierre du pont de Broom Bridge. Ces ' +
+            '« quaternions » sont la toute première tentative sérieuse de calculer avec des ' +
+            'grandeurs à la fois dirigées ET mesurables — l\'idée même qui deviendra, une ' +
+            'fois simplifiée quelques décennies plus tard, le vecteur que tu utilises dans ' +
+            'ce chapitre.',
+          image: {
+            src: '/images/historique/hamilton.jpg',
+            alt: 'Portrait de William Rowan Hamilton',
+            caption: 'William Rowan Hamilton (1805–1865), peinture d\'époque.',
+          },
+        },
       ],
     },
 
@@ -305,6 +325,22 @@ export const calculVectoriel: ChapterContent = {
               'sur $\\vec{u}$ et $\\vec{v}$.',
           ],
         },
+        {
+          kind: 'application',
+          titre: 'Calculer la vraie trajectoire d\'un avion dans le vent',
+          text:
+            'Un avion ne vole jamais exactement où son pilote le dirige : le vent le pousse ' +
+            'de côté. Les pilotes représentent la vitesse propre de l\'avion (par rapport à ' +
+            'l\'air) par un vecteur, et le vent par un second vecteur — la méthode du ' +
+            'parallélogramme de cette section donne alors directement la **trajectoire ' +
+            'réelle au sol** : la somme des deux vecteurs. C\'est exactement ainsi que les ' +
+            'plans de vol sont calculés, aujourd\'hui encore assistés par ordinateur : ' +
+            'additionner le vecteur vitesse-air et le vecteur vent pour obtenir le vecteur ' +
+            'vitesse-sol, avec sa propre direction (la route réellement suivie) et sa propre ' +
+            'longueur (la vitesse réelle, qui peut être plus grande ou plus petite que la ' +
+            'vitesse affichée au tableau de bord).',
+          domaines: ['Aviation', 'Navigation'],
+        },
       ],
     },
 
@@ -463,6 +499,39 @@ export const calculVectoriel: ChapterContent = {
             caption: '$\\vec{u} = \\vec{v} + \\vec{w}$, avec $\\vec{v}$ et $\\vec{w}$ portés par deux directions distinctes',
           },
         },
+        {
+          kind: 'historique',
+          titre: 'Une théorie trop en avance sur son temps',
+          text:
+            'En 1844, l\'Allemand **Hermann Grassmann**, enseignant de lycée sans poste ' +
+            'universitaire, publie « Die lineale Ausdehnungslehre » (« Théorie de ' +
+            'l\'extension linéaire ») : il y développe, bien avant tout le monde, l\'idée ' +
+            'qu\'un vecteur peut se décomposer selon plusieurs directions indépendantes — ' +
+            'exactement ce que tu viens de faire dans cette section. Le problème ? Son livre ' +
+            'est écrit dans un style si abstrait et philosophique que presque aucun ' +
+            'mathématicien de son époque ne le comprend ni ne le lit. Ses idées ne seront ' +
+            'pleinement reconnues et reprises que des décennies plus tard, une fois que ' +
+            'd\'autres auront redécouvert — en plus simple — ce qu\'il avait déjà démontré.',
+          image: {
+            src: '/images/historique/grassmann.jpg',
+            alt: 'Portrait de Hermann Grassmann',
+            caption: 'Hermann Grassmann (1809–1877), photographie d\'époque.',
+          },
+        },
+        {
+          kind: 'application',
+          titre: 'Décomposer la tension d\'un câble pour dimensionner un pont',
+          text:
+            'Dans un pont suspendu ou haubané, chaque câble tire sur le tablier selon une ' +
+            'direction oblique précise. Pour calculer si une poutre va résister, un ' +
+            'ingénieur décompose la force exercée par le câble (un vecteur) selon deux ' +
+            'directions utiles — horizontale et verticale, ou selon l\'axe de la poutre et ' +
+            'perpendiculairement à lui — EXACTEMENT la méthode de cette section. La ' +
+            'composante verticale indique le poids réellement supporté, la composante ' +
+            'horizontale la compression ou la traction exercée sur la structure. Se tromper ' +
+            'dans cette décomposition peut littéralement faire s\'effondrer un ouvrage.',
+          domaines: ['Ingénierie', 'Construction'],
+        },
       ],
     },
 
@@ -495,6 +564,21 @@ export const calculVectoriel: ChapterContent = {
           formula: 'A(2 ; −1), B(5 ; 3).',
           steps: [{ tag: 'composantes', text: '$\\begin{pmatrix} 5-2 \\\\ 3-(-1) \\end{pmatrix}$' }],
           result: { tag: 'résultat', text: '$\\vec{AB}\\begin{pmatrix} 3 \\\\ 4 \\end{pmatrix}$' },
+        },
+        {
+          kind: 'application',
+          titre: 'Déplacer un personnage à l\'écran',
+          text:
+            'Dans un jeu vidéo en 2D, la position d\'un personnage à l\'écran est un point ' +
+            '(x ; y), et sa vitesse de déplacement est un vecteur $(v_x ; v_y)$ — exactement ' +
+            'les composantes que tu viens de voir. À chaque image affichée (souvent 60 fois ' +
+            'par seconde), le moteur du jeu additionne simplement ce vecteur vitesse à la ' +
+            'position actuelle pour calculer la nouvelle position. Changer de direction, ' +
+            'c\'est changer les composantes du vecteur vitesse ; accélérer, c\'est ' +
+            'l\'allonger sans changer sa direction. Toute la physique d\'un jeu — gravité, ' +
+            'rebonds, collisions — se programme en manipulant des vecteurs de cette façon, ' +
+            'composante par composante.',
+          domaines: ['Informatique', 'Jeux vidéo'],
         },
       ],
     },
@@ -899,6 +983,21 @@ export const calculVectoriel: ChapterContent = {
             'Triangle rectangle en A — ⟺ $\\vec{AB} \\cdot \\vec{AC} = 0$. Autre méthode ' +
               'possible, tout aussi valable : $BC^2 = AB^2 + AC^2$ (Pythagore).',
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Simplifier une notation trop compliquée',
+          text:
+            'Après l\'invention des quaternions par Hamilton, les scientifiques héritent ' +
+            'd\'un outil puissant mais lourd à manier pour calculer en trois dimensions. ' +
+            'Dans les années 1880, l\'Américain **Josiah Willard Gibbs** et le Britannique ' +
+            '**Oliver Heaviside**, travaillant indépendamment, débarrassent les quaternions ' +
+            'de tout ce qui ne sert pas à la physique et à l\'ingénierie : il ne reste que le ' +
+            'vecteur tel que tu le connais, avec sa notation $\\vec{u}\\cdot\\vec{v}$ pour le ' +
+            'produit scalaire — exactement le symbole que tu utilises dans cette section. ' +
+            'Beaucoup de mathématiciens de l\'époque, fidèles aux quaternions, critiquent ' +
+            'cette simplification comme une trahison — mais c\'est cette version allégée qui ' +
+            's\'impose définitivement dans les sciences et l\'ingénierie.',
         },
         {
           kind: 'exemple',
