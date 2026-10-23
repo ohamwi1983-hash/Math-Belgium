@@ -302,6 +302,14 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer une espérance de vie à partir d\'une table de mortalité',
+          image: {
+            src: '/images/application/life-expectancy-chart.png',
+            alt: 'Graphique de l\'espérance de vie restante en fonction de l\'âge',
+            caption:
+              'Espérance de vie restante selon l\'âge (table actuarielle 2020, Social ' +
+              'Security Administration américaine). Auteur : RCraig09, CC BY-SA 4.0, via ' +
+              'Wikimedia Commons.',
+          },
           text:
             'Les compagnies d\'assurance-vie utilisent une **table de mortalité** : pour ' +
             'chaque âge, elle donne la probabilité de décéder dans l\'année qui suit. À ' +
@@ -490,6 +498,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'application',
           titre: 'Estimer le nombre de pièces défectueuses dans un lot',
+          image: {
+            src: '/images/application/quality-control.jpg',
+            alt: 'Ouvrier inspectant des pièces manufacturées sur une chaîne de production',
+            caption:
+              'Inspection de pièces sur une chaîne de production. Photo : Tyne & Wear ' +
+              'Archives & Museums, via Wikimedia Commons (aucune restriction de droit connue).',
+          },
           text:
             'Sur une chaîne de fabrication, chaque pièce produite a une probabilité $p$ ' +
             'constante d\'être défectueuse, indépendamment des autres — exactement les 4 ' +
@@ -1200,6 +1215,13 @@ export const variablesAleatoires: ChapterContent = {
         {
           kind: 'application',
           titre: 'Surveiller l\'apparition de cas rares en santé publique',
+          image: {
+            src: '/images/application/epidemiology.jpg',
+            alt: 'Microbiologiste du CDC examinant un échantillon de virus de la grippe',
+            caption:
+              'Un microbiologiste du CDC examine un échantillon viral. Photo : James ' +
+              'Gathany, CDC/Public Health Image Library (domaine public).',
+          },
           text:
             'Un service de santé publique qui surveille une maladie rare (un nombre moyen ' +
             'connu de $\\lambda$ cas par mois dans une région) utilise directement la loi ' +
