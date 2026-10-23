@@ -81,6 +81,26 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Le premier livre sur... les jeux de hasard',
+          text:
+            'En 1657, le savant néerlandais **Christiaan Huygens** publie De ratiociniis in ' +
+            'ludo aleae (« Du calcul dans les jeux de hasard »), le tout premier traité ' +
+            'imprimé consacré entièrement à ce domaine. Il y définit pour la première fois ' +
+            'ce qu\'il appelle la « valeur » d\'un pari — exactement ce que tu appelles ' +
+            'aujourd\'hui l\'espérance $E(X)$ : une moyenne pondérée par les probabilités de ' +
+            'chaque issue, pas une moyenne simple. Huygens avait découvert le travail de ' +
+            '**Blaise Pascal** et **Pierre de Fermat**, échangé trois ans plus tôt sur un ' +
+            'problème de jeu de dés, et décide d\'en faire un traité complet et accessible ' +
+            '— c\'est par ce livre, plus que par leur correspondance privée, que l\'idée ' +
+            'd\'espérance mathématique se répand dans toute l\'Europe savante.',
+          image: {
+            src: '/images/historique/huygens.jpg',
+            alt: 'Portrait de Christiaan Huygens',
+            caption: 'Christiaan Huygens (1629–1695), portrait attribué à Caspar Netscher.',
+          },
+        },
+        {
           kind: 'intuition',
           label: 'Ce que représente vraiment E(X)',
           text:
@@ -280,6 +300,22 @@ export const variablesAleatoires: ChapterContent = {
           text: "Les raccourcis $E(X)=(n+1)/2$ et $V(X)=(n^2-1)/12$ supposent des probabilités toutes égales à $1/n$. Pour une loi non uniforme (comme l'exemple hypergéométrique ci-dessus, où $P(1)=1/2$ diffère nettement des 3 autres probabilités), reviens toujours à la formule générale pondérée — jamais ce raccourci !",
         },
         {
+          kind: 'application',
+          titre: 'Calculer une espérance de vie à partir d\'une table de mortalité',
+          text:
+            'Les compagnies d\'assurance-vie utilisent une **table de mortalité** : pour ' +
+            'chaque âge, elle donne la probabilité de décéder dans l\'année qui suit. À ' +
+            'partir de cette table, l\'espérance de vie restante d\'une personne d\'un âge ' +
+            'donné se calcule EXACTEMENT comme dans cette section — une variable aléatoire ' +
+            '$X$ (le nombre d\'années restantes), ses probabilités associées, et ' +
+            '$E(X) = \\sum x_i \\times P(X=x_i)$. C\'est cette espérance, recalculée pour ' +
+            'chaque tranche d\'âge, qui permet à un assureur de fixer le prix d\'une ' +
+            'assurance-vie : plus l\'espérance de vie restante est élevée, moins le risque ' +
+            'de devoir verser un capital rapidement est grand, et moins la prime annuelle ' +
+            'est chère.',
+          domaines: ['Actuariat', 'Démographie'],
+        },
+        {
           kind: 'entrainement',
           title: 'Variables aléatoires discrètes et espérance',
           generatorId: '6gen49',
@@ -301,6 +337,28 @@ export const variablesAleatoires: ChapterContent = {
           items: [
             "Une variable $X$ suit une **loi binomiale** $B(n,p)$ si l'expérience vérifie exactement ces 4 conditions : (1) un nombre d'épreuves $n$ fixé à l'avance ; (2) des épreuves indépendantes entre elles ; (3) exactement 2 issues à chaque épreuve (succès/échec) ; (4) une probabilité de succès $p$ constante d'une épreuve à l'autre. $X$ compte alors le nombre de succès sur les $n$ épreuves.",
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Un mathématicien, toute une famille de savants',
+          text:
+            'Le mathématicien suisse **Jacob Bernoulli** (1655–1705) est le premier à ' +
+            'étudier systématiquement ce type d\'épreuve répétée — on parle encore ' +
+            'aujourd\'hui d\'« épreuve de Bernoulli » et de « schéma de Bernoulli » en son ' +
+            'honneur. Son travail majeur, Ars Conjectandi (« L\'art de conjecturer »), ne ' +
+            'paraît qu\'en 1713, huit ans après sa mort, publié par son neveu. Il y ' +
+            'démontre aussi la **loi des grands nombres** : plus tu répètes une épreuve de ' +
+            'Bernoulli, plus la fréquence observée de succès se rapproche de la ' +
+            'probabilité théorique $p$ — un résultat qui justifie, encore aujourd\'hui, ' +
+            'pourquoi on peut estimer une probabilité inconnue en comptant des fréquences ' +
+            'sur un grand nombre d\'essais. Jacob n\'est que le premier d\'une dynastie : ' +
+            'les Bernoulli comptent au moins huit mathématiciens notables sur trois ' +
+            'générations, dont son frère Johann et son neveu Daniel.',
+          image: {
+            src: '/images/historique/bernoulli.jpg',
+            alt: 'Portrait de Jacob Bernoulli',
+            caption: 'Jacob Bernoulli (1655–1705), portrait d\'époque, Universität Basel.',
+          },
         },
         {
           kind: 'definition',
@@ -428,6 +486,21 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: 'Toujours vérifier n−1 juste en dessous',
           text: 'Le calcul par logarithme donne une valeur décimale (ici $21,85$). Le bon réflexe : recalcule $P$ pour $n=22$ (doit dépasser le seuil) et pour $n=21$ (doit encore être en dessous), pour confirmer que 22 est vraiment le plus petit entier qui convient.',
+        },
+        {
+          kind: 'application',
+          titre: 'Estimer le nombre de pièces défectueuses dans un lot',
+          text:
+            'Sur une chaîne de fabrication, chaque pièce produite a une probabilité $p$ ' +
+            'constante d\'être défectueuse, indépendamment des autres — exactement les 4 ' +
+            'conditions du schéma de Bernoulli. Le nombre de pièces défectueuses $X$ dans ' +
+            'un lot de $n$ pièces suit donc une **loi binomiale** $B(n,p)$. Un service ' +
+            'qualité l\'utilise directement : si $p=0,02$ (2% de défauts) et qu\'un lot ' +
+            'compte $n=200$ pièces, $P(X\\leq5)$ donne la probabilité que le lot reste sous ' +
+            'un seuil de tolérance accepté par le client — un contrôle qui sert à décider ' +
+            'd\'accepter ou de rejeter tout le lot, sans avoir à inspecter chaque pièce une ' +
+            'par une.',
+          domaines: ['Industrie', 'Contrôle qualité'],
         },
         {
           kind: 'entrainement',
@@ -990,6 +1063,28 @@ export const variablesAleatoires: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: 'Une loi pensée pour les erreurs judiciaires',
+          text:
+            'Le mathématicien français **Siméon Denis Poisson** publie cette loi en 1837, ' +
+            'dans un ouvrage consacré... à la probabilité des erreurs judiciaires et des ' +
+            'verdicts de jurys ! Il cherchait à modéliser des événements rares et ' +
+            'indépendants — exactement la situation que tu étudies dans cette section, ' +
+            'qu\'il s\'agisse de pièces défectueuses ou d\'appels téléphoniques. Son ' +
+            'résultat reste longtemps une curiosité théorique, jusqu\'à ce qu\'un ' +
+            'statisticien de l\'armée prussienne, Ladislaus Bortkiewicz, l\'applique en ' +
+            '1898 à un exemple resté célèbre : le nombre de soldats tués chaque année par ' +
+            'la ruade d\'un cheval dans 14 corps d\'armée prussiens, sur 20 ans — une ' +
+            'distribution qui suit avec une précision frappante la loi de Poisson, et qui ' +
+            'a fini par donner son nom au livre de Bortkiewicz, Das Gesetz der kleinen ' +
+            'Zahlen (« La loi des petits nombres »).',
+          image: {
+            src: '/images/historique/poisson.jpg',
+            alt: 'Portrait de Siméon Denis Poisson',
+            caption: 'Siméon Denis Poisson (1781–1840), portrait d\'époque.',
+          },
+        },
+        {
           kind: 'methode',
           label: 'Calcul itératif, jamais λᵏ et k! séparément',
           items: [
@@ -1101,6 +1196,21 @@ export const variablesAleatoires: ChapterContent = {
           kind: 'astuce',
           label: 'E(X)=V(X)=λ — une propriété caractéristique',
           text: "Pour une loi de Poisson, l'espérance et la variance sont toutes les deux égales à $\\lambda$ — une propriété assez rare : dans la plupart des lois, espérance et variance sont différentes !",
+        },
+        {
+          kind: 'application',
+          titre: 'Surveiller l\'apparition de cas rares en santé publique',
+          text:
+            'Un service de santé publique qui surveille une maladie rare (un nombre moyen ' +
+            'connu de $\\lambda$ cas par mois dans une région) utilise directement la loi ' +
+            'de Poisson pour détecter une anomalie : si le nombre de cas observés un mois ' +
+            'donné dépasse largement ce que $P(X=k)$ prédit comme probable pour ce ' +
+            '$\\lambda$, c\'est un signal d\'alerte — peut-être le début d\'une épidémie, ' +
+            'ou un foyer de contamination localisé. Ce principe, comparer un comptage ' +
+            'observé à la distribution de Poisson attendue, est exactement celui des ' +
+            'systèmes de surveillance épidémiologique automatisés utilisés aujourd\'hui ' +
+            'par les autorités sanitaires.',
+          domaines: ['Santé publique', 'Épidémiologie'],
         },
         {
           kind: 'entrainement',
