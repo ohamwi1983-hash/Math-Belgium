@@ -114,6 +114,26 @@ export const deriveesApplications: ChapterContent = {
             'à la forme de f.',
         },
         {
+          kind: 'historique',
+          titre: 'Le vrai premier inventeur de la dérivée ?',
+          text:
+            "Bien avant Newton et Leibniz, le juriste et mathématicien français **Pierre de " +
+            "Fermat** développe dans les années 1630 une méthode, qu'il appelle « adéquation », " +
+            "pour trouver le maximum ou le minimum d'une courbe — et, au passage, sa tangente " +
+            'en un point. Son idée ressemble étonnamment à celle de cette section : il compare ' +
+            "la valeur de f en un point a à sa valeur en a+h, simplifie, puis fait disparaître " +
+            "h — sans jamais disposer du concept rigoureux de limite, qui n'existera que deux " +
+            "siècles plus tard. Newton lui-même reconnaîtra plus tard s'être inspiré de la " +
+            'méthode de Fermat. Beaucoup d\'historiens des mathématiques considèrent donc ' +
+            'Fermat comme le véritable précurseur du calcul différentiel, des décennies avant ' +
+            'que Newton et Leibniz ne le formalisent.',
+          image: {
+            src: '/images/historique/fermat.jpg',
+            alt: 'Portrait de Pierre de Fermat',
+            caption: 'Pierre de Fermat (1601–1665), portrait anonyme du 17e siècle.',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Calculer f\'(a) par la définition',
           generatorId: '5gen26',
@@ -211,6 +231,26 @@ export const deriveesApplications: ChapterContent = {
             'par le point (a;f(a)) — teste x=a dans ton équation, tu dois retrouver f(a). Et ' +
             'elle a la bonne pente — le coefficient de x doit être exactement f\'(a). Cette ' +
             'double vérification repère immédiatement une erreur.',
+        },
+        {
+          kind: 'historique',
+          titre: 'Le professeur qui a préparé le terrain pour Newton',
+          text:
+            '**Isaac Barrow**, titulaire de la chaire de mathématiques à Cambridge, a pour ' +
+            "élève, dans les années 1660, un certain Isaac Newton. Dans ses travaux de " +
+            'géométrie, Barrow utilise une méthode qu\'il appelle le « triangle ' +
+            'différentiel » : un petit triangle formé par un segment infinitésimal de la ' +
+            'courbe, sa projection horizontale et sa projection verticale, dont le rapport des ' +
+            "côtés donne directement la pente de la tangente — l'idée même que tu viens " +
+            "d'appliquer dans cette section. En 1669, Barrow cède volontairement sa chaire à " +
+            'son brillant élève, convaincu que Newton ira plus loin que lui. L\'histoire lui ' +
+            'donnera raison : Newton bâtira sur ces fondations géométriques tout le calcul ' +
+            'différentiel.',
+          image: {
+            src: '/images/historique/barrow.jpg',
+            alt: 'Portrait d\'Isaac Barrow',
+            caption: 'Isaac Barrow (1630–1677), portrait anonyme.',
+          },
         },
         {
           kind: 'entrainement',
@@ -462,6 +502,26 @@ export const deriveesApplications: ChapterContent = {
             'triviale, en oubliant le facteur de la chaîne !',
         },
         {
+          kind: 'historique',
+          titre: 'Le premier manuel qui réunit tout le calcul différentiel',
+          text:
+            "En 1748, l'italienne **Maria Gaetana Agnesi** publie Instituzioni Analitiche, le " +
+            'premier ouvrage à présenter de façon unifiée et pédagogique l\'ensemble du calcul ' +
+            'différentiel ET intégral — exactement les règles de dérivation (somme, produit, ' +
+            'quotient, composée) que tu viens d\'apprendre, organisées pour la première fois ' +
+            "comme un vrai cours structuré plutôt qu'une collection d'articles de recherche " +
+            "épars. L'ouvrage est traduit dans plusieurs langues et utilisé dans toute " +
+            "l'Europe pendant des décennies. Agnesi devient ainsi, à 30 ans, la première femme " +
+            'nommée professeure de mathématiques dans une université — à Bologne, bien ' +
+            "qu'elle n'y ait finalement jamais enseigné, préférant se consacrer à des œuvres " +
+            'caritatives.',
+          image: {
+            src: '/images/historique/agnesi.jpg',
+            alt: 'Portrait de Maria Gaetana Agnesi',
+            caption: 'Maria Gaetana Agnesi (1718–1799), gravure, 18e siècle.',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Fonction dérivée',
           generatorId: '5gen27',
@@ -575,6 +635,22 @@ export const deriveesApplications: ChapterContent = {
             'de la courbe (monte/descend). Le signe de f\'\' renseigne sur sa **forme** ' +
             '(bol/dôme). Un extremum se lit sur f\', un point d\'inflexion se lit sur f\'\' — ' +
             'jamais l\'inverse !',
+        },
+        {
+          kind: 'application',
+          titre: 'Trouver le moment où un sprinteur accélère le plus',
+          text:
+            "Un sprinteur au 100 m ne court pas à vitesse constante : il accélère fortement au " +
+            "départ, puis son accélération diminue progressivement jusqu'à ce qu'il atteigne " +
+            'sa vitesse maximale (où l\'accélération devient nulle). Si $v(t)$ est sa vitesse, ' +
+            "son accélération est $v'(t)$ — et le moment où cette accélération est " +
+            'elle-même MAXIMALE (où $v$ croît le plus vite) correspond exactement à un point ' +
+            "d'inflexion de la courbe de vitesse, repéré par le signe de $v''(t)$, la même " +
+            "lecture que tu viens de faire sur f' et f''. Les biomécaniciens sportifs " +
+            'utilisent précisément cette analyse, à partir de données de capture de ' +
+            "mouvement, pour identifier la phase où un athlète développe le plus de " +
+            'puissance — et ajuster son entraînement en conséquence.',
+          domaines: ['Sport', 'Biomécanique'],
         },
         {
           kind: 'entrainement',
@@ -719,6 +795,21 @@ export const deriveesApplications: ChapterContent = {
             'f(x)=x³−3kx : fais glisser k. Pour k>0, f\' change de signe aux deux zéros ' +
             '(2 vrais extremums, comme l\'exemple ci-dessus en k=1). Pour k=0, f\'(x)=3x² ne ' +
             'change jamais de signe : point critique SANS extremum.',
+        },
+        {
+          kind: 'application',
+          titre: "Trouver le moment où un médicament agit le plus fort",
+          text:
+            "Après la prise d'un médicament par voie orale, sa concentration $C(t)$ dans le " +
+            'sang augmente d\'abord (absorption), atteint un pic, puis diminue (élimination). ' +
+            'Ce pic — le moment où le médicament est le plus efficace, mais aussi le plus ' +
+            "susceptible de provoquer des effets secondaires — est exactement un extremum " +
+            "local de $C(t)$ : les pharmacologues le trouvent en résolvant $C'(t)=0$, puis en " +
+            "vérifiant que $C'$ change bien de signe autour de cette solution, exactement la " +
+            'méthode de cette section. Cette information détermine l\'intervalle entre deux ' +
+            "prises d'un médicament : assez court pour que la concentration reste efficace, " +
+            'assez long pour éviter une accumulation dangereuse.',
+          domaines: ['Pharmacologie', 'Médecine'],
         },
         {
           kind: 'entrainement',
@@ -1022,6 +1113,23 @@ export const deriveesApplications: ChapterContent = {
             'Une largeur x doit rester strictement positive ET strictement inférieure au ' +
             'périmètre disponible — ici x∈]0;20[, sinon y=20−x devient négatif ou nul. Un ' +
             'extremum mathématique situé hors de ce domaine n\'aurait aucun sens géométrique.',
+        },
+        {
+          kind: 'application',
+          titre: 'Minimiser la quantité de métal d\'une canette',
+          text:
+            "Une canette de boisson a un volume fixé par la réglementation (33 cl, par " +
+            "exemple) — mais sa forme, elle, n'est pas imposée : seul le couple rayon/hauteur " +
+            'doit respecter ce volume. Minimiser la quantité de métal utilisée (donc le coût ' +
+            'de fabrication et le poids à transporter) revient à minimiser l\'aire totale de ' +
+            'la canette — base, couvercle et paroi latérale — sous la contrainte que son ' +
+            'volume reste constant, exactement le même principe que l\'exemple du rectangle ' +
+            "ci-dessus, mais appliqué à un solide. En exprimant l'aire en fonction d'une " +
+            'seule variable (le rayon, grâce à la contrainte de volume) puis en dérivant, les ' +
+            'ingénieurs trouvent le rapport hauteur/rayon optimal — c\'est ce calcul qui ' +
+            'explique pourquoi la plupart des canettes du commerce ont des proportions très ' +
+            'proches les unes des autres.',
+          domaines: ['Ingénierie', 'Industrie'],
         },
         {
           kind: 'entrainement',
