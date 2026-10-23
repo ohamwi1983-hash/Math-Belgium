@@ -719,6 +719,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer l\'angle d\'un bras robotisé à partir de sa position',
+          image: {
+            src: '/images/application/robot-arm.jpg',
+            alt: 'Bras robotisés industriels KUKA sur une chaîne de montage',
+            caption: 'Bras robotisés industriels KUKA. Photo : Mixabest, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
           text:
             'En robotique, un bras articulé doit souvent atteindre une position précise dans ' +
             "l'espace — attraper un objet, souder un point donné. Calculer la position de la " +
@@ -1134,6 +1139,11 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'application',
           titre: "Calculer l'angle de réfraction de la lumière",
+          image: {
+            src: '/images/application/refraction-pencil.jpg',
+            alt: "Un crayon plongé dans un verre d'eau paraissant cassé à cause de la réfraction",
+            caption: "Un crayon dans un verre d'eau : la réfraction à la surface le fait paraître cassé. Photo : Snehit Jamre, CC BY-SA 4.0, via Wikimedia Commons.",
+          },
           text:
             "Quand un rayon de lumière passe d'un milieu à un autre — de l'air à l'eau, par " +
             "exemple — il change de direction : c'est la **réfraction**. La loi de " +
