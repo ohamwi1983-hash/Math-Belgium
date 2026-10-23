@@ -78,6 +78,27 @@ export const probabilites: ChapterContent = {
             'deux cas. La formule « favorables/possibles » n\'est valable QUE si les résultats ' +
             'sont équiprobables — toujours à vérifier avant de compter.',
         },
+        {
+          kind: 'historique',
+          titre: 'Une question de jeu de dés qui a fondé toute une science',
+          text:
+            'En 1654, le chevalier de Méré, un joueur passionné, pose à **Blaise Pascal** ' +
+            'une question qui le trouble : pourquoi perd-il systématiquement de l\'argent ' +
+            'sur un pari qu\'il pensait équitable, impliquant justement des sommes de dés ' +
+            'comme celle ci-dessus ? Pascal en discute par lettres avec **Pierre de ' +
+            'Fermat**, et leur correspondance de 1654 est aujourd\'hui considérée comme ' +
+            'l\'acte de naissance de la théorie des probabilités comme discipline ' +
+            'mathématique rigoureuse — avant eux, on raisonnait sur le hasard de façon ' +
+            'intuitive, souvent fausse, jamais avec une méthode de calcul systématique. ' +
+            'Leur idée centrale est exactement celle du piège ci-dessus : compter ' +
+            'soigneusement TOUTES les combinaisons possibles, sans en oublier ni en ' +
+            'recompter aucune.',
+          image: {
+            src: '/images/historique/pascal.jpg',
+            alt: 'Portrait de Blaise Pascal',
+            caption: 'Blaise Pascal (1623–1662), portrait conservé au château de Versailles.',
+          },
+        },
         { kind: 'subheading', text: 'Probabilité expérimentale (fréquentielle) et probabilité a priori' },
         {
           kind: 'definition',
@@ -119,6 +140,24 @@ export const probabilites: ChapterContent = {
             'la probabilité expérimentale (mesurée en répétant l\'expérience) convergent vers ' +
             'la même valeur. C\'est même comme ça qu\'on détecte un dé ou une pièce truqués : ' +
             'la fréquence observée ne se stabilise PAS autour de la valeur a priori attendue.',
+        },
+        {
+          kind: 'application',
+          titre: 'Pourquoi la météo annonce « 70 % de chances de pluie »',
+          text:
+            'Quand un bulletin météo annonce « 70 % de chances de pluie demain », ce ' +
+            'chiffre n\'est presque jamais une probabilité a priori calculée par un ' +
+            'raisonnement d\'équiprobabilité — il n\'y a pas de « cas favorables » à ' +
+            'compter pour la pluie ! C\'est une probabilité EXPÉRIMENTALE (fréquentielle), ' +
+            'exactement comme celle de cette section : les services météorologiques ' +
+            'recherchent, dans leurs immenses bases de données historiques, toutes les ' +
+            'journées passées où les conditions atmosphériques (pression, humidité, ' +
+            'température, vents) ressemblaient à celles prévues pour demain, puis ' +
+            'calculent la FRÉQUENCE à laquelle il a réellement plu ce jour-là. Plus la ' +
+            'base de données est grande et les situations comparées précisément, plus ' +
+            'cette fréquence s\'approche de la vraie probabilité — exactement le principe ' +
+            'de stabilisation de la fréquence que tu viens de voir.',
+          domaines: ['Météorologie', 'Statistique'],
         },
         { kind: 'subheading', text: 'Représenter A∪B et A∩B' },
         {
@@ -406,6 +445,23 @@ export const probabilites: ChapterContent = {
             'sans remise : 20/56+15/56+15/56+6/56=1). Un excellent moyen de repérer une erreur ' +
             'de calcul avant de répondre !',
         },
+        {
+          kind: 'application',
+          titre: 'Contrôler la qualité d\'une production sans tout casser',
+          text:
+            'Une usine ne peut pas tester TOUS les produits qu\'elle fabrique pour vérifier ' +
+            'qu\'ils fonctionnent — certains tests sont destructifs (faire éclater une ' +
+            'ampoule pour vérifier sa résistance, par exemple), et tester toute la ' +
+            'production reviendrait à ne plus rien avoir à vendre ! Les ingénieurs qualité ' +
+            'prélèvent donc un échantillon dans un lot, SANS remise, exactement comme les ' +
+            'tirages de cette section : chaque pièce retirée change légèrement la ' +
+            'proportion de pièces défectueuses restantes dans le lot, donc la probabilité ' +
+            'de tomber sur une pièce défectueuse au tirage suivant. En calculant la ' +
+            'probabilité de trouver 0, 1 ou plusieurs pièces défectueuses dans un petit ' +
+            'échantillon, ils décident si le lot ENTIER peut être accepté ou doit être ' +
+            'rejeté — sans jamais avoir dû tout tester.',
+          domaines: ['Industrie', 'Contrôle qualité'],
+        },
         { kind: 'subheading', text: 'Une autre façon de dénombrer : le diagramme cartésien' },
         {
           kind: 'methode',
@@ -569,6 +625,29 @@ export const probabilites: ChapterContent = {
               'conditionnement : tu connais $P(B|A)$, tu en déduis $P(A|B)$ — utile dès que ' +
               'seule la probabilité « dans le mauvais sens » est directement connue.',
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Le théorème publié après la mort de son auteur',
+          text:
+            '**Thomas Bayes**, pasteur et mathématicien anglais, ne publie jamais ' +
+            'lui-même le théorème qui porte aujourd\'hui son nom. C\'est seulement après ' +
+            'sa mort, en 1761, que son ami Richard Price retrouve ses papiers, reconnaît ' +
+            'l\'importance du résultat, et le fait publier en 1763 sous le titre « An ' +
+            'Essay towards solving a Problem in the Doctrine of Chances ». Pendant ' +
+            'longtemps, le théorème reste peu utilisé — il faudra attendre le 20e siècle ' +
+            'pour qu\'il devienne un outil central, notamment en intelligence ' +
+            'artificielle, en médecine et en science des données, partout où il faut ' +
+            'remonter d\'un effet observé (un test positif, un symptôme) à sa cause la ' +
+            'plus probable.',
+          image: {
+            src: '/images/historique/bayes.gif',
+            alt: 'Portrait traditionnellement attribué à Thomas Bayes',
+            caption:
+              'Portrait traditionnellement présenté comme celui de Thomas Bayes (1701–1761), ' +
+              'bien que son authenticité reste débattue par les historiens — aucun ' +
+              'portrait confirmé de lui n\'existe.',
+          },
         },
         {
           kind: 'exempleLibre',
@@ -751,6 +830,23 @@ export const probabilites: ChapterContent = {
             'probabilités sont conditionnées par des événements différents.',
         },
         {
+          kind: 'application',
+          titre: 'Comment ta boîte mail reconnaît un spam',
+          text:
+            'Un filtre anti-spam applique le théorème de Bayes des milliers de fois par ' +
+            'seconde, à une échelle totalement différente du test médical ci-dessus, mais ' +
+            'avec exactement le même raisonnement. Le filtre connaît $P(mot|spam)$ — la ' +
+            'fréquence à laquelle un mot donné (« gratuit », « gagner », « urgent »…) ' +
+            'apparaît dans les messages déjà classés comme spam — et veut en déduire ' +
+            '$P(spam|message)$, la probabilité qu\'un NOUVEAU message soit un spam compte ' +
+            'tenu des mots qu\'il contient : exactement le même retournement de ' +
+            'conditionnement que dans cette section. Plus un message contient de mots ' +
+            '« suspects » à la fois, plus cette probabilité calculée grimpe, jusqu\'à ' +
+            'dépasser un seuil au-delà duquel le message est automatiquement déplacé dans ' +
+            'le dossier spam.',
+          domaines: ['Informatique', 'Intelligence artificielle'],
+        },
+        {
           kind: 'entrainement',
           title: 'Indépendance, conditionnement et Bayes',
           generatorId: '6gen32',
@@ -785,6 +881,28 @@ export const probabilites: ChapterContent = {
               'contiennent $k$ succès, puis de multiplier ce nombre par la probabilité commune ' +
               'à chacun d\'eux.',
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Pourquoi on les appelle des « épreuves de Bernoulli »',
+          text:
+            'Le mathématicien suisse **Jacob Bernoulli** consacre les vingt dernières ' +
+            'années de sa vie à l\'étude des épreuves répétées et indépendantes que tu ' +
+            'utilises dans cette section — succès ou échec, toujours avec la même ' +
+            'probabilité $p$. Son ouvrage Ars Conjectandi (« L\'art de la conjecture »), ' +
+            'publié en 1713, huit ans après sa mort, par son neveu Nicolas Bernoulli, ' +
+            'contient l\'une des premières démonstrations rigoureuses de ce qu\'on appelle ' +
+            'aujourd\'hui la **loi des grands nombres** : plus tu répètes une épreuve, ' +
+            'plus la fréquence observée des succès se rapproche de la probabilité ' +
+            'théorique $p$ — exactement l\'idée de la stabilisation des fréquences que tu ' +
+            'as déjà rencontrée à la section 1. C\'est en son honneur qu\'on appelle ' +
+            'aujourd\'hui « épreuve de Bernoulli » toute expérience à deux issues répétée ' +
+            'dans les mêmes conditions.',
+          image: {
+            src: '/images/historique/bernoulli.jpg',
+            alt: 'Portrait de Jacob Bernoulli',
+            caption: 'Jacob Bernoulli (1655–1705), portrait d\'époque.',
+          },
         },
         {
           kind: 'exempleLibre',
