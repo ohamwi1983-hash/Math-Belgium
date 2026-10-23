@@ -144,6 +144,14 @@ export const probabilites: ChapterContent = {
         {
           kind: 'application',
           titre: 'Pourquoi la météo annonce « 70 % de chances de pluie »',
+          image: {
+            src: '/images/application/meteo-radar.jpg',
+            alt: 'Station météorologique avec pluviomètre et radar Doppler',
+            caption:
+              'Pluviomètre et radar Doppler à un bureau du National Weather Service (États-Unis) — ' +
+              'le type de données historiques utilisées pour calculer une probabilité de pluie. ' +
+              'Photo : Famartin, CC BY-SA 4.0, via Wikimedia Commons.',
+          },
           text:
             'Quand un bulletin météo annonce « 70 % de chances de pluie demain », ce ' +
             'chiffre n\'est presque jamais une probabilité a priori calculée par un ' +
@@ -448,6 +456,14 @@ export const probabilites: ChapterContent = {
         {
           kind: 'application',
           titre: 'Contrôler la qualité d\'une production sans tout casser',
+          image: {
+            src: '/images/application/production-ampoules.jpg',
+            alt: 'Chaîne de production d\'ampoules électriques en usine',
+            caption:
+              'Chaîne de production d\'ampoules électriques, usines Luma, vers 1960 — ' +
+              'exactement le type de production où un test destructif empêche de tout vérifier. ' +
+              'Photo : Arbeiderbevegelsens arkiv og bibliotek, CC BY 3.0, via Wikimedia Commons.',
+          },
           text:
             'Une usine ne peut pas tester TOUS les produits qu\'elle fabrique pour vérifier ' +
             'qu\'ils fonctionnent — certains tests sont destructifs (faire éclater une ' +
