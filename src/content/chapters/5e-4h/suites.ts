@@ -198,6 +198,29 @@ export const suites: ChapterContent = {
           items: ['$S_n = \\dfrac{n(u_1+u_n)}{2}$ — n fois la moyenne du premier et du dernier terme.'],
         },
         {
+          kind: 'historique',
+          titre: 'Un écolier de 9 ans qui démonte un piège du maître',
+          text:
+            "Vers 1785, un instituteur allemand demande à ses élèves d'additionner tous les " +
+            'nombres de 1 à 100 — un calcul censé occuper la classe de longues minutes. Le ' +
+            'jeune **Carl Friedrich Gauss**, alors âgé de neuf ans, pose sa tablette presque ' +
+            'immédiatement avec la bonne réponse : 5050. Sa méthode est exactement celle de la ' +
+            'démonstration ci-dessus : il associe le premier terme (1) au dernier (100), le ' +
+            "deuxième (2) à l'avant-dernier (99), et ainsi de suite — chaque paire vaut " +
+            'toujours 101, et il y a 50 paires, donc $50\\times101=5050$. Cette anecdote, ' +
+            "racontée depuis le 19e siècle, n'est peut-être pas exacte dans les moindres " +
+            'détails, mais la méthode, elle, est bien réelle : c\'est la « double échelle » ' +
+            'que tu viens d\'étudier. Gauss deviendra l\'un des plus grands mathématiciens de ' +
+            "l'histoire.",
+          image: {
+            src: '/images/historique/gauss.jpg',
+            alt: 'Portrait de Carl Friedrich Gauss',
+            caption:
+              'Carl Friedrich Gauss (1777–1855), portrait d\'après Christian Albrecht Jensen ' +
+              '(1840), copie de Gottlieb Biermann (1887).',
+          },
+        },
+        {
           kind: 'exemple',
           badge: 'somme des 20 premiers termes',
           formula:
@@ -391,6 +414,30 @@ export const suites: ChapterContent = {
             'la convergence.',
         },
         {
+          kind: 'historique',
+          titre: 'Le paradoxe qui a résisté 2000 ans à la logique',
+          text:
+            "Vers le 5e siècle avant J.-C., le philosophe grec **Zénon d'Élée** imagine un " +
+            "paradoxe resté célèbre : pour qu'Achille, le coureur le plus rapide, rattrape une " +
+            "tortue partie avec un peu d'avance, il doit d'abord atteindre le point de départ " +
+            'de la tortue — mais pendant ce temps, la tortue a avancé un peu plus loin. Achille ' +
+            'doit alors atteindre ce nouveau point — et la tortue a de nouveau avancé. Cette ' +
+            "suite de distances à parcourir ne s'arrête jamais : une infinité d'étapes. Zénon " +
+            'en conclut, à tort, qu\'Achille ne peut JAMAIS rattraper la tortue. L\'erreur ne ' +
+            'sera comprise que des siècles plus tard : une somme d\'une infinité de termes peut ' +
+            'très bien avoir une valeur finie, exactement l\'idée que tu viens d\'entrevoir ' +
+            'avec $|q|<1$ — tu la retrouveras formalisée dans la section suivante, sur la ' +
+            'convergence. Achille rattrape bel et bien la tortue, en un temps fini.',
+          image: {
+            src: '/images/historique/zeno.jpg',
+            alt: "Fresque représentant Zénon d'Élée",
+            caption:
+              "Zénon d'Élée montrant aux jeunes gens les portes de la Vérité et du Mensonge, " +
+              'fresque attribuée à Pellegrino Tibaldi ou Bartolomeo Carducci, fin du 16e ' +
+              'siècle, bibliothèque de l\'Escurial (Madrid).',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Suites géométriques, formule générale et termes',
           generatorId: '5gen15',
@@ -543,6 +590,23 @@ export const suites: ChapterContent = {
             'en 1/n, qui s\'annulent à la limite — sans calcul supplémentaire.',
         },
         {
+          kind: 'application',
+          titre: "Pourquoi une population animale ne grandit pas indéfiniment",
+          text:
+            "Une population animale introduite dans un nouveau milieu croît d'abord vite, " +
+            'presque comme une suite géométrique — chaque génération se reproduit librement. ' +
+            'Mais les ressources (nourriture, territoire, eau) sont limitées : au fil du ' +
+            "temps, la croissance ralentit, et le nombre d'individus se stabilise autour " +
+            "d'une valeur appelée **capacité limite du milieu**. D'une année sur l'autre, " +
+            "l'effectif de la population se comporte alors comme une suite qui CONVERGE vers " +
+            'cette valeur, exactement comme les suites de cette section se rapprochent ' +
+            "indéfiniment de leur limite sans forcément jamais l'atteindre. Les écologues " +
+            "utilisent ce modèle pour estimer combien d'animaux un territoire peut " +
+            'durablement accueillir, et pour détecter quand une population dépasse durablement ' +
+            'cette limite.',
+          domaines: ['Biologie', 'Écologie'],
+        },
+        {
           kind: 'entrainement',
           title: 'Convergence et divergence des suites',
           generatorId: '5gen16',
@@ -669,6 +733,52 @@ export const suites: ChapterContent = {
             '**Position et vitesse** — une distance parcourue par intervalles de temps égaux, ' +
               'modélisée par une suite.',
           ],
+        },
+        {
+          kind: 'historique',
+          titre: 'Le mathématicien qui a importé nos chiffres en Europe',
+          text:
+            'En 1202, le marchand et mathématicien italien **Leonardo Fibonacci** (Leonardo de ' +
+            'Pise) publie le Liber Abaci (« Le livre des calculs »), un ouvrage qui introduit ' +
+            'en Europe les chiffres indo-arabes (0 à 9) que tu utilises tous les jours — à la ' +
+            'place des chiffres romains, bien plus lourds à calculer. Dans ce même livre, il ' +
+            'pose un problème de reproduction de lapins dont la solution est exactement la ' +
+            "suite qui porte aujourd'hui son nom : chaque terme est la somme des deux " +
+            "précédents (1, 1, 2, 3, 5, 8, 13…). Fibonacci lui-même n'a jamais prétendu " +
+            "l'avoir inventée — la même suite apparaît des siècles plus tôt dans les textes de " +
+            "poésie et de musique indiens. C'est seulement au 19e siècle que des " +
+            'mathématiciens lui redonnent vie sous ce nom, en découvrant ses liens avec le ' +
+            'nombre d\'or et avec la croissance des plantes.',
+          image: {
+            src: '/images/historique/fibonacci.jpg',
+            alt: 'Portrait imaginé de Leonardo Fibonacci',
+            caption:
+              'Portrait imaginé de Leonardo Fibonacci, gravure italienne du 19e siècle (aucun ' +
+              "portrait contemporain de Fibonacci n'existe).",
+          },
+        },
+        {
+          kind: 'application',
+          titre: 'Pourquoi les tournesols comptent en Fibonacci',
+          text:
+            "Observe le cœur d'un tournesol : ses graines s'organisent en deux familles de " +
+            'spirales qui s\'enroulent en sens opposés. Compte le nombre de spirales de chaque ' +
+            'sens — tu tombes presque toujours sur deux termes CONSÉCUTIFS de la suite de ' +
+            'Fibonacci (souvent 34 et 55, ou 55 et 89 sur les plus grands capitules). Ce ' +
+            "n'est pas un hasard esthétique : en plaçant chaque nouvelle graine à un angle de " +
+            "rotation irrationnel bien précis par rapport à la précédente (l'angle d'or, " +
+            "environ 137,5°), la plante remplit l'espace disponible SANS jamais superposer " +
+            'deux graines ni laisser de vide — le compromis le plus efficace possible. Le même ' +
+            "motif se retrouve dans les écailles d'une pomme de pin, les pétales d'une " +
+            "marguerite, ou la disposition des feuilles autour d'une tige.",
+          domaines: ['Biologie', 'Botanique'],
+          image: {
+            src: '/images/application/sunflower.jpg',
+            alt: 'Cœur de tournesol montrant les spirales de graines',
+            caption:
+              "Cœur d'un tournesol : les spirales de graines suivent la suite de Fibonacci. " +
+              'Photo : Pudelek, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
         },
         {
           kind: 'astuce',
@@ -955,6 +1065,21 @@ export const suites: ChapterContent = {
             'Pour calculer les premiers termes après $u_1$, applique la récurrence pas à pas — ' +
             'il n\'existe pas de formule fermée simple en fonction de n pour cette famille de ' +
             'suites. $u_2 = a\\times u_1+b$, puis $u_3 = a\\times u_2+b$, et ainsi de suite.',
+        },
+        {
+          kind: 'application',
+          titre: "Calculer combien il te reste à rembourser sur un emprunt",
+          text:
+            'Un emprunt remboursé par mensualités fixes suit exactement une suite récurrente ' +
+            "affine. Chaque mois, la banque calcule d'abord les intérêts sur le capital " +
+            'restant dû (un facteur multiplicatif $a$ légèrement supérieur à 1), puis ' +
+            'soustrait la mensualité payée (une quantité fixe $b$, négative ici puisqu\'elle ' +
+            'réduit la dette) : $u_{n+1} = a\\times u_n + b$, avec $u_n$ le capital restant ' +
+            'dû après $n$ mensualités. Tant que la mensualité est assez élevée pour plus que ' +
+            'couvrir les intérêts, cette suite décroît et finit par atteindre 0 — c\'est la ' +
+            'date de fin de prêt. Les banques utilisent ce calcul, répété mois après mois, ' +
+            "pour établir le tableau d'amortissement remis à chaque emprunteur.",
+          domaines: ['Finance', 'Économie'],
         },
         {
           kind: 'entrainement',
