@@ -40,6 +40,25 @@ export const fonctionsComposees: ChapterContent = {
           'fonctions, et comment lire tout ça sur un graphique.',
       },
       {
+        kind: 'historique',
+        titre: "Pourquoi écrit-on f(x) ?",
+        text:
+          'La notation $f(x)$ que tu utilises à chaque ligne de ce chapitre a été inventée par ' +
+          'le mathématicien suisse **Leonhard Euler**, en 1734, dans un article où il cherchait ' +
+          'un moyen court et pratique de désigner « la valeur que prend la fonction f au point ' +
+          "x ». Avant lui, les mathématiciens décrivaient une relation entre deux grandeurs en " +
+          'toutes lettres ou par des constructions géométriques, sans symbole dédié — ce qui ' +
+          'rendait les calculs avec plusieurs fonctions enchaînées bien plus lourds à écrire. ' +
+          "Euler a produit un nombre record de travaux mathématiques (plus de 800 articles et " +
+          'livres) tout en devenant presque complètement aveugle dans les vingt dernières ' +
+          "années de sa vie — il continuait à dicter ses démonstrations de tête à des assistants.",
+        image: {
+          src: '/images/historique/euler.jpg',
+          alt: 'Portrait de Leonhard Euler',
+          caption: 'Leonhard Euler (1707–1783), portrait attribué à Jakob Emanuel Handmann, vers 1753.',
+        },
+      },
+      {
         kind: 'para',
         text:
           'Deux mots à garder sous la main pour tout le chapitre. Le **domaine de définition** ' +
@@ -209,6 +228,20 @@ export const fonctionsComposees: ChapterContent = {
             'qu’il s’agit bien de deux conditions distinctes (une large, une stricte) à combiner ensuite.',
         },
         {
+          kind: 'historique',
+          titre: 'Qui a le droit de diviser par zéro ?',
+          text:
+            'Le mathématicien indien **Brahmagupta**, au 7e siècle, est l\'un des premiers à ' +
+            'donner des règles de calcul explicites pour le nombre 0 — additions, soustractions, ' +
+            'multiplications. Mais sur la division par zéro, il se trompe : il affirme que ' +
+            '$n/0 = 0$, une règle qui semble raisonnable mais qui est en réalité incohérente ' +
+            '(elle impliquerait que $0\\times0=n$, pour n\'importe quel n !). Il faudra attendre ' +
+            'des siècles, et les travaux d\'autres mathématiciens indiens comme Bhāskara II au ' +
+            '12e siècle, puis la formalisation moderne de l\'analyse, pour comprendre que $n/0$ ' +
+            'n\'est tout simplement **pas défini** — exactement la raison pour laquelle un ' +
+            'dénominateur ne peut jamais valoir 0 dans le domaine d\'une fonction.',
+        },
+        {
           kind: 'entrainement',
           title: 'Domaine de définition',
           generatorId: '5gen1',
@@ -343,6 +376,25 @@ export const fonctionsComposees: ChapterContent = {
           },
         },
         {
+          kind: 'historique',
+          titre: 'Le jour où le mot « fonction » est né',
+          text:
+            'Le mot **« fonction »**, que tu utilises dans ce chapitre sans y penser, apparaît ' +
+            'pour la première fois en mathématiques en 1673, sous la plume du philosophe et ' +
+            'mathématicien allemand **Gottfried Wilhelm Leibniz**. À l\'origine, il l\'utilise ' +
+            'dans un sens encore assez vague, pour désigner une grandeur géométrique qui dépend ' +
+            'd\'une courbe (une tangente, une longueur...) — pas encore la relation précise que ' +
+            'tu étudies ici. Le sens moderne, une règle qui associe à chaque x une seule valeur ' +
+            'f(x), ne se stabilise que peu à peu, au fil du 18e et du 19e siècle.',
+          image: {
+            src: '/images/historique/leibniz.jpg',
+            alt: 'Portrait de Gottfried Wilhelm Leibniz',
+            caption:
+              'Gottfried Wilhelm Leibniz (1646–1716), portrait attribué à Bernhard Christoph ' +
+              'Francke, vers 1700.',
+          },
+        },
+        {
           kind: 'entrainement',
           title: 'Décomposer une fonction composée',
           generatorId: '5gen2',
@@ -454,6 +506,21 @@ export const fonctionsComposees: ChapterContent = {
             'la condition qui la relie à l\'extérieure, puis leur intersection. Fais glisser x et ' +
             'regarde le marqueur passer du vert au gris sur chaque ligne selon la condition ' +
             'vérifiée ou non — reprend les 2 exemples déjà résolus ci-dessus.',
+        },
+        {
+          kind: 'application',
+          titre: 'Enchaîner des commandes informatiques comme des fonctions composées',
+          text:
+            'Sur un ordinateur, une commande Unix/Linux peut envoyer directement son résultat ' +
+            'comme donnée d\'entrée à la commande suivante, grâce au symbole **|** (appelé ' +
+            '« pipe », tuyau en anglais). Écrire `commande1 | commande2` revient exactement à ' +
+            'calculer $(g\\circ f)$ : la sortie de la première commande (f) devient l\'entrée de ' +
+            'la seconde (g), sans étape intermédiaire visible. Les langages de programmation ' +
+            'modernes généralisent cette idée sous le nom de « function chaining » ou « function ' +
+            'composition » : au lieu d\'écrire plusieurs lignes avec des variables temporaires, ' +
+            'un développeur enchaîne directement les traitements — exactement le même principe ' +
+            'que composer f et g par leurs formules.',
+          domaines: ['Informatique', 'Programmation'],
         },
         {
           kind: 'entrainement',
@@ -629,6 +696,25 @@ export const fonctionsComposees: ChapterContent = {
             'quantité de matière première disponible, etc.) : le domaine mathématique n’est qu’un ' +
             'point de départ.',
         },
+        {
+          kind: 'application',
+          titre: 'Une chaîne de montage, où chaque poste reçoit le travail du précédent',
+          image: {
+            src: '/images/application/assembly-line.jpg',
+            alt: 'Chaîne de montage automobile',
+            caption: 'Chaîne de montage Volkswagen à Wolfsbourg, 1960. Photo : Roger Wollstadt, CC BY-SA 2.0, via Wikimedia Commons.',
+          },
+          text:
+            'Sur une chaîne de montage industrielle (automobile, électronique...), chaque poste ' +
+            'de travail reçoit la pièce déjà transformée par le poste précédent, y ajoute sa ' +
+            'propre opération, puis la transmet au poste suivant — exactement le principe de la ' +
+            'composition de fonctions appliqué à un objet physique plutôt qu\'à un nombre. Les ' +
+            'ingénieurs qui conçoivent une chaîne de production réfléchissent précisément en ces ' +
+            'termes : la FORME finale de la pièce dépend de l\'ORDRE dans lequel les opérations ' +
+            'sont appliquées — changer cet ordre peut rendre une étape ultérieure impossible, ' +
+            'exactement comme $f\\circ g \\ne g\\circ f$ en général.',
+          domaines: ['Industrie', 'Production'],
+        },
         { kind: 'subheading', text: 'Un autre contexte classique : le coût unitaire' },
         {
           kind: 'para',
@@ -637,6 +723,25 @@ export const fonctionsComposees: ChapterContent = {
             'quantité $x$ fabriquée : le coût **unitaire** (par objet) s’obtient en composant, cette ' +
             'fois avec une simple division — $c(x) = C(x) / x$. Isoler d’abord la bonne grandeur, ' +
             'composer ou diviser ensuite : la démarche reste identique à celle du bidon.',
+        },
+        {
+          kind: 'application',
+          titre: 'Une chaîne de réactions chimiques, étape par étape',
+          image: {
+            src: '/images/application/glycolysis.png',
+            alt: 'Schéma de la voie métabolique de la glycolyse',
+            caption: 'La glycolyse : une dizaine de réactions enchaînées, chacune transformant le produit de la précédente. Schéma : Yikrazuul, domaine public, via Wikimedia Commons.',
+          },
+          text:
+            'En chimie et en biologie, de nombreux processus se déroulent en plusieurs réactions ' +
+            'successives, où le produit de l\'une devient le réactif de la suivante — exactement ' +
+            'une composition de fonctions. C\'est le cas de la respiration cellulaire, qui ' +
+            's\'écrit comme une longue chaîne de réactions enchaînées (la glycolyse, puis le ' +
+            'cycle de Krebs, puis la chaîne respiratoire...), chacune transformant ce que la ' +
+            'précédente a produit. Un biochimiste qui calcule le rendement global d\'une voie ' +
+            'métabolique fait exactement ce que tu fais en section 2 : il compose les rendements ' +
+            'de chaque étage, de l\'intérieur vers l\'extérieur.',
+          domaines: ['Chimie', 'Biologie'],
         },
         {
           kind: 'entrainement',
