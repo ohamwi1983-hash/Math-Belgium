@@ -397,6 +397,28 @@ export const lieuxGeometriques: ChapterContent = {
             'confondre la bissectrice avec la médiane ! Ces deux droites ne coïncident que si le ' +
             'triangle est isocèle en B (ici $AB=5 \\neq 4=BC$, donc jamais).',
         },
+        {
+          kind: 'historique',
+          titre: 'Des règles vieilles de 2300 ans',
+          text:
+            "La bissectrice, la médiatrice, le centre de gravité d'un triangle : ces " +
+            "constructions ne datent pas de la géométrie analytique que tu utilises ici — elles " +
+            "figurent déjà, démontrées à la règle et au compas, dans les Éléments d'**Euclide**, " +
+            'rédigés vers 300 avant J.-C. à Alexandrie. Euclide ne connaissait ni coordonnées ni ' +
+            'équations : chaque propriété s\'y démontre par un raisonnement purement géométrique, ' +
+            "enchaînant des constructions à partir d'un petit nombre d'axiomes de départ. Ce que " +
+            'la géométrie analytique t\'apporte ici, c\'est un outil différent pour retrouver les ' +
+            'MÊMES résultats — pas une nouvelle géométrie, mais une nouvelle façon, bien plus ' +
+            'rapide, de la calculer.',
+          image: {
+            src: '/images/historique/euclid.jpg',
+            alt: "Détail de L'École d'Athènes représentant Euclide",
+            caption:
+              "Détail de L'École d'Athènes (1509–1511) de Raphaël, traditionnellement identifié " +
+              "comme Euclide — l'identification exacte de cette figure reste débattue par les " +
+              'historiens de l\'art.',
+          },
+        },
         { kind: 'subheading', text: 'Aire variable — un point qui parcourt une droite' },
         {
           kind: 'methode',
@@ -651,6 +673,26 @@ export const lieuxGeometriques: ChapterContent = {
             'question ! Sauf précision supplémentaire dans l\'énoncé (ex. « au-dessus de (AB) »), ' +
             'donne toujours les deux solutions.',
         },
+        {
+          kind: 'application',
+          titre: 'Localiser un téléphone mobile entre deux antennes',
+          text:
+            'Quand un technicien doit localiser un défaut sur une ligne (électrique, ' +
+            'téléphonique, fibre optique) à partir de deux points de mesure A et B équidistants ' +
+            'du défaut, il sait immédiatement que ce défaut se trouve quelque part sur la ' +
+            'médiatrice de [AB] — exactement le raisonnement que tu viens de faire pour trouver ' +
+            'le centre d\'un cercle. En téléphonie mobile, le même principe sert à localiser un ' +
+            "téléphone : si deux antennes relais reçoivent son signal avec un retard identique, " +
+            "l'appareil se trouve forcément sur la médiatrice qui sépare les deux antennes. " +
+            "Ajouter une troisième antenne, avec une troisième médiatrice, suffit alors à isoler " +
+            'un point unique — la position du téléphone.',
+          domaines: ['Télécommunications', 'Ingénierie'],
+          image: {
+            src: '/images/application/cell-tower.jpg',
+            alt: 'Antenne relais de téléphonie mobile',
+            caption: 'Antenne relais de téléphonie mobile. Photo : Superbmust, CC BY-SA 3.0, via Wikimedia Commons.',
+          },
+        },
         { kind: 'subheading', text: 'Cercle inscrit à un triangle' },
         {
           kind: 'definition',
@@ -878,6 +920,25 @@ export const lieuxGeometriques: ChapterContent = {
             'prouverait la propriété que pour ce parallélogramme précis. Garder a, b, c ' +
             'génériques, c\'est exactement ce qui transforme un exemple en démonstration.',
         },
+        {
+          kind: 'historique',
+          titre: 'La révolution qui a transformé la géométrie en calcul',
+          text:
+            'La méthode que tu viens d\'appliquer — choisir un repère, nommer les points avec ' +
+            "des lettres, puis calculer — n'a rien d'évident : avant 1637, personne ne procédait " +
+            'ainsi. C\'est cette année-là que **René Descartes** publie La Géométrie, où il ' +
+            'propose pour la première fois de décrire une figure par des coordonnées et de ' +
+            'transformer un problème géométrique en un problème algébrique. Cette idée, ' +
+            "aujourd'hui si naturelle qu'on l'enseigne dès le plus jeune âge, a mis des siècles " +
+            'à émerger : les mathématiciens grecs, bien plus doués que nous en géométrie pure, ' +
+            "n'avaient tout simplement jamais pensé à représenter un point par deux nombres. Le " +
+            'terme « coordonnées cartésiennes » vient directement de son nom latinisé, Cartesius.',
+          image: {
+            src: '/images/historique/descartes.jpg',
+            alt: 'Portrait de René Descartes',
+            caption: 'René Descartes (1596–1650), portrait attribué à Frans Hals, vers 1649.',
+          },
+        },
       ],
     },
 
@@ -929,6 +990,27 @@ export const lieuxGeometriques: ChapterContent = {
               'paramétrique**, plus loin (où x et y dépendent séparément d\'un même paramètre, ' +
               'éliminé grâce à une identité).',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Comment un GPS calcule ta position',
+          text:
+            'Un récepteur GPS applique, en trois dimensions, exactement le principe de cette ' +
+            'section : traduire une condition de distance en équation. Chaque satellite envoie ' +
+            'un signal daté ; le récepteur mesure le temps de trajet et en déduit sa distance ' +
+            'exacte à ce satellite — ce qui place le récepteur quelque part sur une SPHÈRE ' +
+            "centrée sur ce satellite (l'équivalent en 3D du cercle que tu traces en 2D). Avec " +
+            'UN satellite, le lieu possible est toute une sphère ; avec DEUX, c\'est ' +
+            "l'intersection de deux sphères (un cercle) ; avec TROIS, deux points seulement " +
+            'restent possibles ; un QUATRIÈME satellite élimine la dernière ambiguïté et fixe ' +
+            'une position unique. Le GPS ne « sait » jamais directement où tu es : il calcule, ' +
+            'comme toi, l\'intersection de plusieurs lieux géométriques.',
+          domaines: ['Navigation', 'Technologie'],
+          image: {
+            src: '/images/application/gps-satellite.jpg',
+            alt: "Vue d'artiste d'un satellite GPS en orbite",
+            caption: "Vue d'artiste d'un satellite GPS Block II-F en orbite. NASA, domaine public.",
+          },
         },
         { kind: 'subheading', text: 'Valeur absolue — somme ou différence, deux natures opposées' },
         {
@@ -1106,6 +1188,21 @@ export const lieuxGeometriques: ChapterContent = {
             caption: "cercle d'Apollonius pour k=4 (centre (5;0), rayon 4) et médiatrice pour k=1 (x=0, en pointillé)",
           },
         },
+        {
+          kind: 'historique',
+          titre: 'Le cercle qui porte un nom depuis 2200 ans',
+          text:
+            'Le « cercle d\'Apollonius » que tu viens de retrouver porte le nom du ' +
+            'mathématicien grec **Apollonius de Perge** (environ 262–190 avant J.-C.), surnommé ' +
+            '« le Grand Géomètre » par ses contemporains. Son traité Coniques (tu le retrouveras ' +
+            'au chapitre suivant) reste l\'un des sommets des mathématiques grecques — mais il a ' +
+            'aussi écrit un ouvrage aujourd\'hui perdu, Lieux plans, entièrement consacré à ce ' +
+            'type de problème : retrouver quelle courbe trace un point soumis à une condition de ' +
+            'distance. Le texte original a disparu, mais son contenu nous est connu grâce à ' +
+            'Pappus d\'Alexandrie, qui en a résumé les résultats plusieurs siècles plus tard — ' +
+            'c\'est ainsi que le nom d\'Apollonius est resté attaché à ce cercle précis, plus de ' +
+            'deux millénaires après sa découverte.',
+        },
         { kind: 'subheading', text: 'Somme de distances simples — un seuil différent' },
         {
           kind: 'attention',
@@ -1236,6 +1333,26 @@ export const lieuxGeometriques: ChapterContent = {
               '(5) précise la **restriction** — la portion vraiment balayée quand α parcourt son ' +
               'domaine.',
           ],
+        },
+        {
+          kind: 'application',
+          titre: 'Suivre un point que deux instruments croisent en même temps',
+          text:
+            "Deux radars (ou deux stations de triangulation au sol) qui tournent en " +
+            'synchronisation, chacun balayant l\'horizon à la même vitesse angulaire, voient ' +
+            'leurs deux faisceaux se croiser en un point qui se déplace tout seul au fil du ' +
+            'temps — exactement la configuration des deux génératrices de cette méthode. Les ' +
+            "marins l'utilisaient déjà avant l'informatique : deux phares, ou deux relevés " +
+            "d'angle successifs depuis le bateau, permettaient de retrouver par construction " +
+            "géométrique la trajectoire d'un autre navire ou la position d'un danger, sans " +
+            "aucun calcul électronique — seulement les mêmes outils d'élimination de paramètre " +
+            'que tu utilises dans cette section.',
+          domaines: ['Radar', 'Navigation maritime'],
+          image: {
+            src: '/images/application/radar.jpg',
+            alt: 'Antenne radar de poursuite longue portée',
+            caption: 'Antenne du radar ALTAIR, atoll de Kwajalein. US Army, domaine public.',
+          },
         },
         {
           kind: 'attention',
