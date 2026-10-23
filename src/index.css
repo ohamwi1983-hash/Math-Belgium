@@ -37,6 +37,10 @@
      fois réutilisé comme couleur de section sur la page d'accueil, voir `.home-level`/`
      .home-chapter-card:hover` dans ce fichier). */
   --sky-ink: #1f4e7d;
+  /* Fond doux assorti à --sky, pour le callout "À quoi ça sert ?" — même rôle que
+     --histoire-soft/--plan-soft (jamais utilisé comme fond avant ce callout, --sky lui-même reste
+     calibré pour un trait de diagramme). */
+  --sky-soft: #dde9f5;
   /* Rose dédié au même usage que --sky (groupe de couleurs multiples sur un diagramme, ex. cercle
      trigonométrique à 16 angles codé par 7 familles) — nécessaire dès qu'un diagramme a besoin d'une
      7e couleur distincte des 6 tons existants (accent/good/bad/plan/sky/ink), qui sont déjà tous pris
@@ -82,6 +86,7 @@
     --plan-soft: #221f33;
     --sky: #6ea8e8;
     --sky-ink: #a8cdf2;
+    --sky-soft: #17222c;
     --rose: #e07fb8;
     --histoire: #d6a86b;
     --histoire-soft: #2e2113;
@@ -736,6 +741,21 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 @media (max-width: 560px) {
   .historique-body { flex-direction: column; }
   .historique-figure { flex: none; max-width: 160px; margin: 0 auto; }
+}
+.callout-application { border-left-color: var(--sky); background: var(--sky-soft); }
+.callout-application .callout-label { color: var(--sky-ink); }
+.application-body { display: flex; gap: 18px; align-items: flex-start; margin-top: 8px; }
+.application-figure { flex: 0 0 140px; margin: 0; }
+.application-figure img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--line); }
+.application-figure figcaption { margin-top: 6px; font-size: 11px; color: var(--ink-faint); }
+.application-text { flex: 1; min-width: 0; }
+.application-titre { font-family: var(--serif); font-weight: 700; font-size: 17px; margin: 0 0 6px; color: var(--sky-ink); }
+.application-text p:last-of-type { margin-bottom: 0; }
+.application-domaines { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; }
+.application-domaines li { font: 600 11px/1 var(--sans); color: var(--sky-ink); background: var(--surface); border: 1px solid var(--sky); border-radius: 999px; padding: 4px 10px; }
+@media (max-width: 560px) {
+  .application-body { flex-direction: column; }
+  .application-figure { flex: none; max-width: 160px; margin: 0 auto; }
 }
 
 /* ---------- exemple résolu ---------- */

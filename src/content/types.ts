@@ -1022,7 +1022,7 @@ export type Block =
     }
   | {
       /**
-       * Encart historique "Le saviez-vous ?" — anecdote sur l'origine réelle d'une formule, d'une
+       * Encart historique "Le sais-tu ?" — anecdote sur l'origine réelle d'une formule, d'une
        * notation ou d'un développement mathématique (QUI, QUAND, POURQUOI), avec portrait du
        * mathématicien et/ou document d'époque (page de manuscrit, gravure...) quand une image
        * libre de droits existe. Toujours ancré dans ce que le contenu vient d'introduire
@@ -1039,6 +1039,32 @@ export type Block =
       image?: {
         /** Chemin public (`/images/historique/...`) ou URL externe stable (domaine public
          * vérifié) — jamais une image protégée par le droit d'auteur. */
+        src: string
+        alt: string
+        /** Qui, quoi, quand — texte brut (jamais RichText), sous l'image. */
+        caption: string
+      }
+    }
+  | {
+      /**
+       * Encart "À quoi ça sert ?" — une application CONCRÈTE et DÉVELOPPÉE (pas une simple
+       * mention) de la notion qui vient d'être introduite, dans une discipline hors maths pure
+       * (physique, économie, informatique, biologie...). `text` doit expliquer le MÉCANISME réel
+       * — comment la notion mathématique intervient effectivement dans le phénomène décrit —
+       * pas juste nommer un domaine qui "utilise ça". `domaines` donne la liste courte des
+       * disciplines concernées, en texte BRUT (comme `label`/`badge` ailleurs sur le site,
+       * jamais de LaTeX dedans) — toujours au moins une entrée, cohérente avec `text`. `image`
+       * suit exactement la même convention que `historique.image` (optionnel, no-export).
+       */
+      kind: 'application'
+      /** Titre court et concret de l'usage (ex. "Décrire un courant électrique alternatif"),
+       * jamais juste le nom de la discipline. */
+      titre: string
+      /** Passe par RichText (`$latex$`/`**gras**`), comme un `para` normal. */
+      text: string
+      /** 1 à 3 disciplines, texte brut, courtes (ex. "Électricité", "Physique"). */
+      domaines: string[]
+      image?: {
         src: string
         alt: string
         /** Qui, quoi, quand — texte brut (jamais RichText), sous l'image. */

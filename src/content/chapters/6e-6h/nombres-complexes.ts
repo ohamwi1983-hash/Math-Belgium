@@ -752,6 +752,25 @@ export const nombresComplexes: ChapterContent = {
           ],
         },
         {
+          kind: 'application',
+          titre: 'Décrire un courant électrique alternatif',
+          text:
+            "En électricité, un courant alternatif ne se décrit pas par un seul nombre : il a " +
+            'une amplitude ET une phase (son décalage dans le temps par rapport à la tension). ' +
+            'Les ingénieurs représentent une grandeur sinusoïdale par un nombre complexe — son ' +
+            "module donne l'amplitude, son argument donne la phase. L'**impédance** $Z$ d'un " +
+            'circuit généralise la résistance : $Z=R+jX$ (les électriciens notent $j$ au lieu ' +
+            "de $i$, pour ne pas confondre avec l'intensité du courant). $R$ est la résistance " +
+            'pure (partie réelle), $X$ est la **réactance** (partie imaginaire), due aux ' +
+            "bobines et aux condensateurs. Pour une résistance de $3\\,\\Omega$ en série avec " +
+            'une réactance de $4\\,\\Omega$ : $Z=3+4i$, donc $|Z|=\\sqrt{3^2+4^2}=5$ Ω ' +
+            "(l'opposition totale au courant) et $arg(Z)$ vaut environ 53° (le décalage entre " +
+            'tension et courant). Sans les complexes, calculer cette combinaison résistance + ' +
+            'bobine + condensateur demanderait de refaire de la trigonométrie à chaque étape — ' +
+            'ici, une seule addition de complexes suffit.',
+          domaines: ['Électricité', 'Physique'],
+        },
+        {
           kind: 'entrainement',
           title: 'Forme trigonométrique, module et argument',
           generatorId: '6gen37',
@@ -907,6 +926,25 @@ export const nombresComplexes: ChapterContent = {
             'Les coefficients binomiaux $C(n,k)$ sont purement COMBINATOIRES : ils ne ' +
             'dépendent que de $n$ et $k$, jamais de l\'angle $x$ — exactement comme dans le ' +
             'développement classique de $(a+b)^n$.',
+        },
+        {
+          kind: 'application',
+          titre: 'Comprendre si un cycle économique s\'amortit ou s\'amplifie',
+          text:
+            "Certains modèles économiques décrivent le revenu national d'une année sur la " +
+            "suivante par une relation de récurrence (il dépend des deux années précédentes). " +
+            "L'équation qui caractérise cette récurrence a parfois des racines COMPLEXES " +
+            "plutôt que réelles — et c'est exactement là que la formule de Moivre devient " +
+            'utile : si une racine a pour module $r$ et pour argument $\\theta$, sa puissance ' +
+            "$n$-ième (son effet $n$ années plus tard) vaut $r^n(\\cos(n\\theta)+i\\sin(n\\theta))$, " +
+            'la formule du haut de cette section. Le comportement du revenu au fil du temps ne ' +
+            'dépend donc que de $r$ et $\\theta$ : si $r<1$, les cycles économiques ' +
+            's\'amortissent peu à peu vers un équilibre stable ; si $r>1$, ils s\'amplifient ' +
+            '(cycle explosif) ; si $r=1$, le même cycle se répète indéfiniment. L\'argument ' +
+            '$\\theta$, lui, fixe la durée de ce cycle. Un économiste qui teste la stabilité ' +
+            "d'un modèle regarde donc exactement les deux mêmes nombres que toi dans cette " +
+            'section.',
+          domaines: ['Économie', 'Modélisation'],
         },
         {
           kind: 'entrainement',
@@ -1216,6 +1254,25 @@ export const nombresComplexes: ChapterContent = {
             'commutent toujours : leur composée a pour multiplicateur $ak=ka$, puisque la ' +
             'multiplication complexe est commutative. En revanche, une rotation et une ' +
             'translation ne commutent PAS en général — l\'ordre de composition compte.',
+        },
+        {
+          kind: 'application',
+          titre: 'Faire tourner un objet dans un jeu vidéo ou un bras robotisé',
+          text:
+            "Dans un moteur de jeu vidéo en 2D ou pour commander un bras robotisé, faire " +
+            'pivoter un objet revient exactement à la rotation que tu viens de voir : on ' +
+            'représente sa position par un nombre complexe $z$, et on le multiplie par ' +
+            "$e^{i\\theta}$ pour le faire tourner de l'angle $\\theta$ voulu. Comme " +
+            "$|e^{i\\theta}|=1$, cette multiplication ne change jamais la distance au centre " +
+            "de rotation — seul l'argument change, exactement la définition d'une rotation " +
+            'donnée plus haut. Un moteur de jeu répète cette opération à chaque image ' +
+            'affichée, avec un tout petit $\\theta$ à chaque fois : par la formule de Moivre, ' +
+            '$n$ petites rotations d\'angle $\\theta$ équivalent à une seule rotation d\'angle ' +
+            '$n\\theta$, ce qui garantit une animation fluide et prévisible. Un bras robotisé ' +
+            'articulé fonctionne sur le même principe : la position de sa pince se calcule en ' +
+            'composant, articulation par articulation, une suite de rotations — chacune une ' +
+            'simple multiplication par un nombre complexe de module 1.',
+          domaines: ['Informatique', 'Robotique', 'Jeux vidéo'],
         },
         {
           kind: 'entrainement',

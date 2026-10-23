@@ -103,7 +103,7 @@ export function Intuition({ block }: { block: Extract<Block, { kind: 'intuition'
   )
 }
 
-/** Encart historique "Le saviez-vous ?" — portrait/document d'époque optionnel à côté du texte.
+/** Encart historique "Le sais-tu ?" — portrait/document d'époque optionnel à côté du texte.
  * `image` exclu de l'export HTML (`no-export`) : le pipeline d'export clone le DOM/CSS tel quel
  * (voir `.claude/rules/export-pipeline.md`) et ne sait pas encore inliner une image bitmap en
  * `data:` URI comme il le fait déjà pour les polices — le texte (titre + anecdote) reste exporté,
@@ -115,7 +115,7 @@ export function Historique({ block }: { block: Extract<Block, { kind: 'historiqu
         <span className="icon" aria-hidden="true">
           📜
         </span>{' '}
-        Le saviez-vous ?
+        Le sais-tu ?
       </p>
       <div className="historique-body">
         {block.image && (
@@ -129,6 +129,42 @@ export function Historique({ block }: { block: Extract<Block, { kind: 'historiqu
           <p>
             <RichText text={block.text} />
           </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Encart "À quoi ça sert ?" — application concrète hors maths pure, teinte bleue (`--sky`) pour
+ * se distinguer à la fois des autres callouts et de `Historique` (sépia). `domaines` est rendu en
+ * texte BRUT (comme `label`/`badge` ailleurs), jamais de RichText dedans. Même convention
+ * `no-export` que `Historique` sur `image`. */
+export function Application({ block }: { block: Extract<Block, { kind: 'application' }> }) {
+  return (
+    <div className="callout callout-application">
+      <p className="callout-label">
+        <span className="icon" aria-hidden="true">
+          🌍
+        </span>{' '}
+        À quoi ça sert ?
+      </p>
+      <div className="application-body">
+        {block.image && (
+          <figure className="application-figure no-export">
+            <img src={block.image.src} alt={block.image.alt} loading="lazy" />
+            <figcaption>{block.image.caption}</figcaption>
+          </figure>
+        )}
+        <div className="application-text">
+          <p className="application-titre">{block.titre}</p>
+          <p>
+            <RichText text={block.text} />
+          </p>
+          <ul className="application-domaines">
+            {block.domaines.map((domaine, i) => (
+              <li key={i}>{domaine}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
