@@ -42,6 +42,11 @@
      7e couleur distincte des 6 tons existants (accent/good/bad/plan/sky/ink), qui sont déjà tous pris
      par ailleurs sur ce même diagramme. */
   --rose: #b23a7a;
+  /* Brun dédié au callout historique ("Le saviez-vous ?") — distinct de --accent (déjà pris par
+     les callouts méthode/mise en avant) pour que l'anecdote historique se reconnaisse d'un coup
+     d'œil comme une catégorie à part, pas une variante d'un callout existant. */
+  --histoire: #7a4a2a;
+  --histoire-soft: #f3e6d4;
   --on-accent: #fff8f0;
   --radius: 3px;
   --serif: "Fraunces", "Iowan Old Style", "Georgia", serif;
@@ -78,6 +83,8 @@
     --sky: #6ea8e8;
     --sky-ink: #a8cdf2;
     --rose: #e07fb8;
+    --histoire: #d6a86b;
+    --histoire-soft: #2e2113;
     --on-accent: #201404;
     color-scheme: dark;
   }
@@ -717,6 +724,19 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .callout-exemple .callout-label { color: var(--accent-ink); }
 .callout-intuition { border-left-color: var(--plan); background: var(--plan-soft); }
 .callout-intuition .callout-label { color: var(--plan-ink); }
+.callout-historique { border-left-color: var(--histoire); background: var(--histoire-soft); }
+.callout-historique .callout-label { color: var(--histoire); }
+.historique-body { display: flex; gap: 18px; align-items: flex-start; margin-top: 8px; }
+.historique-figure { flex: 0 0 140px; margin: 0; }
+.historique-figure img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--line); }
+.historique-figure figcaption { margin-top: 6px; font-size: 11px; color: var(--ink-faint); }
+.historique-text { flex: 1; min-width: 0; }
+.historique-titre { font-family: var(--serif); font-weight: 700; font-size: 17px; margin: 0 0 6px; color: var(--histoire); }
+.historique-text p:last-child { margin-bottom: 0; }
+@media (max-width: 560px) {
+  .historique-body { flex-direction: column; }
+  .historique-figure { flex: none; max-width: 160px; margin: 0 auto; }
+}
 
 /* ---------- exemple résolu ---------- */
 .exemple {

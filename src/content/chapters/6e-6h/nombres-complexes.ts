@@ -74,6 +74,28 @@ export const nombresComplexes: ChapterContent = {
           },
         },
         {
+          kind: 'historique',
+          titre: "Des nombres « impossibles » pour résoudre de vraies équations",
+          text:
+            "En 1545, le mathématicien italien **Jérôme Cardan** publie une méthode pour résoudre " +
+            "les équations du troisième degré. En l'appliquant à certains cas, sa formule fait " +
+            "apparaître des racines carrées de nombres négatifs, comme $\\sqrt{-15}$ — des " +
+            "quantités que personne, à l'époque, ne sait interpréter. Cardan les juge inutilisables " +
+            "et les écarte. C'est un autre Italien, **Rafael Bombelli**, qui va plus loin dans son " +
+            'Algebra (1572, page de titre ci-contre) : il montre qu\'en calculant AVEC ces ' +
+            "racines « impossibles » comme si elles obéissaient aux mêmes règles que les autres " +
+            "nombres, elles s'annulent proprement dans le résultat final — qui, lui, est bien un " +
+            "nombre réel. C'est la première preuve que ces nombres, même incompris, sont un outil " +
+            'de calcul valide.',
+          image: {
+            src: '/images/historique/bombelli-algebra.gif',
+            alt: "Page de titre de l'Algebra de Rafael Bombelli (1572)",
+            caption:
+              'Rafael Bombelli, Algebra, 1572 — première manipulation systématique des racines ' +
+              'carrées de nombres négatifs.',
+          },
+        },
+        {
           kind: 'definition',
           label: 'Nombres complexes égaux',
           items: [
@@ -580,6 +602,25 @@ export const nombresComplexes: ChapterContent = {
           ],
         },
         {
+          kind: 'historique',
+          titre: "La formule qu'Euler jugeait lui-même la plus belle des mathématiques",
+          text:
+            'La relation $e^{i\\theta}=\\cos\\theta+i\\sin\\theta$ porte le nom du mathématicien ' +
+            'suisse **Leonhard Euler**, qui la publie en 1748. Elle relie trois domaines qui ' +
+            "semblaient n'avoir rien en commun : l'exponentielle (algèbre), le cosinus et le " +
+            'sinus (trigonométrie), et $i$ (les nombres complexes). Son cas particulier pour ' +
+            '$\\theta=\\pi$, $e^{i\\pi}+1=0$, est resté célèbre : il réunit en une seule égalité ' +
+            'les cinq constantes fondamentales $e$, $i$, $\\pi$, $1$ et $0$. Un sondage mené en ' +
+            '1990 auprès des lecteurs de la revue Mathematical Intelligencer a classé cette ' +
+            'égalité en tête des **plus belles formules des mathématiques**.',
+          image: {
+            src: '/images/historique/euler.jpg',
+            alt: 'Portrait de Leonhard Euler',
+            caption:
+              'Leonhard Euler (1707–1783), portrait attribué à Jakob Emanuel Handmann, vers 1753.',
+          },
+        },
+        {
           kind: 'piege',
           text:
             'Dans $z=r(\\cos\\theta+i\\sin\\theta)$, $r$ est TOUJOURS positif ou nul, jamais ' +
@@ -731,6 +772,26 @@ export const nombresComplexes: ChapterContent = {
           kind: 'definition',
           label: 'Formule de Moivre',
           items: ['$(\\cos\\theta+i\\sin\\theta)^n = \\cos(n\\theta) + i\\sin(n\\theta)$, pour tout entier $n$'],
+        },
+        {
+          kind: 'historique',
+          titre: 'Abraham de Moivre et la formule qui porte son nom',
+          text:
+            'Le mathématicien français **Abraham de Moivre**, protestant réfugié à Londres après ' +
+            "la révocation de l'édit de Nantes, établit dès 1707 la relation " +
+            '$(\\cos\\theta+i\\sin\\theta)^n=\\cos(n\\theta)+i\\sin(n\\theta)$ qui porte aujourd\'hui ' +
+            'son nom — sans jamais l\'écrire avec la notation $i$ moderne, introduite plus tard ' +
+            "par Euler. Une anecdote restée célèbre raconte sa propre mort : vers la fin de sa " +
+            'vie, de Moivre aurait remarqué qu\'il dormait chaque jour un quart d\'heure de plus ' +
+            "que la veille. En prolongeant cette progression arithmétique jusqu'à ce que la " +
+            "durée de sommeil atteigne 24 heures, il aurait calculé — et prédit avec exactitude " +
+            '— la date de sa propre mort, le 27 novembre 1754.',
+          image: {
+            src: '/images/historique/demoivre.jpg',
+            alt: 'Portrait d\'Abraham de Moivre',
+            caption:
+              "Abraham de Moivre (1667–1754), gravure d'après un portrait de Joseph Highmore.",
+          },
         },
         {
           kind: 'illustration',

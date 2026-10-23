@@ -1020,6 +1020,31 @@ export type Block =
       operations: string[]
       direction?: 'forward' | 'backward'
     }
+  | {
+      /**
+       * Encart historique "Le saviez-vous ?" — anecdote sur l'origine réelle d'une formule, d'une
+       * notation ou d'un développement mathématique (QUI, QUAND, POURQUOI), avec portrait du
+       * mathématicien et/ou document d'époque (page de manuscrit, gravure...) quand une image
+       * libre de droits existe. Toujours ancré dans ce que le contenu vient d'introduire
+       * (CLAUDE.md, même principe que le callout `intuition`) — jamais une curiosité
+       * déconnectée placée au hasard. `image` est optionnel : certains mathématiciens
+       * historiques n'ont aucun portrait connu, mieux vaut alors omettre `image` qu'en inventer
+       * un ou en mettre un faux.
+       */
+      kind: 'historique'
+      /** Titre court et accrocheur du fait historique (pas juste le nom du mathématicien). */
+      titre: string
+      /** Passe par RichText (`$latex$`/`**gras**`), comme un `para` normal. */
+      text: string
+      image?: {
+        /** Chemin public (`/images/historique/...`) ou URL externe stable (domaine public
+         * vérifié) — jamais une image protégée par le droit d'auteur. */
+        src: string
+        alt: string
+        /** Qui, quoi, quand — texte brut (jamais RichText), sous l'image. */
+        caption: string
+      }
+    }
 
 export interface FormulaireFormule {
   /** Passe par `RichText` (`$latex$`/`**gras**`) — voir `.claude/rules/content-authoring.md`. */

@@ -103,6 +103,38 @@ export function Intuition({ block }: { block: Extract<Block, { kind: 'intuition'
   )
 }
 
+/** Encart historique "Le saviez-vous ?" — portrait/document d'époque optionnel à côté du texte.
+ * `image` exclu de l'export HTML (`no-export`) : le pipeline d'export clone le DOM/CSS tel quel
+ * (voir `.claude/rules/export-pipeline.md`) et ne sait pas encore inliner une image bitmap en
+ * `data:` URI comme il le fait déjà pour les polices — le texte (titre + anecdote) reste exporté,
+ * seule l'image est omise plutôt que de casser le fichier HTML autonome une fois ouvert hors ligne. */
+export function Historique({ block }: { block: Extract<Block, { kind: 'historique' }> }) {
+  return (
+    <div className="callout callout-historique">
+      <p className="callout-label">
+        <span className="icon" aria-hidden="true">
+          📜
+        </span>{' '}
+        Le saviez-vous ?
+      </p>
+      <div className="historique-body">
+        {block.image && (
+          <figure className="historique-figure no-export">
+            <img src={block.image.src} alt={block.image.alt} loading="lazy" />
+            <figcaption>{block.image.caption}</figcaption>
+          </figure>
+        )}
+        <div className="historique-text">
+          <p className="historique-titre">{block.titre}</p>
+          <p>
+            <RichText text={block.text} />
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /** Callout "Définitions" — paragraphes de définition formelle (pas une liste à puces, contrairement
  * à `Rappel`). */
 export function Definition({ block }: { block: Extract<Block, { kind: 'definition' }> }) {

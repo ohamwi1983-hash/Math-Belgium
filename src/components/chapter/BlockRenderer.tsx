@@ -1,7 +1,7 @@
 import type { Block } from '../../content/types'
 import { RichText } from '../Math'
 import { Illustration } from '../illustrations/Illustration'
-import { Rappel, Methode, Attention, Astuce, PiegeClassique, Definition, Intuition } from './Callouts'
+import { Rappel, Methode, Attention, Astuce, PiegeClassique, Definition, Intuition, Historique } from './Callouts'
 import { ExempleResolu } from './ExempleResolu'
 import { WrongRight } from './WrongRight'
 import { CarteEntrainement } from './CarteEntrainement'
@@ -49,6 +49,8 @@ export function BlockRenderer({ block }: { block: Block }) {
       return <Intuition block={block} />
     case 'definition':
       return <Definition block={block} />
+    case 'historique':
+      return <Historique block={block} />
     case 'exemple':
       return <ExempleResolu block={block} />
     case 'exempleLibre':
