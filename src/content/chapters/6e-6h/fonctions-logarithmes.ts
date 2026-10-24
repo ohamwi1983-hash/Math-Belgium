@@ -509,6 +509,30 @@ export const fonctionsLogarithmes: ChapterContent = {
             alt: 'Carte perforée, chaque trou codant un bit d\'information',
             caption: 'Une carte perforée : chaque position codait un bit (trou ou pas de trou), l\'unité même que log₂(N) permet de compter. Domaine public.',
           },
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.3,
+              xMax: 7.5,
+              yMin: -0.8,
+              yMax: 3.8,
+              vectors: [
+                { from: { x: 0, y: 3 }, to: { x: 7, y: 3 }, tone: 'accent', arrow: false },
+                { from: { x: 4, y: 2 }, to: { x: 7, y: 2 }, tone: 'accent', arrow: false },
+                { from: { x: 6, y: 1 }, to: { x: 7, y: 1 }, tone: 'accent', arrow: false },
+              ],
+              points: [
+                { x: 7, y: 0, label: 'trouvé !', tone: 'good', labelPos: 'below' },
+                { x: 0, y: 3.35, label: '8 possibilités', tone: 'accent', labelPos: 'right', node: false },
+                { x: 0, y: 2.35, label: '4 restantes — question 1', tone: 'accent', labelPos: 'right', node: false },
+                { x: 0, y: 1.35, label: '2 restantes — question 2', tone: 'accent', labelPos: 'right', node: false },
+              ],
+              caption:
+                'Deviner un chiffre parmi 8 (0 à 7) en demandant à chaque fois « c\'est dans ' +
+                'la moitié haute ou basse ? » : 3 questions suffisent toujours — exactement ' +
+                'log₂(8) = 3 bits.',
+            },
+          ],
           text:
             "En informatique, la quantité d'information nécessaire pour distinguer N " +
             'possibilités égales se mesure en bits par $\\log_2(N)$ — le changement de base ' +
@@ -1559,6 +1583,40 @@ export const fonctionsLogarithmes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Lire un taux de croissance directement sur un graphique économique',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 100 * Math.exp(0.05 * t), tone: 'accent' }],
+              xMin: 0,
+              xMax: 40,
+              xTicks: [0, 20, 40],
+              fixedYRange: { min: 0, max: 800 },
+              points: [
+                { x: 0, y: 100, label: 'f(0)=100', tone: 'accent', labelPos: 'right' },
+                { x: 40, y: 739, label: 'f(40)≈739', tone: 'accent', labelPos: 'left' },
+              ],
+              xAxisLabel: 't (années)',
+              yAxisLabel: 'f(t)',
+              caption:
+                'Un chiffre d\'affaires croissant à taux constant de 5%/an : f(t)=100·e^(0,05t). ' +
+                'Courbe qui se creuse de plus en plus — difficile à lire une pente précise ' +
+                "dessus.",
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => Math.log(100 * Math.exp(0.05 * t)), tone: 'good' }],
+              xMin: 0,
+              xMax: 40,
+              xTicks: [0, 20, 40],
+              fixedYRange: { min: 0, max: 7 },
+              xAxisLabel: 't (années)',
+              yAxisLabel: 'ln(f(t))',
+              caption:
+                'La MÊME croissance, mais en traçant ln(f(t)) : une droite, dont la pente ' +
+                '(0,05) EST directement le taux de croissance relatif — plus besoin de ' +
+                "calculer f'(t)/f(t), il suffit de lire la pente sur ce graphique.",
+            },
+          ],
           text:
             'En économie, le rapport $\\dfrac{f\'(x)}{f(x)}$ que tu viens de calculer — la ' +
             'dérivée logarithmique — a un sens concret très utilisé : c\'est le **taux de ' +
@@ -1846,6 +1904,44 @@ export const fonctionsLogarithmes: ChapterContent = {
             alt: 'Dictionnaire ouvert',
             caption: 'Un dictionnaire — chercher un mot en l\'ouvrant d\'abord au milieu, puis en répétant, est exactement la recherche dichotomique du texte. Photo : Dr. Marcus Gossler, CC BY-SA 3.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (n) => Math.log2(Math.max(n, 1)), tone: 'good' },
+                { fn: (n) => n, tone: 'bad' },
+              ],
+              xMin: 0,
+              xMax: 100,
+              xTicks: [0, 50, 100],
+              fixedYRange: { min: 0, max: 60 },
+              textLabels: [
+                { x: 30, y: 10, text: 'dichotomique : log₂(n)', tone: 'good', anchor: 'start' },
+                { x: 5, y: 50, text: 'naïve : n', tone: 'bad', anchor: 'start' },
+              ],
+              xAxisLabel: 'n (taille des données)',
+              yAxisLabel: 'comparaisons',
+              caption:
+                "Nombre de comparaisons nécessaires selon la taille n : la recherche naïve " +
+                '(rouge) explose en ligne droite, la dichotomique (verte) reste quasiment ' +
+                "plate — elle sort même du cadre de ce graphique avant n'avoir atteint 60.",
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (k) => Math.log2(Math.pow(10, k)), tone: 'good' }],
+              xMin: 0,
+              xMax: 9,
+              xTicks: [0, 3, 6, 9],
+              fixedYRange: { min: 0, max: 32 },
+              points: [{ x: 9, y: 29.9, label: '10⁹ données → ≈30 comparaisons', tone: 'good', labelPos: 'left' }],
+              xAxisLabel: 'n = 10^k',
+              yAxisLabel: 'comparaisons (log₂n)',
+              caption:
+                'Chaque facteur 10 de plus sur la taille des données (k+1) ne coûte que ' +
+                '+log₂(10)≈3,32 comparaisons en plus — une droite très plate, là où la ' +
+                'taille des données explose, elle, de façon multiplicative.',
+            },
+          ],
           text:
             'En informatique, la recherche dichotomique (chercher un mot dans un ' +
             'dictionnaire trié en divisant à chaque étape les possibilités restantes par 2) ' +

@@ -724,6 +724,45 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             alt: 'Bras robotisés industriels KUKA sur une chaîne de montage',
             caption: 'Bras robotisés industriels KUKA. Photo : Mixabest, CC BY-SA 3.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => Math.sin(x), tone: 'accent', xMin: -PI / 2, xMax: PI / 2 }],
+              xMin: -PI / 2 - 0.15,
+              xMax: PI / 2 + 0.15,
+              xTicks: [-PI / 2, PI / 2],
+              xTickLabels: { [-PI / 2]: '-π/2', [PI / 2]: 'π/2' },
+              fixedYRange: { min: -1.2, max: 1.2 },
+              points: [{ x: 0.8727, y: 0.766, label: '', tone: 'accent' }],
+              textLabels: [{ x: -PI / 2 + 0.1, y: -1.05, text: 'direct : θ → position', tone: 'accent', anchor: 'start' }],
+              xAxisLabel: 'θ (angle)',
+              yAxisLabel: 'position',
+              caption:
+                "La fonction qui transforme un angle θ en position (sin, restreinte pour être " +
+                'bijective) — lire de gauche à droite donne la cinématique DIRECTE (angle connu ' +
+                '→ position calculée) ; lire de droite à gauche, à partir d\'une position ' +
+                "cible, donne la cinématique INVERSE — c'est arcsin qui fait cette lecture.",
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -0.3,
+              xMax: 1.6,
+              yMin: -0.3,
+              yMax: 1.6,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 0.9, y: 1.073 }, tone: 'accent' },
+                { from: { x: 0.9, y: 1.073 }, to: { x: 0.9, y: 0 }, tone: 'faint', dashed: true, arrow: false },
+                { from: { x: 0.9, y: 1.073 }, to: { x: 0, y: 1.073 }, tone: 'faint', dashed: true, arrow: false },
+              ],
+              points: [{ x: 0.9, y: 1.073, label: 'pince', tone: 'accent', labelPos: 'above' }],
+              angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 50, radiusPx: 26, label: 'θ', tone: 'accent' }],
+              caption:
+                "Le bras vu de dessus : à partir de l'angle θ de l'articulation, la position " +
+                'de la pince se calcule directement (trigonométrie). Mais si c\'est la ' +
+                "position qui est imposée, il faut inverser — retrouver θ à partir de la " +
+                "hauteur de la pince, exactement le rôle d'arcsin.",
+            },
+          ],
           text:
             'En robotique, un bras articulé doit souvent atteindre une position précise dans ' +
             "l'espace — attraper un objet, souder un point donné. Calculer la position de la " +
@@ -1144,6 +1183,50 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
             alt: "Un crayon plongé dans un verre d'eau paraissant cassé à cause de la réfraction",
             caption: "Un crayon dans un verre d'eau : la réfraction à la surface le fait paraître cassé. Photo : Snehit Jamre, CC BY-SA 4.0, via Wikimedia Commons.",
           },
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -1.4,
+              xMax: 1.4,
+              yMin: -1.3,
+              yMax: 1.3,
+              vectors: [
+                { from: { x: -0.836, y: 0.996 }, to: { x: 0, y: 0 }, tone: 'accent' },
+                { from: { x: 0, y: 0 }, to: { x: 0.532, y: -0.962 }, tone: 'good' },
+                { from: { x: 0, y: -1.2 }, to: { x: 0, y: 1.2 }, tone: 'faint', dashed: true, arrow: false },
+                { from: { x: -1.3, y: 0 }, to: { x: 1.3, y: 0 }, tone: 'ink', arrow: false },
+              ],
+              angleArcs: [
+                { cx: 0, cy: 0, fromDeg: 90, toDeg: 130, radiusPx: 26, label: 'θ₁', tone: 'accent' },
+                { cx: 0, cy: 0, fromDeg: 270, toDeg: 298.93, radiusPx: 22, label: 'θ₂', tone: 'good' },
+              ],
+              points: [
+                { x: -1.05, y: 0.55, label: 'air', tone: 'ink', node: false },
+                { x: -1.05, y: -0.5, label: 'eau', tone: 'ink', node: false },
+              ],
+              caption:
+                "Le rayon incident (orange, angle θ₁=40° par rapport à la normale pointillée) " +
+                'se rapproche de la normale en entrant dans l\'eau — le rayon réfracté (vert) ' +
+                'fait un angle θ₂ plus petit, exactement ce que calcule la formule ci-dessous.',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => (Math.asin(Math.sin((x * PI) / 180) / 1.33) * 180) / PI, tone: 'good' }],
+              xMin: 0,
+              xMax: 90,
+              xTicks: [30, 60, 90],
+              yTicks: [30, 60],
+              fixedYRange: { min: 0, max: 70 },
+              points: [{ x: 40, y: 28.93, label: '', tone: 'accent' }],
+              textLabels: [{ x: 45, y: 12, text: 'θ₁=40° → θ₂≈28,9°', tone: 'accent', anchor: 'start' }],
+              xAxisLabel: 'θ1 (air)',
+              yAxisLabel: 'θ2 (eau)',
+              caption:
+                'θ₂ en fonction de θ₁ pour un passage air→eau (n₁=1 ; n₂=1,33) : ' +
+                'θ₂ = arcsin(sin(θ₁)/1,33). Le rayon réfracté fait toujours un angle plus ' +
+                'petit que le rayon incident.',
+            },
+          ],
           text:
             "Quand un rayon de lumière passe d'un milieu à un autre — de l'air à l'eau, par " +
             "exemple — il change de direction : c'est la **réfraction**. La loi de " +
@@ -1662,6 +1745,47 @@ export const fonctionsReciproquesCyclometriques: ChapterContent = {
         {
           kind: 'application',
           titre: 'Trouver la meilleure place pour regarder un écran',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.3,
+              xMax: 3.6,
+              yMin: -0.3,
+              yMax: 4.6,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 0 }, tone: 'faint', dashed: true, arrow: false },
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 1 }, tone: 'accent' },
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 4 }, tone: 'good' },
+                { from: { x: 3, y: 1 }, to: { x: 3, y: 4 }, tone: 'ink', arrow: false },
+              ],
+              points: [
+                { x: 3, y: 1, label: 'bas (a)', tone: 'accent', labelPos: 'right' },
+                { x: 3, y: 4, label: 'haut (b)', tone: 'good', labelPos: 'right' },
+                { x: 0, y: 0, label: 'toi', tone: 'ink', labelPos: 'left' },
+              ],
+              angleArcs: [{ cx: 0, cy: 0, fromDeg: 18.43, toDeg: 53.13, radiusPx: 50, label: 'θ', tone: 'bad' }],
+              caption:
+                "Depuis ta place, à distance x du mur, l'écran (entre les hauteurs a et b au-" +
+                "dessus de tes yeux) est vu sous l'angle θ — la différence entre les deux " +
+                'angles arctan vers le haut et le bas de l\'écran.',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => ((Math.atan(4 / x) - Math.atan(1 / x)) * 180) / PI, tone: 'good' }],
+              xMin: 0.2,
+              xMax: 12,
+              xTicks: [2, 4, 6, 8, 10],
+              fixedYRange: { min: 0, max: 40 },
+              points: [{ x: 2, y: 36.87, label: '', tone: 'bad' }],
+              textLabels: [{ x: 2.6, y: 30, text: 'maximum en x=2 (θ≈36,9°)', tone: 'bad', anchor: 'start' }],
+              xAxisLabel: 'distance x',
+              yAxisLabel: 'angle θ (°)',
+              caption:
+                'θ(x) = arctan(4/x) − arctan(1/x), pour a=1 et b=4 (en unités de hauteur ' +
+                "d'yeux) : l'angle est maximal à une distance précise — ni trop près ni trop " +
+                'loin — exactement le sommet de cette courbe, trouvé en dérivant.',
+            },
+          ],
           text:
             "Au cinéma ou devant un grand panneau publicitaire, l'angle sous lequel tu vois " +
             "l'écran — et donc ton confort visuel — dépend de ta distance au mur. Trop près, " +
