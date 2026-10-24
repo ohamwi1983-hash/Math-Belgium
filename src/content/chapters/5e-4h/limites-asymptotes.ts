@@ -144,6 +144,23 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Pourquoi un parachutiste cesse d\'accélérer',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 200 * (1 - Math.exp(-0.2 * t)), tone: 'accent' }],
+              xMin: 0,
+              xMax: 30,
+              xTicks: [10, 20, 30],
+              yTicks: [100, 200],
+              horizontalAsymptotes: [{ y: 200, label: 'v_max = 200 km/h' }],
+              xAxisLabel: 'temps de chute (s)',
+              yAxisLabel: 'vitesse (km/h)',
+              caption:
+                'La vitesse grimpe vite dans les premières secondes, puis se rapproche de plus ' +
+                'en plus lentement de 200 km/h sans jamais vraiment l\'atteindre — une asymptote ' +
+                'horizontale, exactement comme les courbes de cette section.',
+            },
+          ],
           text:
             "Quand un parachutiste saute, la gravité l'accélère... mais pas indéfiniment : " +
             "l'air exerce une résistance qui augmente avec la vitesse. Sa vitesse $v(t)$ suit " +
@@ -715,6 +732,28 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Lire sur un graphique combien de temps un médicament reste actif',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 100 * Math.pow(0.5, t / 4), tone: 'accent' }],
+              xMin: -1.5,
+              xMax: 20,
+              xTicks: [4, 8, 12, 16, 20],
+              yTicks: [25, 50, 100],
+              horizontalAsymptotes: [{ y: 0, label: '0 (jamais atteint)' }],
+              points: [
+                { x: 0, y: 100, label: '100 %', tone: 'accent', labelPos: 'above' },
+                { x: 4, y: 50, label: '50 % — 1 demi-vie', tone: 'good', labelPos: 'above' },
+                { x: 8, y: 25, label: '25 % — 2 demi-vies', tone: 'good', labelPos: 'right' },
+              ],
+              xAxisLabel: 'temps (h)',
+              yAxisLabel: 'concentration (%)',
+              caption:
+                'Une demi-vie de 4 h : la concentration est divisée par deux toutes les 4 ' +
+                "heures, en se rapprochant de 0 sans jamais l'atteindre — on lit la demi-vie en " +
+                'cherchant où la courbe franchit la moitié de sa valeur précédente.',
+            },
+          ],
           text:
             "Après une injection, la concentration d'un médicament dans le sang suit une " +
             'courbe décroissante qui se rapproche d\'autant plus de 0 que le temps passe, sans ' +
@@ -975,6 +1014,24 @@ export const limitesAsymptotes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Prévoir la concentration finale d\'une réaction chimique',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 0.2 + 0.8 * Math.exp(-0.2 * t), tone: 'accent' }],
+              xMin: 0,
+              xMax: 30,
+              xTicks: [10, 20, 30],
+              yTicks: [0.2, 0.5, 1],
+              horizontalAsymptotes: [{ y: 0.2, label: 'C_eq = 0,2 mol/L' }],
+              xAxisLabel: 'temps (min)',
+              yAxisLabel: 'concentration (mol/L)',
+              caption:
+                "La concentration d'un réactif, partie de 1 mol/L, décroît et se stabilise vers " +
+                "0,2 mol/L — PAS vers 0 : contrairement à une simple disparition, la réaction " +
+                "atteint ici un équilibre où réactif et produit coexistent. L'asymptote " +
+                'horizontale donne directement cette concentration théorique.',
+            },
+          ],
           text:
             "Dans de nombreuses réactions chimiques, la concentration d'un réactif ou d'un " +
             'produit évolue selon une fonction du temps qui admet une asymptote horizontale : ' +

@@ -592,6 +592,31 @@ export const suites: ChapterContent = {
         {
           kind: 'application',
           titre: "Pourquoi une population animale ne grandit pas indéfiniment",
+          illustrations: [
+            {
+              kind: 'sequencePlot',
+              points: [
+                { n: 0, value: 50, label: '50' },
+                { n: 1, value: 95, label: '95' },
+                { n: 2, value: 170, label: '170' },
+                { n: 3, value: 280, label: '280' },
+                { n: 4, value: 380, label: '380' },
+                { n: 5, value: 440, label: '440' },
+                { n: 6, value: 470, label: '470' },
+                { n: 7, value: 485, label: '485' },
+                { n: 8, value: 492, label: '492' },
+              ],
+              connector: 'straight',
+              referenceLine: { value: 500, label: 'K' },
+              trendLabel: { afterIndex: 8, text: 'Pₙ → 500' },
+              xAxisLabel: 'année n',
+              yAxisLabel: 'effectif de la population',
+              caption:
+                "La croissance ralentit d'année en année et l'effectif se rapproche de la " +
+                'capacité limite K = 500 sans jamais vraiment la dépasser — exactement le ' +
+                'comportement d\'une suite convergente de cette section.',
+            },
+          ],
           text:
             "Une population animale introduite dans un nouveau milieu croît d'abord vite, " +
             'presque comme une suite géométrique — chaque génération se reproduit librement. ' +
@@ -760,6 +785,26 @@ export const suites: ChapterContent = {
         {
           kind: 'application',
           titre: 'Pourquoi les tournesols comptent en Fibonacci',
+          illustrations: [
+            {
+              kind: 'complexPlane',
+              xMin: -5.5,
+              xMax: 5.5,
+              yMin: -5.5,
+              yMax: 5.5,
+              points: Array.from({ length: 100 }, (_, n) => {
+                const angle = n * 137.50776405003785 * (Math.PI / 180)
+                const r = 0.5 * Math.sqrt(n)
+                return { x: r * Math.cos(angle), y: r * Math.sin(angle), tone: 'ink' as const }
+              }),
+              caption:
+                "Chaque graine placée à un angle de 137,5° (l'angle d'or) de plus que la " +
+                "précédente, à une distance croissante du centre — aucune formule de Fibonacci " +
+                "n'est utilisée pour ce dessin, et pourtant les spirales à 34/55 branches " +
+                'apparaissent toutes seules : c\'est cet angle précis, irrationnel, qui les fait ' +
+                'émerger.',
+            },
+          ],
           text:
             "Observe le cœur d'un tournesol : ses graines s'organisent en deux familles de " +
             'spirales qui s\'enroulent en sens opposés. Compte le nombre de spirales de chaque ' +
@@ -1069,6 +1114,28 @@ export const suites: ChapterContent = {
         {
           kind: 'application',
           titre: "Calculer combien il te reste à rembourser sur un emprunt",
+          illustrations: [
+            {
+              kind: 'sequencePlot',
+              points: [
+                { n: 0, value: 10000, label: '10 000' },
+                { n: 1, value: 9750, label: '9 750' },
+                { n: 2, value: 9499, label: '9 499' },
+                { n: 3, value: 9246, label: '9 246' },
+                { n: 4, value: 8992, label: '8 992' },
+                { n: 5, value: 8737, label: '8 737' },
+              ],
+              connector: 'straight',
+              stepIndicator: { fromIndex: 0, toIndex: 1, label: '×1,005 − 300' },
+              referenceLine: { value: 0, label: 'u=0' },
+              xAxisLabel: 'mensualité n',
+              yAxisLabel: 'capital restant dû (€)',
+              caption:
+                "Emprunt de 10 000 € à 0,5 % d'intérêt mensuel, remboursé par mensualités de " +
+                '300 € : $u_{n+1}=1{,}005\\times u_n - 300$. Le capital décroît mois après mois ' +
+                'jusqu\'à atteindre 0 — la date de fin de prêt.',
+            },
+          ],
           text:
             'Un emprunt remboursé par mensualités fixes suit exactement une suite récurrente ' +
             "affine. Chaque mois, la banque calcule d'abord les intérêts sur le capital " +

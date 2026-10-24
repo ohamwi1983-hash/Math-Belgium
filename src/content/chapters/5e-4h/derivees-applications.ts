@@ -639,6 +639,43 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'application',
           titre: 'Trouver le moment où un sprinteur accélère le plus',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 10.5 / (1 + Math.exp(-1.2 * (t - 1.5))), tone: 'accent' }],
+              xMin: 0,
+              xMax: 6,
+              xTicks: [1.5, 3, 4.5, 6],
+              yTicks: [5.25, 10.5],
+              points: [{ x: 1.5, y: 5.25, label: "point d'inflexion", tone: 'good', labelPos: 'right' }],
+              xAxisLabel: 'temps (s)',
+              yAxisLabel: 'vitesse v(t) (m/s)',
+              caption:
+                "La vitesse v(t) : elle accélère fort au début, puis de moins en moins — le " +
+                "point d'inflexion (en t=1,5 s) est exactement l'instant où l'accélération " +
+                'bascule de « croissante » à « décroissante ».',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [
+                {
+                  fn: (t) => (10.5 * 1.2 * Math.exp(-1.2 * (t - 1.5))) / Math.pow(1 + Math.exp(-1.2 * (t - 1.5)), 2),
+                  tone: 'good',
+                },
+              ],
+              xMin: 0,
+              xMax: 6,
+              xTicks: [1.5, 3, 4.5, 6],
+              yTicks: [3.15],
+              points: [{ x: 1.5, y: 3.15, label: 'accélération MAXIMALE', tone: 'good', labelPos: 'above' }],
+              xAxisLabel: 'temps (s)',
+              yAxisLabel: "accélération v'(t) (m/s²)",
+              caption:
+                "L'accélération v'(t) : c'est bien son MAXIMUM qui tombe en t=1,5 s — le même " +
+                'instant que le point d\'inflexion de v(t) ci-dessus, lu cette fois comme un ' +
+                "sommet sur la courbe de v' plutôt que comme une bascule sur la courbe de v.",
+            },
+          ],
           text:
             "Un sprinteur au 100 m ne court pas à vitesse constante : il accélère fortement au " +
             "départ, puis son accélération diminue progressivement jusqu'à ce qu'il atteigne " +
@@ -799,6 +836,23 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'application',
           titre: "Trouver le moment où un médicament agit le plus fort",
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 5 * t * Math.exp(-0.5 * t), tone: 'accent' }],
+              xMin: 0,
+              xMax: 12,
+              xTicks: [2, 4, 6, 8, 10, 12],
+              yTicks: [3.68],
+              points: [{ x: 2, y: 3.68, label: 'pic — concentration max', tone: 'good', labelPos: 'above' }],
+              xAxisLabel: 'temps depuis la prise (h)',
+              yAxisLabel: 'concentration C(t)',
+              caption:
+                "Modèle $C(t)=5t\\,e^{-0{,}5t}$ : la concentration monte pendant l'absorption, " +
+                "atteint son pic en t=2 h (où $C'(t)=0$ ET change de signe), puis redescend " +
+                "pendant l'élimination — exactement un extremum local de C.",
+            },
+          ],
           text:
             "Après la prise d'un médicament par voie orale, sa concentration $C(t)$ dans le " +
             'sang augmente d\'abord (absorption), atteint un pic, puis diminue (élimination). ' +
@@ -1117,6 +1171,24 @@ export const deriveesApplications: ChapterContent = {
         {
           kind: 'application',
           titre: 'Minimiser la quantité de métal d\'une canette',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (r) => 2 * Math.PI * r * r + (2 * 330) / r, tone: 'accent', xMin: 1.5, xMax: 8 }],
+              xMin: 0,
+              xMax: 8,
+              xTicks: [2, 4, 6, 8],
+              fixedYRange: { min: 0, max: 700 },
+              points: [{ x: 3.75, y: 264, label: 'minimum — r ≈ 3,75 cm', tone: 'good', labelPos: 'above' }],
+              xAxisLabel: 'rayon r (cm)',
+              yAxisLabel: 'aire totale (cm²)',
+              caption:
+                'Pour un volume fixé à 330 cm³, $A(r)=2\\pi r^2+660/r$ (base+couvercle+paroi, ' +
+                'hauteur éliminée via la contrainte de volume) atteint son minimum en r≈3,75 cm ' +
+                '— et donne alors h≈2r, le rapport que la plupart des canettes du commerce ' +
+                'respectent de près.',
+            },
+          ],
           text:
             "Une canette de boisson a un volume fixé par la réglementation (33 cl, par " +
             "exemple) — mais sa forme, elle, n'est pas imposée : seul le couple rayon/hauteur " +
