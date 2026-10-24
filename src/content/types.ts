@@ -1085,15 +1085,20 @@ export type Block =
          * au domaine public, cette licence l'exige. */
         caption: string
       }
-      /** Diagramme généré (même moteur que le kind `illustration` ailleurs — `complexPlane`,
-       * `vectorPlane`, `curvePlot`...) qui rend visible le MÉCANISME mathématique utilisé dans ce
-       * contexte, avec les valeurs concrètes de `text` reportées sur la figure (ex. l'impédance
-       * $Z=3+4i$ comme point du plan complexe, plutôt qu'une photo d'oscilloscope qui ne montre
-       * que l'objet et jamais le nombre complexe lui-même). À préférer à `image` chaque fois que
-       * le mécanisme se prête à un dessin — une photo d'objet reconnaissable (un théodolite, un
-       * cadenas) n'explique rien que le texte ne dise déjà, alors qu'un diagramme fait vraiment
-       * voir le calcul en train de se faire. */
-      illustration?: IllustrationSpec
+      /** 1 à 3 diagrammes générés (même moteur que le kind `illustration` ailleurs —
+       * `complexPlane`, `vectorPlane`, `curvePlot`...) qui rendent visible le MÉCANISME
+       * mathématique utilisé dans ce contexte, avec les valeurs concrètes de `text` reportées sur
+       * la figure (ex. l'impédance $Z=3+4i$ comme point du plan complexe, plutôt qu'une photo
+       * d'oscilloscope qui ne montre que l'objet et jamais le nombre complexe lui-même). À
+       * préférer à `image` chaque fois que le mécanisme se prête à un dessin — une photo d'objet
+       * reconnaissable (un théodolite, un cadenas) n'explique rien que le texte ne dise déjà,
+       * alors qu'un diagramme fait vraiment voir le calcul en train de se faire. Tableau plutôt
+       * qu'un seul diagramme : une application se comprend rarement d'un seul coup d'œil — ex.
+       * pour l'impédance, un diagramme montrant Z comme point du plan ET un second montrant les
+       * deux sinusoïdes tension/courant déphasées valent mieux qu'un seul qui ne couvrirait
+       * qu'une des deux facettes. En mettre assez pour vraiment faire comprendre l'application,
+       * jamais un seul posé par réflexe ni plusieurs qui répéteraient la même idée. */
+      illustrations?: IllustrationSpec[]
     }
 
 export interface FormulaireFormule {

@@ -787,14 +787,18 @@ ul.plain li, ol.plain li { margin: 6px 0; }
     repeating-linear-gradient(90deg, var(--sky-grid) 0 1px, transparent 1px 20px);
 }
 .callout-application .callout-label { color: var(--sky-ink); }
+/* un ou plusieurs diagrammes (illustration), en rangée AU-DESSUS du texte plutôt qu'en vignette
+   latérale étroite — une application se comprend rarement avec un seul petit schéma coincé à
+   côté du texte ; le diagram-frame fournit déjà son propre fond/bordure. */
+.application-diagrams {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 8px 0 14px;
+}
+.application-diagrams figure { margin: 0; }
+.application-diagrams .diagram-frame { padding: 10px; }
 .application-body { display: flex; gap: 18px; align-items: flex-start; margin-top: 8px; }
 .application-figure { flex: 0 0 140px; margin: 0; }
 .application-figure img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--line); }
 .application-figure figcaption { margin-top: 6px; font-size: 11px; color: var(--ink-faint); }
-/* diagramme (illustration) plutôt qu'une photo : plus large (labels à faire tenir), le cadre
-   diagram-frame fournit déjà son propre fond/bordure, pas besoin de celle de l'img ci-dessus. */
-.application-figure--diagram { flex: 0 0 230px; }
-.application-figure--diagram .diagram-frame { padding: 10px; }
 .application-text { flex: 1; min-width: 0; }
 .application-titre { font-family: var(--serif); font-weight: 700; font-size: 17px; margin: 0 0 6px; color: var(--sky-ink); }
 .application-text p:last-of-type { margin-bottom: 0; }
@@ -806,7 +810,7 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 @media (max-width: 560px) {
   .application-body { flex-direction: column; }
   .application-figure { flex: none; max-width: 160px; margin: 0 auto; }
-  .application-figure--diagram { max-width: 260px; }
+  .application-diagrams { grid-template-columns: 1fr; }
 }
 
 /* ---------- exemple résolu ---------- */

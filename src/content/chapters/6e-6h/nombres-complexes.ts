@@ -754,30 +754,54 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Décrire un courant électrique alternatif',
-          illustration: {
-            kind: 'complexPlane',
-            xMin: -1,
-            xMax: 5.5,
-            yMin: -1,
-            yMax: 5.5,
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 3, y: 4 }, tone: 'accent' },
-              { from: { x: 3, y: 4 }, to: { x: 3, y: 0 }, tone: 'faint', dashed: true },
-              { from: { x: 3, y: 4 }, to: { x: 0, y: 4 }, tone: 'faint', dashed: true },
-            ],
-            points: [
-              { x: 3, y: 4, label: 'Z = 3+4i', tone: 'accent', labelPos: 'above' },
-              { x: 3, y: 0, label: 'R = 3 Ω', tone: 'ink', labelPos: 'below', node: false },
-              { x: 0, y: 4, label: 'X = 4 Ω', tone: 'ink', labelPos: 'left', node: false },
-            ],
-            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 53, radiusPx: 28, label: 'φ', tone: 'good' }],
-            caption:
-              "L'impédance Z = 3+4i comme point du plan complexe : sa partie réelle R = 3 Ω " +
-              '(résistance) et sa partie imaginaire X = 4 Ω (réactance) se lisent en projetant Z ' +
-              'sur les deux axes. Le module |Z| = 5 Ω — la longueur du vecteur — est ' +
-              "l'opposition totale au courant, l'argument φ ≈ 53° est le déphasage entre " +
-              'tension et courant.',
-          },
+          illustrations: [
+            {
+              kind: 'complexPlane',
+              xMin: -1,
+              xMax: 5.5,
+              yMin: -1,
+              yMax: 5.5,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 3, y: 4 }, tone: 'accent' },
+                { from: { x: 3, y: 4 }, to: { x: 3, y: 0 }, tone: 'faint', dashed: true },
+                { from: { x: 3, y: 4 }, to: { x: 0, y: 4 }, tone: 'faint', dashed: true },
+              ],
+              points: [
+                { x: 3, y: 4, label: 'Z = 3+4i', tone: 'accent', labelPos: 'above' },
+                { x: 3, y: 0, label: 'R = 3 Ω', tone: 'ink', labelPos: 'below', node: false },
+                { x: 0, y: 4, label: 'X = 4 Ω', tone: 'ink', labelPos: 'left', node: false },
+              ],
+              angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 53, radiusPx: 28, label: 'φ', tone: 'good' }],
+              caption:
+                "L'impédance Z = 3+4i comme point du plan complexe : sa partie réelle R = 3 Ω " +
+                '(résistance) et sa partie imaginaire X = 4 Ω (réactance) se lisent en projetant Z ' +
+                'sur les deux axes. Le module |Z| = 5 Ω — la longueur du vecteur — est ' +
+                "l'opposition totale au courant.",
+            },
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (t) => Math.cos(t), tone: 'accent' },
+                { fn: (t) => Math.cos(t - Math.atan(4 / 3)), tone: 'good' },
+              ],
+              xMin: 0,
+              xMax: 2 * PI,
+              xTicks: [PI, 2 * PI],
+              xTickLabels: { [PI]: 'π', [2 * PI]: '2π' },
+              fixedYRange: { min: -1.3, max: 1.3 },
+              points: [
+                { x: 0, y: 1, label: '', tone: 'accent' },
+                { x: Math.atan(4 / 3), y: 1, label: '', tone: 'good' },
+              ],
+              xAxisLabel: 't',
+              yAxisLabel: 'amplitude',
+              caption:
+                'Ce que Z résume en un seul nombre : la tension V(t) (orange) et le courant ' +
+                'I(t) (vert) sont deux sinusoïdes de même fréquence, mais le courant atteint ' +
+                'son maximum avec un retard φ ≈ 53° sur la tension — exactement ' +
+                "l'argument de Z lu sur le premier diagramme.",
+            },
+          ],
           text:
             "En électricité, un courant alternatif ne se décrit pas par un seul nombre : il a " +
             'une amplitude ET une phase (son décalage dans le temps par rapport à la tension). ' +
@@ -954,35 +978,72 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comprendre si un cycle économique s\'amortit ou s\'amplifie',
-          illustration: {
-            kind: 'complexPlane',
-            xMin: -3.3,
-            xMax: 1.4,
-            yMin: -0.5,
-            yMax: 2,
-            vectors: [
-              { from: { x: 0.707, y: 0.707 }, to: { x: 0.53, y: 0.53 }, tone: 'good' },
-              { from: { x: 0.53, y: 0.53 }, to: { x: 0, y: 0.563 }, tone: 'good' },
-              { from: { x: 0, y: 0.563 }, to: { x: -0.298, y: 0.298 }, tone: 'good' },
-              { from: { x: -0.298, y: 0.298 }, to: { x: -0.316, y: 0 }, tone: 'good' },
-              { from: { x: -0.316, y: 0 }, to: { x: -0.168, y: -0.168 }, tone: 'good' },
-              { from: { x: 0.707, y: 0.707 }, to: { x: 0.919, y: 0.919 }, tone: 'bad' },
-              { from: { x: 0.919, y: 0.919 }, to: { x: 0, y: 1.69 }, tone: 'bad' },
-              { from: { x: 0, y: 1.69 }, to: { x: -1.554, y: 1.554 }, tone: 'bad' },
-              { from: { x: -1.554, y: 1.554 }, to: { x: -2.856, y: 0 }, tone: 'bad' },
-            ],
-            points: [
-              { x: 0.707, y: 0.707, label: 'année 0', tone: 'ink', labelPos: 'right' },
-              { x: -0.168, y: -0.168, label: 'r < 1 : amortissement', tone: 'good', labelPos: 'below' },
-              { x: -2.856, y: 0, label: 'r > 1 : amplification', tone: 'bad', labelPos: 'above' },
-            ],
-            caption:
-              'Deux cycles économiques partis du même point (année 0), dont la racine complexe ' +
-              'a le même argument θ mais un module différent. Chaque année, le point tourne de ' +
-              "θ ET change de taille d'un facteur r : avec r < 1 (vert) il se rapproche peu à " +
-              "peu de l'équilibre (l'origine) ; avec r > 1 (rouge) il s'en éloigne de plus en " +
-              'plus — le cycle explose au lieu de se stabiliser.',
-          },
+          illustrations: [
+            {
+              kind: 'complexPlane',
+              xMin: -3.3,
+              xMax: 1.4,
+              yMin: -0.5,
+              yMax: 2,
+              vectors: [
+                { from: { x: 0.707, y: 0.707 }, to: { x: 0.53, y: 0.53 }, tone: 'good' },
+                { from: { x: 0.53, y: 0.53 }, to: { x: 0, y: 0.563 }, tone: 'good' },
+                { from: { x: 0, y: 0.563 }, to: { x: -0.298, y: 0.298 }, tone: 'good' },
+                { from: { x: -0.298, y: 0.298 }, to: { x: -0.316, y: 0 }, tone: 'good' },
+                { from: { x: -0.316, y: 0 }, to: { x: -0.168, y: -0.168 }, tone: 'good' },
+                { from: { x: 0.707, y: 0.707 }, to: { x: 0.919, y: 0.919 }, tone: 'bad' },
+                { from: { x: 0.919, y: 0.919 }, to: { x: 0, y: 1.69 }, tone: 'bad' },
+                { from: { x: 0, y: 1.69 }, to: { x: -1.554, y: 1.554 }, tone: 'bad' },
+                { from: { x: -1.554, y: 1.554 }, to: { x: -2.856, y: 0 }, tone: 'bad' },
+              ],
+              points: [
+                { x: 0.707, y: 0.707, label: 'année 0', tone: 'ink', labelPos: 'right' },
+                { x: -0.168, y: -0.168, label: 'r < 1 : amortissement', tone: 'good', labelPos: 'below' },
+                { x: -2.856, y: 0, label: 'r > 1 : amplification', tone: 'bad', labelPos: 'above' },
+              ],
+              caption:
+                'Deux cycles économiques partis du même point (année 0), dont la racine complexe ' +
+                'a le même argument θ mais un module différent. Chaque année, le point tourne de ' +
+                "θ ET change de taille d'un facteur r : avec r < 1 (vert) il se rapproche peu à " +
+                "peu de l'équilibre (l'origine) ; avec r > 1 (rouge) il s'en éloigne de plus en " +
+                'plus — le cycle explose au lieu de se stabiliser.',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [],
+              xMin: -0.3,
+              xMax: 9,
+              xTicks: [1, 2, 3, 4, 5, 6],
+              fixedYRange: { min: -2.3, max: 4.2 },
+              points: [
+                { x: 0, y: 1, label: '', tone: 'accent' },
+                { x: 1, y: 0.35, label: '', tone: 'good' },
+                { x: 2, y: -0.245, label: '', tone: 'good' },
+                { x: 3, y: -0.343, label: '', tone: 'good' },
+                { x: 4, y: -0.12, label: '', tone: 'good' },
+                { x: 5, y: 0.084, label: '', tone: 'good' },
+                { x: 6, y: 0.118, label: '', tone: 'good' },
+                { x: 1, y: 0.625, label: '', tone: 'bad' },
+                { x: 2, y: -0.781, label: '', tone: 'bad' },
+                { x: 3, y: -1.953, label: '', tone: 'bad' },
+                { x: 4, y: -1.221, label: '', tone: 'bad' },
+                { x: 5, y: 1.526, label: '', tone: 'bad' },
+                { x: 6, y: 3.815, label: '', tone: 'bad' },
+              ],
+              textLabels: [
+                { x: 0.3, y: 1.1, text: 'année 0', tone: 'accent', anchor: 'start' },
+                { x: 7.2, y: 3.2, text: 'r > 1 : amplification', tone: 'bad', anchor: 'start' },
+                { x: 7.2, y: 2.3, text: 'r < 1 : amortissement', tone: 'good', anchor: 'start' },
+              ],
+              xAxisLabel: 'année n',
+              yAxisLabel: 'revenu (écart à la tendance)',
+              caption:
+                'Le revenu réel au fil des années — la partie réelle de $r^ne^{in\\theta}$, ' +
+                'mêmes r et θ que ci-dessus — pour les deux cas : la suite à r < 1 (vert) ' +
+                "oscille en revenant vite près de 0, celle à r > 1 (rouge) oscille avec une " +
+                "amplitude qui grandit d'année en année au lieu de se stabiliser.",
+            },
+          ],
           text:
             "Certains modèles économiques décrivent le revenu national d'une année sur la " +
             "suivante par une relation de récurrence (il dépend des deux années précédentes). " +
@@ -1311,36 +1372,62 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Faire tourner un objet dans un jeu vidéo ou un bras robotisé',
-          illustration: {
-            kind: 'complexPlane',
-            xMin: -0.6,
-            xMax: 2.6,
-            yMin: -0.6,
-            yMax: 2.6,
-            circle: { cx: 0, cy: 0, r: 2.2, tone: 'faint' },
-            vectors: [
-              { from: { x: 0, y: 0 }, to: { x: 2.2, y: 0 }, tone: 'accent' },
-              { from: { x: 0, y: 0 }, to: { x: 0, y: 2.2 }, tone: 'good' },
-            ],
-            points: [
-              { x: 2.2, y: 0, label: 'z', tone: 'accent', labelPos: 'below' },
-              { x: 2.125, y: 0.569, tone: 'ink' },
-              { x: 1.905, y: 1.1, tone: 'ink' },
-              { x: 1.556, y: 1.556, tone: 'ink' },
-              { x: 1.1, y: 1.905, tone: 'ink' },
-              { x: 0.569, y: 2.125, tone: 'ink' },
-              { x: 0, y: 2.2, label: 'après n images', tone: 'good', labelPos: 'left' },
-            ],
-            angleArcs: [
-              { cx: 0, cy: 0, fromDeg: 0, toDeg: 15, radiusPx: 22, label: 'θ', tone: 'accent' },
-              { cx: 0, cy: 0, fromDeg: 0, toDeg: 90, radiusPx: 60, label: 'nθ', tone: 'good' },
-            ],
-            caption:
-              'Multiplier z par $e^{i\\theta}$ fait pivoter le point de θ sur le cercle de rayon ' +
-              '|z| (ici 6 petits pas de 15°, un par image affichée). Par la formule de Moivre, ' +
-              'ces 6 petites rotations équivalent à UNE seule rotation de 6θ = 90° — exactement ' +
-              "ce qu'un moteur de jeu ou un bras robotisé recalcule à chaque image.",
-          },
+          illustrations: [
+            {
+              kind: 'complexPlane',
+              xMin: -0.6,
+              xMax: 2.6,
+              yMin: -0.6,
+              yMax: 2.6,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 2.2, y: 0 }, tone: 'accent' },
+                { from: { x: 0, y: 0 }, to: { x: 0, y: 2.2 }, tone: 'good' },
+              ],
+              points: [
+                { x: 2.2, y: 0, label: 'z', tone: 'accent', labelPos: 'below' },
+                { x: 2.125, y: 0.569, tone: 'ink' },
+                { x: 1.905, y: 1.1, tone: 'ink' },
+                { x: 1.556, y: 1.556, tone: 'ink' },
+                { x: 1.1, y: 1.905, tone: 'ink' },
+                { x: 0.569, y: 2.125, tone: 'ink' },
+                { x: 0, y: 2.2, label: 'après n images', tone: 'good', labelPos: 'above' },
+              ],
+              angleArcs: [
+                { cx: 0, cy: 0, fromDeg: 0, toDeg: 90, radiusPx: 220 },
+                { cx: 0, cy: 0, fromDeg: 0, toDeg: 15, radiusPx: 22, label: 'θ', tone: 'accent' },
+                { cx: 0, cy: 0, fromDeg: 0, toDeg: 90, radiusPx: 60, label: 'nθ', tone: 'good' },
+              ],
+              caption:
+                'Multiplier z par $e^{i\\theta}$ fait pivoter le point de θ sur le cercle de ' +
+                'rayon |z| (ici 6 petits pas de 15°, un par image affichée). Par la formule de ' +
+                'Moivre, ces 6 petites rotations équivalent à UNE seule rotation de 6θ = 90°.',
+            },
+            {
+              kind: 'complexPlane',
+              xMin: -0.4,
+              xMax: 1.9,
+              yMin: -0.3,
+              yMax: 2.4,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 1.229, y: 0.86 }, tone: 'accent' },
+                { from: { x: 1.229, y: 0.86 }, to: { x: 1.229, y: 2.06 }, tone: 'good' },
+              ],
+              points: [
+                { x: 1.229, y: 0.86, label: 'articulation', tone: 'accent', labelPos: 'right' },
+                { x: 1.229, y: 2.06, label: 'pince', tone: 'good', labelPos: 'above' },
+              ],
+              angleArcs: [
+                { cx: 0, cy: 0, fromDeg: 0, toDeg: 35, radiusPx: 24, label: 'θ₁', tone: 'accent' },
+                { cx: 1.229, cy: 0.86, fromDeg: 35, toDeg: 90, radiusPx: 22, label: 'θ₂', tone: 'good' },
+              ],
+              caption:
+                "Un bras à 2 articulations compose 2 rotations : le premier segment tourne de " +
+                "θ₁ depuis l'origine (orange), le second tourne de θ₂ EN PLUS depuis le bout du " +
+                'premier (vert) — la position finale de la pince est le résultat des deux ' +
+                'multiplications par un nombre complexe de module 1, appliquées l\'une après ' +
+                "l'autre.",
+            },
+          ],
           text:
             "Dans un moteur de jeu vidéo en 2D ou pour commander un bras robotisé, faire " +
             'pivoter un objet revient exactement à la rotation que tu viens de voir : on ' +
