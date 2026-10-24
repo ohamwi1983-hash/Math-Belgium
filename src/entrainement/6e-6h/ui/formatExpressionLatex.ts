@@ -65,11 +65,11 @@ const ALIAS_FONCTIONS: Record<string, string> = {
   sqrt: "sqrt",
   racine: "sqrt",
   racinecarree: "sqrt",
+  rac: "sqrt",
   abs: "abs",
   valeurabsolue: "abs",
   cbrt: "cbrt",
   racinecubique: "cbrt",
-  racine3: "cbrt",
   sin: "sin",
   cos: "cos",
   tan: "tan",
@@ -146,6 +146,20 @@ function tokeniser(expression: string): Jeton[] {
       const latexConstante = MOTS_CONSTANTES[mot.toLowerCase()];
       if (latexConstante) {
         jetons.push({ type: "CONSTANTE", texte: latexConstante });
+        continue;
+      }
+      // "racN"/"racineN" — racine n-ième (ex: rac4(6), équivalent texte de 6^(1/4)), plus parlant
+      // pour un élève que l'écriture en puissance. Le mot entier ("rac4", chiffre compris) est déjà
+      // disponible ici grâce à l'inclusion des chiffres dans le scan d'identifiant ci-dessus — pas
+      // besoin du hack de consommation différée nécessaire dans expressionGenerale.ts (dont le scan
+      // ne lit que des lettres). Même correspondance degré→nom canonique que là-bas : 2→sqrt,
+      // 3→cbrt (macros LaTeX déjà câblées dans noeudVersLatex), sinon "racineN" rendu en
+      // `\sqrt[N]{...}` (voir plus bas).
+      const correspondanceRacineN = /^(?:rac|racine)(\d+)$/i.exec(mot);
+      if (correspondanceRacineN) {
+        const degre = Number(correspondanceRacineN[1]);
+        const nomCanonique = degre === 2 ? "sqrt" : degre === 3 ? "cbrt" : `racine${degre}`;
+        jetons.push({ type: "FONCTION", nomFonction: nomCanonique });
         continue;
       }
       const canonique = ALIAS_FONCTIONS[mot.toLowerCase()];
@@ -397,6 +411,10 @@ function noeudVersLatex(noeud: Noeud): string {
     case "appel":
       if (noeud.nom === "sqrt") return `\\sqrt{${noeudVersLatex(noeud.argument)}}`;
       if (noeud.nom === "cbrt") return `\\sqrt[3]{${noeudVersLatex(noeud.argument)}}`;
+      {
+        const correspondanceRacineN = /^racine(\d+)$/.exec(noeud.nom);
+        if (correspondanceRacineN) return `\\sqrt[${correspondanceRacineN[1]}]{${noeudVersLatex(noeud.argument)}}`;
+      }
       if (noeud.nom === "abs") return `\\left|${noeudVersLatex(noeud.argument)}\\right|`;
       return `\\${noeud.nom}\\left(${noeudVersLatex(noeud.argument)}\\right)`;
     case "equation":

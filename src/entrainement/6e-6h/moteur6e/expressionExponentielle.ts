@@ -15,9 +15,10 @@
  *
  * Supporte : identifiants multi-lettres comme variables (`x`, `t`...), `pi`, `e`, entiers/décimaux
  * (`.`/`,`), `+ - * / ^`, parenthèses, multiplication implicite (`2x`, `2sqrt(x)`), unicode
- * `²`/`³`, et les fonctions `sqrt`/`abs`/`sin`/`cos`/`tan`/`asin`/`arcsin`/`acos`/`arccos`/
- * `atan`/`arctan`/`ln`/`exp`/`sh`/`ch` (`sh`/`ch` ajoutés pour 6gen19, chapitre 3 "Sinus et cosinus
- * hyperboliques" — additif pur, voir la table `FONCTIONS` ci-dessous). Aucune exception pour un problème de DOMAINE — `NaN`/`Infinity`
+ * `²`/`³`, et les fonctions `sqrt`/`rac`/`abs`/`cbrt`/`sin`/`cos`/`tan`/`asin`/`arcsin`/`acos`/
+ * `arccos`/`atan`/`arctan`/`ln`/`exp`/`sh`/`ch` (`sh`/`ch` ajoutés pour 6gen19, chapitre 3 "Sinus et
+ * cosinus hyperboliques" — additif pur, voir la table `FONCTIONS` ci-dessous ; `racN`, N≥4 collé
+ * juste après "rac", pour une racine n-ième quelconque — ex. `rac4(x)`). Aucune exception pour un problème de DOMAINE — `NaN`/`Infinity`
  * propagés nativement (`Math.log(-1)`, `Math.sqrt(-1)`...) ; seule une erreur de SYNTAXE lève.
  */
 
@@ -62,8 +63,24 @@ function tokeniser(texte: string): Jeton[] {
     if (/[a-zA-Z]/.test(c)) {
       let j = i;
       while (j < s.length && /[a-zA-Z]/.test(s[j])) j++;
-      jetons.push({ type: "identifiant", nom: s.slice(i, j).toLowerCase() });
+      const mot = s.slice(i, j).toLowerCase();
       i = j;
+      // "racN" — racine n-ième (ex: rac4(x) = x^(1/4)), demandée par des élèves pour être plus
+      // parlante que l'écriture en puissance. N est un entier collé juste après "rac" : le scan
+      // ci-dessus ne lit que des lettres, donc il faut le consommer ici explicitement (sinon
+      // "rac4(x)" se scinderait en identifiant "rac" + NOMBRE(4), jamais reconnu comme un seul
+      // nom de fonction). Degré 2 → sqrt, 3 → cbrt (déjà câblées dans FONCTIONS ci-dessous),
+      // sinon "racineN", résolu dynamiquement dans `atome()`.
+      if (mot === "rac" && /[0-9]/.test(s[i] ?? "")) {
+        let k = i;
+        while (k < s.length && /[0-9]/.test(s[k])) k++;
+        const degre = Number(s.slice(i, k));
+        i = k;
+        const nomCanonique = degre === 2 ? "sqrt" : degre === 3 ? "cbrt" : `racine${degre}`;
+        jetons.push({ type: "identifiant", nom: nomCanonique });
+        continue;
+      }
+      jetons.push({ type: "identifiant", nom: mot });
       continue;
     }
     if ("+-*/^()".includes(c)) {
@@ -79,7 +96,9 @@ function tokeniser(texte: string): Jeton[] {
 
 const FONCTIONS: Record<string, (v: number) => number> = {
   sqrt: Math.sqrt,
+  rac: Math.sqrt,
   abs: Math.abs,
+  cbrt: (v) => Math.sign(v) * Math.pow(Math.abs(v), 1 / 3),
   sin: Math.sin,
   cos: Math.cos,
   tan: Math.tan,
@@ -122,6 +141,15 @@ function puissanceReelle(base: number, exposant: number): number {
     }
   }
   return Math.pow(base, exposant);
+}
+
+const MOTIF_RACINE_N = /^racine(\d+)$/;
+
+/** Racine n-ième pour un degré ≥4 (rac2/rac3 passent par sqrt/cbrt ci-dessus) — simple alias de
+ * `puissanceReelle(base, 1/n)`, qui gère déjà correctement le signe/domaine pour un exposant de la
+ * forme 1/n (voir sa documentation juste au-dessus) : aucune nouvelle logique à dupliquer. */
+function racineN(base: number, n: number): number {
+  return puissanceReelle(base, 1 / n);
 }
 
 class Analyseur {
@@ -234,8 +262,10 @@ class Analyseur {
         const arg = this.expression();
         this.attendre(")");
         const fn = FONCTIONS[nom];
-        if (!fn) throw new Error(`Fonction inconnue : "${nom}"`);
-        return fn(arg);
+        if (fn) return fn(arg);
+        const correspondanceRacineN = MOTIF_RACINE_N.exec(nom);
+        if (correspondanceRacineN) return racineN(arg, Number(correspondanceRacineN[1]));
+        throw new Error(`Fonction inconnue : "${nom}"`);
       }
       throw new Error(`Identifiant inconnu : "${nom}"`);
     }

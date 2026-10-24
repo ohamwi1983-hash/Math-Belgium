@@ -12,7 +12,9 @@
  *
  * Supporte : `x`, `pi`, `e`, entiers/décimaux (`.`/`,`), `+ - * / ^`, parenthèses, multiplication
  * implicite (`2x`, `2sqrt(x)`, `(x+1)(x-1)`), unicode `²`/`³`, et les fonctions
- * `sqrt`/`abs`/`sin`/`cos`/`tan`/`asin`/`arcsin`/`acos`/`arccos`/`atan`/`arctan` — `sin`/`cos`/`tan`
+ * `sqrt`/`rac`/`abs`/`cbrt`/`sin`/`cos`/`tan`/`asin`/`arcsin`/`acos`/`arccos`/`atan`/`arctan`
+ * (`racN`, N≥4 collé juste après "rac", pour une racine n-ième quelconque — ex. `rac4(x)`) —
+ * `sin`/`cos`/`tan`
  * et leurs réciproques toujours en RADIANS (contexte calcul différentiel, jamais le chapitre 3).
  * Aucune exception levée pour un problème de DOMAINE (sqrt négatif, asin hors [-1;1]) — `NaN`
  * propagé nativement (`Math.sqrt`/`Math.asin`/...), comme `evaluerExpressionGenerale` ; seule une
@@ -47,8 +49,24 @@ function tokeniser(texte: string): Jeton[] {
     if (/[a-zA-Z]/.test(c)) {
       let j = i;
       while (j < s.length && /[a-zA-Z]/.test(s[j])) j++;
-      jetons.push({ type: "identifiant", nom: s.slice(i, j).toLowerCase() });
+      const mot = s.slice(i, j).toLowerCase();
       i = j;
+      // "racN" — racine n-ième (ex: rac4(x) = x^(1/4)), demandée par des élèves pour être plus
+      // parlante que l'écriture en puissance. N est un entier collé juste après "rac" : le scan
+      // ci-dessus ne lit que des lettres, donc il faut le consommer ici explicitement (sinon
+      // "rac4(x)" se scinderait en identifiant "rac" + NOMBRE(4), jamais reconnu comme un seul
+      // nom de fonction). Degré 2 → sqrt, 3 → cbrt (déjà câblées dans FONCTIONS ci-dessous),
+      // sinon "racineN", résolu dynamiquement dans `atome()`.
+      if (mot === "rac" && /[0-9]/.test(s[i] ?? "")) {
+        let k = i;
+        while (k < s.length && /[0-9]/.test(s[k])) k++;
+        const degre = Number(s.slice(i, k));
+        i = k;
+        const nomCanonique = degre === 2 ? "sqrt" : degre === 3 ? "cbrt" : `racine${degre}`;
+        jetons.push({ type: "identifiant", nom: nomCanonique });
+        continue;
+      }
+      jetons.push({ type: "identifiant", nom: mot });
       continue;
     }
     if ("+-*/^()".includes(c)) {
@@ -64,7 +82,9 @@ function tokeniser(texte: string): Jeton[] {
 
 const FONCTIONS: Record<string, (v: number) => number> = {
   sqrt: Math.sqrt,
+  rac: Math.sqrt,
   abs: Math.abs,
+  cbrt: (v) => Math.sign(v) * Math.pow(Math.abs(v), 1 / 3),
   sin: Math.sin,
   cos: Math.cos,
   tan: Math.tan,
@@ -75,6 +95,16 @@ const FONCTIONS: Record<string, (v: number) => number> = {
   atan: Math.atan,
   arctan: Math.atan,
 };
+
+const MOTIF_RACINE_N = /^racine(\d+)$/;
+
+/** Racine n-ième à signe préservé, pour un degré ≥4 (rac2/rac3 passent par sqrt/cbrt ci-dessus) —
+ * même convention que `expressionGenerale.ts` (4e/5e) : n pair, base négative → NaN (racine réelle
+ * non définie) ; n impair → signe de la base reporté sur le résultat. */
+function racineN(valeur: number, n: number): number {
+  if (n % 2 === 0) return valeur < 0 ? NaN : Math.pow(valeur, 1 / n);
+  return Math.sign(valeur) * Math.pow(Math.abs(valeur), 1 / n);
+}
 
 class Analyseur {
   private pos = 0;
@@ -186,8 +216,10 @@ class Analyseur {
         const arg = this.expression();
         this.attendre(")");
         const fn = FONCTIONS[nom];
-        if (!fn) throw new Error(`Fonction inconnue : "${nom}"`);
-        return fn(arg);
+        if (fn) return fn(arg);
+        const correspondanceRacineN = MOTIF_RACINE_N.exec(nom);
+        if (correspondanceRacineN) return racineN(arg, Number(correspondanceRacineN[1]));
+        throw new Error(`Fonction inconnue : "${nom}"`);
       }
       throw new Error(`Identifiant inconnu : "${nom}"`);
     }

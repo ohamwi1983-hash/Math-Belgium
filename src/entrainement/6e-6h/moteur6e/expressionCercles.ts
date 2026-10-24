@@ -13,7 +13,9 @@ import type { StatutVerification } from "../moteur/statutVerification";
  *    jamais plus d'une poignée de variables mono-lettre à la fois, aucune ambiguïté de tokenisation
  *    avec le mot-clé `sqrt`/`racine`), fractions, racine carrée, parenthèses, multiplication
  *    implicite (mirroir du patron déjà établi côté 4e dans `moteur/expressionGenerale.ts`, jamais
- *    importé pour autant — reconstruit ici en plus général sur les variables).
+ *    importé pour autant — reconstruit ici en plus général sur les variables). Fonctions
+ *    reconnues : `sqrt`/`racine`/`rac` (racine carrée), `cbrt` (racine cubique), `racN`/`racineN`
+ *    (N≥4 collé juste après "rac"/"racine", racine n-ième quelconque, ex. `rac4(6)`).
  * 2. Une vérification d'ÉQUIVALENCE D'ÉQUATION par ÉCHANTILLONNAGE DE RATIO : deux équations
  *    polynomiales représentent le même lieu géométrique ssi leurs membres (gauche−droite) sont
  *    proportionnels (facteur non nul, éventuellement négatif) en TOUT point — on échantillonne
@@ -29,7 +31,7 @@ import type { StatutVerification } from "../moteur/statutVerification";
 type Jeton =
   | { type: "NOMBRE"; valeur: number }
   | { type: "VAR"; nom: string }
-  | { type: "FONCTION"; nom: "sqrt" }
+  | { type: "FONCTION"; nom: string }
   | { type: "PLUS" }
   | { type: "MOINS" }
   | { type: "FOIS" }
@@ -86,7 +88,22 @@ function tokeniser(texte: string, variablesAutorisees: readonly string[]): Jeton
       while (j < texte.length && /[a-zA-Z]/.test(texte[j])) j++;
       const mot = texte.slice(i, j);
       i = j;
-      if (mot.toLowerCase() === "sqrt" || mot.toLowerCase() === "racine") {
+      const motMinuscule = mot.toLowerCase();
+      // "racN" — racine n-ième (ex: rac4(6) = 6^(1/4)), demandée par des élèves pour être plus
+      // parlante que l'écriture en puissance. N est un entier collé juste après "rac"/"racine" : le
+      // scan ci-dessus ne lit que des lettres, donc il faut le consommer ici explicitement AVANT le
+      // test "rac"/"racine" seuls ci-dessous (sinon "rac4(6)" se scinderait en "rac"+NOMBRE(4)).
+      // Degré 2 → sqrt, 3 → cbrt, sinon "racineN", résolu dynamiquement dans `evaluer()`.
+      if ((motMinuscule === "rac" || motMinuscule === "racine") && texte[i] >= "0" && texte[i] <= "9") {
+        let k = i;
+        while (k < texte.length && texte[k] >= "0" && texte[k] <= "9") k++;
+        const degre = Number(texte.slice(i, k));
+        i = k;
+        const nomCanonique = degre === 2 ? "sqrt" : degre === 3 ? "cbrt" : `racine${degre}`;
+        jetons.push({ type: "FONCTION", nom: nomCanonique });
+        continue;
+      }
+      if (motMinuscule === "sqrt" || motMinuscule === "racine" || motMinuscule === "rac") {
         jetons.push({ type: "FONCTION", nom: "sqrt" });
         continue;
       }
@@ -126,7 +143,7 @@ type Noeud =
   | { type: "produit"; operateur: "*" | "/"; gauche: Noeud; droite: Noeud }
   | { type: "puissance"; base: Noeud; exposant: Noeud }
   | { type: "groupe"; interieur: Noeud }
-  | { type: "appel"; nom: "sqrt"; argument: Noeud };
+  | { type: "appel"; nom: string; argument: Noeud };
 
 interface EquationParsee {
   gauche: Noeud;
@@ -262,8 +279,17 @@ function evaluer(noeud: Noeud, variables: Variables): number {
       return Math.pow(evaluer(noeud.base, variables), evaluer(noeud.exposant, variables));
     case "groupe":
       return evaluer(noeud.interieur, variables);
-    case "appel":
-      return Math.sqrt(evaluer(noeud.argument, variables));
+    case "appel": {
+      const valeur = evaluer(noeud.argument, variables);
+      if (noeud.nom === "sqrt") return Math.sqrt(valeur);
+      if (noeud.nom === "cbrt") return Math.sign(valeur) * Math.pow(Math.abs(valeur), 1 / 3);
+      const correspondanceRacineN = /^racine(\d+)$/.exec(noeud.nom);
+      if (correspondanceRacineN) {
+        const n = Number(correspondanceRacineN[1]);
+        return n % 2 === 0 ? (valeur < 0 ? NaN : Math.pow(valeur, 1 / n)) : Math.sign(valeur) * Math.pow(Math.abs(valeur), 1 / n);
+      }
+      throw new Error(`Fonction inconnue : "${noeud.nom}"`);
+    }
   }
 }
 
