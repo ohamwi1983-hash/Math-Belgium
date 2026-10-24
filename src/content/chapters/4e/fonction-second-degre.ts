@@ -762,6 +762,31 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'application',
           titre: 'Reconnaître une parabole dans un pont suspendu',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (x) => 0.008 * x * x, tone: 'good', xMin: -40, xMax: 40 },
+                { fn: (x) => 0.02 * x * x, tone: 'bad', xMin: -40, xMax: 40 },
+              ],
+              xMin: -45,
+              xMax: 64,
+              xTicks: [-40, 40],
+              yTicks: [10, 20, 30],
+              points: [
+                { x: 0, y: 0, label: 'S', tone: 'accent', labelPos: 'below' },
+                { x: 40, y: 12.8, label: 'câble tendu', tone: 'good', labelPos: 'right' },
+                { x: 40, y: 32, label: 'câble relâché', tone: 'bad', labelPos: 'right' },
+              ],
+              xAxisLabel: 'distance au centre (m)',
+              yAxisLabel: 'hauteur (m)',
+              caption:
+                'Deux câbles entre les mêmes pylônes (à ±40 m du centre), même sommet S au ' +
+                'point le plus bas : plus a est grand (rouge), plus le câble est relâché et ' +
+                'remonte haut vers les pylônes ; plus a est petit (vert), plus il reste tendu, ' +
+                'proche de l\'horizontale.',
+            },
+          ],
           text:
             'Les câbles (ou chaînes) principaux d\'un pont suspendu, tirés par le poids ' +
             'uniformément réparti du tablier qu\'ils portent, prennent naturellement la forme ' +
@@ -953,6 +978,28 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'application',
           titre: 'Fixer un prix de vente qui maximise un revenu',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (p) => -2 * p * p + 80 * p, tone: 'accent' }],
+              xMin: 0,
+              xMax: 40,
+              xTicks: [10, 20, 30],
+              yTicks: [200, 400, 600, 800],
+              points: [
+                { x: 20, y: 800, label: 'prix optimal', tone: 'good', labelPos: 'above' },
+                { x: 10, y: 600, label: '', tone: 'bad' },
+                { x: 30, y: 600, label: '', tone: 'bad' },
+              ],
+              xAxisLabel: 'prix (€)',
+              yAxisLabel: 'revenu (€)',
+              caption:
+                'Exemple avec une demande $q(p)=80-2p$ : le revenu $R(p)=p(80-2p)=-2p^2+80p$ ' +
+                'culmine à $p=20\\,€$ (revenu de 800 €). À 10 € comme à 30 € — deux prix très ' +
+                'différents de part et d\'autre du sommet — le revenu retombe au MÊME niveau ' +
+                '(600 €) : s\'éloigner du sommet dans un sens ou dans l\'autre coûte toujours.',
+            },
+          ],
           text:
             'Une entreprise qui baisse son prix de vente attire plus de clients, mais gagne ' +
             'moins par vente — et inversement si elle l\'augmente. Si le nombre d\'acheteurs ' +
@@ -1031,6 +1078,29 @@ export const fonctionSecondDegre: ChapterContent = {
         {
           kind: 'application',
           titre: "Calculer où retombe un ballon, un boulet ou une fusée de feu d'artifice",
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => -5 * t * t + 20 * t + 25, tone: 'accent', xMin: 0, xMax: 5 }],
+              shadedRegions: [{ from: 0, to: 4, upper: (t) => -5 * t * t + 20 * t + 25, lower: () => 25, tone: 'good' }],
+              xMin: 0,
+              xMax: 6.8,
+              xTicks: [1, 2, 3, 4, 5],
+              yTicks: [10, 20, 25, 30, 40, 45],
+              points: [
+                { x: 0, y: 25, label: 'départ', tone: 'accent', labelPos: 'left' },
+                { x: 2, y: 45, label: 'sommet (hauteur max)', tone: 'good', labelPos: 'above' },
+                { x: 5, y: 0, label: 't = 5 s, sol', tone: 'bad', labelPos: 'right' },
+              ],
+              xAxisLabel: 't (s)',
+              yAxisLabel: 'h (m)',
+              caption:
+                'La trajectoire $h(t)=-5t^2+20t+25$ du ballon lancé plus haut : le sommet (t=2 ' +
+                's) est la hauteur maximale, le zéro en t=5 s est l\'instant où il touche le ' +
+                'sol, et la zone verte — entre les deux instants où h(t)=25 — est exactement ' +
+                'l\'intervalle $0<t<4$ trouvé dans l\'inéquation ci-dessus.',
+            },
+          ],
           text:
             'L\'exemple du ballon ci-dessus n\'est pas qu\'un exercice : c\'est exactement ' +
             'ainsi qu\'on calcule, en sport ou en pyrotechnie, où et quand un projectile ' +

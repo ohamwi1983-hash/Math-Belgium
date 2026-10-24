@@ -471,6 +471,28 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'application',
           titre: 'Trouver le seuil de rentabilité d\'une entreprise',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => -x * x + 60 * x - 500, tone: 'accent' }],
+              shadedRegions: [{ from: 10, to: 50, upper: (x) => -x * x + 60 * x - 500, lower: () => 0, tone: 'good' }],
+              xMin: 0,
+              xMax: 60,
+              xTicks: [10, 30, 50],
+              yTicks: [200, 400],
+              points: [
+                { x: 10, y: 0, label: 'seuil bas', tone: 'bad', labelPos: 'below' },
+                { x: 50, y: 0, label: 'seuil haut', tone: 'bad', labelPos: 'below' },
+                { x: 30, y: 400, label: 'bénéfice max', tone: 'good', labelPos: 'above' },
+              ],
+              xAxisLabel: 'quantité vendue x',
+              yAxisLabel: 'bénéfice B(x) (€)',
+              caption:
+                'Exemple avec $B(x)=-x^2+60x-500$ : les deux racines x=10 et x=50 sont les ' +
+                'seuils de rentabilité — l\'entreprise perd de l\'argent en dehors de cet ' +
+                'intervalle (zone verte) et en gagne entre les deux.',
+            },
+          ],
           text:
             'En gestion d\'entreprise, le bénéfice réalisé pour $x$ unités vendues s\'exprime ' +
             'souvent par une fonction du second degré $B(x) = ax^2+bx+c$ (le prix de vente ' +
@@ -601,6 +623,28 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'application',
           titre: 'Garantir une aire minimale avec une clôture limitée',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => x * (20 - x), tone: 'accent' }],
+              shadedRegions: [{ from: 5, to: 15, upper: (x) => x * (20 - x), lower: () => 75, tone: 'good' }],
+              horizontalAsymptotes: [{ y: 75, label: 'A = 75 m²' }],
+              xMin: 0,
+              xMax: 20,
+              xTicks: [5, 15],
+              yTicks: [75, 100],
+              points: [
+                { x: 5, y: 75, label: 'x = 5', tone: 'bad', labelPos: 'below' },
+                { x: 15, y: 75, label: 'x = 15', tone: 'bad', labelPos: 'below' },
+              ],
+              xAxisLabel: 'largeur x (m)',
+              yAxisLabel: 'aire A(x) (m²)',
+              caption:
+                'A(x) = x(20−x) : l\'aire franchit 75 m² (ligne en pointillé) exactement entre ' +
+                'x = 5 et x = 15. La zone verte, au-dessus de 75 m², EST l\'ensemble-solution de ' +
+                'l\'inéquation $-x^2+20x-75 \\geq 0$.',
+            },
+          ],
           text:
             'Un agriculteur dispose de 40 mètres de clôture pour un enclos rectangulaire et ' +
             'veut que sa surface atteigne AU MOINS 75 m². Si x est la longueur d\'un côté, ' +
@@ -767,6 +811,27 @@ export const equationsInequationsSecondDegre: ChapterContent = {
         {
           kind: 'application',
           titre: 'Vérifier qu\'un système reste sûr sous plusieurs contraintes à la fois',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (n) => (n - 500) * (3000 - n), tone: 'accent' }],
+              shadedRegions: [{ from: 500, to: 3000, upper: (n) => (n - 500) * (3000 - n), lower: () => 0, tone: 'good' }],
+              xMin: 0,
+              xMax: 3500,
+              xTicks: [500, 3000],
+              points: [
+                { x: 500, y: 0, label: 'mini (lubrification)', tone: 'bad', labelPos: 'below' },
+                { x: 3000, y: 0, label: 'maxi (sécurité)', tone: 'bad', labelPos: 'below' },
+              ],
+              xAxisLabel: 'vitesse de rotation N (tr/min)',
+              yAxisLabel: '(N−500)(3000−N)',
+              caption:
+                'Deux contraintes à la fois — N ≥ 500 (facteur N−500) ET N ≤ 3000 (facteur ' +
+                '3000−N) — combinées en un seul produit $(N-500)(3000-N)$. La zone verte, où ' +
+                'ce produit est positif, EST la plage de vitesse où les deux conditions sont ' +
+                'respectées simultanément : exactement ce que lit la grille de signes.',
+            },
+          ],
           text:
             'Un ingénieur qui conçoit un système (électrique, mécanique, chimique...) doit ' +
             'souvent garantir que PLUSIEURS grandeurs restent dans une plage sûre EN MÊME ' +
