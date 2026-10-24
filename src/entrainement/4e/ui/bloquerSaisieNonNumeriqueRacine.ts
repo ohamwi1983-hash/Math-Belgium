@@ -7,8 +7,13 @@ import type { KeyboardEvent } from "react";
  * étendu") : "Cette extension est propre à ce générateur pour l'instant, ne pas la répercuter sur
  * les autres générateurs de la plateforme" — module SÉPARÉ plutôt qu'une modification du module
  * partagé, jamais réutilisé ailleurs.
+ *
+ * `a`/`c` ajoutés (rollout "rac") : ce générateur passe par `evaluerExpressionGenerale`
+ * (`moteur/verificationUnSansLautre.ts`), qui reconnaît maintenant `rac(x)`/`racN(x)` — sans ces
+ * deux lettres en plus de `s`/`q`/`r`/`t`, le filtre bloquait silencieusement la frappe de "rac("
+ * dans ce générateur précis alors que la réponse aurait été acceptée si l'élève avait pu la taper.
  */
-const CARACTERE_AUTORISE = /^[0-9\-.,/sqrt()]$/i;
+const CARACTERE_AUTORISE = /^[0-9\-.,/sqrtac()]$/i;
 
 export function gererKeyDownNumeriqueRacine(e: KeyboardEvent<HTMLInputElement>): void {
   if (e.ctrlKey || e.metaKey || e.altKey) return;

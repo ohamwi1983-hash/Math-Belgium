@@ -47,11 +47,11 @@ const ALIAS_FONCTIONS: Record<string, string> = {
   sqrt: "sqrt",
   racine: "sqrt",
   racinecarree: "sqrt",
+  rac: "sqrt",
   abs: "abs",
   valeurabsolue: "abs",
   cbrt: "cbrt",
   racinecubique: "cbrt",
-  racine3: "cbrt",
   sin: "sin",
   cos: "cos",
   tan: "tan",
@@ -122,6 +122,27 @@ function tokeniser(expression: string, variables: Record<string, number>): Jeton
       // `docs/conventions-transversales.md`, "Multiplication implicite — variable nommée".
       if (mot.toLowerCase() in variablesMinuscules) {
         jetons.push({ type: "NOMBRE", valeurNombre: variablesMinuscules[mot.toLowerCase()] });
+        continue;
+      }
+      // "racN"/"racineN" — racine n-ième, N un entier collé juste après "rac"/"racine" (ex:
+      // rac4(6) = 6^(1/4)), plus parlant pour un élève que "^(1/4)". Cas particulier de
+      // reconnaissance (pas une simple entrée de ALIAS_FONCTIONS, qui ne gère que des noms fixes
+      // car le scan d'identifiant ci-dessus ne lit que des LETTRES — un chiffre collé interrompt
+      // toujours le mot) : "rac"/"racine" seuls sont déjà des alias de sqrt ci-dessus
+      // (rac(5)=racine(5)=sqrt(5)) ; ici on consomme EN PLUS les chiffres collés immédiatement
+      // après pour former le degré. degré 2 → sqrt, 3 → cbrt (réutilise les fonctions déjà
+      // câblées), tout autre degré → "racineN", résolu par appliquerFonction(). Bug latent corrigé
+      // au passage : l'entrée `racine3: "cbrt"` de ALIAS_FONCTIONS n'avait JAMAIS pu être atteinte
+      // avant ce correctif (le scan de mot s'arrête à "racine", le "3" formant un NOMBRE séparé,
+      // donc "racine3(27)" levait toujours "Parenthèse ouvrante attendue après racine" plutôt que
+      // de valoir 3) — supprimée plus bas, ce chemin la remplace correctement.
+      if ((mot.toLowerCase() === "rac" || mot.toLowerCase() === "racine") && expression[i] >= "0" && expression[i] <= "9") {
+        let k = i;
+        while (k < expression.length && expression[k] >= "0" && expression[k] <= "9") k++;
+        const degre = Number(expression.slice(i, k));
+        i = k;
+        const nomCanonique = degre === 2 ? "sqrt" : degre === 3 ? "cbrt" : `racine${degre}`;
+        jetons.push({ type: "FONCTION", nomFonction: nomCanonique });
         continue;
       }
       const canonique = ALIAS_FONCTIONS[mot.toLowerCase()];
@@ -318,6 +339,16 @@ function puissance(base: number, exposant: number): number {
   return fraction.p % 2 === 0 ? magnitude : -magnitude;
 }
 
+const MOTIF_RACINE_N = /^racine(\d+)$/;
+
+/** Racine n-ième à signe préservé, généralisation de la racine cubique ci-dessous (cas n=3) à un
+ * degré n quelconque (ex: rac4/rac5...) — n pair : réel non défini pour une base négative (NaN,
+ * même convention que sqrt) ; n impair : signe de la base reporté sur le résultat, comme cbrt. */
+function racineN(valeur: number, n: number): number {
+  if (n % 2 === 0) return valeur < 0 ? NaN : Math.pow(valeur, 1 / n);
+  return Math.sign(valeur) * Math.pow(Math.abs(valeur), 1 / n);
+}
+
 function appliquerFonction(nom: string, valeur: number): number {
   switch (nom) {
     case "sqrt":
@@ -332,8 +363,11 @@ function appliquerFonction(nom: string, valeur: number): number {
       return Math.cos((valeur * Math.PI) / 180);
     case "tan":
       return Math.tan((valeur * Math.PI) / 180);
-    default:
+    default: {
+      const correspondance = MOTIF_RACINE_N.exec(nom);
+      if (correspondance) return racineN(valeur, Number(correspondance[1]));
       throw new Error(`Fonction inconnue : "${nom}"`);
+    }
   }
 }
 
@@ -359,7 +393,8 @@ function evaluer(noeud: Noeud, x: number): number {
 }
 
 /** Évalue `expression` en x, gérant +,-,*,/,^ (multiplication implicite comprise), les
- * parenthèses, sqrt/racine, abs/valeurabsolue/|...|, cbrt/racinecubique/racine3, sin/cos/tan (en
+ * parenthèses, sqrt/racine/rac/rac2, abs/valeurabsolue/|...|, cbrt/racinecubique/racine3/rac3,
+ * racN (n≥4, ex: rac4/rac5) pour une racine n-ième quelconque, sin/cos/tan (en
  * DEGRÉS, chapitre 3) — voir ALIAS_FONCTIONS. Lève une erreur si l'expression est syntaxiquement
  * invalide ; renvoie NaN (pas une erreur) pour une valeur hors domaine mathématique (ex: sqrt d'un
  * négatif), et Infinity/NaN pour une division par zéro, conformément au comportement natif de
