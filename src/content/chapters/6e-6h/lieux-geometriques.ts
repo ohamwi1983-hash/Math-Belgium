@@ -676,6 +676,53 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'application',
           titre: 'Localiser un téléphone mobile entre deux antennes',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -3.5,
+              xMax: 3.5,
+              yMin: -1.5,
+              yMax: 5.5,
+              vectors: [
+                { from: { x: -2, y: 0 }, to: { x: 2, y: 0 }, tone: 'faint', arrow: false },
+                { from: { x: 0, y: 3 }, to: { x: -2, y: 0 }, tone: 'accent', tick: true },
+                { from: { x: 0, y: 3 }, to: { x: 2, y: 0 }, tone: 'accent', tick: true },
+                { from: { x: 0, y: -1 }, to: { x: 0, y: 5 }, tone: 'good', dashed: true, arrow: false },
+              ],
+              points: [
+                { x: -2, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+                { x: 2, y: 0, label: 'B', tone: 'ink', labelPos: 'below' },
+                { x: 0, y: 3, label: 'P', tone: 'good', labelPos: 'right' },
+              ],
+              caption:
+                "Deux antennes A et B captent le signal avec le même retard : le " +
+                "téléphone P est à égale distance de A et de B, donc forcément quelque " +
+                "part sur la médiatrice de [AB] (en pointillés) — sans savoir encore où " +
+                "exactement sur cette droite.",
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -3.75,
+              xMax: 3.75,
+              yMin: -2.5,
+              yMax: 4.5,
+              circle: { cx: 0, cy: 0.875, r: 3.125, tone: 'faint' },
+              vectors: [
+                { from: { x: 0, y: -2 }, to: { x: 0, y: 4 }, tone: 'faint', dashed: true, arrow: false },
+                { from: { x: -2, y: -0.625 }, to: { x: 3.5, y: 3.5 }, tone: 'faint', dashed: true, arrow: false },
+              ],
+              points: [
+                { x: -3, y: 0, label: 'A', tone: 'ink', labelPos: 'below' },
+                { x: 3, y: 0, label: 'B', tone: 'ink', labelPos: 'below' },
+                { x: 0, y: 4, label: 'C', tone: 'ink', labelPos: 'above' },
+                { x: 0, y: 0.875, label: 'téléphone', tone: 'good', labelPos: 'left' },
+              ],
+              caption:
+                "Une troisième antenne C ajoute une troisième médiatrice : son " +
+                "intersection avec la première isole un point UNIQUE — toutes les " +
+                "antennes sont à égale distance de ce point (même cercle en fond).",
+            },
+          ],
           text:
             'Quand un technicien doit localiser un défaut sur une ligne (électrique, ' +
             'téléphonique, fibre optique) à partir de deux points de mesure A et B équidistants ' +
@@ -994,6 +1041,31 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comment un GPS calcule ta position',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -7.1,
+              xMax: 7.1,
+              yMin: -4.5,
+              yMax: 8.8,
+              circles: [
+                { cx: -2, cy: 0, r: 4, tone: 'faint' },
+                { cx: 2, cy: 0, r: 4, tone: 'faint' },
+                { cx: 0, cy: 6, r: 2.536, tone: 'accent' },
+              ],
+              points: [
+                { x: -2, y: 0, label: 'satellite 1', tone: 'ink', labelPos: 'left' },
+                { x: 2, y: 0, label: 'satellite 2', tone: 'ink', labelPos: 'right' },
+                { x: 0, y: 6, label: 'satellite 3', tone: 'ink', labelPos: 'above' },
+                { x: 0, y: 3.464, label: 'TA position', tone: 'good', labelPos: 'right' },
+                { x: 0, y: -3.464, label: 'écarté', tone: 'bad', labelPos: 'below' },
+              ],
+              caption:
+                "Avec 2 satellites, les 2 cercles de distance connue se coupent en 2 " +
+                "points (ambigu). Un 3e cercle (orange) ne passe QUE par l'un des deux — " +
+                "il élimine l'ambiguïté et fixe ta position de façon unique.",
+            },
+          ],
           text:
             'Un récepteur GPS applique, en trois dimensions, exactement le principe de cette ' +
             'section : traduire une condition de distance en équation. Chaque satellite envoie ' +
@@ -1337,6 +1409,31 @@ export const lieuxGeometriques: ChapterContent = {
         {
           kind: 'application',
           titre: 'Suivre un point que deux instruments croisent en même temps',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -5,
+              xMax: 5,
+              yMin: -1,
+              yMax: 7,
+              curves: [{ fn: (x) => -0.3 * (x - 1) * (x - 1) + 6.2, tone: 'faint', xMin: -1, xMax: 4 }],
+              vectors: [
+                { from: { x: -3, y: 0 }, to: { x: 1.96, y: 5.91 }, tone: 'accent' },
+                { from: { x: 3, y: 0 }, to: { x: 1.96, y: 5.91 }, tone: 'good' },
+              ],
+              points: [
+                { x: -3, y: 0, label: 'radar A', tone: 'ink', labelPos: 'below' },
+                { x: 3, y: 0, label: 'radar B', tone: 'ink', labelPos: 'below' },
+                { x: 1.96, y: 5.91, label: 'croisement', tone: 'bad', labelPos: 'above' },
+              ],
+              caption:
+                "Deux radars synchronisés, chacun un faisceau tournant : le point où les " +
+                "deux faisceaux se croisent dépend des deux angles à cet instant. Fais " +
+                "avancer les deux angles ensemble et ce point de croisement se déplace " +
+                "tout seul, en suivant une courbe (en fané) — c'est exactement une " +
+                "génératrice dont tu élimines le paramètre.",
+            },
+          ],
           text:
             "Deux radars (ou deux stations de triangulation au sol) qui tournent en " +
             'synchronisation, chacun balayant l\'horizon à la même vitesse angulaire, voient ' +

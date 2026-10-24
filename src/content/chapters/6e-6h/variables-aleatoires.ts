@@ -310,6 +310,44 @@ export const variablesAleatoires: ChapterContent = {
               'Security Administration américaine). Auteur : RCraig09, CC BY-SA 4.0, via ' +
               'Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              bars: [
+                { label: '10 ans', value: 0.1, valueLabel: '0,10' },
+                { label: '20 ans', value: 0.3, valueLabel: '0,30' },
+                { label: '30 ans', value: 0.4, valueLabel: '0,40' },
+                { label: '40 ans', value: 0.2, valueLabel: '0,20' },
+              ],
+              maxValue: 0.46,
+              xAxisLabel: 'X = années restantes',
+              yAxisLabel: 'P(X=x)',
+              footnote: 'E(X) = 10(0,1)+20(0,3)+30(0,4)+40(0,2) = 27 ans',
+              caption:
+                "Loi de probabilité simplifiée du nombre d'années restantes pour une " +
+                "personne d'un âge donné : exactement la même mécanique que $E(X)=\\sum " +
+                "x_i\\times P(X=x_i)$ vue plus haut, appliquée à une vraie table de " +
+                'mortalité (avec beaucoup plus de 4 valeurs possibles).',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => 70 - 0.8 * x, tone: 'accent' }],
+              xMin: 0,
+              xMax: 80,
+              xTicks: [0, 20, 40, 60, 80],
+              yTicks: [10, 30, 50, 70],
+              points: [
+                { x: 20, y: 54, label: 'E(X)≈54', tone: 'accent', labelPos: 'above' },
+                { x: 60, y: 22, label: 'E(X)≈22', tone: 'good', labelPos: 'above' },
+              ],
+              xAxisLabel: 'âge',
+              yAxisLabel: 'E(X)',
+              caption:
+                "Plus l'âge augmente, plus l'espérance de vie restante $E(X)$ diminue — " +
+                "c'est cette valeur, recalculée à chaque âge, qui fait monter le prix " +
+                "d'une assurance-vie à mesure qu'on vieillit.",
+            },
+          ],
           text:
             'Les compagnies d\'assurance-vie utilisent une **table de mortalité** : pour ' +
             'chaque âge, elle donne la probabilité de décéder dans l\'année qui suit. À ' +
@@ -505,6 +543,27 @@ export const variablesAleatoires: ChapterContent = {
               'Inspection de pièces sur une chaîne de production. Photo : Tyne & Wear ' +
               'Archives & Museums, via Wikimedia Commons (aucune restriction de droit connue).',
           },
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              bars: [
+                { label: '0-1', value: 0.0916, valueLabel: '0,092', tone: 'good' },
+                { label: '2-3', value: 0.3419, valueLabel: '0,342', tone: 'good' },
+                { label: '4-5', value: 0.3517, valueLabel: '0,352', tone: 'good' },
+                { label: '6-7', value: 0.1637, valueLabel: '0,164', tone: 'faint' },
+                { label: '8+', value: 0.0511, valueLabel: '0,051', tone: 'faint' },
+              ],
+              maxValue: 0.4,
+              xAxisLabel: 'k = pièces défectueuses',
+              yAxisLabel: 'P(X=k)',
+              footnote: 'P(X≤5) ≈ 0,785 — lot accepté (barres vertes)',
+              caption:
+                'La loi binomiale B(200; 0,02), regroupée par paires de k : les barres ' +
+                'vertes (k≤5, le seuil de tolérance) cumulent ≈78,5% de probabilité — la ' +
+                'décision « accepter ou rejeter le lot » revient à additionner les ' +
+                'barres vertes.',
+            },
+          ],
           text:
             'Sur une chaîne de fabrication, chaque pièce produite a une probabilité $p$ ' +
             'constante d\'être défectueuse, indépendamment des autres — exactement les 4 ' +
@@ -1222,6 +1281,25 @@ export const variablesAleatoires: ChapterContent = {
               'Un microbiologiste du CDC examine un échantillon viral. Photo : James ' +
               'Gathany, CDC/Public Health Image Library (domaine public).',
           },
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              bars: [
+                { label: '0-1', value: 0.406, valueLabel: '0,406', tone: 'faint' },
+                { label: '2-3', value: 0.4511, valueLabel: '0,451', tone: 'faint' },
+                { label: '4-5', value: 0.1263, valueLabel: '0,126', tone: 'faint' },
+                { label: '6+', value: 0.0166, valueLabel: '0,017', tone: 'accent' },
+              ],
+              maxValue: 0.52,
+              xAxisLabel: 'k = cas observés ce mois',
+              yAxisLabel: 'P(X=k)',
+              footnote: 'λ=2/mois — P(X≥6) ≈ 1,6% (orange) : alerte',
+              caption:
+                "Pour une maladie où λ=2 cas/mois en moyenne, les barres orange (6 cas ou " +
+                "plus) cumulent à peine 1,6% de probabilité — observer un tel mois serait " +
+                "très inhabituel, exactement le signal qu'un système de surveillance guette.",
+            },
+          ],
           text:
             'Un service de santé publique qui surveille une maladie rare (un nombre moyen ' +
             'connu de $\\lambda$ cas par mois dans une région) utilise directement la loi ' +

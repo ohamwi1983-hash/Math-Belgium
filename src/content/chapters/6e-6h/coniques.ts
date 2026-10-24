@@ -1325,6 +1325,25 @@ export const coniques: ChapterContent = {
         {
           kind: 'application',
           titre: "Capter un signal venu de l'espace avec une parabole",
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              orientation: 'horizontal',
+              scale: 'log',
+              logMin: -1,
+              bars: [
+                { label: '0,6 m', value: 0.36, valueLabel: '0,36' },
+                { label: '3 m', value: 9, valueLabel: '9' },
+                { label: '500 m', value: 250000, valueLabel: '250 000' },
+              ],
+              footnote: 'FAST : ≈700 000× plus de signal captée',
+              caption:
+                "La surface qui capte les ondes — donc la puissance du signal reçu au " +
+                "foyer — grandit comme le CARRÉ du diamètre. C'est pour ça qu'un " +
+                "radiotélescope comme FAST (500 m) écrase une antenne domestique (0,6 m), " +
+                "échelle logarithmique pour que les trois tiennent sur le même graphe.",
+            },
+          ],
           text:
             "Tu viens de voir que tout rayon parallèle à l'axe d'une parabole se réfléchit " +
             "vers le foyer : c'est exactement le principe d'une antenne satellite ou d'un " +
@@ -1431,6 +1450,36 @@ export const coniques: ChapterContent = {
         {
           kind: 'application',
           titre: "Détruire un calcul rénal sans opération grâce à l'ellipse",
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -6,
+              xMax: 6,
+              yMin: -5,
+              yMax: 5,
+              curves: [
+                { fn: (x) => 4 * r(1 - (x * x) / 25), tone: 'faint', xMin: -5, xMax: 5 },
+                { fn: (x) => -4 * r(1 - (x * x) / 25), tone: 'faint', xMin: -5, xMax: 5 },
+              ],
+              vectors: [
+                { from: { x: -3, y: 0 }, to: { x: 4, y: 2.4 }, tone: 'attn' },
+                { from: { x: 4, y: 2.4 }, to: { x: 3, y: 0 }, tone: 'good' },
+                { from: { x: -3, y: 0 }, to: { x: 0, y: 4 }, tone: 'attn' },
+                { from: { x: 0, y: 4 }, to: { x: 3, y: 0 }, tone: 'good' },
+                { from: { x: -3, y: 0 }, to: { x: -2, y: 3.666 }, tone: 'attn' },
+                { from: { x: -2, y: 3.666 }, to: { x: 3, y: 0 }, tone: 'good' },
+              ],
+              points: [
+                { x: -3, y: 0, label: 'générateur', tone: 'attn', labelPos: 'below' },
+                { x: 3, y: 0, label: 'calcul rénal', tone: 'good', labelPos: 'below' },
+              ],
+              caption:
+                "Trois ondes de choc parties du générateur (foyer de gauche), chacune " +
+                "réfléchie par la paroi elliptique vers le calcul rénal (foyer de droite) " +
+                "— toute l'énergie émise se concentre au même point, quel que soit le " +
+                "chemin suivi.",
+            },
+          ],
           text:
             "La propriété optique de l'ellipse — tout ce qui part d'un foyer repasse par " +
             "l'autre — a une application médicale directe : la **lithotritie " +
@@ -1456,6 +1505,59 @@ export const coniques: ChapterContent = {
         {
           kind: 'application',
           titre: 'Trouver sa position en mer grâce à des hyperboles',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -7,
+              xMax: 7.5,
+              yMin: -8,
+              yMax: 8,
+              curves: [
+                { fn: (x) => 4 * r((x * x) / 9 - 1), tone: 'accent', xMin: 3, xMax: 6 },
+                { fn: (x) => -4 * r((x * x) / 9 - 1), tone: 'accent', xMin: 3, xMax: 6 },
+              ],
+              vectors: [
+                { from: { x: -5, y: 0 }, to: { x: 5, y: 5.333 }, tone: 'attn', dashed: true },
+                { from: { x: 5, y: 0 }, to: { x: 5, y: 5.333 }, tone: 'good' },
+              ],
+              points: [
+                { x: -5, y: 0, label: 'émetteur 1', tone: 'ink', labelPos: 'below' },
+                { x: 5, y: 0, label: 'émetteur 2', tone: 'ink', labelPos: 'below' },
+                { x: 5, y: 5.333, label: 'position', tone: 'bad', labelPos: 'below' },
+              ],
+              caption:
+                "Pour tout point de cette branche, la distance à l'émetteur 1 (pointillé) " +
+                "moins la distance à l'émetteur 2 (plein) vaut la MÊME constante (ici 6) — " +
+                "exactement ce que mesure la différence de temps d'arrivée. Toute la " +
+                "branche est compatible avec UNE seule paire d'émetteurs.",
+            },
+            {
+              kind: 'vectorPlane',
+              xMin: -7,
+              xMax: 7,
+              yMin: -7,
+              yMax: 7,
+              curves: [
+                { fn: (x) => 4 * r((x * x) / 9 - 1), tone: 'accent', xMin: 3, xMax: 6 },
+                { fn: (x) => -4 * r((x * x) / 9 - 1), tone: 'accent', xMin: 3, xMax: 6 },
+              ],
+              curvesOfY: [
+                { fn: (y) => 4 * r((y * y) / 9 - 1), tone: 'good', yMin: 3, yMax: 6 },
+                { fn: (y) => -4 * r((y * y) / 9 - 1), tone: 'good', yMin: 3, yMax: 6 },
+              ],
+              points: [
+                { x: -5, y: 0, label: 'paire 1', tone: 'ink', labelPos: 'below' },
+                { x: 5, y: 0, label: 'paire 1', tone: 'ink', labelPos: 'below' },
+                { x: 0, y: -5, label: 'paire 2', tone: 'ink', labelPos: 'left' },
+                { x: 0, y: 5, label: 'paire 2', tone: 'ink', labelPos: 'left' },
+                { x: 4.54, y: 4.54, label: 'navire', tone: 'bad', labelPos: 'below' },
+              ],
+              caption:
+                "Une deuxième paire d'émetteurs (orientée différemment) place le navire " +
+                "sur une SECONDE branche d'hyperbole (verte). L'intersection des deux " +
+                "branches — un seul point — donne la position exacte, sans ambiguïté.",
+            },
+          ],
           text:
             "Avant le GPS, les navires et les avions se repéraient avec un système appelé " +
             'LORAN : deux émetteurs radio au sol, à des positions connues et fixes, envoient ' +
