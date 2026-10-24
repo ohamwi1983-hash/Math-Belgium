@@ -165,6 +165,47 @@ export const fonctionsExponentielles: ChapterContent = {
               'Les touches du piano sont accordées sur la gamme tempérée, répartie selon des ' +
               "puissances de 2. Photo : Scott Detwiler, CC BY-SA 3.0, via Wikimedia Commons.",
           },
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (n) => 440 * Math.pow(2, n / 12), tone: 'accent' }],
+              xMin: 0,
+              xMax: 12,
+              xTicks: [0, 6, 12],
+              fixedYRange: { min: 0, max: 920 },
+              points: [
+                { x: 0, y: 440, label: '440 Hz (la)', tone: 'accent', labelPos: 'above' },
+                { x: 12, y: 880, label: '880 Hz (la, octave+)', tone: 'accent', labelPos: 'left' },
+              ],
+              xAxisLabel: 'n (demi-tons)',
+              yAxisLabel: 'fréquence (Hz)',
+              caption:
+                'f(n) = 440·2^(n/12) : 12 demi-tons égaux multiplient bien la fréquence par ' +
+                '2 au total (doublement = une octave).',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (n) => 440 * Math.pow(2, n / 12), tone: 'accent' },
+                { fn: (n) => 440 + ((880 - 440) * n) / 12, tone: 'faint' },
+              ],
+              xMin: 0,
+              xMax: 12,
+              xTicks: [0, 6, 12],
+              fixedYRange: { min: 0, max: 920 },
+              textLabels: [
+                { x: 3.2, y: 560, text: 'linéaire (faux)', tone: 'faint', anchor: 'start' },
+                { x: 1, y: 820, text: 'vraie gamme', tone: 'accent', anchor: 'start' },
+              ],
+              xAxisLabel: 'n (demi-tons)',
+              yAxisLabel: 'fréquence (Hz)',
+              caption:
+                'Si les fréquences augmentaient par PAS ÉGAUX (droite grise), les demi-tons ' +
+                'ne sonneraient pas également espacés à l\'oreille. C\'est le RAPPORT constant ' +
+                'entre deux notes voisines (×2^(1/12)), pas leur différence, qui donne une ' +
+                'gamme régulière — d\'où la vraie courbe exponentielle, en orange.',
+            },
+          ],
           text:
             'Le piano moderne (et presque tous les instruments occidentaux) utilise la ' +
             '**gamme tempérée** : l\'octave est divisée en 12 demi-tons ÉGAUX, où chaque ' +
@@ -1613,6 +1654,41 @@ export const fonctionsExponentielles: ChapterContent = {
               "Le nombre de transistors gravés sur une puce a suivi la loi de Moore pendant " +
               'des décennies. Photo : Krzysztof Gojowy, CC BY 4.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => Math.pow(2, t / 2), tone: 'accent' }],
+              xMin: 0,
+              xMax: 20,
+              xTicks: [0, 10, 20],
+              fixedYRange: { min: 0, max: 1100 },
+              points: [
+                { x: 0, y: 1, label: 'N₀', tone: 'accent', labelPos: 'right' },
+                { x: 20, y: 1024, label: '×1024 en 20 ans', tone: 'accent', labelPos: 'left' },
+              ],
+              xAxisLabel: 't (années)',
+              yAxisLabel: 'N(t) / N₀',
+              caption:
+                "N(t)=N₀·2^(t/2) sur une échelle normale : presque plat pendant 10 ans, puis " +
+                "une explosion — l'allure typique d'une exponentielle qu'on ne voit JAMAIS " +
+                "venir à temps en la regardant seulement au début.",
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => t / 2, tone: 'good' }],
+              xMin: 0,
+              xMax: 20,
+              xTicks: [0, 10, 20],
+              fixedYRange: { min: 0, max: 10 },
+              xAxisLabel: 't (années)',
+              yAxisLabel: 'nombre de doublements',
+              caption:
+                "La MÊME croissance, mais en comptant les doublements plutôt que N(t) lui-" +
+                "même : une droite. C'est pour ça que les graphiques de la loi de Moore sont " +
+                "presque toujours tracés en échelle logarithmique — une exponentielle y " +
+                'devient une droite, beaucoup plus facile à lire.',
+            },
+          ],
           text:
             "En 1965, l'ingénieur américain **Gordon Moore** (cofondateur d'Intel) observe " +
             "que le nombre de transistors que l'on peut placer sur une puce électronique " +
@@ -1818,6 +1894,30 @@ export const fonctionsExponentielles: ChapterContent = {
               'Chaque neurone applique une fonction sigmoïde à la somme pondérée de ses ' +
               'entrées. Diagramme : Cburnett, CC BY-SA 3.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (x) => 1 / (1 + Math.exp(-x)), tone: 'accent' },
+                { fn: (x) => (x < 0 ? 0 : 1), tone: 'bad' },
+              ],
+              xMin: -6,
+              xMax: 6,
+              xTicks: [-6, 0, 6],
+              horizontalAsymptotes: [{ y: 0 }, { y: 1 }],
+              points: [{ x: 0, y: 0.5, label: '', tone: 'accent' }],
+              textLabels: [
+                { x: -5.5, y: 0.85, text: 'sigmoïde (douce)', tone: 'accent', anchor: 'start' },
+                { x: 1.5, y: 0.15, text: 'tout-ou-rien (brutal)', tone: 'bad', anchor: 'start' },
+              ],
+              xAxisLabel: 'x (entrée pondérée)',
+              yAxisLabel: 'σ(x)',
+              caption:
+                "σ(x) = 1/(1+e⁻ˣ) (orange) bascule progressivement de 0 à 1 autour de x=0, au " +
+                'lieu du saut brutal "tout ou rien" (rouge) — c\'est ce qui permet au réseau ' +
+                "d'ajuster ses réponses petit à petit plutôt que par à-coups.",
+            },
+          ],
           text:
             'Les réseaux de neurones artificiels, au cœur de l\'intelligence artificielle ' +
             'moderne, ont besoin d\'une fonction qui transforme n\'importe quel nombre réel ' +
