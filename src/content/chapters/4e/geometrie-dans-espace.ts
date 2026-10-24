@@ -74,6 +74,28 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comment un jeu vidéo 3D dessine un monde sur ton écran plat',
+          illustrations: [
+            {
+              kind: 'planeSketch',
+              width: 320,
+              height: 200,
+              lines: [
+                { points: [{ x: 40, y: 100 }, { x: 280, y: 60 }], tone: 'accent', dashed: true, arrow: true },
+                { points: [{ x: 140, y: 40 }, { x: 140, y: 160 }], tone: 'ink' },
+              ],
+              points: [
+                { x: 40, y: 100, label: 'caméra virtuelle', tone: 'ink', labelDy: 18 },
+                { x: 280, y: 60, label: 'sommet 3D', tone: 'accent', labelDx: -90, labelDy: -10 },
+                { x: 140, y: 83.33, label: 'pixel projeté', tone: 'good', labelDx: -8, labelDy: -10 },
+              ],
+              freeLabels: [{ x: 140, y: 30, text: 'écran (plan de projection)', tone: 'ink' }],
+              caption:
+                'Le moteur trace une droite de la caméra vers chaque sommet 3D et calcule le ' +
+                "pixel où cette droite traverse le plan de l'écran — une règle fixe, répétée " +
+                'pour tous les sommets de tous les objets, exactement comme une convention de ' +
+                'dessin appliquée systématiquement.',
+            },
+          ],
           text:
             "Un écran d'ordinateur ou de téléphone est plat, mais les jeux vidéo en 3D " +
             'affichent des mondes qui ont une vraie profondeur — exactement le même problème ' +
@@ -791,6 +813,29 @@ export const geometrieDansEspace: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comment une imprimante 3D construit un objet, tranche par tranche',
+          illustrations: [
+            {
+              kind: 'planeSketch',
+              width: 320,
+              height: 220,
+              lines: [
+                { points: [{ x: 100, y: 200 }, { x: 220, y: 200 }, { x: 180, y: 40 }, { x: 140, y: 40 }], tone: 'ink', closed: true },
+                { points: [{ x: 107.5, y: 170 }, { x: 212.5, y: 170 }], tone: 'accent', dashed: true },
+                { points: [{ x: 115, y: 140 }, { x: 205, y: 140 }], tone: 'accent', dashed: true },
+                { points: [{ x: 122.5, y: 110 }, { x: 197.5, y: 110 }], tone: 'accent', dashed: true },
+                { points: [{ x: 130, y: 80 }, { x: 190, y: 80 }], tone: 'accent', dashed: true },
+                { points: [{ x: 60, y: 195 }, { x: 60, y: 45 }], tone: 'good', arrow: true },
+              ],
+              freeLabels: [
+                { x: 213, y: 174, text: 'tranche', tone: 'accent' },
+                { x: 40, y: 120, text: 'sens d\'impression', tone: 'good' },
+              ],
+              caption:
+                "Le slicer coupe le modèle 3D par des plans horizontaux régulièrement " +
+                "espacés — chaque intersection donne le contour d'une tranche, imprimée du " +
+                'bas vers le haut, l\'une après l\'autre.',
+            },
+          ],
           text:
             "Une imprimante 3D ne dépose jamais un objet entier d'un coup : elle le construit " +
             'couche par couche, en empilant des tranches horizontales très fines les unes sur ' +
@@ -1172,6 +1217,31 @@ export const geometrieDansEspace: ChapterContent = {
             alt: 'Panneaux solaires installés sur un toit',
             caption: 'Panneaux solaires sur un toit. Photo : Pujanak, domaine public, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'planeSketch',
+              width: 400,
+              height: 220,
+              lines: [
+                { points: [{ x: 10, y: 200 }, { x: 390, y: 200 }], tone: 'ink' },
+                { points: [{ x: 40, y: 200 }, { x: 126.6, y: 150 }], tone: 'accent' },
+                { points: [{ x: 126.6, y: 150 }, { x: 263.95, y: 200 }], tone: 'attn', dashed: true },
+                { points: [{ x: 263.95, y: 200 }, { x: 350.55, y: 150 }], tone: 'accent' },
+              ],
+              points: [{ x: 263.95, y: 200, label: 'espacement minimal', tone: 'good', labelDy: 18 }],
+              freeLabels: [
+                { x: 60, y: 175, text: 'panneau 1', tone: 'accent' },
+                { x: 320, y: 175, text: 'panneau 2', tone: 'accent' },
+                { x: 180, y: 195, text: 'ombre portée', tone: 'ink' },
+                { x: 100, y: 125, text: 'soleil bas (≈20°)', tone: 'ink' },
+              ],
+              caption:
+                "Avec le soleil bas (hauteur ≈ 20°), l'ombre du sommet du panneau 1 s'étend " +
+                "loin au sol : le panneau 2 ne peut commencer qu'à partir de là, sous peine " +
+                "d'être lui-même à l'ombre une partie de la journée — exactement la " +
+                'projection vue dans cette section, appliquée à fixer un espacement minimal.',
+            },
+          ],
         },
         {
           kind: 'entrainement',

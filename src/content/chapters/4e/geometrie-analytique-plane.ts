@@ -340,6 +340,29 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         {
           kind: 'application',
           titre: 'Positionner un objet à l\'écran, pixel par pixel',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.5,
+              xMax: 7,
+              yMin: -0.5,
+              yMax: 5,
+              grid: true,
+              vectors: [{ from: { x: 1, y: 1 }, to: { x: 6, y: 4 }, tone: 'accent' }],
+              points: [
+                { x: 1, y: 1, label: 'P₁ (1 ; 1)', tone: 'ink', labelPos: 'below' },
+                { x: 6, y: 4, label: 'P₂ (6 ; 4)', tone: 'ink', labelPos: 'above' },
+                { x: 2, y: 2, tone: 'good' },
+                { x: 3, y: 2, tone: 'good' },
+                { x: 4, y: 3, tone: 'good' },
+                { x: 5, y: 3, tone: 'good' },
+              ],
+              caption:
+                "Pour tracer un trait net de P₁ à P₂ sur un écran, le logiciel calcule " +
+                "l'équation de la droite (ici pente 0,6), puis arrondit, pixel par pixel " +
+                "(points verts), l'ordonnée que donne cette équation à chaque colonne x.",
+            },
+          ],
           text:
             "Un écran d'ordinateur, de téléphone ou de console est, au fond, un immense " +
             'quadrillage de points — les pixels — repérés exactement comme dans ce chapitre : ' +
@@ -792,6 +815,30 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             alt: 'Un théodolite, instrument de mesure d\'angles utilisé en géométrie de terrain',
             caption: 'Théodolite utilisé en arpentage. Photo : Djat, CC BY-SA 3.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -2,
+              xMax: 12,
+              yMin: -2,
+              yMax: 11,
+              vectors: [
+                { from: { x: -1, y: -0.4 }, to: { x: 11, y: 4.4 }, tone: 'accent', arrow: false },
+                { from: { x: 6, y: 9 }, to: { x: 8.28, y: 3.31 }, tone: 'good', dashed: true },
+              ],
+              points: [
+                { x: 5, y: 2, label: 'limite de propriété (d)', tone: 'accent', labelPos: 'above', node: false },
+                { x: 6, y: 9, label: 'M (coin du mur)', tone: 'good', labelPos: 'above' },
+                { x: 8.28, y: 3.31, label: 'P', tone: 'ink', labelPos: 'right' },
+              ],
+              rightAngleMarkers: [{ vertex: { x: 8.28, y: 3.31 }, arm1: { x: 11, y: 4.4 }, arm2: { x: 6, y: 9 } }],
+              caption:
+                "Même méthode que l'exemple ci-dessus, appliquée au terrain : le géomètre " +
+                'matérialise la limite de propriété (d), construit la perpendiculaire par le ' +
+                'point M à contrôler, et mesure MP ≈ 6,1 m — le vrai recul, jamais une ' +
+                'distance mesurée en diagonale.',
+            },
+          ],
           text:
             'Un géomètre-arpenteur qui doit fixer la limite exacte d\'un terrain, ou vérifier ' +
             'qu\'une construction respecte bien le recul minimal imposé par rapport à la ' +
@@ -1025,6 +1072,31 @@ export const geometrieAnalytiquePlane: ChapterContent = {
             alt: 'Illustration d\'un satellite GPS en orbite',
             caption: 'Satellite GPS en orbite. Photo : NASA, domaine public.',
           },
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -6,
+              xMax: 14,
+              yMin: -6,
+              yMax: 14,
+              circles: [
+                { cx: 0, cy: 0, r: 5, tone: 'accent' },
+                { cx: 8, cy: 0, r: 5, tone: 'good' },
+                { cx: 3, cy: 8, r: 5.1, tone: 'good' },
+              ],
+              points: [
+                { x: 0, y: 0, label: 'satellite 1', tone: 'accent', labelPos: 'below' },
+                { x: 8, y: 0, label: 'satellite 2', tone: 'good', labelPos: 'below' },
+                { x: 3, y: 8, label: 'satellite 3', tone: 'good', labelPos: 'above' },
+                { x: 4, y: 3, label: 'position calculée', tone: 'ink', labelPos: 'right' },
+              ],
+              caption:
+                "Chaque cercle, c'est « être à la distance mesurée r de ce satellite ». Un " +
+                'seul cercle laisse une infinité de positions ; les trois cercles ensemble ' +
+                "ne se recoupent qu'en un seul point commun — la trilatération qui donne la " +
+                'position GPS.',
+            },
+          ],
           text:
             'Un récepteur GPS ne « voit » jamais directement sa position : il la calcule. ' +
             'Chaque satellite envoie un signal horodaté, et le récepteur mesure le temps que ' +

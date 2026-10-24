@@ -702,6 +702,30 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         {
           kind: 'application',
           titre: 'Trouver sa position en mer avec un sextant',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.5,
+              xMax: 4,
+              yMin: -0.5,
+              yMax: 3,
+              showAxes: false,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 3.5, y: 0 }, tone: 'faint', arrow: true },
+                { from: { x: 0, y: 0 }, to: { x: 2.8, y: 2 }, tone: 'accent', arrow: true },
+              ],
+              points: [
+                { x: 3.5, y: 0, label: 'horizon', tone: 'ink', labelPos: 'below', node: false },
+                { x: 2.8, y: 2, label: 'astre visé', tone: 'accent', labelPos: 'above' },
+              ],
+              angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 35.5, radiusPx: 40, label: 'h', tone: 'accent' }],
+              caption:
+                "Ce que le sextant mesure concrètement : l'angle h entre l'horizon et un astre " +
+                "visé (ici h ≈ 35°). Cette seule mesure, combinée à l'heure exacte, suffit à " +
+                'reconstruire un triangle sphérique Pôle–Navire–Astre que la loi des sinus ' +
+                'résout pour donner la latitude.',
+            },
+          ],
           text:
             'Avant le GPS, les marins déterminaient leur position en mer grâce à la ' +
             'trigonométrie. Un sextant mesure précisément l\'angle entre l\'horizon et un ' +
@@ -747,6 +771,21 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer les longueurs d\'une charpente de toit',
+          illustrations: [
+            {
+              kind: 'triangleGeneric',
+              A: { x: 60, y: 220 },
+              B: { x: 335.76, y: 220 },
+              C: { x: 197.88, y: 104.3 },
+              angleArcsAt: ['C'],
+              sideLabels: { a: 'a = 3 m', b: 'b = 3 m', c: 'c ≈ 4,6 m' },
+              caption:
+                'Les deux arbalétriers (a et b), déjà coupés à 3 m chacun, forment un angle ' +
+                'de 100° au faîtage (C) — fixé par la pente voulue. La loi des cosinus donne ' +
+                "directement la largeur de l'entrait c = AB à construire en bas : " +
+                'c² = 3²+3²−2×3×3×cos100° ≈ 21,1, donc c ≈ 4,6 m.',
+            },
+          ],
           text:
             'Une charpente de toit est un assemblage de triangles — les charpentiers ' +
             'choisissent cette forme précisément parce qu\'un triangle est rigide ' +
@@ -913,6 +952,26 @@ export const cercleTrigonometriqueTriangles: ChapterContent = {
         {
           kind: 'application',
           titre: 'Reconstruire un objet en 3D à partir de simples photos',
+          illustrations: [
+            {
+              kind: 'triangulation',
+              labels: {
+                A: 'appareil 1',
+                B: 'appareil 2',
+                F: 'F',
+                S: 'point 3D',
+                distanceLabel: 'd (connue)',
+                heightLabel: 'position cherchée',
+                angleAtA: 'θ₁',
+                angleAtB: 'θ₂',
+              },
+              caption:
+                'La distance d entre les deux appareils photo est connue, et chaque photo ' +
+                'donne un angle de visée (θ₁, θ₂) vers le même point. Le triangle ' +
+                "appareil1–appareil2–point est donc entièrement déterminé (AAS) : la loi des " +
+                'sinus calcule sa position exacte — répétée pour des millions de points.',
+            },
+          ],
           text:
             'La photogrammétrie reconstruit un modèle 3D d\'un objet ou d\'un bâtiment à ' +
             'partir de plusieurs photos prises sous des angles différents — la même ' +
