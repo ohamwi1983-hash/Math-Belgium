@@ -328,6 +328,29 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer la vraie trajectoire d\'un avion dans le vent',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -5,
+              xMax: 120,
+              yMin: -5,
+              yMax: 40,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 100, y: 0 }, tone: 'accent' },
+                { from: { x: 100, y: 0 }, to: { x: 110, y: 25 }, tone: 'attn' },
+                { from: { x: 0, y: 0 }, to: { x: 110, y: 25 }, tone: 'good' },
+              ],
+              points: [
+                { x: 45, y: 4, vectorLabel: [{ text: 'vitesse-air (100 km/h)', vector: true }], tone: 'accent', node: false },
+                { x: 97, y: 15, vectorLabel: [{ text: 'vent', vector: true }], tone: 'attn', node: false },
+                { x: 45, y: 18, vectorLabel: [{ text: 'vitesse-sol (résultante)', vector: true }], tone: 'good', node: false },
+              ],
+              caption:
+                "Vecteur vitesse-air (100 km/h plein est) + vecteur vent (méthode du triangle, " +
+                "bout à bout) = vecteur vitesse-sol : environ 112,8 km/h, dévié d'environ 13° " +
+                "par rapport au cap affiché — c'est la trajectoire réellement suivie.",
+            },
+          ],
           text:
             'Un avion ne vole jamais exactement où son pilote le dirige : le vent le pousse ' +
             'de côté. Les pilotes représentent la vitesse propre de l\'avion (par rapport à ' +
@@ -521,6 +544,30 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'application',
           titre: 'Décomposer la tension d\'un câble pour dimensionner un pont',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -3,
+              xMax: 30,
+              yMin: -3,
+              yMax: 48,
+              vectors: [
+                { from: { x: 0, y: 0 }, to: { x: 25, y: 43.3 }, tone: 'accent' },
+                { from: { x: 25, y: 43.3 }, to: { x: 25, y: 0 }, tone: 'faint', dashed: true, arrow: false },
+                { from: { x: 25, y: 43.3 }, to: { x: 0, y: 43.3 }, tone: 'faint', dashed: true, arrow: false },
+              ],
+              points: [
+                { x: 25, y: 43.3, vectorLabel: [{ text: 'T = 50 kN', vector: true }], tone: 'accent', labelPos: 'above' },
+                { x: 25, y: 0, label: 'Tx ≈ 25 kN', tone: 'ink', labelPos: 'left', node: false },
+                { x: 0, y: 43.3, label: 'Ty ≈ 43,3 kN', tone: 'ink', labelPos: 'right', node: false },
+              ],
+              caption:
+                "Le câble tire avec une tension T = 50 kN, inclinée à 60° sur l'horizontale. " +
+                "Décomposée selon les deux directions de la poutre, sa composante verticale " +
+                "Ty donne le poids réellement supporté, sa composante horizontale Tx la " +
+                'compression transmise au tablier.',
+            },
+          ],
           text:
             'Dans un pont suspendu ou haubané, chaque câble tire sur le tablier selon une ' +
             'direction oblique précise. Pour calculer si une poutre va résister, un ' +
@@ -568,6 +615,26 @@ export const calculVectoriel: ChapterContent = {
         {
           kind: 'application',
           titre: 'Déplacer un personnage à l\'écran',
+          illustrations: [
+            {
+              kind: 'vectorPlane',
+              xMin: -0.5,
+              xMax: 7,
+              yMin: -0.5,
+              yMax: 5,
+              grid: true,
+              vectors: [{ from: { x: 2, y: 1 }, to: { x: 5, y: 3 }, tone: 'good' }],
+              points: [
+                { x: 2, y: 1, label: 'P (image n)', tone: 'ink', labelPos: 'below' },
+                { x: 5, y: 3, label: 'P\' (image n+1)', tone: 'good', labelPos: 'above' },
+                { x: 3.5, y: 2.6, vectorLabel: [{ text: 'v(3 ; 2)', vector: true }], tone: 'good', node: false },
+              ],
+              caption:
+                "À chaque image, le moteur du jeu calcule P' = P + v : le personnage en " +
+                '(2 ; 1) avec une vitesse v(3 ; 2) se retrouve en (5 ; 3) à l\'image suivante — ' +
+                'une simple addition de composantes, répétée 60 fois par seconde.',
+            },
+          ],
           text:
             'Dans un jeu vidéo en 2D, la position d\'un personnage à l\'écran est un point ' +
             '(x ; y), et sa vitesse de déplacement est un vecteur $(v_x ; v_y)$ — exactement ' +
