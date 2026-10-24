@@ -510,6 +510,18 @@ export const fonctionsComposees: ChapterContent = {
         {
           kind: 'application',
           titre: 'Enchaîner des commandes informatiques comme des fonctions composées',
+          illustrations: [
+            {
+              kind: 'chain',
+              stages: ['fichier.txt', 'grep "erreur"', 'wc -l'],
+              highlightIndex: 2,
+              outputLabel: 'nombre de lignes',
+              caption:
+                "`fichier.txt | grep \"erreur\" | wc -l` : chaque commande reçoit la sortie de la " +
+                'précédente comme entrée — exactement la chaîne de composition $h=u\\circ v\\circ w$ ' +
+                "que tu lis de l'intérieur vers l'extérieur.",
+            },
+          ],
           text:
             'Sur un ordinateur, une commande Unix/Linux peut envoyer directement son résultat ' +
             'comme donnée d\'entrée à la commande suivante, grâce au symbole **|** (appelé ' +
@@ -704,6 +716,18 @@ export const fonctionsComposees: ChapterContent = {
             alt: 'Chaîne de montage automobile',
             caption: 'Chaîne de montage Volkswagen à Wolfsbourg, 1960. Photo : Roger Wollstadt, CC BY-SA 2.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'chain',
+              stages: ['châssis', 'peinture', 'moteur'],
+              highlightIndex: 2,
+              outputLabel: 'voiture assemblée',
+              caption:
+                'Chaque poste transforme ce que le précédent lui a transmis — inverser « peinture » ' +
+                'et « moteur » casserait la chaîne (on ne peint pas un moteur déjà monté), ' +
+                'exactement comme $f\\circ g \\ne g\\circ f$ en général.',
+            },
+          ],
           text:
             'Sur une chaîne de montage industrielle (automobile, électronique...), chaque poste ' +
             'de travail reçoit la pièce déjà transformée par le poste précédent, y ajoute sa ' +
@@ -732,6 +756,18 @@ export const fonctionsComposees: ChapterContent = {
             alt: 'Schéma de la voie métabolique de la glycolyse',
             caption: 'La glycolyse : une dizaine de réactions enchaînées, chacune transformant le produit de la précédente. Schéma : Yikrazuul, domaine public, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'chain',
+              stages: ['glucose', 'glycolyse', 'cycle de Krebs'],
+              highlightIndex: 2,
+              outputLabel: 'ATP produit',
+              caption:
+                'Le produit de la glycolyse devient le réactif du cycle de Krebs — le rendement ' +
+                "global se calcule en composant le rendement de chaque étape, de l'intérieur vers " +
+                "l'extérieur, exactement comme une composition de fonctions.",
+            },
+          ],
           text:
             'En chimie et en biologie, de nombreux processus se déroulent en plusieurs réactions ' +
             'successives, où le produit de l\'une devient le réactif de la suivante — exactement ' +

@@ -413,6 +413,23 @@ export const trigonometrie: ChapterContent = {
             alt: 'Gros plan sur des cellules hexagonales de cire dans une ruche',
             caption: 'Photo : Ruth Hartnup, CC BY 2.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              bars: [
+                { label: 'Triangle', value: 1.73, valueLabel: '1,73 cm²', tone: 'faint' },
+                { label: 'Carré', value: 2.25, valueLabel: '2,25 cm²', tone: 'faint' },
+                { label: 'Hexagone', value: 2.6, valueLabel: '2,60 cm²', tone: 'accent' },
+              ],
+              yAxisLabel: 'aire enclose',
+              colorValueLabels: true,
+              footnote: 'les 3 formes partagent le même périmètre de 6 cm',
+              caption:
+                'À périmètre de cire égal (6 cm), les 3 seuls polygones réguliers qui pavent le ' +
+                "plan sans espace vide n'enferment pas la même aire — l'hexagone gagne : plus de " +
+                'surface de stockage pour la même quantité de cire.',
+            },
+          ],
           text:
             'Les abeilles construisent leurs rayons de cire avec des cellules hexagonales — ' +
             "et ce n'est pas un hasard. Parmi tous les polygones réguliers qui peuvent paver " +
@@ -510,6 +527,21 @@ export const trigonometrie: ChapterContent = {
             alt: 'Un étudiant utilise un théodolite sur le terrain',
             caption: 'Photo : Kskhh, CC BY-SA 4.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'triangleGeneric',
+              A: { x: 40, y: 180 },
+              B: { x: 300, y: 180 },
+              C: { x: 140, y: 40 },
+              angleArcsAt: ['A', 'B'],
+              sideLabels: { c: '50 m' },
+              caption:
+                'Depuis A et B — deux points accessibles distants de 50 m — le géomètre vise le ' +
+                'point inaccessible C au théodolite et mesure seulement les deux angles en A et ' +
+                'B. Le triangle ABC est alors entièrement déterminé : un côté et deux angles ' +
+                'suffisent pour calculer les deux autres côtés.',
+            },
+          ],
           text:
             "Un géomètre qui doit connaître la largeur d'une rivière, ou la hauteur d'un " +
             "bâtiment, ne peut évidemment pas y planter un mètre ruban. Il utilise un " +
@@ -813,6 +845,28 @@ export const trigonometrie: ChapterContent = {
         {
           kind: 'application',
           titre: "Modéliser la durée du jour au fil de l'année",
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => 12 - 4.5 * Math.cos((2 * Math.PI * x) / 365.25), tone: 'accent' }],
+              xMin: 0,
+              xMax: 365,
+              xTicks: [91, 182, 274, 365],
+              yTicks: [7.5, 12, 16.5],
+              fixedYRange: { min: 6, max: 18 },
+              points: [
+                { x: 0, y: 7.5, label: 'min : 7,5 h', tone: 'bad', labelPos: 'right' },
+                { x: 182.6, y: 16.5, label: 'max : 16,5 h', tone: 'good', labelPos: 'above' },
+              ],
+              xAxisLabel: "jours depuis le solstice d'hiver",
+              yAxisLabel: 'durée du jour (h)',
+              caption:
+                "Un modèle réaliste pour la Belgique : amplitude 4,5 h autour d'une moyenne de " +
+                "12 h, minimum au solstice d'hiver (x=0), maximum exactement 6 mois plus tard au " +
+                "solstice d'été — les mêmes paramètres A, b et φ que tu lis sur un graphique " +
+                'abstrait dans cette section.',
+            },
+          ],
           text:
             "La durée du jour (le temps entre le lever et le coucher du soleil) varie de " +
             "façon périodique au fil de l'année — minimale au solstice d'hiver, maximale au " +
