@@ -431,6 +431,28 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'application',
           titre: 'Lire un graphique de population ou d\'épidémie',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 20 + 150 * t * Math.exp(-0.2 * t), tone: 'accent' }],
+              horizontalAsymptotes: [{ y: 20, label: 'capacité de charge' }],
+              xMin: 0,
+              xMax: 30,
+              xTicks: [5, 10, 20],
+              yTicks: [20, 100, 200, 300],
+              points: [
+                { x: 0, y: 20, label: 'début du suivi', tone: 'accent', labelPos: 'right' },
+                { x: 5, y: 295.9, label: 'croissance → déclin', tone: 'good', labelPos: 'above' },
+              ],
+              xAxisLabel: 'temps (semaines)',
+              yAxisLabel: 'population',
+              caption:
+                'Une épidémie ou une population animale suivie à partir de t=0 (début du ' +
+                'domaine) : croissance jusqu\'au pic (t=5), puis déclin qui se rapproche peu à ' +
+                'peu de la capacité de charge — exactement l\'asymptote horizontale que tu lis ' +
+                'sur un graphique abstrait.',
+            },
+          ],
           text:
             'Un graphique de biologie ou d\'écologie se lit EXACTEMENT de la même façon ' +
             'qu\'ici — un écologue qui étudie l\'évolution d\'une population animale applique ' +
@@ -649,6 +671,29 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'application',
           titre: 'Décaler un signal physique dans le temps ou en intensité',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (t) => Math.exp(-((t - 5) * (t - 5)) / 2), tone: 'accent' },
+                { fn: (t) => Math.exp(-((t - 8) * (t - 8)) / 2), tone: 'good' },
+              ],
+              xMin: 0,
+              xMax: 14,
+              xTicks: [5, 8],
+              yTicks: [1],
+              points: [
+                { x: 5, y: 1, label: 'signal direct', tone: 'accent', labelPos: 'above' },
+                { x: 8, y: 1, label: 'écho, TH = d = 3', tone: 'good', labelPos: 'above' },
+              ],
+              xAxisLabel: 't',
+              yAxisLabel: 'amplitude',
+              caption:
+                'Un écho (vert) est exactement le signal direct (orange) translaté horizontalement ' +
+                'de d = 3 unités de temps — TH = d, la même translation horizontale que tu viens ' +
+                'de voir sur une fonction de référence.',
+            },
+          ],
           text:
             'En physique et en ingénierie du son, un signal (une onde sonore, un signal ' +
             'électrique, les vibrations d\'un tremblement de terre) se modélise souvent par ' +
@@ -726,6 +771,29 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'application',
           titre: 'Modéliser l\'effet d\'une taxe sur une courbe d\'offre',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (q) => 10 + 0.5 * q, tone: 'accent' },
+                { fn: (q) => 15 + 0.5 * q, tone: 'bad' },
+              ],
+              xMin: 0,
+              xMax: 20,
+              xTicks: [10],
+              yTicks: [10, 15, 20],
+              points: [
+                { x: 10, y: 15, label: 'avant taxe', tone: 'accent', labelPos: 'left' },
+                { x: 10, y: 20, label: 'après taxe, TV = t = 5', tone: 'bad', labelPos: 'right' },
+              ],
+              xAxisLabel: 'quantité Q',
+              yAxisLabel: 'prix (€)',
+              caption:
+                'La courbe d\'offre $P(Q)=10+0{,}5Q$ se translate verticalement de TV = t = 5 € ' +
+                'après la taxe : pour produire la MÊME quantité Q=10, le vendeur doit désormais ' +
+                'recevoir 5 € de plus (15 € → 20 €).',
+            },
+          ],
           text:
             'En économie, une courbe d\'offre donne, pour chaque prix, la quantité qu\'un ' +
             'vendeur est prêt à produire. Quand l\'État impose une taxe fixe $t$ par unité ' +

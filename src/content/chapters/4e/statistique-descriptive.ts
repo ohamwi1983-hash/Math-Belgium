@@ -492,6 +492,36 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'application',
           titre: 'Choisir la bonne statistique pour juger un athlète',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [],
+              points: [
+                { x: 1, y: 18, label: '', tone: 'accent' },
+                { x: 2, y: 22, label: '', tone: 'accent' },
+                { x: 3, y: 15, label: '', tone: 'accent' },
+                { x: 4, y: 20, label: '', tone: 'accent' },
+                { x: 5, y: 19, label: '', tone: 'accent' },
+                { x: 6, y: 17, label: '', tone: 'accent' },
+                { x: 7, y: 21, label: '', tone: 'accent' },
+                { x: 8, y: 50, label: 'match exceptionnel', tone: 'bad', labelPos: 'above' },
+              ],
+              horizontalAsymptotes: [
+                { y: 22.75, label: 'moyenne ≈ 22,75' },
+                { y: 19.5, label: 'médiane = 19,5' },
+              ],
+              xMin: 0.5,
+              xMax: 8.5,
+              xTicks: [1, 2, 3, 4, 5, 6, 7, 8],
+              yTicks: [20, 30, 40, 50],
+              xAxisLabel: 'match',
+              yAxisLabel: 'points marqués',
+              caption:
+                '8 matchs d\'un basketteur, dont un exceptionnel à 50 points. La moyenne ' +
+                '(22,75) est tirée vers le haut par ce seul match ; la médiane (19,5) reste ' +
+                'proche du niveau typique des 7 autres matchs.',
+            },
+          ],
           text:
             "En sport, le choix entre moyenne, médiane et mode change complètement l'histoire " +
             "qu'on raconte. La moyenne de points par match d'un basketteur peut être tirée " +
@@ -699,6 +729,37 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'application',
           titre: 'Surveiller une chaîne de production avec l\'écart-type',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [],
+              axisOfSymmetry: { x: 50, label: 'cible (x̄ = 50 mm)' },
+              points: [
+                { x: 48, y: 1, label: 'lot A — écart-type faible', tone: 'good', labelPos: 'above' },
+                { x: 49, y: 1, label: '', tone: 'good' },
+                { x: 50, y: 1, label: '', tone: 'good' },
+                { x: 51, y: 1, label: '', tone: 'good' },
+                { x: 52, y: 1, label: '', tone: 'good' },
+                { x: 35, y: 2, label: 'lot B — écart-type élevé', tone: 'bad', labelPos: 'below' },
+                { x: 42, y: 2, label: '', tone: 'bad' },
+                { x: 50, y: 2, label: '', tone: 'bad' },
+                { x: 58, y: 2, label: '', tone: 'bad' },
+                { x: 65, y: 2, label: '', tone: 'bad' },
+              ],
+              xMin: 30,
+              xMax: 70,
+              xTicks: [40, 50, 60],
+              fixedYRange: { min: 0, max: 3 },
+              showYAxis: false,
+              xAxisLabel: 'mesure (mm)',
+              yAxisLabel: 'lot',
+              caption:
+                'Deux lots de 5 pièces, EXACTEMENT la même moyenne (x̄ = 50 mm, la cible) : le ' +
+                'lot A (vert) est bien centré ET resserré — machine réglée ; le lot B (rouge) a ' +
+                'la même moyenne mais une dispersion bien plus large — signal d\'alerte, même ' +
+                'si la cible est atteinte en moyenne.',
+            },
+          ],
           image: {
             src: '/images/application/quality-control-steel.jpg',
             alt: 'Ouvrier effectuant un contrôle qualité dans une aciérie',
@@ -864,6 +925,36 @@ export const statistiqueDescriptive: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comparer deux groupes de patients dans un essai clinique',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [],
+              points: [
+                { x: 5, y: 1, label: 'Traitement', tone: 'good', labelPos: 'above' },
+                { x: 6, y: 1, label: '', tone: 'good' },
+                { x: 6, y: 1, label: '', tone: 'good' },
+                { x: 8, y: 1, label: '', tone: 'good' },
+                { x: 12, y: 1, label: '', tone: 'good' },
+                { x: 8, y: 2, label: 'Placebo', tone: 'bad', labelPos: 'below' },
+                { x: 10, y: 2, label: '', tone: 'bad' },
+                { x: 13, y: 2, label: '', tone: 'bad' },
+                { x: 15, y: 2, label: '', tone: 'bad' },
+                { x: 18, y: 2, label: '', tone: 'bad' },
+              ],
+              xMin: 2,
+              xMax: 20,
+              xTicks: [5, 10, 15, 20],
+              fixedYRange: { min: 0, max: 3 },
+              showYAxis: false,
+              xAxisLabel: 'temps de guérison (jours)',
+              yAxisLabel: 'groupe',
+              caption:
+                'Le groupe Traitement (vert) guérit en général plus vite ET de façon plus ' +
+                'homogène (points resserrés entre 5 et 12 jours) que le groupe Placebo (rouge, ' +
+                'étalé de 8 à 18 jours) — mais les deux séries se chevauchent encore entre 8 et ' +
+                '12 jours : la différence est nette, sans être totale.',
+            },
+          ],
           image: {
             src: '/images/application/clinical-trial.jpg',
             alt: 'Essai clinique en laboratoire médical',
