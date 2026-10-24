@@ -754,10 +754,29 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Décrire un courant électrique alternatif',
-          image: {
-            src: '/images/application/oscilloscope.jpg',
-            alt: 'Oscilloscope affichant une onde sinusoïdale de courant alternatif',
-            caption: 'Un oscilloscope affichant une tension alternative sinusoïdale. Photo : Wikimedia Commons, CC BY-SA 3.0.',
+          illustration: {
+            kind: 'complexPlane',
+            xMin: -1,
+            xMax: 5.5,
+            yMin: -1,
+            yMax: 5.5,
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 3, y: 4 }, tone: 'accent' },
+              { from: { x: 3, y: 4 }, to: { x: 3, y: 0 }, tone: 'faint', dashed: true },
+              { from: { x: 3, y: 4 }, to: { x: 0, y: 4 }, tone: 'faint', dashed: true },
+            ],
+            points: [
+              { x: 3, y: 4, label: 'Z = 3+4i', tone: 'accent', labelPos: 'above' },
+              { x: 3, y: 0, label: 'R = 3 Ω', tone: 'ink', labelPos: 'below', node: false },
+              { x: 0, y: 4, label: 'X = 4 Ω', tone: 'ink', labelPos: 'left', node: false },
+            ],
+            angleArcs: [{ cx: 0, cy: 0, fromDeg: 0, toDeg: 53, radiusPx: 28, label: 'φ', tone: 'good' }],
+            caption:
+              "L'impédance Z = 3+4i comme point du plan complexe : sa partie réelle R = 3 Ω " +
+              '(résistance) et sa partie imaginaire X = 4 Ω (réactance) se lisent en projetant Z ' +
+              'sur les deux axes. Le module |Z| = 5 Ω — la longueur du vecteur — est ' +
+              "l'opposition totale au courant, l'argument φ ≈ 53° est le déphasage entre " +
+              'tension et courant.',
           },
           text:
             "En électricité, un courant alternatif ne se décrit pas par un seul nombre : il a " +
@@ -935,6 +954,35 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comprendre si un cycle économique s\'amortit ou s\'amplifie',
+          illustration: {
+            kind: 'complexPlane',
+            xMin: -3.3,
+            xMax: 1.4,
+            yMin: -0.5,
+            yMax: 2,
+            vectors: [
+              { from: { x: 0.707, y: 0.707 }, to: { x: 0.53, y: 0.53 }, tone: 'good' },
+              { from: { x: 0.53, y: 0.53 }, to: { x: 0, y: 0.563 }, tone: 'good' },
+              { from: { x: 0, y: 0.563 }, to: { x: -0.298, y: 0.298 }, tone: 'good' },
+              { from: { x: -0.298, y: 0.298 }, to: { x: -0.316, y: 0 }, tone: 'good' },
+              { from: { x: -0.316, y: 0 }, to: { x: -0.168, y: -0.168 }, tone: 'good' },
+              { from: { x: 0.707, y: 0.707 }, to: { x: 0.919, y: 0.919 }, tone: 'bad' },
+              { from: { x: 0.919, y: 0.919 }, to: { x: 0, y: 1.69 }, tone: 'bad' },
+              { from: { x: 0, y: 1.69 }, to: { x: -1.554, y: 1.554 }, tone: 'bad' },
+              { from: { x: -1.554, y: 1.554 }, to: { x: -2.856, y: 0 }, tone: 'bad' },
+            ],
+            points: [
+              { x: 0.707, y: 0.707, label: 'année 0', tone: 'ink', labelPos: 'right' },
+              { x: -0.168, y: -0.168, label: 'r < 1 : amortissement', tone: 'good', labelPos: 'below' },
+              { x: -2.856, y: 0, label: 'r > 1 : amplification', tone: 'bad', labelPos: 'above' },
+            ],
+            caption:
+              'Deux cycles économiques partis du même point (année 0), dont la racine complexe ' +
+              'a le même argument θ mais un module différent. Chaque année, le point tourne de ' +
+              "θ ET change de taille d'un facteur r : avec r < 1 (vert) il se rapproche peu à " +
+              "peu de l'équilibre (l'origine) ; avec r > 1 (rouge) il s'en éloigne de plus en " +
+              'plus — le cycle explose au lieu de se stabiliser.',
+          },
           text:
             "Certains modèles économiques décrivent le revenu national d'une année sur la " +
             "suivante par une relation de récurrence (il dépend des deux années précédentes). " +
@@ -1263,12 +1311,35 @@ export const nombresComplexes: ChapterContent = {
         {
           kind: 'application',
           titre: 'Faire tourner un objet dans un jeu vidéo ou un bras robotisé',
-          image: {
-            src: '/images/application/canadarm2.jpg',
-            alt: 'Un astronaute sur le bras robotisé Canadarm2 lors d\'une sortie dans l\'espace',
+          illustration: {
+            kind: 'complexPlane',
+            xMin: -0.6,
+            xMax: 2.6,
+            yMin: -0.6,
+            yMax: 2.6,
+            circle: { cx: 0, cy: 0, r: 2.2, tone: 'faint' },
+            vectors: [
+              { from: { x: 0, y: 0 }, to: { x: 2.2, y: 0 }, tone: 'accent' },
+              { from: { x: 0, y: 0 }, to: { x: 0, y: 2.2 }, tone: 'good' },
+            ],
+            points: [
+              { x: 2.2, y: 0, label: 'z', tone: 'accent', labelPos: 'below' },
+              { x: 2.125, y: 0.569, tone: 'ink' },
+              { x: 1.905, y: 1.1, tone: 'ink' },
+              { x: 1.556, y: 1.556, tone: 'ink' },
+              { x: 1.1, y: 1.905, tone: 'ink' },
+              { x: 0.569, y: 2.125, tone: 'ink' },
+              { x: 0, y: 2.2, label: 'après n images', tone: 'good', labelPos: 'left' },
+            ],
+            angleArcs: [
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 15, radiusPx: 22, label: 'θ', tone: 'accent' },
+              { cx: 0, cy: 0, fromDeg: 0, toDeg: 90, radiusPx: 60, label: 'nθ', tone: 'good' },
+            ],
             caption:
-              'L\'astronaute Steve Robinson sur le bras robotisé Canadarm2, mission STS-114 ' +
-              '(2005). Photo : NASA, domaine public.',
+              'Multiplier z par $e^{i\\theta}$ fait pivoter le point de θ sur le cercle de rayon ' +
+              '|z| (ici 6 petits pas de 15°, un par image affichée). Par la formule de Moivre, ' +
+              'ces 6 petites rotations équivalent à UNE seule rotation de 6θ = 90° — exactement ' +
+              "ce qu'un moteur de jeu ou un bras robotisé recalcule à chaque image.",
           },
           text:
             "Dans un moteur de jeu vidéo en 2D ou pour commander un bras robotisé, faire " +

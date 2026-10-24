@@ -1064,10 +1064,14 @@ export type Block =
       text: string
       /** 1 à 3 disciplines, texte brut, courtes (ex. "Électricité", "Physique"). */
       domaines: string[]
-      /** Photo du phénomène/objet réel décrit par `text` (jamais une illustration SVG générée —
-       * ça, c'est le rôle du kind `illustration` ailleurs). Optionnel : beaucoup de sujets
-       * abstraits (un coût marginal, un cycle économique) n'ont tout simplement rien de
-       * photographiable qui ajoute du sens — mieux vaut l'omettre qu'en forcer une hors-sujet. */
+      /** Photo du phénomène/objet réel décrit par `text` — un objet/métier reconnaissable, jamais
+       * le mécanisme mathématique lui-même. Optionnel : beaucoup de sujets abstraits (un coût
+       * marginal, un cycle économique) n'ont tout simplement rien de photographiable qui ajoute du
+       * sens — mieux vaut l'omettre qu'en forcer une hors-sujet. Mutuellement exclusif avec
+       * `illustration` en pratique (jamais les deux à la fois) : une photo d'objet (ex. un
+       * oscilloscope) et un diagramme du mécanisme (ex. l'impédance comme point du plan complexe)
+       * répondent à des questions différentes — préférer `illustration` quand le mécanisme
+       * mathématique lui-même peut se dessiner, se rabattre sur une photo seulement sinon. */
       image?: {
         /** Chemin public (`/images/application/...`) ou URL externe stable. Contrairement aux
          * portraits de `historique` (presque toujours dans le domaine public faute d'âge), une
@@ -1081,6 +1085,15 @@ export type Block =
          * au domaine public, cette licence l'exige. */
         caption: string
       }
+      /** Diagramme généré (même moteur que le kind `illustration` ailleurs — `complexPlane`,
+       * `vectorPlane`, `curvePlot`...) qui rend visible le MÉCANISME mathématique utilisé dans ce
+       * contexte, avec les valeurs concrètes de `text` reportées sur la figure (ex. l'impédance
+       * $Z=3+4i$ comme point du plan complexe, plutôt qu'une photo d'oscilloscope qui ne montre
+       * que l'objet et jamais le nombre complexe lui-même). À préférer à `image` chaque fois que
+       * le mécanisme se prête à un dessin — une photo d'objet reconnaissable (un théodolite, un
+       * cadenas) n'explique rien que le texte ne dise déjà, alors qu'un diagramme fait vraiment
+       * voir le calcul en train de se faire. */
+      illustration?: IllustrationSpec
     }
 
 export interface FormulaireFormule {
