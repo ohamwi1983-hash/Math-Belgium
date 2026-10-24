@@ -900,7 +900,7 @@ export const probabilites: ChapterContent = {
           illustrations: [
             {
               kind: 'naturalFrequencies',
-              headline: 'Retourner le conditionnement : P(gratuit|spam) → P(spam|gratuit)',
+              headline: 'P(gratuit|spam) → P(spam|gratuit)',
               columns: [
                 {
                   title: 'spam',

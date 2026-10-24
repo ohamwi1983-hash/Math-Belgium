@@ -164,13 +164,31 @@ export function CurvePlot({
         <line x1={X_LEFT} y1={zeroY} x2={X_RIGHT} y2={zeroY} className="svg-line" strokeWidth="1.5" markerEnd="url(#cp-arrow)" />
       )}
 
-      <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
-        {xTicks.map((t) => (
-          <text key={t} x={xScale(t)} y={zeroY + 16} textAnchor="middle">
-            {xTickLabels?.[t] ?? t}
-          </text>
-        ))}
-      </g>
+      {/* Bug corrigé (rollout "diagrammes d'application") : les étiquettes de graduation et le nom
+          de l'axe des x s'ancraient sur `zeroY` sans condition — quand 0 est hors de
+          [yBottom;yTop] (un `fixedYRange` qui exclut 0, ex. un domaine d'âges 20–80), `zeroY`
+          tombe des centaines de pixels sous le cadre et, avec `overflow:visible`, ces textes
+          atterrissaient par-dessus le contenu suivant de la page. Même principe que le garde déjà
+          posé sur la ligne de l'axe juste au-dessus : si 0 n'est pas visible, ces étiquettes
+          s'ancrent sur le bord bas RÉEL du cadre (Y_BOTTOM) plutôt que sur l'axe absent, avec les
+          mêmes décalages relatifs qu'avant (+16 pour les graduations, -8 pour le nom de l'axe). */}
+      {(() => {
+        const xAxisAnchorY = yBottom <= 0 && yTop >= 0 ? zeroY : Y_BOTTOM
+        return (
+          <>
+            <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
+              {xTicks.map((t) => (
+                <text key={t} x={xScale(t)} y={xAxisAnchorY + 16} textAnchor="middle">
+                  {xTickLabels?.[t] ?? t}
+                </text>
+              ))}
+            </g>
+            <text x={X_RIGHT} y={xAxisAnchorY - 8} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
+              {mathLabelTspans(xAxisLabel, 13.5)}
+            </text>
+          </>
+        )
+      })()}
       {showYAxis && yTicks && (
         <g className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="12.5">
           {yTicks.map((t) => (
@@ -180,9 +198,6 @@ export function CurvePlot({
           ))}
         </g>
       )}
-      <text x={X_RIGHT} y={zeroY - 8} textAnchor="end" className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
-        {mathLabelTspans(xAxisLabel, 13.5)}
-      </text>
       {showYAxis && (
         <text x={zeroX + 8} y={Y_TOP + 10} className="svg-ink" fontFamily="IBM Plex Mono, monospace" fontSize="13.5">
           {mathLabelTspans(yAxisLabel, 13.5)}

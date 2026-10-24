@@ -998,8 +998,8 @@ export const nombresComplexes: ChapterContent = {
               ],
               points: [
                 { x: 0.707, y: 0.707, label: 'année 0', tone: 'ink', labelPos: 'right' },
-                { x: -0.168, y: -0.168, label: 'r < 1 : amortissement', tone: 'good', labelPos: 'below' },
-                { x: -2.856, y: 0, label: 'r > 1 : amplification', tone: 'bad', labelPos: 'above' },
+                { x: -0.168, y: -0.168, label: 'r < 1', tone: 'good', labelPos: 'below' },
+                { x: -2.856, y: 0, label: 'r > 1', tone: 'bad', labelPos: 'right' },
               ],
               caption:
                 'Deux cycles économiques partis du même point (année 0), dont la racine complexe ' +
@@ -1032,8 +1032,8 @@ export const nombresComplexes: ChapterContent = {
               ],
               textLabels: [
                 { x: 0.3, y: 1.1, text: 'année 0', tone: 'accent', anchor: 'start' },
-                { x: 7.2, y: 3.2, text: 'r > 1 : amplification', tone: 'bad', anchor: 'start' },
-                { x: 7.2, y: 2.3, text: 'r < 1 : amortissement', tone: 'good', anchor: 'start' },
+                { x: 6.7, y: 3.2, text: 'r > 1 : amplification', tone: 'bad', anchor: 'start' },
+                { x: 6.7, y: 2.3, text: 'r < 1 : amortissement', tone: 'good', anchor: 'start' },
               ],
               xAxisLabel: 'année n',
               yAxisLabel: 'revenu (écart à la tendance)',
