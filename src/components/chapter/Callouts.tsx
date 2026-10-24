@@ -153,13 +153,6 @@ export function Application({ block }: { block: Extract<Block, { kind: 'applicat
         </span>{' '}
         À quoi ça sert ?
       </p>
-      {block.illustrations && block.illustrations.length > 0 && (
-        <div className="application-diagrams no-export">
-          {block.illustrations.map((spec, i) => (
-            <Illustration key={i} spec={spec} />
-          ))}
-        </div>
-      )}
       <div className="application-body">
         {block.image && (
           <figure className="application-figure no-export">
@@ -179,6 +172,13 @@ export function Application({ block }: { block: Extract<Block, { kind: 'applicat
           </ul>
         </div>
       </div>
+      {block.illustrations && block.illustrations.length > 0 && (
+        <div className="application-diagrams no-export">
+          {block.illustrations.map((spec, i) => (
+            <Illustration key={i} spec={spec} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

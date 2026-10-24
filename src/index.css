@@ -787,11 +787,11 @@ ul.plain li, ol.plain li { margin: 6px 0; }
     repeating-linear-gradient(90deg, var(--sky-grid) 0 1px, transparent 1px 20px);
 }
 .callout-application .callout-label { color: var(--sky-ink); }
-/* un ou plusieurs diagrammes (illustration), en rangée AU-DESSUS du texte plutôt qu'en vignette
+/* un ou plusieurs diagrammes (illustration), en rangée EN DESSOUS du texte plutôt qu'en vignette
    latérale étroite — une application se comprend rarement avec un seul petit schéma coincé à
    côté du texte ; le diagram-frame fournit déjà son propre fond/bordure. */
 .application-diagrams {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 8px 0 14px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 16px;
 }
 .application-diagrams figure { margin: 0; }
 .application-diagrams .diagram-frame { padding: 10px; }
