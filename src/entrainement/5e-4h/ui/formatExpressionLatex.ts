@@ -77,6 +77,7 @@ const ALIAS_FONCTIONS: Record<string, string> = {
   // du chantier 6e — exponentielles/logarithmes/hyperboliques/primitives/probabilités...) et
   // `moteur6e/expressionCyclometrique.ts` (fonctions réciproques) — voir l'inventaire 6e.
   ln: "ln",
+  log: "log",
   exp: "exp",
   sh: "sinh",
   sinh: "sinh",
@@ -160,6 +161,15 @@ function tokeniser(expression: string): Jeton[] {
         const degre = Number(correspondanceRacineN[1]);
         const nomCanonique = degre === 2 ? "sqrt" : degre === 3 ? "cbrt" : `racine${degre}`;
         jetons.push({ type: "FONCTION", nomFonction: nomCanonique });
+        continue;
+      }
+      // "logN" — logarithme en base N (ex: log2(8), log10(1000)), même principe que "racN"
+      // ci-dessus. Base 10 (explicite "log10" ou "log" seul) → canonique "log", rendu `\log{...}`
+      // sans indice ; toute autre base → "logN", rendu `\log_{N}{...}` (voir plus bas).
+      const correspondanceLogN = /^log(\d+)$/i.exec(mot);
+      if (correspondanceLogN) {
+        const base = Number(correspondanceLogN[1]);
+        jetons.push({ type: "FONCTION", nomFonction: base === 10 ? "log" : `log${base}` });
         continue;
       }
       const canonique = ALIAS_FONCTIONS[mot.toLowerCase()];
@@ -414,6 +424,13 @@ function noeudVersLatex(noeud: Noeud): string {
       {
         const correspondanceRacineN = /^racine(\d+)$/.exec(noeud.nom);
         if (correspondanceRacineN) return `\\sqrt[${correspondanceRacineN[1]}]{${noeudVersLatex(noeud.argument)}}`;
+      }
+      // "log" seul (base 10) tombe dans le cas générique ci-dessous — `\log\left(...\right)` est
+      // déjà la macro LaTeX standard, aucune branche dédiée nécessaire. Seule une base ≠10 a besoin
+      // d'un indice explicite.
+      {
+        const correspondanceLogN = /^log(\d+)$/.exec(noeud.nom);
+        if (correspondanceLogN) return `\\log_{${correspondanceLogN[1]}}\\left(${noeudVersLatex(noeud.argument)}\\right)`;
       }
       if (noeud.nom === "abs") return `\\left|${noeudVersLatex(noeud.argument)}\\right|`;
       return `\\${noeud.nom}\\left(${noeudVersLatex(noeud.argument)}\\right)`;

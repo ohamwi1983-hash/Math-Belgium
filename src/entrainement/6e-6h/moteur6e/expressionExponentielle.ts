@@ -16,9 +16,11 @@
  * Supporte : identifiants multi-lettres comme variables (`x`, `t`...), `pi`, `e`, entiers/décimaux
  * (`.`/`,`), `+ - * / ^`, parenthèses, multiplication implicite (`2x`, `2sqrt(x)`), unicode
  * `²`/`³`, et les fonctions `sqrt`/`rac`/`abs`/`cbrt`/`sin`/`cos`/`tan`/`asin`/`arcsin`/`acos`/
- * `arccos`/`atan`/`arctan`/`ln`/`exp`/`sh`/`ch` (`sh`/`ch` ajoutés pour 6gen19, chapitre 3 "Sinus et
- * cosinus hyperboliques" — additif pur, voir la table `FONCTIONS` ci-dessous ; `racN`, N≥4 collé
- * juste après "rac", pour une racine n-ième quelconque — ex. `rac4(x)`). Aucune exception pour un problème de DOMAINE — `NaN`/`Infinity`
+ * `arccos`/`atan`/`arctan`/`ln`/`exp`/`sh`/`ch`/`log` (`sh`/`ch` ajoutés pour 6gen19, chapitre 3
+ * "Sinus et cosinus hyperboliques" — additif pur, voir la table `FONCTIONS` ci-dessous ; `racN`,
+ * N≥4 collé juste après "rac", pour une racine n-ième quelconque — ex. `rac4(x)` ; `log` seul =
+ * base 10, `logN` (N collé juste après "log", ex. `log2(x)`) pour une base quelconque, changement
+ * de base via `ln`). Aucune exception pour un problème de DOMAINE — `NaN`/`Infinity`
  * propagés nativement (`Math.log(-1)`, `Math.sqrt(-1)`...) ; seule une erreur de SYNTAXE lève.
  */
 
@@ -80,6 +82,19 @@ function tokeniser(texte: string): Jeton[] {
         jetons.push({ type: "identifiant", nom: nomCanonique });
         continue;
       }
+      // "logN" — logarithme en base N (ex: log2(8)=3, log10(1000)=3), même principe que "racN"
+      // ci-dessus : N est un entier collé juste après "log", consommé ici explicitement. Base 10
+      // (explicite via "log10", ou implicite via "log" seul, sans chiffre) → canonique "log",
+      // résolue par `Math.log10` dans FONCTIONS ci-dessous ; toute autre base → "logN", résolue par
+      // changement de base dans `atome()`.
+      if (mot === "log" && /[0-9]/.test(s[i] ?? "")) {
+        let k = i;
+        while (k < s.length && /[0-9]/.test(s[k])) k++;
+        const base = Number(s.slice(i, k));
+        i = k;
+        jetons.push({ type: "identifiant", nom: base === 10 ? "log" : `log${base}` });
+        continue;
+      }
       jetons.push({ type: "identifiant", nom: mot });
       continue;
     }
@@ -109,6 +124,7 @@ const FONCTIONS: Record<string, (v: number) => number> = {
   atan: Math.atan,
   arctan: Math.atan,
   ln: Math.log,
+  log: Math.log10,
   exp: Math.exp,
   // Ajoutés pour 6gen19 (chapitre 3, "Sinus et cosinus hyperboliques") — additif pur, aucune des
   // fonctions existantes n'est touchée. Définitions explicites (plutôt que `Math.sinh`/`Math.cosh`,
@@ -150,6 +166,15 @@ const MOTIF_RACINE_N = /^racine(\d+)$/;
  * forme 1/n (voir sa documentation juste au-dessus) : aucune nouvelle logique à dupliquer. */
 function racineN(base: number, n: number): number {
   return puissanceReelle(base, 1 / n);
+}
+
+const MOTIF_LOG_N = /^log(\d+)$/;
+
+/** Logarithme en base N quelconque (ex: log2(8)=3) par changement de base — base 10 passe par
+ * `Math.log10` (table FONCTIONS ci-dessus), jamais par cette formule, pour éviter l'imprécision
+ * flottante inutile de `Math.log(v)/Math.log(10)` face à `Math.log10` natif. */
+function logN(valeur: number, base: number): number {
+  return Math.log(valeur) / Math.log(base);
 }
 
 class Analyseur {
@@ -265,6 +290,8 @@ class Analyseur {
         if (fn) return fn(arg);
         const correspondanceRacineN = MOTIF_RACINE_N.exec(nom);
         if (correspondanceRacineN) return racineN(arg, Number(correspondanceRacineN[1]));
+        const correspondanceLogN = MOTIF_LOG_N.exec(nom);
+        if (correspondanceLogN) return logN(arg, Number(correspondanceLogN[1]));
         throw new Error(`Fonction inconnue : "${nom}"`);
       }
       throw new Error(`Identifiant inconnu : "${nom}"`);
