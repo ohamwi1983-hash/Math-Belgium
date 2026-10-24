@@ -152,6 +152,29 @@ export const probabilites: ChapterContent = {
               'le type de données historiques utilisées pour calculer une probabilité de pluie. ' +
               'Photo : Famartin, CC BY-SA 4.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'frequencyStabilization',
+              frequencies: [0.85, 0.65, 0.75, 0.68, 0.73, 0.69, 0.71, 0.7, 0.705, 0.698],
+              step: 20,
+              target: { value: 0.7, label: '70 %' },
+              yMin: 0.5,
+              yMax: 0.95,
+              xAxisLabel: 'journées historiques comparées',
+              yAxisLabel: 'fréquence de pluie',
+              caption: 'La fréquence de pluie observée sur des journées historiques comparables, relevée tous les 20 jours, se stabilise près de 70 % — exactement le même principe que la stabilisation étudiée plus haut.',
+            },
+            {
+              kind: 'complementBar',
+              headline: '100 journées historiques comparables',
+              parts: [
+                { fraction: 0.7, label: 'il a plu (70 jours)', tone: 'accent' },
+                { fraction: 0.3, label: 'pas de pluie (30 jours)', tone: 'faint' },
+              ],
+              footer: '0,70 + 0,30 = 1',
+              caption: 'Le « 70 % » annoncé est littéralement ce comptage : la fréquence de pluie parmi les journées passées qui ressemblaient à celle de demain.',
+            },
+          ],
           text:
             'Quand un bulletin météo annonce « 70 % de chances de pluie demain », ce ' +
             'chiffre n\'est presque jamais une probabilité a priori calculée par un ' +
@@ -464,6 +487,32 @@ export const probabilites: ChapterContent = {
               'exactement le type de production où un test destructif empêche de tout vérifier. ' +
               'Photo : Arbeiderbevegelsens arkiv og bibliotek, CC BY 3.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'weightedTree',
+              firstLevel: [
+                { label: 'D', prob: '2/20' },
+                { label: 'B', prob: '18/20' },
+              ],
+              secondLevel: [
+                { fromFirst: 0, label: 'D', prob: '1/19', pathProb: '2/380' },
+                { fromFirst: 0, label: 'B', prob: '18/19', pathProb: '36/380' },
+                { fromFirst: 1, label: 'D', prob: '2/19', pathProb: '36/380' },
+                { fromFirst: 1, label: 'B', prob: '17/19', pathProb: '306/380', highlight: true },
+              ],
+              caption: 'Lot de 20 pièces (2 défectueuses D, 18 bonnes B) : échantillon de 2 pièces SANS remise. Le chemin BB (en évidence) donne P(0 défectueuse)=306/380 ≈ 80,5 %.',
+            },
+            {
+              kind: 'complementBar',
+              headline: 'Décision sur le lot de 20 pièces',
+              parts: [
+                { fraction: 306 / 380, label: 'accepté', tone: 'accent' },
+                { fraction: 74 / 380, label: 'rejeté', tone: 'faint' },
+              ],
+              footer: '≈80,5 % + ≈19,5 % = 1',
+              caption: 'C\'est directement cette probabilité qui décide si le lot entier est accepté ou rejeté — sans avoir dû tester les 20 pièces.',
+            },
+          ],
           text:
             'Une usine ne peut pas tester TOUS les produits qu\'elle fabrique pour vérifier ' +
             'qu\'ils fonctionnent — certains tests sont destructifs (faire éclater une ' +
@@ -848,6 +897,58 @@ export const probabilites: ChapterContent = {
         {
           kind: 'application',
           titre: 'Comment ta boîte mail reconnaît un spam',
+          illustrations: [
+            {
+              kind: 'naturalFrequencies',
+              headline: 'Retourner le conditionnement : P(gratuit|spam) → P(spam|gratuit)',
+              columns: [
+                {
+                  title: 'spam',
+                  titleTone: 'accent',
+                  segments: [
+                    { label: 'sans mot : 40', count: 40, tone: 'accentFaint' },
+                    { label: 'avec mot : 60', count: 60, tone: 'accent' },
+                  ],
+                  labelSide: 'right',
+                  footLabel: '100 spams',
+                },
+                {
+                  title: 'légitime',
+                  titleTone: 'good',
+                  segments: [
+                    { label: 'sans mot : 855', count: 855, tone: 'goodFaint' },
+                    { label: 'avec mot : 45', count: 45, tone: 'good' },
+                  ],
+                  labelSide: 'right',
+                  footLabel: '900 légitimes',
+                },
+                {
+                  title: '',
+                  titleTone: 'accent',
+                  segments: [
+                    { label: '45', count: 45, tone: 'good' },
+                    { label: '60', count: 60, tone: 'accent' },
+                  ],
+                  labelSide: 'left',
+                  footLabel: '105 avec « gratuit »',
+                },
+              ],
+              caption: 'Sur 1000 messages (100 spams), P(gratuit|spam)=60 % mais P(spam|gratuit)=60/(60+45)≈57 % — recombiner par le mot plutôt que par le statut retourne le conditionnement, exactement le calcul que fait le filtre.',
+            },
+            {
+              kind: 'categoricalBarChart',
+              bars: [
+                { label: '0 mot suspect', value: 5, valueLabel: '5 %', tone: 'faint' },
+                { label: '1 mot', value: 40, valueLabel: '40 %', tone: 'faint' },
+                { label: '2 mots', value: 85, valueLabel: '85 %', tone: 'accent' },
+                { label: '3 mots', value: 98, valueLabel: '98 %', tone: 'accent' },
+              ],
+              maxValue: 100,
+              xAxisLabel: 'mots suspects présents à la fois',
+              yAxisLabel: 'P(spam) estimée',
+              caption: 'Plus un message contient de mots suspects à la fois, plus P(spam|message) grimpe — au-delà de 2 mots, elle franchit le seuil (≈90 %) et le message est déplacé automatiquement.',
+            },
+          ],
           text:
             'Un filtre anti-spam applique le théorème de Bayes des milliers de fois par ' +
             'seconde, à une échelle totalement différente du test médical ci-dessus, mais ' +

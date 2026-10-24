@@ -390,6 +390,35 @@ export const primitivesIntegrales: ChapterContent = {
             alt: 'Compteur de vitesse sur le tableau de bord d\'une voiture',
             caption: 'Photo : Michael Sheehan, CC BY 2.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 6 * t, tone: 'accent' }],
+              xMin: 0,
+              xMax: 3,
+              xTicks: [1, 2, 3],
+              shadedRegions: [{ from: 0, to: 2, upper: (t) => 6 * t, tone: 'good' }],
+              textLabels: [{ x: 0.75, y: 5, text: 'aire = 12 m', tone: 'good', anchor: 'middle' }],
+              xAxisLabel: 't (s)',
+              yAxisLabel: 'v (m/s)',
+              caption: 'v(t)=6t : l\'aire sous la courbe entre t=0 et t=2 vaut 12 — la distance parcourue pendant ces 2 secondes.',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (t) => 3 * t * t + 10, tone: 'accent' }],
+              xMin: 0,
+              xMax: 3,
+              xTicks: [1, 2, 3],
+              yTicks: [10, 22],
+              points: [
+                { x: 0, y: 10, label: 'x(0)=10', tone: 'accent', labelPos: 'left' },
+                { x: 2, y: 22, label: 'x(2)=22', tone: 'good', labelPos: 'above' },
+              ],
+              xAxisLabel: 't (s)',
+              yAxisLabel: 'x (m)',
+              caption: 'x(t)=3t²+10 : entre t=0 et t=2, la position augmente de 22−10=12 m — exactement l\'aire trouvée sous v(t).',
+            },
+          ],
           text:
             "En physique, la vitesse $v(t)$ d'un mobile est la DÉRIVÉE de sa position $x(t)$ : " +
             "$x'(t)=v(t)$. Autrement dit, retrouver $x(t)$ à partir de $v(t)$ est EXACTEMENT " +
@@ -777,6 +806,40 @@ export const primitivesIntegrales: ChapterContent = {
         {
           kind: 'application',
           titre: 'Calculer un coût total à partir d\'un coût marginal',
+          illustrations: [
+            {
+              kind: 'curvePlot',
+              curves: [{ fn: (x) => 2 * x + 5, tone: 'accent' }],
+              xMin: 0,
+              xMax: 10,
+              xTicks: [3, 8],
+              shadedRegions: [{ from: 3, to: 8, upper: (x) => 2 * x + 5, tone: 'good' }],
+              textLabels: [{ x: 5.5, y: 4, text: 'aire = 80 €', tone: 'good', anchor: 'middle' }],
+              xAxisLabel: 'x (unités)',
+              yAxisLabel: 'Cₘ(x) (€)',
+              caption: 'Coût marginal Cₘ(x)=2x+5 : l\'aire entre x=3 et x=8 (80 €) est le coût de production des unités 3 à 8.',
+            },
+            {
+              kind: 'curvePlot',
+              curves: [
+                { fn: (x) => 20 - x, tone: 'accent' },
+                { fn: () => 12, tone: 'bad' },
+              ],
+              xMin: 0,
+              xMax: 10,
+              xTicks: [8],
+              fixedYRange: { min: 0, max: 20 },
+              shadedRegions: [{ from: 0, to: 8, upper: (x) => 20 - x, lower: () => 12, tone: 'good' }],
+              points: [{ x: 8, y: 12, label: '', tone: 'accent' }],
+              textLabels: [
+                { x: 1, y: 18, text: 'demande', tone: 'accent', anchor: 'start' },
+                { x: 1, y: 13.5, text: 'prix payé = 12 €', tone: 'bad', anchor: 'start' },
+              ],
+              xAxisLabel: 'x (quantité)',
+              yAxisLabel: 'prix (€)',
+              caption: 'Même principe pour le surplus du consommateur : l\'aire entre la courbe de demande et le prix payé (32) mesure l\'avantage retiré par les acheteurs.',
+            },
+          ],
           text:
             'En économie, le **coût marginal** $C_m(x)$ est le coût de production d\'une ' +
             'unité supplémentaire quand $x$ unités sont déjà produites — c\'est la dérivée du ' +
@@ -1043,6 +1106,26 @@ export const primitivesIntegrales: ChapterContent = {
             alt: 'Artisan tournant une pièce de bois sur un tour, Gujarat',
             caption: 'Tournage sur bois, Gujarat (Inde), vers 1870. Domaine public (CC0), via Wikimedia Commons / Getty Museum.',
           },
+          illustrations: [
+            {
+              kind: 'solidRevolution',
+              variant: 'cone',
+              outerRadius: 3,
+              startLabel: 'base',
+              endLabel: 'sommet',
+              midLabel: 'pied de table conique',
+              caption: 'Un pied de table tourné sur un profil f(x)=x : le solide plein, obtenu par la méthode des disques.',
+            },
+            {
+              kind: 'solidRevolution',
+              variant: 'washer',
+              outerRadius: 3,
+              startLabel: 'base',
+              endLabel: 'bord',
+              midLabel: 'vase évidé',
+              caption: 'Un vase évidé (paroi intérieure creusée) : profil extérieur f(x) ET intérieur g(x) — la méthode des rondelles.',
+            },
+          ],
           text:
             'Un tour (la machine, pas l\'unité de rotation) fabrique des pièces en faisant ' +
             'tourner un bloc de matière autour d\'un axe pendant qu\'un outil en retire la ' +

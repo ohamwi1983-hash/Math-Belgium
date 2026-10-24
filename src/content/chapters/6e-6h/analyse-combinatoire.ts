@@ -458,6 +458,35 @@ export const analyseCombinatoire: ChapterContent = {
             alt: 'Illustration d\'un cadenas, symbole de sécurité informatique',
             caption: 'AJ Ashton, domaine public (CC0), via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              scale: 'log',
+              logMin: 6,
+              bars: [
+                { label: '4 car.', value: 26873856, valueLabel: '27 millions', tone: 'faint' },
+                { label: '6 car.', value: 139314069504, valueLabel: '139 milliards', tone: 'faint' },
+                { label: '8 car.', value: 722204136308736, valueLabel: '722 mille milliards', tone: 'accent' },
+              ],
+              xAxisLabel: 'longueur du mot de passe (72 caractères possibles)',
+              yAxisLabel: 'nombre de mots de passe',
+              footnote: 'échelle logarithmique',
+              caption: 'Chaque caractère ajouté MULTIPLIE l\'espace des clés par 72 — à 8 caractères (l\'exemple du texte), déjà plus de 722 mille milliards de combinaisons.',
+            },
+            {
+              kind: 'categoricalBarChart',
+              scale: 'log',
+              logMin: 4,
+              bars: [
+                { label: '4 minuscules', value: 456976, valueLabel: '457 mille', tone: 'faint' },
+                { label: '8 car. variés', value: 722204136308736, valueLabel: '722 mille milliards', tone: 'accent' },
+              ],
+              xAxisLabel: 'type de mot de passe',
+              yAxisLabel: 'espace des clés',
+              footnote: 'échelle logarithmique',
+              caption: 'Un mot de passe « faible » (4 lettres minuscules) contre un « fort » (8 caractères variés) : la différence se compte en milliards de milliards de combinaisons en plus, pas juste « un peu plus dur ».',
+            },
+          ],
           text:
             'Le principe multiplicatif que tu viens de voir est exactement ce qu\'un ' +
             "informaticien utilise pour évaluer la solidité d'un mot de passe. Un mot de " +
@@ -608,6 +637,19 @@ export const analyseCombinatoire: ChapterContent = {
             alt: 'Schéma de la structure en double hélice de l\'ADN',
             caption: 'Zephyris, CC BY-SA 3.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'letterTiles',
+              letters: ['A', 'T', 'C', 'G', 'A', 'T', 'C', 'A', 'T', 'A'],
+              legend: [
+                { letter: 'A', count: 4, tone: 'accent' },
+                { letter: 'T', count: 3, tone: 'good' },
+                { letter: 'C', count: 2, tone: 'ink' },
+                { letter: 'G', count: 1, tone: 'outline' },
+              ],
+              caption: 'Une séquence de 10 bases (4 A, 3 T, 2 C, 1 G) : 10!/(4!×3!×2!×1!) = 12 600 arrangements distincts — exactement le même calcul que pour MISSISSIPI, avec 4 lettres au lieu de 2.',
+            },
+          ],
           text:
             'L\'ADN s\'écrit avec seulement 4 « lettres » — A, T, C et G, les quatre bases ' +
             'azotées. Compter le nombre de séquences DISTINCTES d\'une longueur donnée, ' +
@@ -1247,6 +1289,21 @@ export const analyseCombinatoire: ChapterContent = {
             alt: 'Boules numérotées dans un tambour de loterie',
             caption: 'elizaIO, CC BY-SA 2.0, via Wikimedia Commons.',
           },
+          illustrations: [
+            {
+              kind: 'categoricalBarChart',
+              scale: 'log',
+              logMin: 3,
+              bars: [
+                { label: 'foudre (1 an)', value: 15300, valueLabel: '1/15 300', tone: 'faint' },
+                { label: 'loto (1 grille)', value: 8145060, valueLabel: '1/8 145 060', tone: 'accent' },
+              ],
+              xAxisLabel: 'événement',
+              yAxisLabel: '« 1 chance sur... »',
+              footnote: 'échelle logarithmique',
+              caption: 'Gagner au loto avec une seule grille ($C_{45}^6 \\approx$ 8,1 millions) est environ 530 fois moins probable qu\'être frappé par la foudre une année donnée.',
+            },
+          ],
           text:
             'Comme pour les mains de poker ci-dessus, gagner à un loto où tu coches 6 numéros ' +
             'parmi 45 revient à choisir une COMBINAISON précise parmi toutes celles possibles ' +
