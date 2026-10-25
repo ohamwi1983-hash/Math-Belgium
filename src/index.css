@@ -759,19 +759,23 @@ ul.plain li, ol.plain li { margin: 6px 0; }
 .callout-exemple .callout-label { color: var(--accent-ink); }
 .callout-intuition { border-left-color: var(--plan); background: var(--plan-soft); }
 .callout-intuition .callout-label { color: var(--plan-ink); }
-/* "Le sais-tu ?" — forme "rouleau" : 2 tiges latérales encadrant une feuille de parchemin,
-   remplace le format carte à bordure gauche des autres callouts (choix validé explicitement,
-   seul callout du site à sortir de ce gabarit commun). */
+/* "Le sais-tu ?" — forme "rouleau" : 2 tiges encadrant une feuille de parchemin en haut et en bas
+   (rouleau vertical, comme un vrai parchemin qu'on déroule), remplace le format carte à bordure
+   gauche des autres callouts (choix validé explicitement, seul callout du site à sortir de ce
+   gabarit commun). */
 .historique-scroll {
-  display: flex; margin: 22px 0; border-radius: var(--radius); overflow: hidden;
+  display: flex; flex-direction: column; margin: 22px 0; border-radius: var(--radius); overflow: hidden;
   box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.35);
 }
 .historique-scroll .dowel {
   flex: 0 0 12px;
-  background: linear-gradient(90deg, var(--histoire) 0%, var(--dowel-light) 35%, var(--histoire) 65%, var(--dowel-dark) 100%);
+  /* Dégradé vertical (perpendiculaire à la tige, qui est maintenant horizontale) — même principe
+     qu'avant la rotation : la lumière "s'enroule" autour du cylindre dans le sens de son épaisseur,
+     jamais dans le sens de sa longueur. */
+  background: linear-gradient(180deg, var(--histoire) 0%, var(--dowel-light) 35%, var(--histoire) 65%, var(--dowel-dark) 100%);
 }
 .historique-scroll .sheet {
-  flex: 1; min-width: 0; padding: 26px 18px;
+  flex: 1; min-width: 0; padding: 18px 26px;
   /* Grain de papier (2 radial-gradient en pointillé très fin) + taches de vieillissement (3
      auréoles diffuses, asymétriques, jamais centrées) par-dessus le dégradé vertical existant —
      un aplat lisse ne suffisait pas à lire "parchemin" (retour utilisateur direct). */
@@ -783,14 +787,17 @@ ul.plain li, ol.plain li { margin: 6px 0; }
     radial-gradient(ellipse 120px 90px at 55% 60%, rgba(120, 74, 42, 0.07), transparent 75%),
     linear-gradient(180deg, var(--parch-1) 0%, var(--parch-2) 100%);
   background-size: 5px 5px, 7px 7px, auto, auto, auto, auto;
-  box-shadow: inset 6px 0 10px -8px rgba(0, 0, 0, 0.25), inset -6px 0 10px -8px rgba(0, 0, 0, 0.25);
-  /* Bord haut/bas en dents de scie (papier déchiré) plutôt qu'un rectangle net — la marge
-     verticale passe de 16px à 26px pour laisser la place aux pointes sans rogner le texte. */
+  /* Ombre de papier courbé déplacée sur les bords gauche/droit (maintenant les bords de la feuille
+     réellement exposés — haut/bas sont couverts par les tiges). */
+  box-shadow: inset 0 6px 10px -8px rgba(0, 0, 0, 0.25), inset 0 -6px 10px -8px rgba(0, 0, 0, 0.25);
+  /* Bord gauche/droit en dents de scie (papier déchiré), même principe que l'ancienne version
+     haut/bas, simplement tourné à 90° (x et y permutés dans le polygone) puisque ce sont désormais
+     les bords gauche/droit qui restent exposés entre les deux tiges. */
   clip-path: polygon(
-    0% 4%, 5% 0%, 10% 3%, 15% 0%, 20% 4%, 25% 0%, 30% 3%, 35% 0%, 40% 4%, 45% 0%,
-    50% 3%, 55% 0%, 60% 4%, 65% 0%, 70% 3%, 75% 0%, 80% 4%, 85% 0%, 90% 3%, 95% 0%, 100% 4%,
-    100% 96%, 95% 100%, 90% 97%, 85% 100%, 80% 96%, 75% 100%, 70% 97%, 65% 100%, 60% 96%, 55% 100%,
-    50% 97%, 45% 100%, 40% 96%, 35% 100%, 30% 97%, 25% 100%, 20% 96%, 15% 100%, 10% 97%, 5% 100%, 0% 96%
+    4% 0%, 0% 5%, 3% 10%, 0% 15%, 4% 20%, 0% 25%, 3% 30%, 0% 35%, 4% 40%, 0% 45%,
+    3% 50%, 0% 55%, 4% 60%, 0% 65%, 3% 70%, 0% 75%, 4% 80%, 0% 85%, 3% 90%, 0% 95%, 4% 100%,
+    96% 100%, 100% 95%, 97% 90%, 100% 85%, 96% 80%, 100% 75%, 97% 70%, 100% 65%, 96% 60%, 100% 55%,
+    97% 50%, 100% 45%, 96% 40%, 100% 35%, 97% 30%, 100% 25%, 96% 20%, 100% 15%, 97% 10%, 100% 5%, 96% 0%
   );
 }
 .historique-scroll .callout-label { color: var(--histoire); }
@@ -816,7 +823,11 @@ ul.plain li, ol.plain li { margin: 6px 0; }
   padding: 0;
   overflow: hidden;
   border-color: var(--sky);
-  border-left-width: 1px;
+  /* Bordures latérales accentuées (retour utilisateur direct) — gauche ET droite, pas seulement
+     la gauche comme le gabarit `.callout` commun : le bandeau de titre porte déjà l'identité en
+     haut, les deux montants latéraux encadrent le corps du callout en dessous. */
+  border-left-width: 4px;
+  border-right-width: 4px;
 }
 .callout-application .callout-label {
   margin: 0; padding: 10px 18px;
