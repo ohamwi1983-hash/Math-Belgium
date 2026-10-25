@@ -11,6 +11,15 @@ liens directs.
 - KaTeX pour toutes les formules mathématiques (rendu via `src/components/Math.tsx`, pas de
   notation maison en CSS).
 - Déploiement : GitHub → Vercel (même schéma que `plateforme-maths`).
+- Pré-rendu statique (SSG) pour le SEO : `npm run build` lance, après `vite build`,
+  `scripts/prerender.mjs` — un vrai Chromium headless (Playwright) visite chaque route réelle
+  (`scripts/routes.mjs`, dérivée de `chaptersIndex.ts`) et écrit son DOM final dans
+  `dist/{route}/index.html`, pour que Google et les crawlers voient le contenu/les balises
+  `og:*`/JSON-LD sans exécuter de JS. Un SSR Node (`react-dom/server`) ne marcherait pas : les
+  illustrations Mafs et les widgets interactifs (Web Components Shadow DOM) ont besoin d'un vrai
+  navigateur pour s'initialiser. `vercel.json` route déjà vers ces fichiers sans rien à changer
+  (Vercel sert un fichier du disque, dont `{route}/index.html`, avant d'appliquer la réécriture
+  SPA de secours) — seul `vite preview` en local ne résout pas ces chemins sans `/` final.
 
 ## Principe d'architecture : gabarit unique + contenu en données
 
