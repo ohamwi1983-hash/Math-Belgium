@@ -141,9 +141,11 @@ export function Historique({ block }: { block: Extract<Block, { kind: 'historiqu
 }
 
 /** Encart "À quoi ça sert ?" — application concrète hors maths pure, teinte bleue (`--sky`) pour
- * se distinguer à la fois des autres callouts et de `Historique` (sépia). `domaines` est rendu en
- * texte BRUT (comme `label`/`badge` ailleurs), jamais de RichText dedans. Même convention
- * `no-export` que `Historique` sur `image`. */
+ * se distinguer à la fois des autres callouts et de `Historique` (sépia). Bandeau de titre plein
+ * (pas juste une bordure gauche) pour se détacher nettement des autres callouts, une fois choisi
+ * entre plusieurs propositions soumises à l'utilisateur. `domaines` est rendu en texte BRUT (comme
+ * `label`/`badge` ailleurs), jamais de RichText dedans. Même convention `no-export` que
+ * `Historique` sur `image`. */
 export function Application({ block }: { block: Extract<Block, { kind: 'application' }> }) {
   return (
     <div className="callout callout-application">
@@ -153,32 +155,34 @@ export function Application({ block }: { block: Extract<Block, { kind: 'applicat
         </span>{' '}
         À quoi ça sert ?
       </p>
-      <div className="application-body">
-        {block.image && (
-          <figure className="application-figure no-export">
-            <img src={block.image.src} alt={block.image.alt} loading="lazy" />
-            <figcaption>{block.image.caption}</figcaption>
-          </figure>
-        )}
-        <div className="application-text">
-          <p className="application-titre">{block.titre}</p>
-          <p>
-            <RichText text={block.text} />
-          </p>
-          <ul className="application-domaines">
-            {block.domaines.map((domaine, i) => (
-              <li key={i}>{domaine}</li>
+      <div className="application-content">
+        <div className="application-body">
+          {block.image && (
+            <figure className="application-figure no-export">
+              <img src={block.image.src} alt={block.image.alt} loading="lazy" />
+              <figcaption>{block.image.caption}</figcaption>
+            </figure>
+          )}
+          <div className="application-text">
+            <p className="application-titre">{block.titre}</p>
+            <p>
+              <RichText text={block.text} />
+            </p>
+            <ul className="application-domaines">
+              {block.domaines.map((domaine, i) => (
+                <li key={i}>{domaine}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        {block.illustrations && block.illustrations.length > 0 && (
+          <div className="application-diagrams no-export">
+            {block.illustrations.map((spec, i) => (
+              <Illustration key={i} spec={spec} />
             ))}
-          </ul>
-        </div>
+          </div>
+        )}
       </div>
-      {block.illustrations && block.illustrations.length > 0 && (
-        <div className="application-diagrams no-export">
-          {block.illustrations.map((spec, i) => (
-            <Illustration key={i} spec={spec} />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
