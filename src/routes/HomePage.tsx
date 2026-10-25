@@ -39,12 +39,25 @@ const CHAPTER_ICON: Record<string, HomeIconKind> = {
  * (`--accent`/`--sky`/`--plan`, voir `index.css`), jamais une couleur inventée pour l'occasion. */
 const LEVEL_TONE = ['accent', 'sky', 'plan'] as const
 
+const BASE_URL = 'https://math-belgium.vercel.app'
+
 export function HomePage() {
-  useDocumentMeta(
-    'Chapitres de maths — FWB',
-    'Chapitres de cours de mathématiques narratifs pour la 4e, 5e et 6e (FWB), avec liens directs vers des exercices interactifs auto-corrigés.',
-    '/',
-  )
+  useDocumentMeta({
+    title: 'Chapitres de maths — FWB',
+    description:
+      'Chapitres de cours de mathématiques narratifs pour la 4e, 5e et 6e (FWB), avec liens directs vers des exercices interactifs auto-corrigés.',
+    path: '/',
+    type: 'website',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Chapitres de maths — FWB',
+      description:
+        'Chapitres de cours de mathématiques narratifs pour la 4e, 5e et 6e (FWB), avec liens directs vers des exercices interactifs auto-corrigés.',
+      url: BASE_URL,
+      inLanguage: 'fr-BE',
+    },
+  })
 
   return (
     <>
