@@ -196,6 +196,12 @@ img, svg { max-width: 100%; }
    deliberately zero-width container (.accent-body); the generic responsive-image rule above
    resolves its max-width against that same zero width, capping the arrow to nothing. */
 .katex svg { max-width: none; }
+/* Une formule trop large pour l'écran (chaîne d'égalités avec plusieurs \dfrac, ex. 6e-6h/coniques,
+   calcul d'aire) ne doit jamais élargir la page sur petit écran : overflow-x/max-width ne
+   s'appliquent qu'à un élément display:inline-block (jamais à un inline pur, qui les ignore) —
+   une formule qui tient dans le texte garde donc son rendu habituel, une trop large scrolle
+   localement dans son propre encadré au lieu de pousser toute la page vers la droite. */
+.math-inline { display: inline-block; max-width: 100%; overflow-x: auto; vertical-align: middle; }
 
 .page {
   max-width: 760px;
