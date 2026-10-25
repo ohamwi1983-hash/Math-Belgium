@@ -1569,7 +1569,7 @@ export const geometrieAnalytiquePlane: ChapterContent = {
         "Ai-je bien vérifié qu'une droite verticale ou horizontale n'admet pas les deux formes explicites ?",
         'Le p de ma parabole est-il bien signé — jamais une distance donnée en positif par défaut ?',
         'Le coefficient de x² et de y² de mon cercle sont-ils bien identiques avant que je complète le carré ?',
-        'Ai-je diagnostiqué le cas (sécantes/parallèles/confondues, 0/1/2 points) avant de me lancer dans un calcul ?',
+        'Ai-je diagnostiqué le cas (sécantes / parallèles / confondues, 0/1/2 points) avant de me lancer dans un calcul ?',
       ],
     },
     forward:

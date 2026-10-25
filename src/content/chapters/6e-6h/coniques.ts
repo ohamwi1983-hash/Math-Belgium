@@ -820,7 +820,7 @@ export const coniques: ChapterContent = {
           title: "Excentricité, foyers, directrices et réduction d'équation",
           generatorId: '6gen59',
           description: [
-            "Passe de foyer/directrice/excentricité à une équation, réduis une équation générale par translation, puis identifie la conique obtenue.",
+            "Passe de foyer / directrice / excentricité à une équation, réduis une équation générale par translation, puis identifie la conique obtenue.",
           ],
           chantier: '6e-6h',
           whereLabel: "6e (6h) → « 59. Excentricité, foyers, directrices et réduction d'équation »",

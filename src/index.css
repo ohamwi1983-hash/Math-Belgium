@@ -182,6 +182,12 @@ body {
   font-size: 17px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  /* Un mot sans espace mais trop long pour sa colonne (ex. "sécantes/parallèles/confondues",
+     une énumération jointe par des / sans espaces, 4e/géométrie-analytique-plane) ne casse
+     jamais naturellement sur un slash ou un tiret — sans ceci il dépasse tel quel de son bloc,
+     comme une formule KaTeX trop large (voir plus bas) mais pour du texte brut. N'a AUCUN effet
+     sur un texte qui tient déjà : ne coupe que le mot qui, sinon, déborderait. */
+  overflow-wrap: break-word;
 }
 
 #root { min-height: 100vh; }
