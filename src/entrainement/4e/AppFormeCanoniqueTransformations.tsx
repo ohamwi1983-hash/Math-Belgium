@@ -15,6 +15,8 @@ import { EtapeEvCvSox } from "./components/EtapeEvCvSox";
 import { EtapeTv } from "./components/EtapeTv";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction du second degré.";
 
@@ -30,12 +32,24 @@ function nouvelleSession(): EtatSessionFormeCanoniqueTransformation {
   return demarrerSessionFormeCanoniqueTransformation(REGLAGES_DEMO, genererExerciceFormeCanoniqueTransformation);
 }
 
-const LIBELLE_PHASE: Record<PhaseFormeCanoniqueTransformation, string> = {
-  canonique: "Forme canonique",
-  th: "Translation horizontale",
-  evCvSox: "Étirement / compression / symétrie",
-  tv: "Translation verticale",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence des phases
+ * (`PhaseFormeCanoniqueTransformation`), toujours linéaire ici (jamais de phase sautée). */
+const ORDRE_PHASES: PhaseFormeCanoniqueTransformation[] = ["canonique", "th", "evCvSox", "tv"];
+
+/** `tv` (dernière phase) n'a jamais besoin de sa propre branche "close" : une fois l'exercice
+ * terminé, un nouveau redémarre à "canonique" (index 0), donc `tv` reste "a-venir" jusqu'à devenir
+ * "courante" — jamais consultée en tant que phase passée (même principe que `AppAnalyseFonction`/
+ * `AppMethodeRapide`). Puces purement visuelles ici (pas de `onSegmentClick`, comportement explicitement
+ * supporté par `ProgressionPuces` sans historique de consultation à câbler). */
+function calculerSegmentsProgression(etat: EtatSessionFormeCanoniqueTransformation): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "canonique" ? etat.canoniqueRevele : phase === "th" ? etat.thRevele : etat.evCvSoxRevele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -106,11 +120,7 @@ export function AppFormeCanoniqueTransformations() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />

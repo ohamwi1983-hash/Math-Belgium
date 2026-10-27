@@ -57,6 +57,10 @@ const DEMI_BASE_MAX = 20;
 const H0_MIN = 2;
 const H0_MAX = 6;
 
+function capitaliser(texte: string): string {
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
+}
+
 export function construireRectangleInscrit(): ExerciceOptimisationModelisation {
   const demiBase = randomInt(DEMI_BASE_MIN, DEMI_BASE_MAX);
   const base = 2 * demiBase;
@@ -87,7 +91,7 @@ export function construireRectangleInscrit(): ExerciceOptimisationModelisation {
     famille: "rectangleInscrit",
     sens: "max",
     contexte: {
-      phraseEnonce: `${skin.nomForme} a la forme d'un triangle isocèle de base ${base} cm et de hauteur ${hauteur} cm. On y inscrit un rectangle dont un côté repose sur la base du triangle.`,
+      phraseEnonce: `${capitaliser(skin.nomForme)} a la forme d'un triangle isocèle de base ${base} cm et de hauteur ${hauteur} cm. On y inscrit un rectangle dont un côté repose sur la base du triangle.`,
       labelVariable: "x",
       nomVariable: "la largeur du rectangle",
       nomGrandeur: "l'aire du rectangle",

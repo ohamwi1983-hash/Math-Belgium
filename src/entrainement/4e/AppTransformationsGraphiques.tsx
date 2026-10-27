@@ -60,12 +60,12 @@ export function AppTransformationsGraphiques() {
         revele: enAttente.revele,
         reponseAttendue: resultatEnAttente && (
           <>
-            {resultatEnAttente.scoreEquation === 0 && (
+            {resultatEnAttente.equationRevele && (
               <div>
                 Fonction attendue : <Katex expression={formatEquationTransformationLatex(exercice)} />
               </div>
             )}
-            {resultatEnAttente.scoreCurseurs === 0 && (
+            {resultatEnAttente.curseursRevele && (
               <p>
                 Curseurs attendus : TH = {exercice.p} ; TV = {exercice.q} ; EV = {exercice.ev} ; CV = {exercice.cv} ; SOX ={" "}
                 {exercice.sox ? "Oui" : "Non"}

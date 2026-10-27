@@ -44,7 +44,12 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
       <div className="equation-box">
         <Katex expression={formatFormeGeneraleLatex(exercice)} block />
       </div>
-      <p className="prompt-text">Retrouve les coordonnées du sommet de la parabole.</p>
+      {/* `prompt-text--question-multiple` : deux questions de poids égal sur cet écran (sommet,
+       * puis forme canonique complète) — sans elle, seule la seconde recevrait la mise en avant
+       * (règle `.prompt-text:not(:has(~ .prompt-text))` de theme.css, pensée pour "consigne
+       * générale puis question spécifique"). Trouvé lors de l'audit du chapitre "La fonction du
+       * second degré", manqué par le balayage générique (point B) initial. */}
+      <p className="prompt-text prompt-text--question-multiple">Retrouve les coordonnées du sommet de la parabole.</p>
       <div className="field-row">
         <div className="field field-inline">
           <label className="field-label field-label-minuscule" htmlFor="canonique-xs">
@@ -71,7 +76,7 @@ export function EtapeCanonique({ exercice, tentativesUtilisees, tentativesMax, o
           />
         </div>
       </div>
-      <p className="prompt-text">Écris la forme canonique complète de f(x).</p>
+      <p className="prompt-text prompt-text--question-multiple">Écris la forme canonique complète de f(x).</p>
       <ApercuExpressionLatex texte={formeCanonique} label="f(x) =" />
       <div className="field field-inline">
         <label className="field-label field-label-minuscule" htmlFor="canonique-forme-complete">

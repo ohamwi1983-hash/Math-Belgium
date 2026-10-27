@@ -10,8 +10,11 @@ import { formatDomaineLatex, formatFonctionDeveloppeeLatex, formatOptimalAttendu
  * écrans, fonction ET domaine déjà fournis) ; `modelisation` — `identification` (seulement si
  * `exercice.identificationXY` est défini, voir `moteur/sessionOptimisation.ts::phaseInitiale`) →
  * `contrainteEtGrandeur` → `systeme` → `domaine` → `sommet` → `decision` → `interpretation`.
+ *
+ * Exportée : réutilisée telle quelle par `AppOptimisation.tsx::calculerSegmentsProgression` (puces
+ * de progression) — même séquence réelle, jamais une deuxième reconstitution divergente.
  */
-function sequencePourExercice(exercice: ExerciceOptimisation): PhaseOptimisation[] {
+export function sequencePourExercice(exercice: ExerciceOptimisation): PhaseOptimisation[] {
   if (exercice.variante === "fonctionDonnee") return ["sommet", "decision", "interpretation"];
   const sequence: PhaseOptimisation[] = [];
   if (exercice.identificationXY) sequence.push("identification");

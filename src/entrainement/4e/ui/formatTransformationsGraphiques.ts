@@ -30,6 +30,10 @@ function formatCorpsCarre(p: number): string {
   return `(${interieur})^2`;
 }
 
+function pgcd(a: number, b: number): number {
+  return b === 0 ? a : pgcd(b, a % b);
+}
+
 /**
  * f(x) = a(x-p)²+q, rendu LaTeX — jamais un décimal arrondi pour la branche CV (1/cv peut être un
  * décimal périodique, ex. 1/3) : rendue en fraction exacte `\frac{(x-p)²}{cv}` plutôt qu'en
@@ -42,9 +46,18 @@ function formatCorpsCarre(p: number): string {
  * (`prompt-generation-vrais-rapports.md`), les deux peuvent être `>1` simultanément (`|a|=ev/cv`,
  * un vrai rapport non trivial) ; le numérateur de la fraction doit alors réintégrer `ev` au lieu
  * de le passer sous silence.
+ *
+ * Réduit `ev/cv` par leur pgcd AVANT de décider de l'affichage (trouvé pendant l'audit du chapitre
+ * "La fonction du second degré") : sans ça, ev=cv=5 (a=1, cas neutre) affichait encore
+ * `5(x-p)²/5` au lieu de `(x-p)²` — la réponse révélée à l'élève montrait une fraction non
+ * simplifiée. `cv>1` reste décidé sur la valeur RÉDUITE (ev=2,cv=4 → 1/2, toujours une fraction ;
+ * ev=5,cv=5 → 1/1, jamais de fraction).
  */
 export function formatEquationTransformationLatex(exercice: ExerciceTransformationGraphique): string {
-  const { p, q, ev, cv, sox } = exercice;
+  const { p, q, sox } = exercice;
+  const diviseur = pgcd(exercice.ev, exercice.cv);
+  const ev = exercice.ev / diviseur;
+  const cv = exercice.cv / diviseur;
   const corpsCarre = formatCorpsCarre(p);
   const signe = sox ? "-" : "";
 

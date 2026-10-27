@@ -46,6 +46,10 @@ const K_MAX = 6;
  * cette famille, jamais un ratio 75/25 (réservé aux familles `fonctionDonnee`, dont le domaine est
  * narratif et indépendant de la fonction).
  */
+function capitaliser(texte: string): string {
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
+}
+
 function domainePositivite(total: number): { inf: number; sup: number } {
   return { inf: 0, sup: total };
 }
@@ -77,7 +81,7 @@ function construirePierre(): ExerciceOptimisationModelisation {
     famille: "sommeDeuxCarres",
     sens: "min",
     contexte: {
-      phraseEnonce: `${nomObjet} de ${M} g se brise accidentellement en 2 morceaux. La valeur de chaque morceau est proportionnelle au carré de sa masse (coefficient de proportionnalité ${k} €/g²).`,
+      phraseEnonce: `${capitaliser(nomObjet)} de ${M} g se brise accidentellement en 2 morceaux. La valeur de chaque morceau est proportionnelle au carré de sa masse (coefficient de proportionnalité ${k} €/g²).`,
       labelVariable: "x",
       nomVariable: "la masse du premier morceau",
       nomGrandeur: "la valeur totale restante",
@@ -163,7 +167,7 @@ function construireMateriau(): ExerciceOptimisationModelisation {
     famille: "sommeDeuxCarres",
     sens: "min",
     contexte: {
-      phraseEnonce: `${nomMateriau} de ${L} cm de long doit être coupé en 2 morceaux : le premier sera plié pour former un carré, le second pour former un triangle rectangle dont les côtés restent toujours dans le rapport 3-4-5.`,
+      phraseEnonce: `${capitaliser(nomMateriau)} de ${L} cm de long doit être coupé en 2 morceaux : le premier sera plié pour former un carré, le second pour former un triangle rectangle dont les côtés restent toujours dans le rapport 3-4-5.`,
       labelVariable: "x",
       nomVariable: "la longueur destinée au carré",
       nomGrandeur: "l'aire totale des 2 formes",

@@ -11,10 +11,12 @@ import {
   soumettreReponseSommet,
   soumettreReponseSysteme,
 } from "./moteur/sessionOptimisation";
-import type { EtatSessionOptimisation, PhaseOptimisation } from "./moteur/typesOptimisation";
+import type { EtatSessionOptimisation } from "./moteur/typesOptimisation";
 import { CATALOGUE_FAMILLES, construireAvecFamilleId, genererExerciceOptimisation } from "./generateurs/optimisation";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
-import { calculerRecapitulatifOptimisation } from "./ui/recapitulatifOptimisation";
+import { calculerRecapitulatifOptimisation, sequencePourExercice } from "./ui/recapitulatifOptimisation";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { EtapeIdentificationOptimisation } from "./components/EtapeIdentificationOptimisation";
 import { EtapeContrainteEtGrandeurOptimisation } from "./components/EtapeContrainteEtGrandeurOptimisation";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -45,15 +47,47 @@ function nouvelleSession(): EtatSessionOptimisation {
   return demarrerSessionOptimisation(REGLAGES_DEMO, genererExerciceOptimisation);
 }
 
-const LIBELLE_PHASE: Record<PhaseOptimisation, string> = {
-  identification: "Identifier x et y",
-  contrainteEtGrandeur: "Poser la contrainte et exprimer la grandeur",
-  systeme: "Résoudre le système",
-  domaine: "Domaine de validité",
-  sommet: "Sommet",
-  decision: "Décision — sommet ou borne",
-  interpretation: "Interprétation",
-};
+/** Segments de la barre de puces — réutilise `sequencePourExercice` (même séquence réelle que le
+ * récapitulatif, jamais une deuxième reconstitution) et la même lecture `etat.xxxRevele`/
+ * `etat.niveauAideXxx` que `terminerEtape` ci-dessous. `interpretation` (dernière phase, clôture
+ * l'exercice) n'a jamais besoin de sa propre branche "close" : un nouvel exercice redémarre toujours
+ * juste après, donc elle reste "a-venir" jusqu'à devenir "courante" — jamais consultée comme passée
+ * (même principe que la dernière phase d'`AppAnalyseFonction`/`AppMethodeRapide`). Puces purement
+ * visuelles (pas de `onSegmentClick`, comportement explicitement supporté par `ProgressionPuces`). */
+function calculerSegmentsProgression(etat: EtatSessionOptimisation): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele =
+      phase === "identification"
+        ? etat.identificationRevele
+        : phase === "contrainteEtGrandeur"
+          ? etat.contrainteEtGrandeurRevele
+          : phase === "systeme"
+            ? etat.systemeRevele
+            : phase === "domaine"
+              ? etat.domaineRevele
+              : phase === "sommet"
+                ? etat.sommetRevele
+                : etat.decisionRevele;
+    if (revele) return "revele";
+    const niveauAide =
+      phase === "identification"
+        ? etat.niveauAideIdentification
+        : phase === "contrainteEtGrandeur"
+          ? etat.niveauAideContrainteEtGrandeur
+          : phase === "systeme"
+            ? etat.niveauAideSysteme
+            : phase === "domaine"
+              ? etat.niveauAideDomaine
+              : phase === "sommet"
+                ? etat.niveauAideSommet
+                : etat.niveauAideDecision;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -150,11 +184,7 @@ export function AppOptimisation() {
         <h1 className="app-title">Problèmes d'optimisation (fonction du second degré)</h1>
         <p className="app-subtitle">Chapitre 1</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">
