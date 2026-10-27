@@ -41,7 +41,7 @@ export function EtapeSegmentDirect({ exercice, connus, segmentsTraces, tentative
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_SEGMENT_DIRECT}</p>
-      <p className="prompt-text">
+      <p className="prompt-fact">
         {texteProgressionPoints(exercice, connus)} — {texteProgressionSegments(exercice, segmentsTraces)}
       </p>
 

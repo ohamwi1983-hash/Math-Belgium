@@ -83,9 +83,9 @@ export function EtapeConditionValidite({ exercice, tentativesUtilisees, tentativ
           aria-label="Valeur seuil de la condition"
         />
       </div>
-      <p className="prompt-text">
+      <div className="apercu-box">
         <Katex expression={formatApercuConditionValiditeSimple(symbole, valeur)} />
-      </p>
+      </div>
 
       {!validation && (
         <>

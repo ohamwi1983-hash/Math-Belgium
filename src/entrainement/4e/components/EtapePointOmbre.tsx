@@ -56,7 +56,7 @@ export function EtapePointOmbre({ exercice, resolus, tentativesUtilisees, tentat
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_POINT}</p>
-      <p className="prompt-text">{texteProgressionBoucle(exercice, resolus.length)}</p>
+      <p className="prompt-fact">{texteProgressionBoucle(exercice, resolus.length)}</p>
 
       <Solide3DSketch solide={solide} pointsExtra={points} segmentsExtra={segments} labelsSommets={false} />
 

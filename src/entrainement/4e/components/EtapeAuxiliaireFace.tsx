@@ -52,7 +52,7 @@ export function EtapeAuxiliaireFace({
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_AUXILIAIRE_FACE}</p>
-      <p className="prompt-text">
+      <p className="prompt-fact">
         {texteProgressionPoints(exercice, connus)} — {texteProgressionSegments(exercice, segmentsTraces)}
       </p>
 

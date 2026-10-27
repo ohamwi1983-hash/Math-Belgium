@@ -55,7 +55,7 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
           aria-label="Première équation"
         />
       </div>
-      <p className="prompt-text">ou</p>
+      <p className="prompt-connecteur">ou</p>
       <div className="field field-inline">
         <input
           className={`text-input${erronee ? " is-erronee" : ""}`}

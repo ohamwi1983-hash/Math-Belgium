@@ -50,7 +50,7 @@ export function EtapeAuxiliaireLignes({ exercice, connus, segmentsTraces, tentat
   return (
     <div>
       <p className="prompt-text">{CONSIGNE_AUXILIAIRE_LIGNES}</p>
-      <p className="prompt-text">
+      <p className="prompt-fact">
         {texteProgressionPoints(exercice, connus)} — {texteProgressionSegments(exercice, segmentsTraces)}
       </p>
 

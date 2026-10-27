@@ -480,12 +480,27 @@
 /* Fait mathématique donné (ex. "domf = ℝ" dans `EtapeDomaineImage`, toujours vrai pour ce
  * générateur) à ne JAMAIS confondre avec la vraie question posée juste en dessous — classe dédiée
  * plutôt que `.prompt-text` : rester en dehors du décompte de `:not(:has(~ .prompt-text))`
- * ci-dessus permet à la vraie question de conserver seule la mise en avant. */
+ * ci-dessus permet à la vraie question de conserver seule la mise en avant. Même usage pour un
+ * texte de progression/état d'avancement (ex. "3 points connus — 2 segments tracés" dans
+ * `EtapeSegmentDirect`/`EtapePointOmbre`/`EtapeDirectionOmbre`/`EtapeAuxiliaireLignes`/
+ * `EtapeAuxiliaireFace`) : même défaut trouvé pendant le balayage générique (point B), même
+ * correctif — un indicateur d'avancement n'est pas plus "la question" qu'un fait donné. */
 .entrainement .prompt-fact {
   font-size: 13px;
   font-style: italic;
   color: var(--color-text-muted);
   margin: 0 0 10px;
+}
+
+/* Mot de liaison entre deux champs empilés (ex. "ou" dans `EtapeSeparation`, entre les deux
+ * équations à séparer) — trouvé pendant le même balayage : recevait par erreur la mise en avant
+ * de "la question" (`.prompt-text:not(:has(~ .prompt-text))` ci-dessus) en étant le dernier
+ * `.prompt-text` de l'écran. Centré, discret, jamais en gras — jamais confondu avec une consigne. */
+.entrainement .prompt-connecteur {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 2px 0;
 }
 
 .entrainement .options-grid {
