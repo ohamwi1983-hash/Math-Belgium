@@ -18,14 +18,19 @@ export const NIVEAU_AIDE_MAX_SUITE_RECURRENTE_AFFINE = 2;
 
 function etatInitial(
   exercice: ExerciceSuiteRecurrenteAffine,
-): Pick<EtatSessionSuiteRecurrenteAffine, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scorePoserRecurrencePartiel" | "scoreRegimePermanentPartiel"> {
+): Pick<
+  EtatSessionSuiteRecurrenteAffine,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scorePoserRecurrencePartiel" | "poserRecurrenceRevele" | "scoreRegimePermanentPartiel" | "regimePermanentRevele"
+> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scorePoserRecurrencePartiel: null,
+    poserRecurrenceRevele: false,
     scoreRegimePermanentPartiel: null,
+    regimePermanentRevele: false,
   };
 }
 
@@ -75,7 +80,15 @@ export function soumettreReponsePoserRecurrence(etat: EtatSessionSuiteRecurrente
 
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: "regimePermanent", scorePoserRecurrencePartiel: score, derniereEtapeRevelee: revele };
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: "regimePermanent",
+    scorePoserRecurrencePartiel: score,
+    poserRecurrenceRevele: revele,
+    derniereEtapeRevelee: revele,
+  };
 }
 
 export function soumettreReponseRegimePermanent(etat: EtatSessionSuiteRecurrenteAffine, reponse: ReponseRegimePermanent): EtatSessionSuiteRecurrenteAffine {
@@ -90,7 +103,15 @@ export function soumettreReponseRegimePermanent(etat: EtatSessionSuiteRecurrente
 
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: "termesSuccessifs", scoreRegimePermanentPartiel: score, derniereEtapeRevelee: revele };
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: "termesSuccessifs",
+    scoreRegimePermanentPartiel: score,
+    regimePermanentRevele: revele,
+    derniereEtapeRevelee: revele,
+  };
 }
 
 export function soumettreReponseTermesSuccessifs(etat: EtatSessionSuiteRecurrenteAffine, textes: string[]): EtatSessionSuiteRecurrenteAffine {

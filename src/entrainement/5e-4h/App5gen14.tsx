@@ -191,8 +191,10 @@ function nouvelleSession(): EtatSessionSuiteArithmetique {
  * (5 familles structurellement disjointes, ordre parfois inversé — voir l'en-tête de
  * `moteur5e/typesSuiteArithmetique.ts`), donc toujours recalculée via `ordreComplet(exercice)`,
  * même principe que `App5gen4.tsx` (questions dynamiques). `scoresPartiels[phase]` (jamais
- * undefined pour une phase déjà close) pilote "correcte"/"revele" avec la même heuristique
- * `score === 0 ⟺ révélée` que `calculerRecapitulatifSuiteArithmetique`.
+ * undefined pour une phase déjà close) signale qu'une phase est close ; la révélation vient de
+ * `etat.revelesPartiels[phase]` (peuplé depuis `etapeCourante.revelee` à la clôture de chaque
+ * phase, `sessionSuiteArithmetique.ts::soumettreEcran`) — jamais `score === 0`, même correctif que
+ * `calculerRecapitulatifSuiteArithmetique` (point A, balayage générique).
  */
 function calculerSegmentsProgression(
   etat: EtatSessionSuiteArithmetique,
@@ -202,7 +204,7 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[phase]) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

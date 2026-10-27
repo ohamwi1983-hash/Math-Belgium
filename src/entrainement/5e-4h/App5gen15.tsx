@@ -251,8 +251,10 @@ function nouvelleSession(): EtatSessionSuiteGeometrique {
 
 /** Puces de progression — pas de `ORDRE_PHASES` statique (même raison que 5gen14) : la séquence
  * réelle dépend de `exercice.famille`/`combo`/`statutQ` (branches B1/B2 dupliquées), donc toujours
- * recalculée via `ordreComplet(exercice)`. Même heuristique `score === 0 ⟺ révélée` que
- * `calculerRecapitulatifSuiteGeometrique`. */
+ * recalculée via `ordreComplet(exercice)`. Révélation lue depuis `etat.revelesPartiels[phase]`
+ * (peuplé depuis `etapeCourante.revelee` à la clôture de chaque phase,
+ * `sessionSuiteGeometrique.ts::soumettreEcran`) — jamais `score === 0`, même correctif que
+ * `calculerRecapitulatifSuiteGeometrique` (point A, balayage générique). */
 function calculerSegmentsProgression(
   etat: EtatSessionSuiteGeometrique,
   aideUtiliseeParPhase: Partial<Record<PhaseSuiteGeometrique, boolean>>,
@@ -261,7 +263,7 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[phase]) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

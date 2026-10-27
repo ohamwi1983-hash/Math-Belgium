@@ -14,9 +14,11 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
  * et on les affiche une par une selon ce qui est RÉELLEMENT clos (`scoreXxxPartiel !== null`),
  * même convention que `AppAnalyseFonction.tsx` (4e).
  *
- * Heuristique de révélation : le moteur ne garde que `derniereEtapeRevelee` (générique), jamais un
- * booléen par phase — `scoreXxxPartiel === 0` pilote donc l'icône (✓/✗), même convention que les 4
- * autres cibles de cette tâche.
+ * Icône (✓/✗) pilotée par `etat.poserRecurrenceRevele`/`etat.regimePermanentRevele`, peuplés
+ * depuis `etapeCourante.revelee` à la clôture de chaque écran (`sessionSuiteRecurrenteAffine.ts`) —
+ * jamais `scoreXxxPartiel === 0` (point A, balayage générique) : la pénalité d'aide multi-niveaux
+ * de ce générateur est soustraite APRÈS le score de tentatives puis plafonnée à 0, donc une
+ * réussite fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée".
  */
 export function calculerRecapitulatifSuiteRecurrenteAffine(etat: EtatSessionSuiteRecurrenteAffine): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -24,10 +26,10 @@ export function calculerRecapitulatifSuiteRecurrenteAffine(etat: EtatSessionSuit
   const entrees: EntreeRecapitulatif[] = [];
 
   if (etat.scorePoserRecurrencePartiel !== null) {
-    entrees.push({ libelle: "Relation de récurrence", estLatex: true, valeur: relation, revele: etat.scorePoserRecurrencePartiel === 0 });
+    entrees.push({ libelle: "Relation de récurrence", estLatex: true, valeur: relation, revele: etat.poserRecurrenceRevele });
   }
   if (etat.scoreRegimePermanentPartiel !== null) {
-    entrees.push({ libelle: "Régime permanent", estLatex: true, valeur: regime, revele: etat.scoreRegimePermanentPartiel === 0 });
+    entrees.push({ libelle: "Régime permanent", estLatex: true, valeur: regime, revele: etat.regimePermanentRevele });
   }
   return entrees;
 }

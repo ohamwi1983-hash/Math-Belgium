@@ -63,7 +63,8 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = phase === "poserRecurrence" ? etat.scorePoserRecurrencePartiel : phase === "regimePermanent" ? etat.scoreRegimePermanentPartiel : null;
     if (score === null) return "a-venir";
-    if (score === 0) return "revele";
+    const revele = phase === "poserRecurrence" ? etat.poserRecurrenceRevele : phase === "regimePermanent" ? etat.regimePermanentRevele : false;
+    if (revele) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

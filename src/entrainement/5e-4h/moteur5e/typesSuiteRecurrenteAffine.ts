@@ -37,7 +37,16 @@ export interface EtatSessionSuiteRecurrenteAffine {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scorePoserRecurrencePartiel: number | null;
+  /** true si l'écran "poserRecurrence" a dû être révélé (tentatives épuisées) — jusqu'au 2025-10,
+   * déduit de `scorePoserRecurrencePartiel === 0`, une heuristique FAUSSE ici : la pénalité d'aide
+   * multi-niveaux (`PENALITE_PAR_NIVEAU_AIDE * niveauAide`, `sessionSuiteRecurrenteAffine.ts`) est
+   * soustraite APRÈS le score de tentatives puis plafonnée à 0 (`Math.max(0, ...)`), donc une
+   * RÉUSSITE fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée"
+   * (point A, balayage générique). Peuplé depuis `etapeCourante.revelee`, jamais recalculé. */
+  poserRecurrenceRevele: boolean;
   scoreRegimePermanentPartiel: number | null;
+  /** même principe que `poserRecurrenceRevele` ci-dessus, pour l'écran "regimePermanent". */
+  regimePermanentRevele: boolean;
   resultats: ResultatExerciceSuiteRecurrenteAffine[];
   terminee: boolean;
   /** Capturé au moment précis où l'écran se ferme (post-soumission) — `etat.etapeCourante.revelee`

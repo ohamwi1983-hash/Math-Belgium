@@ -61,9 +61,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même heuristique que `calculerRecapitulatifVitessePosition` (`scoresPartiels[ecran] === 0 ⟺
- * révélée`) — `ordreEcransVitessePosition(exercice)` donne la séquence RÉELLE (5 écrans pour la
- * variante "A", 6 pour "B", fixée dès le tirage). */
+/** Même source que `calculerRecapitulatifVitessePosition` (`etat.revelesPartiels[ecran]`, jamais
+ * `scoresPartiels[ecran] === 0` — point A, balayage générique) — `ordreEcransVitessePosition(exercice)`
+ * donne la séquence RÉELLE (5 écrans pour la variante "A", 6 pour "B", fixée dès le tirage). */
 function calculerSegmentsProgression(
   etat: EtatSessionVitessePosition,
   aideUtiliseeParPhase: Partial<Record<string, boolean>>,
@@ -72,7 +72,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideUtiliseeParPhase[ecran] ? "aide" : "correcte";
   });
 }

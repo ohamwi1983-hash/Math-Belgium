@@ -65,9 +65,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même heuristique que `calculerRecapitulatifTangentes` (`scoresPartiels[ecran] === 0 ⟺
- * révélée`) — `ordreEcransTangente(exercice)` donne la séquence RÉELLE (2 ou 3 écrans selon la
- * variante, fixée dès le tirage). */
+/** Même source que `calculerRecapitulatifTangentes` (`etat.revelesPartiels[ecran]`, jamais
+ * `scoresPartiels[ecran] === 0` — point A, balayage générique) — `ordreEcransTangente(exercice)`
+ * donne la séquence RÉELLE (2 ou 3 écrans selon la variante, fixée dès le tirage). */
 function calculerSegmentsProgression(
   etat: EtatSessionTangente,
   aideParPhase: Partial<Record<EcranTangente, boolean>>,
@@ -76,7 +76,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideParPhase[ecran] ? "aide" : "correcte";
   });
 }
