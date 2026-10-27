@@ -27,8 +27,19 @@ export function niveauAideMaxOptimisation(): number {
 
 function etatInitial(
   exercice: ExerciceOptimisation,
-): Pick<EtatSessionOptimisation, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "dernieresReponsesParEcran"> {
-  return { exerciceCourant: exercice, phase: ecranInitial(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, dernieresReponsesParEcran: {} };
+): Pick<
+  EtatSessionOptimisation,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "dernieresReponsesParEcran"
+> {
+  return {
+    exerciceCourant: exercice,
+    phase: ecranInitial(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    dernieresReponsesParEcran: {},
+  };
 }
 
 export function demarrerSessionOptimisation(reglages: ReglagesSession5e, generateur: () => ExerciceOptimisation): EtatSessionOptimisation {
@@ -73,10 +84,20 @@ export function soumettreReponseEcran(etat: EtatSessionOptimisation, reponses: R
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const ecranSuivant = ecranApres(exercice, phaseCourante);
 
   if (ecranSuivant === "termine") {
-    return cloturerExerciceOuSuivant({ ...etat, dernieresReponsesParEcran }, { exercice, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant({ ...etat, dernieresReponsesParEcran }, { exercice, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: ecranSuivant, scoresPartiels, dernieresReponsesParEcran, derniereEtapeRevelee: revele };
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: ecranSuivant,
+    scoresPartiels,
+    revelesPartiels,
+    dernieresReponsesParEcran,
+    derniereEtapeRevelee: revele,
+  };
 }

@@ -58,9 +58,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même ternaire que `calculerRecapitulatifGeometrieCercle` (`scoresPartiels[phase] === 0 ⟺
- * révélée`) — la séquence de phases dépend du scénario de l'exercice courant (`phasesDuScenario`),
- * jamais un seul ordre générique (voir `moteur5e/typesGeometrieCercle.ts`). */
+/** Même source que `calculerRecapitulatifGeometrieCercle` (`revelesPartiels[phase]`) — la
+ * séquence de phases dépend du scénario de l'exercice courant (`phasesDuScenario`), jamais un
+ * seul ordre générique (voir `moteur5e/typesGeometrieCercle.ts`). */
 function calculerSegmentsProgression(
   etat: EtatSessionGeometrieCercle,
   aideUtiliseeParPhase: Partial<Record<PhaseGeometrieCercle, boolean>>,
@@ -69,7 +69,7 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[phase]) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

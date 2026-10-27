@@ -12,8 +12,10 @@ import { diagnostiquerCibleAsymptote, diagnostiquerCibleComportement } from "./v
 
 const POINTS_DE_BASE = 100;
 
-function etatInitial(exercice: ExerciceLectureGraphiqueLimites): Pick<EtatSessionLectureGraphiqueLimites, "exerciceCourant" | "phase" | "etapeCourante" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceLectureGraphiqueLimites,
+): Pick<EtatSessionLectureGraphiqueLimites, "exerciceCourant" | "phase" | "etapeCourante" | "scoresPartiels" | "revelesPartiels"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), scoresPartiels: {}, revelesPartiels: {} };
 }
 
 export function demarrerSessionLectureGraphiqueLimites(reglages: ReglagesSession5e, generateur: () => ExerciceLectureGraphiqueLimites): EtatSessionLectureGraphiqueLimites {
@@ -46,12 +48,13 @@ function soumettreEcran<T>(etat: EtatSessionLectureGraphiqueLimites, phaseAttend
   const revele = etapeCourante.revelee;
   const score = etapeCourante.score as number;
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 
   if (phaseSuivante === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: phaseSuivante, scoresPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
 }
 
 /** Écran "completerLimites" — un texte par slot de `listeComportements`, dans le MÊME ordre,

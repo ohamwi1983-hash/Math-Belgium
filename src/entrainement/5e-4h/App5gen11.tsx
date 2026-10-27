@@ -46,9 +46,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même ternaire que `calculerRecapitulatifExtremumsSinusoide` (`scoreXxxPartiel === 0 ⟺
- * révélée`) — `solutions` (dernière phase) n'a pas de champ `scoreSolutionsPartiel` : forcément
- * "courante" tant que l'exercice n'est pas terminé (dernière phase active). */
+/** Même source que `calculerRecapitulatifExtremumsSinusoide` (`poserEquationRevele`/
+ * `isolerXRevele`) — `solutions` (dernière phase) n'a pas de champ `scoreSolutionsPartiel` :
+ * forcément "courante" tant que l'exercice n'est pas terminé (dernière phase active). */
 function calculerSegmentsProgression(
   etat: EtatSessionExtremumsSinusoide,
   aideUtiliseeParPhase: Partial<Record<PhaseExtremumsSinusoide, boolean>>,
@@ -57,7 +57,8 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = phase === "poserEquation" ? etat.scorePoserEquationPartiel : phase === "isolerX" ? etat.scoreIsolerXPartiel : null;
     if (score === null) return "a-venir";
-    if (score === 0) return "revele";
+    const revele = phase === "poserEquation" ? etat.poserEquationRevele : phase === "isolerX" ? etat.isolerXRevele : false;
+    if (revele) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

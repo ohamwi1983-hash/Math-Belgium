@@ -24,8 +24,18 @@ export function niveauAideMaxFonctionDerivee(): number {
   return NIVEAU_AIDE_MAX_FONCTION_DERIVEE;
 }
 
-function etatInitial(exercice: ExerciceFonctionDerivee): Pick<EtatSessionFonctionDerivee, "exerciceCourant" | "phase" | "typeRetenu" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: "reconnaissance", typeRetenu: null, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceFonctionDerivee,
+): Pick<EtatSessionFonctionDerivee, "exerciceCourant" | "phase" | "typeRetenu" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return {
+    exerciceCourant: exercice,
+    phase: "reconnaissance",
+    typeRetenu: null,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+  };
 }
 
 export function demarrerSessionFonctionDerivee(reglages: ReglagesSession5e, generateur: () => ExerciceFonctionDerivee): EtatSessionFonctionDerivee {
@@ -65,12 +75,18 @@ function terminerEcranEtAvancer(
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [ecranAttendu]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [ecranAttendu]: revele };
 
   if (phaseSuivante === "termine") {
-    const resultat: ResultatExerciceFonctionDerivee = { exercice: etat.exerciceCourant, typeRetenu: (extra.typeRetenu ?? etat.typeRetenu) as TypeDerivee, scores: scoresPartiels };
+    const resultat: ResultatExerciceFonctionDerivee = {
+      exercice: etat.exerciceCourant,
+      typeRetenu: (extra.typeRetenu ?? etat.typeRetenu) as TypeDerivee,
+      scores: scoresPartiels,
+      revelesPartiels,
+    };
     return cloturerExerciceOuSuivant(etat, resultat, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, derniereEtapeRevelee: revele, ...extra };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele, ...extra };
 }
 
 // ============================================================================

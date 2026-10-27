@@ -38,7 +38,14 @@ export interface EtatSessionExtremumsSinusoide {
   /** Remis à 0 à chaque transition de phase (même principe que 5gen6/5gen7/5gen8/5gen10). */
   niveauAide: number;
   scorePoserEquationPartiel: number | null;
+  /** vrai signal "révélé", peuplé depuis `etapeCourante.revelee` à la clôture (même principe que
+   * les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scorePoserEquationPartiel === 0` ; champ explicite ajouté pendant le balayage générique
+   * (point A). */
+  poserEquationRevele: boolean;
   scoreIsolerXPartiel: number | null;
+  /** même principe que `poserEquationRevele` ci-dessus. */
+  isolerXRevele: boolean;
   indexExercice: number;
   resultats: ResultatExerciceExtremumsSinusoide[];
   terminee: boolean;

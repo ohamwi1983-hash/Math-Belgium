@@ -4,9 +4,10 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 import { champsEcran, LIBELLE_ECRAN } from "./formatOptimisationGeometrique";
 
 /**
- * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen32). Même heuristique
- * que les autres générateurs 5e migrés : `scoresPartiels[ecran] === 0 ⟺ révélée` (le moteur ne
- * trackait, à l'origine, que `derniereEtapeRevelee`, générique). `ordreEcransOptimisation(exercice)`
+ * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen32). Icône (✓/✗)
+ * pilotée par `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture
+ * de chaque écran (`sessionOptimisationGeometrique.ts::soumettreReponseEcran`).
+ * `ordreEcransOptimisation(exercice)`
  * donne la séquence RÉELLE (4 écrans pour "cubique", 6-7 pour les autres familles, fixée dès le
  * tirage, voir `typesOptimisationGeometrique.ts`) ; on s'arrête à l'écran courant (pas encore clos).
  *
@@ -45,7 +46,7 @@ export function calculerRecapitulatifOptimisation(etat: EtatSessionOptimisation)
       estLatex: true,
       valeur: valeurs.join("\\quad"),
       ...(valeurs.length > 1 ? { valeurs } : {}),
-      revele: score === 0,
+      revele: etat.revelesPartiels[ecran] ?? false,
     });
   }
 

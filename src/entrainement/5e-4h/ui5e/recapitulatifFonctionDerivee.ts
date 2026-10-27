@@ -10,9 +10,9 @@ import {
 import type { TypeDerivee } from "../core5e/fonctionDerivee.types";
 
 /**
- * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen27). Même heuristique
- * que les autres générateurs 5e migrés : `scoresPartiels[ecran] === 0 ⟺ révélée` (le moteur ne
- * trackait, à l'origine, que `derniereEtapeRevelee`, générique). On itère `ECRANS_POSSIBLES` (les 3
+ * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen27). Icône (✓/✗)
+ * pilotée par `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture de
+ * chaque écran (`sessionFonctionDerivee.ts::terminerEcranEtAvancer`). On itère `ECRANS_POSSIBLES` (les 3
  * écrans possibles, dans l'ordre) et on ignore simplement ceux absents de `scoresPartiels` — ce qui
  * couvre à la fois "pas encore atteint" ET "écran decomposer sauté" (type retenu "reglebase") sans
  * distinction nécessaire ici (dans les deux cas, rien à afficher). On s'arrête à l'écran courant.
@@ -31,7 +31,7 @@ export function calculerRecapitulatifFonctionDerivee(etat: EtatSessionFonctionDe
         libelle: LIBELLE_ECRAN.reconnaissance,
         estLatex: false,
         valeur: texteReponseAttendueReconnaissance(exercice),
-        revele: score === 0,
+        revele: etat.revelesPartiels[ecran] ?? false,
       });
     } else if (ecran === "decomposer" && etat.typeRetenu !== null) {
       const valeurs = formatTermesReponseAttendueDecomposerLatex(exercice, etat.typeRetenu as TypeDerivee);
@@ -40,14 +40,14 @@ export function calculerRecapitulatifFonctionDerivee(etat: EtatSessionFonctionDe
         estLatex: true,
         valeur: valeurs.join("\\quad"),
         ...(valeurs.length > 1 ? { valeurs } : {}),
-        revele: score === 0,
+        revele: etat.revelesPartiels[ecran] ?? false,
       });
     } else if (ecran === "calculer") {
       entrees.push({
         libelle: LIBELLE_ECRAN.calculer,
         estLatex: true,
         valeur: formatReponseAttendueCalculerLatex(exercice),
-        revele: score === 0,
+        revele: etat.revelesPartiels[ecran] ?? false,
       });
     }
   }

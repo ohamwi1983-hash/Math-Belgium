@@ -37,9 +37,20 @@ export interface EtatSessionParametresSinusoideGraphique {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoreDecalagePartiel: number | null;
+  /** vrai signal "révélé", peuplé depuis `etapeCourante.revelee` à la clôture (même principe que
+   * les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scoreDecalagePartiel === 0` ; champ explicite ajouté pendant le balayage générique
+   * (point A). */
+  decalageRevele: boolean;
   scoreAmplitudePartiel: number | null;
+  /** même principe que `decalageRevele` ci-dessus. */
+  amplitudeRevele: boolean;
   scorePeriodePartiel: number | null;
+  /** même principe que `decalageRevele` ci-dessus. */
+  periodeRevele: boolean;
   scoreFrequencePartiel: number | null;
+  /** même principe que `decalageRevele` ci-dessus. */
+  frequenceRevele: boolean;
   indexExercice: number;
   resultats: ResultatExerciceParametresSinusoideGraphique[];
   terminee: boolean;

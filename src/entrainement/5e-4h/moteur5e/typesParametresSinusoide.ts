@@ -37,9 +37,20 @@ export interface EtatSessionParametresSinusoide {
   /** Remis à 0 à chaque transition de phase (même principe que 5gen6/5gen7). */
   niveauAide: number;
   scoreAmplitudePartiel: number | null;
+  /** vrai signal "révélé", peuplé depuis `etapeCourante.revelee` à la clôture (même principe que
+   * les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scoreAmplitudePartiel === 0` ; champ explicite ajouté pendant le balayage générique
+   * (point A). */
+  amplitudeRevele: boolean;
   scorePhiPartiel: number | null;
+  /** même principe que `amplitudeRevele` ci-dessus. */
+  phiRevele: boolean;
   scorePeriodePartiel: number | null;
+  /** même principe que `amplitudeRevele` ci-dessus. */
+  periodeRevele: boolean;
   scoreFrequencePartiel: number | null;
+  /** même principe que `amplitudeRevele` ci-dessus. */
+  frequenceRevele: boolean;
   indexExercice: number;
   resultats: ResultatExerciceParametresSinusoide[];
   terminee: boolean;

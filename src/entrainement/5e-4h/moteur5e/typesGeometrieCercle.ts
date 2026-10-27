@@ -98,6 +98,12 @@ export interface EtatSessionGeometrieCercle {
    * 5gen6) — assemblé en `ResultatExerciceGeometrieCercle` (une forme fixe par scénario) une fois
    * la dernière phase de la séquence atteinte. */
   scoresPartiels: Partial<Record<PhaseGeometrieCercle, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que `scoresPartiels` ci-dessus) — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scoresPartiels[phase] === 0` ; champ explicite ajouté pendant le balayage générique
+   * (point A). Jamais recopié dans `resultats` (`ResultatExerciceGeometrieCercle`) : seul
+   * `calculerRecapitulatifGeometrieCercle` le lit, jamais le bilan final. */
+  revelesPartiels: Partial<Record<PhaseGeometrieCercle, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceGeometrieCercle[];
   terminee: boolean;

@@ -34,9 +34,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même heuristique que `calculerRecapitulatifOptimisation` (`scoresPartiels[ecran] === 0 ⟺
- * révélée`) — `ordreEcransOptimisation(exercice)` donne la séquence RÉELLE (4 écrans pour
- * "cubique", 6-7 pour les autres familles, fixée dès le tirage).
+/** Même source que `calculerRecapitulatifOptimisation` (`revelesPartiels[ecran]`) —
+ * `ordreEcransOptimisation(exercice)` donne la séquence RÉELLE (4 écrans pour "cubique", 6-7 pour
+ * les autres familles, fixée dès le tirage).
  *
  * `aideUtiliseeParPhase` : état local dédié (voir `App5gen32`, ci-dessous) — rien dans
  * `EtatSessionOptimisation` ne trace le niveau d'aide d'un écran déjà clos (`niveauAide` est remis
@@ -50,7 +50,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideUtiliseeParPhase[ecran] ? "aide" : "correcte";
   });
 }

@@ -3,10 +3,10 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 import { formatTermesEtatActuelExtremums } from "./formatExtremumsSinusoide";
 
 /**
- * Construit le récapitulatif des étapes déjà confirmées de l'exercice en cours (5gen11). Le moteur
- * ne trackait, à l'origine, que `derniereEtapeRevelee` (générique, pas un booléen par phase) — on
- * retrouve donc le verdict par phase via l'heuristique `scoreXxxPartiel === 0 ⟺ révélée` (même
- * principe que 5gen9). `solutions` (dernière phase, bonus) n'a volontairement pas de champ
+ * Construit le récapitulatif des étapes déjà confirmées de l'exercice en cours (5gen11). Icône
+ * (✓/✗) pilotée par `poserEquationRevele`/`isolerXRevele`, peuplés depuis `etapeCourante.revelee`
+ * à la clôture de chaque écran (`sessionExtremumsSinusoide.ts::soumettreEcran`). `solutions`
+ * (dernière phase, bonus) n'a volontairement pas de champ
  * `scoreSolutionsPartiel` — à ce stade l'exercice se termine, donc jamais affiché ici (même raison
  * que `formatTermesEtatActuelExtremums`, qui s'arrête juste avant la phase courante).
  *
@@ -29,7 +29,7 @@ export function calculerRecapitulatifExtremumsSinusoide(etat: EtatSessionExtremu
       libelle: "Équation d'extremum",
       estLatex: true,
       valeur: equationSubstituee,
-      revele: etat.scorePoserEquationPartiel === 0,
+      revele: etat.poserEquationRevele,
     });
   }
 
@@ -38,7 +38,7 @@ export function calculerRecapitulatifExtremumsSinusoide(etat: EtatSessionExtremu
       libelle: "Solutions en x",
       estLatex: true,
       valeur: brancheX,
-      revele: etat.scoreIsolerXPartiel === 0,
+      revele: etat.isolerXRevele,
     });
   }
 

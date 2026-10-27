@@ -75,8 +75,7 @@ function ordreEcransReels(exercice: ExerciceFonctionDerivee): ("reconnaissance" 
   return exercice.famille === "reglebase" ? ["reconnaissance", "calculer"] : ["reconnaissance", "decomposer", "calculer"];
 }
 
-/** Même heuristique que `calculerRecapitulatifFonctionDerivee` (`scoresPartiels[ecran] === 0 ⟺
- * révélée`). */
+/** Même source que `calculerRecapitulatifFonctionDerivee` (`revelesPartiels[ecran]`). */
 function calculerSegmentsProgression(
   etat: EtatSessionFonctionDerivee,
   aideParPhase: Partial<Record<EcranFonctionDerivee, boolean>>,
@@ -85,7 +84,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideParPhase[ecran] ? "aide" : "correcte";
   });
 }

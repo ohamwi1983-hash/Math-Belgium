@@ -35,14 +35,21 @@ export function niveauAideMaxExtremums(phase: PhaseExtremumsSinusoide): number {
   return NIVEAU_AIDE_MAX_EXTREMUMS;
 }
 
-function etatInitial(exercice: ExerciceExtremumsSinusoide): Pick<EtatSessionExtremumsSinusoide, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scorePoserEquationPartiel" | "scoreIsolerXPartiel"> {
+function etatInitial(
+  exercice: ExerciceExtremumsSinusoide,
+): Pick<
+  EtatSessionExtremumsSinusoide,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scorePoserEquationPartiel" | "poserEquationRevele" | "scoreIsolerXPartiel" | "isolerXRevele"
+> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scorePoserEquationPartiel: null,
+    poserEquationRevele: false,
     scoreIsolerXPartiel: null,
+    isolerXRevele: false,
   };
 }
 
@@ -99,8 +106,13 @@ function soumettreEcran<T>(etat: EtatSessionExtremumsSinusoide, phaseAttendue: P
   }
 
   const partielsMisAJour: Partial<EtatSessionExtremumsSinusoide> = {};
-  if (phaseAttendue === "poserEquation") partielsMisAJour.scorePoserEquationPartiel = score;
-  else if (phaseAttendue === "isolerX") partielsMisAJour.scoreIsolerXPartiel = score;
+  if (phaseAttendue === "poserEquation") {
+    partielsMisAJour.scorePoserEquationPartiel = score;
+    partielsMisAJour.poserEquationRevele = revele;
+  } else if (phaseAttendue === "isolerX") {
+    partielsMisAJour.scoreIsolerXPartiel = score;
+    partielsMisAJour.isolerXRevele = revele;
+  }
 
   return { ...etat, ...partielsMisAJour, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereEtapeRevelee: revele };
 }

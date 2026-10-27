@@ -3,10 +3,10 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 import { formatValeurPhaseLatex, labelRecapPhase, phasesDuScenario } from "./formatGeometrieCercle";
 
 /**
- * Construit le récapitulatif des écrans déjà confirmés de l'exercice en cours (5gen12). Le moteur
- * ne trackait, à l'origine, que `derniereEtapeRevelee` (générique, pas un booléen par phase) — on
- * retrouve donc le verdict par phase via l'heuristique `scoresPartiels[phase] === 0 ⟺ révélée`
- * (même principe que 5gen9/5gen11). La séquence de phases dépend du SCÉNARIO de l'exercice courant
+ * Construit le récapitulatif des écrans déjà confirmés de l'exercice en cours (5gen12). Icône
+ * (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à la
+ * clôture de chaque écran (`sessionGeometrieCercle.ts::soumettreReponse`). La séquence de phases
+ * dépend du SCÉNARIO de l'exercice courant
  * (`phasesDuScenario`, 3 séquences structurellement disjointes — jamais un seul ordre générique,
  * voir `moteur5e/typesGeometrieCercle.ts`) ; `formatValeurPhaseLatex`/`labelRecapPhase` sont les
  * primitives déjà prévues côté présentation pour ce récapitulatif (voir le commentaire
@@ -29,7 +29,7 @@ export function calculerRecapitulatifGeometrieCercle(etat: EtatSessionGeometrieC
       libelle: labelRecapPhase(phase),
       estLatex: true,
       valeur: formatValeurPhaseLatex(exercice, phase),
-      revele: score === 0,
+      revele: etat.revelesPartiels[phase] ?? false,
     });
   }
   return entrees;

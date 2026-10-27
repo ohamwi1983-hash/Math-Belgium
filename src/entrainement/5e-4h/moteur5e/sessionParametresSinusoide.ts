@@ -36,16 +36,36 @@ function cibleActuelle(exercice: ExerciceParametresSinusoide, phase: PhaseParame
   }
 }
 
-function etatInitial(exercice: ExerciceParametresSinusoide): Pick<EtatSessionParametresSinusoide, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreAmplitudePartiel" | "scorePhiPartiel" | "scorePeriodePartiel" | "scoreFrequencePartiel"> {
+function etatInitial(
+  exercice: ExerciceParametresSinusoide,
+): Pick<
+  EtatSessionParametresSinusoide,
+  | "exerciceCourant"
+  | "phase"
+  | "etapeCourante"
+  | "niveauAide"
+  | "scoreAmplitudePartiel"
+  | "amplitudeRevele"
+  | "scorePhiPartiel"
+  | "phiRevele"
+  | "scorePeriodePartiel"
+  | "periodeRevele"
+  | "scoreFrequencePartiel"
+  | "frequenceRevele"
+> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scoreAmplitudePartiel: null,
+    amplitudeRevele: false,
     scorePhiPartiel: null,
+    phiRevele: false,
     scorePeriodePartiel: null,
+    periodeRevele: false,
     scoreFrequencePartiel: null,
+    frequenceRevele: false,
   };
 }
 
@@ -104,10 +124,19 @@ export function soumettreReponseParametresSinusoide(etat: EtatSessionParametresS
   }
 
   const partielsMisAJour: Partial<EtatSessionParametresSinusoide> = {};
-  if (etat.phase === "amplitude") partielsMisAJour.scoreAmplitudePartiel = score;
-  else if (etat.phase === "phi") partielsMisAJour.scorePhiPartiel = score;
-  else if (etat.phase === "periode") partielsMisAJour.scorePeriodePartiel = score;
-  else if (etat.phase === "frequence") partielsMisAJour.scoreFrequencePartiel = score;
+  if (etat.phase === "amplitude") {
+    partielsMisAJour.scoreAmplitudePartiel = score;
+    partielsMisAJour.amplitudeRevele = revele;
+  } else if (etat.phase === "phi") {
+    partielsMisAJour.scorePhiPartiel = score;
+    partielsMisAJour.phiRevele = revele;
+  } else if (etat.phase === "periode") {
+    partielsMisAJour.scorePeriodePartiel = score;
+    partielsMisAJour.periodeRevele = revele;
+  } else if (etat.phase === "frequence") {
+    partielsMisAJour.scoreFrequencePartiel = score;
+    partielsMisAJour.frequenceRevele = revele;
+  }
 
   return { ...etat, ...partielsMisAJour, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereEtapeRevelee: revele };
 }

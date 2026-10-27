@@ -10,15 +10,11 @@ import { formatAmplitudeAbsolueLatex, formatFrequenceLatex, formatRationnelPiLat
  * `ui5e/formatParametresSinusoide.ts`), seulement reformaté en une entrée par paramètre (libellé +
  * icône ✓/✗) plutôt qu'un flux unique de fragments KaTeX sans label.
  *
- * ATTENTION — ce générateur n'a PAS de booléen `xxxRevele` dédié par phase (contrairement aux 4
- * autres cibles de cette tâche) : `EtatSessionParametresSinusoide` ne garde que
- * `derniereEtapeRevelee`, le booléen générique de la DERNIÈRE phase close uniquement (voir
- * `moteur5e/typesParametresSinusoide.ts`). Pour les phases closes plus tôt, la révélation est
- * donc reconstituée par l'HEURISTIQUE `scoreXxxPartiel === 0` (un échec de révélation fait TOUJOURS
- * tomber le score à exactement 0 — `moteur/etapeTentatives.ts` — mais une réussite très pénalisée
- * par les aides peut, dans de rares cas, tomber à 0 également ; cette imprécision est assumée,
- * signalée explicitement par la consigne de cette tâche, pas une régression introduite ici).
- * "decalage" (5e et dernière phase) n'a pas de champ `scoreDecalagePartiel` dédié à la racine de
+ * Icône (✓/✗) pilotée par `amplitudeRevele`/`phiRevele`/`periodeRevele`/`frequenceRevele`, peuplés
+ * depuis `etapeCourante.revelee` à la clôture de chaque phase
+ * (`sessionParametresSinusoide.ts::soumettreReponseParametresSinusoide`) — jusqu'au 2025-10,
+ * reconstitués par l'heuristique `scoreXxxPartiel === 0`, corrigée pendant le balayage générique
+ * (point A). "decalage" (5e et dernière phase) n'a pas de champ `scoreDecalagePartiel` dédié à la racine de
  * l'état (toujours la phase COURANTE tant que l'exercice est en cours, jamais "déjà close") —
  * jamais montrée dans ce récapitulatif, même principe que les autres générateurs de cette tâche.
  *
@@ -33,16 +29,16 @@ export function calculerRecapitulatifParametresSinusoide(etat: EtatSessionParame
   const entrees: EntreeRecapitulatif[] = [];
 
   if (etat.scoreAmplitudePartiel !== null) {
-    entrees.push({ libelle: "Amplitude (A)", estLatex: true, valeur: `|A| = ${formatAmplitudeAbsolueLatex(exercice.A)}`, revele: etat.scoreAmplitudePartiel === 0 });
+    entrees.push({ libelle: "Amplitude (A)", estLatex: true, valeur: `|A| = ${formatAmplitudeAbsolueLatex(exercice.A)}`, revele: etat.amplitudeRevele });
   }
   if (etat.scorePhiPartiel !== null) {
-    entrees.push({ libelle: "Déphasage (Φ)", estLatex: true, valeur: `\\Phi = ${formatRationnelPiLatex(exercice.phi)}`, revele: etat.scorePhiPartiel === 0 });
+    entrees.push({ libelle: "Déphasage (Φ)", estLatex: true, valeur: `\\Phi = ${formatRationnelPiLatex(exercice.phi)}`, revele: etat.phiRevele });
   }
   if (etat.scorePeriodePartiel !== null) {
-    entrees.push({ libelle: "Période (T)", estLatex: true, valeur: `T = ${formatRationnelPiLatex(exercice.T)}`, revele: etat.scorePeriodePartiel === 0 });
+    entrees.push({ libelle: "Période (T)", estLatex: true, valeur: `T = ${formatRationnelPiLatex(exercice.T)}`, revele: etat.periodeRevele });
   }
   if (etat.scoreFrequencePartiel !== null) {
-    entrees.push({ libelle: "Fréquence (f)", estLatex: true, valeur: `f = ${formatFrequenceLatex(exercice)}`, revele: etat.scoreFrequencePartiel === 0 });
+    entrees.push({ libelle: "Fréquence (f)", estLatex: true, valeur: `f = ${formatFrequenceLatex(exercice)}`, revele: etat.frequenceRevele });
   }
 
   return entrees;

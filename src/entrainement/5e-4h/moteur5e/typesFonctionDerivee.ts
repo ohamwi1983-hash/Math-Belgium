@@ -31,6 +31,8 @@ export interface ResultatExerciceFonctionDerivee {
   /** Indexé par écran RÉELLEMENT traversé — 2 clés ("reconnaissance"/"calculer") pour "reglebase",
    * 3 clés sinon. */
   scores: Partial<Record<EcranFonctionDerivee, number>>;
+  /** même principe que `EtatSessionFonctionDerivee.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranFonctionDerivee, boolean>>;
 }
 
 export interface EtatSessionFonctionDerivee {
@@ -44,6 +46,11 @@ export interface EtatSessionFonctionDerivee {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranFonctionDerivee, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[ecran] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<EcranFonctionDerivee, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceFonctionDerivee[];
   terminee: boolean;

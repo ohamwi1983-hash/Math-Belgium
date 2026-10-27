@@ -3,12 +3,11 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 import { formatChampParametreGraphiqueLatex } from "./formatParametresSinusoideGraphique";
 
 /**
- * Construit le récapitulatif des paramètres déjà confirmés de l'exercice en cours (5gen9). Le
- * moteur ne trackait, à l'origine, que `derniereEtapeRevelee` (générique, pas un booléen par
- * phase) — on retrouve donc le verdict par phase via l'heuristique `scoreXxxPartiel === 0 ⟺
- * révélée` (seule information disponible, cohérente avec le reste du moteur qui calcule déjà le
- * score à 0 quand les tentatives sont épuisées sans bonne réponse, voir
- * `moteur5e/sessionParametresSinusoideGraphique.ts`). `phi` (dernière phase) n'a volontairement
+ * Construit le récapitulatif des paramètres déjà confirmés de l'exercice en cours (5gen9). Icône
+ * (✓/✗) pilotée par `decalageRevele`/`amplitudeRevele`/`periodeRevele`/`frequenceRevele`, peuplés
+ * depuis `etapeCourante.revelee` à la clôture de chaque phase
+ * (`sessionParametresSinusoideGraphique.ts::soumettreReponseParametresSinusoideGraphique`). `phi`
+ * (dernière phase) n'a volontairement
  * pas de champ `scorePhiPartiel` — à ce stade l'exercice se termine, donc jamais affiché ici (même
  * raison que `formatTermesEtatActuelParametresSinusoideGraphiqueLatex`, qui s'arrête juste avant la
  * phase courante).
@@ -29,7 +28,7 @@ export function calculerRecapitulatifParametresSinusoideGraphique(etat: EtatSess
       libelle: "Décalage vertical",
       estLatex: true,
       valeur: formatChampParametreGraphiqueLatex(exercice, "decalage"),
-      revele: etat.scoreDecalagePartiel === 0,
+      revele: etat.decalageRevele,
     });
   }
 
@@ -38,7 +37,7 @@ export function calculerRecapitulatifParametresSinusoideGraphique(etat: EtatSess
       libelle: "Amplitude",
       estLatex: true,
       valeur: formatChampParametreGraphiqueLatex(exercice, "amplitude"),
-      revele: etat.scoreAmplitudePartiel === 0,
+      revele: etat.amplitudeRevele,
     });
   }
 
@@ -47,7 +46,7 @@ export function calculerRecapitulatifParametresSinusoideGraphique(etat: EtatSess
       libelle: "Période",
       estLatex: true,
       valeur: formatChampParametreGraphiqueLatex(exercice, "periode"),
-      revele: etat.scorePeriodePartiel === 0,
+      revele: etat.periodeRevele,
     });
   }
 
@@ -56,7 +55,7 @@ export function calculerRecapitulatifParametresSinusoideGraphique(etat: EtatSess
       libelle: "Fréquence",
       estLatex: true,
       valeur: formatChampParametreGraphiqueLatex(exercice, "frequence"),
-      revele: etat.scoreFrequencePartiel === 0,
+      revele: etat.frequenceRevele,
     });
   }
 

@@ -113,6 +113,8 @@ import type { EtatEtapeTentatives } from "../moteur/etapeTentatives";
 export interface ResultatExerciceLectureGraphiqueLimites {
   exercice: ExerciceLectureGraphiqueLimites;
   scores: Partial<Record<PhaseLectureGraphiqueLimites, number>>;
+  /** même principe que `EtatSessionLectureGraphiqueLimites.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseLectureGraphiqueLimites, boolean>>;
 }
 
 export interface EtatSessionLectureGraphiqueLimites {
@@ -122,6 +124,11 @@ export interface EtatSessionLectureGraphiqueLimites {
   phase: PhaseLectureGraphiqueLimites;
   etapeCourante: EtatEtapeTentatives;
   scoresPartiels: Partial<Record<PhaseLectureGraphiqueLimites, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[phase] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<PhaseLectureGraphiqueLimites, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceLectureGraphiqueLimites[];
   terminee: boolean;

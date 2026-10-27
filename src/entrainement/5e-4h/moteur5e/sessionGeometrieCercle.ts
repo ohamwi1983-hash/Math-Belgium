@@ -35,8 +35,10 @@ export function niveauAideMaxGeometrieCercle(phase: PhaseGeometrieCercle): numbe
   return PHASES_AIDE_MAX_1.has(phase) ? 1 : NIVEAU_AIDE_MAX_GEOMETRIE_CERCLE;
 }
 
-function etatInitial(exercice: ExerciceGeometrieCercle): Pick<EtatSessionGeometrieCercle, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceGeometrieCercle,
+): Pick<EtatSessionGeometrieCercle, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, revelesPartiels: {} };
 }
 
 export function demarrerSessionGeometrieCercle(reglages: ReglagesSession5e, generateur: () => ExerciceGeometrieCercle): EtatSessionGeometrieCercle {
@@ -107,11 +109,12 @@ export function soumettreReponse(etat: EtatSessionGeometrieCercle, texte: string
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [phase]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phase]: revele };
   const phaseSuivante = phaseApres(exercice, phase);
 
   if (phaseSuivante === "termine") {
     return cloturerExerciceOuSuivant(etat, construireResultat(exercice, scoresPartiels), revele);
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereEtapeRevelee: revele };
+  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereEtapeRevelee: revele };
 }

@@ -67,9 +67,10 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même ternaire que `calculerRecapitulatifParametresSinusoideGraphique` (`scoreXxxPartiel === 0 ⟺
- * révélée`) — `phi` (dernière phase) n'a pas de champ `scorePhiPartiel` : forcément "courante" tant
- * que l'exercice n'est pas terminé (dernière phase active). */
+/** Même source que `calculerRecapitulatifParametresSinusoideGraphique`
+ * (`decalageRevele`/`amplitudeRevele`/`periodeRevele`/`frequenceRevele`) — `phi` (dernière phase)
+ * n'a pas de champ `scorePhiPartiel` : forcément "courante" tant que l'exercice n'est pas terminé
+ * (dernière phase active). */
 function calculerSegmentsProgression(
   etat: EtatSessionParametresSinusoideGraphique,
   aideUtiliseeParPhase: Partial<Record<string, boolean>>,
@@ -87,7 +88,17 @@ function calculerSegmentsProgression(
               ? etat.scoreFrequencePartiel
               : null;
     if (score === null) return "a-venir";
-    if (score === 0) return "revele";
+    const revele =
+      phase === "decalage"
+        ? etat.decalageRevele
+        : phase === "amplitude"
+          ? etat.amplitudeRevele
+          : phase === "periode"
+            ? etat.periodeRevele
+            : phase === "frequence"
+              ? etat.frequenceRevele
+              : false;
+    if (revele) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

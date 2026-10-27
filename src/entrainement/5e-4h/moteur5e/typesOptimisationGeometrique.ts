@@ -47,6 +47,8 @@ export interface ResultatExerciceOptimisation {
   /** Indexé par écran RÉELLEMENT traversé — 4 clés (cubique) ou 6-7 clés (autres), selon
    * `ordreEcransOptimisation`. */
   scores: Partial<Record<EcranOptimisation, number>>;
+  /** même principe que `EtatSessionOptimisation.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranOptimisation, boolean>>;
 }
 
 export interface EtatSessionOptimisation {
@@ -57,6 +59,11 @@ export interface EtatSessionOptimisation {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranOptimisation, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[ecran] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<EcranOptimisation, boolean>>;
   /** Dernières réponses soumises pour l'écran courant — nécessaire au bloc "état actuel" de
    * l'écran suivant ET au récapitulatif final (`ui5e/formatOptimisationGeometrique.ts`), qui
    * affichent la réponse RÉELLEMENT attendue, jamais recalculée depuis un score. */

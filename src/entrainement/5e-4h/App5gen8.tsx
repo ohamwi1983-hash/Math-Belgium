@@ -74,9 +74,25 @@ function scorePartielDeLaPhase(etat: EtatSessionParametresSinusoide, phase: Phas
   }
 }
 
-/** Même heuristique `scoreXxxPartiel === 0` que `calculerRecapitulatifParametresSinusoide`
- * (`ui5e/recapitulatifParametresSinusoide.ts`) — ce générateur n'a pas de booléen `xxxRevele`
- * dédié par phase (voir la note de ce fichier). */
+/** Même source que `calculerRecapitulatifParametresSinusoide`
+ * (`ui5e/recapitulatifParametresSinusoide.ts`) — "decalage" n'a pas de champ `xxxRevele` dédié,
+ * même raison que `scorePartielDeLaPhase` ci-dessus (toujours la phase courante tant que
+ * l'exercice n'est pas terminé). */
+function reveleDeLaPhase(etat: EtatSessionParametresSinusoide, phase: PhaseParametresSinusoide): boolean {
+  switch (phase) {
+    case "amplitude":
+      return etat.amplitudeRevele;
+    case "phi":
+      return etat.phiRevele;
+    case "periode":
+      return etat.periodeRevele;
+    case "frequence":
+      return etat.frequenceRevele;
+    case "decalage":
+      return false;
+  }
+}
+
 function calculerSegmentsProgression(
   etat: EtatSessionParametresSinusoide,
   aideUtiliseeParPhase: Partial<Record<string, boolean>>,
@@ -85,7 +101,7 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = scorePartielDeLaPhase(etat, phase);
     if (score === null) return "a-venir";
-    if (score === 0) return "revele";
+    if (reveleDeLaPhase(etat, phase)) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }
