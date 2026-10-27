@@ -72,7 +72,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
       />
       <p className="prompt-text">Résous ces équations ci-dessus et donne les valeurs de x.</p>
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         Facteur 1{facteur1NecessiteLignes && exercice.facteur1.regime === "decimal" && ANNONCE_PRECISION_DECIMAL} :
       </p>
       {facteur1NecessiteLignes ? (
@@ -104,7 +104,7 @@ export function EtapeIsolerXProduit({ exercice, tentativesUtilisees, tentativesM
         <p className="prompt-text">Ce facteur n'a aucune solution — rien à isoler.</p>
       )}
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         Facteur 2{facteur2NecessiteLignes && exercice.facteur2.regime === "decimal" && ANNONCE_PRECISION_DECIMAL} :
       </p>
       {facteur2NecessiteLignes ? (

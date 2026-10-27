@@ -64,7 +64,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
       <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE_EQUATION_TRIG} blocDonnees={null} />
       <p className="prompt-text">{CONSIGNE_RACINES_RESOLUTION}</p>
 
-      <p className="prompt-text">Racine t = {formatT(exercice.racine1.t)} :</p>
+      <p className="prompt-text prompt-text--question-multiple">Racine t = {formatT(exercice.racine1.t)} :</p>
       <button type="button" className={`btn ${rejeter1 ? "toggle-active" : ""}`} onClick={() => setRejeter1((v) => !v)}>
         Rejeter cette racine
       </button>
@@ -95,7 +95,7 @@ export function EtapeRacinesResolutionPythagoricienne({ exercice, tentativesUtil
         </div>
       )}
 
-      <p className="prompt-text">Racine t = {formatT(exercice.racine2.t)} :</p>
+      <p className="prompt-text prompt-text--question-multiple">Racine t = {formatT(exercice.racine2.t)} :</p>
       <button type="button" className={`btn ${rejeter2 ? "toggle-active" : ""}`} onClick={() => setRejeter2((v) => !v)}>
         Rejeter cette racine
       </button>

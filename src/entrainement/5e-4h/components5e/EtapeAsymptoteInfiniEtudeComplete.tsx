@@ -54,7 +54,7 @@ function BlocDirection({
 }) {
   return (
     <div>
-      <p className="prompt-text">{titre}</p>
+      <p className="prompt-text prompt-text--question-multiple">{titre}</p>
       <div className="options-grid">
         <button type="button" className={etat.choix === "aucune" ? "btn toggle-active" : "btn"} onClick={() => setEtat({ choix: "aucune", valeur: "" })}>
           Pas de AO ou AH

@@ -81,7 +81,7 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
           </div>
         }
       />
-      <p className="prompt-text">Détermine la limite à gauche.</p>
+      <p className="prompt-text prompt-text--question-multiple">Détermine la limite à gauche.</p>
       <div className="field-row">
         <span className="field-label field-label-minuscule">
           <Katex expression={formatLabelLimiteGaucheLatex(exercice)} block />
@@ -89,7 +89,7 @@ export function EtapeLimitesGaucheDroite({ exercice, tentativesUtilisees, tentat
         {comboboxSigne("limite-gauche", gauche, setGauche, correction !== null && !correction.gauche)}
       </div>
 
-      <p className="prompt-text">Détermine la limite à droite.</p>
+      <p className="prompt-text prompt-text--question-multiple">Détermine la limite à droite.</p>
       <div className="field-row">
         <span className="field-label field-label-minuscule">
           <Katex expression={formatLabelLimiteDroiteLatex(exercice)} block />

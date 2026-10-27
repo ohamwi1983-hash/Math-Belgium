@@ -54,7 +54,7 @@ function BlocFacteurArgument({
   const lignesVisibles = choix === false;
   return (
     <div>
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         Facteur {numero} — {formatQuestionArgumentTexte(facteur.fonction)} <Katex expression={facteur.k.latex} /> ?
         {facteur.regime === "decimal" && ANNONCE_PRECISION_DECIMAL}
       </p>

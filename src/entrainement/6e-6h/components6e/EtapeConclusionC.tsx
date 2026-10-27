@@ -64,7 +64,7 @@ export function EtapeConclusionC({ consigneGenerale, blocDonnees, consigneEcran,
       <p className="prompt-text">
         <RenduFragments fragments={consigneEcran} />
       </p>
-      <p className="prompt-text">Les 2 expressions confirmées sont-elles égales ?</p>
+      <p className="prompt-text prompt-text--question-multiple">Les 2 expressions confirmées sont-elles égales ?</p>
       <div className="options-grid-compact">
         {optionsStatut.map((option) => (
           <button key={option.id} type="button" className={`btn ${statut === option.id ? "toggle-active" : ""} ${montrerErreurs && statut === option.id ? "is-erronee" : ""}`} onClick={() => setStatut(option.id)}>
@@ -74,7 +74,7 @@ export function EtapeConclusionC({ consigneGenerale, blocDonnees, consigneEcran,
       </div>
       {statut !== null && (
         <div className="contenu-conditionnel">
-          <p className="prompt-text">La réciproque est-elle vraie ?</p>
+          <p className="prompt-text prompt-text--question-multiple">La réciproque est-elle vraie ?</p>
           <div className="options-grid-compact">
             {optionsReciproque.map((option) => (
               <button key={option.id} type="button" className={`btn ${reciproque === option.id ? "toggle-active" : ""} ${montrerErreurs && reciproque === option.id ? "is-erronee" : ""}`} onClick={() => setReciproque(option.id)}>

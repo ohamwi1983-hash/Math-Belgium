@@ -95,7 +95,7 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
 
       {estPoints && (
         <>
-          <p className="prompt-text">
+          <p className="prompt-text prompt-text--question-multiple">
             {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={LATEX_VEC_U} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
             {QUESTION_COLINEARITE_VECTEURS_APRES}
           </p>
@@ -111,7 +111,7 @@ export function EtapeTestColinearite({ exercice, tentativesUtilisees, tentatives
       )}
 
       {estPoints ? (
-        <p className="prompt-text">{QUESTION_ALIGNEMENT_POINTS}</p>
+        <p className="prompt-text prompt-text--question-multiple">{QUESTION_ALIGNEMENT_POINTS}</p>
       ) : (
         <p className="prompt-text">
           {QUESTION_COLINEARITE_VECTEURS_AVANT} <Katex expression={LATEX_VEC_U} /> {QUESTION_COLINEARITE_VECTEURS_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}

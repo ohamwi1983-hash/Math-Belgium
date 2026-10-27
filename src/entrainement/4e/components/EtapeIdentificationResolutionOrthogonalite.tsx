@@ -96,7 +96,7 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
           </div>
         ))}
       </div>
-      <p className="prompt-text">Résous la seule équation résolvable.</p>
+      <p className="prompt-text prompt-text--question-multiple">Résous la seule équation résolvable.</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="orthogonalite-identification-x">
@@ -112,7 +112,7 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
         />
       </div>
 
-      <p className="prompt-text">{QUESTION_TRIANGLE_RECTANGLE}</p>
+      <p className="prompt-text prompt-text--question-multiple">{QUESTION_TRIANGLE_RECTANGLE}</p>
       <div className="options-grid-compact">
         <button
           type="button"
@@ -135,7 +135,7 @@ export function EtapeIdentificationResolutionOrthogonalite({ exercice, tentative
 
       {estRectangle === true && (
         <>
-          <p className="prompt-text contenu-conditionnel">{QUESTION_SOMMET_RECTANGLE}</p>
+          <p className="prompt-text prompt-text--question-multiple contenu-conditionnel">{QUESTION_SOMMET_RECTANGLE}</p>
           <div className="options-grid-compact">
             {SOMMETS.map((s) => (
               <button key={s} type="button" className={sommet === s ? "btn toggle-active" : "btn"} onClick={() => setSommet(s)}>

@@ -47,7 +47,7 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtil
       />
       <p className="prompt-text">{consignePhase(exercice, "pointVideConclusion")}</p>
 
-      <p className="prompt-text">{`Y a-t-il une asymptote verticale en x=${point?.position} ?`}</p>
+      <p className="prompt-text prompt-text--question-multiple">{`Y a-t-il une asymptote verticale en x=${point?.position} ?`}</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn${estAV === true ? " toggle-active" : ""}${montrerErreurs && estAV === true ? " is-erronee" : ""}`} onClick={() => setEstAV(true)}>
           Oui
@@ -57,7 +57,7 @@ export function EtapeConclusionPointVideEtudeComplete({ exercice, tentativesUtil
         </button>
       </div>
 
-      <p className="prompt-text">{`x=${point?.position} appartient-il au domaine de définition de f ?`}</p>
+      <p className="prompt-text prompt-text--question-multiple">{`x=${point?.position} appartient-il au domaine de définition de f ?`}</p>
       <div className="options-grid-compact">
         <button
           type="button"

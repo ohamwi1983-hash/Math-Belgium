@@ -59,7 +59,7 @@ export function EtapeAccepterRejeterEquationsCyclometriques({ exercice, tentativ
       <div className="liste-morceaux">
         {exercice.candidats.map((cand, i) => (
           <div key={i} className="liste-morceaux-ligne">
-            <p className="prompt-text">
+            <p className="prompt-text prompt-text--question-multiple">
               <Katex expression={formatCandidatLatex(cand.x)} />
             </p>
             <div className="options-grid-compact">

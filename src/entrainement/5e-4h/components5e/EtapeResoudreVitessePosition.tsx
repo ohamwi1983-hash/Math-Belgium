@@ -63,7 +63,7 @@ export function EtapeResoudreVitessePosition({
 
   return (
     <div>
-      <p className="prompt-text">{consigneEcran(exercice, "resoudre")}</p>
+      <p className="prompt-text prompt-text--question-multiple">{consigneEcran(exercice, "resoudre")}</p>
 
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">t =</label>
@@ -87,7 +87,7 @@ export function EtapeResoudreVitessePosition({
       </div>
       <CalculatriceScientifique />
 
-      <p className="prompt-text">{consigneJustification()}</p>
+      <p className="prompt-text prompt-text--question-multiple">{consigneJustification()}</p>
       <div className="options-grid">
         {exercice.optionsRejetRacine.map((option, index) => (
           <button

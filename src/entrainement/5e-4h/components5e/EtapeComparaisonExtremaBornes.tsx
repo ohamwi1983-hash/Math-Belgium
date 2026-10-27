@@ -61,7 +61,7 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
     <div>
       <p className="prompt-text">{consigneEcranExtremaBornes("comparaison")}</p>
 
-      <p className="prompt-text">Quelle valeur est le MAXIMUM absolu de f sur [0;T] ?</p>
+      <p className="prompt-text prompt-text--question-multiple">Quelle valeur est le MAXIMUM absolu de f sur [0;T] ?</p>
       <div className="options-grid">
         {candidats.map((c, i) => (
           <button type="button" key={`max-${i}`} className={classeBouton("max", i)} onClick={() => setIndexMax(i)}>
@@ -70,7 +70,7 @@ export function EtapeComparaisonExtremaBornes({ exercice, tentativesUtilisees, t
         ))}
       </div>
 
-      <p className="prompt-text">Quelle valeur est le MINIMUM absolu de f sur [0;T] ?</p>
+      <p className="prompt-text prompt-text--question-multiple">Quelle valeur est le MINIMUM absolu de f sur [0;T] ?</p>
       <div className="options-grid">
         {candidats.map((c, i) => (
           <button type="button" key={`min-${i}`} className={classeBouton("min", i)} onClick={() => setIndexMin(i)}>

@@ -60,7 +60,7 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
         }
       />
       <QuestionFinale question={questionFinale(exercice)} />
-      <p className="prompt-text">{consigneEcran(exercice, "resoudreEgaliteMarginales")}</p>
+      <p className="prompt-text prompt-text--question-multiple">{consigneEcran(exercice, "resoudreEgaliteMarginales")}</p>
 
       <div className="field field-inline">
         <label className="field-label field-label-minuscule">
@@ -75,7 +75,7 @@ export function EtapeResoudreEgaliteMarginales({ exercice, tentativesUtilisees, 
         <input type="text" className={`text-input${statut2 && statut2 !== "correct" ? " is-erronee" : ""}`} value={racine2} onChange={(e) => setRacine2(e.target.value)} placeholder="ex : -2" />
       </div>
 
-      <p className="prompt-text">Rappel : x représente une quantité produite — laquelle des 2 solutions est physiquement valable ?</p>
+      <p className="prompt-text prompt-text--question-multiple">Rappel : x représente une quantité produite — laquelle des 2 solutions est physiquement valable ?</p>
       <div className="options-grid-compact">
         <button type="button" className={`btn${choix === "positive" ? " toggle-active" : ""}`} onClick={() => setChoix("positive")}>
           La solution positive (x&gt;0)

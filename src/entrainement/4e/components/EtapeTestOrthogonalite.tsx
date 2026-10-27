@@ -57,7 +57,7 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
           </div>
         }
       />
-      <p className="prompt-text">Calcule le critère d'orthogonalité, puis conclus.</p>
+      <p className="prompt-text prompt-text--question-multiple">Calcule le critère d'orthogonalité, puis conclus.</p>
 
       <div className="field field-inline">
         <label className="field-label" htmlFor="orthogonalite-test-critere">
@@ -73,7 +73,7 @@ export function EtapeTestOrthogonalite({ exercice, tentativesUtilisees, tentativ
         />
       </div>
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         {QUESTION_ORTHOGONALITE_VECTEURS_AVANT} <Katex expression={LATEX_VEC_U} /> {QUESTION_ORTHOGONALITE_VECTEURS_ENTRE} <Katex expression={LATEX_VEC_V} />{" "}
         {QUESTION_ORTHOGONALITE_VECTEURS_APRES}
       </p>

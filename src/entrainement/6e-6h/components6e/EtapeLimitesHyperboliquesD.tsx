@@ -76,7 +76,7 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
         <RenduFragments fragments={consigneEcran} />
       </p>
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         <Katex expression="\lim_{x\to+\infty} f(x) =" />
       </p>
       <div className="options-grid-compact">
@@ -92,7 +92,7 @@ export function EtapeLimitesHyperboliquesD({ consigneGenerale, blocDonnees, etat
         ))}
       </div>
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         <Katex expression="\lim_{x\to-\infty} f(x) =" />
       </p>
       <div className="options-grid-compact">

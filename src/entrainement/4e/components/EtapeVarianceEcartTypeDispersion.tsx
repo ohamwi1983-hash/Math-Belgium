@@ -55,7 +55,7 @@ export function EtapeVarianceEcartTypeDispersion({
   return (
     <div>
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         {consigneV.avant}
         <Katex expression={consigneV.latex} />
         {consigneV.apres}
@@ -74,7 +74,7 @@ export function EtapeVarianceEcartTypeDispersion({
         />
       </div>
 
-      <p className="prompt-text">
+      <p className="prompt-text prompt-text--question-multiple">
         {consigneS.avant}
         <Katex expression={consigneS.latex} />
         {consigneS.apres}
