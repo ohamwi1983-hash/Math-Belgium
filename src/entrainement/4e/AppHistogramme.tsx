@@ -16,6 +16,8 @@ import { EtapeFrequencesHistogramme } from "./components/EtapeFrequencesHistogra
 import { EtapeTraceHistogramme } from "./components/EtapeTraceHistogramme";
 import { formatClassementAttenduTexte, formatEnonceTexte, formatFrequencesAttenduesTexte, formatTraceAttendueTexte } from "./ui/formatHistogramme";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -29,11 +31,26 @@ function nouvelleSession(): EtatSessionHistogramme {
   return demarrerSessionHistogramme(REGLAGES_DEMO, genererExerciceHistogramme);
 }
 
-const LIBELLE_PHASE: Record<PhaseHistogramme, string> = {
-  classement: "Classement",
-  frequences: "Fréquences",
-  trace: "Tracer l'histogramme",
-};
+/** Séquence dépendant de `exercice.variante` ("effectif" : classement → trace ; "frequence" :
+ * classement → frequences → trace, voir `typesHistogramme.ts`) — "trace" (toujours la dernière
+ * phase) n'a jamais besoin de sa propre branche "close" : jamais consultée comme phase passée.
+ * Puces purement visuelles (pas de `onSegmentClick`). */
+function sequencePourExercice(exercice: EtatSessionHistogramme["exerciceCourant"]): PhaseHistogramme[] {
+  return exercice.variante === "frequence" ? ["classement", "frequences", "trace"] : ["classement", "trace"];
+}
+
+function calculerSegmentsProgression(etat: EtatSessionHistogramme): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "classement" ? etat.classementRevele : etat.frequencesRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "classement" ? etat.niveauAideClassement : etat.niveauAideFrequences;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -106,11 +123,7 @@ export function AppHistogramme() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />

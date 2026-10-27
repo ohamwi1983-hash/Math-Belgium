@@ -10,6 +10,8 @@ import { EtapeJustificationPositionDroitePlan } from "./components/EtapeJustific
 import { LIBELLE_CLASSIFICATION, libelleDroite, libellePlan, texteReponseJustificationAttendue } from "./ui/formatPositionDroitePlan";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { Solide3DSketch } from "./components/Solide3DSketch";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -23,10 +25,20 @@ function nouvelleSession(): EtatSessionPositionDroitePlan {
   return demarrerSessionPositionDroitePlan(REGLAGES_DEMO, genererExercicePositionDroitePlan);
 }
 
-const LIBELLE_PHASE: Record<PhasePositionDroitePlan, string> = {
-  classification: "Classification",
-  justification: "Justification",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (toujours
+ * linéaire ici, 2 phases fixes). "justification" (dernière phase) n'a jamais besoin de sa propre
+ * branche "close" — même principe que gen9/gen55. Puces purement visuelles. */
+const ORDRE_PHASES: PhasePositionDroitePlan[] = ["classification", "justification"];
+
+function calculerSegmentsProgression(etat: EtatSessionPositionDroitePlan): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (etat.classificationRevele) return "revele";
+    return etat.niveauAideClassification > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -90,11 +102,7 @@ export function AppPositionDroitePlan() {
         <h1 className="app-title">Position d'une droite par rapport à un plan</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie dans l'espace</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

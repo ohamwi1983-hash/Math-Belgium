@@ -11,6 +11,8 @@ import { Katex } from "./components/Katex";
 import { formatEnonceLatex, formatEtatActuelPointsLatex } from "./ui/formatConstructionDroite";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifConstructionDroite } from "./ui/recapitulatifConstructionDroite";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -24,10 +26,17 @@ function nouvelleSession(): EtatSessionConstructionDroite {
   return demarrerSessionConstructionDroite(REGLAGES_DEMO, genererExerciceConstructionDroite);
 }
 
-const LIBELLE_PHASE: Record<PhaseConstructionDroite, string> = {
-  points: "Points de la droite",
-  trace: "Tracé sur le graphe",
-};
+const ORDRE_PHASES: PhaseConstructionDroite[] = ["points", "trace"];
+
+function calculerSegmentsProgression(etat: EtatSessionConstructionDroite): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (etat.pointsRevele) return "revele";
+    return etat.niveauAidePoints > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -86,11 +95,7 @@ export function AppConstructionDroite() {
         <h1 className="app-title">Construction graphique — tracer une droite</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

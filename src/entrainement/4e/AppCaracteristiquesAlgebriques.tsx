@@ -78,6 +78,9 @@ import { formatFractionIrreductible } from "./ui/formatFraction";
 import { formatDomaineLatex } from "./ui/apercuDomaine";
 import type { EtatMorceauFraction } from "./ui/morceauFraction";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import { necessiteSeparation } from "./moteur/verificationCaracteristiquesAlgebriques";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Étudie les caractéristiques algébriques de cette fonction de référence.";
 
@@ -105,19 +108,71 @@ function demarrer(
   return demarrerSessionCaracteristiquesAlgebriques(reglagesSession, creerGenerateurCaracteristiquesAlgebriques(reglagesFamilles, niveau));
 }
 
-const LIBELLE_PHASE: Record<PhaseCaracteristiquesAlgebriques, string> = {
-  ordonnee: "Ordonnée à l'origine",
-  ce: "Conditions d'existence",
-  domaine: "Domaine de définition",
-  isolement: "Zéros — isolement",
-  separation: "Zéros — séparation",
-  debarrasser: "Zéros — se débarrasser de...",
-  validite: "Validité de l'équation",
-  regroupe: "Zéros — regroupe",
-  resolutionBranches: "Zéros — résolution des branches",
-  validationSolution: "Zéros — validation",
-  zeros: "Zéros",
-};
+/** Séquence de phases pour l'exercice courant — niveau 1 : `ordonnee→ce→domaine→isolement→
+ * [separation|debarrasser]→zeros` (`sessionCaracteristiquesAlgebriques.ts`, en-tête de fichier).
+ * Niveau 2 : dispatch par famille après `isolement` (voir `phaseApresIsolement`, même fichier) —
+ * `validationSolution` (qui se répète 0 à 2 fois sans jamais changer de `phase`, voir
+ * `releveRevelePhase` ci-dessus) n'apparaît ici qu'UNE SEULE FOIS, comme un bloc agrégé : la barre
+ * de puces n'a pas besoin d'un segment par répétition. */
+function sequencePourExercice(exercice: ExerciceCaracteristiquesAlgebriques): PhaseCaracteristiquesAlgebriques[] {
+  const base: PhaseCaracteristiquesAlgebriques[] = ["ordonnee", "ce", "domaine", "isolement"];
+  if (exercice.niveau === "niveau1") {
+    return [...base, necessiteSeparation(exercice) ? "separation" : "debarrasser", "zeros"];
+  }
+  switch (exercice.famille) {
+    case "carre":
+    case "cube":
+      return [...base, "zeros"];
+    case "inverse":
+    case "racine_cubique":
+      return [...base, "regroupe", "zeros"];
+    case "racine_carree":
+      return [...base, "validite", "regroupe", "zeros", "validationSolution"];
+    case "valeur_absolue":
+      return [...base, "validite", "resolutionBranches", "validationSolution", "zeros"];
+  }
+}
+
+/** Segments de la barre de puces — "validationSolution" (bloc agrégé, voir `sequencePourExercice`)
+ * est "révélé" si au moins une de ses répétitions l'a été (`scoresValidationSolutionExercice`,
+ * aucune aide sur cet écran — voir `releveRevelePhase` ci-dessus — donc jamais de statut "aide"
+ * pour ce segment). Les autres phases passées lisent directement leur `xxxRevele` dédié ; ce
+ * générateur ne trace aucune aide par écran (aucun `niveauAide`/`onActiverAide` câblé sur ses
+ * étapes), donc correcte/révélé seulement, même principe que `AppFormeCanoniqueTransformations.tsx`.
+ * La dernière phase de chaque séquence (toujours terminale) n'a jamais besoin de sa propre branche
+ * "close". */
+function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesAlgebriques): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (phase === "validationSolution") {
+      return etat.scoresValidationSolutionExercice.some((score) => score === 0) ? "revele" : "correcte";
+    }
+    const revele =
+      phase === "ordonnee"
+        ? etat.ordonneeRevele
+        : phase === "ce"
+          ? etat.ceRevele
+          : phase === "domaine"
+            ? etat.domaineRevele
+            : phase === "isolement"
+              ? etat.isolementRevele
+              : phase === "separation"
+                ? etat.separationRevele
+                : phase === "debarrasser"
+                  ? etat.debarrasserRevele
+                  : phase === "validite"
+                    ? etat.validiteRevele
+                    : phase === "regroupe"
+                      ? etat.regroupeRevele
+                      : phase === "resolutionBranches"
+                        ? etat.resolutionBranchesRevele
+                        : etat.zerosRevele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -409,6 +464,7 @@ export function AppCaracteristiquesAlgebriques() {
         <h1 className="app-title">Caractéristiques algébriques d'une fonction de référence</h1>
         <p className="app-subtitle">Chapitre 2</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">
@@ -417,7 +473,6 @@ export function AppCaracteristiquesAlgebriques() {
             <span className="card-progress-step">
               Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
             </span>
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
           </div>
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />

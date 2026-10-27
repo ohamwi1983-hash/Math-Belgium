@@ -12,6 +12,8 @@ import { Katex } from "./components/Katex";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationCercle } from "./ui/recapitulatifEquationCercle";
 import { formatEquationAttendueLatex, formatEtatActuelCentreLatex } from "./ui/formatEquationCercle";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -25,11 +27,19 @@ function nouvelleSession(): EtatSessionEquationCercle {
   return demarrerSessionEquationCercle(REGLAGES_DEMO, genererExerciceEquationCercle);
 }
 
-const LIBELLE_PHASE: Record<PhaseEquationCercle, string> = {
-  centre: "Centre du cercle",
-  rayon: "Rayon du cercle",
-  equation: "Équation du cercle",
-};
+const ORDRE_PHASES: PhaseEquationCercle[] = ["centre", "rayon", "equation"];
+
+function calculerSegmentsProgression(etat: EtatSessionEquationCercle): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "centre" ? etat.centreRevele : etat.rayonRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "centre" ? etat.niveauAideCentre : etat.niveauAideRayon;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -95,11 +105,7 @@ export function AppEquationCercle() {
         <h1 className="app-title">Équation d'un cercle (non développée) à partir d'un graphe</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

@@ -19,6 +19,8 @@ import { Katex } from "./components/Katex";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationCercleDeveloppee } from "./ui/recapitulatifEquationCercleDeveloppee";
 import { formatCentreAttenduLatex, formatCompletionLatex, formatRayonAttenduLatex, formatRegroupementLatex } from "./ui/formatEquationCercleDeveloppee";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -32,11 +34,19 @@ function nouvelleSession(): EtatSessionEquationCercleDeveloppee {
   return demarrerSessionEquationCercleDeveloppee(REGLAGES_DEMO, genererExerciceEquationCercleDeveloppee);
 }
 
-const LIBELLE_PHASE: Record<PhaseEquationCercleDeveloppee, string> = {
-  regroupement: "Regroupement et factorisation",
-  completion: "Complétion du carré",
-  centreRayon: "Centre et rayon",
-};
+const ORDRE_PHASES: PhaseEquationCercleDeveloppee[] = ["regroupement", "completion", "centreRayon"];
+
+function calculerSegmentsProgression(etat: EtatSessionEquationCercleDeveloppee): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "regroupement" ? etat.regroupementRevele : etat.completionRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "regroupement" ? etat.niveauAideRegroupement : etat.niveauAideCompletion;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -105,11 +115,7 @@ export function AppEquationCercleDeveloppee() {
         <h1 className="app-title">Centre et rayon d'un cercle depuis l'équation développée</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

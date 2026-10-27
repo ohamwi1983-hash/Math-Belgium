@@ -15,6 +15,8 @@ import { EtapeCarreUnSansLautre } from "./components/EtapeCarreUnSansLautre";
 import { EtapeValeurSigneeUnSansLautre } from "./components/EtapeValeurSigneeUnSansLautre";
 import { EtapeTangenteUnSansLautre } from "./components/EtapeTangenteUnSansLautre";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Retrouve sin, cos ou tan à partir de l'autre.";
 import { Katex } from "./components/Katex";
@@ -38,11 +40,23 @@ function nouvelleSession(): EtatSessionUnSansLautre {
   return demarrerSessionUnSansLautre(REGLAGES_DEMO, genererExerciceUnSansLautre);
 }
 
-const LIBELLE_PHASE: Record<PhaseUnSansLautre, string> = {
-  carre: "Carré",
-  valeurSignee: "Valeur signée",
-  tangente: "Tangente",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (3 phases fixes,
+ * aucun saut conditionnel, voir `typesUnSansLautre.ts`). "tangente" (dernière phase) n'a jamais
+ * besoin de sa propre branche "close" — même principe que gen9/gen55. Aide simple (booléen, pas de
+ * niveau progressif) : "aide" si révélation évitée mais aide utilisée. Puces purement visuelles. */
+const ORDRE_PHASES: PhaseUnSansLautre[] = ["carre", "valeurSignee", "tangente"];
+
+function calculerSegmentsProgression(etat: EtatSessionUnSansLautre): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "carre" ? etat.carreRevele : etat.valeurSigneeRevele;
+    if (revele) return "revele";
+    const aideUtilisee = phase === "carre" ? etat.aideCarreUtilisee : etat.aideValeurSigneeUtilisee;
+    return aideUtilisee ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -110,11 +124,7 @@ export function AppUnSansLautre() {
         <h1 className="app-title">Retrouver sin ou cos à partir de l'autre</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

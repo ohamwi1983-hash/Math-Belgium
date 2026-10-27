@@ -22,6 +22,8 @@ import { formatEquationImpliciteLatex, formatPointLatex } from "./ui/formatEquat
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifDistanceDroite } from "./ui/recapitulatifDistanceDroite";
 import { formatAideDistancePQNiveau2Latex, formatAideIntersectionQNiveau2Latex, formatDistanceAttendueLatex, formatEnonceLatex } from "./ui/formatDistanceDroite";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -35,12 +37,26 @@ function nouvelleSession(): EtatSessionDistanceDroite {
   return demarrerSessionDistanceDroite(REGLAGES_DEMO, genererExerciceDistanceDroite);
 }
 
-const LIBELLE_PHASE: Record<PhaseDistanceDroite, string> = {
-  choixPoint: "Choix d'un point sur la droite",
-  equationB: "Équation de la perpendiculaire b",
-  intersectionQ: "Coordonnées de Q",
-  distancePQ: "Distance PQ",
-};
+/** Séquence réelle de phases pour CET exercice — `"choixPoint"` n'a jamais lieu pour la variante
+ * "point" (voir le commentaire de `PhaseDistanceDroite` dans `typesDistanceDroite.ts`). */
+function sequencePourExercice(exercice: { variante: VarianteDistanceDroite }): PhaseDistanceDroite[] {
+  return exercice.variante === "paralleles"
+    ? ["choixPoint", "equationB", "intersectionQ", "distancePQ"]
+    : ["equationB", "intersectionQ", "distancePQ"];
+}
+
+function calculerSegmentsProgression(etat: EtatSessionDistanceDroite): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "choixPoint" ? etat.choixPointRevele : phase === "equationB" ? etat.equationBRevele : etat.intersectionQRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "choixPoint" ? etat.niveauAideChoixPoint : phase === "equationB" ? etat.niveauAideEquationB : etat.niveauAideIntersectionQ;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -121,11 +137,7 @@ export function AppDistanceDroite() {
         <h1 className="app-title">Distance point-droite et droite-droite (méthode géométrique)</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

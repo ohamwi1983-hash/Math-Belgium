@@ -34,6 +34,8 @@ import {
 import { libelleFamille } from "./ui/famillesReferenceLabels";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Détermine la forme canonique de cette fonction de référence transformée.";
 
@@ -49,14 +51,30 @@ function nouvelleSession(): EtatSessionFormeCanoniqueFonctionReference {
   return demarrerSessionFormeCanoniqueFonctionReference(REGLAGES_DEMO, genererExerciceFormeCanoniqueFonctionReference);
 }
 
-const LIBELLE_PHASE: Record<PhaseFormeCanoniqueFonctionReference, string> = {
-  reconnaissance: "Reconnaissance de la famille",
-  canonique: "Forme canonique",
-  ehChSoy: "Étirement / compression / symétrie horizontale",
-  th: "Translation horizontale",
-  evCvSox: "Étirement / compression / symétrie verticale",
-  tv: "Translation verticale",
-};
+/** 6 phases fixes, toujours le même ordre — pas de mécanisme d'aide sur ce générateur (aucun champ
+ * `niveauAideXxx` dans `typesFormeCanoniqueFonctionsReference.ts`). "tv" (dernière phase) n'a
+ * jamais besoin de sa propre branche "close" : jamais consultée comme phase passée. Puces
+ * purement visuelles (pas de `onSegmentClick`). */
+const ORDRE_PHASES: PhaseFormeCanoniqueFonctionReference[] = ["reconnaissance", "canonique", "ehChSoy", "th", "evCvSox", "tv"];
+
+function calculerSegmentsProgression(etat: EtatSessionFormeCanoniqueFonctionReference): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele =
+      phase === "reconnaissance"
+        ? etat.reconnaissanceRevele
+        : phase === "canonique"
+          ? etat.canoniqueRevele
+          : phase === "ehChSoy"
+            ? etat.ehChSoyRevele
+            : phase === "th"
+              ? etat.thRevele
+              : etat.evCvSoxRevele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -136,11 +154,7 @@ export function AppFormeCanoniqueFonctionsReference() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />

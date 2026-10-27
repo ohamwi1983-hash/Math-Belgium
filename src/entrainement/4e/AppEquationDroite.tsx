@@ -28,6 +28,8 @@ import {
 import { Katex } from "./components/Katex";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationDroite } from "./ui/recapitulatifEquationDroite";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -79,12 +81,31 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-const LIBELLE_PHASE: Record<PhaseEquationDroite, string> = {
-  extraction: "Extraction",
-  possibilite: "Possibilité de la forme",
-  coefficients: "Coefficients",
-  possibiliteCoefficients: "Possibilité et équation",
-};
+/** Séquence dépendant de `formeCible` — 3 chemins DISJOINTS (voir `typesEquationDroite.ts`,
+ * `PhaseEquationDroite`) : "coefficients"/"possibiliteCoefficients" sont chacune toujours la
+ * DERNIÈRE phase de leur chemin, jamais consultées comme phase passée — seules "extraction" et
+ * "possibilite" ont besoin d'une branche "close" ci-dessous. Puces purement visuelles (pas de
+ * `onSegmentClick`). */
+function sequencePourExercice(exercice: ExerciceEquationDroite): PhaseEquationDroite[] {
+  if (exercice.formeCible === "parametrique") return ["extraction", "coefficients"];
+  if (exercice.formeCible === "implicite") return ["extraction", "possibilite", "coefficients"];
+  return ["extraction", "possibiliteCoefficients"];
+}
+
+function calculerSegmentsProgression(etat: EtatSessionEquationDroite): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (phase === "extraction") {
+      if (etat.extractionRevele) return "revele";
+      return etat.niveauAideExtraction > 0 ? "aide" : "correcte";
+    }
+    // phase === "possibilite" (jamais d'aide sur cet écran, NIVEAU_AIDE_MAX_POSSIBILITE = 0)
+    return etat.possibiliteRevele ? "revele" : "correcte";
+  });
+}
 
 export function AppEquationDroite() {
   const [etat, setEtat] = useState<EtatSessionEquationDroite>(nouvelleSession);
@@ -158,11 +179,7 @@ export function AppEquationDroite() {
         <h1 className="app-title">Équation d'une droite</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

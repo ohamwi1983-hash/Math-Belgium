@@ -3,6 +3,7 @@ import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
   demarrerSessionTriangleLies,
+  sequencePourVariante,
   soumettreReponseAngles,
   soumettreReponseCible,
   soumettreReponseInterpretation,
@@ -20,6 +21,8 @@ import { EtapeAnglesTriangleLies } from "./components/EtapeAnglesTriangleLies";
 import { EtapeSoustractionTriangleLies } from "./components/EtapeSoustractionTriangleLies";
 import { EtapeCibleTriangleLies } from "./components/EtapeCibleTriangleLies";
 import { EtapeInterpretationTriangleLies } from "./components/EtapeInterpretationTriangleLies";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -42,13 +45,30 @@ function formatNombre(valeur: number): string {
  * triviale sur des données déjà affichées, "interpretation" un QCM. */
 const PHASES_CALCULATRICE = new Set<PhaseTriangleLies>(["pont", "cible"]);
 
-const LIBELLE_PHASE: Record<PhaseTriangleLies, string> = {
-  pont: "Triangle pont",
-  angles: "Angles du triangle cible",
-  soustraction: "Côtés du triangle cible",
-  cible: "Triangle cible",
-  interpretation: "Interprétation",
-};
+/** Segments de la barre de puces — réutilise `sequencePourVariante` (même séquence réelle que
+ * `terminerEtape` ci-dessous, jamais une deuxième reconstitution). "interpretation" (toujours
+ * dernière phase, voir `typesTriangleLies.ts`) n'a jamais besoin de sa propre branche "close" —
+ * même principe que gen9/gen55. Puces purement visuelles. */
+function calculerSegmentsProgression(etat: EtatSessionTriangleLies): EtatPuceProgression[] {
+  const sequence = sequencePourVariante(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele =
+      phase === "pont" ? etat.pontRevele : phase === "angles" ? etat.anglesRevele : phase === "soustraction" ? etat.soustractionRevele : etat.cibleRevele;
+    if (revele) return "revele";
+    const niveauAide =
+      phase === "pont"
+        ? etat.niveauAidePont
+        : phase === "angles"
+          ? etat.niveauAideAngles
+          : phase === "soustraction"
+            ? etat.niveauAideSoustraction
+            : etat.niveauAideCible;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -141,11 +161,7 @@ export function AppTriangleLies() {
         <h1 className="app-title">Triangles liés (triangulation, côté ou angle partagé)</h1>
         <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_FAMILLES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

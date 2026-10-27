@@ -31,6 +31,8 @@ import { EtapeInterpretationEquationInequationSecondDegre } from "./components/E
 import { QuestionFinale } from "./components/QuestionFinale";
 import { formatEquationInequationLatex, formatResolutionAttendueTexte, formatValidationAttendueTexte, texteAidePoserSystemeNiveau2 } from "./ui/formatEquationInequationSecondDegre";
 import { Katex } from "./components/Katex";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -58,14 +60,46 @@ const OPTIONS_DEV = PAIRES_VALIDES.map((p) => ({
   label: `${LABEL_FAMILLE[p.familleId]} — ${LABEL_VARIANTE[p.varianteId]}`,
 }));
 
-const LIBELLE_PHASE: Record<PhaseEquationInequationSecondDegre, string> = {
-  poserSysteme: "Poser le système",
-  isolerSubstituer: "Isoler et substituer",
-  poserEquationInequation: "Poser l'équation/l'inéquation",
-  resoudre: "Résolution",
-  validation: "Validation contextuelle",
-  interpretation: "Interprétation",
-};
+/** Séquence dépendant de `exercice.voieSysteme` (architecture D vs A/B/C — voir
+ * `typesEquationInequationSecondDegre.ts`) : "interpretation" (dernière phase des 2 chemins) n'a
+ * jamais besoin de sa propre branche "close" ci-dessous — jamais consultée comme phase passée.
+ * Puces purement visuelles (pas de `onSegmentClick`). */
+function sequencePourExercice(exercice: EtatSessionEquationInequationSecondDegre["exerciceCourant"]): PhaseEquationInequationSecondDegre[] {
+  return exercice.voieSysteme
+    ? ["poserSysteme", "isolerSubstituer", "resoudre", "validation", "interpretation"]
+    : ["poserEquationInequation", "resoudre", "validation", "interpretation"];
+}
+
+function calculerSegmentsProgression(etat: EtatSessionEquationInequationSecondDegre): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele =
+      phase === "poserSysteme"
+        ? etat.poserSystemeRevele
+        : phase === "isolerSubstituer"
+          ? etat.isolerSubstituerRevele
+          : phase === "poserEquationInequation"
+            ? etat.poserEquationInequationRevele
+            : phase === "resoudre"
+              ? etat.resoudreRevele
+              : etat.validationRevele;
+    if (revele) return "revele";
+    const niveauAide =
+      phase === "poserSysteme"
+        ? etat.niveauAidePoserSysteme
+        : phase === "isolerSubstituer"
+          ? etat.niveauAideIsolerSubstituer
+          : phase === "poserEquationInequation"
+            ? etat.niveauAidePoserEquationInequation
+            : phase === "resoudre"
+              ? etat.niveauAideResoudre
+              : etat.niveauAideValidation;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -156,11 +190,7 @@ export function AppEquationInequationSecondDegre() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <RecapitulatifPanel entrees={recapitulatif} />

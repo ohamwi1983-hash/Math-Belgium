@@ -12,6 +12,8 @@ import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifCaracteristiquesDroite } from "./ui/recapitulatifCaracteristiquesDroite";
 import { formatCaracteristiquesAttenduesLatex, formatEnonceLatex, formatEtatActuelPointVecteurLatex } from "./ui/formatCaracteristiquesDroite";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Détermine les caractéristiques de cette droite.";
 
@@ -27,10 +29,20 @@ function nouvelleSession(): EtatSessionCaracteristiquesDroite {
   return demarrerSessionCaracteristiquesDroite(REGLAGES_DEMO, genererExerciceCaracteristiquesDroite);
 }
 
-const LIBELLE_PHASE: Record<PhaseCaracteristiquesDroite, string> = {
-  extraction: "Extraction du point et du vecteur directeur",
-  caracteristiques: "Pente ou angle, et ordonnée à l'origine",
-};
+const ORDRE_PHASES: PhaseCaracteristiquesDroite[] = ["extraction", "caracteristiques"];
+
+/** Segments de la barre de puces — séquence FIXE à 2 écrans, toujours la même (voir
+ * `typesCaracteristiquesDroite.ts`). "caracteristiques" (dernière phase, clôture l'exercice) n'a
+ * jamais besoin de sa propre branche "close" — même principe que `AppFormeCanoniqueTransformations.tsx`. */
+function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesDroite): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (etat.extractionRevele) return "revele";
+    return etat.niveauAideExtraction > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -90,11 +102,7 @@ export function AppCaracteristiquesDroite() {
         <h1 className="app-title">Caractéristiques d'une droite</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

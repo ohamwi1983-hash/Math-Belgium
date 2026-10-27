@@ -24,6 +24,8 @@ import {
   texteNombrePointsAttendu,
   texteReponseResolutionAttendue,
 } from "./ui/formatLieuxGeometriques";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Détermine l'intersection de ces lieux géométriques.";
 
@@ -39,11 +41,24 @@ function nouvelleSession(): EtatSessionLieuxGeometriques {
   return demarrerSessionLieuxGeometriques(REGLAGES_DEMO, genererExerciceLieuxGeometriques);
 }
 
-const LIBELLE_PHASE: Record<PhaseLieuxGeometriques, string> = {
-  identification: "Identification",
-  equations: "Équations",
-  resolution: "Résolution",
-};
+/** 3 phases fixes (voir `PhaseLieuxGeometriques`). "resolution" (dernière phase) n'a jamais besoin
+ * de sa propre branche "close" : un nouvel exercice redémarre toujours juste après, donc elle reste
+ * "a-venir" jusqu'à devenir "courante" — jamais consultée comme passée (même principe que la
+ * dernière phase d'`AppFormeCanoniqueTransformations`/`AppOptimisation`). Puces purement visuelles
+ * (pas de `onSegmentClick`). */
+const ORDRE_PHASES: PhaseLieuxGeometriques[] = ["identification", "equations", "resolution"];
+
+function calculerSegmentsProgression(etat: EtatSessionLieuxGeometriques): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "identification" ? etat.identificationRevele : etat.equationsRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "identification" ? etat.niveauAideIdentification : etat.niveauAideEquations;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -123,11 +138,7 @@ export function AppLieuxGeometriques() {
         <h1 className="app-title">Lieux géométriques : intersection</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

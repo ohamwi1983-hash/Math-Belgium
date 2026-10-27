@@ -24,7 +24,8 @@ import {
   soumettreReponseV8Pourcent0,
   soumettreReponseV8XBar,
 } from "./moteur/sessionBienaymeTchebychev";
-import type { EtatSessionBienaymeTchebychev, PhaseBienaymeTchebychev } from "./moteur/typesBienaymeTchebychev";
+import type { EtatSessionBienaymeTchebychev } from "./moteur/typesBienaymeTchebychev";
+import { SEQUENCES } from "./moteur/typesBienaymeTchebychev";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceBienaymeTchebychev } from "./generateurs/bienaymeTchebychev";
 import type { VarianteBienaymeTchebychev } from "./core/bienaymeTchebychev.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -51,6 +52,8 @@ import {
 } from "./ui/formatBienaymeTchebychev";
 import { SegmentsInline } from "./components/SegmentsInline";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -157,28 +160,22 @@ function construireReponseAttendue(
   return undefined;
 }
 
-const LIBELLE_PHASE: Record<PhaseBienaymeTchebychev, string> = {
-  v1K: "k",
-  v1Pourcent: "% minimal",
-  v2K: "k",
-  v2Intervalle: "Intervalle",
-  v3K: "k",
-  v3Pourcent: "% minimal",
-  v3Nombre: "Nombre minimal d'individus",
-  v4Pourcent0: "% minimal",
-  v4K: "k",
-  v4Intervalle: "Intervalle",
-  v5K: "k",
-  v5Sigma: "Écart-type σ",
-  v6K: "k",
-  v6XBar: "Moyenne x̄",
-  v7Pourcent0: "% minimal",
-  v7K: "k",
-  v7Sigma: "Écart-type σ",
-  v8Pourcent0: "% minimal",
-  v8K: "k",
-  v8XBar: "Moyenne x̄",
-};
+/** Segments de la barre de puces — réutilise `SEQUENCES` (même séquence réelle que le récapitulatif,
+ * jamais une deuxième reconstitution) et `scoresAccumules[phase]` (score/aide déjà capturés à la
+ * clôture de chaque écran, voir `ui/recapitulatifBienaymeTchebychev.ts`). La dernière phase de
+ * chaque variante (toujours terminale) n'a jamais besoin de sa propre branche "close" — même
+ * principe que `AppOptimisation.tsx`. Puces purement visuelles (pas de `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionBienaymeTchebychev): EtatPuceProgression[] {
+  const sequence = SEQUENCES[etat.exerciceCourant.variante];
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const entree = etat.scoresAccumules[phase]!;
+    if (entree.revele) return "revele";
+    return entree.niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 export function AppBienaymeTchebychev() {
   const [etat, setEtat] = useState<EtatSessionBienaymeTchebychev>(nouvelleSession);
@@ -223,11 +220,7 @@ export function AppBienaymeTchebychev() {
         <h1 className="app-title">Inégalité de Bienaymé-Tchebychev</h1>
         <p className="app-subtitle">Chapitre 5 — Statistiques</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

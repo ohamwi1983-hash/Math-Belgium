@@ -26,6 +26,8 @@ import {
   segmentsComparaisonMedianesAttendue,
 } from "./ui/formatBoiteMoustaches";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -39,12 +41,21 @@ function nouvelleSession(): EtatSessionBoiteMoustaches {
   return demarrerSessionBoiteMoustaches(REGLAGES_DEMO, genererExerciceBoiteMoustaches);
 }
 
-const LIBELLE_PHASE: Record<PhaseBoiteMoustaches, string> = {
-  construction: "Construction",
-  lecture: "Lecture",
-  comparaisonMedianes: "Comparaison — médianes",
-  comparaisonDispersions: "Comparaison — dispersions",
-};
+const SEQUENCE_COMPARAISON: PhaseBoiteMoustaches[] = ["comparaisonMedianes", "comparaisonDispersions"];
+
+/** Segments de la barre de puces — seule la variante "comparaison" traverse une vraie séquence à 2
+ * écrans (`comparaisonMedianes → comparaisonDispersions`) ; "construction"/"lecture" sont chacun un
+ * SEUL écran toujours terminal (voir `typesBoiteMoustaches.ts`), donc sans barre de puces — même
+ * principe qu'un écran unique. */
+function calculerSegmentsProgression(etat: EtatSessionBoiteMoustaches): EtatPuceProgression[] | null {
+  if (etat.exerciceCourant.variante !== "comparaison") return null;
+  const indexCourant = SEQUENCE_COMPARAISON.indexOf(etat.phase);
+  return SEQUENCE_COMPARAISON.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    return etat.comparaisonMedianesRevele ? "revele" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -105,6 +116,7 @@ export function AppBoiteMoustaches() {
   }
 
   const reponseAttendue = enAttente ? calculerReponseAttendue() : undefined;
+  const segmentsProgression = calculerSegmentsProgression(etat);
 
   const validation = enAttente
     ? {
@@ -125,11 +137,7 @@ export function AppBoiteMoustaches() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        {segmentsProgression && <ProgressionPuces segments={segmentsProgression} />}
 
         <div className="card-body">
           <EnTeteExercice

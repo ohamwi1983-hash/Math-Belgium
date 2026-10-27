@@ -13,6 +13,8 @@ import type { EtatSessionConstructionParabole } from "./moteur/typesConstruction
 import { EtapeConstructionParabole } from "./components/EtapeConstructionParabole";
 import { EtapeTraceParabole } from "./components/EtapeTraceParabole";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Construis cette parabole au compas et à l'équerre.";
 
@@ -28,9 +30,20 @@ function nouvelleSession(): EtatSessionConstructionParabole {
   return demarrerSessionConstructionParabole(REGLAGES_DEMO, genererExerciceConstructionParabole);
 }
 
-function libellePhase(etat: EtatSessionConstructionParabole): string {
-  if (etat.phase === "trace") return "Tracé final";
-  return `Itération ${etat.iterationCourante + 1} / ${NOMBRE_ITERATIONS_CONSTRUCTION_PARABOLE}`;
+function calculerSegmentsProgression(etat: EtatSessionConstructionParabole): EtatPuceProgression[] {
+  const segmentsConstruction: EtatPuceProgression[] = [];
+  for (let i = 0; i < NOMBRE_ITERATIONS_CONSTRUCTION_PARABOLE; i++) {
+    if (etat.phase === "construction" && etat.iterationCourante === i) {
+      segmentsConstruction.push("courante");
+    } else if (i < etat.iterationsCompletes.length) {
+      const iteration = etat.iterationsCompletes[i]!;
+      segmentsConstruction.push(iteration.constructionRevele ? "revele" : iteration.constructionAideUtilisee ? "aide" : "correcte");
+    } else {
+      segmentsConstruction.push("a-venir");
+    }
+  }
+  const segmentTrace: EtatPuceProgression = etat.phase === "trace" ? "courante" : "a-venir";
+  return [...segmentsConstruction, segmentTrace];
 }
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
@@ -93,11 +106,7 @@ export function AppConstructionParabole() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Construction de la parabole au compas et à l'équerre</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{libellePhase(etat)}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

@@ -39,6 +39,8 @@ import type { PhaseCaracteristiquesFonction } from "./core/caracteristiquesFonct
 import { etatListeInitiale } from "./ui/listeMorceaux";
 import type { EtatListeMorceaux } from "./ui/listeMorceaux";
 import { morceauxCompletsPourSurlignage } from "./ui/surlignageCaracteristiques";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Lis les caractéristiques de cette fonction sur son graphique.";
 
@@ -89,16 +91,44 @@ interface TransitionEnAttente {
  * graphe en temps réel (`blocDonnees`, voir plus bas) à partir de la construction en cours. */
 const PHASES_AVEC_LISTE = new Set<PhaseCaracteristiquesFonction>(["domaine", "croissance", "decroissance", "constance"]);
 
-const LIBELLE_PHASE: Record<PhaseCaracteristiquesFonction, string> = {
-  domaine: "Domaine de définition",
-  zeros: "Zéros",
-  croissance: "Intervalles de croissance",
-  decroissance: "Intervalles de décroissance",
-  constance: "Constance",
-  ordonnee: "Ordonnée à l'origine",
-  valeur: "Valeur en un point",
-  asymptotes: "Asymptotes",
-};
+const ORDRE_PHASES: PhaseCaracteristiquesFonction[] = [
+  "domaine",
+  "zeros",
+  "croissance",
+  "decroissance",
+  "constance",
+  "ordonnee",
+  "valeur",
+  "asymptotes",
+];
+
+/** Segments de la barre de puces — séquence FIXE à 8 écrans, toujours la même (voir
+ * `sessionCaracteristiquesFonction.ts`, "aucune étape n'est sautable ici"). Aucune aide tracée sur ce
+ * générateur (pas de `niveauAide`/`onActiverAide` câblé sur ses 8 écrans) — correcte/révélé
+ * seulement, même principe que `AppFormeCanoniqueTransformations.tsx`. "asymptotes" (dernière phase,
+ * clôture l'exercice) n'a jamais besoin de sa propre branche "close". */
+function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesFonction): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele =
+      phase === "domaine"
+        ? etat.domaineRevele
+        : phase === "zeros"
+          ? etat.zerosRevele
+          : phase === "croissance"
+            ? etat.croissanceRevele
+            : phase === "decroissance"
+              ? etat.decroissanceRevele
+              : phase === "constance"
+                ? etat.constanceRevele
+                : phase === "ordonnee"
+                  ? etat.ordonneeRevele
+                  : etat.valeurRevele;
+    return revele ? "revele" : "correcte";
+  });
+}
 
 export function AppCaracteristiquesFonction() {
   const [etat, setEtat] = useState<EtatSessionCaracteristiquesFonction>(nouvelleSession);
@@ -231,11 +261,7 @@ export function AppCaracteristiquesFonction() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques d'une fonction (lecture graphique)</h1>
         <p className="app-subtitle">Chapitre 2</p>
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

@@ -13,6 +13,7 @@ import {
   soumettreReponseTest,
   soumettreReponseTestSommet,
 } from "./moteur/sessionOrthogonalite";
+import { SEQUENCES } from "./moteur/typesOrthogonalite";
 import type { EtatSessionOrthogonalite, PhaseOrthogonalite, ResultatExerciceOrthogonalite } from "./moteur/typesOrthogonalite";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOrthogonalite } from "./generateurs/orthogonalite";
 import type { VarianteOrthogonalite } from "./core/orthogonalite.types";
@@ -38,6 +39,8 @@ import {
   formatReductionLatex,
   libelleRectangleEn,
 } from "./ui/formatOrthogonalite";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -51,21 +54,24 @@ function nouvelleSession(): EtatSessionOrthogonalite {
   return demarrerSessionOrthogonalite(REGLAGES_DEMO, genererExerciceOrthogonalite);
 }
 
-const LIBELLE_PHASE: Record<PhaseOrthogonalite, string> = {
-  test: "Test d'orthogonalité",
-  reductionParametre: "Réduction",
-  resolutionParametre: "Résolution",
-  constructionTriangle: "Construction des vecteurs",
-  testSommetA: "Test au sommet A",
-  testSommetB: "Test au sommet B",
-  testSommetC: "Test au sommet C",
-  conclusionTriangle: "Conclusion",
-  constructionAvecX: "Construction symbolique",
-  reductionSommetA: "Réduction — sommet A",
-  reductionSommetB: "Réduction — sommet B",
-  reductionSommetC: "Réduction — sommet C",
-  identificationResolution: "Identification et résolution",
-};
+/** Réutilise `SEQUENCES` (séquence réelle par variante, déjà exposée par `typesOrthogonalite.ts`)
+ * et `etat.scoresAccumules` (déjà rempli à chaque clôture d'écran — `score`/`revele`/`niveauAide`)
+ * plutôt qu'une deuxième reconstitution divergente — même patron que `AppNormeDistance`. La
+ * dernière phase de chaque séquence n'a jamais besoin d'être lue dans `scoresAccumules` : un nouvel
+ * exercice redémarre toujours juste après, donc elle reste "a-venir" jusqu'à devenir "courante" —
+ * jamais consultée comme passée. Puces purement visuelles (pas de `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionOrthogonalite): EtatPuceProgression[] {
+  const sequence = SEQUENCES[etat.exerciceCourant.variante];
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const score = etat.scoresAccumules[phase];
+    if (!score) return "correcte";
+    if (score.revele) return "revele";
+    return score.niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** Révélation de l'écran `phase` lue sur le résultat déjà clos de l'exercice (le dernier de la
  * séquence de sa variante — voir `scoresAccumules`/`SEQUENCES`, `typesOrthogonalite.ts`). */
@@ -213,11 +219,7 @@ export function AppOrthogonalite() {
         <h1 className="app-title">Orthogonalité et théorème de Pythagore généralisé</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

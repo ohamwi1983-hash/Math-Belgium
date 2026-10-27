@@ -8,6 +8,8 @@ import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeDiagnosticIntersectionDroites } from "./components/EtapeDiagnosticIntersectionDroites";
 import { EtapePointIntersectionDroites } from "./components/EtapePointIntersectionDroites";
 import { texteConclusionAttendue, texteReponsePointAttendue } from "./ui/formatIntersectionDroites";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -21,10 +23,25 @@ function nouvelleSession(): EtatSessionIntersectionDroites {
   return demarrerSessionIntersectionDroites(REGLAGES_DEMO, genererExerciceIntersectionDroites);
 }
 
-const LIBELLE_PHASE: Record<PhaseIntersectionDroites, string> = {
-  diagnostic: "Diagnostic",
-  point: "Point d'intersection",
-};
+/** Séquence dépendant de `exercice.conclusion` — "point" uniquement si `conclusion === "secantes"`,
+ * sinon l'exercice se clôt directement après "diagnostic" (voir `typesIntersectionDroites.ts`).
+ * "point", quand présent, est toujours la dernière phase : jamais consultée comme phase passée.
+ * Puces purement visuelles (pas de `onSegmentClick`). */
+function sequencePourExercice(exercice: EtatSessionIntersectionDroites["exerciceCourant"]): PhaseIntersectionDroites[] {
+  return exercice.conclusion === "secantes" ? ["diagnostic", "point"] : ["diagnostic"];
+}
+
+function calculerSegmentsProgression(etat: EtatSessionIntersectionDroites): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    // phase === "diagnostic" (seule phase jamais terminale pouvant être "passée" ici)
+    if (etat.diagnosticRevele) return "revele";
+    return etat.niveauAideDiagnostic > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -92,11 +109,7 @@ export function AppIntersectionDroites() {
         <h1 className="app-title">Intersection entre deux droites</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

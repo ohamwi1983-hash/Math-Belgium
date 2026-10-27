@@ -15,7 +15,7 @@ import {
 } from "./moteur/sessionMediane";
 import type { EtatSessionMediane, PhaseMediane } from "./moteur/typesMediane";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMediane } from "./generateurs/mediane";
-import type { VarianteMediane } from "./core/mediane.types";
+import type { ExerciceMediane, VarianteMediane } from "./core/mediane.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeMedianeDiscrete } from "./components/EtapeMedianeDiscrete";
 import { EtapeQ1Mediane } from "./components/EtapeQ1Mediane";
@@ -41,6 +41,8 @@ import {
   formatSyntheseAttendueTexte,
   surlignageSeuilTable,
 } from "./ui/formatMediane";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -54,17 +56,60 @@ function nouvelleSession(): EtatSessionMediane {
   return demarrerSessionMediane(REGLAGES_DEMO, genererExerciceMediane);
 }
 
-const LIBELLE_PHASE: Record<PhaseMediane, string> = {
-  mediane: "Médiane",
-  q1: "Premier quartile",
-  q3: "Troisième quartile",
-  minMaxMode: "Min, max et mode(s)",
-  polygone: "Polygone des effectifs cumulés",
-  lectureQ1: "Lecture — Q1",
-  lectureMediane: "Lecture — médiane",
-  lectureQ3: "Lecture — Q3",
-  synthese: "Synthèse",
-};
+/** Séquence FIXE mais choisie dès le départ selon la variante (même logique que `phaseInitiale`,
+ * `moteur/sessionMediane.ts`) : "discrete" → mediane → q1 → q3 → minMaxMode (terminal) ; "classes" →
+ * polygone → lectureMediane → lectureQ1 → lectureQ3 → synthese (terminal). Pas de fichier recap
+ * partagé pour ce générateur (contrairement à `AppOptimisation`/`recapitulatifOptimisation.ts`),
+ * donc la séquence est définie ici, directement depuis la même logique que le moteur. */
+function sequencePourExercice(exercice: ExerciceMediane): PhaseMediane[] {
+  return exercice.variante === "discrete"
+    ? ["mediane", "q1", "q3", "minMaxMode"]
+    : ["polygone", "lectureMediane", "lectureQ1", "lectureQ3", "synthese"];
+}
+
+/** La dernière phase de chaque séquence (minMaxMode / synthese) n'a jamais besoin de sa propre
+ * branche "close" : un nouvel exercice redémarre toujours juste après, donc elle reste "a-venir"
+ * jusqu'à devenir "courante" — jamais consultée comme passée (même principe que la dernière phase
+ * d'`AppFormeCanoniqueTransformations`/`AppOptimisation`). Puces purement visuelles (pas de
+ * `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionMediane): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele =
+      phase === "mediane"
+        ? etat.medianeRevele
+        : phase === "q1"
+          ? etat.q1Revele
+          : phase === "q3"
+            ? etat.q3Revele
+            : phase === "polygone"
+              ? etat.polygoneRevele
+              : phase === "lectureMediane"
+                ? etat.lectureMedianeRevele
+                : phase === "lectureQ1"
+                  ? etat.lectureQ1Revele
+                  : etat.lectureQ3Revele;
+    if (revele) return "revele";
+    const niveauAide =
+      phase === "mediane"
+        ? etat.niveauAideMediane
+        : phase === "q1"
+          ? etat.niveauAideQ1
+          : phase === "q3"
+            ? etat.niveauAideQ3
+            : phase === "polygone"
+              ? etat.niveauAidePolygone
+              : phase === "lectureMediane"
+                ? etat.niveauAideLectureMediane
+                : phase === "lectureQ1"
+                  ? etat.niveauAideLectureQ1
+                  : etat.niveauAideLectureQ3;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -187,11 +232,7 @@ export function AppMediane() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={blocDonnees} />

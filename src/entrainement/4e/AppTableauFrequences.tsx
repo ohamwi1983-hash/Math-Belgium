@@ -22,6 +22,8 @@ import {
   formatTableIdentificationTexte,
 } from "./ui/formatTableauFrequences";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -35,12 +37,24 @@ function nouvelleSession(): EtatSessionTableauFrequences {
   return demarrerSessionTableauFrequences(REGLAGES_DEMO, genererExerciceTableauFrequences);
 }
 
-const LIBELLE_PHASE: Record<PhaseTableauFrequences, string> = {
-  identification: "Identification",
-  frequences: "Fréquences",
-  cumules: "Effectifs cumulés",
-  frequencesCumulees: "Fréquences cumulées",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (4 phases fixes,
+ * aucun saut conditionnel, voir `typesTableauFrequences.ts`). "frequencesCumulees" (dernière
+ * phase) n'a jamais besoin de sa propre branche "close" — même principe que gen9/gen55. Puces
+ * purement visuelles. */
+const ORDRE_PHASES: PhaseTableauFrequences[] = ["identification", "frequences", "cumules", "frequencesCumulees"];
+
+function calculerSegmentsProgression(etat: EtatSessionTableauFrequences): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "identification" ? etat.identificationRevele : phase === "frequences" ? etat.frequencesRevele : etat.cumulesRevele;
+    if (revele) return "revele";
+    const niveauAide =
+      phase === "identification" ? etat.niveauAideIdentification : phase === "frequences" ? etat.niveauAideFrequences : etat.niveauAideCumules;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -109,11 +123,7 @@ export function AppTableauFrequences() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={null} />

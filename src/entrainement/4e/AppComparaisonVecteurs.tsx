@@ -9,6 +9,8 @@ import { EtapeSelectionComparaison } from "./components/EtapeSelectionComparaiso
 import { EtapeEgaliteComparaison } from "./components/EtapeEgaliteComparaison";
 import { Katex } from "./components/Katex";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Compare visuellement ces vecteurs sur la figure.";
 
@@ -49,10 +51,16 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-const LIBELLE_PHASE: Record<PhaseComparaisonVecteurs, string> = {
-  selection: "Sélection",
-  egalite: "Égalité",
-};
+const ORDRE_PHASES: PhaseComparaisonVecteurs[] = ["selection", "egalite"];
+
+function calculerSegmentsProgression(etat: EtatSessionComparaisonVecteurs): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    return etat.selectionRevele ? "revele" : "correcte";
+  });
+}
 
 export function AppComparaisonVecteurs() {
   const [etat, setEtat] = useState<EtatSessionComparaisonVecteurs>(nouvelleSession);
@@ -108,11 +116,7 @@ export function AppComparaisonVecteurs() {
         <h1 className="app-title">Comparaison visuelle de vecteurs sur figure</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

@@ -28,6 +28,8 @@ import { calculerRecapitulatifColinearite } from "./ui/recapitulatifColinearite"
 import { conclusionAttendue, critereReel } from "./moteur/verificationColinearite";
 import { formatComposantesLinMatriceLatex, formatComposantesMatriceLatex, formatEquationReduiteLatex, LIBELLES_OUI_NON } from "./ui/formatColinearite";
 import { Katex } from "./components/Katex";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -125,15 +127,40 @@ function construireReponseAttendue(etat: EtatSessionColinearite, exercice: Exerc
   return undefined;
 }
 
-const LIBELLE_PHASE: Record<PhaseColinearite, string> = {
-  constructionVecteurs: "Construction des vecteurs",
-  constructionAvecX: "Construction des vecteurs",
-  reduction: "Réduction",
-  reductionAvecX: "Réduction",
-  resolution: "Résolution",
-  resolutionAvecX: "Résolution",
-  test: "Test de colinéarité",
-};
+/** Séquence de phases pour l'exercice courant — dépend de la variante (voir `typesColinearite.ts`,
+ * doc de `PhaseColinearite`). "vecteurs" ne traverse qu'un seul écran ("test") : pas de barre de
+ * puces dans ce cas (même principe qu'un écran unique), géré par `calculerSegmentsProgression`. */
+function sequencePourExercice(exercice: ExerciceColinearite): PhaseColinearite[] {
+  switch (exercice.variante) {
+    case "vecteurs":
+      return ["test"];
+    case "points":
+      return ["constructionVecteurs", "test"];
+    case "parametre":
+      return ["reduction", "resolution"];
+    case "pointsParametre":
+      return ["constructionAvecX", "reductionAvecX", "resolutionAvecX"];
+  }
+}
+
+/** Segments de la barre de puces — seules "constructionVecteurs"/"constructionAvecX" et
+ * "reduction"/"reductionAvecX" peuvent être des phases PASSÉES (non terminales) : `test`/
+ * `resolution`/`resolutionAvecX` sont toujours la dernière phase de leur variante, jamais
+ * consultées comme passées (même principe que `AppOptimisation.tsx`). `niveauAideConstruction`/
+ * `niveauAideReduction` restent lisibles après la clôture de leur écran (champs dédiés, jamais
+ * remis à 0 par un changement de phase — contrairement à un `niveauAide` unique partagé). */
+function calculerSegmentsProgression(etat: EtatSessionColinearite): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const estConstruction = phase === "constructionVecteurs" || phase === "constructionAvecX";
+    if (estConstruction ? etat.constructionRevele : etat.reductionRevele) return "revele";
+    const niveauAide = estConstruction ? etat.niveauAideConstruction : etat.niveauAideReduction;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 export function AppColinearite() {
   const [etat, setEtat] = useState<EtatSessionColinearite>(nouvelleSession);
@@ -165,6 +192,8 @@ export function AppColinearite() {
   const exercice = etat.exerciceCourant;
 
   const recapitulatif = calculerRecapitulatifColinearite(etat);
+  const sequence = sequencePourExercice(exercice);
+  const segmentsProgression = sequence.length > 1 ? calculerSegmentsProgression(etat) : null;
 
   function onGenererDev(varianteId: string) {
     setEnAttente(null);
@@ -187,11 +216,7 @@ export function AppColinearite() {
         <h1 className="app-title">Colinéarité et alignement de points</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        {segmentsProgression && <ProgressionPuces segments={segmentsProgression} />}
       </header>
 
       <main className="card">

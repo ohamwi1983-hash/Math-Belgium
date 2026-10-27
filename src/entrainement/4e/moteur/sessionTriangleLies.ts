@@ -43,6 +43,16 @@ function phaseApresPont(exercice: ExerciceTriangleLies): PhaseTriangleLies {
   return "cible";
 }
 
+/** Séquence réelle des phases pour un exercice donné — réutilisée telle quelle par
+ * `AppTriangleLies.tsx::calculerSegmentsProgression` (puces de progression), jamais une
+ * deuxième reconstitution divergente. Mêmes 3 séquences disjointes que `phaseApresPont`
+ * ci-dessus, voir le commentaire de `PhaseTriangleLies` (`typesTriangleLies.ts`). */
+export function sequencePourVariante(exercice: ExerciceTriangleLies): PhaseTriangleLies[] {
+  if (exercice.variante === "cotePartage") return ["pont", "cible", "interpretation"];
+  if (exercice.variante === "anglePartage") return ["pont", "angles", "cible", "interpretation"];
+  return ["pont", "soustraction", "cible", "interpretation"];
+}
+
 const ETAT_TRANSITOIRE_INITIAL = {
   niveauAidePont: 0,
   niveauAideAngles: 0,

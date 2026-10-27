@@ -20,6 +20,7 @@ import {
   soumettreReponseVarianceEcartType,
 } from "./moteur/sessionExerciceSynthese";
 import type { EtatSessionExerciceSynthese, PhaseExerciceSynthese } from "./moteur/typesExerciceSynthese";
+import { SEQUENCES } from "./moteur/typesExerciceSynthese";
 import {
   versBoiteMoustaches,
   versDispersion,
@@ -68,6 +69,8 @@ import { SegmentsInline } from "./components/SegmentsInline";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifExerciceSynthese } from "./ui/recapitulatifExerciceSynthese";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 import { TableEffectifsDiscrete } from "./components/TableEffectifsDiscrete";
 import { TableEffectifsClasses } from "./components/TableEffectifsClasses";
 
@@ -95,25 +98,22 @@ function nouvelleSession(): EtatSessionExerciceSynthese {
  * ou fournis par l'énoncé. */
 const PHASES_CALCULATRICE = new Set<PhaseExerciceSynthese>(["quotient", "varianceEcartType", "btIntervalle"]);
 
-const LIBELLE_PHASE: Record<PhaseExerciceSynthese, string> = {
-  centres: "Centres de classe",
-  sommes: "Sommes intermédiaires",
-  quotient: "Moyenne pondérée",
-  mediane: "Médiane",
-  q1: "Premier quartile (Q1)",
-  q3: "Troisième quartile (Q3)",
-  minMaxMode: "Min, max et mode(s)",
-  polygone: "Polygone des effectifs cumulés",
-  lectureMediane: "Lecture — médiane",
-  lectureQ1: "Lecture — Q1",
-  lectureQ3: "Lecture — Q3",
-  synthese: "Synthèse (classe modale)",
-  boxplot: "Boîte à moustaches",
-  tableau: "Tableau et sommes (variance)",
-  varianceEcartType: "Variance et écart-type",
-  btIntervalle: "Bienaymé-Tchebychev — intervalle",
-  btPourcent: "Bienaymé-Tchebychev — % minimal",
-};
+/** Segments de la barre de puces — réutilise `SEQUENCES[exercice.variante]` (même séquence réelle
+ * que le moteur, jamais une deuxième reconstitution) et `etat.scoresAccumules[phase]` (écrans déjà
+ * clos de CET exercice — `revele`/`niveauAide` déjà calculés par le moteur). "btPourcent" (dernière
+ * phase des 2 séquences) n'a jamais besoin de sa propre branche "close" : jamais consultée comme
+ * phase passée. Puces purement visuelles (pas de `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionExerciceSynthese): EtatPuceProgression[] {
+  const sequence = SEQUENCES[etat.exerciceCourant.variante];
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const ecran = etat.scoresAccumules[phase]!;
+    if (ecran.revele) return "revele";
+    return ecran.niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** Réponse attendue à afficher dans `ValidationEcran` pour la phase QUI VIENT DE SE TERMINER —
  * reprend tel quel le contenu de chaque bloc `answer-reveal` de l'ancien `ResultatPanelExerciceSynthese.tsx`
@@ -299,11 +299,7 @@ export function AppExerciceSynthese() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
 
         <div className="card-body">
           <EnTeteExercice consigneGenerale={formatEnonceTexte(exercice)} blocDonnees={blocDonnees} />

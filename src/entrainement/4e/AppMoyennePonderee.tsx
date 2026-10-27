@@ -9,7 +9,7 @@ import {
 } from "./moteur/sessionMoyennePonderee";
 import type { EtatSessionMoyennePonderee, PhaseMoyennePonderee } from "./moteur/typesMoyennePonderee";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceMoyennePonderee } from "./generateurs/moyennePonderee";
-import type { VarianteMoyennePonderee } from "./core/moyennePonderee.types";
+import type { ExerciceMoyennePonderee, VarianteMoyennePonderee } from "./core/moyennePonderee.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { CalculatriceScientifique } from "./components/CalculatriceScientifique";
 import { EtapeCentresMoyennePonderee } from "./components/EtapeCentresMoyennePonderee";
@@ -20,6 +20,8 @@ import { formatCentresAttendusTexte, formatEnonceTexte, formatSommesAttenduesTex
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { EnTeteExercice } from "./components/EnTeteExercice";
 import { calculerRecapitulatifMoyennePonderee } from "./ui/recapitulatifMoyennePonderee";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -33,11 +35,30 @@ function nouvelleSession(): EtatSessionMoyennePonderee {
   return demarrerSessionMoyennePonderee(REGLAGES_DEMO, genererExerciceMoyennePonderee);
 }
 
-const LIBELLE_PHASE: Record<PhaseMoyennePonderee, string> = {
-  centres: "Centres de classe",
-  sommes: "Sommes intermédiaires",
-  quotient: "Moyenne pondérée",
-};
+/** Séquence FIXE mais choisie dès le départ selon la variante (même logique que `phaseInitiale`,
+ * `moteur/sessionMoyennePonderee.ts`) : "classes" → centres → sommes → quotient (terminal) ; sinon
+ * → sommes → quotient (terminal) directement. Pas de fichier recap exposant déjà une telle
+ * séquence pour ce générateur, donc définie ici, depuis la même logique que le moteur. */
+function sequencePourExercice(exercice: ExerciceMoyennePonderee): PhaseMoyennePonderee[] {
+  return exercice.variante === "classes" ? ["centres", "sommes", "quotient"] : ["sommes", "quotient"];
+}
+
+/** "quotient" (dernière phase) n'a jamais besoin de sa propre branche "close" : un nouvel exercice
+ * redémarre toujours juste après, donc elle reste "a-venir" jusqu'à devenir "courante" — jamais
+ * consultée comme passée (même principe que la dernière phase d'`AppFormeCanoniqueTransformations`/
+ * `AppOptimisation`). Puces purement visuelles (pas de `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionMoyennePonderee): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "centres" ? etat.centresRevele : etat.sommesRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "centres" ? etat.niveauAideCentres : etat.niveauAideSommes;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -109,11 +130,7 @@ export function AppMoyennePonderee() {
         <h1 className="app-title">Moyenne pondérée</h1>
         <p className="app-subtitle">Chapitre 5</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

@@ -11,6 +11,8 @@ import { Katex } from "./components/Katex";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationParabole } from "./ui/recapitulatifEquationParabole";
 import { formatEquationAttendueLatex, formatFoyerLatex, formatSommetLatex } from "./ui/formatEquationParabole";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -24,10 +26,20 @@ function nouvelleSession(): EtatSessionEquationParabole {
   return demarrerSessionEquationParabole(REGLAGES_DEMO, genererExerciceEquationParabole);
 }
 
-const LIBELLE_PHASE: Record<PhaseEquationParabole, string> = {
-  sommetFoyer: "Sommet et foyer",
-  equation: "Équation de la parabole",
-};
+/** 2 phases fixes, toujours le même ordre — "equation" (dernière phase) n'a jamais besoin de sa
+ * propre branche "close" : jamais consultée comme phase passée. Puces purement visuelles (pas de
+ * `onSegmentClick`). */
+const ORDRE_PHASES: PhaseEquationParabole[] = ["sommetFoyer", "equation"];
+
+function calculerSegmentsProgression(etat: EtatSessionEquationParabole): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (etat.sommetFoyerRevele) return "revele";
+    return etat.niveauAideSommetFoyer > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -94,11 +106,7 @@ export function AppEquationParabole() {
         <h1 className="app-title">Équation d'une parabole depuis un graphe</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

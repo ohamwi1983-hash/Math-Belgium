@@ -21,6 +21,8 @@ import {
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifDispersion } from "./ui/recapitulatifDispersion";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -34,10 +36,17 @@ function nouvelleSession(): EtatSessionDispersion {
   return demarrerSessionDispersion(REGLAGES_DEMO, genererExerciceDispersion);
 }
 
-const LIBELLE_PHASE: Record<PhaseDispersion, string> = {
-  tableau: "Tableau et sommes intermédiaires",
-  varianceEcartType: "Variance et écart-type",
-};
+const ORDRE_PHASES: PhaseDispersion[] = ["tableau", "varianceEcartType"];
+
+function calculerSegmentsProgression(etat: EtatSessionDispersion): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (etat.tableauRevele) return "revele";
+    return etat.niveauAideTableau > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -92,15 +101,10 @@ export function AppDispersion() {
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Paramètres de dispersion</h1>
         <p className="app-subtitle">Chapitre 5</p>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
-
         <div className="card-body">
           <EnTeteExercice consigneGenerale={<SegmentsInline segments={formatEnonceSegments(exercice)} />} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />

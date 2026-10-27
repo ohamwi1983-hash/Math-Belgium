@@ -18,6 +18,8 @@ import { Katex } from "./components/Katex";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifEquationParaboleDeveloppee } from "./ui/recapitulatifEquationParaboleDeveloppee";
 import { formatCompletionLatex, formatDirectriceLatex, formatFoyerLatex, formatRegroupementLatex, formatSommetLatex } from "./ui/formatEquationParaboleDeveloppee";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -31,11 +33,22 @@ function nouvelleSession(): EtatSessionEquationParaboleDeveloppee {
   return demarrerSessionEquationParaboleDeveloppee(REGLAGES_DEMO, genererExerciceEquationParaboleDeveloppee);
 }
 
-const LIBELLE_PHASE: Record<PhaseEquationParaboleDeveloppee, string> = {
-  regroupement: "Orientation et factorisation",
-  completion: "Complétion du carré",
-  caracteristiques: "Caractéristiques finales",
-};
+/** 3 phases fixes, toujours le même ordre — "caracteristiques" (dernière phase) n'a jamais besoin
+ * de sa propre branche "close" : jamais consultée comme phase passée. Puces purement visuelles
+ * (pas de `onSegmentClick`). */
+const ORDRE_PHASES: PhaseEquationParaboleDeveloppee[] = ["regroupement", "completion", "caracteristiques"];
+
+function calculerSegmentsProgression(etat: EtatSessionEquationParaboleDeveloppee): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "regroupement" ? etat.regroupementRevele : etat.completionRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "regroupement" ? etat.niveauAideRegroupement : etat.niveauAideCompletion;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -116,11 +129,7 @@ export function AppEquationParaboleDeveloppee() {
         <h1 className="app-title">Sommet, foyer, p et directrice d'une parabole depuis l'équation développée</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

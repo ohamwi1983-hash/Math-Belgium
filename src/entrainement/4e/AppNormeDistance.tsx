@@ -15,6 +15,7 @@ import {
   soumettreReponseResolutionParametreNorme,
   soumettreReponseTestPythagore,
 } from "./moteur/sessionNormeDistance";
+import { SEQUENCES } from "./moteur/typesNormeDistance";
 import type { EtatSessionNormeDistance, PhaseNormeDistance, ResultatExerciceNormeDistance } from "./moteur/typesNormeDistance";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceNormeDistance } from "./generateurs/normeDistance";
 import type { VarianteNormeDistance } from "./core/normeDistance.types";
@@ -42,6 +43,8 @@ import {
   formatVecteurLatex,
   libelleRectangleEn,
 } from "./ui/formatNormeDistance";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -55,19 +58,25 @@ function nouvelleSession(): EtatSessionNormeDistance {
   return demarrerSessionNormeDistance(REGLAGES_DEMO, genererExerciceNormeDistance);
 }
 
-const LIBELLE_PHASE: Record<PhaseNormeDistance, string> = {
-  normeVecteur: "Norme",
-  constructionDistance: "Construction du vecteur",
-  calculDistance: "Calcul de la distance",
-  constructionIsocele: "Construction des côtés",
-  calculIsocele: "Calcul des longueurs",
-  conclusionIsocele: "Conclusion",
-  reductionParametreNorme: "Réduction",
-  resolutionParametreNorme: "Résolution",
-  constructionPythagore: "Construction des côtés",
-  calculPythagore: "Calcul des longueurs",
-  testPythagore: "Rectangle en...",
-};
+/** Réutilise `SEQUENCES` (séquence réelle par variante, déjà exposée par `typesNormeDistance.ts`)
+ * et `etat.scoresAccumules` (déjà rempli à chaque clôture d'écran — `score`/`revele`/`niveauAide`)
+ * plutôt qu'une deuxième reconstitution divergente. La dernière phase de chaque séquence n'a jamais
+ * besoin d'être lue dans `scoresAccumules` : un nouvel exercice redémarre toujours juste après,
+ * donc elle reste "a-venir" jusqu'à devenir "courante" — jamais consultée comme passée (même
+ * principe que la dernière phase d'`AppFormeCanoniqueTransformations`/`AppOptimisation`). Puces
+ * purement visuelles (pas de `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionNormeDistance): EtatPuceProgression[] {
+  const sequence = SEQUENCES[etat.exerciceCourant.variante];
+  const indexCourant = sequence.indexOf(etat.phase);
+  return sequence.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const score = etat.scoresAccumules[phase];
+    if (!score) return "correcte";
+    if (score.revele) return "revele";
+    return score.niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** Révélation de l'écran `phase` lue sur le résultat déjà clos de l'exercice (le dernier de la
  * séquence de sa variante — voir `scoresAccumules`/`SEQUENCES`, `typesNormeDistance.ts`). */
@@ -204,11 +213,7 @@ export function AppNormeDistance() {
         <h1 className="app-title">Norme d'un vecteur et distance entre 2 points</h1>
         <p className="app-subtitle">Chapitre 4 — Calcul vectoriel</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">

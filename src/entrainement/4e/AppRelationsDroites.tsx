@@ -17,6 +17,8 @@ import {
 } from "./ui/formatRelationsDroites";
 import { RecapitulatifPanel } from "./components/RecapitulatifPanel";
 import { calculerRecapitulatifRelationsDroites } from "./ui/recapitulatifRelationsDroites";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const REGLAGES_DEMO: ReglagesSession = {
   nombreExercices: 1,
@@ -30,11 +32,23 @@ function nouvelleSession(): EtatSessionRelationsDroites {
   return demarrerSessionRelationsDroites(REGLAGES_DEMO, genererExerciceRelationsDroites);
 }
 
-const LIBELLE_PHASE: Record<PhaseRelationsDroites, string> = {
-  extraction: "Extraction du vecteur directeur",
-  construction: "Construction du vecteur cherché",
-  equation: "Équation de la droite cherchée",
-};
+/** Ordre d'affichage des puces de progression — même ordre que la vraie séquence (3 phases fixes,
+ * aucun saut conditionnel, voir `typesRelationsDroites.ts`). "equation" (dernière phase) n'a
+ * jamais besoin de sa propre branche "close" — même principe que gen9/gen55. Puces purement
+ * visuelles. */
+const ORDRE_PHASES: PhaseRelationsDroites[] = ["extraction", "construction", "equation"];
+
+function calculerSegmentsProgression(etat: EtatSessionRelationsDroites): EtatPuceProgression[] {
+  const indexCourant = ORDRE_PHASES.indexOf(etat.phase);
+  return ORDRE_PHASES.map((phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    const revele = phase === "extraction" ? etat.extractionRevele : etat.constructionRevele;
+    if (revele) return "revele";
+    const niveauAide = phase === "extraction" ? etat.niveauAideExtraction : etat.niveauAideConstruction;
+    return niveauAide > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -107,11 +121,7 @@ export function AppRelationsDroites() {
         <h1 className="app-title">Relations entre droites</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie analytique</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[etat.phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">
