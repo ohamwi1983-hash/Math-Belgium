@@ -54,10 +54,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       libelle: exercice.ce.length === 1 ? "Condition d'existence (CE)" : "Conditions d'existence (CE)",
       estLatex: false,
       valeur: exercice.ce.map((v) => `x ≠ ${v}`).join(" et "),
-      // Pas de `ceRevele` tracké par le moteur (`moteur/typesEquationRationnelle.ts`) — exception
-      // structurelle déjà documentée (AppEquationRationnelle) : score exactement 0 ⟺ révélée
-      // (jamais atteint par une réussite, voir `etapeTentatives.ts`).
-      revele: etat.scoreCEExercice === 0,
+      revele: etat.ceRevele,
     });
   }
 
@@ -68,8 +65,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       libelle: "Mise en évidence (fraction)",
       estLatex: true,
       valeur: formatMiseEnEvidence(p2DeFractionGauche(fractionGauche)),
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreSimplifierReductionExercice === 0,
+      revele: etat.simplifierReductionRevele,
     });
   }
 
@@ -84,11 +80,10 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
 
   if (fractionGauche && etat.scoreSimplifierChamp1Exercice !== null) {
     const p2 = p2DeFractionGauche(fractionGauche);
-    const revele = etat.scoreSimplifierChamp1Exercice === 0;
+    const revele = etat.simplifierChamp1Revele;
     entrees.push(
       p2.categorie === "cas_general"
         ? { libelle: "Δ (fraction)", estLatex: false, valeur: `Δ = ${p2.solution.delta}`, revele }
-        // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
         : { libelle: "Forme factorisée (fraction)", estLatex: true, valeur: `${p2.solution.formeFactorisee} = 0`, revele },
     );
   }
@@ -101,8 +96,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       estLatex: true,
       valeur: formatZerosAttendusLatex(p2),
       ...(valeurs.length > 1 ? { valeurs } : {}),
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreSimplifierChamp2Exercice === 0,
+      revele: etat.simplifierChamp2Revele,
     });
   }
 
@@ -112,8 +106,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       libelle: "Forme factorisée (fraction)",
       estLatex: true,
       valeur: `${formatFormeFactoriseeDepuisRacines(p2.enonce, p2.solution.racines)} = 0`,
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreSimplifierFactorisationExercice === 0,
+      revele: etat.simplifierFactorisationRevele,
     });
   }
 
@@ -122,8 +115,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       libelle: "Fraction simplifiée",
       estLatex: true,
       valeur: formatFractionSimplifiee(fractionGauche),
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreSimplifierFractionExercice === 0,
+      revele: etat.simplifierFractionRevele,
     });
   }
 
@@ -134,8 +126,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       estLatex: true,
       valeur: valeurs.join("\\quad"),
       valeurs,
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreSimplifierExercice === 0,
+      revele: etat.simplifierRevele,
     });
   }
 
@@ -144,8 +135,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       libelle: "Équation isolée",
       estLatex: true,
       valeur: formatEnonceLatex(exercice.equationIsolee.enonce),
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreIsolementExercice === 0,
+      revele: etat.isolementRevele,
     });
   }
 
@@ -160,11 +150,10 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
 
   if (etat.scoreChampPrincipalExercice !== null) {
     const eq = exercice.equationIsolee;
-    const revele = etat.scoreChampPrincipalExercice === 0;
+    const revele = etat.champPrincipalRevele;
     entrees.push(
       eq.categorie === "cas_general"
         ? { libelle: "Δ", estLatex: false, valeur: `Δ = ${eq.solution.delta}`, revele }
-        // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
         : { libelle: "Forme factorisée", estLatex: true, valeur: `${eq.solution.formeFactorisee} = 0`, revele },
     );
   }
@@ -177,8 +166,7 @@ export function calculerRecapitulatifEquationRationnelle(etat: EtatSessionEquati
       estLatex: true,
       valeur: formatZerosAttendusLatex(eq),
       ...(valeurs.length > 1 ? { valeurs } : {}),
-      // Pas de champ "revele" tracké pour cette phase — même heuristique de repli.
-      revele: etat.scoreRacinesExercice === 0,
+      revele: etat.racinesRevele,
     });
   }
 

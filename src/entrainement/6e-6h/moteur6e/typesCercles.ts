@@ -115,6 +115,8 @@ export function phasesPourExercice(exercice: ExerciceCercles): PhaseCercles[] {
 export interface ResultatExerciceCercles {
   exercice: ExerciceCercles;
   scores: Partial<Record<PhaseCercles, number>>;
+  /** même principe que `EtatSessionCercles.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseCercles, boolean>>;
 }
 
 export interface EtatSessionCercles {
@@ -125,6 +127,12 @@ export interface EtatSessionCercles {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseCercles, number>>;
+  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionCercles.ts`) peut ramener une RÉUSSITE
+   * fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite ajouté
+   * pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
+  revelesPartiels: Partial<Record<PhaseCercles, boolean>>;
   /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
    * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
    * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */

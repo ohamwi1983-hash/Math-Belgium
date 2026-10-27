@@ -27,8 +27,23 @@ export const NIVEAU_AIDE_MAX = 2;
  * variable à phase constante). */
 let prochainGenerationId = 0;
 
-function etatInitial(exercice: ExerciceExtensionsBinomialeNormaleBayes): Pick<EtatSessionExtensionsBinomialeNormaleBayes, "exerciceCourant" | "phase" | "generationId" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), generationId: prochainGenerationId++, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, aidePartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceExtensionsBinomialeNormaleBayes,
+): Pick<
+  EtatSessionExtensionsBinomialeNormaleBayes,
+  "exerciceCourant" | "phase" | "generationId" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "aidePartiels" | "derniereTransitionRevelee"
+> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    generationId: prochainGenerationId++,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    aidePartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionExtensionsBinomialeNormaleBayes(reglages: ReglagesSession6e, generateur: () => ExerciceExtensionsBinomialeNormaleBayes, calculerReference: CalculerReferenceExtensionsBinomialeNormaleBayes): EtatSessionExtensionsBinomialeNormaleBayes {
@@ -70,13 +85,23 @@ export function soumettreReponseEcran(etat: EtatSessionExtensionsBinomialeNormal
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };
   const phaseSuivante = phaseApres(phaseCourante);
 
   if (phaseSuivante === "termine") {
     const resultat: ResultatExerciceExtensionsBinomialeNormaleBayes = { exercice, scores: scoresPartiels };
-    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels }, resultat), derniereTransitionRevelee: revele };
+    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels, revelesPartiels }, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return {
+    ...etat,
+    scoresPartiels,
+    revelesPartiels,
+    aidePartiels,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: phaseSuivante,
+    derniereTransitionRevelee: revele,
+  };
 }

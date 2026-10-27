@@ -21,8 +21,22 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
 /** 2 niveaux d'aide sur tous les écrans (spec explicite pour chaque écran documenté). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceIntegralesDefinies): Pick<EtatSessionIntegralesDefinies, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, aidePartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceIntegralesDefinies,
+): Pick<
+  EtatSessionIntegralesDefinies,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "aidePartiels" | "derniereTransitionRevelee"
+> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    aidePartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionIntegralesDefinies(reglages: ReglagesSession6e, generateur: () => ExerciceIntegralesDefinies): EtatSessionIntegralesDefinies {
@@ -63,13 +77,23 @@ export function soumettreReponseEcran(etat: EtatSessionIntegralesDefinies, valeu
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseIntegralesDefinies, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseIntegralesDefinies, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseIntegralesDefinies, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };
   const phaseSuivante = phaseApres(exercice, phaseCourante);
 
   if (phaseSuivante === "termine") {
     const resultat: ResultatExerciceIntegralesDefinies = { exercice, scores: scoresPartiels };
-    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels }, resultat), derniereTransitionRevelee: revele };
+    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels, revelesPartiels }, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return {
+    ...etat,
+    scoresPartiels,
+    revelesPartiels,
+    aidePartiels,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: phaseSuivante,
+    derniereTransitionRevelee: revele,
+  };
 }

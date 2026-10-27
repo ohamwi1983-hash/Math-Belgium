@@ -157,6 +157,13 @@ export interface EtatSessionExtensionsBinomialeNormaleBayes {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, number>>;
+  /** Vrai signal "révélé" par phase déjà close, peuplé depuis `etapeCourante.revelee` à la clôture
+   * (`soumettreReponseEcran`) — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scoresPartiels[phase] === 0`, une heuristique non fiable ici : la pénalité d'aide est
+   * soustraite APRÈS le score de tentatives (`Math.max(0, score - niveauAide*PENALITE)`), donc une
+   * RÉUSSITE fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée".
+   * Champ explicite ajouté pendant le balayage générique (point A). */
+  revelesPartiels: Partial<Record<PhaseExtensionsBinomialeNormaleBayes, boolean>>;
   /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
    * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
    * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */

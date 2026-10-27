@@ -21,8 +21,18 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
  * `max=0` ailleurs (voir `ui6e/formatBinomeNewton.ts`, `niveauAideMaxEcran`). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceBinomeNewton): Pick<EtatSessionBinomeNewton, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceBinomeNewton,
+): Pick<EtatSessionBinomeNewton, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "derniereTransitionRevelee"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionBinomeNewton(reglages: ReglagesSession6e, generateur: () => ExerciceBinomeNewton): EtatSessionBinomeNewton {
@@ -63,12 +73,13 @@ export function soumettreReponseEcran(etat: EtatSessionBinomeNewton, valeurs: st
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseBinomeNewton, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseBinomeNewton, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);
 
   if (phaseSuivante === "termine") {
-    const resultat: ResultatExerciceBinomeNewton = { exercice, scores: scoresPartiels };
+    const resultat: ResultatExerciceBinomeNewton = { exercice, scores: scoresPartiels, revelesPartiels };
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

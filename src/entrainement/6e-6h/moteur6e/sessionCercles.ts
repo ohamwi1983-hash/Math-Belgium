@@ -19,8 +19,19 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
  * `ui6e/formatCercles.ts`, `niveauAideMaxEcran`). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceCercles): Pick<EtatSessionCercles, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, aidePartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceCercles,
+): Pick<EtatSessionCercles, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    aidePartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionCercles(reglages: ReglagesSession6e, generateur: () => ExerciceCercles): EtatSessionCercles {
@@ -61,13 +72,14 @@ export function soumettreReponseEcran(etat: EtatSessionCercles, valeurs: string[
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseCercles, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseCercles, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseCercles, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };
   const phaseSuivante = phaseApres(phaseCourante);
 
   if (phaseSuivante === "termine") {
-    const resultat: ResultatExerciceCercles = { exercice, scores: scoresPartiels };
-    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels }, resultat), derniereTransitionRevelee: revele };
+    const resultat: ResultatExerciceCercles = { exercice, scores: scoresPartiels, revelesPartiels };
+    return { ...cloturerExerciceOuSuivant({ ...etat, revelesPartiels, aidePartiels }, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, revelesPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

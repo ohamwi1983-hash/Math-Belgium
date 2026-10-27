@@ -151,8 +151,9 @@ function nouvelleSession(): EtatSessionSuiteClassique {
 
 /** Puces de progression — pas de `ORDRE_PHASES` local ici : celui déjà exporté par
  * `moteur5e/typesSuiteClassique.ts` (`Record<ScenarioSuiteClassique, PhaseSuiteClassique[]>`) suffit
- * via `ordreComplet(exercice)`, même principe que 5gen14/5gen15/5gen16. Même heuristique
- * `score === 0 ⟺ révélée` que `calculerRecapitulatifSuiteClassique`. */
+ * via `ordreComplet(exercice)`, même principe que 5gen14/5gen15/5gen16. Icône "revele" pilotée par
+ * `etat.revelesPartiels[phase]`, même source que `calculerRecapitulatifSuiteClassique` (jamais
+ * `scoresPartiels[phase] === 0`, point A). */
 function calculerSegmentsProgression(
   etat: EtatSessionSuiteClassique,
   aideUtiliseeParPhase: Partial<Record<PhaseSuiteClassique, boolean>>,
@@ -161,7 +162,7 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[phase]) return "revele";
     return aideUtiliseeParPhase[phase] ? "aide" : "correcte";
   });
 }

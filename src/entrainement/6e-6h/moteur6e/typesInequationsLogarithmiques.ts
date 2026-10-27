@@ -94,6 +94,12 @@ export interface EtatSessionInequationLogarithmique {
   /** Accumule au fil des écrans (l'ensemble de phases réellement traversées varie par famille —
    * voir `phaseInitiale`/`phaseApres`). */
   scoresPartiels: Partial<Record<PhaseInequationLogarithmique, number>>;
+  /** Vrai signal "révélé" par phase déjà close, peuplé depuis `etapeCourante.revelee` à la clôture
+   * — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, non fiable
+   * ici : la pénalité d'aide est soustraite APRÈS le score (`Math.max(0, score -
+   * niveauAide*PENALITE)`), donc une RÉUSSITE fortement aidée pouvait tomber à 0 et s'afficher à
+   * tort comme "révélée". Champ explicite ajouté pendant le balayage générique (point A). */
+  revelesPartiels: Partial<Record<PhaseInequationLogarithmique, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceInequationLogarithmique[];
   terminee: boolean;

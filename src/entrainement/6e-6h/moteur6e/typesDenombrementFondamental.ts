@@ -136,6 +136,8 @@ export function phasesPourExercice(exercice: ExerciceDenombrementFondamental): P
 export interface ResultatExerciceDenombrementFondamental {
   exercice: ExerciceDenombrementFondamental;
   scores: Partial<Record<PhaseDenombrementFondamental, number>>;
+  /** même principe que `EtatSessionDenombrementFondamental.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseDenombrementFondamental, boolean>>;
 }
 
 export interface EtatSessionDenombrementFondamental {
@@ -146,6 +148,13 @@ export interface EtatSessionDenombrementFondamental {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseDenombrementFondamental, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture — jusqu'au
+   * 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, une heuristique
+   * corrigée pendant le balayage générique (point A) car non fiable ici : la pénalité d'aide
+   * (`Math.max(0, score - niveauAide*20)`, voir sessionDenombrementFondamental.ts) est soustraite
+   * APRÈS le score de tentatives, donc une RÉUSSITE fortement aidée pouvait tomber à exactement 0
+   * et s'afficher à tort comme "révélée". */
+  revelesPartiels: Partial<Record<PhaseDenombrementFondamental, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceDenombrementFondamental[];
   terminee: boolean;

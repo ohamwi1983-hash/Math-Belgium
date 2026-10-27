@@ -31,7 +31,7 @@ export function calculerRecapitulatifInequationsExponentielles(etat: EtatSession
     const contenu = contenuRecapPhase(exercice, phase);
     const estLatex = contenu.latex !== null;
     const valeur = estLatex ? (contenu.latex as string) : contenu.texte ?? "";
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: LIBELLE_PHASE_INEQ[phase], estLatex, valeur, revele };
   });
 }
@@ -41,6 +41,6 @@ export function calculerSegmentsProgressionInequationsExponentielles(etat: EtatS
   return sequence.map((phase) => {
     if (phase === etat.phase) return "courante" as const;
     if (etat.scoresPartiels[phase] === undefined) return "a-venir" as const;
-    return etat.scoresPartiels[phase] === 0 ? ("revele" as const) : ("correcte" as const);
+    return etat.revelesPartiels[phase] ? ("revele" as const) : ("correcte" as const);
   });
 }

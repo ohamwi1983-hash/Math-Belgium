@@ -16,7 +16,7 @@ export function calculerRecapitulatifIntegralesProblemes(etat: EtatSessionIntegr
 
   return precedentes.map((phase: PhaseIntegralesProblemes) => {
     const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele };
   });
 }
@@ -27,7 +27,7 @@ export function calculerSegmentsProgressionIntegralesProblemes(etat: EtatSession
   return sequence.map((phase) => {
     if (phase === etat.phase) return "courante" as const;
     if (etat.scoresPartiels[phase] === undefined) return "a-venir" as const;
-    if (etat.scoresPartiels[phase] === 0) return "revele" as const;
+    if (etat.revelesPartiels[phase]) return "revele" as const;
     return etat.aidePartiels[phase] ? ("aide" as const) : ("correcte" as const);
   });
 }

@@ -93,11 +93,11 @@ interface TransitionEnAttente {
 /** Puces de progression — séquence RÉELLEMENT parcourue par CET exercice (`ordreEcransEtudeLocale`,
  * 2 à 7 écrans selon `exercice.type`/`exercice.niveau`/le nombre de vrais extremums-PI — jamais la
  * liste complète des 7 écrans possibles, "domaine"/"resoudreFSeconde"/"tableauFSeconde"/"inflexions"
- * étant souvent sautés). Aucun booléen `xxxRevele` dédié par écran côté session : `scoresPartiels`
- * (`moteur5e/typesEtudeLocale.ts`/`sessionEtudeLocale.ts`) garde le score de chaque écran déjà clos
- * de l'exercice courant (remis à `{}` au prochain exercice) — heuristique `score === 0 ⟺ révélée`
- * (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand
- * l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e). */
+ * étant souvent sautés). Icône "revele" pilotée par `etat.revelesPartiels[ecran]`, peuplé depuis
+ * `etapeCourante.revelee` à la clôture de chaque écran (`sessionEtudeLocale.ts::soumettreEcran`) —
+ * jamais `scoresPartiels[ecran] === 0` (point A, balayage générique) : la pénalité d'aide de ce
+ * générateur est soustraite APRÈS le score de tentatives puis plafonnée à 0, donc une réussite
+ * fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée". */
 function calculerSegmentsProgression(
   etat: EtatSessionEtudeLocale,
   aideParPhase: Partial<Record<EcranEtudeLocale, boolean>>,
@@ -106,7 +106,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideParPhase[ecran] ? "aide" : "correcte";
   });
 }

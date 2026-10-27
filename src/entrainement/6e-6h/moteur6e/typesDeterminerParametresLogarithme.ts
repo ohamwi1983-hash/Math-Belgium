@@ -56,6 +56,12 @@ export interface EtatSessionDeterminerParametresLogarithme {
   /** Accumule au fil des écrans (l'ensemble de phases réellement traversées varie par famille —
    * voir `phaseInitiale`/`phaseApres` — même principe que 6gen12/6gen16). */
   scoresPartiels: Partial<Record<PhaseDeterminerParametresLogarithme, number>>;
+  /** Vrai signal "révélé" par phase, même index que `scoresPartiels`, peuplé depuis
+   * `etapeCourante.revelee` à la clôture — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scoresPartiels[phase] === 0`, corrigé pendant le balayage générique (point A) car non fiable
+   * ici : la pénalité d'aide (`Math.max(0, score - niveauAide*20)`) est soustraite APRÈS le score
+   * de tentatives, donc une réussite fortement aidée pouvait tomber à exactement 0. */
+  revelesPartiels: Partial<Record<PhaseDeterminerParametresLogarithme, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceDeterminerParametresLogarithme[];
   terminee: boolean;

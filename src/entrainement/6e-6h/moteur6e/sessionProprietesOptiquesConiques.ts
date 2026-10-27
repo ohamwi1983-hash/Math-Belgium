@@ -21,8 +21,18 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
  * `ui6e/formatProprietesOptiquesConiques.ts`, `niveauAideMaxEcran`). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceProprietesOptiquesConiques): Pick<EtatSessionProprietesOptiquesConiques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceProprietesOptiquesConiques,
+): Pick<EtatSessionProprietesOptiquesConiques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "derniereTransitionRevelee"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionProprietesOptiquesConiques(reglages: ReglagesSession6e, generateur: () => ExerciceProprietesOptiquesConiques): EtatSessionProprietesOptiquesConiques {
@@ -63,6 +73,7 @@ export function soumettreReponseEcran(etat: EtatSessionProprietesOptiquesConique
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseProprietesOptiquesConiques, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseProprietesOptiquesConiques, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const phaseSuivante = phaseApres(phaseCourante);
 
   if (phaseSuivante === "termine") {
@@ -70,5 +81,5 @@ export function soumettreReponseEcran(etat: EtatSessionProprietesOptiquesConique
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

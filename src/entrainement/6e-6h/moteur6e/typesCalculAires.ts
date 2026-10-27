@@ -76,6 +76,8 @@ export function phasesPourExercice(exercice: ExerciceCalculAires): PhaseCalculAi
 export interface ResultatExerciceCalculAires {
   exercice: ExerciceCalculAires;
   scores: Partial<Record<PhaseCalculAires, number>>;
+  /** même principe que `EtatSessionCalculAires.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseCalculAires, boolean>>;
 }
 
 export interface EtatSessionCalculAires {
@@ -87,6 +89,12 @@ export interface EtatSessionCalculAires {
   niveauAide: number;
   /** Accumule au fil des écrans de l'exercice COURANT — remis à `{}` à chaque nouvel exercice. */
   scoresPartiels: Partial<Record<PhaseCalculAires, number>>;
+  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionCalculAires.ts`) peut ramener une RÉUSSITE
+   * fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite ajouté
+   * pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
+  revelesPartiels: Partial<Record<PhaseCalculAires, boolean>>;
   /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
    * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
    * aide" de `ProgressionPuces`. */

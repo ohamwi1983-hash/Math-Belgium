@@ -106,6 +106,8 @@ export function phasesPourExercice(exercice: ExerciceComplexesAvances): PhaseCom
 export interface ResultatExerciceComplexesAvances {
   exercice: ExerciceComplexesAvances;
   scores: Partial<Record<PhaseComplexesAvances, number>>;
+  /** même principe que `EtatSessionComplexesAvances.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseComplexesAvances, boolean>>;
 }
 
 export interface EtatSessionComplexesAvances {
@@ -116,6 +118,12 @@ export interface EtatSessionComplexesAvances {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseComplexesAvances, number>>;
+  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionComplexesAvances.ts`) peut ramener une
+   * RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite
+   * ajouté pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
+  revelesPartiels: Partial<Record<PhaseComplexesAvances, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceComplexesAvances[];
   terminee: boolean;

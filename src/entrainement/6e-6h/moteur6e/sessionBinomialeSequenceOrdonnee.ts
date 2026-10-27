@@ -43,8 +43,23 @@ export const NIVEAU_AIDE_MAX = 2;
  */
 let prochainGenerationId = 0;
 
-function etatInitial(exercice: ExerciceBinomialeSequenceOrdonnee): Pick<EtatSessionBinomialeSequenceOrdonnee, "exerciceCourant" | "phase" | "generationId" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "aidePartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), generationId: prochainGenerationId++, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, aidePartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceBinomialeSequenceOrdonnee,
+): Pick<
+  EtatSessionBinomialeSequenceOrdonnee,
+  "exerciceCourant" | "phase" | "generationId" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "aidePartiels" | "derniereTransitionRevelee"
+> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    generationId: prochainGenerationId++,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    aidePartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionBinomialeSequenceOrdonnee(reglages: ReglagesSession6e, generateur: () => ExerciceBinomialeSequenceOrdonnee): EtatSessionBinomialeSequenceOrdonnee {
@@ -85,13 +100,14 @@ export function soumettreReponseEcran(etat: EtatSessionBinomialeSequenceOrdonnee
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
   const aidePartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, boolean>> = { ...etat.aidePartiels, [phaseCourante]: etat.niveauAide > 0 };
   const phaseSuivante = phaseApres(phaseCourante);
 
   if (phaseSuivante === "termine") {
-    const resultat: ResultatExerciceBinomialeSequenceOrdonnee = { exercice, scores: scoresPartiels };
-    return { ...cloturerExerciceOuSuivant({ ...etat, aidePartiels }, resultat), derniereTransitionRevelee: revele };
+    const resultat: ResultatExerciceBinomialeSequenceOrdonnee = { exercice, scores: scoresPartiels, revelesPartiels };
+    return { ...cloturerExerciceOuSuivant({ ...etat, revelesPartiels, aidePartiels }, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, revelesPartiels, aidePartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

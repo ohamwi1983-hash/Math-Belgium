@@ -93,6 +93,12 @@ export interface EtatSessionIdentificationConiques {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseIdentificationConiques, number>>;
+  /** Vrai signal "révélé" par phase déjà close, peuplé depuis `etapeCourante.revelee` à la clôture
+   * — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, non fiable
+   * ici : la pénalité d'aide est soustraite APRÈS le score (`Math.max(0, score -
+   * niveauAide*PENALITE)`), donc une RÉUSSITE fortement aidée pouvait tomber à 0 et s'afficher à
+   * tort comme "révélée". Champ explicite ajouté pendant le balayage générique (point A). */
+  revelesPartiels: Partial<Record<PhaseIdentificationConiques, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceIdentificationConiques[];
   terminee: boolean;

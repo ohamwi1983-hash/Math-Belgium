@@ -20,8 +20,18 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
  * `ui6e/formatIntersectionsConiques.ts`, `niveauAideMaxEcran`). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceIntersectionsConiques): Pick<EtatSessionIntersectionsConiques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceIntersectionsConiques,
+): Pick<EtatSessionIntersectionsConiques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "derniereTransitionRevelee"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionIntersectionsConiques(reglages: ReglagesSession6e, generateur: () => ExerciceIntersectionsConiques): EtatSessionIntersectionsConiques {

@@ -174,28 +174,28 @@ function calculerSegmentsProgression(etat: EtatSessionEquationRationnelle): Etat
     if (score === null) return "a-venir";
     const revele =
       phase === "ce"
-        ? etat.scoreCEExercice === 0
+        ? etat.ceRevele
         : phase === "simplifier"
-          ? etat.scoreSimplifierExercice === 0
+          ? etat.simplifierRevele
           : phase === "simplifierReduction"
-            ? etat.scoreSimplifierReductionExercice === 0
+            ? etat.simplifierReductionRevele
             : phase === "simplifierReconnaissance"
               ? etat.simplifierCategorieRevelee
               : phase === "simplifierChamp1"
-                ? etat.scoreSimplifierChamp1Exercice === 0
+                ? etat.simplifierChamp1Revele
                 : phase === "simplifierChamp2"
-                  ? etat.scoreSimplifierChamp2Exercice === 0
+                  ? etat.simplifierChamp2Revele
                   : phase === "simplifierFactorisation"
-                    ? etat.scoreSimplifierFactorisationExercice === 0
+                    ? etat.simplifierFactorisationRevele
                     : phase === "simplifierFraction"
-                      ? etat.scoreSimplifierFractionExercice === 0
+                      ? etat.simplifierFractionRevele
                       : phase === "isolement"
-                        ? etat.scoreIsolementExercice === 0
+                        ? etat.isolementRevele
                         : phase === "reconnaissance"
                           ? etat.categorieRevelee
                           : phase === "champ1"
-                            ? etat.scoreChampPrincipalExercice === 0
-                            : etat.scoreRacinesExercice === 0; // champ2
+                            ? etat.champPrincipalRevele
+                            : etat.racinesRevele; // champ2
     if (revele) return "revele";
     return aideUtiliseePhase(etat, phase) ? "aide" : "correcte";
   });
@@ -409,42 +409,43 @@ function reponseAttenduePhase(etat: EtatSessionEquationRationnelle): ReactNode {
 
 /**
  * Signal `revele` de la phase qui vient JUSTE de se terminer (`etat.phase`, avant la transition).
- * Ce générateur n'a JAMAIS tracké de booléen `xxxRevele` fiable par écran au niveau du moteur
- * (seules "simplifierReconnaissance"/"reconnaissance" en ont un, `simplifierCategorieRevelee`/
- * `categorieRevelee` — QCM sans aide) : pour toutes les autres phases, l'ancien
- * `ResultatPanelEquationRationnelle.tsx` dérivait `revele` post-hoc comme `scoreXxx === 0`
- * (approximatif : une pénalité d'aide peut aussi ramener à 0 une réponse correcte mais aidée — même
- * défaut qu'avant, reproduit ici à l'identique, PAS corrigé dans cette passe). "racinesEtrangeres"
- * clôture TOUJOURS l'exercice : son score n'existe que sur le dernier `resultats[...]` de
- * `nouvelEtat`, jamais sur un champ `xxxExercice` top-level. */
+ * Lit `xxxRevele`, peuplé depuis `etapeCourante.revelee` à la clôture de chaque phase (jamais une
+ * valeur recalculée) — jusqu'au 2025-10, dérivé post-hoc comme `scoreXxx === 0`
+ * (`ResultatPanelEquationRationnelle.tsx` à l'origine). Contrairement à d'autres générateurs
+ * corrigés dans le même balayage générique (point A), cette heuristique était ici mathématiquement
+ * sûre (pénalité d'aide ×0,5 sur le score de tentatives, jamais soustractive — un succès ne peut
+ * jamais tomber exactement à 0, voir `etapeTentatives.ts`) : champ explicite ajouté pour la clarté
+ * du code, pas pour corriger un bug visible. "racinesEtrangeres" clôture TOUJOURS l'exercice : son
+ * signal n'existe que sur le dernier `resultats[...]` de `nouvelEtat`, jamais sur un champ
+ * `xxxRevele` top-level. */
 function releveRevelePhase(etat: EtatSessionEquationRationnelle, nouvelEtat: EtatSessionEquationRationnelle): boolean {
   switch (etat.phase) {
     case "ce":
-      return nouvelEtat.scoreCEExercice === 0;
+      return nouvelEtat.ceRevele;
     case "simplifier":
-      return nouvelEtat.scoreSimplifierExercice === 0;
+      return nouvelEtat.simplifierRevele;
     case "simplifierReduction":
-      return nouvelEtat.scoreSimplifierReductionExercice === 0;
+      return nouvelEtat.simplifierReductionRevele;
     case "simplifierReconnaissance":
       return nouvelEtat.simplifierCategorieRevelee;
     case "simplifierChamp1":
-      return nouvelEtat.scoreSimplifierChamp1Exercice === 0;
+      return nouvelEtat.simplifierChamp1Revele;
     case "simplifierChamp2":
-      return nouvelEtat.scoreSimplifierChamp2Exercice === 0;
+      return nouvelEtat.simplifierChamp2Revele;
     case "simplifierFactorisation":
-      return nouvelEtat.scoreSimplifierFactorisationExercice === 0;
+      return nouvelEtat.simplifierFactorisationRevele;
     case "simplifierFraction":
-      return nouvelEtat.scoreSimplifierFractionExercice === 0;
+      return nouvelEtat.simplifierFractionRevele;
     case "isolement":
-      return nouvelEtat.scoreIsolementExercice === 0;
+      return nouvelEtat.isolementRevele;
     case "reconnaissance":
       return nouvelEtat.categorieRevelee;
     case "champ1":
-      return nouvelEtat.scoreChampPrincipalExercice === 0;
+      return nouvelEtat.champPrincipalRevele;
     case "champ2":
-      return nouvelEtat.scoreRacinesExercice === 0;
+      return nouvelEtat.racinesRevele;
     case "racinesEtrangeres":
-      return nouvelEtat.resultats[nouvelEtat.resultats.length - 1].scoreRacinesEtrangeres === 0;
+      return nouvelEtat.resultats[nouvelEtat.resultats.length - 1].racinesEtrangeresRevele;
   }
 }
 

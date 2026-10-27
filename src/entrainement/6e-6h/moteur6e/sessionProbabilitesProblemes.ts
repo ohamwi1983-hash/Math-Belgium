@@ -22,8 +22,18 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
 /** 2 niveaux d'aide sur tous les écrans (même convention que `6gen30`/`6gen31`/`6gen32`). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceProbabilitesProblemes): Pick<EtatSessionProbabilitesProblemes, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+function etatInitial(
+  exercice: ExerciceProbabilitesProblemes,
+): Pick<EtatSessionProbabilitesProblemes, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "derniereTransitionRevelee"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionProbabilitesProblemes(reglages: ReglagesSession6e, generateur: () => ExerciceProbabilitesProblemes): EtatSessionProbabilitesProblemes {
@@ -65,11 +75,12 @@ export function soumettreReponseEcran(etat: EtatSessionProbabilitesProblemes, va
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const phaseSuivante = phaseApres(phaseCourante);
   const scoresPartiels: Partial<Record<PhaseProbabilitesProblemes, number>> = { ...etat.scoresPartiels, [phaseCourante]: score };
+  const revelesPartiels: Partial<Record<PhaseProbabilitesProblemes, boolean>> = { ...etat.revelesPartiels, [phaseCourante]: revele };
 
   if (phaseSuivante === "termine") {
     const resultat: ResultatExerciceProbabilitesProblemes = { exercice, scores: scoresPartiels };
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
 }

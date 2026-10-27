@@ -131,6 +131,8 @@ export function phasesPourExercice(exercice: ExerciceCalculPrimitives): PhaseCal
 export interface ResultatExerciceCalculPrimitives {
   exercice: ExerciceCalculPrimitives;
   scores: Partial<Record<PhaseCalculPrimitives, number>>;
+  /** même principe que `EtatSessionCalculPrimitives.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseCalculPrimitives, boolean>>;
 }
 
 export interface EtatSessionCalculPrimitives {
@@ -143,6 +145,12 @@ export interface EtatSessionCalculPrimitives {
   /** Accumule au fil des écrans de l'exercice COURANT — l'ensemble de phases réellement traversées
    * varie par famille/sous-type (voir `phasesPourExercice`), remis à `{}` à chaque nouvel exercice. */
   scoresPartiels: Partial<Record<PhaseCalculPrimitives, number>>;
+  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionCalculPrimitives.ts`) peut ramener une
+   * RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite
+   * ajouté pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
+  revelesPartiels: Partial<Record<PhaseCalculPrimitives, boolean>>;
   /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture (avant que la transition
    * suivante ne remette `niveauAide` à zéro) — capturé dans `avancerPhase`/`soumettreReponseEcran`,
    * jamais recalculé depuis le score (ambigu : un score réduit peut aussi venir de tentatives

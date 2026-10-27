@@ -16,7 +16,7 @@ export function calculerRecapitulatifDeterminerParametresLogarithme(etat: EtatSe
 
   return precedentes.map((phase: PhaseDeterminerParametresLogarithme) => {
     const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele };
   });
 }
@@ -26,6 +26,6 @@ export function calculerSegmentsProgressionDeterminerParametresLogarithme(etat: 
   return sequence.map((phase) => {
     if (phase === etat.phase) return "courante" as const;
     if (etat.scoresPartiels[phase] === undefined) return "a-venir" as const;
-    return etat.scoresPartiels[phase] === 0 ? ("revele" as const) : ("correcte" as const);
+    return etat.revelesPartiels[phase] ? ("revele" as const) : ("correcte" as const);
   });
 }

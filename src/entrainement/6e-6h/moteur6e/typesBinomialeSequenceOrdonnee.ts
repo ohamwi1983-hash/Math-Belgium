@@ -66,6 +66,8 @@ export function phasesPourExercice(exercice: ExerciceBinomialeSequenceOrdonnee):
 export interface ResultatExerciceBinomialeSequenceOrdonnee {
   exercice: ExerciceBinomialeSequenceOrdonnee;
   scores: Partial<Record<PhaseBinomialeSequenceOrdonnee, number>>;
+  /** même principe que `EtatSessionBinomialeSequenceOrdonnee.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, boolean>>;
 }
 
 export interface EtatSessionBinomialeSequenceOrdonnee {
@@ -84,6 +86,12 @@ export interface EtatSessionBinomialeSequenceOrdonnee {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, number>>;
+  /** Vrai signal "révélé" par écran déjà clos — jusqu'au 2025-10, déduit de
+   * `scoresPartiels[phase] === 0`, une heuristique fausse ici : la pénalité d'aide
+   * (`Math.max(0, score - niveauAide*20)` dans `sessionBinomialeSequenceOrdonnee.ts`) peut ramener
+   * une RÉUSSITE fortement aidée à exactement 0, affichée à tort comme "révélée". Champ explicite
+   * ajouté pendant le balayage générique (point A), peuplé depuis `etapeCourante.revelee`. */
+  revelesPartiels: Partial<Record<PhaseBinomialeSequenceOrdonnee, boolean>>;
   /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
    * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
    * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */

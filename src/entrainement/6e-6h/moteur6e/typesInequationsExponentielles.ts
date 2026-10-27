@@ -87,6 +87,12 @@ export interface EtatSessionInequationExponentielle {
   /** Accumule au fil des écrans (l'ensemble de phases réellement traversées varie par famille/
    * sous-type — voir `phaseInitiale`/`phaseApres` — même principe que 6gen3/6gen6/6gen9). */
   scoresPartiels: Partial<Record<PhaseInequationExponentielle, number>>;
+  /** Vrai signal "révélé" par phase déjà close, peuplé depuis `etapeCourante.revelee` à la clôture
+   * — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, non fiable
+   * ici : la pénalité d'aide est soustraite APRÈS le score (`Math.max(0, score -
+   * niveauAide*PENALITE)`), donc une RÉUSSITE fortement aidée pouvait tomber à 0 et s'afficher à
+   * tort comme "révélée". Champ explicite ajouté pendant le balayage générique (point A). */
+  revelesPartiels: Partial<Record<PhaseInequationExponentielle, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceInequationExponentielle[];
   terminee: boolean;

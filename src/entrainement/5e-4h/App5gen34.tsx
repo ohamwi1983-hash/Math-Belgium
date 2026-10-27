@@ -88,11 +88,12 @@ interface TransitionEnAttente {
 
 /** Ordre d'affichage des puces de progression — séquence FIXE à 5 écrans
  * (`ORDRE_ECRANS_EXTREMA_BORNES`, `moteur5e/typesExtremaBornes.ts`), jamais de saut pour ce
- * générateur (contrairement à 5gen29/30/31). Aucun booléen `xxxRevele` dédié par écran côté
- * session : `scoresPartiels` garde le score de chaque écran déjà clos de l'exercice courant (remis
- * à `{}` au prochain exercice) — heuristique `score === 0 ⟺ révélée` (`soumettreEtapeTentatives`,
- * `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand l'écran est révélé), même
- * convention que `AppMethodeRapide.tsx` (4e). */
+ * générateur (contrairement à 5gen29/30/31). Icône "revele" pilotée par
+ * `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la clôture de chaque
+ * écran (`sessionExtremaBornes.ts::soumettreEcran`) — jamais `scoresPartiels[ecran] === 0` (point
+ * A, balayage générique) : la pénalité d'aide de ce générateur est soustraite APRÈS le score de
+ * tentatives puis plafonnée à 0, donc une réussite fortement aidée pouvait légitimement tomber à
+ * 0 et s'afficher à tort comme "révélée". */
 function calculerSegmentsProgression(
   etat: EtatSessionExtremaBornes,
   aideUtiliseeParPhase: Partial<Record<string, boolean>>,
@@ -101,7 +102,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideUtiliseeParPhase[ecran] ? "aide" : "correcte";
   });
 }

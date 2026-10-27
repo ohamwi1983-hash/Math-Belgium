@@ -84,19 +84,29 @@ function necessiteFactorisation(exercice: ExerciceEquationRationnelle): boolean 
 
 const ETAT_TRANSITOIRE_VIERGE = {
   scoreCEExercice: null,
+  ceRevele: false,
   scoreSimplifierExercice: null,
+  simplifierRevele: false,
   scoreSimplifierReductionExercice: null,
+  simplifierReductionRevele: false,
   scoreSimplifierReconnaissanceExercice: null,
   simplifierCategorieRevelee: false,
   scoreSimplifierChamp1Exercice: null,
+  simplifierChamp1Revele: false,
   scoreSimplifierChamp2Exercice: null,
+  simplifierChamp2Revele: false,
   scoreSimplifierFactorisationExercice: null,
+  simplifierFactorisationRevele: false,
   scoreSimplifierFractionExercice: null,
+  simplifierFractionRevele: false,
   scoreIsolementExercice: null,
+  isolementRevele: false,
   scoreReconnaissanceExercice: null,
   categorieRevelee: false,
   scoreChampPrincipalExercice: null,
+  champPrincipalRevele: false,
   scoreRacinesExercice: null,
+  racinesRevele: false,
   aideCeUtilisee: false,
   aideSimplifierReductionUtilisee: false,
   aideSimplifierChamp1Utilisee: false,
@@ -164,6 +174,7 @@ export function soumettreReponseCE(etat: EtatSessionEquationRationnelle, reponse
         ? "simplifier"
         : "isolement",
     scoreCEExercice: etat.aideCeUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    ceRevele: etapeCourante.revelee,
   };
 }
 
@@ -207,6 +218,7 @@ export function soumettreReponseSimplifierReduction(
     scoreSimplifierReductionExercice: etat.aideSimplifierReductionUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierReductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -260,6 +272,7 @@ export function soumettreReponseSimplifierChamp1(
     scoreSimplifierChamp1Exercice: etat.aideSimplifierChamp1Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierChamp1Revele: etapeCourante.revelee,
   };
 }
 
@@ -290,6 +303,7 @@ export function soumettreReponseSimplifierChamp2(
     scoreSimplifierChamp2Exercice: etat.aideSimplifierChamp2Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierChamp2Revele: etapeCourante.revelee,
   };
 }
 
@@ -325,6 +339,7 @@ export function soumettreReponseSimplifierFactorisation(
     scoreSimplifierFactorisationExercice: etat.aideSimplifierFactorisationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierFactorisationRevele: etapeCourante.revelee,
   };
 }
 
@@ -364,6 +379,7 @@ export function soumettreReponseSimplifierFraction(
     scoreSimplifierFractionExercice: etat.aideSimplifierFractionUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierFractionRevele: etapeCourante.revelee,
   };
 }
 
@@ -405,6 +421,7 @@ export function soumettreReponseSimplifier(
     etapeCourante: demarrerEtapeTentatives(),
     phase: "isolement",
     scoreSimplifierExercice: etapeCourante.score,
+    simplifierRevele: etapeCourante.revelee,
   };
 }
 
@@ -431,6 +448,7 @@ export function soumettreReponseIsolement(
         ? "reconnaissance"
         : "champ1",
     scoreIsolementExercice: etat.aideIsolementUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    isolementRevele: etapeCourante.revelee,
   };
 }
 
@@ -482,6 +500,7 @@ export function soumettreReponseChamp1(
     etapeCourante: demarrerEtapeTentatives(),
     phase: "champ2",
     scoreChampPrincipalExercice: etat.aideChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    champPrincipalRevele: etapeCourante.revelee,
   };
 }
 
@@ -518,6 +537,7 @@ export function soumettreReponseChamp2(
     etapeCourante: demarrerEtapeTentatives(),
     phase: "racinesEtrangeres",
     scoreRacinesExercice: etat.aideChamp2Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    racinesRevele: etapeCourante.revelee,
   };
 }
 
@@ -577,6 +597,7 @@ export function soumettreReponseRacinesEtrangeres(
     scoreRacines: etat.scoreRacinesExercice as number,
     aideChamp2Utilisee: etat.aideChamp2Utilisee,
     scoreRacinesEtrangeres: etapeCourante.score as number,
+    racinesEtrangeresRevele: etapeCourante.revelee,
   };
 
   const resultats = [...etat.resultats, resultat];
