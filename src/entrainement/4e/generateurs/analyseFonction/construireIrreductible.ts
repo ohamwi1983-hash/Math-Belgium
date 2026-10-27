@@ -16,10 +16,15 @@ import { randomInt, randomNonZeroInt } from "../secondDegre/aleatoire";
  * rejetés après coup, même principe que le reste du projet. `yS = -Δ/(4a)` (identité valable pour
  * tout a,b,c) a donc toujours le même signe que `a` puisque `-Δ>0` par construction — propriété
  * mathématique, pas un cas particulier à gérer.
+ *
+ * Plages élargies (a : [-4,4]→[-6,6], m : [-4,4]→[-5,5]) suite à l'audit pilote — ce générateur
+ * sert désormais à la pratique répétée (plus de comptage de points), où les mêmes petits nombres
+ * revenaient trop vite. `seuil = b²/(4a) = a·m²/4` (identité, b=a·m) reste mentalement calculable
+ * au pire cas (a=6, m=5 → 6·25/4 = 37.5), toujours sans calculatrice.
  */
 export function construireIrreductible(): Omit<Exercice, "formeAffichage"> {
-  const a = randomNonZeroInt(-4, 4);
-  const m = randomInt(-4, 4);
+  const a = randomNonZeroInt(-6, 6);
+  const m = randomInt(-5, 5);
   const b = a * m;
   const seuil = (b * b) / (4 * a);
   const marge = randomInt(1, 4);

@@ -1,5 +1,5 @@
 import type { Exercice } from "../../../core/generateur.types";
-import { randomInt, randomNonZeroInt } from "../aleatoire";
+import { randomNonZeroInt } from "../aleatoire";
 
 /**
  * a(x - r)² = ax² + bx + c, avec b = -2a·r et c = a·r².
@@ -11,9 +11,16 @@ import { randomInt, randomNonZeroInt } from "../aleatoire";
 export function construireProduitRemarquable(options?: {
   racineImposee?: number;
   aImpose?: number;
+  /** Même principe que `construireMiseEnEvidence` (voir son commentaire) — plages par défaut
+   * [1,4]/[-5,5] (comportement historique inchangé), gen7 passe des plages plus larges et un `a`
+   * signé. */
+  aRange?: [number, number];
+  rRange?: [number, number];
 }): Omit<Exercice, "formeAffichage"> {
-  const a = options?.aImpose ?? randomInt(1, 4);
-  const r = options?.racineImposee ?? randomNonZeroInt(-5, 5);
+  const [aMin, aMax] = options?.aRange ?? [1, 4];
+  const [rMin, rMax] = options?.rRange ?? [-5, 5];
+  const a = options?.aImpose ?? randomNonZeroInt(aMin, aMax);
+  const r = options?.racineImposee ?? randomNonZeroInt(rMin, rMax);
   const b = -2 * a * r;
   const c = a * r * r;
 

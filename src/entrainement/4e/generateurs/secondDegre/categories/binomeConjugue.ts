@@ -1,5 +1,5 @@
 import type { Exercice } from "../../../core/generateur.types";
-import { randomInt } from "../aleatoire";
+import { randomInt, randomNonZeroInt } from "../aleatoire";
 
 /**
  * ax² + c = a(x - r)(x + r) = 0, avec c = -a·r².
@@ -13,9 +13,17 @@ import { randomInt } from "../aleatoire";
 export function construireBinomeConjugue(options?: {
   racineImposee?: number;
   aImpose?: number;
+  /** Même principe que `construireMiseEnEvidence` (voir son commentaire) — `aRange` par défaut
+   * [1,4] (comportement historique), gen7 passe une plage signée plus large. `rMax` seul (pas de
+   * min) : `r` reste toujours tiré positif ici (`[1, rMax]`), les deux racines ±r n'ont pas besoin
+   * d'un signe tiré au hasard sur `r` lui-même. */
+  aRange?: [number, number];
+  rMax?: number;
 }): Omit<Exercice, "formeAffichage"> {
-  const a = options?.aImpose ?? randomInt(1, 4);
-  const r = options?.racineImposee !== undefined ? Math.abs(options.racineImposee) : randomInt(1, 5);
+  const [aMin, aMax] = options?.aRange ?? [1, 4];
+  const rMax = options?.rMax ?? 5;
+  const a = options?.aImpose ?? randomNonZeroInt(aMin, aMax);
+  const r = options?.racineImposee !== undefined ? Math.abs(options.racineImposee) : randomInt(1, rMax);
   const c = -a * r * r;
 
   const prefixe = a === 1 ? "" : a === -1 ? "-" : String(a);

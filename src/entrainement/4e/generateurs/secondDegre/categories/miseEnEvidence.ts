@@ -1,5 +1,5 @@
 import type { Exercice } from "../../../core/generateur.types";
-import { randomInt, randomNonZeroInt } from "../aleatoire";
+import { randomNonZeroInt } from "../aleatoire";
 
 /**
  * ax² + bx = x(ax + b) = 0, racines 0 et -b/a.
@@ -29,9 +29,22 @@ import { randomInt, randomNonZeroInt } from "../aleatoire";
 export function construireMiseEnEvidence(options?: {
   racineImposee?: number;
   aImpose?: number;
+  /**
+   * Plages de tirage de `a`/`r` si `aImpose`/`racineImposee` sont absents — par défaut [1,4]/
+   * [-5,5] (comportement historique inchangé pour tous les appelants existants). "Analyse d'une
+   * fonction du second degré" (gen7) passe des plages plus larges et signées pour `a` : ce
+   * générateur sert désormais à la pratique répétée (plus de comptage de points), où les mêmes
+   * petits nombres et le même signe de `a` revenaient trop vite — voir l'audit pilote, chat Oct.
+   * 2026. Les autres appelants (equationRationnelle, signesProduit, simplification, secondDegre,
+   * inequationRationnelle) n'ont pas été audités : leurs plages restent celles d'origine.
+   */
+  aRange?: [number, number];
+  rRange?: [number, number];
 }): Omit<Exercice, "formeAffichage"> {
-  const a = options?.aImpose ?? randomInt(1, 4);
-  const r = options?.racineImposee ?? randomNonZeroInt(-5, 5);
+  const [aMin, aMax] = options?.aRange ?? [1, 4];
+  const [rMin, rMax] = options?.rRange ?? [-5, 5];
+  const a = options?.aImpose ?? randomNonZeroInt(aMin, aMax);
+  const r = options?.racineImposee ?? randomNonZeroInt(rMin, rMax);
   const b = -a * r;
 
   const formeFactorisee =

@@ -12,11 +12,25 @@ import { construireGrilleSigneVariation } from "./grilleSigneVariation";
  * jamais cas_general par construction, donc aucun filtrage a posteriori n'est nécessaire.
  * `construireIrreductible` (4e catégorie, prompt-cas-non-factorisable.md) est équiprobable avec
  * les 3 autres — aucune n'est privilégiée.
+ *
+ * Plages `aRange`/`rRange` : élargies et signées suite à l'audit pilote (plus de comptage de
+ * points, donc pratique répétée — les mêmes petits nombres positifs revenaient trop vite). Chaque
+ * plage reste calibrée pour que le calcul resté à la charge de l'élève (yS = -a·r²/4 pour
+ * `mise_en_evidence`, seul endroit où une vraie multiplication/division est nécessaire — `yS` vaut
+ * `c` ou `0` dans les 2 autres) reste faisable sans calculatrice (ex. a=5,r=6 → 5·36/4 = 45).
+ * `binomeConjugue`/`produitRemarquable` n'imposent aucun calcul équivalent à l'élève (yS = c ou 0),
+ * d'où des plages plus larges. Ces 3 constructeurs sont partagés avec d'autres générateurs
+ * (equationRationnelle, signesProduit, simplification, secondDegre, inequationRationnelle, non
+ * audités) — leurs plages par défaut, utilisées par tous les autres appelants, restent inchangées.
  */
+const construireMiseEnEvidenceEtendue = () => construireMiseEnEvidence({ aRange: [-5, 5], rRange: [-6, 6] });
+const construireBinomeConjugueEtendu = () => construireBinomeConjugue({ aRange: [-6, 6], rMax: 8 });
+const construireProduitRemarquableEtendu = () => construireProduitRemarquable({ aRange: [-6, 6], rRange: [-7, 7] });
+
 const CONSTRUCTEURS: Array<() => Omit<Exercice, "formeAffichage">> = [
-  construireMiseEnEvidence,
-  construireBinomeConjugue,
-  construireProduitRemarquable,
+  construireMiseEnEvidenceEtendue,
+  construireBinomeConjugueEtendu,
+  construireProduitRemarquableEtendu,
   construireIrreductible,
 ];
 
@@ -60,9 +74,9 @@ export const CATALOGUE_VARIANTES: VarianteAnalyseFonction[] = [
 ];
 
 const CONSTRUCTEURS_PAR_ID: Record<VarianteAnalyseFonctionId, () => Omit<Exercice, "formeAffichage">> = {
-  mise_en_evidence: construireMiseEnEvidence,
-  binome_conjugue: construireBinomeConjugue,
-  produit_remarquable: construireProduitRemarquable,
+  mise_en_evidence: construireMiseEnEvidenceEtendue,
+  binome_conjugue: construireBinomeConjugueEtendu,
+  produit_remarquable: construireProduitRemarquableEtendu,
   irreductible: construireIrreductible,
 };
 
