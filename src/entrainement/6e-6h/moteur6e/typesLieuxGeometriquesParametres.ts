@@ -262,6 +262,12 @@ export interface EtatSessionLieuxGeometriquesParametres {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseLieuxGeometriquesParametres, number>>;
+  /** Vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture — jusqu'au
+   * 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`, heuristique non
+   * fiable ici : la pénalité d'aide, soustraite APRÈS le score de tentatives (`Math.max(0, score -
+   * niveauAide * PENALITE)`), pouvait amener une RÉUSSITE fortement aidée à exactement 0 (faux
+   * "révélé") — corrigé pendant le balayage générique (point A). */
+  revelesPartiels: Partial<Record<PhaseLieuxGeometriquesParametres, boolean>>;
   /** Vrai pour une phase si `niveauAide > 0` AU MOMENT de sa clôture — capturé dans
    * `soumettreReponseEcran`, jamais recalculé depuis le score. Pilote la puce jaune "correcte avec
    * aide" de `ProgressionPuces` — mirroir `aidePartiels` de `typesLogarithmesProblemes.ts`. */

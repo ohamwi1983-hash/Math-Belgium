@@ -8,6 +8,12 @@ import { LIBELLE_PHASE, formatReponseAttenduePhaseLatex } from "./formatNombresC
  * `LIBELLE_PHASE`/`phasesPourExercice`/`formatReponseAttenduePhaseLatex`, déjà exportés par
  * `formatNombresComplexes.ts`/`typesNombresComplexes.ts` — jamais une logique recalculée
  * séparément.
+ *
+ * `revele` vient de `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à la
+ * clôture de chaque écran — jusqu'au 2025-10, déduit de `scoresPartiels[phase] === 0`,
+ * heuristique non fiable ici : la pénalité d'aide, soustraite APRÈS le score de tentatives,
+ * pouvait amener une RÉUSSITE fortement aidée à exactement 0 (faux "révélé") — corrigé pendant le
+ * balayage générique (point A).
  */
 export function calculerRecapitulatifNombresComplexes(etat: EtatSessionNombresComplexes): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -16,7 +22,7 @@ export function calculerRecapitulatifNombresComplexes(etat: EtatSessionNombresCo
 
   return precedentes.map((phase) => {
     const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: LIBELLE_PHASE[phase], estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele };
   });
 }
@@ -28,6 +34,6 @@ export function calculerSegmentsProgressionNombresComplexes(etat: EtatSessionNom
   return sequence.map((phase) => {
     if (phase === etat.phase) return "courante" as const;
     if (etat.scoresPartiels[phase] === undefined) return "a-venir" as const;
-    return etat.scoresPartiels[phase] === 0 ? ("revele" as const) : ("correcte" as const);
+    return etat.revelesPartiels[phase] ? ("revele" as const) : ("correcte" as const);
   });
 }

@@ -72,6 +72,8 @@ export function phaseApres(exercice: ExerciceSuiteClassique, phase: PhaseSuiteCl
 export interface ResultatExerciceSuiteClassique {
   exercice: ExerciceSuiteClassique;
   scores: Partial<Record<PhaseSuiteClassique, number>>;
+  /** même principe que `EtatSessionSuiteClassique.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseSuiteClassique, boolean>>;
 }
 
 export interface EtatSessionSuiteClassique {
@@ -83,6 +85,13 @@ export interface EtatSessionSuiteClassique {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseSuiteClassique, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture (jamais
+   * recalculé) — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`,
+   * une heuristique fausse ici : la pénalité d'aide (`niveauAide * PENALITE`) est soustraite APRÈS
+   * le score de tentatives puis plafonnée à 0 (`Math.max(0, ...)`), donc une réussite fortement
+   * aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée" (point A, balayage
+   * générique). */
+  revelesPartiels: Partial<Record<PhaseSuiteClassique, boolean>>;
   resultats: ResultatExerciceSuiteClassique[];
   terminee: boolean;
   /** POST-soumission — reflète la révélation de la DERNIÈRE phase venant de se clôturer (fermeture

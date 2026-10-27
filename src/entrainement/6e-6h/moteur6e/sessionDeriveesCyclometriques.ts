@@ -38,8 +38,15 @@ export const NIVEAU_AIDE_MAX = 2;
 
 function etatInitial(
   exercice: ExerciceDeriveesCyclometriques,
-): Pick<EtatSessionDeriveesCyclometriques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+): Pick<EtatSessionDeriveesCyclometriques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+  };
 }
 
 export function demarrerSessionDeriveesCyclometriques(
@@ -119,6 +126,7 @@ function avancerPhase(
 
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: etapeCourante.revelee };
   const derniereCloture = { phase: etat.phase, info: { niveauAide: etat.niveauAide, revele: etapeCourante.revelee } };
   const phaseSuivante = phaseApres(etat.phase);
 
@@ -126,7 +134,7 @@ function avancerPhase(
     return cloturerExerciceOuSuivant({ ...etat, derniereCloture }, construireResultat(exercice, scoresPartiels));
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereCloture };
+  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereCloture };
 }
 
 function garder<T extends ExerciceDeriveesCyclometriques["famille"]>(

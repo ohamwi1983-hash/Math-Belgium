@@ -35,8 +35,19 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
 
 function etatInitial(
   exercice: ExerciceEquationsExpLog,
-): Pick<EtatSessionEquationsExpLog, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, derniereTransitionRevelee: false };
+): Pick<
+  EtatSessionEquationsExpLog,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "derniereTransitionRevelee"
+> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(exercice),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionEquationsExpLog(reglages: ReglagesSession6e, generateur: () => ExerciceEquationsExpLog): EtatSessionEquationsExpLog {
@@ -108,13 +119,22 @@ function avancerPhase<TReponse>(
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const phaseSuivante = phaseApres(etat.phase);
 
   if (phaseSuivante === "termine") {
     return { ...cloturerExerciceOuSuivant(etat, construireResultat(exercice, scoresPartiels)), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return {
+    ...etat,
+    scoresPartiels,
+    revelesPartiels,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: phaseSuivante,
+    derniereTransitionRevelee: revele,
+  };
 }
 
 // ============================================================================

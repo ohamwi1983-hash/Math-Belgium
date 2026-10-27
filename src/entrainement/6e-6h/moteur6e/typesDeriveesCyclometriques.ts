@@ -116,6 +116,13 @@ export interface EtatSessionDeriveesCyclometriques {
   /** Accumule au fil des écrans (l'ensemble de phases réellement traversées varie par famille —
    * même principe que 6gen3/5gen6/5gen10/5gen12/5gen13). */
   scoresPartiels: Partial<Record<PhaseDeriveesCyclometriques, number>>;
+  /** Vrai signal "révélé" par phase, même index que `scoresPartiels`, peuplé depuis
+   * `etapeCourante.revelee` à la clôture — jusqu'au 2025-10, le récapitulatif le déduisait de
+   * `scoresPartiels[phase] === 0`, une heuristique corrigée pendant le balayage générique
+   * (point A) car non fiable ici : la pénalité d'aide (`Math.max(0, score - niveauAide*20)`, voir
+   * sessionDeriveesCyclometriques.ts) est soustraite APRÈS le score de tentatives, donc une
+   * RÉUSSITE fortement aidée pouvait tomber à exactement 0 et s'afficher à tort comme "révélée". */
+  revelesPartiels: Partial<Record<PhaseDeriveesCyclometriques, boolean>>;
   /** Dernier écran fermé (phase + aide/révélation) — `null` avant la toute première fermeture
    * d'écran. Alimente le récapitulatif final (`ResultatPanelDeriveesCyclometriques`) via
    * `App6gen4.tsx::terminerEtape`, sans jamais dépendre du timing d'un closure React. */

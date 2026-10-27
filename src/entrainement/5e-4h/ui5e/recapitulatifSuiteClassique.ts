@@ -23,9 +23,11 @@ function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): En
  * est toujours la DERNIÈRE phase de son scénario (`ORDRE_PHASES`), donc jamais rencontrée dans
  * cette boucle, même comportement que `elementsEtatActuel`.
  *
- * Heuristique de révélation : le moteur ne garde que `derniereEtapeRevelee` (générique), jamais un
- * booléen par phase — `scoresPartiels[phase] === 0` pilote donc l'icône (✓/✗), même convention que
- * 5gen14/5gen15/5gen16.
+ * Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à
+ * la clôture de chaque écran (`sessionSuiteClassique.ts::soumettreEcran`) — jamais
+ * `scoresPartiels[phase] === 0` (point A, balayage générique) : la pénalité d'aide de ce
+ * générateur est soustraite APRÈS le score de tentatives puis plafonnée à 0, donc une réussite
+ * fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée".
  */
 export function calculerRecapitulatifSuiteClassique(etat: EtatSessionSuiteClassique): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -35,7 +37,7 @@ export function calculerRecapitulatifSuiteClassique(etat: EtatSessionSuiteClassi
 
   const entrees: EntreeRecapitulatif[] = [];
   for (const phase of precedentes) {
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     const libelle = LIBELLE_PHASE_SUITE_CLASSIQUE[phase];
     const termes = formatTermesReponseAttendueLatex(exercice, phase);
     if (termes !== null) {

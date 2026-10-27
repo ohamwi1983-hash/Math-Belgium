@@ -37,8 +37,11 @@ import {
  * LaTeX) — on reprend alors EXACTEMENT le texte déjà affiché par `reponseAttenduePhase`
  * (`App6gen4.tsx`) pour cet écran, jamais une valeur LaTeX inventée.
  *
- * `revele` déduit de `scoresPartiels[phase] === 0` — même convention que 6gen3/6gen14
- * (`soumettreEtapeTentatives` force le score à exactement 0 ssi révélé, jamais en cas de réussite).
+ * `revele` vient de `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à la
+ * clôture (`sessionDeriveesCyclometriques.ts`) — jusqu'au 2025-10, déduit de
+ * `scoresPartiels[phase] === 0`, corrigé pendant le balayage générique (point A) car non fiable
+ * ici : la pénalité d'aide est soustraite APRÈS le score de tentatives, donc une réussite
+ * fortement aidée pouvait tomber à exactement 0 (faux "révélé").
  */
 
 function libellePourPhase(phase: PhaseDeriveesCyclometriques, exercice: ExerciceDeriveesCyclometriques): string {
@@ -126,7 +129,7 @@ export function calculerRecapitulatifDeriveesCyclometriques(etat: EtatSessionDer
   const precedentes = sequence.slice(0, sequence.indexOf(etat.phase));
 
   return precedentes.map((phase) => {
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: libellePourPhase(phase, exercice), revele, ...valeurPourPhase(exercice, phase) };
   });
 }
@@ -139,6 +142,6 @@ export function calculerSegmentsProgressionDeriveesCyclometriques(etat: EtatSess
     if (phase === etat.phase) return "courante" as const;
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir" as const;
-    return score === 0 ? ("revele" as const) : ("correcte" as const);
+    return etat.revelesPartiels[phase] ? ("revele" as const) : ("correcte" as const);
   });
 }
