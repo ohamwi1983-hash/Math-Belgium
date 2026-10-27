@@ -11,12 +11,11 @@ import { MAX_DEN, formatCandidatLatex, formatEquationNonCycloLatex } from "./for
  * supposée) — voir l'en-tête de `typesEquationsCyclometriques.ts` : l'écran "condition" n'existe
  * que pour la variante `arcfonctionsDifferentes`, l'écran "acceptRejet" est sauté si 0 candidat.
  *
- * `revele` par phase close déduit de `scoresPartiels[phase] === 0` — convention déjà établie par
- * `recapitulatifEquationsExpLog.ts` (6gen14) : `soumettreEtapeTentatives` (`moteur/etapeTentatives.ts`)
- * force le score à EXACTEMENT 0 ssi la réponse a été révélée (tentatives épuisées), jamais en cas de
- * réussite (`pointsDeBase` plein, toujours >0, même sans pénalité). Aucun champ "revele" par phase
- * n'existe côté `scoresPartiels` lui-même (seul `derniereCloture` porte celui de l'écran qui VIENT
- * de se fermer) — cette déduction est donc la seule source fiable pour une phase déjà ancienne.
+ * `revele` par phase close vient de `etat.revelesPartiels[phase]`, peuplé depuis
+ * `etapeCourante.revelee` à la clôture (`sessionEquationsCyclometriques.ts`) — jusqu'au 2025-10,
+ * déduit de `scoresPartiels[phase] === 0`, corrigé pendant le balayage générique (point A) car non
+ * fiable ici : la pénalité d'aide est soustraite APRÈS le score de tentatives, donc une réussite
+ * fortement aidée pouvait tomber à exactement 0 (faux "révélé").
  */
 
 const LIBELLE_PHASE: Record<PhaseEquationsCyclometriques, string> = {
@@ -69,7 +68,7 @@ export function calculerRecapitulatifEquationsCyclometriques(etat: EtatSessionEq
   const precedentes = sequence.slice(0, sequence.indexOf(etat.phase));
 
   return precedentes.map((phase) => {
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     return { libelle: LIBELLE_PHASE[phase], revele, ...valeurPourPhase(exercice, phase) };
   });
 }
@@ -82,6 +81,6 @@ export function calculerSegmentsProgressionEquationsCyclometriques(etat: EtatSes
     if (phase === etat.phase) return "courante" as const;
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir" as const;
-    return score === 0 ? ("revele" as const) : ("correcte" as const);
+    return etat.revelesPartiels[phase] ? ("revele" as const) : ("correcte" as const);
   });
 }

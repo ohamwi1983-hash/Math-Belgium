@@ -32,8 +32,17 @@ export function niveauAideMaxExtremaBornes(): number {
   return NIVEAU_AIDE_MAX_EXTREMA_BORNES;
 }
 
-function etatInitial(exercice: ExerciceExtremaBornes): Pick<EtatSessionExtremaBornes, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: ecranInitialExtremaBornes(), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceExtremaBornes,
+): Pick<EtatSessionExtremaBornes, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return {
+    exerciceCourant: exercice,
+    phase: ecranInitialExtremaBornes(),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+  };
 }
 
 export function demarrerSessionExtremaBornes(reglages: ReglagesSession5e, generateur: () => ExerciceExtremaBornes): EtatSessionExtremaBornes {
@@ -72,12 +81,21 @@ function soumettreEcran<T>(etat: EtatSessionExtremaBornes, ecranAttendu: EcranEx
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: revele };
   const ecranSuivant = ecranApresExtremaBornes(etat.phase);
 
   if (ecranSuivant === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: ecranSuivant, scoresPartiels, derniereEtapeRevelee: revele };
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: ecranSuivant,
+    scoresPartiels,
+    revelesPartiels,
+    derniereEtapeRevelee: revele,
+  };
 }
 
 // ============================================================================

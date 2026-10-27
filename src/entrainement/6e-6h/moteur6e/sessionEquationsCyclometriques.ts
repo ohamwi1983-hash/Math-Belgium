@@ -20,8 +20,17 @@ const PENALITE_PAR_NIVEAU_AIDE = 20;
 /** 2 niveaux d'aide sur tous les écrans (spec explicite). */
 export const NIVEAU_AIDE_MAX = 2;
 
-function etatInitial(exercice: ExerciceEquationsCyclometriques): Pick<EtatSessionEquationsCyclometriques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: PHASE_INITIALE, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceEquationsCyclometriques,
+): Pick<EtatSessionEquationsCyclometriques, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return {
+    exerciceCourant: exercice,
+    phase: PHASE_INITIALE,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: {},
+    revelesPartiels: {},
+  };
 }
 
 export function demarrerSessionEquationsCyclometriques(reglages: ReglagesSession6e, generateur: () => ExerciceEquationsCyclometriques): EtatSessionEquationsCyclometriques {
@@ -77,6 +86,7 @@ function avancerPhase<TReponse>(
 
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [etat.phase]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [etat.phase]: etapeCourante.revelee };
   const derniereCloture = { phase: etat.phase, info: { niveauAide: etat.niveauAide, revele: etapeCourante.revelee } };
   const phaseSuivante = phaseApres(etat.phase, exercice);
 
@@ -84,7 +94,7 @@ function avancerPhase<TReponse>(
     return cloturerExerciceOuSuivant({ ...etat, derniereCloture }, construireResultat(exercice, scoresPartiels));
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereCloture };
+  return { ...etat, scoresPartiels, revelesPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereCloture };
 }
 
 export function soumettreReponseCE(etat: EtatSessionEquationsCyclometriques, reponse: EnsembleReelGuide): EtatSessionEquationsCyclometriques {

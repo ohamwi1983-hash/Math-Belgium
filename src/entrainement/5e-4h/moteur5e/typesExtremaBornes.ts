@@ -32,6 +32,8 @@ export interface ResultatExerciceExtremaBornes {
   exercice: ExerciceExtremaBornes;
   /** Indexé par écran — TOUJOURS les 5 clés de `ORDRE_ECRANS_EXTREMA_BORNES` (jamais de saut). */
   scores: Partial<Record<EcranExtremaBornes, number>>;
+  /** même principe que `EtatSessionExtremaBornes.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranExtremaBornes, boolean>>;
 }
 
 export interface EtatSessionExtremaBornes {
@@ -42,6 +44,13 @@ export interface EtatSessionExtremaBornes {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranExtremaBornes, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (jamais
+   * recalculé) — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`,
+   * une heuristique fausse ici : la pénalité d'aide (`niveauAide * PENALITE`) est soustraite APRÈS
+   * le score de tentatives puis plafonnée à 0 (`Math.max(0, ...)`), donc une réussite fortement
+   * aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée" (point A, balayage
+   * générique). */
+  revelesPartiels: Partial<Record<EcranExtremaBornes, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceExtremaBornes[];
   terminee: boolean;

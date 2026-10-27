@@ -23,7 +23,12 @@ function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): En
  * Récapitulatif "Ce qu'on sait déjà" pour 5gen30 — même principe que `recapitulatifEtudeLocale.ts`
  * (5gen29) : réutilise `formatTermesEtatActuelLatex`, un flux PLAT cumulé, et isole les termes de
  * chaque phase en le rappelant à CHAQUE frontière puis en découpant la différence entre deux
- * frontières successives — jamais une formule recalculée séparément.
+ * frontières successives — jamais une formule recalculée séparément. Icône (✓/✗) pilotée par
+ * `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à la clôture de chaque
+ * écran (`sessionLectureGraphiqueDerivees.ts::soumettreEcran`) — jamais `scoresPartiels[phase]
+ * === 0` (point A, balayage générique) : la pénalité d'aide de ce générateur est soustraite APRÈS
+ * le score de tentatives puis plafonnée à 0, donc une réussite fortement aidée pouvait
+ * légitimement tomber à 0 et s'afficher à tort comme "révélée".
  */
 export function calculerRecapitulatifLectureGraphiqueDerivees(etat: EtatSessionLectureGraphiqueDerivees): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -40,7 +45,7 @@ export function calculerRecapitulatifLectureGraphiqueDerivees(etat: EtatSessionL
     const nouveaux = cumulApres.slice(cumulAvant.length);
     cumulAvant = cumulApres;
     if (nouveaux.length === 0) continue;
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     const libelle = LIBELLE_PHASE[phase];
     entrees.push(nouveaux.length === 1 ? entreeUnique(libelle, nouveaux[0], revele) : entreeMultiple(libelle, nouveaux, revele));
   }

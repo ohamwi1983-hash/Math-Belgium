@@ -25,7 +25,12 @@ function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): En
  * chaque phase en le rappelant à CHAQUE frontière puis en découpant la différence entre deux
  * frontières successives — jamais une formule recalculée séparément. "comparaison" (dernier écran)
  * n'est jamais "précédente" (voir `ORDRE_ECRANS_EXTREMA_BORNES`), donc jamais rencontrée ici — même
- * comportement que l'ancien bloc.
+ * comportement que l'ancien bloc. Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé
+ * depuis `etapeCourante.revelee` à la clôture de chaque écran
+ * (`sessionExtremaBornes.ts::soumettreEcran`) — jamais `scoresPartiels[phase] === 0` (point A,
+ * balayage générique) : la pénalité d'aide de ce générateur est soustraite APRÈS le score de
+ * tentatives puis plafonnée à 0, donc une réussite fortement aidée pouvait légitimement tomber à
+ * 0 et s'afficher à tort comme "révélée".
  */
 export function calculerRecapitulatifExtremaBornes(etat: EtatSessionExtremaBornes): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -42,7 +47,7 @@ export function calculerRecapitulatifExtremaBornes(etat: EtatSessionExtremaBorne
     const nouveaux = cumulApres.slice(cumulAvant.length);
     cumulAvant = cumulApres;
     if (nouveaux.length === 0) continue;
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     const libelle = LIBELLE_PHASE[phase];
     entrees.push(nouveaux.length === 1 ? entreeUnique(libelle, nouveaux[0], revele) : entreeMultiple(libelle, nouveaux, revele));
   }

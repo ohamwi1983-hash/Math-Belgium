@@ -43,6 +43,8 @@ export function ecranApres(exercice: ExerciceLectureGraphiqueDerivees, ecran: Ec
 export interface ResultatExerciceLectureGraphiqueDerivees {
   exercice: ExerciceLectureGraphiqueDerivees;
   scores: Partial<Record<EcranLectureGraphiqueDerivees, number>>;
+  /** même principe que `EtatSessionLectureGraphiqueDerivees.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranLectureGraphiqueDerivees, boolean>>;
 }
 
 export interface EtatSessionLectureGraphiqueDerivees {
@@ -53,6 +55,13 @@ export interface EtatSessionLectureGraphiqueDerivees {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranLectureGraphiqueDerivees, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (jamais
+   * recalculé) — jusqu'au 2025-10, le récapitulatif le déduisait de `scoresPartiels[phase] === 0`,
+   * une heuristique fausse ici : la pénalité d'aide (`niveauAide * PENALITE`) est soustraite APRÈS
+   * le score de tentatives puis plafonnée à 0 (`Math.max(0, ...)`), donc une réussite fortement
+   * aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée" (point A, balayage
+   * générique). */
+  revelesPartiels: Partial<Record<EcranLectureGraphiqueDerivees, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceLectureGraphiqueDerivees[];
   terminee: boolean;

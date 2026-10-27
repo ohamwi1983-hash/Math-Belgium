@@ -31,7 +31,11 @@ function entreeMultiple(libelle: string, valeurs: string[], revele: boolean): En
  * successives (`cumulApres.slice(cumulAvant.length)`) — jamais une nouvelle logique de formatage,
  * seule la façon de BORNER le flux change.
  *
- * Heuristique de révélation : comme le reste du chantier 5e-4h, `scoresPartiels[phase] === 0`.
+ * Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à
+ * la clôture de chaque écran (`sessionEtudeLocale.ts::soumettreEcran`) — jamais
+ * `scoresPartiels[phase] === 0` (point A, balayage générique) : la pénalité d'aide de ce
+ * générateur est soustraite APRÈS le score de tentatives puis plafonnée à 0, donc une réussite
+ * fortement aidée pouvait légitimement tomber à 0 et s'afficher à tort comme "révélée".
  */
 export function calculerRecapitulatifEtudeLocale(etat: EtatSessionEtudeLocale): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
@@ -48,7 +52,7 @@ export function calculerRecapitulatifEtudeLocale(etat: EtatSessionEtudeLocale): 
     const nouveaux = cumulApres.slice(cumulAvant.length);
     cumulAvant = cumulApres;
     if (nouveaux.length === 0) continue;
-    const revele = etat.scoresPartiels[phase] === 0;
+    const revele = etat.revelesPartiels[phase] ?? false;
     const libelle = LIBELLE_PHASE[phase];
     entrees.push(nouveaux.length === 1 ? entreeUnique(libelle, nouveaux[0], revele) : entreeMultiple(libelle, nouveaux, revele));
   }
