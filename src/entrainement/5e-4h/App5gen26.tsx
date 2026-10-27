@@ -57,8 +57,8 @@ interface TransitionEnAttente {
  * `moteur5e/typesDefinitionDerivee.ts`). */
 const ORDRE_PHASES: EcranDefinitionDerivee[] = ORDRE_COMPLET;
 
-/** Même heuristique que `calculerRecapitulatifDefinitionDerivee` (`scoresPartiels[ecran] === 0 ⟺
- * révélée`) — jamais une valeur recalculée séparément. */
+/** Même source que `calculerRecapitulatifDefinitionDerivee` (`revelesPartiels[ecran]`) — jamais
+ * une valeur recalculée séparément. */
 function calculerSegmentsProgression(
   etat: EtatSessionDefinitionDerivee,
   aideParPhase: Partial<Record<EcranDefinitionDerivee, boolean>>,
@@ -67,7 +67,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideParPhase[ecran] ? "aide" : "correcte";
   });
 }

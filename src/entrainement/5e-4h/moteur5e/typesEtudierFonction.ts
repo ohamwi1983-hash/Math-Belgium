@@ -49,6 +49,8 @@ export interface ResultatExerciceEtudierFonction {
   /** Indexé par écran RÉELLEMENT traversé — jamais de clé "recap" (aucun score, voir tête de
    * fichier), 7 ou 8 clés selon `ordreEcransEtudierFonction`. */
   scores: Partial<Record<EcranEtudierFonction, number>>;
+  /** même principe que `EtatSessionEtudierFonction.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranEtudierFonction, boolean>>;
 }
 
 export interface EtatSessionEtudierFonction {
@@ -59,6 +61,11 @@ export interface EtatSessionEtudierFonction {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranEtudierFonction, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[phase] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<EcranEtudierFonction, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceEtudierFonction[];
   terminee: boolean;

@@ -29,6 +29,8 @@ export interface ResultatExerciceDefinitionDerivee {
   exercice: ExerciceDefinitionDerivee;
   /** Indexé par `EcranDefinitionDerivee` — un score par écran (toujours les 3, séquence fixe). */
   scores: Partial<Record<EcranDefinitionDerivee, number>>;
+  /** même principe que `EtatSessionDefinitionDerivee.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranDefinitionDerivee, boolean>>;
 }
 
 export interface EtatSessionDefinitionDerivee {
@@ -39,6 +41,11 @@ export interface EtatSessionDefinitionDerivee {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranDefinitionDerivee, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[ecran] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<EcranDefinitionDerivee, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceDefinitionDerivee[];
   terminee: boolean;

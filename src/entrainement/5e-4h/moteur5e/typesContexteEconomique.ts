@@ -76,6 +76,8 @@ export interface ResultatExerciceContexteEconomique {
   exercice: ExerciceContexteEconomique;
   /** Indexé par écran RÉELLEMENT traversé — voir `ordreEcransContexteEconomique`. */
   scores: Partial<Record<EcranContexteEconomique, number>>;
+  /** même principe que `EtatSessionContexteEconomique.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<EcranContexteEconomique, boolean>>;
 }
 
 export interface EtatSessionContexteEconomique {
@@ -86,6 +88,11 @@ export interface EtatSessionContexteEconomique {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<EcranContexteEconomique, number>>;
+  /** vrai signal "révélé" par écran, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que `sessionAsymptoteOblique.ts`) — jusqu'au 2025-10, le récapitulatif le déduisait
+   * de `scoresPartiels[ecran] === 0` ; champ explicite ajouté pendant le balayage générique
+   * (point A). */
+  revelesPartiels: Partial<Record<EcranContexteEconomique, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceContexteEconomique[];
   terminee: boolean;

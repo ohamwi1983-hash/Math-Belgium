@@ -33,6 +33,9 @@ export function phaseApres(exercice: ExerciceAsymptoteOblique, phase: PhaseAsymp
 export interface ResultatExerciceAsymptoteOblique {
   exercice: ExerciceAsymptoteOblique;
   scores: Partial<Record<PhaseAsymptoteOblique, number>>;
+  /** même principe que `EtatSessionAsymptoteOblique.revelesPartiels` (voir son commentaire) —
+   * conservé dans le résultat clos, comme `scores`. */
+  revelesPartiels: Partial<Record<PhaseAsymptoteOblique, boolean>>;
 }
 
 export interface EtatSessionAsymptoteOblique {
@@ -43,6 +46,13 @@ export interface EtatSessionAsymptoteOblique {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseAsymptoteOblique, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture de chaque
+   * écran (`sessionAsymptoteOblique.ts::soumettreEcran`) — jusqu'au 2025-10, le récapitulatif
+   * déduisait ce signal de `scoresPartiels[phase] === 0`, une heuristique explicitement documentée
+   * comme non fiable ici (la pénalité d'aide, soustraite APRÈS le score de tentatives, peut aussi
+   * amener une RÉUSSITE tardive fortement pénalisée à exactement 0) ; champ explicite ajouté
+   * pendant le balayage générique (point A) pour corriger ce faux "révélé" potentiel. */
+  revelesPartiels: Partial<Record<PhaseAsymptoteOblique, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceAsymptoteOblique[];
   terminee: boolean;

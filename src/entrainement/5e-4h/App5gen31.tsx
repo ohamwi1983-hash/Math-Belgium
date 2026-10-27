@@ -62,9 +62,8 @@ interface Bilan {
  * présentationnel, voir `typesEtudierFonction.ts`/`sessionEtudierFonction.ts::avancerRecap`) n'a
  * JAMAIS de clé dans `scoresPartiels` même une fois franchi — seule sa position dans l'ordre avant
  * `etat.phase` dit qu'il est déjà clos ("correcte", jamais "revele", aucune notion de révélation
- * pour un écran sans question). Pour les autres écrans, heuristique `score === 0 ⟺ révélée`
- * (`soumettreEtapeTentatives`, `moteur/etapeTentatives.ts` — score forcé à 0 exactement quand
- * l'écran est révélé), même convention que `AppMethodeRapide.tsx` (4e).
+ * pour un écran sans question). Pour les autres écrans, `etat.revelesPartiels[ecran]` (peuplé
+ * depuis `etapeCourante.revelee` à la clôture, `sessionEtudierFonction.ts::soumettreEcran`).
  *
  * `aideParPhase` : même état local déjà tenu par le composant pour le bilan
  * (`ResultatPanelEtudierFonction`) — réutilisé ICI tel quel pour distinguer "correcte"/"aide" :
@@ -86,7 +85,7 @@ function calculerSegmentsProgression(
     if (index > indexCourant) return "a-venir";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "correcte";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return (aideParPhase[ecran]?.niveauAide ?? 0) > 0 ? "aide" : "correcte";
   });
 }

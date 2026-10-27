@@ -54,8 +54,10 @@ export function niveauAideMaxGraphique(): number {
   return NIVEAU_AIDE_MAX_GRAPHIQUE;
 }
 
-function etatInitial(exercice: ExerciceEtudierFonction): Pick<EtatSessionEtudierFonction, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: ecranInitial(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceEtudierFonction,
+): Pick<EtatSessionEtudierFonction, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return { exerciceCourant: exercice, phase: ecranInitial(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, revelesPartiels: {} };
 }
 
 export function demarrerSessionEtudierFonction(reglages: ReglagesSession5e, generateur: () => ExerciceEtudierFonction): EtatSessionEtudierFonction {
@@ -95,12 +97,13 @@ function soumettreEcran<T>(etat: EtatSessionEtudierFonction, ecranAttendu: Ecran
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [ecranAttendu]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [ecranAttendu]: revele };
   const ecranSuivant = ecranApres(etat.exerciceCourant, ecranAttendu);
 
   if (ecranSuivant === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: ecranSuivant, scoresPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: ecranSuivant, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
 }
 
 // ============================================================================
@@ -171,5 +174,6 @@ export function soumettreReponseGraphique(etat: EtatSessionEtudierFonction, resu
   const brut = resume.pointsTotal > 0 ? Math.round((POINTS_DE_BASE * resume.pointsReussis) / resume.pointsTotal) : POINTS_DE_BASE;
   const score = Math.max(0, brut - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, graphique: score };
-  return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, resume.revele);
+  const revelesPartiels = { ...etat.revelesPartiels, graphique: resume.revele };
+  return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, resume.revele);
 }

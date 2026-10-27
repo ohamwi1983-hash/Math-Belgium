@@ -12,9 +12,9 @@ import { libellePhase, formatReponseAttenduePhaseLatex } from "./formatPropriete
  */
 export function calculerRecapitulatifProprietesLogarithme(etat: EtatSessionProprietesLogarithme): EntreeRecapitulatif[] {
   const exercice = etat.exerciceCourant;
-  return etat.scoresPartiels.map((score, phase) => {
+  return etat.scoresPartiels.map((_score, phase) => {
     const valeurs = formatReponseAttenduePhaseLatex(exercice, phase);
-    return { libelle: libellePhase(exercice, phase), estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele: score === 0 };
+    return { libelle: libellePhase(exercice, phase), estLatex: true, valeur: valeurs.join(" \\quad "), valeurs, revele: etat.revelesPartiels[phase] };
   });
 }
 
@@ -25,6 +25,6 @@ export function calculerSegmentsProgressionProprietesLogarithme(etat: EtatSessio
   return Array.from({ length: total }, (_, i) => {
     if (i === etat.phase) return "courante" as const;
     if (i > etat.phase) return "a-venir" as const;
-    return etat.scoresPartiels[i] === 0 ? ("revele" as const) : ("correcte" as const);
+    return etat.revelesPartiels[i] ? ("revele" as const) : ("correcte" as const);
   });
 }

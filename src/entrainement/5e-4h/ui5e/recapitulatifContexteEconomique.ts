@@ -4,9 +4,9 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
 import { formatReponseAttenduePhaseLatex, LIBELLE_ECRAN_CONTEXTE_ECONOMIQUE } from "./formatContexteEconomique";
 
 /**
- * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen33). Même heuristique
- * que les autres générateurs 5e migrés : `scoresPartiels[ecran] === 0 ⟺ révélée` (le moteur ne
- * trackait, à l'origine, que `derniereEtapeRevelee`, générique).
+ * Construit le récapitulatif des écrans déjà clos de l'exercice en cours (5gen33). Le signal
+ * "révélé" vient de `etat.revelesPartiels[ecran]`, peuplé depuis `etapeCourante.revelee` à la
+ * clôture de chaque écran (`sessionContexteEconomique.ts::soumettreEcran`).
  * `ordreEcransContexteEconomique(exercice)` donne la séquence RÉELLE (5 écrans pour la famille "A",
  * 8 pour "B", 6 pour le bonus — fixée dès le tirage, voir `typesContexteEconomique.ts`) ; on
  * s'arrête à l'écran courant (pas encore clos). Réutilise `formatReponseAttenduePhaseLatex`, déjà
@@ -28,7 +28,7 @@ export function calculerRecapitulatifContexteEconomique(etat: EtatSessionContext
       estLatex: true,
       valeur: valeurs.join("\\quad"),
       ...(valeurs.length > 1 ? { valeurs } : {}),
-      revele: score === 0,
+      revele: etat.revelesPartiels[ecran] ?? false,
     });
   }
 

@@ -34,6 +34,8 @@ export function phaseApres(exercice: ExerciceConvergenceSuite, phase: PhaseConve
 export interface ResultatExerciceConvergenceSuite {
   exercice: ExerciceConvergenceSuite;
   scores: Partial<Record<PhaseConvergenceSuite, number>>;
+  /** même principe que `EtatSessionConvergenceSuite.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseConvergenceSuite, boolean>>;
 }
 
 export interface EtatSessionConvergenceSuite {
@@ -44,6 +46,11 @@ export interface EtatSessionConvergenceSuite {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseConvergenceSuite, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que `sessionAsymptoteOblique.ts`/`sessionContexteEconomique.ts`) — jusqu'au 2025-10,
+   * le récapitulatif le déduisait de `scoresPartiels[phase] === 0` ; champ explicite ajouté
+   * pendant le balayage générique (point A). */
+  revelesPartiels: Partial<Record<PhaseConvergenceSuite, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceConvergenceSuite[];
   terminee: boolean;

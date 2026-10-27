@@ -34,6 +34,14 @@ export interface EtatSessionGraphiqueDeriveeLogarithme {
    * uniquement tant que l'écran "derivee" n'est pas encore terminé (jamais `null` dans un
    * `ResultatExerciceGraphiqueDeriveeLogarithme`, toutes les familles traversent cet écran). */
   scoreDeriveePartiel: number | null;
+  /** true si l'écran "derivee" a dû être révélé (tentatives épuisées) — jusqu'au 2025-10, déduit
+   * indirectement de `scoreDeriveePartiel === 0` (un succès ne vaut jamais exactement 0, la
+   * pénalité par tentative garantissant un score strictement positif même à la dernière tentative
+   * autorisée) ; champ explicite ajouté pendant le balayage générique (point A). Volontairement
+   * distinct de `derniereTransitionRevelee` ci-dessous : ce dernier n'est valable que JUSTE après
+   * la clôture d'un écran (écrasé à la transition suivante), alors que ce champ doit rester lisible
+   * tant que l'écran "selection" (qui suit) est affiché. */
+  deriveeRevele: boolean;
   /** `niveauAide` AU MOMENT PRÉCIS de la clôture de l'écran "derivee" (avant que la transition vers
    * "selection" ne le remette à zéro) — même principe que `scoreDeriveePartiel`/
    * `derniereTransitionRevelee`, jamais recalculé depuis le score (ambigu : un score réduit peut

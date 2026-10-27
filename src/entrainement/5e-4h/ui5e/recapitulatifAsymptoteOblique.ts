@@ -8,13 +8,12 @@ import { LIBELLE_PHASE_ASYMPTOTE_OBLIQUE, formatReponseAttenduePhaseLatex } from
  * oblique") — une entrée par phase de `ordreComplet(etat.exerciceCourant)` (séquence RÉELLE,
  * propre à la variante du tirage — "divisionEuclidienne" ou "viaLimites", jamais un ordre fixe
  * reconstitué à la main) dont le score est déjà connu (`etat.scoresPartiels[phase] !==
- * undefined`), dans l'ordre. Le moteur ne trackait, à l'origine, que `derniereEtapeRevelee`
- * (générique, pas un booléen par phase) — on retrouve donc le verdict par phase via l'heuristique
- * `scoresPartiels[phase] === 0 ⟺ révélée` (seul cas où `soumettreEtapeTentatives` renvoie
- * exactement 0, voir `moteur/etapeTentatives.ts` ; `soumettreEcran` y soustrait ensuite la
- * pénalité d'aide avant stockage, donc ce 0 peut aussi provenir d'une réussite tardive fortement
- * pénalisée par l'aide — même heuristique qu'ailleurs sur la plateforme, pas une garantie
- * absolue).
+ * undefined`), dans l'ordre. Le signal "révélé" vient de `etat.revelesPartiels[phase]`, peuplé
+ * directement depuis `etapeCourante.revelee` à la clôture de chaque écran
+ * (`sessionAsymptoteOblique.ts::soumettreEcran`) — jusqu'au 2025-10, ce récapitulatif le déduisait
+ * de `scoresPartiels[phase] === 0`, une heuristique corrigée pendant le balayage générique
+ * (point A) car non fiable ici : la pénalité d'aide, soustraite APRÈS le score de tentatives,
+ * pouvait amener une RÉUSSITE tardive fortement pénalisée à exactement 0 (faux "révélé").
  *
  * Chaque phase réutilise `formatReponseAttenduePhaseLatex` (même source que la validation inline
  * de `App5gen21.tsx`), jamais une valeur recalculée séparément. Plusieurs fragments LaTeX d'une
@@ -32,7 +31,7 @@ export function calculerRecapitulatifAsymptoteOblique(etat: EtatSessionAsymptote
       libelle: LIBELLE_PHASE_ASYMPTOTE_OBLIQUE[phase],
       estLatex: true,
       valeur: formatReponseAttenduePhaseLatex(exercice, phase).join("\\quad"),
-      revele: score === 0,
+      revele: etat.revelesPartiels[phase] ?? false,
     });
   }
 

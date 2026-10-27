@@ -15,7 +15,7 @@ export function calculerRecapitulatifGraphiquesDeriveeExponentielles(etat: EtatS
   if (etat.phase !== "selection" || etat.scoreDeriveePartiel === null) return [];
   const valeur = formatDeriveeCorrecteLatex(etat.exerciceCourant);
   if (valeur === null) return [];
-  return [{ libelle: "Dérivée", estLatex: true, valeur, revele: etat.scoreDeriveePartiel === 0 }];
+  return [{ libelle: "Dérivée", estLatex: true, valeur, revele: etat.deriveeRevele }];
 }
 
 /** Puces pour `6gen8` : 1 puce ("derivee") si et seulement si la famille de l'exercice courant
@@ -26,7 +26,7 @@ export function calculerSegmentsProgressionGraphiquesDeriveeExponentielles(etat:
   if (etat.phase === "derivee") {
     segments.push("courante");
   } else if (etat.scoreDeriveePartiel !== null) {
-    segments.push(etat.scoreDeriveePartiel === 0 ? "revele" : "correcte");
+    segments.push(etat.deriveeRevele ? "revele" : "correcte");
   }
   segments.push(etat.phase === "selection" ? "courante" : "a-venir");
   return segments;

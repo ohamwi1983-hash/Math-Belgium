@@ -11,7 +11,7 @@ import { formatDeriveeCorrecteLatex } from "./formatGraphiqueDeriveeLogarithme";
 export function calculerRecapitulatifGraphiqueDeriveeLogarithme(etat: EtatSessionGraphiqueDeriveeLogarithme): EntreeRecapitulatif[] {
   if (etat.phase !== "selection" || etat.scoreDeriveePartiel === null) return [];
   const valeur = formatDeriveeCorrecteLatex(etat.exerciceCourant);
-  return [{ libelle: "Dérivée", estLatex: true, valeur, revele: etat.scoreDeriveePartiel === 0 }];
+  return [{ libelle: "Dérivée", estLatex: true, valeur, revele: etat.deriveeRevele }];
 }
 
 /** Puces pour `6gen20` : toujours 2 puces ("derivee" puis "selection"), séquence fixe. */
@@ -19,7 +19,7 @@ export function calculerSegmentsProgressionGraphiqueDeriveeLogarithme(etat: Etat
   const segmentDerivee: EtatPuceProgression =
     etat.phase === "derivee"
       ? "courante"
-      : etat.scoreDeriveePartiel === 0
+      : etat.deriveeRevele
         ? "revele"
         : etat.deriveeNiveauAide !== null && etat.deriveeNiveauAide > 0
           ? "aide"

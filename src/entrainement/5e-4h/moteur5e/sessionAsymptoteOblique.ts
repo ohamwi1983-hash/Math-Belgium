@@ -20,8 +20,10 @@ export function niveauAideMaxAsymptoteOblique(): number {
   return NIVEAU_AIDE_MAX_ASYMPTOTE_OBLIQUE;
 }
 
-function etatInitial(exercice: ExerciceAsymptoteOblique): Pick<EtatSessionAsymptoteOblique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceAsymptoteOblique,
+): Pick<EtatSessionAsymptoteOblique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, revelesPartiels: {} };
 }
 
 export function demarrerSessionAsymptoteOblique(reglages: ReglagesSession5e, generateur: () => ExerciceAsymptoteOblique): EtatSessionAsymptoteOblique {
@@ -60,12 +62,13 @@ function soumettreEcran<T>(etat: EtatSessionAsymptoteOblique, phaseAttendue: Pha
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 
   if (phaseSuivante === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
 }
 
 // ============================================================================

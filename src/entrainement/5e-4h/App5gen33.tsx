@@ -75,9 +75,9 @@ interface TransitionEnAttente {
   revele: boolean;
 }
 
-/** Même heuristique que `calculerRecapitulatifContexteEconomique` (`scoresPartiels[ecran] === 0 ⟺
- * révélée`) — `ordreEcransContexteEconomique(exercice)` donne la séquence RÉELLE (5 écrans pour la
- * famille "A", 8 pour "B", 6 pour le bonus, fixée dès le tirage).
+/** Même source que `calculerRecapitulatifContexteEconomique` (`revelesPartiels[ecran]`) —
+ * `ordreEcransContexteEconomique(exercice)` donne la séquence RÉELLE (5 écrans pour la famille "A",
+ * 8 pour "B", 6 pour le bonus, fixée dès le tirage).
  *
  * `aideUtiliseeParPhase` : état local dédié (voir `App5gen33`, ci-dessous) — rien dans
  * `EtatSessionContexteEconomique` ne trace le niveau d'aide d'un écran déjà clos (`niveauAide` est
@@ -91,7 +91,7 @@ function calculerSegmentsProgression(
     if (ecran === etat.phase) return "courante";
     const score = etat.scoresPartiels[ecran];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[ecran]) return "revele";
     return aideUtiliseeParPhase[ecran] ? "aide" : "correcte";
   });
 }

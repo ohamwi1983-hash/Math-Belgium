@@ -20,8 +20,19 @@ export const NIVEAU_AIDE_MAX = 2;
 
 function etatInitial(
   exercice: ExerciceProprieteLogarithme,
-): Pick<EtatSessionProprietesLogarithme, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "derniereTransitionRevelee"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: [], derniereTransitionRevelee: false };
+): Pick<
+  EtatSessionProprietesLogarithme,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels" | "derniereTransitionRevelee"
+> {
+  return {
+    exerciceCourant: exercice,
+    phase: phaseInitiale(),
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    scoresPartiels: [],
+    revelesPartiels: [],
+    derniereTransitionRevelee: false,
+  };
 }
 
 export function demarrerSessionProprietesLogarithme(reglages: ReglagesSession6e, generateur: () => ExerciceProprieteLogarithme): EtatSessionProprietesLogarithme {
@@ -62,6 +73,7 @@ export function soumettreReponse(etat: EtatSessionProprietesLogarithme, texte: s
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = [...etat.scoresPartiels, score];
+  const revelesPartiels = [...etat.revelesPartiels, revele];
   const phaseSuivante = phaseApres(exercice, phase);
 
   if (phaseSuivante === "termine") {
@@ -69,5 +81,13 @@ export function soumettreReponse(etat: EtatSessionProprietesLogarithme, texte: s
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoresPartiels, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return {
+    ...etat,
+    scoresPartiels,
+    revelesPartiels,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: phaseSuivante,
+    derniereTransitionRevelee: revele,
+  };
 }

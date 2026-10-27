@@ -34,6 +34,13 @@ export interface EtatSessionGraphiqueDeriveeExponentielle {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoreDeriveePartiel: number | null;
+  /** true si l'écran "derivee" a dû être révélé (tentatives épuisées) — jusqu'au 2025-10, déduit
+   * indirectement de `scoreDeriveePartiel === 0` (un succès ne vaut jamais exactement 0, la
+   * pénalité par tentative garantissant un score strictement positif même à la dernière tentative
+   * autorisée) ; champ explicite ajouté pendant le balayage générique (point A). Volontairement
+   * distinct de `derniereTransitionRevelee` ci-dessous (écrasé à la transition suivante) : ce champ
+   * reste lisible tant que l'écran "selection" qui suit est affiché. */
+  deriveeRevele: boolean;
   indexExercice: number;
   resultats: ResultatExerciceGraphiqueDeriveeExponentielle[];
   terminee: boolean;

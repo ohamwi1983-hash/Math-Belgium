@@ -51,7 +51,7 @@ export function calculerRecapitulatifEtudierFonction(etat: EtatSessionEtudierFon
       libelle: LIBELLE_PHASE[phase],
       estLatex: PHASES_LATEX.has(phase),
       valeur: nouveaux[0],
-      revele: etat.scoresPartiels[phase] === 0,
+      revele: etat.revelesPartiels[phase] ?? false,
     });
   }
   return entrees;

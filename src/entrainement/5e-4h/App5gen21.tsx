@@ -54,8 +54,8 @@ interface TransitionEnAttente {
 /** Une puce par phase de `ordreComplet(etat.exerciceCourant)` — séquence RÉELLE propre à la
  * variante du tirage ("divisionEuclidienne"/"viaLimites"), jamais un `ORDRE_PHASES` fixe
  * reconstitué à la main : même source que `calculerRecapitulatifAsymptoteOblique`. "courante" pour
- * `etat.phase`, "correcte"/"revele" pour les phases déjà closes (`scoresPartiels[phase]`, 0 ⟺
- * révélée), "a-venir" au-delà. */
+ * `etat.phase`, "correcte"/"revele" pour les phases déjà closes (`revelesPartiels[phase]`),
+ * "a-venir" au-delà. */
 function calculerSegmentsProgression(
   etat: EtatSessionAsymptoteOblique,
   aideParPhase: Partial<Record<PhaseAsymptoteOblique, boolean>>,
@@ -64,7 +64,7 @@ function calculerSegmentsProgression(
     if (phase === etat.phase) return "courante";
     const score = etat.scoresPartiels[phase];
     if (score === undefined) return "a-venir";
-    if (score === 0) return "revele";
+    if (etat.revelesPartiels[phase]) return "revele";
     return aideParPhase[phase] ? "aide" : "correcte";
   });
 }

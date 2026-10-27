@@ -20,13 +20,17 @@ export const NIVEAU_AIDE_MAX = 2;
 
 function etatInitial(
   exercice: ExerciceGraphiqueDeriveeExponentielle,
-): Pick<EtatSessionGraphiqueDeriveeExponentielle, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreDeriveePartiel" | "derniereTransitionRevelee"> {
+): Pick<
+  EtatSessionGraphiqueDeriveeExponentielle,
+  "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoreDeriveePartiel" | "deriveeRevele" | "derniereTransitionRevelee"
+> {
   return {
     exerciceCourant: exercice,
     phase: phaseInitiale(exercice),
     etapeCourante: demarrerEtapeTentatives(),
     niveauAide: 0,
     scoreDeriveePartiel: null,
+    deriveeRevele: false,
     derniereTransitionRevelee: false,
   };
 }
@@ -83,7 +87,15 @@ function avancerPhase<TReponse>(
     return { ...cloturerExerciceOuSuivant(etat, resultat), derniereTransitionRevelee: revele };
   }
 
-  return { ...etat, scoreDeriveePartiel: score, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, derniereTransitionRevelee: revele };
+  return {
+    ...etat,
+    scoreDeriveePartiel: score,
+    deriveeRevele: revele,
+    etapeCourante: demarrerEtapeTentatives(),
+    niveauAide: 0,
+    phase: phaseSuivante,
+    derniereTransitionRevelee: revele,
+  };
 }
 
 export function soumettreReponseDerivee(etat: EtatSessionGraphiqueDeriveeExponentielle, texte: string): EtatSessionGraphiqueDeriveeExponentielle {

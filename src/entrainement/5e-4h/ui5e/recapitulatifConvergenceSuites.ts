@@ -14,9 +14,8 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
  * jamais atteinte pour les 2 autres variantes ni pour "diviserQuelconque" lui-même (premier écran
  * de sa séquence) : même comportement repris ici à l'identique.
  *
- * Heuristique de révélation : le moteur ne garde que `derniereEtapeRevelee` (générique), jamais un
- * booléen par phase — `scoresPartiels[phase] === 0` pilote donc l'icône (✓/✗), même convention que
- * 5gen14/5gen15.
+ * Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à
+ * la clôture de chaque écran (`sessionConvergenceSuites.ts::soumettreEcran`).
  */
 const PHASES_AVEC_VALEUR_CONFIRMEE: PhaseConvergenceSuite[] = ["diviserQuelconque"];
 
@@ -32,6 +31,6 @@ export function calculerRecapitulatifConvergenceSuite(etat: EtatSessionConvergen
     libelle: LIBELLE_PHASE_CONVERGENCE_SUITE[phase],
     estLatex: true,
     valeur: valeurs[i],
-    revele: etat.scoresPartiels[phase] === 0,
+    revele: etat.revelesPartiels[phase] ?? false,
   }));
 }
