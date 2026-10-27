@@ -54,8 +54,10 @@ function sommeGeometriqueFinieLocal(u1: FractionQ, q: FractionQ, n: number): num
   return fractionQVersNombre(sommeGeometriqueFinieQ(u1, q, n));
 }
 
-function etatInitial(exercice: ExerciceSuiteGeometrique): Pick<EtatSessionSuiteGeometrique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceSuiteGeometrique,
+): Pick<EtatSessionSuiteGeometrique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, revelesPartiels: {} };
 }
 
 export function demarrerSessionSuiteGeometrique(reglages: ReglagesSession5e, generateur: () => ExerciceSuiteGeometrique): EtatSessionSuiteGeometrique {
@@ -107,12 +109,13 @@ function soumettreEcran<T>(etat: EtatSessionSuiteGeometrique, phaseAttendue: Pha
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 
   if (phaseSuivante === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
 }
 
 // ============================================================================

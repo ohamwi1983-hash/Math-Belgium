@@ -107,6 +107,8 @@ export function phaseApres(exercice: ExerciceSuiteArithmetique, phase: PhaseSuit
 export interface ResultatExerciceSuiteArithmetique {
   exercice: ExerciceSuiteArithmetique;
   scores: Partial<Record<PhaseSuiteArithmetique, number>>;
+  /** même principe que `EtatSessionSuiteArithmetique.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseSuiteArithmetique, boolean>>;
 }
 
 export interface EtatSessionSuiteArithmetique {
@@ -117,6 +119,11 @@ export interface EtatSessionSuiteArithmetique {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseSuiteArithmetique, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[phase] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<PhaseSuiteArithmetique, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceSuiteArithmetique[];
   terminee: boolean;

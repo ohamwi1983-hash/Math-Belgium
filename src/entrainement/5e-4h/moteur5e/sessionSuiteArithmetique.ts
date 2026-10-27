@@ -40,8 +40,10 @@ function sommeArithmetiqueLocal(u1: number, r: number, n: number): number {
   return (n / 2) * (2 * u1 + (n - 1) * r);
 }
 
-function etatInitial(exercice: ExerciceSuiteArithmetique): Pick<EtatSessionSuiteArithmetique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels"> {
-  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {} };
+function etatInitial(
+  exercice: ExerciceSuiteArithmetique,
+): Pick<EtatSessionSuiteArithmetique, "exerciceCourant" | "phase" | "etapeCourante" | "niveauAide" | "scoresPartiels" | "revelesPartiels"> {
+  return { exerciceCourant: exercice, phase: phaseInitiale(exercice), etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, scoresPartiels: {}, revelesPartiels: {} };
 }
 
 export function demarrerSessionSuiteArithmetique(reglages: ReglagesSession5e, generateur: () => ExerciceSuiteArithmetique): EtatSessionSuiteArithmetique {
@@ -98,12 +100,13 @@ function soumettreEcran<T>(etat: EtatSessionSuiteArithmetique, phaseAttendue: Ph
   const revele = etapeCourante.revelee;
   const score = Math.max(0, (etapeCourante.score as number) - etat.niveauAide * PENALITE_PAR_NIVEAU_AIDE);
   const scoresPartiels = { ...etat.scoresPartiels, [phaseAttendue]: score };
+  const revelesPartiels = { ...etat.revelesPartiels, [phaseAttendue]: revele };
   const phaseSuivante = phaseApres(etat.exerciceCourant, phaseAttendue);
 
   if (phaseSuivante === "termine") {
-    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels }, revele);
+    return cloturerExerciceOuSuivant(etat, { exercice: etat.exerciceCourant, scores: scoresPartiels, revelesPartiels }, revele);
   }
-  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, derniereEtapeRevelee: revele };
+  return { ...etat, etapeCourante: demarrerEtapeTentatives(), niveauAide: 0, phase: phaseSuivante, scoresPartiels, revelesPartiels, derniereEtapeRevelee: revele };
 }
 
 // ============================================================================

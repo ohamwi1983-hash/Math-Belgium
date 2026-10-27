@@ -124,6 +124,8 @@ export function phaseApres(exercice: ExerciceSuiteGeometrique, phase: PhaseSuite
 export interface ResultatExerciceSuiteGeometrique {
   exercice: ExerciceSuiteGeometrique;
   scores: Partial<Record<PhaseSuiteGeometrique, number>>;
+  /** même principe que `EtatSessionSuiteGeometrique.revelesPartiels` (voir son commentaire). */
+  revelesPartiels: Partial<Record<PhaseSuiteGeometrique, boolean>>;
 }
 
 export interface EtatSessionSuiteGeometrique {
@@ -134,6 +136,11 @@ export interface EtatSessionSuiteGeometrique {
   etapeCourante: EtatEtapeTentatives;
   niveauAide: number;
   scoresPartiels: Partial<Record<PhaseSuiteGeometrique, number>>;
+  /** vrai signal "révélé" par phase, peuplé depuis `etapeCourante.revelee` à la clôture (même
+   * principe que les autres générateurs 5e migrés) — jusqu'au 2025-10, le récapitulatif le
+   * déduisait de `scoresPartiels[phase] === 0` ; champ explicite ajouté pendant le balayage
+   * générique (point A). */
+  revelesPartiels: Partial<Record<PhaseSuiteGeometrique, boolean>>;
   indexExercice: number;
   resultats: ResultatExerciceSuiteGeometrique[];
   terminee: boolean;

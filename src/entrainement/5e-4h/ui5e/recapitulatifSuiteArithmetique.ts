@@ -21,10 +21,8 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
  * même liste filtrée (`PHASES_AVEC_VALEUR_CONFIRMEE`) pour zipper chaque valeur avec son libellé
  * (`LIBELLE_PHASE_SUITE_ARITHMETIQUE`) dans le même ordre.
  *
- * Heuristique de révélation (A.5/`App5genXX.tsx` round "RecapitulatifPanel") : le moteur ne garde
- * qu'un booléen générique `derniereEtapeRevelee` (la toute dernière phase close), jamais un
- * booléen par phase — on utilise donc `scoresPartiels[phase] === 0` comme heuristique d'icône
- * (✓/✗), jamais consommée pour autre chose que l'affichage.
+ * Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à
+ * la clôture de chaque phase (`sessionSuiteArithmetique.ts::soumettreEcran`).
  */
 const PHASES_AVEC_VALEUR_CONFIRMEE: PhaseSuiteArithmetique[] = [
   "trouverR",
@@ -48,6 +46,6 @@ export function calculerRecapitulatifSuiteArithmetique(etat: EtatSessionSuiteAri
     libelle: LIBELLE_PHASE_SUITE_ARITHMETIQUE[phase],
     estLatex: true,
     valeur: valeurs[i],
-    revele: etat.scoresPartiels[phase] === 0,
+    revele: etat.revelesPartiels[phase] ?? false,
   }));
 }

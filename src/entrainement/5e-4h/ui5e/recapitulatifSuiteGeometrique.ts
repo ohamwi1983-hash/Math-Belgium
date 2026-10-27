@@ -17,10 +17,8 @@ import type { EntreeRecapitulatif } from "./recapitulatif";
  * sommeInfinie, calculerTermesAlgebrique, resoudreRangN, chacun avec leurs variantes B1/B2) sont
  * toujours en fin de séquence et n'accumulent donc jamais : même comportement repris à l'identique.
  *
- * Heuristique de révélation : le moteur ne garde que `derniereEtapeRevelee` (générique, la toute
- * dernière phase close), jamais un booléen par phase — on utilise donc `scoresPartiels[phase] === 0`
- * comme heuristique d'icône (✓/✗), jamais consommée pour autre chose que l'affichage (même
- * convention que 5gen14).
+ * Icône (✓/✗) pilotée par `etat.revelesPartiels[phase]`, peuplé depuis `etapeCourante.revelee` à
+ * la clôture de chaque phase (`sessionSuiteGeometrique.ts::soumettreEcran`).
  */
 const PHASES_AVEC_VALEUR_CONFIRMEE: PhaseSuiteGeometrique[] = [
   "trouverQ",
@@ -48,6 +46,6 @@ export function calculerRecapitulatifSuiteGeometrique(etat: EtatSessionSuiteGeom
     libelle: LIBELLE_PHASE_SUITE_GEOMETRIQUE[phase],
     estLatex: true,
     valeur: valeurs[i],
-    revele: etat.scoresPartiels[phase] === 0,
+    revele: etat.revelesPartiels[phase] ?? false,
   }));
 }
