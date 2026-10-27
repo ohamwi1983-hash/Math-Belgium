@@ -107,8 +107,9 @@ export function construireAvecVarianteId(varianteId: VarianteAnalyseFonctionId):
 }
 
 /**
- * Implémentation de la Couche A pour "Analyse d'une fonction du second degré" : tire une des 3
- * techniques sans Δ (poids égal), formeAffichage forcée à "canonique" bien qu'inutilisée — la
+ * Implémentation de la Couche A pour "Analyse d'une fonction du second degré" : tire une des 4
+ * variantes du catalogue (poids égal — 3 techniques sans Δ plus "irreductible", qui, elle, EST
+ * définie par Δ<0), formeAffichage forcée à "canonique" bien qu'inutilisée — la
  * présentation de f(x) est entièrement portée par src/ui/formatAnalyseFonction.ts (ordreTermes),
  * jamais par formatEnonceAffichage. xS/yS calculés directement depuis enonce, indépendamment de la
  * catégorie.
