@@ -64,6 +64,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Centrage vertical : sans ça, un écran dont le contenu est court (ex. la première question
+   * d'un générateur, avant que l'historique ne s'accumule) laisse un grand vide sous la carte sur
+   * un écran haut (desktop comme mobile en portrait) — la carte reste collée en haut comme si du
+   * contenu manquait. `min-height: 100svh` garantit que la zone à centrer existe toujours, donc ce
+   * centrage ne pousse jamais la carte hors de l'écran même sur le plus petit smartphone : au pire
+   * (contenu plus haut que l'écran), flex revient naturellement à afficher depuis le haut. */
+  justify-content: center;
   /* Marge latérale réduite au minimum (pas 0 : un bouton/texte qui touche littéralement le bord de
    * l'écran reste inconfortable au doigt) — la carte occupe donc quasi toute la largeur de l'écran
    * sur téléphone, là où chaque pixel gagné compte le plus pour une équation. */
