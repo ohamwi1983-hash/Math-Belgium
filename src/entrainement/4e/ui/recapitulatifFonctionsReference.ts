@@ -16,11 +16,10 @@ export function calculerRecapitulatifFonctionReference(etat: EtatSessionFonction
       libelle: "Famille",
       estLatex: false,
       valeur: libelleFamille(etat.exerciceCourant.famille),
-      // Pas de `reconnaissanceRevele` tracké par le moteur (`moteur/typesFonctionsReference.ts`) —
-      // même heuristique que les autres exceptions documentées ailleurs sur ce chantier : score
-      // exactement 0 ⟺ révélée (jamais atteint par une réussite, voir `etapeTentatives.ts` — le
-      // score d'une réussite reste toujours strictement positif).
-      revele: etat.scoreReconnaissanceExercice === 0,
+      // `etat.etapeReconnaissance` garde son état terminal (`.revelee`) jusqu'à la clôture de
+      // l'exercice (jamais réinitialisé en phase "exercice", voir sessionFonctionsReference.ts) —
+      // pas besoin d'un champ `reconnaissanceRevele` séparé au niveau de la session comme ailleurs.
+      revele: etat.etapeReconnaissance.revelee,
     },
   ];
 }

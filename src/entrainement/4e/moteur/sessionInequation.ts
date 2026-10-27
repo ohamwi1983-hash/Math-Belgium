@@ -50,6 +50,10 @@ export interface EtatSessionInequation {
   etapeCourante: EtatEtapeTentatives;
   /** score de la phase "simplification" une fois close, ou null si l'étape n'a pas eu lieu (voir necessiteSimplification) */
   scoreSimplificationExercice: number | null;
+  /** true si l'étape a dû être révélée (tentatives épuisées) — jusqu'au 2025-10, déduit
+   * indirectement de `scoreSimplificationExercice === 0` (un succès ne vaut jamais exactement 0,
+   * voir `etapeTentatives.ts`) ; champ explicite ajouté pendant le balayage générique (point A). */
+  simplificationRevele: boolean;
   scoreRacinesExercice: number | null;
   racinesRevele: boolean;
   scoreSigneAExercice: number | null;
@@ -79,6 +83,7 @@ export function demarrerSessionInequation(
     phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     scoreSimplificationExercice: null,
+    simplificationRevele: false,
     scoreRacinesExercice: null,
     racinesRevele: false,
     scoreSigneAExercice: null,
@@ -130,6 +135,7 @@ export function soumettreReponseSimplification(etat: EtatSessionInequation, repo
     scoreSimplificationExercice: etat.aideSimplificationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplificationRevele: etapeCourante.revelee,
   };
 }
 
@@ -255,6 +261,7 @@ export function soumettreReponseIntervalle(
     phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     scoreSimplificationExercice: null,
+    simplificationRevele: false,
     scoreRacinesExercice: null,
     racinesRevele: false,
     scoreSigneAExercice: null,

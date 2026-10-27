@@ -32,9 +32,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Dénominateur mis en évidence",
       estLatex: true,
       valeur: formatMiseEnEvidence(denom),
-      // Pas de `denomReductionRevele` tracké par le moteur (`moteur/typesSimplification.ts`) — même
-      // heuristique que recapitulatif.ts : score exactement 0 ⟺ révélée.
-      revele: etat.scoreDenomReductionExercice === 0,
+      revele: etat.denomReductionRevele,
     });
   }
   if (etat.scoreDenomReductionP1Exercice !== null) {
@@ -43,8 +41,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Dénominateur mis en évidence",
       estLatex: true,
       valeur: formatPolynomeMisEnEvidence(denom),
-      // Pas de `denomReductionP1Revele` tracké par le moteur — même heuristique.
-      revele: etat.scoreDenomReductionP1Exercice === 0,
+      revele: etat.denomReductionP1Revele,
     });
   }
   if (etat.scoreDenomReconnaissanceExercice !== null) {
@@ -62,8 +59,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Dénominateur factorisé",
       estLatex: denom.categorie !== "cas_general",
       valeur: denom.categorie === "cas_general" ? `Δ = ${denom.solution.delta}` : (denom.solution.formeFactorisee as string),
-      // Pas de `denomChamp1Revele` tracké par le moteur — même heuristique.
-      revele: etat.scoreDenomChamp1Exercice === 0,
+      revele: etat.denomChamp1Revele,
     });
   }
   if (etat.scoreDenomChamp2Exercice !== null) {
@@ -72,8 +68,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Conditions d'existence (CE)",
       estLatex: false,
       valeur: denom.solution.racines.map((r) => `x≠${r}`).join(" ; "),
-      // Pas de `denomChamp2Revele` tracké par le moteur — même heuristique.
-      revele: etat.scoreDenomChamp2Exercice === 0,
+      revele: etat.denomChamp2Revele,
     });
   }
   if (etat.scoreDenomFactorisationExercice !== null) {
@@ -82,8 +77,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Forme factorisée (dénominateur)",
       estLatex: true,
       valeur: `${formatFormeFactoriseeDepuisRacines(denom.enonce, denom.solution.racines)} = 0`,
-      // Pas de `denomFactorisationRevele` tracké par le moteur — même heuristique.
-      revele: etat.scoreDenomFactorisationExercice === 0,
+      revele: etat.denomFactorisationRevele,
     });
   }
   if (etat.scoreCEDirecteExercice !== null) {
@@ -91,8 +85,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Condition d'existence (CE)",
       estLatex: false,
       valeur: `x≠${exercice.racineCommune}`,
-      // Pas de `ceDirecteRevele` tracké par le moteur — même heuristique.
-      revele: etat.scoreCEDirecteExercice === 0,
+      revele: etat.ceDirecteRevele,
     });
   }
   if (etat.scoreNumReductionExercice !== null) {
@@ -101,8 +94,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Numérateur mis en évidence",
       estLatex: true,
       valeur: formatMiseEnEvidence(num),
-      // Pas de `numReductionRevele` tracké par le moteur — même heuristique.
-      revele: etat.scoreNumReductionExercice === 0,
+      revele: etat.numReductionRevele,
     });
   }
   if (etat.scoreNumReductionP1Exercice !== null) {
@@ -111,8 +103,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Numérateur mis en évidence",
       estLatex: true,
       valeur: formatPolynomeMisEnEvidence(num),
-      // Pas de `numReductionP1Revele` tracké par le moteur — même heuristique.
-      revele: etat.scoreNumReductionP1Exercice === 0,
+      revele: etat.numReductionP1Revele,
     });
   }
   if (etat.scoreNumReconnaissanceExercice !== null) {
@@ -130,8 +121,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Numérateur factorisé",
       estLatex: num.categorie !== "cas_general",
       valeur: num.categorie === "cas_general" ? `Δ = ${num.solution.delta}` : (num.solution.formeFactorisee as string),
-      // Pas de `numChamp1Revele` tracké par le moteur — même heuristique.
-      revele: etat.scoreNumChamp1Exercice === 0,
+      revele: etat.numChamp1Revele,
     });
   }
   if (etat.scoreNumChamp2Exercice !== null) {
@@ -140,8 +130,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Racines (numérateur)",
       estLatex: false,
       valeur: num.solution.racines.join(" ; "),
-      // Pas de `numChamp2Revele` tracké par le moteur — même heuristique.
-      revele: etat.scoreNumChamp2Exercice === 0,
+      revele: etat.numChamp2Revele,
     });
   }
   if (etat.scoreNumFactorisationExercice !== null) {
@@ -150,8 +139,7 @@ export function calculerRecapitulatifSimplification(etat: EtatSessionSimplificat
       libelle: "Forme factorisée (numérateur)",
       estLatex: true,
       valeur: `${formatFormeFactoriseeDepuisRacines(num.enonce, num.solution.racines)} = 0`,
-      // Pas de `numFactorisationRevele` tracké par le moteur — même heuristique.
-      revele: etat.scoreNumFactorisationExercice === 0,
+      revele: etat.numFactorisationRevele,
     });
   }
 

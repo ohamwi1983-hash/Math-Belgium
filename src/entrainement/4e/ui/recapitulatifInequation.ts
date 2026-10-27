@@ -19,9 +19,7 @@ export function calculerRecapitulatifInequation(etat: EtatSessionInequation): En
       libelle: "Trinôme simplifié",
       estLatex: true,
       valeur: formatMembreGauche(exercice.enonce),
-      // Pas de `simplificationRevele` tracké par le moteur (`moteur/sessionInequation.ts`) — même
-      // heuristique que recapitulatif.ts : score exactement 0 ⟺ révélée.
-      revele: etat.scoreSimplificationExercice === 0,
+      revele: etat.simplificationRevele,
     });
   }
 

@@ -73,13 +73,19 @@ function phaseInitiale(exercice: ExerciceSignesProduit): PhaseSignesProduit {
 const ETAT_TRANSITOIRE_VIERGE = {
   indexFacteurExercice: 0,
   scoresRacineLineaireExercice: [],
+  racineLineaireRevelees: [],
   scoresMethodeExercice: [],
   methodeRevelees: [],
   scoreReductionFacteurExercice: null,
+  reductionFacteurRevele: false,
   scoreFactorisationChamp1Exercice: null,
+  factorisationChamp1Revele: false,
   scoreFactorisationChamp2Exercice: null,
+  factorisationChamp2Revele: false,
   scoreFactorisationFactorisationExercice: null,
+  factorisationFactorisationRevele: false,
   scoresSigneIrreductibleExercice: [],
+  signeIrreductibleRevelees: [],
   scoreGrilleExercice: null,
   grilleRevelee: false,
   aideUtilisee: false,
@@ -104,9 +110,11 @@ export function demarrerSessionSignesProduit(
     etapeCourante: demarrerEtapeTentatives(),
     ...ETAT_TRANSITOIRE_VIERGE,
     scoresRacineLineaireExercice: [],
+    racineLineaireRevelees: [],
     scoresMethodeExercice: [],
     methodeRevelees: [],
     scoresSigneIrreductibleExercice: [],
+    signeIrreductibleRevelees: [],
     resultats: [],
     terminee: false,
   };
@@ -142,6 +150,7 @@ export function soumettreReponseRacineLineaire(etat: EtatSessionSignesProduit, r
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const scoresRacineLineaireExercice = [...etat.scoresRacineLineaireExercice, etapeCourante.score as number];
+  const racineLineaireRevelees = [...etat.racineLineaireRevelees, etapeCourante.revelee];
   const indexFacteurExercice = etat.indexFacteurExercice + 1;
 
   return {
@@ -150,6 +159,7 @@ export function soumettreReponseRacineLineaire(etat: EtatSessionSignesProduit, r
     phase: phaseApresFacteur(etat.exerciceCourant, indexFacteurExercice),
     indexFacteurExercice,
     scoresRacineLineaireExercice,
+    racineLineaireRevelees,
   };
 }
 
@@ -185,6 +195,7 @@ export function soumettreReponseReductionFacteur(etat: EtatSessionSignesProduit,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "methodeFacteur",
     scoreReductionFacteurExercice: etat.aideReductionFacteurUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    reductionFacteurRevele: etapeCourante.revelee,
   };
 }
 
@@ -251,6 +262,7 @@ export function soumettreReponseFactorisationChamp1(
     scoreFactorisationChamp1Exercice: etat.aideFactorisationChamp1Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    factorisationChamp1Revele: etapeCourante.revelee,
   };
 }
 
@@ -286,6 +298,7 @@ export function soumettreReponseFactorisationChamp2(
       etapeCourante: demarrerEtapeTentatives(),
       phase: "factorisationFactorisation",
       scoreFactorisationChamp2Exercice,
+      factorisationChamp2Revele: etapeCourante.revelee,
     };
   }
 
@@ -296,6 +309,7 @@ export function soumettreReponseFactorisationChamp2(
     phase: phaseApresFacteur(etat.exerciceCourant, indexFacteurExercice),
     indexFacteurExercice,
     scoreFactorisationChamp2Exercice,
+    factorisationChamp2Revele: etapeCourante.revelee,
   };
 }
 
@@ -334,6 +348,7 @@ export function soumettreReponseFactorisationFactorisation(
     scoreFactorisationFactorisationExercice: etat.aideFactorisationFactorisationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    factorisationFactorisationRevele: etapeCourante.revelee,
   };
 }
 
@@ -367,6 +382,7 @@ export function soumettreReponseSigneIrreductible(
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
   const scoresSigneIrreductibleExercice = [...etat.scoresSigneIrreductibleExercice, etapeCourante.score as number];
+  const signeIrreductibleRevelees = [...etat.signeIrreductibleRevelees, etapeCourante.revelee];
   const indexFacteurExercice = etat.indexFacteurExercice + 1;
 
   return {
@@ -375,6 +391,7 @@ export function soumettreReponseSigneIrreductible(
     phase: phaseApresFacteur(etat.exerciceCourant, indexFacteurExercice),
     indexFacteurExercice,
     scoresSigneIrreductibleExercice,
+    signeIrreductibleRevelees,
   };
 }
 
@@ -435,17 +452,23 @@ export function soumettreReponseIntervalle(
 
   const resultat: ResultatExerciceSignesProduit = {
     scoresRacineLineaire: etat.scoresRacineLineaireExercice,
+    racineLineaireRevelees: etat.racineLineaireRevelees,
     scoresMethode: etat.scoresMethodeExercice,
     methodeRevelees: etat.methodeRevelees,
     scoreReductionFacteur: etat.scoreReductionFacteurExercice,
+    reductionFacteurRevele: etat.reductionFacteurRevele,
     aideReductionFacteurUtilisee: etat.aideReductionFacteurUtilisee,
     scoreFactorisationChamp1: etat.scoreFactorisationChamp1Exercice,
+    factorisationChamp1Revele: etat.factorisationChamp1Revele,
     aideFactorisationChamp1Utilisee: etat.aideFactorisationChamp1Utilisee,
     scoreFactorisationChamp2: etat.scoreFactorisationChamp2Exercice,
+    factorisationChamp2Revele: etat.factorisationChamp2Revele,
     aideFactorisationChamp2Utilisee: etat.aideFactorisationChamp2Utilisee,
     scoreFactorisationFactorisation: etat.scoreFactorisationFactorisationExercice,
+    factorisationFactorisationRevele: etat.factorisationFactorisationRevele,
     aideFactorisationFactorisationUtilisee: etat.aideFactorisationFactorisationUtilisee,
     scoresSigneIrreductible: etat.scoresSigneIrreductibleExercice,
+    signeIrreductibleRevelees: etat.signeIrreductibleRevelees,
     scoreGrille: etat.scoreGrilleExercice as number,
     grilleRevelee: etat.grilleRevelee,
     aideGrilleTableauUtilisee: etat.aideGrilleTableauUtilisee,
@@ -471,8 +494,10 @@ export function soumettreReponseIntervalle(
     etapeCourante: demarrerEtapeTentatives(),
     ...ETAT_TRANSITOIRE_VIERGE,
     scoresRacineLineaireExercice: [],
+    racineLineaireRevelees: [],
     scoresMethodeExercice: [],
     methodeRevelees: [],
     scoresSigneIrreductibleExercice: [],
+    signeIrreductibleRevelees: [],
   };
 }

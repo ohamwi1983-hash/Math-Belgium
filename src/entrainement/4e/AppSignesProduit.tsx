@@ -125,7 +125,7 @@ function calculerSegmentsProgression(etat: EtatSessionSignesProduit): EtatPucePr
       } else if (i === etat.indexFacteurExercice && etat.phase === "racineLineaire") {
         segments.push("courante");
       } else {
-        segments.push(etat.scoresRacineLineaireExercice[index] === 0 ? "revele" : "correcte");
+        segments.push(etat.racineLineaireRevelees[index] ? "revele" : "correcte");
       }
       return;
     }
@@ -167,17 +167,17 @@ function calculerSegmentsProgression(etat: EtatSessionSignesProduit): EtatPucePr
       const revele = (() => {
         switch (sousPhase) {
           case "reductionFacteur":
-            return etat.scoreReductionFacteurExercice === 0;
+            return etat.reductionFacteurRevele;
           case "methodeFacteur":
             return etat.methodeRevelees[indexQuadratique] ?? false;
           case "factorisationChamp1":
-            return etat.scoreFactorisationChamp1Exercice === 0;
+            return etat.factorisationChamp1Revele;
           case "factorisationChamp2":
-            return etat.scoreFactorisationChamp2Exercice === 0;
+            return etat.factorisationChamp2Revele;
           case "factorisationFactorisation":
-            return etat.scoreFactorisationFactorisationExercice === 0;
+            return etat.factorisationFactorisationRevele;
           default:
-            return etat.scoresSigneIrreductibleExercice[indexIrreductible] === 0;
+            return etat.signeIrreductibleRevelees[indexIrreductible];
         }
       })();
       if (revele) {
@@ -314,19 +314,19 @@ export function AppSignesProduit() {
     const revele = (() => {
       switch (etat.phase) {
         case "racineLineaire":
-          return nouvelEtat.scoresRacineLineaireExercice[nouvelEtat.scoresRacineLineaireExercice.length - 1] === 0;
+          return nouvelEtat.racineLineaireRevelees[nouvelEtat.racineLineaireRevelees.length - 1]!;
         case "reductionFacteur":
-          return nouvelEtat.scoreReductionFacteurExercice === 0;
+          return nouvelEtat.reductionFacteurRevele;
         case "methodeFacteur":
           return nouvelEtat.methodeRevelees[nouvelEtat.methodeRevelees.length - 1]!;
         case "factorisationChamp1":
-          return nouvelEtat.scoreFactorisationChamp1Exercice === 0;
+          return nouvelEtat.factorisationChamp1Revele;
         case "factorisationChamp2":
-          return nouvelEtat.scoreFactorisationChamp2Exercice === 0;
+          return nouvelEtat.factorisationChamp2Revele;
         case "factorisationFactorisation":
-          return nouvelEtat.scoreFactorisationFactorisationExercice === 0;
+          return nouvelEtat.factorisationFactorisationRevele;
         case "signeIrreductible":
-          return nouvelEtat.scoresSigneIrreductibleExercice[nouvelEtat.scoresSigneIrreductibleExercice.length - 1] === 0;
+          return nouvelEtat.signeIrreductibleRevelees[nouvelEtat.signeIrreductibleRevelees.length - 1]!;
         case "grille":
           return nouvelEtat.grilleRevelee;
         case "intervalle":

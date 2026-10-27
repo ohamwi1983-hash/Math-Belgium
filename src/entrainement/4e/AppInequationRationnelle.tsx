@@ -313,7 +313,7 @@ function releveRevele(etat: EtatSessionInequationRationnelle, phase: PhaseInequa
     case "racineNumerateur":
       return etat.racineNumerateurRevele;
     case "denomReduction":
-      return etat.scoreDenomReductionExercice === 0;
+      return etat.denomReductionRevele;
     case "denomReconnaissance":
       return etat.denomReconnaissanceRevele;
     case "denomChamp1":
@@ -323,7 +323,7 @@ function releveRevele(etat: EtatSessionInequationRationnelle, phase: PhaseInequa
     case "miseEnEvidence":
       return etat.miseEnEvidenceRevele;
     case "reduction":
-      return etat.scoreReductionExercice === 0;
+      return etat.reductionRevele;
     case "reconnaissance":
       return etat.reconnaissanceRevele;
     case "champ1":
@@ -333,27 +333,27 @@ function releveRevele(etat: EtatSessionInequationRationnelle, phase: PhaseInequa
     case "factorisation":
       return etat.factorisationRevele;
     case "simplifierDenomReduction":
-      return etat.scoreSimplifierDenomReductionExercice === 0;
+      return etat.simplifierDenomReductionRevele;
     case "simplifierDenomReconnaissance":
       return etat.simplifierDenomCategorieRevelee;
     case "simplifierDenomChamp1":
-      return etat.scoreSimplifierDenomChamp1Exercice === 0;
+      return etat.simplifierDenomChamp1Revele;
     case "simplifierDenomChamp2":
-      return etat.scoreSimplifierDenomChamp2Exercice === 0;
+      return etat.simplifierDenomChamp2Revele;
     case "simplifierDenomFactorisation":
-      return etat.scoreSimplifierDenomFactorisationExercice === 0;
+      return etat.simplifierDenomFactorisationRevele;
     case "simplifierNumReduction":
-      return etat.scoreSimplifierNumReductionExercice === 0;
+      return etat.simplifierNumReductionRevele;
     case "simplifierNumReconnaissance":
       return etat.simplifierNumCategorieRevelee;
     case "simplifierNumChamp1":
-      return etat.scoreSimplifierNumChamp1Exercice === 0;
+      return etat.simplifierNumChamp1Revele;
     case "simplifierNumChamp2":
-      return etat.scoreSimplifierNumChamp2Exercice === 0;
+      return etat.simplifierNumChamp2Revele;
     case "simplifierNumFactorisation":
-      return etat.scoreSimplifierNumFactorisationExercice === 0;
+      return etat.simplifierNumFactorisationRevele;
     case "simplifierFraction":
-      return etat.scoreSimplifierFractionExercice === 0;
+      return etat.simplifierFractionRevele;
     case "grille":
       return etat.grilleRevelee;
     case "intervalle":
@@ -480,14 +480,12 @@ interface TransitionEnAttente {
 
 /**
  * Signal `revele` de la phase qui vient JUSTE de se terminer (`etat.phase`, avant la transition).
- * Beaucoup de phases ont un vrai booléen `xxxRevele` dédié (lu directement sur `nouvelEtat`) ; les
- * autres ("denomReduction", "reduction", et tout le groupe "simplifierXxxReduction/Champ1/Champ2/
- * Factorisation"/"simplifierFraction") n'en ont JAMAIS eu au niveau du moteur — l'ancien
- * `ResultatPanelInequationRationnelle.tsx` dérivait alors `revele` post-hoc comme `scoreXxx === 0`
- * (approximatif : une pénalité d'aide peut aussi ramener à 0 une réponse correcte mais aidée — même
- * défaut qu'avant, reproduit ici à l'identique, PAS corrigé dans cette passe). "intervalle" clôture
- * TOUJOURS l'exercice : son booléen `intervalleRevele` (un vrai booléen, pas un score) n'existe que
- * sur le dernier `resultats[...]` de `nouvelEtat`, jamais sur un champ top-level. */
+ * Chaque phase lit un booléen `xxxRevele` dédié sur `nouvelEtat` (point A du balayage générique,
+ * 2025-10 : les derniers champs qui n'en avaient pas — "denomReduction", "reduction", et le groupe
+ * "simplifierXxx*" — en ont désormais un, plutôt que l'ancienne heuristique `scoreXxx === 0`,
+ * approximative en présence d'une pénalité d'aide). "intervalle" clôture TOUJOURS l'exercice : son
+ * booléen `intervalleRevele` (un vrai booléen, pas un score) n'existe que sur le dernier
+ * `resultats[...]` de `nouvelEtat`, jamais sur un champ top-level. */
 function releveRevelePhase(etat: EtatSessionInequationRationnelle, nouvelEtat: EtatSessionInequationRationnelle): boolean {
   switch (etat.phase) {
     case "isoler":
@@ -499,7 +497,7 @@ function releveRevelePhase(etat: EtatSessionInequationRationnelle, nouvelEtat: E
     case "racineNumerateur":
       return nouvelEtat.racineNumerateurRevele;
     case "denomReduction":
-      return nouvelEtat.scoreDenomReductionExercice === 0;
+      return nouvelEtat.denomReductionRevele;
     case "denomReconnaissance":
       return nouvelEtat.denomReconnaissanceRevele;
     case "denomChamp1":
@@ -509,7 +507,7 @@ function releveRevelePhase(etat: EtatSessionInequationRationnelle, nouvelEtat: E
     case "miseEnEvidence":
       return nouvelEtat.miseEnEvidenceRevele;
     case "reduction":
-      return nouvelEtat.scoreReductionExercice === 0;
+      return nouvelEtat.reductionRevele;
     case "reconnaissance":
       return nouvelEtat.reconnaissanceRevele;
     case "champ1":
@@ -519,27 +517,27 @@ function releveRevelePhase(etat: EtatSessionInequationRationnelle, nouvelEtat: E
     case "factorisation":
       return nouvelEtat.factorisationRevele;
     case "simplifierDenomReduction":
-      return nouvelEtat.scoreSimplifierDenomReductionExercice === 0;
+      return nouvelEtat.simplifierDenomReductionRevele;
     case "simplifierDenomReconnaissance":
       return nouvelEtat.simplifierDenomCategorieRevelee;
     case "simplifierDenomChamp1":
-      return nouvelEtat.scoreSimplifierDenomChamp1Exercice === 0;
+      return nouvelEtat.simplifierDenomChamp1Revele;
     case "simplifierDenomChamp2":
-      return nouvelEtat.scoreSimplifierDenomChamp2Exercice === 0;
+      return nouvelEtat.simplifierDenomChamp2Revele;
     case "simplifierDenomFactorisation":
-      return nouvelEtat.scoreSimplifierDenomFactorisationExercice === 0;
+      return nouvelEtat.simplifierDenomFactorisationRevele;
     case "simplifierNumReduction":
-      return nouvelEtat.scoreSimplifierNumReductionExercice === 0;
+      return nouvelEtat.simplifierNumReductionRevele;
     case "simplifierNumReconnaissance":
       return nouvelEtat.simplifierNumCategorieRevelee;
     case "simplifierNumChamp1":
-      return nouvelEtat.scoreSimplifierNumChamp1Exercice === 0;
+      return nouvelEtat.simplifierNumChamp1Revele;
     case "simplifierNumChamp2":
-      return nouvelEtat.scoreSimplifierNumChamp2Exercice === 0;
+      return nouvelEtat.simplifierNumChamp2Revele;
     case "simplifierNumFactorisation":
-      return nouvelEtat.scoreSimplifierNumFactorisationExercice === 0;
+      return nouvelEtat.simplifierNumFactorisationRevele;
     case "simplifierFraction":
-      return nouvelEtat.scoreSimplifierFractionExercice === 0;
+      return nouvelEtat.simplifierFractionRevele;
     case "grille":
       return nouvelEtat.grilleRevelee;
     case "intervalle":

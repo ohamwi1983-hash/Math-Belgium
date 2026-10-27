@@ -51,22 +51,37 @@ export type PhaseSignesProduit =
 export interface ResultatExerciceSignesProduit {
   /** un score par facteur linéaire présent, dans l'ordre de exercice.facteurs (0 à 3 entrées) */
   scoresRacineLineaire: number[];
+  /** un booléen "révélé" par facteur linéaire, même principe/même index que `scoresRacineLineaire`
+   * — jusqu'au 2025-10, déduit indirectement de `score === 0` (voir `etapeTentatives.ts`) ; tableau
+   * explicite ajouté pendant le balayage générique (point A), même principe que `methodeRevelees`
+   * ci-dessous (déjà un vrai tableau de booléens). */
+  racineLineaireRevelees: boolean[];
   /** un score par facteur quadratique présent (factorisable OU irréductible), dans l'ordre de exercice.facteurs (0 à 3 entrées) */
   scoresMethode: number[];
   methodeRevelees: boolean[];
   /** null si aucun facteur n'était réellement factorisable dans cet exercice, ou s'il l'était déjà à coefficients réduits */
   scoreReductionFacteur: number | null;
+  /** même principe que `racineLineaireRevelees` ci-dessus, pour ce champ unique (jamais un tableau). */
+  reductionFacteurRevele: boolean;
   aideReductionFacteurUtilisee: boolean;
   /** null si aucun facteur n'était réellement factorisable dans cet exercice */
   scoreFactorisationChamp1: number | null;
+  /** même principe que `racineLineaireRevelees` ci-dessus. */
+  factorisationChamp1Revele: boolean;
   aideFactorisationChamp1Utilisee: boolean;
   scoreFactorisationChamp2: number | null;
+  /** même principe que `racineLineaireRevelees` ci-dessus. */
+  factorisationChamp2Revele: boolean;
   aideFactorisationChamp2Utilisee: boolean;
   /** score de l'étape "factorisationFactorisation", null sauf si le facteur factorisable est cas_general. */
   scoreFactorisationFactorisation: number | null;
+  /** même principe que `racineLineaireRevelees` ci-dessus. */
+  factorisationFactorisationRevele: boolean;
   aideFactorisationFactorisationUtilisee: boolean;
   /** un score par facteur irréductible présent, dans l'ordre de exercice.facteurs (0 à 2 entrées) */
   scoresSigneIrreductible: number[];
+  /** même principe que `racineLineaireRevelees` ci-dessus, même index que `scoresSigneIrreductible`. */
+  signeIrreductibleRevelees: boolean[];
   scoreGrille: number;
   grilleRevelee: boolean;
   aideGrilleTableauUtilisee: boolean;
@@ -86,13 +101,19 @@ export interface EtatSessionSignesProduit {
   /** combien de facteurs (exercice.facteurs, dans l'ordre) sont déjà ENTIÈREMENT traités — voir le commentaire de PhaseSignesProduit. */
   indexFacteurExercice: number;
   scoresRacineLineaireExercice: number[];
+  racineLineaireRevelees: boolean[];
   scoresMethodeExercice: number[];
   methodeRevelees: boolean[];
   scoreReductionFacteurExercice: number | null;
+  reductionFacteurRevele: boolean;
   scoreFactorisationChamp1Exercice: number | null;
+  factorisationChamp1Revele: boolean;
   scoreFactorisationChamp2Exercice: number | null;
+  factorisationChamp2Revele: boolean;
   scoreFactorisationFactorisationExercice: number | null;
+  factorisationFactorisationRevele: boolean;
   scoresSigneIrreductibleExercice: number[];
+  signeIrreductibleRevelees: boolean[];
   scoreGrilleExercice: number | null;
   grilleRevelee: boolean;
   /**

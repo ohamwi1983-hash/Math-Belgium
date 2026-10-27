@@ -99,20 +99,31 @@ function prochainePhaseApresDenom(exercice: ExerciceSimplification): PhaseSimpli
 
 const ETAT_TRANSITOIRE_VIERGE = {
   scoreDenomReductionExercice: null,
+  denomReductionRevele: false,
   scoreDenomReductionP1Exercice: null,
+  denomReductionP1Revele: false,
   scoreDenomReconnaissanceExercice: null,
   denomCategorieRevelee: false,
   scoreDenomChamp1Exercice: null,
+  denomChamp1Revele: false,
   scoreDenomChamp2Exercice: null,
+  denomChamp2Revele: false,
   scoreDenomFactorisationExercice: null,
+  denomFactorisationRevele: false,
   scoreCEDirecteExercice: null,
+  ceDirecteRevele: false,
   scoreNumReductionExercice: null,
+  numReductionRevele: false,
   scoreNumReductionP1Exercice: null,
+  numReductionP1Revele: false,
   scoreNumReconnaissanceExercice: null,
   numCategorieRevelee: false,
   scoreNumChamp1Exercice: null,
+  numChamp1Revele: false,
   scoreNumChamp2Exercice: null,
+  numChamp2Revele: false,
   scoreNumFactorisationExercice: null,
+  numFactorisationRevele: false,
   aideDenomReductionUtilisee: false,
   aideDenomReductionP1Utilisee: false,
   aideDenomChamp1Utilisee: false,
@@ -184,6 +195,7 @@ export function soumettreReponseDenomReduction(etat: EtatSessionSimplification, 
     etapeCourante: demarrerEtapeTentatives(),
     phase: "denomReconnaissance",
     scoreDenomReductionExercice: etat.aideDenomReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    denomReductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -215,6 +227,7 @@ export function soumettreReponseDenomReductionP1(etat: EtatSessionSimplification
     etapeCourante: demarrerEtapeTentatives(),
     phase: "ceDirecte",
     scoreDenomReductionP1Exercice: etat.aideDenomReductionP1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    denomReductionP1Revele: etapeCourante.revelee,
   };
 }
 
@@ -260,6 +273,7 @@ export function soumettreReponseDenomChamp1(etat: EtatSessionSimplification, rep
     etapeCourante: demarrerEtapeTentatives(),
     phase: "denomChamp2",
     scoreDenomChamp1Exercice: etat.aideDenomChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    denomChamp1Revele: etapeCourante.revelee,
   };
 }
 
@@ -296,6 +310,7 @@ export function soumettreReponseDenomChamp2(
     etapeCourante: demarrerEtapeTentatives(),
     phase: prochainePhase,
     scoreDenomChamp2Exercice: etat.aideDenomChamp2Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    denomChamp2Revele: etapeCourante.revelee,
   };
 }
 
@@ -330,6 +345,7 @@ export function soumettreReponseDenomFactorisation(
     scoreDenomFactorisationExercice: etat.aideDenomFactorisationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    denomFactorisationRevele: etapeCourante.revelee,
   };
 }
 
@@ -355,6 +371,7 @@ export function soumettreReponseCEDirecte(etat: EtatSessionSimplification, valeu
     etapeCourante: demarrerEtapeTentatives(),
     phase: necessiteSimplification(numerateurP2(etat.exerciceCourant)) ? "numReduction" : "numReconnaissance",
     scoreCEDirecteExercice: etapeCourante.score,
+    ceDirecteRevele: etapeCourante.revelee,
   };
 }
 
@@ -379,6 +396,7 @@ export function soumettreReponseNumReduction(etat: EtatSessionSimplification, re
     etapeCourante: demarrerEtapeTentatives(),
     phase: "numReconnaissance",
     scoreNumReductionExercice: etat.aideNumReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    numReductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -409,6 +427,7 @@ export function soumettreReponseNumReductionP1(etat: EtatSessionSimplification, 
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplification",
     scoreNumReductionP1Exercice: etat.aideNumReductionP1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    numReductionP1Revele: etapeCourante.revelee,
   };
 }
 
@@ -462,6 +481,7 @@ export function soumettreReponseNumChamp1(etat: EtatSessionSimplification, repon
     etapeCourante: demarrerEtapeTentatives(),
     phase: numerateurP2(etat.exerciceCourant).categorie === "cas_general" ? "numChamp2" : "simplification",
     scoreNumChamp1Exercice: etat.aideNumChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    numChamp1Revele: etapeCourante.revelee,
   };
 }
 
@@ -490,6 +510,7 @@ export function soumettreReponseNumChamp2(
     etapeCourante: demarrerEtapeTentatives(),
     phase: numerateurP2(etat.exerciceCourant).categorie === "cas_general" ? "numFactorisation" : "simplification",
     scoreNumChamp2Exercice: etat.aideNumChamp2Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    numChamp2Revele: etapeCourante.revelee,
   };
 }
 
@@ -523,6 +544,7 @@ export function soumettreReponseNumFactorisation(
     scoreNumFactorisationExercice: etat.aideNumFactorisationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    numFactorisationRevele: etapeCourante.revelee,
   };
 }
 
@@ -581,6 +603,7 @@ export function soumettreReponseSimplification(
     scoreSimplification: etat.aideSimplificationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : (etapeCourante.score as number),
+    simplificationRevele: etapeCourante.revelee,
     aideSimplificationUtilisee: etat.aideSimplificationUtilisee,
   };
 

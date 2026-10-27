@@ -75,6 +75,10 @@ export interface ResultatExerciceSimplification {
   scoreNumFactorisation: number | null;
   aideNumFactorisationUtilisee: boolean;
   scoreSimplification: number;
+  /** même principe que `EtatSessionSimplification.denomReductionRevele` (voir son commentaire) —
+   * clôt toujours l'exercice, jamais présente dans le récapitulatif, mais utilisée par
+   * `AppSimplification.tsx` pour l'historique de l'écran "simplification" final. */
+  simplificationRevele: boolean;
   aideSimplificationUtilisee: boolean;
 }
 
@@ -86,20 +90,44 @@ export interface EtatSessionSimplification {
   phase: PhaseSimplification;
   etapeCourante: EtatEtapeTentatives;
   scoreDenomReductionExercice: number | null;
+  /** true si l'étape a dû être révélée (tentatives épuisées) — jusqu'au 2025-10, déduit
+   * indirectement de `scoreDenomReductionExercice === 0` (un succès ne vaut jamais exactement 0,
+   * voir `etapeTentatives.ts`) ; champ explicite ajouté pendant le balayage générique (point A). */
+  denomReductionRevele: boolean;
   scoreDenomReductionP1Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  denomReductionP1Revele: boolean;
   scoreDenomReconnaissanceExercice: number | null;
   denomCategorieRevelee: boolean;
   scoreDenomChamp1Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  denomChamp1Revele: boolean;
   scoreDenomChamp2Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  denomChamp2Revele: boolean;
   scoreDenomFactorisationExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  denomFactorisationRevele: boolean;
   scoreCEDirecteExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  ceDirecteRevele: boolean;
   scoreNumReductionExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  numReductionRevele: boolean;
   scoreNumReductionP1Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  numReductionP1Revele: boolean;
   scoreNumReconnaissanceExercice: number | null;
   numCategorieRevelee: boolean;
   scoreNumChamp1Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  numChamp1Revele: boolean;
   scoreNumChamp2Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  numChamp2Revele: boolean;
   scoreNumFactorisationExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  numFactorisationRevele: boolean;
   /**
    * Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture —
    * conceptionaidescomposantspartageshistorique.md) — remises à false au passage à l'exercice

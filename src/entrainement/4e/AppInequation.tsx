@@ -65,7 +65,7 @@ function calculerSegmentsProgression(etat: EtatSessionInequation): EtatPuceProgr
     if (score === null) return "a-venir";
     const revele =
       phase === "simplification"
-        ? etat.scoreSimplificationExercice === 0
+        ? etat.simplificationRevele
         : phase === "racines"
           ? etat.racinesRevele
           : etat.signeARevele;
@@ -123,12 +123,9 @@ export function AppInequation() {
       if (votreReponse !== undefined) {
         ajouterHistorique(votreReponse, nouvelEtat);
       }
-      // "simplification" n'expose aucun champ `xxxRevele` dédié côté moteur (jamais de ligne de
-      // réponse révélée pour cette étape dans l'ancien ResultatPanel) — équivalent exact :
-      // score 0 ⟺ tentatives épuisées (voir etapeTentatives.ts, soumettreEtapeTentatives).
       const revele =
         etat.phase === "simplification"
-          ? nouvelEtat.scoreSimplificationExercice === 0
+          ? nouvelEtat.simplificationRevele
           : etat.phase === "racines"
             ? nouvelEtat.racinesRevele
             : etat.phase === "signe_a"

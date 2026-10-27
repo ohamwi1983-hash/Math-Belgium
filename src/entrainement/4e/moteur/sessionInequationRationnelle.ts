@@ -220,6 +220,10 @@ export interface EtatSessionInequationRationnelle {
   scoreRacineNumerateurExercice: number | null;
   racineNumerateurRevele: boolean;
   scoreDenomReductionExercice: number | null;
+  /** true si l'étape a dû être révélée (tentatives épuisées) — jusqu'au 2025-10, déduit
+   * indirectement de `scoreDenomReductionExercice === 0` (un succès ne vaut jamais exactement 0,
+   * voir `etapeTentatives.ts`) ; champ explicite ajouté pendant le balayage générique (point A). */
+  denomReductionRevele: boolean;
   scoreDenomReconnaissanceExercice: number | null;
   denomReconnaissanceRevele: boolean;
   scoreDenomChamp1Exercice: number | null;
@@ -229,6 +233,8 @@ export interface EtatSessionInequationRationnelle {
   scoreMiseEnEvidenceExercice: number | null;
   miseEnEvidenceRevele: boolean;
   scoreReductionExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  reductionRevele: boolean;
   scoreReconnaissanceExercice: number | null;
   reconnaissanceRevele: boolean;
   scoreChamp1Exercice: number | null;
@@ -238,18 +244,36 @@ export interface EtatSessionInequationRationnelle {
   scoreFactorisationExercice: number | null;
   factorisationRevele: boolean;
   scoreSimplifierDenomReductionExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierDenomReductionRevele: boolean;
   scoreSimplifierDenomReconnaissanceExercice: number | null;
   simplifierDenomCategorieRevelee: boolean;
   scoreSimplifierDenomChamp1Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierDenomChamp1Revele: boolean;
   scoreSimplifierDenomChamp2Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierDenomChamp2Revele: boolean;
   scoreSimplifierDenomFactorisationExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierDenomFactorisationRevele: boolean;
   scoreSimplifierNumReductionExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierNumReductionRevele: boolean;
   scoreSimplifierNumReconnaissanceExercice: number | null;
   simplifierNumCategorieRevelee: boolean;
   scoreSimplifierNumChamp1Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierNumChamp1Revele: boolean;
   scoreSimplifierNumChamp2Exercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierNumChamp2Revele: boolean;
   scoreSimplifierNumFactorisationExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierNumFactorisationRevele: boolean;
   scoreSimplifierFractionExercice: number | null;
+  /** même principe que `denomReductionRevele` ci-dessus. */
+  simplifierFractionRevele: boolean;
   scoreGrilleExercice: number | null;
   grilleRevelee: boolean;
   /** Bouton "Aide" de l'étape intervalle : révélation à sens unique, jamais remise à false pour
@@ -295,6 +319,7 @@ const ETAT_TRANSITOIRE_VIERGE = {
   scoreRacineNumerateurExercice: null,
   racineNumerateurRevele: false,
   scoreDenomReductionExercice: null,
+  denomReductionRevele: false,
   scoreDenomReconnaissanceExercice: null,
   denomReconnaissanceRevele: false,
   scoreDenomChamp1Exercice: null,
@@ -304,6 +329,7 @@ const ETAT_TRANSITOIRE_VIERGE = {
   scoreMiseEnEvidenceExercice: null,
   miseEnEvidenceRevele: false,
   scoreReductionExercice: null,
+  reductionRevele: false,
   scoreReconnaissanceExercice: null,
   reconnaissanceRevele: false,
   scoreChamp1Exercice: null,
@@ -313,18 +339,27 @@ const ETAT_TRANSITOIRE_VIERGE = {
   scoreFactorisationExercice: null,
   factorisationRevele: false,
   scoreSimplifierDenomReductionExercice: null,
+  simplifierDenomReductionRevele: false,
   scoreSimplifierDenomReconnaissanceExercice: null,
   simplifierDenomCategorieRevelee: false,
   scoreSimplifierDenomChamp1Exercice: null,
+  simplifierDenomChamp1Revele: false,
   scoreSimplifierDenomChamp2Exercice: null,
+  simplifierDenomChamp2Revele: false,
   scoreSimplifierDenomFactorisationExercice: null,
+  simplifierDenomFactorisationRevele: false,
   scoreSimplifierNumReductionExercice: null,
+  simplifierNumReductionRevele: false,
   scoreSimplifierNumReconnaissanceExercice: null,
   simplifierNumCategorieRevelee: false,
   scoreSimplifierNumChamp1Exercice: null,
+  simplifierNumChamp1Revele: false,
   scoreSimplifierNumChamp2Exercice: null,
+  simplifierNumChamp2Revele: false,
   scoreSimplifierNumFactorisationExercice: null,
+  simplifierNumFactorisationRevele: false,
   scoreSimplifierFractionExercice: null,
+  simplifierFractionRevele: false,
   scoreGrilleExercice: null,
   grilleRevelee: false,
   aideUtilisee: false,
@@ -490,6 +525,7 @@ export function soumettreReponseDenomReduction(etat: EtatSessionInequationRation
     etapeCourante: demarrerEtapeTentatives(),
     phase: "denomReconnaissance",
     scoreDenomReductionExercice: etat.aideDenomReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    denomReductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -788,6 +824,7 @@ export function soumettreReponseReduction(etat: EtatSessionInequationRationnelle
     etapeCourante: demarrerEtapeTentatives(),
     phase: "reconnaissance",
     scoreReductionExercice: etat.aideReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    reductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -997,6 +1034,7 @@ export function soumettreReponseSimplifierDenomReduction(
     scoreSimplifierDenomReductionExercice: etat.aideSimplifierDenomReductionUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierDenomReductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -1058,6 +1096,7 @@ export function soumettreReponseSimplifierDenomChamp1(
     scoreSimplifierDenomChamp1Exercice: etat.aideSimplifierDenomChamp1Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierDenomChamp1Revele: etapeCourante.revelee,
   };
 }
 
@@ -1097,6 +1136,7 @@ export function soumettreReponseSimplifierDenomChamp2(
     scoreSimplifierDenomChamp2Exercice: etat.aideSimplifierDenomChamp2Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierDenomChamp2Revele: etapeCourante.revelee,
   };
 }
 
@@ -1135,6 +1175,7 @@ export function soumettreReponseSimplifierDenomFactorisation(
     scoreSimplifierDenomFactorisationExercice: etat.aideSimplifierDenomFactorisationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierDenomFactorisationRevele: etapeCourante.revelee,
   };
 }
 
@@ -1173,6 +1214,7 @@ export function soumettreReponseSimplifierNumReduction(
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplifierNumReconnaissance",
     scoreSimplifierNumReductionExercice: etat.aideSimplifierNumReductionUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    simplifierNumReductionRevele: etapeCourante.revelee,
   };
 }
 
@@ -1234,6 +1276,7 @@ export function soumettreReponseSimplifierNumChamp1(
     scoreSimplifierNumChamp1Exercice: etat.aideSimplifierNumChamp1Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierNumChamp1Revele: etapeCourante.revelee,
   };
 }
 
@@ -1268,6 +1311,7 @@ export function soumettreReponseSimplifierNumChamp2(
     scoreSimplifierNumChamp2Exercice: etat.aideSimplifierNumChamp2Utilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierNumChamp2Revele: etapeCourante.revelee,
   };
 }
 
@@ -1303,6 +1347,7 @@ export function soumettreReponseSimplifierNumFactorisation(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "simplifierFraction",
+    simplifierNumFactorisationRevele: etapeCourante.revelee,
     scoreSimplifierNumFactorisationExercice: etat.aideSimplifierNumFactorisationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
@@ -1350,6 +1395,7 @@ export function soumettreReponseSimplifierFraction(
     scoreSimplifierFractionExercice: etat.aideSimplifierFractionUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplifierFractionRevele: etapeCourante.revelee,
   };
 }
 

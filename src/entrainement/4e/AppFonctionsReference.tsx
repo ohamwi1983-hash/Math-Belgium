@@ -110,9 +110,9 @@ function releveRevelePhase(etatAvant: EtatSessionFonctionReference, nouvelEtat: 
 /**
  * Segments de la barre de puces pour les 2 phases FIXES de l'exercice courant (`PhaseFonctionReference`,
  * typesFonctionsReference.ts) : "reconnaissance" (jamais sautée) puis "exercice". "reconnaissance"
- * reprend exactement la même heuristique que `calculerRecapitulatifFonctionReference`
- * (ui/recapitulatifFonctionsReference.ts) : pas de `reconnaissanceRevele` tracké au niveau de
- * l'exercice par le moteur, donc `scoreReconnaissanceExercice === 0` ⟺ révélée. "exercice" (dernière
+ * reprend exactement la même lecture que `calculerRecapitulatifFonctionReference`
+ * (ui/recapitulatifFonctionsReference.ts) : `etat.etapeReconnaissance.revelee`, qui garde son état
+ * terminal jusqu'à la clôture de l'exercice (voir sessionFonctionsReference.ts). "exercice" (dernière
  * phase) n'a pas de branche "close" propre : une fois notée, un nouvel exercice démarre (ou la
  * session se termine) — même principe que la dernière phase d'AppAnalyseFonction.tsx. Ce indicateur
  * est ORTHOGONAL au bloc "Exercice N / Total" ci-dessous (`.card-progress-step`/`.progress-track`,
@@ -121,7 +121,7 @@ function releveRevelePhase(etatAvant: EtatSessionFonctionReference, nouvelEtat: 
  */
 function calculerSegmentsProgression(etat: EtatSessionFonctionReference): EtatPuceProgression[] {
   return [
-    etat.phase === "reconnaissance" ? "courante" : etat.scoreReconnaissanceExercice === 0 ? "revele" : "correcte",
+    etat.phase === "reconnaissance" ? "courante" : etat.etapeReconnaissance.revelee ? "revele" : "correcte",
     etat.phase === "exercice" ? "courante" : "a-venir",
   ];
 }

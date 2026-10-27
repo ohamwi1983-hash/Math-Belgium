@@ -151,30 +151,30 @@ function calculerSegmentsProgression(etat: EtatSessionSimplification): EtatPuceP
     if (score === null) return "a-venir";
     const revele =
       phase === "denomReduction"
-        ? etat.scoreDenomReductionExercice === 0
+        ? etat.denomReductionRevele
         : phase === "denomReductionP1"
-          ? etat.scoreDenomReductionP1Exercice === 0
+          ? etat.denomReductionP1Revele
           : phase === "denomReconnaissance"
             ? etat.denomCategorieRevelee
             : phase === "denomChamp1"
-              ? etat.scoreDenomChamp1Exercice === 0
+              ? etat.denomChamp1Revele
               : phase === "denomChamp2"
-                ? etat.scoreDenomChamp2Exercice === 0
+                ? etat.denomChamp2Revele
                 : phase === "denomFactorisation"
-                  ? etat.scoreDenomFactorisationExercice === 0
+                  ? etat.denomFactorisationRevele
                   : phase === "ceDirecte"
-                    ? etat.scoreCEDirecteExercice === 0
+                    ? etat.ceDirecteRevele
                     : phase === "numReduction"
-                      ? etat.scoreNumReductionExercice === 0
+                      ? etat.numReductionRevele
                       : phase === "numReductionP1"
-                        ? etat.scoreNumReductionP1Exercice === 0
+                        ? etat.numReductionP1Revele
                         : phase === "numReconnaissance"
                           ? etat.numCategorieRevelee
                           : phase === "numChamp1"
-                            ? etat.scoreNumChamp1Exercice === 0
+                            ? etat.numChamp1Revele
                             : phase === "numChamp2"
-                              ? etat.scoreNumChamp2Exercice === 0
-                              : etat.scoreNumFactorisationExercice === 0;
+                              ? etat.numChamp2Revele
+                              : etat.numFactorisationRevele;
     if (revele) return "revele";
     // "denomReconnaissance"/"numReconnaissance"/"ceDirecte" n'ont aucun mécanisme d'aide (toujours
     // "correcte", jamais "aide").
@@ -259,33 +259,33 @@ export function AppSimplification() {
     const revele = (() => {
       switch (etat.phase) {
         case "denomReduction":
-          return nouvelEtat.scoreDenomReductionExercice === 0;
+          return nouvelEtat.denomReductionRevele;
         case "denomReductionP1":
-          return nouvelEtat.scoreDenomReductionP1Exercice === 0;
+          return nouvelEtat.denomReductionP1Revele;
         case "denomReconnaissance":
           return nouvelEtat.denomCategorieRevelee;
         case "denomChamp1":
-          return nouvelEtat.scoreDenomChamp1Exercice === 0;
+          return nouvelEtat.denomChamp1Revele;
         case "denomChamp2":
-          return nouvelEtat.scoreDenomChamp2Exercice === 0;
+          return nouvelEtat.denomChamp2Revele;
         case "denomFactorisation":
-          return nouvelEtat.scoreDenomFactorisationExercice === 0;
+          return nouvelEtat.denomFactorisationRevele;
         case "ceDirecte":
-          return nouvelEtat.scoreCEDirecteExercice === 0;
+          return nouvelEtat.ceDirecteRevele;
         case "numReduction":
-          return nouvelEtat.scoreNumReductionExercice === 0;
+          return nouvelEtat.numReductionRevele;
         case "numReductionP1":
-          return nouvelEtat.scoreNumReductionP1Exercice === 0;
+          return nouvelEtat.numReductionP1Revele;
         case "numReconnaissance":
           return nouvelEtat.numCategorieRevelee;
         case "numChamp1":
-          return nouvelEtat.scoreNumChamp1Exercice === 0;
+          return nouvelEtat.numChamp1Revele;
         case "numChamp2":
-          return nouvelEtat.scoreNumChamp2Exercice === 0;
+          return nouvelEtat.numChamp2Revele;
         case "numFactorisation":
-          return nouvelEtat.scoreNumFactorisationExercice === 0;
+          return nouvelEtat.numFactorisationRevele;
         case "simplification":
-          return nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.scoreSimplification === 0;
+          return nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.simplificationRevele;
       }
     })();
 
