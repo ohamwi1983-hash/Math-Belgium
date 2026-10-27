@@ -464,6 +464,30 @@
   margin: 0;
 }
 
+/* Écran à deux questions de poids égal (ex. `EtapeAllure` : "signe de a ?" / "signe de a·b ?") —
+ * la règle `:not(:has(~ .prompt-text))` ci-dessus ne met en avant QUE la dernière question d'un
+ * écran (hypothèse "consigne générale puis question spécifique"), fausse ici puisqu'aucune des
+ * deux n'est une simple consigne de contexte. Même spécificité que cette règle (3 classes/pseudo-
+ * classes), placée après elle dans la cascade pour gagner sur l'ordre source. */
+.entrainement .prompt-text.prompt-text--question-multiple {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  padding-left: 12px;
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Fait mathématique donné (ex. "domf = ℝ" dans `EtapeDomaineImage`, toujours vrai pour ce
+ * générateur) à ne JAMAIS confondre avec la vraie question posée juste en dessous — classe dédiée
+ * plutôt que `.prompt-text` : rester en dehors du décompte de `:not(:has(~ .prompt-text))`
+ * ci-dessus permet à la vraie question de conserver seule la mise en avant. */
+.entrainement .prompt-fact {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
+}
+
 .entrainement .options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

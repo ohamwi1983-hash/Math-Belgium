@@ -29,7 +29,11 @@ export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, reca
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">Quel est le signe de a ?</p>
+      {/* `prompt-text--question-multiple` : deux questions de poids égal sur cet écran — la règle
+       * générique (`.prompt-text:not(:has(~ .prompt-text))` dans theme.css) ne met en avant que la
+       * DERNIÈRE question d'un écran (cas "consigne générale puis question spécifique"), ce qui
+       * laissait "signe de a ?" sans accent comme si ce n'était qu'un rappel de contexte. */}
+      <p className="prompt-text prompt-text--question-multiple">Quel est le signe de a ?</p>
       <div className="options-grid-compact">
         <button type="button" className={signeA === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigneA("+")}>
           a &gt; 0
@@ -38,7 +42,7 @@ export function EtapeAllure({ exercice, tentativesUtilisees, tentativesMax, reca
           a &lt; 0
         </button>
       </div>
-      <p className="prompt-text">Quel est le signe de a·b ?</p>
+      <p className="prompt-text prompt-text--question-multiple">Quel est le signe de a·b ?</p>
       <div className="options-grid-compact">
         <button type="button" className={signeAB === "+" ? "btn toggle-active" : "btn"} onClick={() => setSigneAB("+")}>
           a·b &gt; 0

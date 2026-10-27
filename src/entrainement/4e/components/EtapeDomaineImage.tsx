@@ -60,7 +60,11 @@ export function EtapeDomaineImage({
   return (
     <div>
       <RecapitulatifPanel entrees={recapitulatif} />
-      <p className="prompt-text">domf = ℝ</p>
+      {/* `prompt-fact`, pas `prompt-text` : domf = ℝ est un fait donné (toujours vrai pour ce
+       * générateur), pas une question — une classe dédiée évite qu'il partage le style de la vraie
+       * question ci-dessous (et la cascade `.prompt-text:not(:has(~ .prompt-text))` de theme.css,
+       * qui met en avant la question, s'applique alors correctement à elle seule). */}
+      <p className="prompt-fact">domf = ℝ</p>
       <p className="prompt-text">Quel est l'ensemble-image (imf) de cette fonction ?</p>
       {aideActivee && <SketchAxeSommet geom={geom} courbe={courbe} signeA={signeA} surlignage={surlignage} />}
       <div className="field">
