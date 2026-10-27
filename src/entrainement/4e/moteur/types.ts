@@ -39,6 +39,10 @@ export interface ResultatExercice {
   scoreChampPrincipal: number;
   /** score de l'étape "Zéros", 0-100 */
   scoreZeros: number;
+  /** même principe que `EtatSession.simplificationRevele` (voir son commentaire), pour l'étape
+   * "Zéros" — clôt toujours l'exercice, jamais présente dans le récapitulatif, mais utilisée par
+   * `AppMethodeRapide.tsx` pour colorer la puce de progression correspondante. */
+  zerosRevele: boolean;
   /** true si tentativesMax a été atteint sans que l'élève ne trouve la bonne catégorie */
   categorieRevelee: boolean;
 }
@@ -62,16 +66,25 @@ export interface EtatSession {
   etapeCourante: EtatEtapeTentatives;
   /** score de la phase "simplification" une fois close, ou null si l'étape n'a pas eu lieu (voir necessiteSimplification) */
   scoreSimplificationExercice: number | null;
+  /** true si l'étape de simplification a dû être révélée (tentatives épuisées) — jusqu'au 2025-10,
+   * déduit indirectement de `scoreSimplificationExercice === 0` (un succès ne vaut jamais
+   * exactement 0, voir `etapeTentatives.ts`) ; champ explicite ajouté pendant le balayage générique
+   * (point A) pour ne plus dépendre de cette équivalence implicite. */
+  simplificationRevele: boolean;
   /** score de la phase "isolement" une fois close, ou null si l'étape n'a pas eu lieu (voir necessiteIsolement) */
   scoreIsolementExercice: number | null;
   /** true si l'étape d'isolement a dû être révélée — affiché à l'étape de reconnaissance qui suit */
   isolementRevele: boolean;
   /** score de la phase "developper" une fois close, ou null si l'étape n'a pas eu lieu (voir necessiteDeveloppement) */
   scoreDevelopperExercice: number | null;
+  /** même principe que `simplificationRevele` ci-dessus, pour la phase "developper". */
+  developperRevele: boolean;
   /** score de la phase "reconnaissance" une fois close, conservé jusqu'à la clôture de l'exercice */
   scoreReconnaissanceExercice: number | null;
   /** score de la phase "champ1" une fois close, conservé jusqu'à la clôture de l'exercice */
   scoreChampPrincipalExercice: number | null;
+  /** même principe que `simplificationRevele` ci-dessus, pour la phase "champ1". */
+  champPrincipalRevele: boolean;
   categorieRevelee: boolean;
   /**
    * Aides à sens unique (1 seul niveau, ×0,5 sur le score de l'étape concernée à sa clôture —

@@ -91,11 +91,14 @@ export function demarrerSession(reglages: ReglagesSession, generateur: Generateu
     phase: phaseInitiale(exerciceCourant),
     etapeCourante: demarrerEtapeTentatives(),
     scoreSimplificationExercice: null,
+    simplificationRevele: false,
     scoreIsolementExercice: null,
     isolementRevele: false,
     scoreDevelopperExercice: null,
+    developperRevele: false,
     scoreReconnaissanceExercice: null,
     scoreChampPrincipalExercice: null,
+    champPrincipalRevele: false,
     categorieRevelee: false,
     aideSimplificationUtilisee: false,
     aideIsolementUtilisee: false,
@@ -147,6 +150,7 @@ export function soumettreReponseSimplification(etat: EtatSession, reponse: strin
     scoreSimplificationExercice: etat.aideSimplificationUtilisee
       ? (etapeCourante.score as number) * 0.5
       : etapeCourante.score,
+    simplificationRevele: etapeCourante.revelee,
   };
 }
 
@@ -228,6 +232,7 @@ export function soumettreReponseDevelopper(etat: EtatSession, reponse: string): 
     etapeCourante: demarrerEtapeTentatives(),
     phase: phaseApresIsolement(etat.exerciceCourant),
     scoreDevelopperExercice: etat.aideDevelopperUtilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    developperRevele: etapeCourante.revelee,
   };
 }
 
@@ -288,6 +293,7 @@ export function soumettreReponseChamp1(etat: EtatSession, reponse: string): Etat
     etapeCourante: demarrerEtapeTentatives(),
     phase: "champ2",
     scoreChampPrincipalExercice: etat.aideChamp1Utilisee ? (etapeCourante.score as number) * 0.5 : etapeCourante.score,
+    champPrincipalRevele: etapeCourante.revelee,
   };
 }
 
@@ -322,11 +328,14 @@ function cloturerExerciceOuSuivant(etat: EtatSession, resultat: ResultatExercice
     phase: phaseInitiale(prochainExercice),
     etapeCourante: demarrerEtapeTentatives(),
     scoreSimplificationExercice: null,
+    simplificationRevele: false,
     scoreIsolementExercice: null,
     isolementRevele: false,
     scoreDevelopperExercice: null,
+    developperRevele: false,
     scoreReconnaissanceExercice: null,
     scoreChampPrincipalExercice: null,
+    champPrincipalRevele: false,
     categorieRevelee: false,
     aideSimplificationUtilisee: false,
     aideIsolementUtilisee: false,
@@ -369,6 +378,7 @@ export function soumettreReponseChamp2(etat: EtatSession, reponse: ReponseZeros)
     scoreReconnaissance: etat.scoreReconnaissanceExercice,
     scoreChampPrincipal: etat.scoreChampPrincipalExercice as number,
     scoreZeros: etat.aideZerosUtilisee ? (etapeCourante.score as number) * 0.5 : (etapeCourante.score as number),
+    zerosRevele: etapeCourante.revelee,
     categorieRevelee: etat.categorieRevelee,
   };
 

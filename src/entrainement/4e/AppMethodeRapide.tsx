@@ -53,7 +53,7 @@ function nouvelleSession(): EtatSession {
  * générateur (type `Phase` dans `moteur/types.ts`, et les branches de `terminerEtape` ci-dessous). */
 const ORDRE_PHASES: EtatSession["phase"][] = ["simplification", "isolement", "developper", "reconnaissance", "champ1", "champ2"];
 
-/** Même heuristique que `calculerRecapitulatif` (`ui/recapitulatif.ts`) et que `terminerEtape`
+/** Même principe que `calculerRecapitulatif` (`ui/recapitulatif.ts`) et que `terminerEtape`
  * ci-dessous pour lire `scoreXxxExercice`/`xxxRevele` — jamais une valeur recalculée séparément.
  * `champ2` (dernière phase) n'a pas de champ `scoreXxxExercice` propre : elle clôt toujours
  * immédiatement l'exercice (voir commentaire sur `calculerRecapitulatif`), donc tant qu'elle n'est
@@ -76,14 +76,14 @@ function calculerSegmentsProgression(etat: EtatSession): EtatPuceProgression[] {
     if (score === null) return "a-venir";
     const revele =
       phase === "simplification"
-        ? etat.scoreSimplificationExercice === 0
+        ? etat.simplificationRevele
         : phase === "isolement"
           ? etat.isolementRevele
           : phase === "developper"
-            ? etat.scoreDevelopperExercice === 0
+            ? etat.developperRevele
             : phase === "reconnaissance"
               ? etat.categorieRevelee
-              : etat.scoreChampPrincipalExercice === 0;
+              : etat.champPrincipalRevele;
     if (revele) return "revele";
     // "reconnaissance" n'a aucun mécanisme d'aide (toujours "correcte", jamais "aide").
     const aideUtilisee =
@@ -124,11 +124,7 @@ function demandeFormeGeneraleDirecte(exercice: Exercice): boolean {
 /** État tenu en attente dès qu'un écran se termine (bonne réponse, ou tentatives épuisées) — l'état
  * de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
  * `ValidationEcran`, jamais immédiatement (convention CLAUDE.md, "validation/invalidation avant de
- * passer à l'écran suivant"). Ce générateur (le plus ancien de la plateforme) ne garde pas de champ
- * `xxxRevele` explicite par écran pour simplification/developper/champ1 — seuls `isolementRevele`
- * et `categorieRevelee` existent côté session (`moteur/types.ts`) ; pour les 3 autres, `revele` se
- * déduit du score de clôture de l'écran étant exactement 0, exactement la même condition que
- * l'ancien `ResultatPanel.tsx` utilisait pour décider d'afficher la réponse révélée. */
+ * passer à l'écran suivant"). */
 interface TransitionEnAttente {
   etatSuivant: EtatSession;
   revele: boolean;
@@ -172,16 +168,16 @@ export function AppMethodeRapide() {
       }
       const revele =
         etat.phase === "simplification"
-          ? nouvelEtat.scoreSimplificationExercice === 0
+          ? nouvelEtat.simplificationRevele
           : etat.phase === "isolement"
             ? nouvelEtat.isolementRevele
             : etat.phase === "developper"
-              ? nouvelEtat.scoreDevelopperExercice === 0
+              ? nouvelEtat.developperRevele
               : etat.phase === "reconnaissance"
                 ? nouvelEtat.categorieRevelee
                 : etat.phase === "champ1"
-                  ? nouvelEtat.scoreChampPrincipalExercice === 0
-                  : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.scoreZeros === 0;
+                  ? nouvelEtat.champPrincipalRevele
+                  : nouvelEtat.resultats[nouvelEtat.resultats.length - 1]!.zerosRevele;
       setEnAttente({ etatSuivant: nouvelEtat, revele });
       return;
     }

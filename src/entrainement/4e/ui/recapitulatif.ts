@@ -54,11 +54,7 @@ export function calculerRecapitulatif(etat: EtatSession): EntreeRecapitulatif[] 
       libelle: "Équation simplifiée",
       estLatex: true,
       valeur: formatEnonceAffichage(exercice.enonce, exercice.formeAffichage, exercice.parametresAffichage, exercice.irrationnel),
-      // Pas de `simplificationRevele` tracké par le moteur (`moteur/types.ts`) — même heuristique
-      // que les 2 exceptions déjà documentées ailleurs sur ce chantier (AppEquationRationnelle/
-      // AppInequationRationnelle) : score exactement 0 ⟺ révélée (jamais atteint par une réussite,
-      // voir `etapeTentatives.ts` — le score d'une réussite reste toujours strictement positif).
-      revele: etat.scoreSimplificationExercice === 0,
+      revele: etat.simplificationRevele,
     });
   }
 
@@ -76,7 +72,7 @@ export function calculerRecapitulatif(etat: EtatSession): EntreeRecapitulatif[] 
       libelle: "Équation développée",
       estLatex: true,
       valeur: formatEnonceLatex(exercice.enonce),
-      revele: etat.scoreDevelopperExercice === 0,
+      revele: etat.developperRevele,
     });
   }
 
@@ -86,13 +82,13 @@ export function calculerRecapitulatif(etat: EtatSession): EntreeRecapitulatif[] 
 
   if (etat.scoreChampPrincipalExercice !== null) {
     if (exercice.categorie === "cas_general") {
-      entrees.push({ libelle: "Δ", estLatex: false, valeur: `Δ = ${exercice.solution.delta}`, revele: etat.scoreChampPrincipalExercice === 0 });
+      entrees.push({ libelle: "Δ", estLatex: false, valeur: `Δ = ${exercice.solution.delta}`, revele: etat.champPrincipalRevele });
     } else {
       entrees.push({
         libelle: "Forme factorisée",
         estLatex: true,
         valeur: `${exercice.solution.formeFactorisee} = 0`,
-        revele: etat.scoreChampPrincipalExercice === 0,
+        revele: etat.champPrincipalRevele,
       });
     }
   }
