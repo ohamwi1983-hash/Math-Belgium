@@ -8,6 +8,7 @@ import {
   domaineAttendu,
   existeOrdonneeNiveau1,
   necessiteSeparation,
+  pariteAttendue,
   zerosNiveau1,
 } from "../../moteur/verificationCaracteristiquesAlgebriques";
 import {
@@ -18,6 +19,7 @@ import {
   formatEquationNiveau1Latex,
   formatEquationsSepareesLatex,
   formatOrdonneeExacteLatex,
+  formatPariteLabel,
   formatValeurExacteLatex,
   formatZerosAttendusLatex,
   instructionDebarrasser,
@@ -40,25 +42,25 @@ import { CATALOGUE_VARIANTES, construireNiveau1AvecFamille, genererExerciceCarac
  * variable), avec des structures de données internes différentes par famille
  * (`ExerciceNiveau2Quadratique`/`RacineCarree`/`ValeurAbsolue`/`Cubique`) — bien plus risqué à
  * resynthétiser fidèlement sur papier qu'à couvrir correctement dans le temps imparti. Le niveau 1
- * est strictement homogène (6-7 phases fixes, une structure de données unique) et correspond au
+ * est strictement homogène (7-8 phases fixes, une structure de données unique) et correspond au
  * réglage par défaut de l'écran interactif, retenu ici en toute sécurité mathématique plutôt que de
  * risquer un corrigé faux sur le niveau 2 (voir la note de `AdaptateurFeuilleExercices` : la
  * correction doit toujours être resynthétisée depuis des valeurs déjà connues et correctes).
  *
- * 6 questions par instance — une par écran RÉELLEMENT traversé côté interactif (voir
+ * 7 questions par instance — une par écran RÉELLEMENT traversé côté interactif (voir
  * `moteur/sessionCaracteristiquesAlgebriques.ts`, séquence niveau 1) : ordonnée à l'origine → CE →
- * domaine → isolement (zéros) → séparation (`valeur_absolue`/`carre`) OU débarrasser (les 4 autres
- * familles) → zéros. Chaque consigne réutilise TEXTUELLEMENT ce que l'écran affiche
+ * domaine → parité → isolement (zéros) → séparation (`valeur_absolue`/`carre`) OU débarrasser (les
+ * 4 autres familles) → zéros. Chaque consigne réutilise TEXTUELLEMENT ce que l'écran affiche
  * (`ui/formatCaracteristiquesAlgebriques.ts` — `instructionIsolement`, `instructionDebarrasser`,
  * `INSTRUCTION_ZEROS`), jamais reformulée indépendamment. `regroupable` non activé : plusieurs
  * questions par instance (voir `AdaptateurFeuilleExercices.regroupable`, condition explicite "une
  * seule question par instance").
  *
  * Correction : RESYNTHÉTISÉE depuis les valeurs déjà connues et correctes de l'instance tirée
- * (`ceAttendues`, `domaineAttendu`, `zerosNiveau1`...) et les mêmes fonctions de formatage LaTeX que
- * l'écran interactif (`formatEquationIsoleeLatex`, `formatEquationsSepareesLatex`,
+ * (`ceAttendues`, `domaineAttendu`, `pariteAttendue`, `zerosNiveau1`...) et les mêmes fonctions de
+ * formatage LaTeX que l'écran interactif (`formatEquationIsoleeLatex`, `formatEquationsSepareesLatex`,
  * `formatEquationDebarrasseeLatex`, `formatOrdonneeExacteLatex`, `formatCEAttenduesLatex`,
- * `formatZerosAttendusLatex`) — jamais recalculée indépendamment.
+ * `formatPariteLabel`, `formatZerosAttendusLatex`) — jamais recalculée indépendamment.
  */
 
 /** `[base](ax+b) = -k`/deux équations séparées/équation débarrassée : ce module ne connaît que le
@@ -127,6 +129,10 @@ function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteri
         reponse: { type: "lignes", nombre: 1 },
       },
       {
+        consigne: [texte("Cette fonction est-elle paire, impaire, ou ni l'une ni l'autre ? Justifie.")],
+        reponse: { type: "lignes", nombre: 1 },
+      },
+      {
         consigne: [texte(instructionIsolement(instance.famille))],
         reponse: { type: "lignes", nombre: 1 },
       },
@@ -172,33 +178,39 @@ function construireCorrectionCaracteristiquesAlgebriques(instance: ExerciceCarac
     fragments: [texte("c) Domaine de définition : "), latex(`\\mathrm{dom}\\,f = ${formatDomaineAttenduLatex(domaineAttendu(instance))}`)],
   });
 
-  // d) Isolement.
+  // d) Parité.
   blocs.push({
     type: "paragraphe",
-    fragments: [texte("d) L'équation isolée : "), latex(formatEquationIsoleeLatex(instance))],
+    fragments: [texte(`d) Cette fonction est ${formatPariteLabel(pariteAttendue(instance))}.`)],
   });
 
-  // e) Séparation ou "se débarrasser de...".
+  // e) Isolement.
+  blocs.push({
+    type: "paragraphe",
+    fragments: [texte("e) L'équation isolée : "), latex(formatEquationIsoleeLatex(instance))],
+  });
+
+  // f) Séparation ou "se débarrasser de...".
   if (necessiteSeparation(instance)) {
     blocs.push({
       type: "paragraphe",
-      fragments: [texte("e) On sépare en deux équations : "), latex(formatEquationsSepareesLatex(instance))],
+      fragments: [texte("f) On sépare en deux équations : "), latex(formatEquationsSepareesLatex(instance))],
     });
   } else {
     blocs.push({
       type: "paragraphe",
-      fragments: [texte(`e) ${instructionDebarrasser(instance.famille)} On obtient : `), latex(formatEquationDebarrasseeLatex(instance))],
+      fragments: [texte(`f) ${instructionDebarrasser(instance.famille)} On obtient : `), latex(formatEquationDebarrasseeLatex(instance))],
     });
   }
 
-  // f) Zéros.
+  // g) Zéros.
   const zeros = zerosNiveau1(instance);
   if (zeros.length === 0) {
-    blocs.push({ type: "paragraphe", fragments: [texte("f) Cette fonction n'a aucun zéro.")] });
+    blocs.push({ type: "paragraphe", fragments: [texte("g) Cette fonction n'a aucun zéro.")] });
   } else {
     blocs.push({
       type: "paragraphe",
-      fragments: [texte("f) Zéros attendus : "), latex(formatZerosAttendusLatex(zeros) as string)],
+      fragments: [texte("g) Zéros attendus : "), latex(formatZerosAttendusLatex(zeros) as string)],
     });
   }
 

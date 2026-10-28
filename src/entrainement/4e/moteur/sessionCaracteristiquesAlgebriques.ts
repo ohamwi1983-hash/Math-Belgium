@@ -1,8 +1,10 @@
 /**
  * Couche B — moteur de session pour "Caractéristiques algébriques d'une fonction de référence".
  *
- * Niveau 1 : 6 ou 7 phases selon la famille — `ordonnee → ce → domaine → isolement →
- * [separation | debarrasser] → zeros`. Après `isolement`, chaque famille traverse EXACTEMENT une
+ * Niveau 1 : 7 ou 8 phases selon la famille — `ordonnee → ce → domaine → parite → isolement →
+ * [separation | debarrasser] → zeros`. `parite` (audit du chapitre 3) n'existe qu'à ce niveau —
+ * voir `ReponseParite`/`pariteAttendue` (`core/caracteristiquesAlgebriques.types.ts`/
+ * `verificationCaracteristiquesAlgebriques.ts`). Après `isolement`, chaque famille traverse EXACTEMENT une
  * des deux étapes intermédiaires : `separation` pour `valeur_absolue`/`carre`
  * (`necessiteSeparation`), `debarrasser` pour les 4 autres familles (`necessiteDebarrasser`,
  * `prompt-3-ameliorations-finales.md`, point 2) — jamais aucune des deux, jamais les deux à la
@@ -59,6 +61,7 @@ import type {
   ReponseDomaine,
   ReponseExistence,
   ReponseIsolement,
+  ReponseParite,
   ReponseResolutionBranches,
   ReponseSeparation,
   ReponseValidationSolution,
@@ -81,6 +84,7 @@ import {
   verifierDomaineNiveau1,
   verifierIsolementNiveau1,
   verifierOrdonneeNiveau1,
+  verifierParite,
   verifierRegroupe,
   verifierResolutionBranches,
   verifierSeparationNiveau1,
@@ -102,6 +106,8 @@ function etatInitialTransitoire(): Pick<
   | "ceRevele"
   | "scoreDomaineExercice"
   | "domaineRevele"
+  | "scorePariteExercice"
+  | "pariteRevele"
   | "scoreIsolementExercice"
   | "isolementRevele"
   | "scoreSeparationExercice"
@@ -127,6 +133,8 @@ function etatInitialTransitoire(): Pick<
     ceRevele: false,
     scoreDomaineExercice: null,
     domaineRevele: false,
+    scorePariteExercice: null,
+    pariteRevele: false,
     scoreIsolementExercice: null,
     isolementRevele: false,
     scoreSeparationExercice: null,
@@ -180,6 +188,8 @@ function construireResultat(
     ceRevele: etat.ceRevele,
     scoreDomaine: etat.scoreDomaineExercice as number,
     domaineRevele: etat.domaineRevele,
+    scoreParite: etat.scorePariteExercice,
+    pariteRevele: etat.pariteRevele,
     scoreIsolement: etat.scoreIsolementExercice as number,
     isolementRevele: etat.isolementRevele,
     scoreSeparation: etat.scoreSeparationExercice,
@@ -288,9 +298,42 @@ export function soumettreReponseDomaine(
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: "isolement",
+    // "parite" (audit du chapitre 3) n'existe qu'au niveau 1 — un exercice niveau 2 va directement
+    // à "isolement", comme avant son ajout.
+    phase: etat.exerciceCourant.niveau === "niveau1" ? "parite" : "isolement",
     scoreDomaineExercice: etapeCourante.score,
     domaineRevele: etapeCourante.revelee,
+  };
+}
+
+/** Étape "parité" (niveau 1 UNIQUEMENT, audit du chapitre 3) : après domaine, avant isolement —
+ * voir `ReponseParite`/`pariteAttendue` pour le détail complet. */
+export function soumettreReponseParite(
+  etat: EtatSessionCaracteristiquesAlgebriques,
+  reponse: ReponseParite,
+): EtatSessionCaracteristiquesAlgebriques {
+  if (etat.terminee || etat.phase !== "parite") {
+    throw new Error("soumettreReponseParite : la session n'est pas à l'étape parite");
+  }
+  const exercice = etat.exerciceCourant;
+  if (exercice.niveau !== "niveau1") {
+    throw new Error("soumettreReponseParite : cette étape n'existe qu'au niveau 1");
+  }
+
+  const etapeCourante = soumettreEtapeTentatives<ReponseParite>(etat.etapeCourante, reponse, {
+    ...reglagesEtape(etat),
+    verifier: (r) => verifierParite(exercice, r),
+    revelerReponse: () => {},
+  });
+
+  if (!etapeCourante.terminee) return { ...etat, etapeCourante };
+
+  return {
+    ...etat,
+    etapeCourante: demarrerEtapeTentatives(),
+    phase: "isolement",
+    scorePariteExercice: etapeCourante.score,
+    pariteRevele: etapeCourante.revelee,
   };
 }
 

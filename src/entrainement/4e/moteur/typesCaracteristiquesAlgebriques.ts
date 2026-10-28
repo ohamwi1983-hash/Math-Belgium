@@ -50,6 +50,11 @@ export interface ResultatExerciceCaracteristiquesAlgebriques {
   ceRevele: boolean;
   scoreDomaine: number;
   domaineRevele: boolean;
+  /** `number | null` : `null` pour un exercice niveau 2 (l'étape "parité" n'existe qu'au niveau 1,
+   * audit du chapitre 3 — voir `core/caracteristiquesAlgebriques.types.ts`, doc de
+   * `ReponseParite`), toujours un `number` au niveau 1. */
+  scoreParite: number | null;
+  pariteRevele: boolean;
   scoreIsolement: number;
   isolementRevele: boolean;
   scoreSeparation: number | null;
@@ -80,6 +85,8 @@ export interface EtatSessionCaracteristiquesAlgebriques {
   ceRevele: boolean;
   scoreDomaineExercice: number | null;
   domaineRevele: boolean;
+  scorePariteExercice: number | null;
+  pariteRevele: boolean;
   scoreIsolementExercice: number | null;
   isolementRevele: boolean;
   scoreSeparationExercice: number | null;

@@ -85,8 +85,23 @@ function construireK(famille: FamilleReference): Fraction {
   switch (famille) {
     case "valeur_absolue":
     case "inverse":
-    case "racine_cubique":
+      // `inverse` garde `k` TOUJOURS non nul — contrairement à `cube`/`racine_cubique` ci-dessous,
+      // `k=0` y donnerait "aucun zéro" (`1/u=0` n'a jamais de solution), ce qui casserait l'étape
+      // "débarrasser" (`diagnostiquerDebarrasserNiveau1`, `verificationCaracteristiquesAlgebriques.ts`),
+      // qui suppose toujours EXACTEMENT un zéro existant pour cette famille — jamais relâché, voir
+      // `pariteAttendue` (même fichier) pour la conséquence assumée sur l'écran "parité".
       return fractionLibre();
+    case "racine_cubique": {
+      // k=0 une fraction minoritaire du temps (1 sur 5, k non nul le reste du temps pour garder
+      // les écrans "isolement"/"débarrasser" substantiels la plupart du temps) — nécessaire pour
+      // que l'écran "parité" (audit du chapitre 3) puisse atteindre "impaire" pour cette famille
+      // (base impaire : impaire ssi b=0 ET k=0, voir `pariteAttendue`,
+      // `verificationCaracteristiquesAlgebriques.ts`). Sûr ici (contrairement à `inverse`
+      // ci-dessus) : `zerosU("racine_cubique", 0)` renvoie toujours exactement une valeur (`[0]`),
+      // jamais un tableau vide — aucune étape avale ne suppose plus que ça.
+      if (Math.random() < 1 / 5) return { num: 0, den: 1 };
+      return fractionLibre();
+    }
     case "carre": {
       // k positif (u²=-k n'a alors aucune solution, "aucun zéro" — aucune extraction de racine
       // nécessaire pour conclure ça, donc aucune contrainte de "carré parfait" ici) la moitié du
@@ -103,6 +118,10 @@ function construireK(famille: FamilleReference): Fraction {
       return reduire(-(p * p), q * q);
     }
     case "cube": {
+      // k=0 une fraction minoritaire du temps — même raison et même proportion que
+      // `racine_cubique` ci-dessus (base impaire, impaire ssi b=0 ET k=0). Sûr ici aussi :
+      // `zerosU("cube", 0)` renvoie toujours exactement une valeur (`[0]`), jamais un tableau vide.
+      if (Math.random() < 1 / 5) return { num: 0, den: 1 };
       // k = ±(p/q)³ : ∛(-k) toujours rationnel exact, quel que soit le signe choisi.
       const { p, q } = rationnelPositifCoprime(3);
       const signe = Math.random() < 0.5 ? -1 : 1;

@@ -18,6 +18,19 @@ import { formatEnonceLatex, formatSommeTermes } from "./formatEquation";
  * en KaTeX sur chacun des écrans, via `formatEquationNiveau1Latex` ci-dessous.
  */
 
+/** Libellé affiché pour la réponse attendue de l'écran "parité" — texte brut (jamais de LaTeX
+ * nécessaire pour ces 3 mots). */
+export function formatPariteLabel(parite: "paire" | "impaire" | "ni"): string {
+  switch (parite) {
+    case "paire":
+      return "paire";
+    case "impaire":
+      return "impaire";
+    case "ni":
+      return "ni paire ni impaire";
+  }
+}
+
 /** `ax+b`, rendu LaTeX — coefficient 1/-1 jamais explicite, terme `b` omis s'il est nul, signe
  * adapté (jamais `+ -3`). Même convention que le reste du projet pour un polynôme du 1er degré. */
 export function formatP1Latex(a: number, b: number): string {
@@ -90,13 +103,18 @@ function formatMembreGaucheNiveau1Latex(exercice: ExerciceCaracteristiquesAlgebr
   }
 
   const { k } = exercice;
+  // `k=0` possible depuis l'ajout de l'écran "parité" (audit du chapitre 3, familles `cube`/
+  // `racine_cubique`) — terme omis entièrement plutôt que d'afficher "... + 0"/"... - 0".
+  if (k.num === 0) return base;
   const kLatex = formatFractionLatex(k);
   const terme = k.num > 0 ? ` + ${kLatex}` : ` - ${formatFractionLatex({ num: -k.num, den: k.den })}`;
   return `${base}${terme}`;
 }
 
-/** `f(x) = [base](ax+b) + k` — le terme `k` toujours affiché (jamais nul par construction),
- * signe adapté. Niveau 2 (`prompt-niveau2caracteristiquesalgebriques.md`, corrigé par
+/** `f(x) = [base](ax+b) + k` — le terme `k` omis si `k=0` (`cube`/`racine_cubique` uniquement,
+ * depuis l'ajout de l'écran "parité", audit du chapitre 3 — toutes les autres familles gardent
+ * `k` non nul par construction), sinon affiché avec son signe adapté. Niveau 2
+ * (`prompt-niveau2caracteristiquesalgebriques.md`, corrigé par
  * `prompt-corrections-niveau2-tests.md`, point 1) : `k` devient `k(x)=cx+d`, un vrai polynôme du
  * 1er degré — désormais distribué (`formatKLineaireSuite`), jamais entre parenthèses. Réservée aux
  * écrans qui portent sur `f` elle-même (ordonnée à l'origine, conditions d'existence, domaine,
@@ -449,6 +467,10 @@ export function formatOrdonneeExacteLatex(exercice: ExerciceCaracteristiquesAlge
     if (racineParfaite(b, ordre) === null) {
       const base = famille === "racine_carree" ? `\\sqrt{${b}}` : `\\sqrt[3]{${b}}`;
       const k = kEnZeroCommeFraction(exercice);
+      // `k=0` possible pour `racine_cubique` depuis l'ajout de l'écran "parité" (audit du chapitre
+      // 3) — terme omis entièrement plutôt que d'afficher "... + 0"/"... - 0" (jamais `racine_carree`,
+      // dont `k` reste toujours non nul par construction).
+      if (k.num === 0) return base;
       const kLatex = formatFractionLatex(k.num > 0 ? k : { num: -k.num, den: k.den });
       return k.num > 0 ? `${base} + ${kLatex}` : `${base} - ${kLatex}`;
     }

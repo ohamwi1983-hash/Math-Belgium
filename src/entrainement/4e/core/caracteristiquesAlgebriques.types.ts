@@ -174,6 +174,17 @@ export interface ReponseDomaine {
   intervalles: Morceau[];
 }
 
+/**
+ * Étape "parité" (niveau 1 UNIQUEMENT, audit du chapitre 3) — un choix parmi 3 : `f` paire,
+ * impaire, ou ni l'un ni l'autre. Placée après `domaine` (le domaine doit déjà être connu pour
+ * reconnaître les 2 familles dont il est structurellement jamais symétrique) et avant `isolement`.
+ * N'existe pas au niveau 2 : `k(x)=cx+d` n'est jamais constant (`c≠0` toujours), ce qui rend la
+ * parité de `f` triviale à exclure (voir `pariteAttendue`, `verificationCaracteristiquesAlgebriques.ts`,
+ * pour la preuve complète par famille) — ajouter cette étape là n'aurait aucune valeur
+ * diagnostique.
+ */
+export type ReponseParite = "paire" | "impaire" | "ni";
+
 /** Étape 4 (isolement) : un seul champ libre, l'équation complète `[base](P1) = -k` (niveau 1,
  * membre droit CONSTANT) ou `[base](P1) = -k(x)` (niveau 2, membre droit LINÉAIRE en x) — même
  * structure de réponse aux deux niveaux, seule la vérification du membre droit diffère. */
@@ -247,8 +258,11 @@ export type { Categorie };
  * Phases possibles, réunies pour les deux niveaux (voir `phaseInitiale`/les fonctions
  * `soumettreXxx`, `src/moteur/sessionCaracteristiquesAlgebriques.ts`, pour le détail exact de
  * l'enchaînement par niveau/famille) :
- * - Niveau 1 : `ordonnee → ce → domaine → isolement → [separation | debarrasser] → zeros` (7
- *   phases, chaque famille traverse EXACTEMENT une des deux étapes intermédiaires).
+ * - Niveau 1 : `ordonnee → ce → domaine → parite → isolement → [separation | debarrasser] → zeros`
+ *   (8 phases, chaque famille traverse EXACTEMENT une des deux étapes intermédiaires). `parite`
+ *   (audit du chapitre 3) n'existe qu'à ce niveau — voir `ReponseParite` ci-dessus et
+ *   `pariteAttendue`/`verifierParite` (`verificationCaracteristiquesAlgebriques.ts`) pour le détail
+ *   complet par famille.
  * - Niveau 2 (`prompt-corrections-niveau2-vague2.md` — 2e vague de corrections, retire
  *   **entièrement** l'ancien mécanisme reconnaissance/champ1/champ2/factorisation, qui subsistait
  *   encore pour `inverse`/`racine_carree` malgré la décision déjà prise pour `carre` en 1re vague —
@@ -291,6 +305,7 @@ export type PhaseCaracteristiquesAlgebriques =
   | "ordonnee"
   | "ce"
   | "domaine"
+  | "parite"
   | "isolement"
   | "separation"
   | "debarrasser"

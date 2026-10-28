@@ -1,6 +1,6 @@
 import type { Morceau } from "../core/inequation.types";
 import type { EtatSessionCaracteristiquesAlgebriques } from "../moteur/typesCaracteristiquesAlgebriques";
-import { ceAttendues, domaineAttendu, necessiteValidite, racinesAValiderRacineCarree } from "../moteur/verificationCaracteristiquesAlgebriques";
+import { ceAttendues, domaineAttendu, necessiteValidite, pariteAttendue, racinesAValiderRacineCarree } from "../moteur/verificationCaracteristiquesAlgebriques";
 import { formatDomaineLatex } from "./apercuDomaine";
 import type { EntreeRecapitulatif } from "./recapitulatif";
 import {
@@ -12,6 +12,7 @@ import {
   formatEquationsSepareesLatex,
   formatFractionLatex,
   formatOrdonneeExacteLatex,
+  formatPariteLabel,
   formatTermesZerosAttendusLatex,
 } from "./formatCaracteristiquesAlgebriques";
 import { formatFractionIrreductible } from "./formatFraction";
@@ -90,6 +91,10 @@ export function calculerRecapitulatifCaracteristiquesAlgebriques(
 
   if (etat.scoreDomaineExercice !== null) {
     entrees.push({ libelle: "Domaine de définition", estLatex: true, valeur: formatDomaineAttenduLatex(exercice), revele: etat.domaineRevele });
+  }
+
+  if (etat.scorePariteExercice !== null && exercice.niveau === "niveau1") {
+    entrees.push({ libelle: "Parité", estLatex: false, valeur: formatPariteLabel(pariteAttendue(exercice)), revele: etat.pariteRevele });
   }
 
   if (etat.scoreIsolementExercice !== null) {

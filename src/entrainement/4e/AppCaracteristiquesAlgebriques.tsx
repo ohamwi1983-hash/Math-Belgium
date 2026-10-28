@@ -9,6 +9,7 @@ import type {
   ReponseCondition,
   ReponseDomaine,
   ReponseExistence,
+  ReponseParite,
   ReponseResolutionBranches,
   ReponseSeparation,
   ReponseZerosCaracteristiques,
@@ -22,6 +23,7 @@ import {
   soumettreReponseDomaine,
   soumettreReponseIsolement,
   soumettreReponseOrdonnee,
+  soumettreReponseParite,
   soumettreReponseRegroupe,
   soumettreReponseResolutionBranches,
   soumettreReponseSeparation,
@@ -35,6 +37,7 @@ import {
   domaineAttendu,
   necessiteRegroupe,
   necessiteValidite,
+  pariteAttendue,
   racineRespecteCondition,
   racinesAValiderRacineCarree,
   zerosAttendus,
@@ -54,6 +57,7 @@ import { EtapeReglagesCaracteristiquesAlgebriques } from "./components/EtapeRegl
 import { EtapeOrdonneeAlgebrique } from "./components/EtapeOrdonneeAlgebrique";
 import { EtapeCE } from "./components/EtapeCE";
 import { EtapeDomaineNiveau1 } from "./components/EtapeDomaineNiveau1";
+import { EtapeParite } from "./components/EtapeParite";
 import { EtapeIsolementNiveau1 } from "./components/EtapeIsolementNiveau1";
 import { EtapeSeparation } from "./components/EtapeSeparation";
 import { EtapeDebarrasser } from "./components/EtapeDebarrasser";
@@ -72,6 +76,7 @@ import {
   formatEquationsSepareesLatex,
   formatFractionLatex,
   formatOrdonneeExacteLatex,
+  formatPariteLabel,
   formatTermesZerosAttendusLatex,
 } from "./ui/formatCaracteristiquesAlgebriques";
 import { formatFractionIrreductible } from "./ui/formatFraction";
@@ -115,10 +120,12 @@ function demarrer(
  * `releveRevelePhase` ci-dessus) n'apparaît ici qu'UNE SEULE FOIS, comme un bloc agrégé : la barre
  * de puces n'a pas besoin d'un segment par répétition. */
 function sequencePourExercice(exercice: ExerciceCaracteristiquesAlgebriques): PhaseCaracteristiquesAlgebriques[] {
-  const base: PhaseCaracteristiquesAlgebriques[] = ["ordonnee", "ce", "domaine", "isolement"];
+  const basePartagee: PhaseCaracteristiquesAlgebriques[] = ["ordonnee", "ce", "domaine"];
   if (exercice.niveau === "niveau1") {
-    return [...base, necessiteSeparation(exercice) ? "separation" : "debarrasser", "zeros"];
+    // "parite" (audit du chapitre 3) n'existe qu'à ce niveau — voir `pariteAttendue`.
+    return [...basePartagee, "parite", "isolement", necessiteSeparation(exercice) ? "separation" : "debarrasser", "zeros"];
   }
+  const base: PhaseCaracteristiquesAlgebriques[] = [...basePartagee, "isolement"];
   switch (exercice.famille) {
     case "carre":
     case "cube":
@@ -157,19 +164,21 @@ function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesAlgebrique
           ? etat.ceRevele
           : phase === "domaine"
             ? etat.domaineRevele
-            : phase === "isolement"
-              ? etat.isolementRevele
-              : phase === "separation"
-                ? etat.separationRevele
-                : phase === "debarrasser"
-                  ? etat.debarrasserRevele
-                  : phase === "validite"
-                    ? etat.validiteRevele
-                    : phase === "regroupe"
-                      ? etat.regroupeRevele
-                      : phase === "resolutionBranches"
-                        ? etat.resolutionBranchesRevele
-                        : etat.zerosRevele;
+            : phase === "parite"
+              ? etat.pariteRevele
+              : phase === "isolement"
+                ? etat.isolementRevele
+                : phase === "separation"
+                  ? etat.separationRevele
+                  : phase === "debarrasser"
+                    ? etat.debarrasserRevele
+                    : phase === "validite"
+                      ? etat.validiteRevele
+                      : phase === "regroupe"
+                        ? etat.regroupeRevele
+                        : phase === "resolutionBranches"
+                          ? etat.resolutionBranchesRevele
+                          : etat.zerosRevele;
     return revele ? "revele" : "correcte";
   });
 }
@@ -260,6 +269,10 @@ function reponseAttenduePhase(etat: EtatSessionCaracteristiquesAlgebriques): Rea
           Domaine attendu : <Katex expression={formatDomaineAttenduLatex(exercice)} />
         </>
       );
+    case "parite": {
+      if (exercice.niveau !== "niveau1") return null;
+      return <>Parité attendue : {formatPariteLabel(pariteAttendue(exercice))}</>;
+    }
     case "isolement":
       return (
         <>
@@ -357,6 +370,8 @@ function releveRevelePhase(etatAvant: EtatSessionCaracteristiquesAlgebriques, no
       return nouvelEtat.ceRevele;
     case "domaine":
       return nouvelEtat.domaineRevele;
+    case "parite":
+      return nouvelEtat.pariteRevele;
     case "isolement":
       return nouvelEtat.isolementRevele;
     case "separation":
@@ -503,6 +518,14 @@ export function AppCaracteristiquesAlgebriques() {
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
               onValider={(reponse: ReponseDomaine) => terminerEtape(soumettreReponseDomaine(etat, reponse))}
+              validation={validation}
+            />
+          ) : etat.phase === "parite" && etat.exerciceCourant.niveau === "niveau1" ? (
+            <EtapeParite
+              exercice={etat.exerciceCourant}
+              tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
+              tentativesMax={etat.reglages.tentativesMax}
+              onValider={(reponse: ReponseParite) => terminerEtape(soumettreReponseParite(etat, reponse))}
               validation={validation}
             />
           ) : etat.phase === "isolement" ? (

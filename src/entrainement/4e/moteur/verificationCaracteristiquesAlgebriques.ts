@@ -93,6 +93,62 @@ export function verifierOrdonneeNiveau1(exercice: ExerciceCaracteristiquesAlgebr
 }
 
 /**
+ * `true` si le domaine de `f` (niveau 1) est symétrique par rapport à 0 — condition NÉCESSAIRE
+ * (pas suffisante) pour qu'une parité existe. Dérivé directement de `domaineAttendu`/`ceAttendues`
+ * ci-dessous (jamais une seconde logique de domaine) :
+ * - `racine_carree` : JAMAIS symétrique — le domaine est une demi-droite fermée (`[p;+∞[` ou
+ *   `]-∞;p]`), qui ne peut jamais égaler son symétrique par rapport à 0 (lui-même une demi-droite
+ *   de sens opposé), quels que soient `a`/`b`/`k` — nécessité mathématique, pas un cas à calculer
+ *   au cas par cas (même catégorie que la preuve "toujours union" de l'audit du chapitre 2,
+ *   équation rationnelle/gen6).
+ * - `inverse` : symétrique seulement si le pôle (`p=-b/a`) vaut 0, soit `b=0` (`a` jamais nul).
+ * - les 4 autres familles (`carre`/`cube`/`racine_cubique`/`valeur_absolue`) : domaine toujours
+ *   `ℝ`, donc toujours symétrique.
+ */
+function domaineSymetriqueNiveau1(exercice: ExerciceCaracteristiquesAlgebriquesNiveau1): boolean {
+  if (exercice.famille === "racine_carree") return false;
+  if (exercice.famille === "inverse") return exercice.b === 0;
+  return true;
+}
+
+/**
+ * Parité EXACTE de `f` (niveau 1) — jamais par échantillonnage numérique (contrairement aux
+ * vérifications d'équivalence d'expression ailleurs dans ce module) : chaque famille a une
+ * structure algébrique connue qui détermine la parité directement depuis `b` (et `k` pour les 3
+ * familles à base impaire), prouvée une fois pour toutes ici plutôt que recalculée à chaque
+ * exercice :
+ * - domaine non symétrique (`!domaineSymetriqueNiveau1`) → toujours "ni" (une fonction dont le
+ *   domaine n'est pas symétrique par rapport à 0 ne peut être ni paire ni impaire, par définition).
+ * - `carre`/`valeur_absolue` (base PAIRE : `g(-u)=g(u)`) : `f(x)=g(ax+b)+k` paire ssi `b=0` (alors
+ *   `g(a(-x)+b)=g(-(ax))=g(ax)`), quel que soit `k` (`k` ne dépend pas de `x`, n'affecte jamais la
+ *   comparaison `f(x)` vs `f(-x)`) — jamais impaire : le terme `g(ax+b)` reste structurellement
+ *   pair quel que soit `b` (seule son éventuelle ASYMÉTRIE en `b` peut le rendre "ni", jamais
+ *   impair, puisque `g` elle-même ne change jamais de signe entre deux valeurs opposées).
+ * - `cube`/`racine_cubique`/`inverse` (base IMPAIRE : `g(-u)=-g(u)`) : `f(x)=g(ax+b)+k` impaire
+ *   ssi `b=0` ET `k=0` à la fois (`b=0` pour que `g(a(-x)+b)=-g(ax+b)`, PUIS `k=0` pour que le
+ *   terme constant, qui ne s'annule jamais par symétrie, disparaisse lui-même) ; jamais paire
+ *   (`g` impaire ne devient jamais paire par un simple décalage horizontal, quel que soit `b`).
+ *   `inverse` garde `k` TOUJOURS non nul par construction (`construireK`,
+ *   `generateurs/caracteristiquesAlgebriques/index.ts` — la famille `inverse` n'a jamais reçu la
+ *   possibilité de tirer `k=0`, contrairement à `cube`/`racine_cubique`, pour ne pas casser l'étape
+ *   "débarrasser" qui suppose toujours EXACTEMENT un zéro — voir le commentaire de `construireK`) :
+ *   `inverse` atteint donc TOUJOURS "ni" en pratique, par construction — même catégorie de
+ *   nécessité que `racine_carree` ci-dessus, pas un défaut.
+ */
+export function pariteAttendue(exercice: ExerciceCaracteristiquesAlgebriquesNiveau1): "paire" | "impaire" | "ni" {
+  if (!domaineSymetriqueNiveau1(exercice)) return "ni";
+  const { famille, b } = exercice;
+  if (famille === "carre" || famille === "valeur_absolue") {
+    return b === 0 ? "paire" : "ni";
+  }
+  return b === 0 && kValeur(exercice) === 0 ? "impaire" : "ni";
+}
+
+export function verifierParite(exercice: ExerciceCaracteristiquesAlgebriquesNiveau1, saisie: "paire" | "impaire" | "ni"): boolean {
+  return saisie === pariteAttendue(exercice);
+}
+
+/**
  * Conditions d'existence — dérivées directement de `ax+b` (pas de "pente" séparée à considérer,
  * contrairement à l'ancienne version : ici l'argument EST `x` directement, jamais mis à l'échelle) :
  * - `valeur_absolue`/`carre`/`cube`/`racine_cubique` : aucune CE (domaine illimité).
