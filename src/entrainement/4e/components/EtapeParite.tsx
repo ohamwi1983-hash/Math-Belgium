@@ -38,6 +38,11 @@ export function EtapeParite({ exercice, tentativesUtilisees, tentativesMax, onVa
         <Katex expression={formatEquationNiveau1Latex(exercice)} block />
       </div>
       <p className="prompt-text">Cette fonction est-elle paire, impaire, ou ni l'une ni l'autre ?</p>
+      <p className="prompt-fact">
+        f est paire si f(-x) = f(x) pour tout x du domaine ; f est impaire si f(-x) = -f(x) pour tout x du domaine.
+        Condition nécessaire dans les deux cas : le domaine doit d'abord être symétrique par rapport à 0 (sinon, c'est
+        automatiquement ni l'un ni l'autre).
+      </p>
       <div className="options-grid">
         {OPTIONS.map((option) => (
           <button
