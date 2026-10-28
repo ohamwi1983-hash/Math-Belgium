@@ -59,6 +59,7 @@ tâches :
 | `.claude/rules/interactive-widgets.md` | `src/interactive/**`, `src/components/chapter/InteractiveWidget.tsx`, `tsconfig.app.json` | Mécanisme de portage des Web Components vanilla (Shadow DOM) depuis un artifact, montage impératif, ordre d'import, et le piège UMD `module.exports`/Vite-Rollup. |
 | `.claude/rules/export-pipeline.md` | `src/lib/export/**`, `src/components/chapter/ExportSection.tsx` | Pipeline d'export Word/PDF/PowerPoint (`collectBlocks`, `captureBlocks`, `buildPdf`/`buildDocx`/`buildPptx`). |
 | `.claude/rules/content-history.md` | `src/content/chapters/**` | Historique détaillé, chapitre par chapitre, des migrations/enrichissements déjà réalisés (choix éditoriaux, bugs trouvés et corrigés, kinds ajoutés). |
+| `.claude/rules/quiz-generators.md` | `src/entrainement/**/generateurs/quiz*/**` | Convention des bancs d'affirmations vrai/faux : jamais de « grand calcul » (seulement vérification rapide), critère de tri, et le piège `nombreExercices` fixe si le compte varie par thème. |
 
 ## Vérification avant de pousser
 
