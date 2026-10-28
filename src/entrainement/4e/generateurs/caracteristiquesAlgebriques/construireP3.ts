@@ -42,3 +42,25 @@ export function construireP3(forme: FormeP3, p: number, q: number, uLibre: numbe
   const v = -(q * q * q);
   return { u, v, factorisation: { type: "avecX", quadratique: { A: p * p * p, B: 3 * p * p * q, C: 3 * p * q * q + u } } };
 }
+
+/** Bornes de lisibilité (audit du chapitre 3) — sans elles, le côté linéaire DÉRIVÉ `(u,v)` montait
+ * jusqu'à |u| = 144 et |v| = 64 (ex. `(−3x−4)³ + 117x − 44`), et l'équation finale à factoriser
+ * jusqu'à des coefficients de 148, alors que les autres familles restent sous |a| ≤ 4, |b| ≤ 6.
+ * Constante ≤ 27 et coefficients ≤ 27 laissent passer `±3³` (cube naturel de la famille). Filtrage
+ * par rejet côté appelant (~40 % des tirages passent) : les 3 formes et 1, 2 ou 3 zéros restent
+ * représentés. */
+const PENTE_LINEAIRE_MAX = 12;
+const CONSTANTE_LINEAIRE_MAX = 27;
+const COEFFICIENT_P3_MAX = 27;
+
+export function resultatP3Lisible({ u, v, factorisation }: ResultatP3): boolean {
+  const coefficients =
+    factorisation.type === "avecX"
+      ? [factorisation.quadratique.A, factorisation.quadratique.B, factorisation.quadratique.C]
+      : [factorisation.lineaire.A, factorisation.lineaire.B];
+  return (
+    Math.abs(u) <= PENTE_LINEAIRE_MAX &&
+    Math.abs(v) <= CONSTANTE_LINEAIRE_MAX &&
+    coefficients.every((coefficient) => Math.abs(coefficient) <= COEFFICIENT_P3_MAX)
+  );
+}

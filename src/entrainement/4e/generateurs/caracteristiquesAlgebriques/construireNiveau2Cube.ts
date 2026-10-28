@@ -1,6 +1,6 @@
 import type { ExerciceNiveau2Cubique } from "../../core/caracteristiquesAlgebriques.types";
 import { randomInt, randomIntNonNul } from "./aleatoire";
-import { FORMES_P3, construireP3 } from "./construireP3";
+import { FORMES_P3, construireP3, resultatP3Lisible } from "./construireP3";
 
 /**
  * Niveau 2, famille `cube` — `f(x) = (ax+b)³ + (cx+d)`. Résoudre les zéros revient à résoudre
@@ -19,7 +19,9 @@ export function construireNiveau2Cube(): ExerciceNiveau2Cubique {
     if (forme === "forme3" && b === 0) continue;
 
     const uLibre = randomIntNonNul(-4, 4);
-    const { u: c, v: d, factorisation } = construireP3(forme, a, b, uLibre);
+    const resultat = construireP3(forme, a, b, uLibre);
+    if (!resultatP3Lisible(resultat)) continue;
+    const { u: c, v: d, factorisation } = resultat;
     if (c === 0) continue;
 
     return { niveau: "niveau2", famille: "cube", a, b, c, d, factorisationP3: factorisation };
