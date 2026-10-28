@@ -3,7 +3,7 @@ import { ordreEcransEtudierFonction } from "../moteur5e/typesEtudierFonction";
 import { tableauFPrimeAttendu, tableauFSecondeAttendu } from "../moteur5e/verificationEtudierFonction";
 import { LIBELLE_ECRAN_ETUDIER_FONCTION, formatEnteteColonnesTableauEtudierFonction, formatReponseAttenduePhaseLatex } from "../ui5e/formatEtudierFonction";
 import { Katex } from "../components/Katex";
-import { LigneRecap, RecapTotalPoints, statutRecap } from "./LigneRecap";
+import { LigneRecap, statutRecap } from "./LigneRecap";
 import { TableauEtudeLocaleRecap } from "./TableauEtudeLocaleRecap";
 
 interface Props {
@@ -56,15 +56,6 @@ export function ResultatPanelEtudierFonction({ resultat, aideParPhase, onContinu
             </LigneRecap>
           );
         })}
-      <RecapTotalPoints
-        ecrans={ordreEcransEtudierFonction(exercice)
-          .filter((ecran) => ecran !== "recap")
-          .filter((ecran) => resultat.scores[ecran] !== undefined)
-          .map((ecran) => {
-            const info = aideParPhase[ecran];
-            return { revele: info?.revele ?? false, niveauAide: info?.niveauAide ?? null };
-          })}
-      />
       <button type="button" className="btn btn-primary" onClick={onContinuer}>
         {dernier ? "Voir le résumé" : "Exercice suivant"}
       </button>
