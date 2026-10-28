@@ -17,6 +17,7 @@ import type {
 import type { PhaseCaracteristiquesAlgebriques } from "./core/caracteristiquesAlgebriques.types";
 import type { ReglagesSession } from "./core/session.types";
 import {
+  activerAideSuivante,
   demarrerSessionCaracteristiquesAlgebriques,
   soumettreReponseCE,
   soumettreReponseDebarrasser,
@@ -525,6 +526,8 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideParite}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse: ReponseParite) => terminerEtape(soumettreReponseParite(etat, reponse))}
               validation={validation}
             />

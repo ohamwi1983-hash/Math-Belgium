@@ -49,8 +49,12 @@
  * `validationSolution`, qui clôture l'exercice à sa place.
  *
  * N'importe jamais rien de `src/generateurs/` (voir `sessionCaracteristiquesAlgebriques.test.ts`,
- * générateurs factices locaux). Aucun bouton "Aide" demandé par la spec — aucun mécanisme de
- * révélation à sens unique ici.
+ * générateurs factices locaux). Aucun bouton "Aide" sur les écrans d'origine — "parite" (audit du
+ * chapitre 3) fait exception, demande explicite de l'utilisateur ("c'est que lorsqu'on active
+ * l'aide qu'on a ce message") : le rappel de méthode, d'abord affiché en permanence, n'apparaît
+ * plus que derrière `BoutonAide` (1 seul niveau, `NIVEAU_AIDE_MAX_PARITE`), même mécanisme
+ * (`activerAideSuivante`/pénalité additive `-20`/exercice) que les autres générateurs à aide de ce
+ * chantier (ex. `sessionDistanceDroite.ts`, `sessionColinearite.ts`).
  */
 import type {
   ExerciceCaracteristiquesAlgebriques,
@@ -95,6 +99,17 @@ import {
 import type { EtatSessionCaracteristiquesAlgebriques, ResultatExerciceCaracteristiquesAlgebriques } from "./typesCaracteristiquesAlgebriques";
 
 const POINTS_DE_BASE = 100;
+const PENALITE_PAR_NIVEAU_AIDE = 20;
+
+/** Seule phase à avoir une aide (le rappel de méthode "parité" — audit du chapitre 3) — 1 niveau
+ * unique, pas de palier supplémentaire (la méthode tient en une seule phrase, rien à graduer). */
+export const NIVEAU_AIDE_MAX_PARITE = 1;
+
+/** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires.
+ * Même formule que les autres générateurs à aide de ce chantier (`sessionDistanceDroite.ts`...). */
+function appliquerPenaliteNiveau(score: number, niveauAide: number): number {
+  return Math.max(0, score - niveauAide * PENALITE_PAR_NIVEAU_AIDE);
+}
 
 function etatInitialTransitoire(): Pick<
   EtatSessionCaracteristiquesAlgebriques,
@@ -108,6 +123,7 @@ function etatInitialTransitoire(): Pick<
   | "domaineRevele"
   | "scorePariteExercice"
   | "pariteRevele"
+  | "niveauAideParite"
   | "scoreIsolementExercice"
   | "isolementRevele"
   | "scoreSeparationExercice"
@@ -135,6 +151,7 @@ function etatInitialTransitoire(): Pick<
     domaineRevele: false,
     scorePariteExercice: null,
     pariteRevele: false,
+    niveauAideParite: 0,
     scoreIsolementExercice: null,
     isolementRevele: false,
     scoreSeparationExercice: null,
@@ -190,6 +207,7 @@ function construireResultat(
     domaineRevele: etat.domaineRevele,
     scoreParite: etat.scorePariteExercice,
     pariteRevele: etat.pariteRevele,
+    niveauAideParite: etat.niveauAideParite,
     scoreIsolement: etat.scoreIsolementExercice as number,
     isolementRevele: etat.isolementRevele,
     scoreSeparation: etat.scoreSeparationExercice,
@@ -328,13 +346,32 @@ export function soumettreReponseParite(
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
+  const score = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideParite);
+
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "isolement",
-    scorePariteExercice: etapeCourante.score,
+    scorePariteExercice: score,
     pariteRevele: etapeCourante.revelee,
   };
+}
+
+/** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, si le
+ * niveau maximal de l'écran courant est déjà atteint, ou si l'écran courant n'a aucune aide prévue
+ * ("parite" est la seule phase à en avoir une — voir le commentaire de tête de fichier). Même
+ * principe que `activerAideSuivante` des autres générateurs à aide de ce chantier. */
+export function activerAideSuivante(etat: EtatSessionCaracteristiquesAlgebriques): EtatSessionCaracteristiquesAlgebriques {
+  if (etat.terminee) {
+    throw new Error("activerAideSuivante : la session est déjà terminée");
+  }
+  if (etat.phase !== "parite") {
+    throw new Error("activerAideSuivante : cet écran n'a aucune aide");
+  }
+  if (etat.niveauAideParite >= NIVEAU_AIDE_MAX_PARITE) {
+    throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
+  }
+  return { ...etat, niveauAideParite: etat.niveauAideParite + 1 };
 }
 
 /**
