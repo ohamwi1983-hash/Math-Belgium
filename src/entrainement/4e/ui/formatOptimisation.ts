@@ -76,12 +76,28 @@ export function segmentsPhraseEnonce(phrase: string): SegmentTexte[] {
   return segments;
 }
 
-/** f(labelVariable) développée, simplifiée (jamais "0x²"/"1x"/double signe). */
+/** Arrondi à 2 décimales (sans tronquer un entier) — même convention que `formatNombre` ci-dessus,
+ * mais renvoie un NOMBRE (pas une chaîne) : nécessaire ici pour que `formatSommeTermes` continue à
+ * décider lui-même du signe/de l'omission des termes nuls sur la valeur réellement affichée,
+ * jamais sur la valeur brute non arrondie. */
+function arrondi2(valeur: number): number {
+  return Number.isInteger(valeur) ? valeur : Math.round(valeur * 100) / 100;
+}
+
+/** f(labelVariable) développée, simplifiée (jamais "0x²"/"1x"/double signe). Coefficients arrondis
+ * à 2 décimales avant affichage — bug trouvé en auditant gen55 : le générateur `sommeDeuxCarres`
+ * produit délibérément UN coefficient non entier (`a=5/48`, voir son fichier), qui s'affichait
+ * jusque-là en toute sa précision flottante brute ("0.10416666666666667x² ..."), `formatSommeTermes`
+ * n'arrondissant jamais lui-même (il est partagé par des appelants qui veulent du texte exact).
+ * Chaque AUTRE nombre affiché par ce générateur (domaine, sommet, optimum) passait déjà par
+ * `formatNombre` ci-dessus ; seule cette fonction avait été oubliée. Partagée avec gen57
+ * (`formatEquationInequationSecondDegre.ts`), donc ce correctif le protège aussi — sans aucun
+ * changement pour les coefficients déjà entiers (cas de toutes les autres familles). */
 export function formatFonctionDeveloppeeLatex(fonction: CoefficientsQuadratiques, labelVariable: string): string {
   return formatSommeTermes([
-    { valeur: fonction.a, suffixe: `${labelVariable}^2` },
-    { valeur: fonction.b, suffixe: labelVariable },
-    { valeur: fonction.c, suffixe: "" },
+    { valeur: arrondi2(fonction.a), suffixe: `${labelVariable}^2` },
+    { valeur: arrondi2(fonction.b), suffixe: labelVariable },
+    { valeur: arrondi2(fonction.c), suffixe: "" },
   ]);
 }
 

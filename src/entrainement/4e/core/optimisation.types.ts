@@ -188,7 +188,8 @@ export interface ContexteOptimisationCommun {
   uniteGrandeur: string;
   /** Croquis SVG optionnel illustrant la géométrie de l'instance — voir `CroquisOptimisation`
    * ci-dessus pour le motif "ghost optional-prop" et la liste exacte des familles concernées.
-   * `undefined` ⇒ aucun croquis affiché (`EnonceOptimisation.tsx`), jamais un repli générique. */
+   * `undefined` ⇒ aucun croquis affiché (`EtapeContrainteEtGrandeurOptimisation.tsx`), jamais un
+   * repli générique. */
   croquis?: CroquisOptimisation;
   /** Question finale de l'exercice (ex. "Quelle est l'aire maximale ?"), affichée PERSISTANTE sur
    * chaque écran (`components/QuestionFinale.tsx`, voir CLAUDE.md "Question finale persistante") —
