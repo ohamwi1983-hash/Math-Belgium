@@ -518,6 +518,18 @@ export const equationsInequationsSecondDegre: ChapterContent = {
           chantier: '4e',
           whereLabel: '4e → « 1. Méthode la plus rapide »',
         },
+        {
+          kind: 'entrainement',
+          title: 'Relations entre racines et coefficients',
+          generatorId: 'gen67',
+          description: [
+            'Calcule la somme et le produit des racines (relations de Viète), factorise une ' +
+              'équation à partir de ses racines, puis construis une équation à partir de ses ' +
+              'solutions.',
+          ],
+          chantier: '4e',
+          whereLabel: '4e → « 67. Relations entre racines et coefficients »',
+        },
       ],
     },
     {
