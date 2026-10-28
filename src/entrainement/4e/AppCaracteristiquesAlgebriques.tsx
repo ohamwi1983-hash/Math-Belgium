@@ -36,6 +36,7 @@ import {
   brancheEstValide,
   ceAttendues,
   domaineAttendu,
+  equationIsoleeAdmetSolution,
   necessiteRegroupe,
   necessiteValidite,
   pariteAttendue,
@@ -123,8 +124,12 @@ function demarrer(
 function sequencePourExercice(exercice: ExerciceCaracteristiquesAlgebriques): PhaseCaracteristiquesAlgebriques[] {
   const basePartagee: PhaseCaracteristiquesAlgebriques[] = ["ordonnee", "ce", "domaine"];
   if (exercice.niveau === "niveau1") {
-    // "parite" (audit du chapitre 3) n'existe qu'à ce niveau — voir `pariteAttendue`.
-    return [...basePartagee, "parite", "isolement", necessiteSeparation(exercice) ? "separation" : "debarrasser", "zeros"];
+    // "parite" (audit du chapitre 3) n'existe qu'à ce niveau — voir `pariteAttendue`. Sans solution
+    // à l'équation isolée (K<0), pas d'étape intermédiaire — même règle que `phaseApresIsolement`.
+    const intermediaire: PhaseCaracteristiquesAlgebriques[] = !equationIsoleeAdmetSolution(exercice)
+      ? []
+      : [necessiteSeparation(exercice) ? "separation" : "debarrasser"];
+    return [...basePartagee, "parite", "isolement", ...intermediaire, "zeros"];
   }
   const base: PhaseCaracteristiquesAlgebriques[] = [...basePartagee, "isolement"];
   switch (exercice.famille) {

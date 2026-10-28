@@ -6,6 +6,7 @@ import { latex, texte } from "../../../export/fragmentsDocx";
 import {
   ceAttendues,
   domaineAttendu,
+  equationIsoleeAdmetSolution,
   existeOrdonneeNiveau1,
   necessiteSeparation,
   pariteAttendue,
@@ -109,9 +110,15 @@ function genererInstanceNiveau1(): ExerciceCaracteristiquesAlgebriquesNiveau1 {
 }
 
 function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): SectionExercice {
-  const questionSeparationOuDebarrasser = necessiteSeparation(instance)
-    ? { consigne: [texte("Sépare l'équation isolée en deux équations.")], reponse: { type: "lignes" as const, nombre: 2 } }
-    : { consigne: [texte(instructionDebarrasser(instance.famille))], reponse: { type: "lignes" as const, nombre: 1 } };
+  // Sans solution à l'équation isolée (K<0), pas de question intermédiaire — même règle que
+  // `phaseApresIsolement` côté interactif (`equationIsoleeAdmetSolution`).
+  const questionsIntermediaires = !equationIsoleeAdmetSolution(instance)
+    ? []
+    : [
+        necessiteSeparation(instance)
+          ? { consigne: [texte("Sépare l'équation isolée en deux équations.")], reponse: { type: "lignes" as const, nombre: 2 } }
+          : { consigne: [texte(instructionDebarrasser(instance.famille))], reponse: { type: "lignes" as const, nombre: 1 } },
+      ];
 
   return {
     enteteFragments: [texte("On considère la fonction "), latex(formatEquationNiveau1Latex(instance)), texte(".")],
@@ -136,7 +143,7 @@ function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteri
         consigne: [texte(instructionIsolement(instance.famille))],
         reponse: { type: "lignes", nombre: 1 },
       },
-      questionSeparationOuDebarrasser,
+      ...questionsIntermediaires,
       {
         consigne: [texte(INSTRUCTION_ZEROS)],
         reponse: { type: "lignes", nombre: 2 },
@@ -190,27 +197,36 @@ function construireCorrectionCaracteristiquesAlgebriques(instance: ExerciceCarac
     fragments: [texte("e) L'équation isolée : "), latex(formatEquationIsoleeLatex(instance))],
   });
 
-  // f) Séparation ou "se débarrasser de...".
-  if (necessiteSeparation(instance)) {
-    blocs.push({
-      type: "paragraphe",
-      fragments: [texte("f) On sépare en deux équations : "), latex(formatEquationsSepareesLatex(instance))],
-    });
-  } else {
-    blocs.push({
-      type: "paragraphe",
-      fragments: [texte(`f) ${instructionDebarrasser(instance.famille)} On obtient : `), latex(formatEquationDebarrasseeLatex(instance))],
-    });
+  const zeros = zerosNiveau1(instance);
+
+  // f) Séparation ou "se débarrasser de..." — absente sans solution (voir l'énoncé ci-dessus) : la
+  // lettre des zéros suit donc dynamiquement.
+  let lettreZeros = "f";
+  if (zeros.length > 0) {
+    lettreZeros = "g";
+    if (necessiteSeparation(instance)) {
+      blocs.push({
+        type: "paragraphe",
+        fragments: [texte("f) On sépare en deux équations : "), latex(formatEquationsSepareesLatex(instance))],
+      });
+    } else {
+      blocs.push({
+        type: "paragraphe",
+        fragments: [texte(`f) ${instructionDebarrasser(instance.famille)} On obtient : `), latex(formatEquationDebarrasseeLatex(instance))],
+      });
+    }
   }
 
-  // g) Zéros.
-  const zeros = zerosNiveau1(instance);
+  // Zéros.
   if (zeros.length === 0) {
-    blocs.push({ type: "paragraphe", fragments: [texte("g) Cette fonction n'a aucun zéro.")] });
+    blocs.push({
+      type: "paragraphe",
+      fragments: [texte(`${lettreZeros}) Cette fonction n'a aucun zéro : le membre de droite de l'équation isolée est négatif, ce que la fonction de référence ne peut jamais valoir.`)],
+    });
   } else {
     blocs.push({
       type: "paragraphe",
-      fragments: [texte("g) Zéros attendus : "), latex(formatZerosAttendusLatex(zeros) as string)],
+      fragments: [texte(`${lettreZeros}) Zéros attendus : `), latex(formatZerosAttendusLatex(zeros) as string)],
     });
   }
 

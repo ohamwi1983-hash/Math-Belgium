@@ -633,6 +633,14 @@ export function verifierZerosCandidatsRacineCarree(exercice: ExerciceNiveau2Raci
   return memesValeurs(saisie.valeurs, candidats);
 }
 
+/** `false` si l'équation isolée `[base](P1) = K` (niveau 1) n'a aucune solution — seulement
+ * `carre`/`valeur_absolue`/`racine_carree` avec `K<0` (un carré, une valeur absolue ou une racine
+ * ne vaut jamais un négatif). Dans ce cas l'étape "séparation"/"débarrasser" n'a pas lieu d'être :
+ * la session passe directement à "zeros" (réponse "aucun"). */
+export function equationIsoleeAdmetSolution(exercice: ExerciceCaracteristiquesAlgebriquesNiveau1): boolean {
+  return zerosNiveau1(exercice).length > 0;
+}
+
 /** `true` uniquement pour les familles nécessitant l'étape "séparation" (section 4, point 5) —
  * niveau 1 seul (voir `necessiteRegroupe`/`necessiteValidite` pour les branchements propres au
  * niveau 2). */

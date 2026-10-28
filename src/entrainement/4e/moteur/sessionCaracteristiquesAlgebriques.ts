@@ -77,6 +77,7 @@ import { demarrerEtapeTentatives, soumettreEtapeTentatives } from "./etapeTentat
 import type { ReglagesEtape } from "./etapeTentatives";
 import {
   brancheEstValide,
+  equationIsoleeAdmetSolution,
   necessiteRegroupe,
   necessiteSeparation,
   necessiteValidite,
@@ -383,6 +384,11 @@ export function activerAideSuivante(etat: EtatSessionCaracteristiquesAlgebriques
  */
 function phaseApresIsolement(exercice: ExerciceCaracteristiquesAlgebriques): PhaseCaracteristiquesAlgebriques {
   if (exercice.niveau === "niveau1") {
+    // `[base](P1) = K` avec K<0 pour `carre`/`valeur_absolue`/`racine_carree` : aucune solution, à
+    // conclure dès l'isolement (un carré, une valeur absolue ou une racine ne vaut jamais un
+    // négatif) — séparer ou "se débarrasser de" n'aurait aucun sens (séparation : √K non défini ;
+    // débarrasser : aucune racine attendue). Direction "zeros" (réponse "aucun").
+    if (!equationIsoleeAdmetSolution(exercice)) return "zeros";
     return necessiteSeparation(exercice) ? "separation" : "debarrasser";
   }
   switch (exercice.famille) {
