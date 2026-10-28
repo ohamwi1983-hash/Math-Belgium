@@ -1,9 +1,19 @@
 /**
  * Couche A — banque de questions vrai/faux pour "Caractéristiques d'une fonction & fonctions de
- * référence" (chapitre 2, nommage propre à sa spec). 245 affirmations pré-écrites (jamais générées
- * procéduralement), 7 thèmes de 35 questions chacun (20 initiales, transcrites depuis l'artefact
- * validé par l'utilisateur, puis 15 par thème ajoutées ultérieurement pour enrichir la banque).
+ * référence" (chapitre 3, nommage propre à sa spec). Affirmations pré-écrites (jamais générées
+ * procéduralement), 7 thèmes, 20 initiales par thème (transcrites depuis l'artefact validé par
+ * l'utilisateur) puis 15 par thème ajoutées ultérieurement pour enrichir la banque.
  * Chaque affirmation vérifiée mathématiquement à la rédaction.
+ *
+ * 243 affirmations au total (33 à 35 selon le thème, voir `nombreQuestions` dans `index.ts` —
+ * jamais une constante 35 fixe) depuis le retrait, lors de l'audit du chapitre 3, de 2 affirmations
+ * du thème `carreCube` demandant de vérifier qu'une équation admet EXACTEMENT une liste complète
+ * de solutions (ex. "la droite y=x coupe la courbe du cube en trois points, d'abscisses -1, 0 et
+ * 1") — vérifier la complétude exige de factoriser x³-x=x(x-1)(x+1) en entier, pas une vérification
+ * rapide (même règle que `quizFonctionSecondDegre`/`quizEquationsSecondDegre`, voir
+ * `.claude/rules/quiz-generators.md`). Les affirmations qui se contentent de tester UN candidat
+ * donné (ex. "x²=x³ n'est vérifiée que pour x=1", réfutable par le seul contre-exemple x=0) restent
+ * acceptables et n'ont pas été retirées.
  */
 import type { QuestionVraiFaux, VarianteQuizFonctionsReference } from "../../core/quizFonctionsReference.types";
 
@@ -105,7 +115,6 @@ export const BANQUE_QUIZ_FONCTIONS_REFERENCE: Record<VarianteQuizFonctionsRefere
     { enonce: "Sur l'intervalle ]-∞;0], la fonction cube est décroissante.", reponse: false, justification: "Faux : x³ est strictement croissante partout, y compris sur cet intervalle." },
     { enonce: "Pour tout réel x strictement négatif, x² est strictement positif alors que x³ est strictement négatif.", reponse: true, justification: "Vrai : un carré de nombre non nul est toujours positif, alors qu'un cube conserve le signe de x." },
     { enonce: "Pour tout réel x, l'égalité x²=x³ n'est vérifiée que pour x=1.", reponse: false, justification: "Faux : x²=x³ équivaut à x²(x-1)=0, donc à x=0 ou x=1 — x=0 est aussi solution, pas seulement x=1." },
-    { enonce: "Les courbes des fonctions carrée et cube se coupent exactement aux points (0;0) et (1;1).", reponse: true, justification: "Vrai : x²=x³ équivaut à x²(x-1)=0, dont les seules solutions sont x=0 et x=1." },
     { enonce: "La fonction carrée est bijective sur ℝ tout entier.", reponse: false, justification: "Faux : elle n'est pas injective — par exemple f(-2)=f(2)=4, deux abscisses distinctes donnent la même image." },
     { enonce: "La fonction cube est bijective de ℝ vers ℝ.", reponse: true, justification: "Vrai : elle est strictement croissante sur ℝ (donc injective) et son image est ℝ tout entier (donc surjective)." },
     { enonce: "Pour tout réel x, (x²)³=(x³)².", reponse: true, justification: "Vrai : les deux expressions valent x⁶." },
@@ -113,7 +122,6 @@ export const BANQUE_QUIZ_FONCTIONS_REFERENCE: Record<VarianteQuizFonctionsRefere
     { enonce: "La fonction cube transforme deux nombres opposés x et -x en la même image.", reponse: false, justification: "Faux : elle les transforme en deux images opposées, (-x)³=-(x³), pas en la même image." },
     { enonce: "Sur l'intervalle [0;1], on a x³≤x² pour tout x de cet intervalle.", reponse: true, justification: "Vrai : x²(x-1)≤0 sur [0;1] car x²≥0 et x-1≤0, donc x³-x²≤0." },
     { enonce: "Sur l'intervalle [1;+∞[, on a x³≤x² pour tout x de cet intervalle.", reponse: false, justification: "Faux : dès que x>1 (ex. x=2), x³=8>x²=4 — l'inégalité ne vaut que pour x=1 (égalité) et s'inverse au-delà." },
-    { enonce: "La droite d'équation y=x coupe la courbe de la fonction cube en trois points, d'abscisses -1, 0 et 1.", reponse: true, justification: "Vrai : x³=x équivaut à x(x²-1)=0, dont les solutions sont -1, 0 et 1." },
     { enonce: "La droite d'équation y=x coupe la courbe de la fonction carrée en trois points.", reponse: false, justification: "Faux : x²=x équivaut à x(x-1)=0, qui n'a que deux solutions, x=0 et x=1." },
     { enonce: "Sur l'intervalle [-2;1], la fonction cube atteint sa plus grande valeur en x=1.", reponse: true, justification: "Vrai : la fonction cube est strictement croissante sur ℝ, son maximum sur un intervalle fermé est donc toujours atteint à l'extrémité droite." },
     { enonce: "Sur l'intervalle [-1;2], la fonction carrée atteint son maximum en x=0.", reponse: false, justification: "Faux : x=0 donne au contraire le minimum (0) sur cet intervalle ; le maximum est atteint en x=2, où x²=4." },

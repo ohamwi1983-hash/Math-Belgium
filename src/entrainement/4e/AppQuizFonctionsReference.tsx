@@ -3,25 +3,28 @@ import type { VarianteQuizFonctionsReference } from "./core/quizFonctionsReferen
 import type { ReglagesSession } from "./core/session.types";
 import { demarrerSessionQuizFonctionsReference, soumettreReponseQuizFonctionsReference } from "./moteur/sessionQuizFonctionsReference";
 import type { EtatSessionQuizFonctionsReference, ResultatExerciceQuizFonctionsReference } from "./moteur/typesQuizFonctionsReference";
-import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition } from "./generateurs/quizFonctionsReference";
+import { CATALOGUE_VARIANTES, construireAvecVarianteId, creerGenerateurSansRepetition, nombreQuestions } from "./generateurs/quizFonctionsReference";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
 import { EtapeQuestionQuizFonctionsReference } from "./components/EtapeQuestionQuizFonctionsReference";
 import { ResultatPanelQuizFonctionsReference } from "./components/ResultatPanelQuizFonctionsReference";
 import { ResumeSessionQuizFonctionsReference } from "./components/ResumeSessionQuizFonctionsReference";
 
-/** `nombreExercices: 35` correspond exactement à la taille de la banque par thème (voir
- * `generateurs/quizFonctionsReference/banque.ts`) : couplé à `creerGenerateurSansRepetition`, une
- * session parcourt donc les 35 questions du thème choisi sans jamais en répéter une. */
-const REGLAGES_DEMO: ReglagesSession = {
-  nombreExercices: 35,
-  tentativesMax: 1,
-  penaliteActivee: true,
-  affichageReponseApresEchec: true,
-  affichageExplication: true,
-};
+/** `nombreExercices` est calculé depuis la taille RÉELLE de la banque du thème choisi
+ * (`nombreQuestions`, `generateurs/quizFonctionsReference/index.ts`) — jamais une constante fixe
+ * (33 à 35 selon le thème) : couplé à `creerGenerateurSansRepetition`, une session parcourt donc
+ * exactement les questions du thème choisi sans jamais en répéter une. */
+function reglagesPourTheme(theme: VarianteQuizFonctionsReference): ReglagesSession {
+  return {
+    nombreExercices: nombreQuestions(theme),
+    tentativesMax: 1,
+    penaliteActivee: true,
+    affichageReponseApresEchec: true,
+    affichageExplication: true,
+  };
+}
 
 function nouvelleSession(theme: VarianteQuizFonctionsReference): EtatSessionQuizFonctionsReference {
-  return demarrerSessionQuizFonctionsReference(REGLAGES_DEMO, creerGenerateurSansRepetition(theme));
+  return demarrerSessionQuizFonctionsReference(reglagesPourTheme(theme), creerGenerateurSansRepetition(theme));
 }
 
 /** Contrairement aux autres générateurs, le thème (variante) n'est pas tiré au hasard : c'est
@@ -51,7 +54,7 @@ export function AppQuizFonctionsReference() {
     const theme = varianteId as VarianteQuizFonctionsReference;
     setThemeChoisi(theme);
     setDernierResultat(null);
-    setEtat(demarrerSessionQuizFonctionsReference(REGLAGES_DEMO, () => construireAvecVarianteId(theme)));
+    setEtat(demarrerSessionQuizFonctionsReference(reglagesPourTheme(theme), () => construireAvecVarianteId(theme)));
   }
 
   const enCoursDeSession = etat !== null && !etat.terminee && !dernierResultat;
@@ -61,7 +64,7 @@ export function AppQuizFonctionsReference() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques d'une fonction &amp; fonctions de référence — vrai ou faux</h1>
-        <p className="app-subtitle">Chapitre 2{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
+        <p className="app-subtitle">Chapitre 3{themeChoisi ? ` — ${CATALOGUE_VARIANTES.find((v) => v.id === themeChoisi)?.label}` : ""}</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         {enCoursDeSession && etat && (
           <div className="progress">
@@ -82,7 +85,7 @@ export function AppQuizFonctionsReference() {
           {!etat ? (
             <div>
               <h2 className="result-title">Choisis un thème</h2>
-              <p className="result-subtitle">7 thèmes, 35 affirmations vrai/faux chacun — révision complète du chapitre.</p>
+              <p className="result-subtitle">7 thèmes, 33 à 35 affirmations vrai/faux chacun — révision complète du chapitre.</p>
               <div className="accueil-choix">
                 {CATALOGUE_VARIANTES.map((variante, index) => (
                   <button key={variante.id} type="button" className="btn btn-primary" onClick={() => choisirTheme(variante.id)}>

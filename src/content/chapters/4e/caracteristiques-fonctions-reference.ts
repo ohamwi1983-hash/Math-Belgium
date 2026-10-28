@@ -830,7 +830,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
         {
           kind: 'para',
           text:
-            '140 affirmations. 7 thèmes. Ils reprennent tout ce chapitre : vocabulaire et ' +
+            '243 affirmations. 7 thèmes. Ils reprennent tout ce chapitre : vocabulaire et ' +
             'lecture graphique, les 6 fonctions de référence (domaine et allure), fonction ' +
             'carrée et fonction cube, fonction racine carrée et fonction racine cubique, ' +
             'fonction inverse (asymptotes et comportement), fonction valeur absolue, ' +
@@ -848,7 +848,7 @@ export const caracteristiquesFonctionsReference: ChapterContent = {
           title: 'Caractéristiques d\'une fonction & fonctions de référence — quiz vrai/faux',
           generatorId: 'gen62',
           description: [
-            'Choisis un thème et teste-toi : 140 affirmations pré-écrites, une seule tentative ' +
+            'Choisis un thème et teste-toi : 243 affirmations pré-écrites, une seule tentative ' +
               'par question, justification toujours révélée.',
           ],
           chantier: '4e',
