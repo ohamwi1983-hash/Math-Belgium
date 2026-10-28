@@ -27,6 +27,25 @@ function phaseInitiale(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil {
   return "direction";
 }
 
+/** Séquence COMPLÈTE des phases pour un exercice donné — connue entièrement dès sa génération
+ * (contrairement à "Section plane d'un solide", `typesSectionPlaneSolide.ts`, où la suite dépend de
+ * la face réellement choisie par l'élève à chaque étape) : la longueur de la boucle est fixée par
+ * `exercice.obstacles.length`/`exercice.piquets.length`, déjà connus à la génération. Réutilisée
+ * telle quelle par `AppOmbreSoleil.tsx::calculerSegmentsProgression` (puces de progression), jamais
+ * une deuxième reconstitution divergente. Une même valeur de phase ("point", ou "direction" pour
+ * `directionInconnue`) apparaît plusieurs fois dans le tableau — l'appelant ne doit donc jamais
+ * localiser la phase courante par `indexOf(etat.phase)` (ambigu ici), mais directement par
+ * `etat.scoresAccumules.length` : chaque écran noté de cette séquence pousse exactement une entrée à
+ * sa clôture, dans l'ordre, donc l'index dans ce tableau coïncide toujours avec l'index dans
+ * `scoresAccumules`/`revelesAccumules`/`niveauxAideAccumules`. */
+export function sequencePourExercice(exercice: ExerciceOmbreSoleil): PhaseOmbreSoleil[] {
+  if (exercice.variante === "simple") return ["pointSimple"];
+  if (exercice.variante === "obstacle") {
+    return ["direction", ...exercice.obstacles.map(() => "point" as const)];
+  }
+  return ["directionInconnue", ...exercice.piquets.flatMap(() => ["direction", "point"] as const)];
+}
+
 export function demarrerSessionOmbreSoleil(
   reglages: ReglagesSession,
   generateur: GenerateurExerciceOmbreSoleil,

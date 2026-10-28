@@ -3,13 +3,14 @@ import type { ReglagesSession } from "./core/session.types";
 import {
   activerAideSuivante,
   demarrerSessionOmbreSoleil,
+  sequencePourExercice,
   soumettreConclusion,
   soumettreReponseDirection,
   soumettreReponseDirectionInconnue,
   soumettreReponsePoint,
   soumettreReponsePointSimple,
 } from "./moteur/sessionOmbreSoleil";
-import type { EtatSessionOmbreSoleil, PhaseOmbreSoleil } from "./moteur/typesOmbreSoleil";
+import type { EtatSessionOmbreSoleil } from "./moteur/typesOmbreSoleil";
 import { CATALOGUE_VARIANTES, construireAvecVarianteId, genererExerciceOmbreSoleil } from "./generateurs/ombreSoleil";
 import type { VarianteOmbreSoleil } from "./core/ombreSoleil.types";
 import { SelecteurVarianteDev } from "./components/SelecteurVarianteDev";
@@ -19,6 +20,8 @@ import { EtapeDirectionOmbre } from "./components/EtapeDirectionOmbre";
 import { EtapePointOmbre } from "./components/EtapePointOmbre";
 import { EtapePointSimple } from "./components/EtapePointSimple";
 import { EnTeteExercice } from "./components/EnTeteExercice";
+import type { EtatPuceProgression } from "../components/ProgressionPuces";
+import { ProgressionPuces } from "../components/ProgressionPuces";
 
 const CONSIGNE_GENERALE = "Détermine l'ombre de cet objet au soleil.";
 
@@ -34,16 +37,24 @@ function nouvelleSession(): EtatSessionOmbreSoleil {
   return demarrerSessionOmbreSoleil(REGLAGES_DEMO, genererExerciceOmbreSoleil);
 }
 
-/** Libellé de la phase COURANTE — même principe que "Section plane d'un solide" : le nombre
- * d'écrans varie par exercice (variante + nombre d'obstacles/de piquets), la progression AU SEIN de
- * la boucle est portée par `texteProgressionBoucle`, pas par ce libellé fixe. */
-const LIBELLE_PHASE: Record<PhaseOmbreSoleil, string> = {
-  pointSimple: "Point d'ombre",
-  directionInconnue: "Direction inconnue",
-  direction: "Direction",
-  point: "Point d'ombre",
-  conclusion: "Conclusion",
-};
+/** Segments de la barre de puces — réutilise `sequencePourExercice` (séquence COMPLÈTE connue dès
+ * la génération de l'exercice, contrairement à "Section plane d'un solide" où la suite dépend de la
+ * face réellement choisie par l'élève). L'index courant est `etat.scoresAccumules.length`, jamais
+ * `sequence.indexOf(etat.phase)` : une même valeur de phase ("point", ou "direction" pour
+ * `directionInconnue`) apparaît plusieurs fois dans la séquence, donc `indexOf` serait ambigu — voir
+ * le commentaire de `sequencePourExercice` (`sessionOmbreSoleil.ts`) pour la preuve que les index
+ * coïncident malgré tout avec `scoresAccumules`/`revelesAccumules`/`niveauxAideAccumules`. Puces
+ * purement visuelles (pas de `onSegmentClick`). */
+function calculerSegmentsProgression(etat: EtatSessionOmbreSoleil): EtatPuceProgression[] {
+  const sequence = sequencePourExercice(etat.exerciceCourant);
+  const indexCourant = etat.scoresAccumules.length;
+  return sequence.map((_phase, index) => {
+    if (index === indexCourant) return "courante";
+    if (index > indexCourant) return "a-venir";
+    if (etat.revelesAccumules[index]) return "revele";
+    return etat.niveauxAideAccumules[index] > 0 ? "aide" : "correcte";
+  });
+}
 
 /** État tenu en attente dès qu'un écran NOTÉ se termine (bonne réponse, ou tentatives épuisées) —
  * l'état de session calculé par le moteur n'est appliqué (`setEtat`) qu'au clic sur le bouton de
@@ -102,11 +113,7 @@ export function AppOmbreSoleil() {
         <h1 className="app-title">Ombre au soleil</h1>
         <p className="app-subtitle">Chapitre 6 — Géométrie dans l'espace</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-phase">{LIBELLE_PHASE[phase]}</span>
-          </div>
-        </div>
+        <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 
       <main className="card">
