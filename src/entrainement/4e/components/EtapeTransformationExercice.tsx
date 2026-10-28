@@ -96,13 +96,23 @@ export function EtapeTransformationExercice({
         </button>
       </div>
       {terminologieOuverte && (
-        <ul className="terminologie-liste contenu-conditionnel">
-          {TERMINOLOGIE.map((t) => (
-            <li key={t.abbr}>
-              <strong>{t.abbr}</strong> : {t.texte}
-            </li>
-          ))}
-        </ul>
+        <div className="contenu-conditionnel">
+          <ul className="terminologie-liste">
+            {TERMINOLOGIE.map((t) => (
+              <li key={t.abbr}>
+                <strong>{t.abbr}</strong> : {t.texte}
+              </li>
+            ))}
+          </ul>
+          {/* EV et CV ne sont jamais comparés séparément (voir `evaluerCurseurs`) : seul leur
+           * RAPPORT compte, car il représente |a|. Sans cette précision, rien dans l'écran
+           * n'indique qu'il existe plusieurs réglages corrects pour un même |a| — repéré lors de
+           * l'audit du chapitre 1 (le widget "Manipule toi-même" de la leçon utilise un seul
+           * curseur, jamais deux à combiner, ce qui ne prépare pas l'élève à ce mécanisme ici). */}
+          <p className="prompt-fact">
+            EV et CV se combinent : seul leur rapport EV / CV compte, il représente |a|. Plusieurs réglages peuvent donc être corrects (ex. EV=2 et CV=4 équivaut à EV=1 et CV=2).
+          </p>
+        </div>
       )}
 
       <div className="curseur-row">

@@ -69,6 +69,13 @@ export function EtapeEvCvSoxFR({ exercice, tentativesUtilisees, tentativesMax, o
         ]}
         live={live}
       />
+      {/* EV et CV ne sont jamais comparés séparément (voir `evaluerEvCvSoxFR`) : seul leur
+       * RAPPORT compte, car il représente |a|. Ce générateur n'a aucun mécanisme d'aide — cette
+       * précision reste donc visible en permanence plutôt que cachée derrière un bouton.
+       * Même correctif que `EtapeEvCvSox.tsx` (gen9, chapitre 1), suite à son audit. */}
+      <p className="prompt-fact">
+        EV et CV se combinent : seul leur rapport EV / CV compte, il représente |a|. Plusieurs réglages peuvent donc être corrects (ex. EV=2 et CV=4 équivaut à EV=1 et CV=2).
+      </p>
       <div className="curseur-row">
         <label className={classeCurseur(evaluation.ev)} htmlFor="curseur-ev-fr">
           <span>EV : {ev}</span>

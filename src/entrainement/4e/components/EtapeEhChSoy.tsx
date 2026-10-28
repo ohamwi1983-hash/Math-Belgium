@@ -68,6 +68,14 @@ export function EtapeEhChSoy({ exercice, tentativesUtilisees, tentativesMax, onV
         <Katex expression={NOM_G[exercice.famille]} />.
       </p>
       <MafsGraphFormeCanoniqueFonctionsReference confirmees={[]} live={live} />
+      {/* EH et CH ne sont jamais comparés séparément (voir `evaluerEhChSoy`) : seul leur RAPPORT
+       * CH/EH compte. Ce générateur n'a aucun mécanisme d'aide — cette précision reste donc
+       * visible en permanence plutôt que cachée derrière un bouton. Même correctif que
+       * `EtapeEvCvSox.tsx` (gen9, chapitre 1) et `EtapeEvCvSoxFR.tsx` (son équivalent vertical ici
+       * même), suite à leur audit — EH/CH souffre exactement du même risque de confusion. */}
+      <p className="prompt-fact">
+        EH et CH se combinent : seul leur rapport CH / EH compte. Plusieurs réglages peuvent donc être corrects (ex. CH=2 et EH=4 équivaut à CH=1 et EH=2).
+      </p>
       <div className="curseur-row">
         <label className={classeCurseur(evaluation.eh)} htmlFor="curseur-eh-fr">
           <span>EH : {eh}</span>

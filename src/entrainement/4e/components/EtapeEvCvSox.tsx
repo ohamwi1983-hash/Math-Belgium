@@ -64,6 +64,15 @@ export function EtapeEvCvSox({ exercice, tentativesUtilisees, tentativesMax, onV
         <Katex expression={fonctionThLatex} />.
       </p>
       <MafsGraphFormeCanoniqueTransformations confirmees={[confirmee]} live={live} />
+      {/* EV et CV ne sont jamais comparés séparément (voir `evaluerEvCvSox`/`evaluerCurseurs`) :
+       * seul leur RAPPORT compte, car il représente |a|. Cet écran n'a aucun mécanisme d'aide
+       * (aucun champ `niveauAideXxx` sur ce générateur, voir AppFormeCanoniqueTransformations.tsx)
+       * — cette précision reste donc visible en permanence plutôt que cachée derrière un bouton
+       * que ce générateur n'a jamais. Repéré lors de l'audit du chapitre 1 : le widget "Manipule
+       * toi-même" de la leçon utilise un seul curseur, jamais deux à combiner. */}
+      <p className="prompt-fact">
+        EV et CV se combinent : seul leur rapport EV / CV compte, il représente |a|. Plusieurs réglages peuvent donc être corrects (ex. EV=2 et CV=4 équivaut à EV=1 et CV=2).
+      </p>
       <div className="curseur-row">
         <label className={classeCurseur(evaluation.ev)} htmlFor="curseur-ev">
           <span>EV : {ev}</span>
