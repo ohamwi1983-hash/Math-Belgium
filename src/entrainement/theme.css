@@ -1801,6 +1801,37 @@
   color: var(--color-error);
 }
 
+/* `.curseur-row`/`.curseur-champ` (gen8/gen9/AppFonctionsReference/AppFormeCanoniqueFonctionsReference,
+ * 4 écrans à curseurs TH/TV/EV/CV) : même bug que `.options-grid-compact` et `.field-row`/
+ * `.field-row-wrap` avant leur propre correctif documenté plus haut dans ce fichier — ces deux
+ * classes n'avaient AUCUNE règle de mise en page, seules leurs variantes `.is-erronee` existaient.
+ * Un `<label>` est `inline` par défaut et un `<input type="range">` a une largeur fixe ~129px côté
+ * navigateur : sans règle propre, "TH : 0"/"TV : 0" se retrouvaient à flotter comme du texte sur la
+ * même ligne, un curseur minuscule perdu dans tout le reste de la largeur disponible, sans aucun
+ * rapport visuel clair entre une étiquette et SON curseur — repéré par l'utilisateur sur capture
+ * d'écran, confirmé ici par mesure DOM réelle (`getBoundingClientRect`) avant correctif. */
+.entrainement .curseur-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.entrainement label.curseur-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 160px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.entrainement label.curseur-champ input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-primary);
+}
+
 .entrainement .curseur-champ.is-erronee {
   color: var(--color-error);
 }
