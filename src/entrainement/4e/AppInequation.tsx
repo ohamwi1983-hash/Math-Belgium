@@ -165,7 +165,14 @@ export function AppInequation() {
           : etat.phase === "simplification"
             ? undefined
             : etat.phase === "racines"
-              ? <>Zéros attendus : {exercice.racines === undefined ? "∅" : exercice.racines.join(" ; ")}</>
+              ? <>
+                  Zéros attendus :{" "}
+                  {exercice.racines === undefined
+                    ? "∅"
+                    : exercice.racines[0] === exercice.racines[1]
+                      ? String(exercice.racines[0])
+                      : exercice.racines.join(" ; ")}
+                </>
               : etat.phase === "signe_a"
                 ? <>Signe de a attendu : {exercice.enonce.a > 0 ? "a > 0" : "a < 0"}</>
                 : <>Réponse attendue : S = {formatSolutionEnsemble(exercice.solution)}</>,
