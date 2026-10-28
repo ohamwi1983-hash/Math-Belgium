@@ -503,6 +503,18 @@
   margin: 2px 0;
 }
 
+/* Symbole de liaison entre deux champs empilés (ex. "∪" dans `EtapeInequation`, entre les deux
+ * morceaux d'une union d'intervalles) — même principe que `.prompt-connecteur` ci-dessus
+ * (centré, discret), classe JSX jamais stylée trouvée pendant l'audit du chapitre 2 : un
+ * `<p>` retombait en `display:block`/marges par défaut, "∪" collé à gauche sous le premier
+ * champ au lieu d'un vrai séparateur centré entre les deux. */
+.entrainement .union-separator {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 2px 0;
+}
+
 .entrainement .options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -624,6 +636,22 @@
 .entrainement .btn:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Bouton "✕ retirer" (gen5/gen6, écran "domaine = ℝ sauf...") — jamais stylée, trouvée pendant
+ * l'audit du chapitre 2 : rendu identique au bouton neutre "+ Ajouter" voisin, sans teinte
+ * d'alerte pour une action destructive. Même teinte que `.liste-morceaux-retirer` (texte/bordure
+ * en rouge, jamais un fond plein — moins agressif) ; placée APRÈS `.btn` pour que `color`/
+ * `border-color` l'emportent (même piège que `.btn-aide` ci-dessous). Pas de changement de taille/
+ * disposition, seulement la couleur — le bouton reste dans le flux de `.field-row` tel quel. */
+.entrainement .btn-supprimer {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.entrainement .btn-supprimer:disabled {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
 }
 
 /* Déplacée APRÈS `.btn` (même spécificité, l'ordre de cascade décide) — restée avant jusqu'ici,
@@ -1133,6 +1161,33 @@
 
 .entrainement .select-souligne-wrap:has(.is-erronee)::after {
   border-color: var(--color-error);
+}
+
+/* `.ce-ligne-champs`/`.ce-slot-latex` ("conditions d'existence" — un label LaTeX type "x ≠" suivi
+ * d'un `.ce-select`/`ComboboxTexte`) : classes utilisées dans 6 écrans à travers 3 chantiers,
+ * jamais stylées (trouvé pendant l'audit du chapitre 2, 4e) — `.ce-select` lui-même est soigné,
+ * mais la ligne qui l'encadre et son étiquette voisine ne l'étaient jamais. `.ce-ligne-champs` est
+ * tantôt le conteneur de toute la ligne (seul, pas d'enrobage), tantôt un enfant de
+ * `.liste-morceaux-ligne` (déjà flex) à côté d'un bouton retirer — `flex: 1` n'a d'effet que dans
+ * ce second cas, sans rien changer au premier (un `flex` sur un élément qui n'est l'enfant direct
+ * d'aucun conteneur flex n'a aucun effet). */
+.entrainement .ce-ligne-champs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+/* `:not(.field-label)` : un seul des 6 écrans (`EtapeChampsEtudeComplete.tsx`, 5e-4h) combine
+ * `.ce-slot-latex` avec `.field-label.field-label-minuscule`, déjà entièrement stylées et déjà
+ * correctement dimensionnées par la règle générique `.field-row > *` — l'exclusion garantit un
+ * comportement rigoureusement inchangé sur ce seul écran, cette règle ne corrigeant que les 5
+ * autres où `.ce-slot-latex` est seule à porter l'étiquette. */
+.entrainement .ce-slot-latex:not(.field-label) {
+  flex: none;
+  white-space: nowrap;
+  font-size: 14.5px;
+  color: var(--color-text);
 }
 
 .entrainement .field-inline {
