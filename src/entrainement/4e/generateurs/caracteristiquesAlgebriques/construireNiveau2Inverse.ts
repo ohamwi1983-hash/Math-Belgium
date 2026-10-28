@@ -1,6 +1,7 @@
 import type { ExerciceNiveau2Quadratique } from "../../core/caracteristiquesAlgebriques.types";
 import { construireExerciceClassifie } from "../equationRationnelle/construireExerciceClassifie";
 import { randomInt, randomIntNonNul } from "./aleatoire";
+import { construireEquationSansRacine } from "./construireEquationSansRacine";
 
 /**
  * Niveau 2, famille `inverse` — `f(x) = 1/(ax+b) + (cx+d)`. Les zéros résolvent
@@ -16,6 +17,10 @@ import { randomInt, randomIntNonNul } from "./aleatoire";
  * empirique ~1,5% à la plage [-4,4] (donc quelques dizaines de tentatives suffisent en pratique).
  */
 export function construireNiveau2Inverse(): ExerciceNiveau2Quadratique {
+  // 1 fois sur 3 : un tirage à Δ<0 est RETENU ("aucun zéro", audit gen13 — ces tirages étaient
+  // systématiquement rejetés, rendant ce cas impossible malgré le choix "aucun" de l'écran "zéros").
+  // Aucune contrainte de racine entière dans ce cas (il n'y a aucune racine à saisir).
+  const sansRacine = Math.random() < 1 / 3;
   const plages = [4, 6, 8, 10];
   for (const borne of plages) {
     for (let tentative = 0; tentative < 3000; tentative++) {
@@ -28,6 +33,10 @@ export function construireNiveau2Inverse(): ExerciceNiveau2Quadratique {
       const B = a * d + b * c;
       const C = b * d + 1;
       const discriminant = B * B - 4 * A * C;
+      if (sansRacine) {
+        if (discriminant >= 0) continue;
+        return { niveau: "niveau2", famille: "inverse", a, b, c, d, zeros: construireEquationSansRacine(A, B, C) };
+      }
       if (discriminant < 0) continue;
 
       const racineDiscriminant = Math.sqrt(discriminant);

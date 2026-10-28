@@ -115,14 +115,14 @@ function demarrer(
   return demarrerSessionCaracteristiquesAlgebriques(reglagesSession, creerGenerateurCaracteristiquesAlgebriques(reglagesFamilles, niveau));
 }
 
-/** Séquence de phases pour l'exercice courant — niveau 1 : `ordonnee→ce→domaine→isolement→
+/** Séquence de phases pour l'exercice courant — niveau 1 : `ce→domaine→ordonnee→parite→isolement→
  * [separation|debarrasser]→zeros` (`sessionCaracteristiquesAlgebriques.ts`, en-tête de fichier).
  * Niveau 2 : dispatch par famille après `isolement` (voir `phaseApresIsolement`, même fichier) —
  * `validationSolution` (qui se répète 0 à 2 fois sans jamais changer de `phase`, voir
  * `releveRevelePhase` ci-dessus) n'apparaît ici qu'UNE SEULE FOIS, comme un bloc agrégé : la barre
  * de puces n'a pas besoin d'un segment par répétition. */
 function sequencePourExercice(exercice: ExerciceCaracteristiquesAlgebriques): PhaseCaracteristiquesAlgebriques[] {
-  const basePartagee: PhaseCaracteristiquesAlgebriques[] = ["ordonnee", "ce", "domaine"];
+  const basePartagee: PhaseCaracteristiquesAlgebriques[] = ["ce", "domaine", "ordonnee"];
   if (exercice.niveau === "niveau1") {
     // "parite" (audit du chapitre 3) n'existe qu'à ce niveau — voir `pariteAttendue`. Sans solution
     // à l'équation isolée (K<0), pas d'étape intermédiaire — même règle que `phaseApresIsolement`.
@@ -149,9 +149,9 @@ function sequencePourExercice(exercice: ExerciceCaracteristiquesAlgebriques): Ph
 /** Segments de la barre de puces — "validationSolution" (bloc agrégé, voir `sequencePourExercice`)
  * est "révélé" si au moins une de ses répétitions l'a été (`scoresValidationSolutionExercice`,
  * aucune aide sur cet écran — voir `releveRevelePhase` ci-dessus — donc jamais de statut "aide"
- * pour ce segment). Les autres phases passées lisent directement leur `xxxRevele` dédié ; ce
- * générateur ne trace aucune aide par écran (aucun `niveauAide`/`onActiverAide` câblé sur ses
- * étapes), donc correcte/révélé seulement, même principe que `AppFormeCanoniqueTransformations.tsx`.
+ * pour ce segment). Les autres phases passées lisent directement leur `xxxRevele` dédié, puis leur
+ * niveau d'aide (6 écrans à aide, voir `AIDE_PAR_PHASE`, `sessionCaracteristiquesAlgebriques.ts`) :
+ * "revele" prime sur "aide", même convention que les autres générateurs à aide.
  * La dernière phase de chaque séquence (toujours terminale) n'a jamais besoin de sa propre branche
  * "close". */
 function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesAlgebriques): EtatPuceProgression[] {
@@ -185,7 +185,22 @@ function calculerSegmentsProgression(etat: EtatSessionCaracteristiquesAlgebrique
                         : phase === "resolutionBranches"
                           ? etat.resolutionBranchesRevele
                           : etat.zerosRevele;
-    return revele ? "revele" : "correcte";
+    if (revele) return "revele";
+    const niveauAide =
+      phase === "ce"
+        ? etat.niveauAideCE
+        : phase === "parite"
+          ? etat.niveauAideParite
+          : phase === "isolement"
+            ? etat.niveauAideIsolement
+            : phase === "separation"
+              ? etat.niveauAideSeparation
+              : phase === "debarrasser"
+                ? etat.niveauAideDebarrasser
+                : phase === "zeros"
+                  ? etat.niveauAideZeros
+                  : 0;
+    return niveauAide > 0 ? "aide" : "correcte";
   });
 }
 
@@ -460,7 +475,7 @@ export function AppCaracteristiquesAlgebriques() {
         </header>
         <main className="card">
           <div className="card-body">
-            <EtapeReglagesCaracteristiquesAlgebriques onCommencer={commencerSession} />
+            <EtapeReglagesCaracteristiquesAlgebriques onCommencer={commencerSession} onNiveauChange={setNiveau} niveauInitial={niveau} />
           </div>
         </main>
       </div>
@@ -489,16 +504,6 @@ export function AppCaracteristiquesAlgebriques() {
       </header>
 
       <main className="card">
-        <div className="card-progress">
-          <div className="card-progress-row">
-            <span className="card-progress-step">
-              Exercice {etat.indexExercice + 1} / {etat.reglages.nombreExercices}
-            </span>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${(etat.indexExercice / etat.reglages.nombreExercices) * 100}%` }} />
-          </div>
-        </div>
         <div className="card-body">
           <EnTeteExercice consigneGenerale={CONSIGNE_GENERALE} blocDonnees={null} />
           <RecapitulatifPanel entrees={recapitulatif} />
@@ -515,6 +520,8 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideCE}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse: ReponseCE) => terminerEtape(soumettreReponseCE(etat, reponse))}
               validation={validation}
             />
@@ -541,6 +548,8 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideIsolement}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse: string) => terminerEtape(soumettreReponseIsolement(etat, reponse))}
               validation={validation}
             />
@@ -549,6 +558,8 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideSeparation}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse: ReponseSeparation) => terminerEtape(soumettreReponseSeparation(etat, reponse))}
               validation={validation}
             />
@@ -557,6 +568,8 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideDebarrasser}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse: string) => terminerEtape(soumettreReponseDebarrasser(etat, reponse))}
               validation={validation}
             />
@@ -601,6 +614,8 @@ export function AppCaracteristiquesAlgebriques() {
               exercice={etat.exerciceCourant}
               tentativesUtilisees={etat.etapeCourante.tentativesUtilisees}
               tentativesMax={etat.reglages.tentativesMax}
+              niveauAide={etat.niveauAideZeros}
+              onActiverAide={() => setEtat(activerAideSuivante(etat))}
               onValider={(reponse: ReponseZerosCaracteristiques) => terminerEtape(soumettreReponseZeros(etat, reponse))}
               validation={validation}
             />

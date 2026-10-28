@@ -55,9 +55,15 @@ export interface ResultatExerciceCaracteristiquesAlgebriques {
    * `ReponseParite`), toujours un `number` au niveau 1. */
   scoreParite: number | null;
   pariteRevele: boolean;
-  /** Niveau d'aide utilisé sur cet écran (0 à `NIVEAU_AIDE_MAX_PARITE`) — même convention que les
-   * autres générateurs à aide de ce chantier (ex. `ResultatExerciceDistanceDroite`). */
+  /** Niveaux d'aide utilisés (0 ou 1) sur les 6 écrans qui en ont une (`NIVEAU_AIDE_MAX_*`,
+   * `sessionCaracteristiquesAlgebriques.ts`) — même convention que les autres générateurs à aide de
+   * ce chantier (ex. `ResultatExerciceDistanceDroite`). Restent à 0 pour un écran non traversé. */
   niveauAideParite: number;
+  niveauAideCE: number;
+  niveauAideIsolement: number;
+  niveauAideSeparation: number;
+  niveauAideDebarrasser: number;
+  niveauAideZeros: number;
   scoreIsolement: number;
   isolementRevele: boolean;
   scoreSeparation: number | null;
@@ -91,6 +97,11 @@ export interface EtatSessionCaracteristiquesAlgebriques {
   scorePariteExercice: number | null;
   pariteRevele: boolean;
   niveauAideParite: number;
+  niveauAideCE: number;
+  niveauAideIsolement: number;
+  niveauAideSeparation: number;
+  niveauAideDebarrasser: number;
+  niveauAideZeros: number;
   scoreIsolementExercice: number | null;
   isolementRevele: boolean;
   scoreSeparationExercice: number | null;

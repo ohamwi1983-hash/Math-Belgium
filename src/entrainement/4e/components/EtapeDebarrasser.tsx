@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ExerciceCaracteristiquesAlgebriques } from "../core/caracteristiquesAlgebriques.types";
 import { diagnostiquerDebarrasserNiveau1 } from "../moteur/verificationCaracteristiquesAlgebriques";
-import { formatEquationRechercheZerosLatex, instructionDebarrasser } from "../ui/formatCaracteristiquesAlgebriques";
+import { NIVEAU_AIDE_MAX_DEBARRASSER } from "../moteur/sessionCaracteristiquesAlgebriques";
+import { formatEquationRechercheZerosLatex, instructionDebarrasser, placeholderDebarrasser, texteAideDebarrasser } from "../ui/formatCaracteristiquesAlgebriques";
+import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -11,6 +13,8 @@ interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (reponse: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -28,7 +32,7 @@ interface Props {
  * (`RecapitulatifPanel`, `calculerRecapitulatifCaracteristiquesAlgebriques`) affiché en haut de
  * chaque écran par `AppCaracteristiquesAlgebriques.tsx`.
  */
-export function EtapeDebarrasser({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeDebarrasser({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const statut =
@@ -46,11 +50,18 @@ export function EtapeDebarrasser({ exercice, tentativesUtilisees, tentativesMax,
           className={`text-input${erronee ? " is-erronee" : ""}`}
           value={texte}
           onChange={(e) => setTexte(e.target.value)}
+          placeholder={placeholderDebarrasser(exercice.famille)}
           aria-label="Équation simplifiée"
         />
       </div>
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          <p>{texteAideDebarrasser(exercice.famille)}</p>
+        </div>
+      )}
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_DEBARRASSER} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
           Valider
         </button>

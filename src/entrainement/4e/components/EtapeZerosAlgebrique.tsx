@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ExerciceCaracteristiquesAlgebriques, ReponseZerosCaracteristiques } from "../core/caracteristiquesAlgebriques.types";
 import { diagnostiquerExpressionNumerique, parserExpressionNumerique } from "../moteur/verificationCaracteristiquesAlgebriques";
-import { INSTRUCTION_ZEROS, formatEquationRechercheZerosLatex, placeholderExpressionNumerique } from "../ui/formatCaracteristiquesAlgebriques";
+import { INSTRUCTION_ZEROS, formatEquationRechercheZerosLatex, placeholderExpressionNumerique, texteAideZeros } from "../ui/formatCaracteristiquesAlgebriques";
+import { NIVEAU_AIDE_MAX_ZEROS } from "../moteur/sessionCaracteristiquesAlgebriques";
+import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -13,6 +15,8 @@ interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (reponse: ReponseZerosCaracteristiques) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -39,7 +43,7 @@ interface Props {
  * `calculerRecapitulatifCaracteristiquesAlgebriques`) affiché en haut de chaque écran par
  * `AppCaracteristiquesAlgebriques.tsx`.
  */
-export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [valeurs, setValeurs] = useState<string[]>([""]);
 
@@ -122,8 +126,14 @@ export function EtapeZerosAlgebrique({ exercice, tentativesUtilisees, tentatives
         </div>
       )}
 
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          <p>{texteAideZeros(exercice)}</p>
+        </div>
+      )}
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ZEROS} onActiverAide={onActiverAide} />
         <button
           type="button"
           className="btn btn-primary"

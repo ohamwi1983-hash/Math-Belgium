@@ -5,6 +5,13 @@ import { OPTIONS_FAMILLE } from "../ui/famillesReferenceLabels";
 
 interface Props {
   onCommencer: (reglages: ReglagesFamillesFonctionReference, niveau: NiveauCaracteristiquesAlgebriques) => void;
+  /** Notifie le parent dès que le niveau change, AVANT "Commencer" — nécessaire pour que le panneau
+   * dev (`SelecteurVarianteDev` → "Générer") construise un exercice du niveau affiché ici (sinon
+   * toujours niveau 1 : le parent ne connaissait le niveau qu'au clic sur "Commencer"). */
+  onNiveauChange?: (niveau: NiveauCaracteristiquesAlgebriques) => void;
+  /** Niveau affiché au montage — celui que le parent connaît déjà, pour ne jamais afficher
+   * "Niveau 1" alors que le parent (et donc le panneau dev) est resté sur le niveau 2. */
+  niveauInitial?: NiveauCaracteristiquesAlgebriques;
 }
 
 function quantitesInitiales(): Record<FamilleReference, number> {
@@ -20,10 +27,15 @@ function quantitesInitiales(): Record<FamilleReference, number> {
  * "Niveau 2" (`prompt-niveau2caracteristiquesalgebriques.md`) — s'applique uniformément à toute la
  * série (voir `creerGenerateurCaracteristiquesAlgebriques`), jamais un mélange niveau 1/niveau 2.
  */
-export function EtapeReglagesCaracteristiquesAlgebriques({ onCommencer }: Props) {
+export function EtapeReglagesCaracteristiquesAlgebriques({ onCommencer, onNiveauChange, niveauInitial = "niveau1" }: Props) {
   const [mode, setMode] = useState<ModeSelectionFamilles>("aleatoire");
   const [quantites, setQuantites] = useState<Record<FamilleReference, number>>(quantitesInitiales);
-  const [niveau, setNiveau] = useState<NiveauCaracteristiquesAlgebriques>("niveau1");
+  const [niveau, setNiveauLocal] = useState<NiveauCaracteristiquesAlgebriques>(niveauInitial);
+
+  function setNiveau(nouveau: NiveauCaracteristiquesAlgebriques) {
+    setNiveauLocal(nouveau);
+    onNiveauChange?.(nouveau);
+  }
 
   const total = OPTIONS_FAMILLE.reduce((somme, { valeur }) => somme + quantites[valeur], 0);
   const peutCommencer = mode === "aleatoire" || total > 0;

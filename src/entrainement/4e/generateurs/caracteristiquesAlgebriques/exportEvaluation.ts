@@ -48,10 +48,10 @@ import { CATALOGUE_VARIANTES, construireNiveau1AvecFamille, genererExerciceCarac
  * risquer un corrigé faux sur le niveau 2 (voir la note de `AdaptateurFeuilleExercices` : la
  * correction doit toujours être resynthétisée depuis des valeurs déjà connues et correctes).
  *
- * 7 questions par instance — une par écran RÉELLEMENT traversé côté interactif (voir
- * `moteur/sessionCaracteristiquesAlgebriques.ts`, séquence niveau 1) : ordonnée à l'origine → CE →
- * domaine → parité → isolement (zéros) → séparation (`valeur_absolue`/`carre`) OU débarrasser (les
- * 4 autres familles) → zéros. Chaque consigne réutilise TEXTUELLEMENT ce que l'écran affiche
+ * 6 ou 7 questions par instance — une par écran RÉELLEMENT traversé côté interactif (voir
+ * `moteur/sessionCaracteristiquesAlgebriques.ts`, séquence niveau 1) : CE → domaine → ordonnée à
+ * l'origine → parité → isolement (zéros) → séparation (`valeur_absolue`/`carre`) OU débarrasser (les
+ * 4 autres familles), absente si l'équation isolée n'a aucune solution → zéros. Chaque consigne réutilise TEXTUELLEMENT ce que l'écran affiche
  * (`ui/formatCaracteristiquesAlgebriques.ts` — `instructionIsolement`, `instructionDebarrasser`,
  * `INSTRUCTION_ZEROS`), jamais reformulée indépendamment. `regroupable` non activé : plusieurs
  * questions par instance (voir `AdaptateurFeuilleExercices.regroupable`, condition explicite "une
@@ -124,15 +124,15 @@ function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteri
     enteteFragments: [texte("On considère la fonction "), latex(formatEquationNiveau1Latex(instance)), texte(".")],
     questions: [
       {
-        consigne: [texte("Quelle est l'ordonnée à l'origine de cette fonction ? (forme exacte ; indique si elle n'existe pas.)")],
-        reponse: { type: "lignes", nombre: 1 },
-      },
-      {
         consigne: [texte("Quelles sont les conditions d'existence de cette fonction ?")],
         reponse: { type: "lignes", nombre: 2 },
       },
       {
         consigne: [texte("Quel est le domaine de définition de cette fonction ?")],
+        reponse: { type: "lignes", nombre: 1 },
+      },
+      {
+        consigne: [texte("Quelle est l'ordonnée à l'origine de cette fonction ? (forme exacte ; indique si elle n'existe pas.)")],
         reponse: { type: "lignes", nombre: 1 },
       },
       {
@@ -155,35 +155,35 @@ function construireEnonceCaracteristiquesAlgebriques(instance: ExerciceCaracteri
 function construireCorrectionCaracteristiquesAlgebriques(instance: ExerciceCaracteristiquesAlgebriquesNiveau1): BlocCorrection[] {
   const blocs: BlocCorrection[] = [];
 
-  // a) Ordonnée à l'origine.
+  // a) Conditions d'existence.
+  const conditions = ceAttendues(instance);
+  if (conditions.length === 0) {
+    blocs.push({ type: "paragraphe", fragments: [texte("a) Cette fonction n'a aucune condition d'existence.")] });
+  } else {
+    blocs.push({
+      type: "paragraphe",
+      fragments: [texte("a) Conditions d'existence : "), latex(formatCEAttenduesLatex(conditions) as string)],
+    });
+  }
+
+  // b) Domaine de définition.
+  blocs.push({
+    type: "paragraphe",
+    fragments: [texte("b) Domaine de définition : "), latex(`\\mathrm{dom}\\,f = ${formatDomaineAttenduLatex(domaineAttendu(instance))}`)],
+  });
+
+  // c) Ordonnée à l'origine (après le domaine, dont son existence dépend).
   if (!existeOrdonneeNiveau1(instance)) {
     blocs.push({
       type: "paragraphe",
-      fragments: [texte("a) L'ordonnée à l'origine n'existe pas : x = 0 n'appartient pas au domaine de définition.")],
+      fragments: [texte("c) L'ordonnée à l'origine n'existe pas : x = 0 n'appartient pas au domaine de définition.")],
     });
   } else {
     blocs.push({
       type: "paragraphe",
-      fragments: [texte("a) Ordonnée à l'origine : "), latex(`f(0) = ${formatOrdonneeExacteLatex(instance)}`)],
+      fragments: [texte("c) Ordonnée à l'origine : "), latex(`f(0) = ${formatOrdonneeExacteLatex(instance)}`)],
     });
   }
-
-  // b) Conditions d'existence.
-  const conditions = ceAttendues(instance);
-  if (conditions.length === 0) {
-    blocs.push({ type: "paragraphe", fragments: [texte("b) Cette fonction n'a aucune condition d'existence.")] });
-  } else {
-    blocs.push({
-      type: "paragraphe",
-      fragments: [texte("b) Conditions d'existence : "), latex(formatCEAttenduesLatex(conditions) as string)],
-    });
-  }
-
-  // c) Domaine de définition.
-  blocs.push({
-    type: "paragraphe",
-    fragments: [texte("c) Domaine de définition : "), latex(`\\mathrm{dom}\\,f = ${formatDomaineAttenduLatex(domaineAttendu(instance))}`)],
-  });
 
   // d) Parité.
   blocs.push({

@@ -74,11 +74,6 @@ export function calculerRecapitulatifCaracteristiquesAlgebriques(
   const exercice = etat.exerciceCourant;
   const entrees: EntreeRecapitulatif[] = [];
 
-  if (etat.scoreOrdonneeExercice !== null) {
-    const attendu = formatOrdonneeExacteLatex(exercice);
-    entrees.push({ libelle: "f(0)", estLatex: attendu !== null, valeur: attendu ?? "n'existe pas", revele: etat.ordonneeRevele });
-  }
-
   if (etat.scoreCEExercice !== null) {
     const attendu = formatCEAttenduesLatex(ceAttendues(exercice));
     entrees.push({
@@ -91,6 +86,12 @@ export function calculerRecapitulatifCaracteristiquesAlgebriques(
 
   if (etat.scoreDomaineExercice !== null) {
     entrees.push({ libelle: "Domaine de définition", estLatex: true, valeur: formatDomaineAttenduLatex(exercice), revele: etat.domaineRevele });
+  }
+
+  // Après le domaine — même ordre que les écrans (`ce → domaine → ordonnee`).
+  if (etat.scoreOrdonneeExercice !== null) {
+    const attendu = formatOrdonneeExacteLatex(exercice);
+    entrees.push({ libelle: "f(0)", estLatex: attendu !== null, valeur: attendu ?? "n'existe pas", revele: etat.ordonneeRevele });
   }
 
   if (etat.scorePariteExercice !== null && exercice.niveau === "niveau1") {
@@ -140,5 +141,14 @@ export function calculerRecapitulatifCaracteristiquesAlgebriques(
     );
   }
 
-  return entrees;
+  return entrees.map(lisibleSurMobile);
+}
+
+/** Rendu inline d'une ligne à 13px (`.recap-item`) : sans `\displaystyle`, KaTeX compresse chaque
+ * `\frac` en taille « script » (~9px), illisible sur smartphone pour les CE, le domaine ou les
+ * équations à coefficients fractionnaires. Limité à ce générateur : le panneau partagé
+ * (`RecapitulatifPanel`) n'est pas modifié. */
+function lisibleSurMobile(entree: EntreeRecapitulatif): EntreeRecapitulatif {
+  if (entree.valeurs !== undefined) return { ...entree, valeurs: entree.valeurs.map((v) => `\\displaystyle ${v}`) };
+  return entree.estLatex ? { ...entree, valeur: `\\displaystyle ${entree.valeur}` } : entree;
 }

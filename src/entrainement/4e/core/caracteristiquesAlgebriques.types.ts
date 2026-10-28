@@ -258,8 +258,10 @@ export type { Categorie };
  * Phases possibles, réunies pour les deux niveaux (voir `phaseInitiale`/les fonctions
  * `soumettreXxx`, `src/moteur/sessionCaracteristiquesAlgebriques.ts`, pour le détail exact de
  * l'enchaînement par niveau/famille) :
- * - Niveau 1 : `ordonnee → ce → domaine → parite → isolement → [separation | debarrasser] → zeros`
- *   (8 phases, chaque famille traverse EXACTEMENT une des deux étapes intermédiaires). `parite`
+ * - Niveau 1 : `ce → domaine → ordonnee → parite → isolement → [separation | debarrasser] → zeros`
+ *   (étape intermédiaire absente quand l'équation isolée n'a aucune solution — sinon chaque famille
+ *   traverse EXACTEMENT une des deux). Les 3 premières phases (`ce → domaine → ordonnee`) sont
+ *   communes aux deux niveaux — l'ordonnée suit le domaine, dont son existence dépend. `parite`
  *   (audit du chapitre 3) n'existe qu'à ce niveau — voir `ReponseParite` ci-dessus et
  *   `pariteAttendue`/`verifierParite` (`verificationCaracteristiquesAlgebriques.ts`) pour le détail
  *   complet par famille.

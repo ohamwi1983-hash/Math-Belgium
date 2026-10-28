@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ExerciceCaracteristiquesAlgebriques, ReponseCE, SymboleCE } from "../core/caracteristiquesAlgebriques.types";
 import { parserNombreOuFraction } from "../moteur/verificationAnalyseFonction";
-import { formatEquationNiveau1Latex } from "../ui/formatCaracteristiquesAlgebriques";
+import { formatEquationNiveau1Latex, texteAideCE } from "../ui/formatCaracteristiquesAlgebriques";
+import { NIVEAU_AIDE_MAX_CE } from "../moteur/sessionCaracteristiquesAlgebriques";
+import { BoutonAide } from "./BoutonAide";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
 import type { ValidationEtapeProps } from "../../components/ValidationEcran";
@@ -23,6 +25,8 @@ interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (reponse: ReponseCE) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -38,7 +42,7 @@ interface Props {
  * `parserNombreOuFraction` — les CE de ce générateur sont souvent des rationnels non entiers, ex.
  * `-1/3`).
  */
-export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [choix, setChoix] = useState<Choix | null>(null);
   const [lignes, setLignes] = useState<LigneCE[]>([ligneVide()]);
 
@@ -136,8 +140,14 @@ export function EtapeCE({ exercice, tentativesUtilisees, tentativesMax, onValide
         </div>
       )}
 
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          <p>{texteAideCE()}</p>
+        </div>
+      )}
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_CE} onActiverAide={onActiverAide} />
         <button
           type="button"
           className="btn btn-primary"

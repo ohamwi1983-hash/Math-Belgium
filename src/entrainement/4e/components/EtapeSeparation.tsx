@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ExerciceCaracteristiquesAlgebriques, ReponseSeparation } from "../core/caracteristiquesAlgebriques.types";
 import { diagnostiquerSeparationNiveau1 } from "../moteur/verificationCaracteristiquesAlgebriques";
-import { formatEquationRechercheZerosLatex } from "../ui/formatCaracteristiquesAlgebriques";
+import { NIVEAU_AIDE_MAX_SEPARATION } from "../moteur/sessionCaracteristiquesAlgebriques";
+import { formatEquationRechercheZerosLatex, placeholdersSeparation, texteAideSeparation } from "../ui/formatCaracteristiquesAlgebriques";
+import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -11,6 +13,8 @@ interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (reponse: ReponseSeparation) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -31,7 +35,7 @@ interface Props {
  * `calculerRecapitulatifCaracteristiquesAlgebriques`) affiché en haut de chaque écran par
  * `AppCaracteristiquesAlgebriques.tsx`.
  */
-export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [equation1, setEquation1] = useState("");
   const [equation2, setEquation2] = useState("");
   const complet = equation1.trim() !== "" && equation2.trim() !== "";
@@ -40,6 +44,7 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
       ? diagnostiquerSeparationNiveau1(exercice, { equation1, equation2 })
       : undefined;
   const erronee = tentativesUtilisees > 0 && statut !== "correct";
+  const [placeholder1, placeholder2] = placeholdersSeparation(exercice.famille);
 
   return (
     <div>
@@ -52,6 +57,7 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
           className={`text-input${erronee ? " is-erronee" : ""}`}
           value={equation1}
           onChange={(e) => setEquation1(e.target.value)}
+          placeholder={placeholder1}
           aria-label="Première équation"
         />
       </div>
@@ -61,11 +67,18 @@ export function EtapeSeparation({ exercice, tentativesUtilisees, tentativesMax, 
           className={`text-input${erronee ? " is-erronee" : ""}`}
           value={equation2}
           onChange={(e) => setEquation2(e.target.value)}
+          placeholder={placeholder2}
           aria-label="Seconde équation"
         />
       </div>
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          <p>{texteAideSeparation(exercice.famille)}</p>
+        </div>
+      )}
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_SEPARATION} onActiverAide={onActiverAide} />
         <button
           type="button"
           className="btn btn-primary"

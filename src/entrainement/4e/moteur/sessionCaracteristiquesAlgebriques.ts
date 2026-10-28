@@ -1,8 +1,13 @@
 /**
  * Couche B — moteur de session pour "Caractéristiques algébriques d'une fonction de référence".
  *
- * Niveau 1 : 7 ou 8 phases selon la famille — `ordonnee → ce → domaine → parite → isolement →
- * [separation | debarrasser] → zeros`. `parite` (audit du chapitre 3) n'existe qu'à ce niveau —
+ * Ordre des 3 premières phases (audit gen13) : `ce → domaine → ordonnee`, aux DEUX niveaux —
+ * l'existence de l'ordonnée à l'origine dépend du domaine (`inverse`/`racine_carree`), elle est donc
+ * demandée une fois celui-ci établi, plus en tout premier.
+ *
+ * Niveau 1 : 6 à 8 phases selon la famille — `ce → domaine → ordonnee → parite → isolement →
+ * [separation | debarrasser] → zeros` (étape intermédiaire absente si l'équation isolée n'a aucune
+ * solution, voir `phaseApresIsolement`). `parite` (audit du chapitre 3) n'existe qu'à ce niveau —
  * voir `ReponseParite`/`pariteAttendue` (`core/caracteristiquesAlgebriques.types.ts`/
  * `verificationCaracteristiquesAlgebriques.ts`). Après `isolement`, chaque famille traverse EXACTEMENT une
  * des deux étapes intermédiaires : `separation` pour `valeur_absolue`/`carre`
@@ -102,9 +107,34 @@ import type { EtatSessionCaracteristiquesAlgebriques, ResultatExerciceCaracteris
 const POINTS_DE_BASE = 100;
 const PENALITE_PAR_NIVEAU_AIDE = 20;
 
-/** Seule phase à avoir une aide (le rappel de méthode "parité" — audit du chapitre 3) — 1 niveau
- * unique, pas de palier supplémentaire (la méthode tient en une seule phrase, rien à graduer). */
+/** Aides — 1 niveau unique par écran (un rappel de méthode, rien à graduer) : "parite" (audit du
+ * chapitre 3), puis CE/isolement/séparation/débarrasser/zéros (audit gen13). Les écrans propres au
+ * niveau 2 (validite, regroupe, resolutionBranches, validationSolution) et domaine/ordonnée n'en ont
+ * pas. */
 export const NIVEAU_AIDE_MAX_PARITE = 1;
+export const NIVEAU_AIDE_MAX_CE = 1;
+export const NIVEAU_AIDE_MAX_ISOLEMENT = 1;
+export const NIVEAU_AIDE_MAX_SEPARATION = 1;
+export const NIVEAU_AIDE_MAX_DEBARRASSER = 1;
+export const NIVEAU_AIDE_MAX_ZEROS = 1;
+
+type ChampNiveauAide =
+  | "niveauAideParite"
+  | "niveauAideCE"
+  | "niveauAideIsolement"
+  | "niveauAideSeparation"
+  | "niveauAideDebarrasser"
+  | "niveauAideZeros";
+
+/** Écran → (champ de niveau d'aide, plafond). Une phase absente n'a aucune aide. */
+const AIDE_PAR_PHASE: Partial<Record<PhaseCaracteristiquesAlgebriques, { champ: ChampNiveauAide; max: number }>> = {
+  parite: { champ: "niveauAideParite", max: NIVEAU_AIDE_MAX_PARITE },
+  ce: { champ: "niveauAideCE", max: NIVEAU_AIDE_MAX_CE },
+  isolement: { champ: "niveauAideIsolement", max: NIVEAU_AIDE_MAX_ISOLEMENT },
+  separation: { champ: "niveauAideSeparation", max: NIVEAU_AIDE_MAX_SEPARATION },
+  debarrasser: { champ: "niveauAideDebarrasser", max: NIVEAU_AIDE_MAX_DEBARRASSER },
+  zeros: { champ: "niveauAideZeros", max: NIVEAU_AIDE_MAX_ZEROS },
+};
 
 /** Pénalité additive, jamais sous 0 — un cran de plus retire toujours 20 points supplémentaires.
  * Même formule que les autres générateurs à aide de ce chantier (`sessionDistanceDroite.ts`...). */
@@ -124,7 +154,7 @@ function etatInitialTransitoire(): Pick<
   | "domaineRevele"
   | "scorePariteExercice"
   | "pariteRevele"
-  | "niveauAideParite"
+  | ChampNiveauAide
   | "scoreIsolementExercice"
   | "isolementRevele"
   | "scoreSeparationExercice"
@@ -142,7 +172,7 @@ function etatInitialTransitoire(): Pick<
   | "zerosRevele"
 > {
   return {
-    phase: "ordonnee",
+    phase: "ce",
     etapeCourante: demarrerEtapeTentatives(),
     scoreOrdonneeExercice: null,
     ordonneeRevele: false,
@@ -153,6 +183,11 @@ function etatInitialTransitoire(): Pick<
     scorePariteExercice: null,
     pariteRevele: false,
     niveauAideParite: 0,
+    niveauAideCE: 0,
+    niveauAideIsolement: 0,
+    niveauAideSeparation: 0,
+    niveauAideDebarrasser: 0,
+    niveauAideZeros: 0,
     scoreIsolementExercice: null,
     isolementRevele: false,
     scoreSeparationExercice: null,
@@ -209,6 +244,11 @@ function construireResultat(
     scoreParite: etat.scorePariteExercice,
     pariteRevele: etat.pariteRevele,
     niveauAideParite: etat.niveauAideParite,
+    niveauAideCE: etat.niveauAideCE,
+    niveauAideIsolement: etat.niveauAideIsolement,
+    niveauAideSeparation: etat.niveauAideSeparation,
+    niveauAideDebarrasser: etat.niveauAideDebarrasser,
+    niveauAideZeros: etat.niveauAideZeros,
     scoreIsolement: etat.scoreIsolementExercice as number,
     isolementRevele: etat.isolementRevele,
     scoreSeparation: etat.scoreSeparationExercice,
@@ -248,7 +288,7 @@ function cloturerExerciceOuSuivant(
   };
 }
 
-/** Étape "ordonnée à l'origine" : toujours la première. */
+/** Étape "ordonnée à l'origine" : après domaine (son existence en dépend). */
 export function soumettreReponseOrdonnee(
   etat: EtatSessionCaracteristiquesAlgebriques,
   reponse: ReponseExistence,
@@ -268,13 +308,15 @@ export function soumettreReponseOrdonnee(
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    phase: "ce",
+    // "parite" (audit du chapitre 3) n'existe qu'au niveau 1 — un exercice niveau 2 va directement
+    // à "isolement".
+    phase: etat.exerciceCourant.niveau === "niveau1" ? "parite" : "isolement",
     scoreOrdonneeExercice: etapeCourante.score,
     ordonneeRevele: etapeCourante.revelee,
   };
 }
 
-/** Étape "conditions d'existence" : après ordonnée. */
+/** Étape "conditions d'existence" : toujours la première. */
 export function soumettreReponseCE(etat: EtatSessionCaracteristiquesAlgebriques, reponse: ReponseCE): EtatSessionCaracteristiquesAlgebriques {
   if (etat.terminee || etat.phase !== "ce") {
     throw new Error("soumettreReponseCE : la session n'est pas à l'étape ce");
@@ -292,7 +334,7 @@ export function soumettreReponseCE(etat: EtatSessionCaracteristiquesAlgebriques,
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "domaine",
-    scoreCEExercice: etapeCourante.score,
+    scoreCEExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideCE),
     ceRevele: etapeCourante.revelee,
   };
 }
@@ -317,15 +359,13 @@ export function soumettreReponseDomaine(
   return {
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
-    // "parite" (audit du chapitre 3) n'existe qu'au niveau 1 — un exercice niveau 2 va directement
-    // à "isolement", comme avant son ajout.
-    phase: etat.exerciceCourant.niveau === "niveau1" ? "parite" : "isolement",
+    phase: "ordonnee",
     scoreDomaineExercice: etapeCourante.score,
     domaineRevele: etapeCourante.revelee,
   };
 }
 
-/** Étape "parité" (niveau 1 UNIQUEMENT, audit du chapitre 3) : après domaine, avant isolement —
+/** Étape "parité" (niveau 1 UNIQUEMENT, audit du chapitre 3) : après ordonnée, avant isolement —
  * voir `ReponseParite`/`pariteAttendue` pour le détail complet. */
 export function soumettreReponseParite(
   etat: EtatSessionCaracteristiquesAlgebriques,
@@ -358,21 +398,21 @@ export function soumettreReponseParite(
   };
 }
 
-/** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, si le
- * niveau maximal de l'écran courant est déjà atteint, ou si l'écran courant n'a aucune aide prévue
- * ("parite" est la seule phase à en avoir une — voir le commentaire de tête de fichier). Même
- * principe que `activerAideSuivante` des autres générateurs à aide de ce chantier. */
+/** Révèle le niveau d'aide suivant de l'écran courant — lève si la session est terminée, si
+ * l'écran courant n'a aucune aide (`AIDE_PAR_PHASE`), ou si son niveau maximal est déjà atteint.
+ * Même principe que `activerAideSuivante` des autres générateurs à aide de ce chantier. */
 export function activerAideSuivante(etat: EtatSessionCaracteristiquesAlgebriques): EtatSessionCaracteristiquesAlgebriques {
   if (etat.terminee) {
     throw new Error("activerAideSuivante : la session est déjà terminée");
   }
-  if (etat.phase !== "parite") {
+  const aide = AIDE_PAR_PHASE[etat.phase];
+  if (!aide) {
     throw new Error("activerAideSuivante : cet écran n'a aucune aide");
   }
-  if (etat.niveauAideParite >= NIVEAU_AIDE_MAX_PARITE) {
+  if (etat[aide.champ] >= aide.max) {
     throw new Error("activerAideSuivante : niveau d'aide maximal déjà atteint pour cet écran");
   }
-  return { ...etat, niveauAideParite: etat.niveauAideParite + 1 };
+  return { ...etat, [aide.champ]: etat[aide.champ] + 1 };
 }
 
 /**
@@ -425,7 +465,7 @@ export function soumettreReponseIsolement(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: phaseApresIsolement(etat.exerciceCourant),
-    scoreIsolementExercice: etapeCourante.score,
+    scoreIsolementExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideIsolement),
     isolementRevele: etapeCourante.revelee,
   };
 }
@@ -455,7 +495,7 @@ export function soumettreReponseSeparation(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "zeros",
-    scoreSeparationExercice: etapeCourante.score,
+    scoreSeparationExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideSeparation),
     separationRevele: etapeCourante.revelee,
   };
 }
@@ -487,7 +527,7 @@ export function soumettreReponseDebarrasser(
     ...etat,
     etapeCourante: demarrerEtapeTentatives(),
     phase: "zeros",
-    scoreDebarrasserExercice: etapeCourante.score,
+    scoreDebarrasserExercice: appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideDebarrasser),
     debarrasserRevele: etapeCourante.revelee,
   };
 }
@@ -690,15 +730,17 @@ export function soumettreReponseZeros(
 
   if (!etapeCourante.terminee) return { ...etat, etapeCourante };
 
+  const scoreZeros = appliquerPenaliteNiveau(etapeCourante.score as number, etat.niveauAideZeros);
+
   if (candidatsAvantValidation) {
     return {
       ...etat,
       etapeCourante: demarrerEtapeTentatives(),
       phase: "validationSolution",
-      scoreZerosExercice: etapeCourante.score,
+      scoreZerosExercice: scoreZeros,
       zerosRevele: etapeCourante.revelee,
     };
   }
 
-  return cloturerExerciceOuSuivant(etat, construireResultat(etat, etapeCourante.score as number, etapeCourante.revelee));
+  return cloturerExerciceOuSuivant(etat, construireResultat(etat, scoreZeros, etapeCourante.revelee));
 }

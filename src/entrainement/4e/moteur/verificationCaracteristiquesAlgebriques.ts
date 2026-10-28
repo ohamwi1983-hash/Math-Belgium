@@ -401,13 +401,20 @@ export function diagnostiquerIsolementNiveau1(
 
   const p = pivot(exercice);
   const cibleGauche = (x: number) => appliquerBase(exercice.famille, exercice.a * x + exercice.b);
-  const statutGauche = diagnostiquerExpressionEgaleFonction(gauche, p, cibleGauche);
-  if (statutGauche !== "correct") return statutGauche;
+  const diagnostiquerMembres = (membreBase: string, membreK: string): StatutVerification => {
+    const statutBase = diagnostiquerExpressionEgaleFonction(membreBase, p, cibleGauche);
+    if (statutBase !== "correct") return statutBase;
+    if (exercice.niveau === "niveau1") {
+      return diagnostiquerExpressionEgaleConstante(membreK, -kValeur(exercice));
+    }
+    return diagnostiquerExpressionEgaleFonction(membreK, p, (x) => -(exercice.c * x + exercice.d));
+  };
 
-  if (exercice.niveau === "niveau1") {
-    return diagnostiquerExpressionEgaleConstante(droite, -kValeur(exercice));
-  }
-  return diagnostiquerExpressionEgaleFonction(droite, p, (x) => -(exercice.c * x + exercice.d));
+  // Membres inversés (`-k = [base](P1)`) tout aussi justes — acceptés (audit gen13 : refusés à
+  // 100 % jusqu'ici). Le diagnostic de l'ordre "naturel" est conservé en cas d'échec des deux.
+  const direct = diagnostiquerMembres(gauche, droite);
+  if (direct === "correct" || direct === "parse_error") return direct;
+  return diagnostiquerMembres(droite, gauche) === "correct" ? "correct" : direct;
 }
 
 export function verifierIsolementNiveau1(exercice: ExerciceCaracteristiquesAlgebriques, saisie: ReponseIsolement | string): boolean {
@@ -485,10 +492,16 @@ export function diagnostiquerSeparationNiveau1(
     racine2 = (-racineMoinsK - b) / a;
   }
 
+  // L'ordre des deux équations n'est jamais imposé à l'élève (aucun libellé ne le distingue à
+  // l'écran) : appariement direct OU croisé accepté (audit gen13 — l'ordre inversé était refusé à
+  // 100 %).
   const statut1 = diagnostiquerEquationLineaire(saisie.equation1, racine1);
   const statut2 = diagnostiquerEquationLineaire(saisie.equation2, racine2);
   if (statut1 === "parse_error" || statut2 === "parse_error") return "parse_error";
-  return statut1 === "correct" && statut2 === "correct" ? "correct" : "not_equivalent";
+  if (statut1 === "correct" && statut2 === "correct") return "correct";
+  const croise1 = diagnostiquerEquationLineaire(saisie.equation1, racine2);
+  const croise2 = diagnostiquerEquationLineaire(saisie.equation2, racine1);
+  return croise1 === "correct" && croise2 === "correct" ? "correct" : "not_equivalent";
 }
 
 export function verifierSeparationNiveau1(exercice: ExerciceCaracteristiquesAlgebriquesNiveau1, saisie: ReponseSeparation): boolean {
@@ -563,7 +576,12 @@ function memesValeurs(saisie: number[], attendu: number[]): boolean {
  */
 export function zerosAttendus(exercice: ExerciceCaracteristiquesAlgebriques): number[] {
   if (exercice.niveau === "niveau1") return zerosNiveau1(exercice);
-  if (exercice.famille === "carre" || exercice.famille === "inverse") return racinesDistinctes(exercice.zeros.solution.racines);
+  if (exercice.famille === "carre" || exercice.famille === "inverse") {
+    // Δ<0 (catégorie "irreductible", racines `[NaN, NaN]` par convention du contrat `Exercice`) :
+    // aucun zéro — jamais passé à `racinesDistinctes`, qui renverrait deux `NaN`.
+    if (exercice.zeros.categorie === "irreductible") return [];
+    return racinesDistinctes(exercice.zeros.solution.racines);
+  }
   if (exercice.famille === "racine_carree") return racinesValidesNiveau2(exercice);
   if (exercice.famille === "valeur_absolue") return racinesValidesValeurAbsolue(exercice);
   if (exercice.famille === "racine_cubique" || exercice.famille === "cube") return racinesP3(exercice.factorisationP3);
@@ -583,6 +601,7 @@ export function zerosAttendus(exercice: ExerciceCaracteristiquesAlgebriques): nu
 function multipliciteZeros(exercice: ExerciceCaracteristiquesAlgebriques): number[] {
   if (exercice.niveau === "niveau1") return zerosNiveau1(exercice).map(() => 1);
   if (exercice.famille === "carre" || exercice.famille === "inverse") {
+    if (exercice.zeros.categorie === "irreductible") return [];
     const [r1, r2] = exercice.zeros.solution.racines;
     return Math.abs(r1 - r2) < TOLERANCE ? [2] : [1, 1];
   }

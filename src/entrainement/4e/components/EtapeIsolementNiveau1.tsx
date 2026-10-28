@@ -8,7 +8,10 @@ import {
   instructionIsolement,
   placeholderIsolement,
   placeholderRegroupe,
+  texteAideIsolement,
 } from "../ui/formatCaracteristiquesAlgebriques";
+import { NIVEAU_AIDE_MAX_ISOLEMENT } from "../moteur/sessionCaracteristiquesAlgebriques";
+import { BoutonAide } from "./BoutonAide";
 import { formatMessageErreur } from "../ui/messageErreur";
 import { Katex } from "./Katex";
 import { ValidationEcran } from "../../components/ValidationEcran";
@@ -18,6 +21,8 @@ interface Props {
   exercice: ExerciceCaracteristiquesAlgebriques;
   tentativesUtilisees: number;
   tentativesMax: number;
+  niveauAide: number;
+  onActiverAide: () => void;
   onValider: (reponse: string) => void;
   /** Présent une fois l'écran terminé (bonne réponse, ou tentatives épuisées) — gèle le
    * champ, remplace "Valider" par le bloc `ValidationEcran` (convention CLAUDE.md,
@@ -49,7 +54,7 @@ interface Props {
  * (`formatEquationRechercheZerosLatex`, `prompt-corrections-niveau2-vague2.md`, point 1) — cet
  * écran appartient à la séquence "zéros", jamais à un écran portant sur `f` elle-même.
  */
-export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentativesMax, onValider, validation}: Props) {
+export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentativesMax, niveauAide, onActiverAide, onValider, validation }: Props) {
   const [texte, setTexte] = useState("");
   const complet = texte.trim() !== "";
   const developpementDirect = exercice.niveau === "niveau2" && (exercice.famille === "carre" || exercice.famille === "cube");
@@ -80,8 +85,14 @@ export function EtapeIsolementNiveau1({ exercice, tentativesUtilisees, tentative
           aria-label="Équation isolée"
         />
       </div>
+      {niveauAide > 0 && (
+        <div className="triangle-quelconque-aide">
+          <p>{texteAideIsolement(exercice)}</p>
+        </div>
+      )}
       {!validation && (
         <>
+        <BoutonAide niveauAide={niveauAide} niveauAideMax={NIVEAU_AIDE_MAX_ISOLEMENT} onActiverAide={onActiverAide} />
         <button type="button" className="btn btn-primary" disabled={!complet} onClick={() => onValider(texte)}>
           Valider
         </button>

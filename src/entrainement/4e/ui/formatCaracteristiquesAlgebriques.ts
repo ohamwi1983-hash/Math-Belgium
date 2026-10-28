@@ -18,6 +18,97 @@ import { formatEnonceLatex, formatSommeTermes } from "./formatEquation";
  * en KaTeX sur chacun des écrans, via `formatEquationNiveau1Latex` ci-dessous.
  */
 
+/* ==========================================================================================
+ * Aides (1 niveau par écran, audit gen13) — rappels de MÉTHODE, jamais la réponse de l'exercice
+ * courant : formulés sur une inconnue générique `u` (l'expression de l'exercice) et une valeur
+ * générique `K`, jamais avec les nombres réels de l'exercice. Texte brut (comme l'aide "parité"),
+ * symboles Unicode plutôt que LaTeX.
+ * ========================================================================================== */
+
+/** Écran "conditions d'existence" — même rappel pour toutes les familles (lequel s'applique fait
+ * partie de ce que l'élève doit reconnaître). */
+export function texteAideCE(): string {
+  return (
+    "Seules deux écritures imposent une condition d'existence : un dénominateur doit être non nul (≠ 0), et ce qui est " +
+    "sous une racine carrée doit être positif ou nul (≥ 0). Un carré, un cube, une racine cubique ou une valeur absolue " +
+    "n'en imposent aucune. Pour résoudre ax + b ≥ 0, isole x — et inverse le sens de l'inégalité si tu divises par un " +
+    "nombre négatif."
+  );
+}
+
+const NOM_BASE_AIDE: Record<FamilleReference, string> = {
+  carre: "le carré",
+  cube: "le cube",
+  racine_carree: "la racine carrée",
+  racine_cubique: "la racine cubique",
+  inverse: "la fraction 1/(…)",
+  valeur_absolue: "la valeur absolue",
+};
+
+/** Écran "isolement" — niveau 2 `carre`/`cube` : l'écran y demande de développer (voir
+ * `instructionIsolement`/`EtapeIsolementNiveau1.tsx`), l'aide suit. */
+export function texteAideIsolement(exercice: ExerciceCaracteristiquesAlgebriques): string {
+  if (exercice.niveau === "niveau2" && (exercice.famille === "carre" || exercice.famille === "cube")) {
+    const puissance = exercice.famille === "carre" ? "(ax + b)²" : "(ax + b)³";
+    return `Développe ${puissance} à l'aide d'une identité remarquable, puis ramène tous les termes du même côté pour obtenir une équation de la forme … = 0.`;
+  }
+  const nom = NOM_BASE_AIDE[exercice.famille];
+  const autreMembre =
+    exercice.niveau === "niveau1"
+      ? "fais passer la constante de l'autre côté du signe =, en changeant son signe"
+      : "fais passer cx + d de l'autre côté du signe =, en changeant le signe de ses deux termes";
+  return `Laisse uniquement ${nom} dans un membre de l'équation : ${autreMembre}.`;
+}
+
+/** Écran "séparation" (niveau 1, `carre`/`valeur_absolue`, toujours avec K>0 — sinon l'écran n'a
+ * pas lieu, voir `phaseApresIsolement`). */
+export function texteAideSeparation(famille: FamilleReference): string {
+  return famille === "valeur_absolue"
+    ? "Si |u| = K avec K > 0, alors u = K ou u = −K : écris ces deux équations du 1er degré, où u est l'expression dans la valeur absolue."
+    : "Si u² = K avec K > 0, alors u = √K ou u = −√K : écris ces deux équations du 1er degré, où u est l'expression entre parenthèses.";
+}
+
+/** Écran "se débarrasser de..." (niveau 1, `inverse`/`racine_carree`/`racine_cubique`/`cube`). */
+export function texteAideDebarrasser(famille: FamilleReference): string {
+  switch (famille) {
+    case "inverse":
+      return "Si 1/u = K, multiplie les deux membres par u (non nul grâce aux conditions d'existence) : 1 = K·u, puis développe.";
+    case "racine_carree":
+      return "Si √u = K (avec K ≥ 0), élève les deux membres au carré : u = K².";
+    case "racine_cubique":
+      return "Si ∛u = K, élève les deux membres au cube : u = K³.";
+    case "cube":
+      return "Si u³ = K, prends la racine cubique des deux membres : u = ∛K.";
+    case "valeur_absolue":
+    case "carre":
+      return "";
+  }
+}
+
+const RAPPEL_DELTA = "calcule Δ = b² − 4ac : Δ < 0 → aucun zéro ; Δ = 0 → un seul zéro x = −b/(2a) ; Δ > 0 → deux zéros x = (−b ± √Δ)/(2a)";
+
+/** Écran "zéros" — dépend du niveau et, au niveau 2, de la famille (équation finale différente). */
+export function texteAideZeros(exercice: ExerciceCaracteristiquesAlgebriques): string {
+  if (exercice.niveau === "niveau1") {
+    return (
+      "Résous la ou les équations du 1er degré obtenues : ax + b = V donne x = (V − b)/a. Si l'équation isolée demandait " +
+      "qu'un carré, une valeur absolue ou une racine carrée vaille un nombre négatif, il n'y a aucun zéro."
+    );
+  }
+  switch (exercice.famille) {
+    case "carre":
+    case "inverse":
+      return `Résous l'équation du 2nd degré obtenue : ${RAPPEL_DELTA}.`;
+    case "racine_carree":
+      return `Résous l'équation du 2nd degré obtenue (${RAPPEL_DELTA}). Ce sont des solutions CANDIDATES : tu vérifieras ensuite lesquelles respectent la condition de validité.`;
+    case "valeur_absolue":
+      return "Ne garde que les racines des branches qui respectent leur propre condition (vérifiées à l'écran précédent).";
+    case "cube":
+    case "racine_cubique":
+      return "Factorise le polynôme obtenu : mets x en évidence (ou regroupe pour faire apparaître x² + 1, qui ne s'annule jamais), puis annule chaque facteur. Un facteur du 2nd degré se résout avec Δ.";
+  }
+}
+
 /** Libellé affiché pour la réponse attendue de l'écran "parité" — texte brut (jamais de LaTeX
  * nécessaire pour ces 3 mots). */
 export function formatPariteLabel(parite: "paire" | "impaire" | "ni"): string {
@@ -171,6 +262,31 @@ export function placeholderIsolement(famille: FamilleReference): string {
       return "ex : cbrt(3x+1) = -1/4";
     case "inverse":
       return "ex : 1/(2x+4) = -1/3";
+  }
+}
+
+/** Exemples des deux champs de l'étape "séparation" (`carre`/`valeur_absolue`) — prolongent
+ * l'exemple de `placeholderIsolement` de la même famille (ex. `(2x+3)^2 = 25/16` → `2x+3 = 5/4` /
+ * `2x+3 = -5/4`), pour montrer la syntaxe attendue sans jamais rien révéler de l'exercice réel. */
+export function placeholdersSeparation(famille: FamilleReference): [string, string] {
+  return famille === "valeur_absolue" ? ["ex : 2x+3 = 1/2", "ex : 2x+3 = -1/2"] : ["ex : 2x+3 = 5/4", "ex : 2x+3 = -5/4"];
+}
+
+/** Exemple du champ de l'étape "se débarrasser de..." — prolonge `placeholderIsolement` de la même
+ * famille (ex. `sqrt(2x-4) = 1/2` → `2x-4 = 1/4`). */
+export function placeholderDebarrasser(famille: FamilleReference): string {
+  switch (famille) {
+    case "inverse":
+      return "ex : 2x+4 = -3";
+    case "racine_carree":
+      return "ex : 2x-4 = 1/4";
+    case "racine_cubique":
+      return "ex : 3x+1 = -1/64";
+    case "cube":
+      return "ex : 3x+1 = -2/3";
+    case "valeur_absolue":
+    case "carre":
+      return "";
   }
 }
 
