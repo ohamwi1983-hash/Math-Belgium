@@ -1,6 +1,6 @@
 /**
  * Couche B — moteur de session pour "Forme canonique et transformations — fonctions de référence"
- * (chapitre 2) : 6 phases fixes, toujours dans le même ordre (reconnaissance → canonique → ehChSoy
+ * (chapitre 3) : 6 phases fixes, toujours dans le même ordre (reconnaissance → canonique → ehChSoy
  * → th → evCvSox → tv), aucun saut conditionnel — même principe que
  * sessionFormeCanoniqueTransformations.ts, étendu d'une étape de reconnaissance (comme
  * sessionFonctionsReference.ts) et d'une étape EH/CH/SOY. N'importe jamais rien de

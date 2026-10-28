@@ -1,6 +1,6 @@
 /**
  * Couche B — types de session pour "Caractéristiques d'une fonction & fonctions de référence"
- * (quiz vrai/faux, chapitre 2, nommage propre à sa spec). Structure identique à
+ * (quiz vrai/faux, chapitre 3, nommage propre à sa spec). Structure identique à
  * `typesQuizEquationsSecondDegre.ts` (gen61) et aux 2 quiz précédents (gen59/gen60) : **mono-écran,
  * une seule tentative** (jamais de `niveauAide` : avec 2 réponses possibles, aucune aide
  * progressive n'a de sens ici — CLAUDE.md, "Aide progressive additive... max=0 → pas de bouton").

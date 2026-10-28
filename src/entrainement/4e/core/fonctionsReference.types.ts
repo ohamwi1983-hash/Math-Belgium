@@ -1,6 +1,6 @@
 /**
  * Couche core — contrat propre au générateur "Transformations graphiques — fonctions de
- * référence" (chapitre 2). Généralise "Transformations graphiques" (chapitre 1, x² seul,
+ * référence" (chapitre 3). Généralise "Transformations graphiques" (chapitre 1, x² seul,
  * core/transformationsGraphiques.types.ts) à 6 familles de référence, toutes exprimées sous la
  * forme unique :
  *

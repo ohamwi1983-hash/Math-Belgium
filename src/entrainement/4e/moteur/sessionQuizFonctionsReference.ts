@@ -1,6 +1,6 @@
 /**
  * Couche B — moteur de session pour "Caractéristiques d'une fonction & fonctions de référence"
- * (quiz vrai/faux, ajout ultérieur au chapitre 2). N'importe jamais rien de `src/generateurs/` —
+ * (quiz vrai/faux, ajout ultérieur au chapitre 3). N'importe jamais rien de `src/generateurs/` —
  * voir `sessionQuizFonctionsReference.test.ts` pour la preuve avec un générateur factice, même
  * principe que les autres moteurs. Structure identique à `sessionQuizEquationsSecondDegre.ts`
  * (gen61) et aux 2 quiz précédents (gen59/gen60).

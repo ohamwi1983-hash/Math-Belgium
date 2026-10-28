@@ -7,7 +7,7 @@ import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFormeCanoniq
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFormeCanoniqueFonctionReference>` pour gen11
- * (Transformer une fonction de référence — forme canonique et transformations, chapitre 2,
+ * (Transformer une fonction de référence — forme canonique et transformations, chapitre 3,
  * `AppFormeCanoniqueFonctionsReference.tsx`) — feuille d'évaluation.
  *
  * Analogue direct de gen9 (`generateurs/formeCanoniqueTransformations/exportEvaluation.ts`),

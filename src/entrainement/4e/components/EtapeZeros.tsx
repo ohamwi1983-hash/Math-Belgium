@@ -41,7 +41,7 @@ interface Props {
 /**
  * Étape "Zéros" (prompt-generateurs123groupe.md, points 3-6) — remplace les champs fixes x1/x2
  * (EtapeChamp2) par le pattern "Aucun/Au moins un zéro" + liste extensible déjà implémenté par
- * `EtapeZerosAlgebrique.tsx` (générateur "Caractéristiques algébriques", chapitre 2). Chaque champ
+ * `EtapeZerosAlgebrique.tsx` (générateur "Caractéristiques algébriques", chapitre 3). Chaque champ
  * accepte une expression libre complète (`parserExpressionNumerique`, réutilisé tel quel — jamais
  * une nouvelle logique de parsing) : un simple entier pour les 4 catégories rationnelles, une
  * expression radicale équivalente (`6*sqrt(5)`, `6sqrt(5)`...) pour la variante irrationnelle.

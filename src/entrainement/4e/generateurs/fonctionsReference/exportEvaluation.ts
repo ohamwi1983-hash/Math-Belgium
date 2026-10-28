@@ -10,7 +10,7 @@ import { CATALOGUE_VARIANTES, construireAvecFamille, genererExerciceFonctionRefe
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceFonctionReference>` pour gen10 (Transformer une
- * fonction de référence — chapitre 2, `AppFonctionsReference.tsx`) — feuille d'évaluation.
+ * fonction de référence — chapitre 3, `AppFonctionsReference.tsx`) — feuille d'évaluation.
  *
  * Analogue direct de gen8 (`generateurs/transformationsGraphiques/exportEvaluation.ts`), généralisé
  * aux 6 familles de référence (`FAMILLES`) : l'écran interactif fait lire TH/TV/CH/EH/EV/CV/SOX/SOY

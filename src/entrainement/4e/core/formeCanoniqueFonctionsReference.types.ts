@@ -4,7 +4,7 @@ export type { FamilleReference };
 
 /**
  * Couche core — contrat propre au générateur "Forme canonique et transformations — fonctions de
- * référence" (chapitre 2, spec-formecanonique6familles.md). Fusionne les principes de
+ * référence" (chapitre 3, spec-formecanonique6familles.md). Fusionne les principes de
  * "Transformations graphiques — fonctions de référence" (reconnaissance de famille + formule
  * unifiée à 6 familles, core/fonctionsReference.types.ts) et de "Forme canonique et
  * transformations" (déroulement en étapes fixes + trace cumulative, chapitre 1,

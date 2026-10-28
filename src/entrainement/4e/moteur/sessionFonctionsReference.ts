@@ -1,6 +1,6 @@
 /**
  * Couche B — moteur de session pour "Transformations graphiques — fonctions de référence"
- * (chapitre 2). N'importe jamais rien de src/generateurs — voir sessionFonctionsReference.test.ts
+ * (chapitre 3). N'importe jamais rien de src/generateurs — voir sessionFonctionsReference.test.ts
  * pour la preuve avec un générateur factice minimal, même principe que les 7 autres moteurs du
  * projet.
  *

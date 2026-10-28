@@ -88,7 +88,17 @@ function construireK(famille: FamilleReference): Fraction {
     case "racine_cubique":
       return fractionLibre();
     case "carre": {
-      // -k doit être le carré exact d'un rationnel (ex. k=-25/16, -k=(5/4)²) — jamais positif.
+      // k positif (u²=-k n'a alors aucune solution, "aucun zéro" — aucune extraction de racine
+      // nécessaire pour conclure ça, donc aucune contrainte de "carré parfait" ici) la moitié du
+      // temps, pour que l'écran "zéros" teste réellement les deux cas enseignés (0 ou 2 zéros selon
+      // le signe de k) — audit du chapitre 3 (4e) : ce signe était codé en dur négatif, rendant le
+      // cas "aucun zéro" impossible à tirer pour cette famille.
+      if (Math.random() < 0.5) {
+        const { num, den } = fractionLibre();
+        return reduire(Math.abs(num), den);
+      }
+      // k strictement négatif : -k doit être le carré exact d'un rationnel (ex. k=-25/16,
+      // -k=(5/4)²), pour que √(-k) (les deux zéros) reste exact.
       const { p, q } = rationnelPositifCoprime(4);
       return reduire(-(p * p), q * q);
     }
@@ -99,6 +109,13 @@ function construireK(famille: FamilleReference): Fraction {
       return reduire(signe * p * p * p, q * q * q);
     }
     case "racine_carree": {
+      // k positif (√u=-k n'a alors aucune solution, "aucun zéro" — le carré ne peut jamais valoir
+      // un nombre négatif) la moitié du temps, même correctif que "carre" ci-dessus et pour la même
+      // raison (audit du chapitre 3, 4e : "aucun zéro" était impossible à tirer pour cette famille).
+      if (Math.random() < 0.5) {
+        const { num, den } = fractionLibre();
+        return reduire(Math.abs(num), den);
+      }
       // k strictement négatif (garantit -k>0, donc √(-k) toujours défini) — pas de contrainte de
       // "valeur parfaite" : élever (-k) au carré est toujours exact, aucune racine à extraire ici.
       const { num, den } = fractionLibre();

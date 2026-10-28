@@ -260,7 +260,7 @@ export function AppCaracteristiquesFonction() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques d'une fonction (lecture graphique)</h1>
-        <p className="app-subtitle">Chapitre 2</p>
+        <p className="app-subtitle">Chapitre 3</p>
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>
 

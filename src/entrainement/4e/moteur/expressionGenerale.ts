@@ -2,7 +2,7 @@
  * Évaluateur générique d'expressions algébriques à une variable (x), généralisation de
  * expressionAlgebrique.ts (qui reste polynomial-only, utilisé par les exercices 1-6) pour couvrir
  * les 6 familles de référence du générateur "Transformations graphiques — fonctions de référence"
- * (chapitre 2) : puissances, racines (carrée et cubique, signées), valeur absolue, fractions.
+ * (chapitre 3) : puissances, racines (carrée et cubique, signées), valeur absolue, fractions.
  *
  * spec-fonctions-reference.md section 4 : "Nécessite un évaluateur d'expression général... utiliser
  * une bibliothèque d'évaluation mathématique existante plutôt qu'un parseur from scratch si

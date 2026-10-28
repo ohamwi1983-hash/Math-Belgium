@@ -5,7 +5,7 @@ import type { ReponseExistence, ReponseZerosCaracteristiques } from "./caracteri
 
 /**
  * Couche core — contrat propre à "Caractéristiques algébriques d'une fonction de référence"
- * (chapitre 2). **Niveau 1** (`spec-caracteristiquesalgebriquesniveau1.md`) : `f(x) = [base](P1) +
+ * (chapitre 3). **Niveau 1** (`spec-caracteristiquesalgebriquesniveau1.md`) : `f(x) = [base](P1) +
  * k`, `P1 = ax+b` (`a≠0`, `a,b` entiers), `k` un rationnel non nul CONSTANT, stocké comme fraction
  * irréductible exacte (`Fraction`) — jamais un flottant. **Niveau 2**
  * (`prompt-niveau2caracteristiquesalgebriques.md`) coexiste avec le niveau 1 sans en changer le

@@ -12,7 +12,7 @@ import { normaliserExposantsUnicode } from "./expressionAlgebrique";
 import type { StatutVerification } from "./statutVerification";
 
 /**
- * Vérification pour "Forme canonique et transformations — fonctions de référence" (chapitre 2).
+ * Vérification pour "Forme canonique et transformations — fonctions de référence" (chapitre 3).
  * Contrairement à "Transformations graphiques — fonctions de référence" (10e exercice), AUCUNE
  * vérification par échantillonnage numérique global ici (section 3 de la spec) : chaque étape se
  * vérifie structurellement + algébriquement, comme "Forme canonique et transformations" (9e
@@ -455,7 +455,17 @@ export interface EvaluationEhChSoy {
 }
 
 /** Seul le rapport CH/EH compte (comme EV/CV ailleurs dans le projet) — CH et EH sont donc toujours
- * évalués ENSEMBLE, jamais l'un correct et l'autre faux. */
+ * évalués ENSEMBLE, jamais l'un correct et l'autre faux.
+ *
+ * `soy` n'est exigé EXACTEMENT que pour les 4 familles où il affecte réellement la fonction
+ * intermédiaire (`cube`/`racine_carree`/`racine_cubique`/`inverse`, où SOY inverse un signe
+ * interne visible sur le graphe) — jamais pour `carre`/`valeur_absolue` (audit du chapitre 3,
+ * confirmé par `coefficientInterneSimple`, `generateurs/formeCanoniqueFonctionsReference/index.ts` :
+ * ces deux familles sont PAIRES, g(-u)=g(u), donc SOY ne change rigoureusement RIEN à la forme de
+ * départ affichée — exactement l'astuce « SOX et SOY se confondent parfois » déjà enseignée dans
+ * le cours). Avant ce correctif, l'écran exigeait malgré tout une valeur SOY précise pour ces 2
+ * familles : une donnée mathématiquement indétectable depuis le graphe/la fonction affichés,
+ * jamais devinable par un raisonnement légitime — ~1/6 des exercices de ce générateur. */
 export function evaluerEhChSoy(
   exercice: ExerciceFormeCanoniqueFonctionReference,
   reponse: { eh: number; ch: number; soy: boolean },
@@ -463,7 +473,8 @@ export function evaluerEhChSoy(
   const rapportAttendu = exercice.ch / exercice.eh;
   const rapportSaisi = reponse.ch / reponse.eh;
   const rapportCorrect = Math.abs(rapportSaisi - rapportAttendu) < TOLERANCE;
-  return { eh: rapportCorrect, ch: rapportCorrect, soy: reponse.soy === exercice.soy };
+  const soyIndifferent = exercice.famille === "carre" || exercice.famille === "valeur_absolue";
+  return { eh: rapportCorrect, ch: rapportCorrect, soy: soyIndifferent || reponse.soy === exercice.soy };
 }
 
 export function diagnostiquerEhChSoy(exercice: ExerciceFormeCanoniqueFonctionReference, reponse: ReponseEhChSoy): StatutVerification {

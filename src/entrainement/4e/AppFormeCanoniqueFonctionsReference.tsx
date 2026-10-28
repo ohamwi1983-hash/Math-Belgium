@@ -149,7 +149,7 @@ export function AppFormeCanoniqueFonctionsReference() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Forme canonique et transformations — fonctions de référence</h1>
-        <p className="app-subtitle">Chapitre 2</p>
+        <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={forcerVariante} />
       </header>
 

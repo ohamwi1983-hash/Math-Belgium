@@ -16,7 +16,7 @@ export { RATIO_GRAPHE, ZOOM_MAX, ZOOM_MIN, calculerPasGrille, formatEtiquetteGri
 export type { SegmentTrace };
 
 /**
- * Graphe Mafs pour "Forme canonique et transformations — fonctions de référence" (chapitre 2) :
+ * Graphe Mafs pour "Forme canonique et transformations — fonctions de référence" (chapitre 3) :
  * généralise `calculerViewBoxFonctionReference` (`mafsFonctionsReference.ts`, "Transformations
  * graphiques — fonctions de référence") de 2 courbes (cible + live) à N courbes simultanées — même
  * mouvement que `calculerViewBoxMultiple` (`mafsTransformation.ts`, "Forme canonique et

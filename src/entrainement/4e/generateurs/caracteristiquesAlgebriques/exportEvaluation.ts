@@ -27,7 +27,7 @@ import { CATALOGUE_VARIANTES, construireNiveau1AvecFamille, genererExerciceCarac
 
 /**
  * Adaptateur `AdaptateurFeuilleExercices<ExerciceCaracteristiquesAlgebriquesNiveau1>` pour gen13
- * (Étudier algébriquement une fonction de référence, chapitre 2 — `AppCaracteristiquesAlgebriques.tsx`).
+ * (Étudier algébriquement une fonction de référence, chapitre 3 — `AppCaracteristiquesAlgebriques.tsx`).
  *
  * NIVEAU RETENU — niveau 1 uniquement (`k` constant), jamais le niveau 2 (`k(x)=cx+d`) : les deux
  * niveaux ne sont PAS deux étapes progressives d'une même séance (voir

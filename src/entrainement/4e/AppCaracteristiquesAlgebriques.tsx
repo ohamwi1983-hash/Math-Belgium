@@ -434,7 +434,7 @@ export function AppCaracteristiquesAlgebriques() {
         <header className="app-header">
           <p className="app-eyebrow">4e — Entraînement</p>
           <h1 className="app-title">Caractéristiques algébriques d'une fonction de référence</h1>
-          <p className="app-subtitle">Chapitre 2</p>
+          <p className="app-subtitle">Chapitre 3</p>
           <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         </header>
         <main className="card">
@@ -462,7 +462,7 @@ export function AppCaracteristiquesAlgebriques() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Caractéristiques algébriques d'une fonction de référence</h1>
-        <p className="app-subtitle">Chapitre 2</p>
+        <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         <ProgressionPuces segments={calculerSegmentsProgression(etat)} />
       </header>

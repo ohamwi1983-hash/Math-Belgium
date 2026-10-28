@@ -2,7 +2,7 @@ import type { Morceau } from "./inequation.types";
 
 /**
  * Couche core — contrat propre à "Caractéristiques d'une fonction (lecture graphique)"
- * (chapitre 2, 4e/5e FWB). Comme "Transformations graphiques" et "Forme canonique et
+ * (chapitre 3, 4e/5e FWB). Comme "Transformations graphiques" et "Forme canonique et
  * transformations" (chapitre 1), ce générateur ne réutilise aucun type des onze premiers
  * exercices pour SON PROPRE contrat d'énoncé — la courbe est composite (dessinée zone par zone),
  * pas dérivée d'une seule formule algébrique connue des autres générateurs. Réutilise en revanche

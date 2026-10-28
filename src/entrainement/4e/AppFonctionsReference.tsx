@@ -224,7 +224,7 @@ export function AppFonctionsReference() {
         <header className="app-header">
           <p className="app-eyebrow">4e — Entraînement</p>
           <h1 className="app-title">Transformations graphiques — fonctions de référence</h1>
-          <p className="app-subtitle">Chapitre 2</p>
+          <p className="app-subtitle">Chapitre 3</p>
           <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
         </header>
         <main className="card">
@@ -257,7 +257,7 @@ export function AppFonctionsReference() {
       <header className="app-header">
         <p className="app-eyebrow">4e — Entraînement</p>
         <h1 className="app-title">Transformations graphiques — fonctions de référence</h1>
-        <p className="app-subtitle">Chapitre 2</p>
+        <p className="app-subtitle">Chapitre 3</p>
         <SelecteurVarianteDev options={CATALOGUE_VARIANTES} onGenerer={onGenererDev} />
       </header>
 
