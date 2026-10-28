@@ -39,6 +39,15 @@ export function genererExerciceQuizEquationsSecondDegre(): ExerciceQuizEquations
   return construireAvecVarianteId(varianteId);
 }
 
+/** Taille réelle de la banque d'un thème — 22 à 35 selon le thème depuis le retrait de 21
+ * affirmations demandant un vrai calcul à plusieurs étapes (audit du chapitre 2), jamais une
+ * constante 35 fixe. `AppQuizEquationsSecondDegre.tsx` l'utilise pour fixer `nombreExercices`,
+ * seule façon pour `creerGenerateurSansRepetition` ci-dessous de garder sa garantie "jamais de
+ * répétition dans une session" quel que soit le thème choisi. */
+export function nombreQuestions(varianteId: VarianteQuizEquationsSecondDegre): number {
+  return BANQUE_QUIZ_EQUATIONS_SECOND_DEGRE[varianteId].length;
+}
+
 function melanger<T>(items: readonly T[]): T[] {
   const copie = [...items];
   for (let i = copie.length - 1; i > 0; i--) {
@@ -50,9 +59,10 @@ function melanger<T>(items: readonly T[]): T[] {
 
 /**
  * Générateur SANS RÉPÉTITION pour un thème donné — chaque session étudiant porte sur un thème
- * unique et compte autant d'exercices que de questions dans la banque de ce thème (20) : sans
- * cette précaution, le tirage indépendant habituel (`genererExerciceQuizEquationsSecondDegre`)
- * pourrait répéter une question avant d'avoir couvert les 19 autres. État interne (file mélangée,
+ * unique et compte autant d'exercices que de questions dans la banque de ce thème (22 à 35 selon
+ * le thème, voir `nombreQuestions` ci-dessous) : sans cette précaution, le tirage indépendant
+ * habituel (`genererExerciceQuizEquationsSecondDegre`) pourrait répéter une question avant d'avoir
+ * couvert toutes les autres. État interne (file mélangée,
  * ré-mélangée à chaque épuisement) enfermé dans la fermeture, jamais partagé entre deux appels de
  * cette fonction — voir `AppQuizEquationsSecondDegre.tsx`, qui en crée une par session démarrée.
  */
